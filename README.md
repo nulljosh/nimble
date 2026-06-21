@@ -19,6 +19,11 @@ Inspired by the original [Nimble](https://github.com/Maybulb/Nimble) (Electron +
 
 > MenuBarExtra disabled (macOS Tahoe beta bug). Re-enabled when SDK stabilizes.
 
+## Roadmap
+
+- [x] Verified math already returns direct computed answers, never a Wikipedia link — `AppState.performQuery()` runs `evaluateMath()` first and short-circuits before any network query. Confirmed via `QueryEngineTests` (21/21 pass) and live DDG API check.
+- [ ] "Who is the current president" style queries can't return a person-specific answer (e.g. a Donald Trump profile) from the existing DDG + Wikipedia pipeline — checked live: DDG's Instant Answer for "president of the united states" returns the *office* abstract with an empty `Answer` field and no incumbent data in its Infobox, and Wikipedia search resolves to the same office page. Getting an actual current-officeholder profile needs a different data source (e.g. a small LLM call or a maintained current-facts table) — out of scope for the existing offline/API-only architecture, flagging for a future feature decision rather than building it blind.
+
 ## Development
 
 ```bash
