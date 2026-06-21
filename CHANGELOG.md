@@ -1,5 +1,10 @@
 # Changelog
 
+## [v1.3.0] — 2026-06-21
+
+- feat: Wikidata direct-answer layer for factual questions
+- docs: clarify math bypasses Wikipedia; live-officeholder queries out of scope
+
 ## [v0.0.1] — 2026-05-23
 
 - 5644eea3 chore: snow leopard pass (lingo-macos)
