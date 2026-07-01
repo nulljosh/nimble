@@ -13,7 +13,9 @@ targets:
     platform: macOS
     deploymentTarget: "14.0"
     sources:
-      - Sources
+      - path: Sources
+        excludes:
+          - "iOS/**"
       - path: Resources
         buildPhase: resources
     settings:
@@ -23,6 +25,26 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+  Nimble-iOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Sources/Models
+      - path: Sources/Views
+        excludes:
+          - "SearchView.swift"
+          - "VisualEffectView.swift"
+          - "ContextMenuView.swift"
+          - "SettingsView.swift"
+      - path: Sources/iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nimble
+        INFOPLIST_KEY_UILaunchScreen: {}
+        TARGETED_DEVICE_FAMILY: "1"
   NimbleTests:
     type: bundle.unit-test
     platform: macOS

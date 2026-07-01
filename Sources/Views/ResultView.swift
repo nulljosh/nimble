@@ -83,7 +83,7 @@ struct ResultView: View {
                     .font(.system(size: 11))
                     .foregroundStyle(Color.white.opacity(0.35))
                 if let searchURL, let url = URL(string: searchURL) {
-                    Button("Search on DuckDuckGo →") { NSWorkspace.shared.open(url) }
+                    Button("Search on DuckDuckGo →") { state.openInDDG() }
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(state.theme.color.opacity(0.85))
                         .buttonStyle(.plain)

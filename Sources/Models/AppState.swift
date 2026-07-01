@@ -1,5 +1,9 @@
 import SwiftUI
+#if os(macOS)
 import ServiceManagement
+#else
+import UIKit
+#endif
 
 enum NimbleTheme: String, CaseIterable, Codable {
     case orange, red, yellow, green, blue, purple, pink, contrast
@@ -101,6 +105,7 @@ final class AppState {
     }
 
     func applyLaunchOnStartup() {
+        #if os(macOS)
         if #available(macOS 13.0, *) {
             do {
                 if launchOnStartup {
@@ -112,6 +117,7 @@ final class AppState {
                 // Silently fail -- sandboxed app may not have permission
             }
         }
+        #endif
     }
 
     func performQuery() {
@@ -157,18 +163,30 @@ final class AppState {
         case .convert(let from, let to, let fromUnit, let toUnit): text = "\(from) \(fromUnit) = \(to) \(toUnit)"
         default: return
         }
+        #if os(macOS)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
+        #else
+        UIPasteboard.general.string = text
+        #endif
     }
 
     func copySearchLink() {
+        #if os(macOS)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(searchURL, forType: .string)
+        #else
+        UIPasteboard.general.string = searchURL
+        #endif
     }
 
     func openInDDG() {
         guard let url = URL(string: searchURL) else { return }
+        #if os(macOS)
         NSWorkspace.shared.open(url)
+        #else
+        UIApplication.shared.open(url)
+        #endif
     }
 
     private func startPlaceholderTimer() {

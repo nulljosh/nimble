@@ -1,0 +1,112 @@
+import SwiftUI
+
+struct SearchView: View {
+    @Environment(AppState.self) private var state
+    @FocusState private var isInputFocused: Bool
+
+    var body: some View {
+        @Bindable var state = state
+
+        NavigationStack {
+            VStack(spacing: 0) {
+                HStack(spacing: 12) {
+                    Canvas { ctx, size in
+                        let accent = state.theme.color
+                        let c = Path(ellipseIn: CGRect(x: 2, y: 2, width: 12, height: 12))
+                        ctx.stroke(c, with: .color(accent.opacity(0.9)), lineWidth: 1.5)
+                        var line = Path()
+                        line.move(to: CGPoint(x: 13, y: 13))
+                        line.addLine(to: CGPoint(x: 18, y: 18))
+                        ctx.stroke(line, with: .color(accent.opacity(0.9)), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
+                    }
+                    .frame(width: 20, height: 20)
+
+                    TextField(state.currentPlaceholder, text: $state.queryText)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 22, weight: .light))
+                        .foregroundStyle(Color.white.opacity(0.92))
+                        .focused($isInputFocused)
+                        .onSubmit { state.performQuery() }
+                        .submitLabel(.search)
+
+                    if state.result == .loading {
+                        Circle()
+                            .trim(from: 0, to: 0.75)
+                            .stroke(state.theme.color, lineWidth: 2)
+                            .frame(width: 18, height: 18)
+                            .rotationEffect(.degrees(-90))
+                            .animation(.linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 13)
+
+                if state.result != .none {
+                    Divider().opacity(0.1)
+
+                    ResultView()
+                        .environment(state)
+                        .animation(.spring(duration: 0.3), value: state.result == .loading)
+
+                    if sourceText != "" {
+                        HStack {
+                            Spacer()
+                            Text(sourceText)
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.white.opacity(0.2))
+                                .onTapGesture { openSource() }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
+                        .padding(.top, 2)
+                    }
+                }
+
+                Spacer()
+
+                HStack {
+                    ThemePickerView()
+                        .environment(state)
+                    Spacer()
+                    HStack(spacing: 14) {
+                        Button(action: { state.copyResultText() }) {
+                            Text("⎘")
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color.white.opacity(0.3))
+                        }
+                        NavigationLink {
+                            PreferencesView().environment(state)
+                        } label: {
+                            Text("⚙")
+                                .font(.system(size: 15))
+                                .foregroundStyle(Color.white.opacity(0.3))
+                        }
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 12)
+                .overlay(alignment: .top) { Divider().opacity(0.07) }
+            }
+            .background(Color(red: 0.07, green: 0.07, blue: 0.118).ignoresSafeArea())
+            .onAppear { isInputFocused = true }
+        }
+    }
+
+    private var sourceText: String {
+        switch state.result {
+        case .math: return "mathjs"
+        case .text(_, _, let source, _, _): return source
+        case .list(_, let source): return source
+        default: return ""
+        }
+    }
+
+    private func openSource() {
+        switch state.result {
+        case .text(_, _, _, let url, _):
+            if let url, let u = URL(string: url) { UIApplication.shared.open(u) }
+        default:
+            state.openInDDG()
+        }
+    }
+}
