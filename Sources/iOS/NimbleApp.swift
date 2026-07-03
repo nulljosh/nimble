@@ -8,6 +8,7 @@ struct NimbleApp: App {
         WindowGroup {
             SearchView()
                 .environment(appState)
+                .overlay { WhatsNewSheet() }
         }
     }
 }
