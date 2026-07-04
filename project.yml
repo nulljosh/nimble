@@ -42,6 +42,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios
         GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         INFOPLIST_KEY_UILaunchScreen: {}
         TARGETED_DEVICE_FAMILY: "1"
