@@ -3,6 +3,7 @@ import SwiftUI
 struct SearchView: View {
     @Environment(AppState.self) private var state
     @FocusState private var isInputFocused: Bool
+    @AppStorage("whats_new_seen_version") private var whatsNewSeenVersion = ""
 
     var body: some View {
         @Bindable var state = state
@@ -21,10 +22,12 @@ struct SearchView: View {
                     }
                     .frame(width: 20, height: 20)
 
-                    TextField(state.currentPlaceholder, text: $state.queryText)
+                    TextField("", text: $state.queryText, prompt: Text(state.currentPlaceholder).foregroundStyle(Color.white.opacity(0.35)))
                         .textFieldStyle(.plain)
                         .font(.system(size: 22, weight: .light))
                         .foregroundStyle(Color.white.opacity(0.92))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                         .focused($isInputFocused)
                         .onSubmit { state.performQuery() }
                         .submitLabel(.search)
@@ -88,7 +91,10 @@ struct SearchView: View {
                 .overlay(alignment: .top) { Divider().opacity(0.07) }
             }
             .background(Color(red: 0.07, green: 0.07, blue: 0.118).ignoresSafeArea())
-            .onAppear { isInputFocused = true }
+            .onAppear {
+                guard whatsNewSeenVersion == whatsNewVersion else { return }
+                isInputFocused = true
+            }
         }
     }
 

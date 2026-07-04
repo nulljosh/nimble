@@ -1,6 +1,6 @@
 import SwiftUI
 
-private let whatsNewVersion = "1.2.0"
+let whatsNewVersion = "1.2.0"
 private let whatsNewBullets = [
     "Nimble is now available as an iOS companion app",
 ]

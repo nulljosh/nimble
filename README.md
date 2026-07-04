@@ -19,6 +19,10 @@ Inspired by the original [Nimble](https://github.com/Maybulb/Nimble) (Electron +
 
 > MenuBarExtra disabled (macOS Tahoe beta bug). Re-enabled when SDK stabilizes.
 
+## iOS companion
+
+<img src="docs/screenshots/ios-search.jpg" width="240">
+
 ## Roadmap
 
 - [x] Verified math already returns direct computed answers, never a Wikipedia link — `AppState.performQuery()` runs `evaluateMath()` first and short-circuits before any network query. Confirmed via `QueryEngineTests` (21/21 pass) and live DDG API check.
