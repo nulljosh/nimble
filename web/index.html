@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nimble — Instant Answers</title>
+<meta name="description" content="Native instant-answer search. Math offline, knowledge via Wikipedia & DuckDuckGo.">
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--orange:#ff8c12;--bg:#1a1a2e;--panel:#22223a;--text:#f4f4f8;--mid:#9a9ab0;--line:rgba(255,255,255,.08)}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;padding:1.5rem;-webkit-font-smoothing:antialiased}
+  .app{width:100%;max-width:560px}
+  .brand{display:flex;align-items:center;gap:.6rem;justify-content:center;margin-bottom:1.4rem}
+  .brand svg{width:34px;height:34px}
+  .brand h1{font-size:1.4rem;font-weight:700;letter-spacing:-.02em}
+  form{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:1.05rem;padding:1rem 1.1rem}
+  input::placeholder{color:var(--mid)}
+  button{background:var(--orange);border:0;color:#1a1a2e;font-weight:700;padding:0 1.3rem;cursor:pointer;font-size:1rem}
+  button:disabled{opacity:.5;cursor:default}
+  .result{margin-top:1.1rem;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.2rem;display:none}
+  .result.show{display:block}
+  .result h2{font-size:1.15rem;margin-bottom:.4rem}
+  .result .big{font-size:2rem;font-weight:700;color:var(--orange)}
+  .result p{color:var(--text);line-height:1.55}
+  .result .src{margin-top:.7rem;font-size:.8rem;color:var(--mid)}
+  .result .src a{color:var(--orange);text-decoration:none}
+  .result img{max-width:120px;border-radius:8px;float:right;margin:0 0 .6rem .8rem}
+  .hint{text-align:center;color:var(--mid);font-size:.82rem;margin-top:1rem}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#1a1a2e;border-radius:50%;animation:s .6s linear infinite;vertical-align:-3px}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<main class="app">
+  <div class="brand">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="200" fill="#22223a" rx="44"/><circle cx="90" cy="88" r="36" fill="none" stroke="#ff8c12" stroke-linecap="round" stroke-width="7"/><line x1="116" y1="114" x2="140" y2="138" stroke="#ff8c12" stroke-linecap="round" stroke-width="7"/></svg>
+    <h1>Nimble</h1>
+  </div>
+  <form id="f" autocomplete="off">
+    <input id="q" placeholder="Ask anything — math, facts, definitions" autofocus>
+    <button id="go" type="submit">Search</button>
+  </form>
+  <section class="result" id="r"></section>
+  <p class="hint">Math runs offline. Knowledge via Wikipedia &amp; DuckDuckGo.</p>
+</main>
+<script>
+const ANSWER_PROXY = "https://nimble-answers.heyitsmejosh.workers.dev";
+const $ = s => document.querySelector(s);
+const r = $("#r"), q = $("#q"), go = $("#go");
+
+// --- offline math ---
+// ponytail: whitelist-guarded eval over Math.*; upgrade to a real parser if untrusted input ever matters.
+function tryMath(s){
+  const t = s.trim().toLowerCase().replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E")
+    .replace(/\b(sqrt|sin|cos|tan|log|log2|log10|abs|round|floor|ceil|cbrt)\b/g,"Math.$1")
+    .replace(/\bln\b/g,"Math.log");
+  if(!/^[0-9+\-*/(). ,]*(Math\.[a-z0-9]+|[0-9+\-*/(). ,])*$/.test(t)) return null;
+  if(!/[0-9]/.test(t) || !/[+\-*/]|Math\./.test(t)) return null;
+  try{ const v = Function('"use strict";return ('+t+')')();
+    return (typeof v==="number" && isFinite(v)) ? v : null; }
+  catch{ return null; }
+}
+
+function render(html){ r.innerHTML = html; r.classList.add("show"); }
+function loading(){ render('<p><span class="spin"></span> Searching…</p>'); }
+
+async function ddg(query){
+  try{
+    const d = await (await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`)).json();
+    const heading = d.Heading || query;
+    if(d.Answer) return {title:heading, body:d.Answer, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
+    if(d.AbstractText) return {title:heading, body:d.AbstractText, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
+    if(d.Definition) return {title:heading, body:d.Definition, src:d.DefinitionSource||"DuckDuckGo", url:d.DefinitionURL};
+  }catch{}
+  return null;
+}
+
+async function wiki(query){
+  try{
+    const s = await (await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=1&origin=*`)).json();
+    const hit = s?.query?.search?.[0];
+    if(!hit) return null;
+    const sum = await (await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hit.title)}`)).json();
+    if(!sum.extract) return null;
+    return {title:sum.title, body:sum.extract, src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null};
+  }catch{}
+  return null;
+}
+
+async function gemma(query){
+  try{
+    const res = await fetch(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({query})});
+    if(!res.ok) return null;
+    const d = await res.json();
+    const a = (d.answer||"").trim();
+    if(a && a.toUpperCase()!=="UNKNOWN") return {title:query, body:a, src:"Nimble AI"};
+  }catch{}
+  return null;
+}
+
+async function search(query){
+  if(!query) return;
+  const m = tryMath(query);
+  if(m !== null){ render(`<h2>${query.replace(/</g,"&lt;")}</h2><div class="big">${m}</div>`); return; }
+  loading(); go.disabled = true;
+  try{
+    const hit = await gemma(query) || await ddg(query) || await wiki(query);
+    if(hit){
+      render(`${hit.img?`<img src="${hit.img}" alt="">`:""}<h2>${hit.title.replace(/</g,"&lt;")}</h2><p>${hit.body.replace(/</g,"&lt;")}</p>`
+        + `<div class="src">Source: ${hit.url?`<a href="${hit.url}" target="_blank" rel="noopener">${hit.src}</a>`:hit.src}</div>`);
+    } else {
+      render(`<p>No instant answer found. <a class="src" href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank" rel="noopener" style="color:var(--orange)">Search the web →</a></p>`);
+    }
+  } finally { go.disabled = false; }
+}
+
+$("#f").addEventListener("submit", e => { e.preventDefault(); search(q.value.trim()); });
+</script>
+</body>
+</html>
