@@ -79,6 +79,9 @@ enum QueryType {
 }
 
 final class QueryEngine: Sendable {
+    // Gemma answer proxy (Cloudflare Worker holds the key; nothing secret ships here).
+    private static let answerProxyURL = "https://nimble-answers.heyitsmejosh.workers.dev"
+
     private static let suggestions: [String] = {
         guard let url = Bundle.main.url(forResource: "suggestions", withExtension: "json"),
               let data = try? Data(contentsOf: url),
@@ -327,166 +330,41 @@ final class QueryEngine: Sendable {
         return (ddgQuery: raw, wikiQuery: raw)
     }
 
-    private struct RelationQuestion {
-        let entity: String
-        let property: String // Wikidata property id
-        let verb: String     // for the answer sentence, e.g. "founded"
-    }
+    // General answer engine: one Gemma call for any factual question. Replaces the
+    // old per-shape Wikidata handlers (which dumped every historical officeholder).
+    private struct ProxyResponse: Codable { let answer: String? }
 
-    // Maps "who founded/invented/wrote/directed X" style questions to a Wikidata
-    // property so we can return a direct answer (e.g. "Steve Jobs") instead of
-    // the full Wikipedia abstract for X.
-    private static let relationVerbs: [(pattern: String, property: String, verb: String)] = [
-        (#"(?i)^who\s+(?:co-)?founded\s+(?:the\s+)?(.+)$"#, "P112", "founded"),
-        (#"(?i)^who\s+(?:invented|created)\s+(?:the\s+)?(.+)$"#, "P61", "invented"),
-        (#"(?i)^who\s+wrote\s+(?:the\s+)?(.+)$"#, "P50", "wrote"),
-        (#"(?i)^who\s+directed\s+(?:the\s+)?(.+)$"#, "P57", "directed"),
-        (#"(?i)^who\s+(?:is|was)\s+the\s+ceo\s+of\s+(?:the\s+)?(.+)$"#, "P169", "leads"),
-    ]
-
-    private func matchRelationQuestion(_ input: String) -> RelationQuestion? {
-        var q = input.trimmingCharacters(in: .whitespaces)
-        while q.hasSuffix("?") { q = String(q.dropLast()).trimmingCharacters(in: .whitespaces) }
-
-        for (pattern, property, verb) in Self.relationVerbs {
-            guard let regex = try? NSRegularExpression(pattern: pattern),
-                  let match = regex.firstMatch(in: q, range: NSRange(q.startIndex..., in: q)),
-                  match.numberOfRanges > 1,
-                  let range = Range(match.range(at: 1), in: q) else { continue }
-            let entity = String(q[range]).trimmingCharacters(in: .whitespaces)
-            if !entity.isEmpty {
-                return RelationQuestion(entity: entity, property: property, verb: verb)
-            }
-        }
-        return nil
-    }
-
-    private func queryWikidataRelation(_ relation: RelationQuestion, session: URLSession) async -> QueryResult? {
-        // A plain word like "apple" can resolve to an unrelated direct title (the fruit)
-        // before the disambiguating one (Apple Inc.), so try a few candidates in order
-        // and use the first one that actually has the requested property.
-        for qid in await wikidataCandidates(for: relation.entity, session: session) {
-            guard let claimsURL = URL(string: "https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=\(qid)&property=\(relation.property)&format=json") else { continue }
-
-            do {
-                let (data, _) = try await session.data(from: claimsURL)
-                guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let claims = json["claims"] as? [String: Any],
-                      let statements = claims[relation.property] as? [[String: Any]],
-                      !statements.isEmpty else { continue }
-
-                var valueIDs: [String] = []
-                for statement in statements {
-                    if let mainsnak = statement["mainsnak"] as? [String: Any],
-                       let datavalue = mainsnak["datavalue"] as? [String: Any],
-                       let value = datavalue["value"] as? [String: Any],
-                       let id = value["id"] as? String {
-                        valueIDs.append(id)
-                    }
-                }
-                guard !valueIDs.isEmpty else { continue }
-
-                let names = await wikidataLabels(for: valueIDs, session: session)
-                guard !names.isEmpty else { continue }
-
-                let answer = names.count == 1 ? names[0] : names.dropLast().joined(separator: ", ") + " and " + names.last!
-                return .text(heading: relation.entity.capitalized, body: answer, source: "Wikidata", sourceURL: "https://www.wikidata.org/wiki/\(qid)", imageURL: nil)
-            } catch {
-                continue
-            }
-        }
-        return nil
-    }
-
-    private func wikidataCandidates(for entity: String, session: URLSession) async -> [String] {
-        var candidates: [String] = []
-
-        let titleEntity = entity.replacingOccurrences(of: " ", with: "_")
-        if let encoded = titleEntity.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-           let url = URL(string: "https://en.wikipedia.org/w/api.php?action=query&titles=\(encoded)&prop=pageprops&format=json") {
-            do {
-                let (data, _) = try await session.data(from: url)
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let query = json["query"] as? [String: Any],
-                   let pages = query["pages"] as? [String: Any],
-                   let page = pages.values.first as? [String: Any],
-                   let props = page["pageprops"] as? [String: Any],
-                   let qid = props["wikibase_item"] as? String {
-                    candidates.append(qid)
-                }
-            } catch {}
-        }
-
-        // Search results often surface the more notable/disambiguated entity
-        // (e.g. "Apple Inc." over "Apple" the fruit) after a direct title hit.
-        if let searchEncoded = entity.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-           let searchURL = URL(string: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=\(searchEncoded)&format=json&srlimit=3") {
-            do {
-                let (data, _) = try await session.data(from: searchURL)
-                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let query = json["query"] as? [String: Any],
-                   let search = query["search"] as? [[String: Any]] {
-                    for result in search {
-                        guard let title = result["title"] as? String else { continue }
-                        let titleUnderscored = title.replacingOccurrences(of: " ", with: "_")
-                        if let encoded = titleUnderscored.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-                           let url = URL(string: "https://en.wikipedia.org/w/api.php?action=query&titles=\(encoded)&prop=pageprops&format=json") {
-                            do {
-                                let (data, _) = try await session.data(from: url)
-                                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                                   let query = json["query"] as? [String: Any],
-                                   let pages = query["pages"] as? [String: Any],
-                                   let page = pages.values.first as? [String: Any],
-                                   let props = page["pageprops"] as? [String: Any],
-                                   let qid = props["wikibase_item"] as? String,
-                                   !candidates.contains(qid) {
-                                    candidates.append(qid)
-                                }
-                            } catch {}
-                        }
-                    }
-                }
-            } catch {}
-        }
-
-        return candidates
-    }
-
-    private func wikidataLabels(for ids: [String], session: URLSession) async -> [String] {
-        guard let joined = ids.joined(separator: "|").addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://www.wikidata.org/w/api.php?action=wbgetentities&ids=\(joined)&props=labels&languages=en&format=json") else { return [] }
+    private func queryLLM(_ input: String, session: URLSession) async -> QueryResult? {
+        guard let url = URL(string: Self.answerProxyURL) else { return nil }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "content-type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["q": input])
 
         do {
-            let (data, _) = try await session.data(from: url)
-            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let entities = json["entities"] as? [String: Any] else { return [] }
-            return ids.compactMap { id -> String? in
-                guard let entity = entities[id] as? [String: Any],
-                      let labels = entity["labels"] as? [String: Any],
-                      let en = labels["en"] as? [String: Any],
-                      let value = en["value"] as? String else { return nil }
-                return value
-            }
+            let (data, response) = try await session.data(for: req)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
+            let decoded = try JSONDecoder().decode(ProxyResponse.self, from: data)
+            guard let answer = decoded.answer?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !answer.isEmpty, answer.uppercased() != "UNKNOWN" else { return nil }
+            return .text(heading: nil, body: answer, source: "Gemma", sourceURL: nil, imageURL: nil)
         } catch {
-            return []
+            return nil
         }
     }
 
     func query(_ input: String) async -> QueryResult {
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 5
+        config.timeoutIntervalForRequest = 8
         let session = URLSession(configuration: config)
 
-        if let relation = matchRelationQuestion(input),
-           let result = await queryWikidataRelation(relation, session: session) {
-            return result
-        }
+        // Gemma first for a crisp one-line answer; fall back to DDG/Wikipedia when the
+        // key is unreachable or Gemma returns UNKNOWN (keeps a no-key offline degrade).
+        if let llm = await queryLLM(input, session: session) { return llm }
 
         let (ddgInput, wikiInput) = preprocessQuery(input)
-
         async let ddg = queryDDG(ddgInput, session: session)
         async let wiki = queryWikipedia(wikiInput, session: session)
-
         if let ddgResult = await ddg { return ddgResult }
         if let wikiResult = await wiki { return wikiResult }
 

@@ -1,0 +1,6 @@
+{
+  "name": "nimble-answers",
+  "main": "worker.js",
+  "compatibility_date": "2025-07-01"
+  // Secret: wrangler secret put GEMMA_KEY
+}
