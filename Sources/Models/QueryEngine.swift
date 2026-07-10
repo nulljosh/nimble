@@ -80,7 +80,7 @@ enum QueryType {
 
 final class QueryEngine: Sendable {
     // Gemma answer proxy (Cloudflare Worker holds the key; nothing secret ships here).
-    private static let answerProxyURL = "https://nimble-answers.heyitsmejosh.workers.dev"
+    private static let answerProxyURL = "https://nimble-answers.trommatic.workers.dev"
 
     private static let suggestions: [String] = {
         guard let url = Bundle.main.url(forResource: "suggestions", withExtension: "json"),
