@@ -1,6 +1,8 @@
-// Nimble answer proxy. Holds the Gemma key so it never ships in the app binary.
+// Nimble answer proxy. Runs Gemma + Qwen in parallel on Cloudflare Workers AI
+// (no external API key needed) and synthesizes one answer.
 // POST { "q": "who is the ceo of apple" } -> { "answer": "Tim Cook." } or { "answer": "UNKNOWN" }
-const MODEL = "gemma-4-31b-it";
+const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
+const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 const SYSTEM =
   "Answer in one short factual sentence. No preamble, no markdown. If you do not know, reply exactly UNKNOWN.";
 
@@ -17,27 +19,50 @@ export default {
     if (typeof q !== "string" || !q.trim()) return json({ error: "empty q" }, 400);
     if (q.length > 500) return json({ error: "too long" }, 400);
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
-    let r;
-    try {
-      r = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-goog-api-key": env.GEMMA_KEY },
-        body: JSON.stringify({
-          // Gemma has no system role; prepend the instruction to the user turn.
-          contents: [{ role: "user", parts: [{ text: `${SYSTEM}\n\nQuestion: ${q}` }] }],
-          generationConfig: { temperature: 0, maxOutputTokens: 400 },
-        }),
-      });
-    } catch {
-      return json({ error: "upstream unreachable" }, 502);
-    }
-    if (!r.ok) return json({ error: "upstream", status: r.status }, 502);
+    const ask = (model) =>
+      env.AI.run(model, {
+        messages: [
+          { role: "system", content: SYSTEM },
+          { role: "user", content: `${q} /no_think` },
+        ],
+        temperature: 0,
+        max_tokens: 600,
+      })
+        .then((d) => {
+          const msg = d?.choices?.[0]?.message;
+          // Reasoning models sometimes hit max_tokens mid-thought and leave content null;
+          // fall back to the last sentence of the reasoning trace.
+          const text = d?.response || msg?.content || msg?.reasoning?.split(/(?<=[.!?])\s+/).pop() || "";
+          return text.trim() || "UNKNOWN";
+        })
+        .catch(() => "UNKNOWN");
 
-    const data = await r.json();
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    // Gemma 4 emits reasoning parts flagged thought:true; the answer is the non-thought part.
-    const answer = parts.filter((p) => !p.thought).map((p) => p.text).join("").trim() || "UNKNOWN";
+    const [qwenAnswer, gemmaAnswer] = await Promise.all([ask(QWEN), ask(GEMMA)]);
+
+    if (qwenAnswer === "UNKNOWN" && gemmaAnswer === "UNKNOWN") return json({ answer: "UNKNOWN" });
+    if (qwenAnswer === "UNKNOWN") return json({ answer: gemmaAnswer });
+    if (gemmaAnswer === "UNKNOWN") return json({ answer: qwenAnswer });
+    if (qwenAnswer === gemmaAnswer) return json({ answer: qwenAnswer });
+
+    // Both models answered but disagree/differ in wording — synthesize one sentence.
+    const synthesis = await env.AI.run(QWEN, {
+      messages: [
+        {
+          role: "system",
+          content:
+            "Two AI models answered the same question. Merge them into one short, accurate factual sentence. No preamble, no markdown.",
+        },
+        {
+          role: "user",
+          content: `Question: ${q}\nAnswer A: ${qwenAnswer}\nAnswer B: ${gemmaAnswer}`,
+        },
+      ],
+      temperature: 0,
+      max_tokens: 200,
+    }).catch(() => null);
+
+    const answer =
+      (synthesis?.response || synthesis?.choices?.[0]?.message?.content || "").trim() || qwenAnswer;
     return json({ answer });
   },
 };
