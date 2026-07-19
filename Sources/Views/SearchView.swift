@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(AppState.self) private var state
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isInputFocused: Bool
 
     var body: some View {
@@ -39,7 +40,7 @@ struct SearchView: View {
                         .stroke(state.theme.color, lineWidth: 2)
                         .frame(width: 18, height: 18)
                         .rotationEffect(.degrees(-90))
-                        .animation(.linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
+                        .animation(reduceMotion ? nil : .linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
                 } else if !state.queryText.isEmpty {
                     Text("↩")
                         .font(.system(size: 10, weight: .medium))
@@ -65,11 +66,12 @@ struct SearchView: View {
                 if sourceText != "" {
                     HStack {
                         Spacer()
-                        Text(sourceText)
-                            .font(.system(size: 10))
-                            .foregroundStyle(Color.white.opacity(0.2))
-                            .onTapGesture { openSource() }
-                            .onHover { inside in _ = inside }
+                        Button(action: openSource) {
+                            Text(sourceText)
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.white.opacity(0.2))
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding(.horizontal, 16)
                     .padding(.bottom, 8)
@@ -96,6 +98,7 @@ struct SearchView: View {
                     }
                     .buttonStyle(.plain)
                     .help("Copy Result")
+                    .accessibilityLabel("Copy Result")
                     Button(action: {}) {
                         Text("⚙")
                             .font(.system(size: 13))
@@ -103,6 +106,7 @@ struct SearchView: View {
                     }
                     .buttonStyle(.plain)
                     .help("Preferences")
+                    .accessibilityLabel("Preferences")
                     .contextMenu {
                         ContextMenuView().environment(state)
                     }
@@ -113,6 +117,7 @@ struct SearchView: View {
                     }
                     .buttonStyle(.plain)
                     .help("Quit Nimble")
+                    .accessibilityLabel("Quit Nimble")
                 }
             }
             .padding(.horizontal, 14)
