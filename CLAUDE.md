@@ -1,18 +1,20 @@
 # Nimble
-v1.3.0
+v1.0.0
 
-Native macOS instant-answer search. Query classification (math/factual/definition). Offline math. DDG + Wikipedia.
+Instant-answer search: macOS menu bar app, iOS app, and a static web app. Query classification (math/factual/definition). Offline math. DDG + Wikipedia.
 
 ## Stack
-- SwiftUI, macOS 14+, @Observable
-- QueryEngine: classifyQuery() enum, NSExpression math eval
+- SwiftUI (macOS 14+ / iOS 17+), @Observable
+- QueryEngine: classifyQuery() enum, NSExpression math eval (native); same logic reimplemented in JS for `web/index.html`
 - DuckDuckGo Instant Answer API + Wikipedia REST API
 - 26 tests (QueryEngine + Preferences)
 
 ## Structure
 - `Sources/Models/QueryEngine.swift` — classification, math eval, API queries
 - `Sources/Models/AppState.swift` — state, theme, preferences
-- `Sources/Views/SearchView.swift` — main search UI
+- `Sources/Views/SearchView.swift` — macOS search UI, `Sources/iOS/SearchView.swift` — iOS
+- `web/index.html` — standalone web app (no backend), deployed via Vercel to `nimble.heyitsmejosh.com`
+- `docs/index.html` — marketing/landing page, deployed via GitHub Pages (default `nulljosh.github.io/nimble` URL — the custom domain is taken by the web app)
 - `Tests/` — 26 tests
 
 ## Build

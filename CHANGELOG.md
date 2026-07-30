@@ -1,5 +1,13 @@
 # Changelog
 
+## [v1.0.0] — 2026-07-29
+
+- Reset versioning to 1.0 across macOS/iOS/web as the first real cross-platform release
+- Web app redesigned to fill the full viewport instead of a small centered box; dropped drop-shadows/extra borders
+- Icon and architecture diagram refreshed
+- README trimmed; roadmap moved to `roadmap.md`
+- Landing page (`docs/index.html`) links updated to the live web app + GitHub release
+
 ## [v1.3.0] — 2026-06-21
 
 - feat: Wikidata direct-answer layer for factual questions

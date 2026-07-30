@@ -7,35 +7,35 @@
 <meta name="description" content="Native instant-answer search. Math offline, knowledge via Wikipedia & DuckDuckGo.">
 <style>
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-  :root{--orange:#ff8c12;--bg:#1a1a2e;--panel:#22223a;--text:#f4f4f8;--mid:#9a9ab0;--line:rgba(255,255,255,.08)}
+  :root{--orange:#ff8c12;--bg:#1a1a2e;--text:#f4f4f8;--mid:#9a9ab0;--line:rgba(255,255,255,.06)}
   html,body{height:100%}
-  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;padding:1.5rem;-webkit-font-smoothing:antialiased}
-  .app{width:100%;max-width:560px}
-  .brand{display:flex;align-items:center;gap:.6rem;justify-content:center;margin-bottom:1.4rem}
-  .brand svg{width:34px;height:34px}
-  .brand h1{font-size:1.4rem;font-weight:700;letter-spacing:-.02em}
-  form{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:1.05rem;padding:1rem 1.1rem}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+  .app{flex:1;display:flex;flex-direction:column;width:100%;max-width:720px;margin:0 auto;padding:1.5rem}
+  .brand{display:flex;align-items:center;gap:.6rem;margin-bottom:1.6rem}
+  .brand svg{width:30px;height:30px}
+  .brand h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em}
+  form{display:flex;border-bottom:1px solid var(--line)}
+  input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:1.4rem;font-weight:300;padding:.9rem 0}
   input::placeholder{color:var(--mid)}
-  button{background:var(--orange);border:0;color:#1a1a2e;font-weight:700;padding:0 1.3rem;cursor:pointer;font-size:1rem}
-  button:disabled{opacity:.5;cursor:default}
-  .result{margin-top:1.1rem;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.2rem;display:none}
+  button{background:transparent;border:0;color:var(--orange);font-weight:700;padding:0 .4rem;cursor:pointer;font-size:1rem}
+  button:disabled{opacity:.4;cursor:default}
+  .result{margin-top:1.6rem;flex:1;display:none}
   .result.show{display:block}
-  .result h2{font-size:1.15rem;margin-bottom:.4rem}
-  .result .big{font-size:2rem;font-weight:700;color:var(--orange)}
-  .result p{color:var(--text);line-height:1.55}
-  .result .src{margin-top:.7rem;font-size:.8rem;color:var(--mid)}
+  .result h2{font-size:1.3rem;margin-bottom:.5rem}
+  .result .big{font-size:2.4rem;font-weight:700;color:var(--orange)}
+  .result p{color:var(--text);line-height:1.6}
+  .result .src{margin-top:.9rem;font-size:.8rem;color:var(--mid)}
   .result .src a{color:var(--orange);text-decoration:none}
   .result img{max-width:120px;border-radius:8px;float:right;margin:0 0 .6rem .8rem}
-  .hint{text-align:center;color:var(--mid);font-size:.82rem;margin-top:1rem}
-  .spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#1a1a2e;border-radius:50%;animation:s .6s linear infinite;vertical-align:-3px}
+  .hint{text-align:center;color:var(--mid);font-size:.8rem;padding:1rem 0}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--mid);border-top-color:var(--orange);border-radius:50%;animation:s .6s linear infinite;vertical-align:-3px}
   @keyframes s{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 <main class="app">
   <div class="brand">
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><rect width="200" height="200" fill="#22223a" rx="44"/><circle cx="90" cy="88" r="36" fill="none" stroke="#ff8c12" stroke-linecap="round" stroke-width="7"/><line x1="116" y1="114" x2="140" y2="138" stroke="#ff8c12" stroke-linecap="round" stroke-width="7"/></svg>
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="90" cy="88" r="36" fill="none" stroke="#ff8c12" stroke-linecap="round" stroke-width="9"/><line x1="116" y1="114" x2="140" y2="138" stroke="#ff8c12" stroke-linecap="round" stroke-width="9"/></svg>
     <h1>Nimble</h1>
   </div>
   <form id="f" autocomplete="off">
