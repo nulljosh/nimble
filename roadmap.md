@@ -17,3 +17,7 @@
 - [ ] Re-upload the new icon to App Store Connect once the two app records exist (blocked on the Ember Power Select issue under **App Store submission** above).
 - [ ] `docs/splash.html` still isn't wired as an iOS LaunchScreen — web-only splash.
 - [ ] **Vercel project drift (fixed locally 2026-08-04, but `web/.vercel` is gitignored so it will recur on a fresh clone).** `web/.vercel/project.json` was linked to a stray project literally named `web` (`prj_Z9IRsL4LPETp91ppjkr0Ha0yR02b`, no custom domain, not live) instead of `nimble-web` (`prj_UU27GTzoFNO1kVqL55PWiC8dkuA6`), which is what actually serves `nimble.heyitsmejosh.com` — so a plain `vercel --prod` from `web/` silently deployed to the wrong place. Relinked, and cleared `nimble-web`'s stale `rootDirectory: "nimble-web"` + `framework: "vite"` settings (leftovers from the deleted apps monorepo) via `PATCH /v9/projects/…`, which were making it fail with "path does not exist". Consider deleting the stray `web` project once confirmed unused.
+
+## Decision 2026-08-04
+
+- [ ] Rename the app off **Nimble** (decided; new name TBD). Reason: maybulb.com is a real third-party studio whose own shipping macOS product is also called Nimble, so the name is trademark exposure and a likely App Review rejection. Keep the bulb mark and the yellow design system - only the name changes. Use the `asc-name-creator` skill to find an available App Store name, then update repo, Cloudflare/Vercel projects, `nimble.heyitsmejosh.com`, ASC record, and tokens/UI strings.
