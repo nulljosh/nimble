@@ -2,8 +2,10 @@ name: Nimble
 options:
   minimumXcodeGenVersion: 2.38.0
 settings:
-  DEVELOPMENT_TEAM: QMM486NPYC
   base:
+    # Must live under `base:` — as a sibling of it xcodegen ignores it entirely,
+    # and signing fails with "requires a development team".
+    DEVELOPMENT_TEAM: QMM486NPYC
     SWIFT_VERSION: "6.0"
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
@@ -46,6 +48,14 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         INFOPLIST_KEY_UILaunchScreen: {}
         TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+        # Without an entitlements file the signed bundle carries no
+        # application-identifier while the embedded profile does — Apple rejects
+        # that combination for TestFlight with ITMS-90886. Hand-committed rather
+        # than generated via xcodegen `entitlements.properties` (drops keys).
+        # NB: Resources/Nimble.entitlements is a macOS-flavoured file that is
+        # bundled as a *resource* and never wired to signing — not this one.
+        CODE_SIGN_ENTITLEMENTS: Nimble-iOS.entitlements
   NimbleTests:
     type: bundle.unit-test
     platform: macOS
