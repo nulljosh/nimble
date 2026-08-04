@@ -1,1 +1,6 @@
-.vercel
+# Track project.json so a fresh clone is linked to `nimble-web` (the project that
+# actually serves nimble.heyitsmejosh.com). It previously drifted to a stray project
+# named `web`, and `vercel --prod` silently deployed to the wrong place.
+# Contents-glob + negation: git cannot re-include a file inside an excluded directory.
+.vercel/*
+!.vercel/project.json
