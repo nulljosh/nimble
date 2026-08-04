@@ -5,43 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nimble — Instant Answers</title>
 <meta name="description" content="Native instant-answer search. Math offline, knowledge via Wikipedia & DuckDuckGo.">
+<meta name="theme-color" content="#ffca30">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="tokens.css">
 <style>
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-  :root{--orange:#ff8c12;--bg:#1a1a2e;--text:#f4f4f8;--mid:#9a9ab0;--line:rgba(255,255,255,.06)}
+  /* Page-local aliases onto the design system (tokens.css) */
+  :root{--accent:var(--yellow-deep);--mid:var(--text-mid)}
   html,body{height:100%}
-  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
-  .app{flex:1;display:flex;flex-direction:column;width:100%;padding:1.5rem}
-  .brand{display:flex;align-items:center;gap:.6rem;margin-bottom:2.5rem}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+  ::selection{background:var(--yellow);color:var(--black)}
+  .app{flex:1;display:flex;flex-direction:column;width:100%;padding:var(--s3)}
+  .brand{display:flex;align-items:center;gap:.6rem;margin-bottom:var(--s4)}
   .brand svg{width:30px;height:30px}
-  .brand h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em}
+  .brand h1{font-size:1.25rem;font-weight:var(--fw-bold);letter-spacing:var(--tracking-tight)}
   .body{width:100%;max-width:720px;margin:0 auto;flex:1;display:flex;flex-direction:column}
-  form{display:flex;border-bottom:1px solid var(--line)}
-  #splash{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9;transition:opacity .3s ease}
+  form{display:flex;border-bottom:var(--divider)}
+  #splash{position:fixed;inset:0;background:var(--yellow);display:flex;align-items:center;justify-content:center;z-index:9;transition:opacity .3s ease}
   #splash.hide{opacity:0;pointer-events:none}
-  #splash svg{width:64px;height:64px;animation:s .9s ease-in-out infinite alternate}
-  @keyframes s{to{transform:scale(.9);opacity:.6}}
-  input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-size:1.4rem;font-weight:300;padding:.9rem 0}
-  input::placeholder{color:var(--mid)}
-  button{background:transparent;border:0;color:var(--orange);font-weight:700;padding:0 .4rem;cursor:pointer;font-size:1rem}
+  /* ponytail: splash + spinner share one rotate keyframe — they used to be two
+     rules both named "s", where the second silently overrode the first. */
+  #splash svg{width:64px;height:64px;animation:spin .9s ease-in-out infinite alternate}
+  input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-family:var(--font);font-size:1.4rem;padding:.9rem 0}
+  input::placeholder{color:var(--text-light)}
+  button{background:transparent;border:0;color:var(--accent);font-family:var(--font);font-weight:var(--fw-bold);padding:0 .4rem;cursor:pointer;font-size:1rem}
   button:disabled{opacity:.4;cursor:default}
   .result{margin-top:1.6rem;flex:1;display:none}
   .result.show{display:block}
-  .result h2{font-size:1.3rem;margin-bottom:.5rem}
-  .result .big{font-size:2.4rem;font-weight:700;color:var(--orange)}
-  .result p{color:var(--text);line-height:1.6}
+  .result h2{font-size:1.3rem;margin-bottom:var(--s1)}
+  .result .big{font-size:2.4rem;font-weight:var(--fw-bold);color:var(--accent)}
+  .result p{color:var(--text);line-height:var(--lh)}
   .result .src{margin-top:.9rem;font-size:.8rem;color:var(--mid)}
-  .result .src a{color:var(--orange);text-decoration:none}
-  .result img{max-width:120px;border-radius:8px;float:right;margin:0 0 .6rem .8rem}
-  .hint{text-align:center;color:var(--mid);font-size:.8rem;padding:1rem 0}
-  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--mid);border-top-color:var(--orange);border-radius:50%;animation:s .6s linear infinite;vertical-align:-3px}
-  @keyframes s{to{transform:rotate(360deg)}}
+  .result .src a{color:var(--accent);text-decoration:none}
+  .result img{max-width:120px;border-radius:var(--radius-card);float:right;margin:0 0 .6rem .8rem}
+  .hint{text-align:center;color:var(--mid);font-size:.8rem;padding:var(--s2) 0}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-3px}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
-<div id="splash"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="90" cy="88" r="36" fill="none" stroke="#ff8c12" stroke-linecap="round" stroke-width="9"/><line x1="116" y1="114" x2="140" y2="138" stroke="#ff8c12" stroke-linecap="round" stroke-width="9"/></svg></div>
+<div id="splash"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nimble"><rect width="200" height="200" rx="44" fill="#000"/><circle cx="100" cy="80" r="44" fill="#ffca30"/><rect x="85" y="110" width="30" height="26" fill="#ffca30"/><rect x="80" y="130" width="40" height="32" rx="8" fill="#ffca30"/><rect x="80" y="140" width="40" height="5" fill="#000"/><rect x="80" y="150" width="40" height="5" fill="#000"/></svg></div>
 <main class="app">
   <div class="brand">
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><circle cx="90" cy="88" r="36" fill="none" stroke="#ff8c12" stroke-linecap="round" stroke-width="9"/><line x1="116" y1="114" x2="140" y2="138" stroke="#ff8c12" stroke-linecap="round" stroke-width="9"/></svg>
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nimble"><rect width="200" height="200" rx="44" fill="#000"/><circle cx="100" cy="80" r="44" fill="#ffca30"/><rect x="85" y="110" width="30" height="26" fill="#ffca30"/><rect x="80" y="130" width="40" height="32" rx="8" fill="#ffca30"/><rect x="80" y="140" width="40" height="5" fill="#000"/><rect x="80" y="150" width="40" height="5" fill="#000"/></svg>
     <h1>Nimble</h1>
   </div>
   <div class="body">
@@ -119,7 +125,7 @@ async function search(query){
       render(`${hit.img?`<img src="${hit.img}" alt="">`:""}<h2>${hit.title.replace(/</g,"&lt;")}</h2><p>${hit.body.replace(/</g,"&lt;")}</p>`
         + `<div class="src">Source: ${hit.url?`<a href="${hit.url}" target="_blank" rel="noopener">${hit.src}</a>`:hit.src}</div>`);
     } else {
-      render(`<p>No instant answer found. <a class="src" href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank" rel="noopener" style="color:var(--orange)">Search the web →</a></p>`);
+      render(`<p>No instant answer found. <a class="src" href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank" rel="noopener" style="color:var(--accent)">Search the web →</a></p>`);
     }
   } finally { go.disabled = false; }
 }
