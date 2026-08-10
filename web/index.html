@@ -105,7 +105,7 @@ async function wiki(query){
 
 async function gemma(query){
   try{
-    const res = await fetch(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({query})});
+    const res = await fetch(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({q:query})});
     if(!res.ok) return null;
     const d = await res.json();
     const a = (d.answer||"").trim();
