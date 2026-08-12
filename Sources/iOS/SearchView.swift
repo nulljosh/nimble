@@ -22,10 +22,10 @@ struct SearchView: View {
                     }
                     .frame(width: 20, height: 20)
 
-                    TextField("", text: $state.queryText, prompt: Text(state.currentPlaceholder).foregroundStyle(Color.white.opacity(0.35)))
+                    TextField("", text: $state.queryText, prompt: Text(state.currentPlaceholder).foregroundStyle(.tertiary))
                         .textFieldStyle(.plain)
                         .font(.system(size: 22, weight: .light))
-                        .foregroundStyle(Color.white.opacity(0.92))
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                         .focused($isInputFocused)
@@ -56,7 +56,7 @@ struct SearchView: View {
                             Spacer()
                             Text(sourceText)
                                 .font(.system(size: 10))
-                                .foregroundStyle(Color.white.opacity(0.2))
+                                .foregroundStyle(.tertiary)
                                 .onTapGesture { openSource() }
                         }
                         .padding(.horizontal, 16)
@@ -73,24 +73,29 @@ struct SearchView: View {
                     Spacer()
                     HStack(spacing: 14) {
                         Button(action: { state.copyResultText() }) {
-                            Text("⎘")
-                                .font(.system(size: 15))
-                                .foregroundStyle(Color.white.opacity(0.3))
+                            Image(systemName: "doc.on.doc")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.secondary)
                         }
+                        .accessibilityLabel("Copy result")
                         NavigationLink {
                             PreferencesView().environment(state)
                         } label: {
-                            Text("⚙")
-                                .font(.system(size: 15))
-                                .foregroundStyle(Color.white.opacity(0.3))
+                            Image(systemName: "gearshape")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.secondary)
                         }
+                        .accessibilityLabel("Settings")
                     }
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
                 .overlay(alignment: .top) { Divider().opacity(0.07) }
             }
-            .background(Color(red: 0.07, green: 0.07, blue: 0.118).ignoresSafeArea())
+            // Mirrors the web app: the theme owns the surface, and `.primary`/`.secondary`
+            // follow it via colorScheme instead of every view hardcoding white-on-dark.
+            .background(state.theme.backgroundColor.ignoresSafeArea())
+            .environment(\.colorScheme, state.theme.colorScheme)
             .onAppear {
                 guard whatsNewSeenVersion == whatsNewVersion else { return }
                 isInputFocused = true

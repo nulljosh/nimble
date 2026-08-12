@@ -134,6 +134,10 @@ struct SearchView: View {
                 Color(red: 0.07, green: 0.07, blue: 0.118).opacity(0.78)
             }
         )
+        // The macOS popover is always the dark HUD surface regardless of theme, so pin
+        // the subtree's scheme — that keeps `.primary`/`.secondary` in the shared
+        // ResultView resolving light-on-dark here while iOS follows its theme.
+        .environment(\.colorScheme, .dark)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
         .onAppear { isInputFocused = true }

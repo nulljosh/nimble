@@ -17,3 +17,7 @@
 Rename decision REVERSED by Joshua 2026-08-04: **Nimble keeps its name.** Do not rename it; do not re-raise this unprompted.
 
 Context kept only so the risk is known, not as a task: maybulb.com is a real third-party studio whose own shipping macOS product is also called Nimble. The practical exposure is an App Store name collision at submission time. If App Review ever rejects on the name, that is the moment to revisit, and `asc-name-creator` is the tool for it. The bulb mark shipped here is original work in their spirit, not their artwork, so it carries no separate risk.
+
+## From Apple Notes (imported 2026-08-11)
+- [ ] iOS app must mirror the website in functionality + UI (incl. shopping)
+- [ ] Site needs a landing/marketing page — currently it drops straight into the app with no preview

@@ -28,11 +28,11 @@ struct ResultView: View {
                         if let heading, !heading.isEmpty {
                             Text(heading)
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(Color.white.opacity(0.9))
+                                .foregroundStyle(.primary)
                         }
                         Text(body)
                             .font(.system(size: 13))
-                            .foregroundStyle(Color.white.opacity(0.55))
+                            .foregroundStyle(.secondary)
                             .textSelection(.enabled)
                             .lineSpacing(3)
                             .lineLimit(nil)
@@ -55,7 +55,7 @@ struct ResultView: View {
                                 .frame(width: 16)
                             Text(item)
                                 .font(.system(size: 13))
-                                .foregroundStyle(Color.white.opacity(0.7))
+                                .foregroundStyle(.secondary)
                                 .textSelection(.enabled)
                                 .lineLimit(3)
                         }
@@ -81,7 +81,7 @@ struct ResultView: View {
             VStack(spacing: 10) {
                 Text(message)
                     .font(.system(size: 11))
-                    .foregroundStyle(Color.white.opacity(0.35))
+                    .foregroundStyle(.secondary)
                 if let searchURL, let url = URL(string: searchURL) {
                     Button("Search on DuckDuckGo →") { state.openInDDG() }
                         .font(.system(size: 11, weight: .medium))
@@ -108,7 +108,7 @@ private struct MathResultView: View {
         VStack(spacing: 4) {
             Text(value)
                 .font(.system(size: 42, weight: .semibold))
-                .foregroundStyle(Color.white)
+                .foregroundStyle(.primary)
                 .textSelection(.enabled)
                 .letterSpacing(-0.03)
             Text("RESULT")
@@ -145,7 +145,7 @@ private struct ColorResultView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(hex: hex) ?? .orange)
                 .frame(width: 56, height: 56)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.1), lineWidth: 1))
             VStack(alignment: .leading, spacing: 5) {
                 colorRow(label: "HEX", value: hex.uppercased(), accent: accent)
                 colorRow(label: "RGB", value: "rgb(\(c.r), \(c.g), \(c.b))", accent: accent)
@@ -159,7 +159,7 @@ private struct ColorResultView: View {
     private func colorRow(label: String, value: String, accent: Color) -> some View {
         HStack(spacing: 8) {
             Text(label).font(.system(size: 9, weight: .semibold)).foregroundStyle(accent.opacity(0.7)).frame(width: 30)
-            Text(value).font(.system(size: 12)).foregroundStyle(Color.white.opacity(0.8))
+            Text(value).font(.system(size: 12)).foregroundStyle(.primary)
         }
     }
 }
@@ -177,12 +177,12 @@ private struct ConvertResultView: View {
     var body: some View {
         HStack(spacing: 20) {
             VStack(spacing: 2) {
-                Text(from).font(.system(size: 32, weight: .light)).foregroundStyle(Color.white.opacity(0.5))
-                Text(fromUnit).font(.system(size: 11)).foregroundStyle(Color.white.opacity(0.25)).tracking(0.5)
+                Text(from).font(.system(size: 32, weight: .light)).foregroundStyle(.secondary)
+                Text(fromUnit).font(.system(size: 11)).foregroundStyle(.secondary).tracking(0.5)
             }
             Text("→").font(.system(size: 18, weight: .light)).foregroundStyle(accent.opacity(0.5))
             VStack(spacing: 2) {
-                Text(to).font(.system(size: 40, weight: .semibold)).foregroundStyle(.white)
+                Text(to).font(.system(size: 40, weight: .semibold)).foregroundStyle(.primary)
                     .scaleEffect(appeared ? 1.0 : 0.88)
                     .onAppear { withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true } }
                 Text(toUnit).font(.system(size: 11)).foregroundStyle(accent.opacity(0.6)).tracking(0.5)

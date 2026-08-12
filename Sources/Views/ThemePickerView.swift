@@ -9,7 +9,7 @@ struct ThemePickerView: View {
             Circle()
                 .fill(state.theme.color)
                 .frame(width: 22, height: 22)
-                .overlay(Circle().stroke(Color.white.opacity(0.3), lineWidth: 2))
+                .overlay(Circle().stroke(Color.primary.opacity(0.3), lineWidth: 2))
         }
         .buttonStyle(.plain)
         .scaleEffect(showPopover ? 1.1 : 1.0)
@@ -25,7 +25,7 @@ struct ThemePickerView: View {
                         Circle()
                             .fill(t.color)
                             .frame(width: 22, height: 22)
-                            .overlay(Circle().stroke(state.theme == t ? Color.white : Color.clear, lineWidth: 2))
+                            .overlay(Circle().stroke(state.theme == t ? Color.primary : Color.clear, lineWidth: 2))
                     }
                     .buttonStyle(.plain)
                 }

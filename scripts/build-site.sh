@@ -1,9 +1,15 @@
-#!/bin/sh
-# ponytail: compose the Pages site — marketing landing (docs/) at /, web app at /app
-set -e
+#!/bin/bash
+# Assemble the deployable site: landing page at /, the search app at /app.
+# ponytail: cp into dist/ — no bundler, the two surfaces are plain static HTML.
+set -euo pipefail
 cd "$(dirname "$0")/.."
-rm -rf dist && mkdir -p dist/app
-cp -R docs/. dist/
-cp -R web/. dist/app/
-rm -rf dist/app/.vercel
-echo "built dist/ (landing at /, app at /app)"
+
+rm -rf dist
+mkdir -p dist/app
+
+cp docs/index.html docs/tokens.css docs/icon.svg docs/splash.html dist/
+[ -d docs/screenshots ] && cp -R docs/screenshots dist/
+
+cp web/index.html web/tokens.css web/icon.svg dist/app/
+
+echo "dist/ built: landing at /, app at /app"

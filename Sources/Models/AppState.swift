@@ -33,6 +33,12 @@ enum NimbleTheme: String, CaseIterable, Codable {
         .white
     }
 
+    /// Drives SwiftUI's semantic colors (`.primary`/`.secondary`) so views can stop
+    /// hardcoding white and still read correctly on each theme's own background.
+    var colorScheme: ColorScheme {
+        self == .contrast ? .dark : .light
+    }
+
     var displayName: String {
         rawValue.capitalized
     }
