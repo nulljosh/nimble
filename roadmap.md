@@ -1,5 +1,8 @@
 # Nimble roadmap
 
+## Security (2026-08-17)
+- **Public answer proxy rate-limited** — The public Cloudflare Workers AI proxy endpoint had no authentication or rate-limiting, exposed to abuse. Added per-IP 20 requests/minute limit in wrangler.jsonc (commit 0105db9), deployed live.
+
 ## Open
 - Current-officeholder queries ("who is the current president") — DDG + Wikipedia return the *office* page, not the incumbent. Fix is a Gemma call via the Cloudflare Worker proxy (`worker/worker.js`, merged); blocked on deploying the Worker with a Gemma API key.
 - Sync iOS UI polish to match the web app's classification/theming (mostly there — web is the newest surface).
