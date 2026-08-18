@@ -2,5 +2,17 @@
   "name": "nimble-answers",
   "main": "worker.js",
   "compatibility_date": "2025-07-01",
-  "ai": { "binding": "AI" }
+  "ai": { "binding": "AI" },
+  // ponytail: native Cloudflare rate limiting instead of a hand-rolled Map --
+  // the endpoint is public and every request bills Workers AI.
+  "unsafe": {
+    "bindings": [
+      {
+        "name": "RATE_LIMITER",
+        "type": "ratelimit",
+        "namespace_id": "1001",
+        "simple": { "limit": 20, "period": 60 }
+      }
+    ]
+  }
 }

@@ -10,6 +10,11 @@ export default {
   async fetch(req, env) {
     if (req.method !== "POST") return new Response("POST only", { status: 405 });
 
+    // Public endpoint, and every request bills Workers AI. Throttle per client IP.
+    const ip = req.headers.get("cf-connecting-ip") || "unknown";
+    const { success } = await env.RATE_LIMITER.limit({ key: ip });
+    if (!success) return json({ error: "rate limited" }, 429);
+
     let q;
     try {
       q = (await req.json()).q;
