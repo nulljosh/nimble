@@ -26,3 +26,7 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 - [ ] Site needs a landing/marketing page — currently it drops straight into the app with no preview
 
 > Resume note (2026-08-11): a `wip: partial work from /work notes ingest` commit holds unfinished, unverified changes for the items above. Review `git show HEAD` before building on it — it was committed mid-flight, not reviewed, and is unpushed.
+
+## Ingested 2026-08-18
+- [ ] Add more thorough tests, making sure results are more filtered.
+- [ ] Build out Windows/Linux apps + Android. (iOS, macOS, and web already exist.)
