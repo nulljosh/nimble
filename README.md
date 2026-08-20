@@ -47,3 +47,7 @@ Requires Xcode + xcodegen.
 ## License
 
 MIT 2026 Joshua Trommel
+
+## Whitepaper
+
+[Technical whitepaper](WHITEPAPER.md)
