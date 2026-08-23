@@ -51,6 +51,13 @@ DONE this session:
   *landing page* via a catch-all. Do not use that URL — App Review would see the wrong document.
 - Metadata authored under `metadata/` (app-info + version/1.0.0), lengths validated.
 
+Verified 2026-08-23 by running it: `asc xcode archive` **succeeds**, `asc xcode export`
+**fails** with `No profiles for 'com.nulljosh.nimble.ios' were found`. Automatic signing
+cannot mint a distribution profile until the App Store Connect record exists, so the
+record gates the entire build pipeline, not just metadata. Do not attempt to build and
+upload before creating it. `.asc/workflow.json` and `ExportOptions.plist` are in place
+and ready; fill in `IOS_APP_ID` once the record exists, then `asc workflow run ship-ios`.
+
 REMAINING, in order:
 - [ ] **Create the ASC app record** — browser-only, `asc-app-create-ui` skill. Name "Nimble Answers", bundle `com.nulljosh.nimble.ios` (already registered, NU796452Z2). Known friction: the New App dialog's Primary Language Ember Power Select widget resists automation — expect to need Joshua for two clicks rather than burning attempts.
 - [ ] Apply `metadata/` to the record, set marketingUrl + supportUrl to https://heyitsmejosh.com.

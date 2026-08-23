@@ -1,0 +1,16 @@
+{
+  // Release automation. Run: asc workflow run ship-ios VERSION:1.0.0
+  // App record does not exist yet — create it first (asc-app-create-ui skill),
+  // then put its ID in IOS_APP_ID below. SUBMIT stays false until the
+  // 2026-08-22 resubmissions are approved; see roadmap.md.
+  "env": { "IOS_APP_ID": "", "VERSION": "1.0.0", "SUBMIT": "false" },
+  "before_all": "asc auth status",
+  "workflows": {
+    "ship-ios": { "description": "Bump, archive, export, upload iOS", "steps": [
+      { "name": "bump", "run": "asc xcode version edit --version \"$VERSION\" --build-number \"$(date +%Y%m%d%H%M)\"" },
+      { "name": "archive", "run": "asc xcode archive --project Nimble.xcodeproj --scheme Nimble-iOS --archive-path .asc/artifacts/Nimble.xcarchive --overwrite --xcodebuild-flag=-skipPackagePluginValidation --output json" },
+      { "name": "export", "run": "asc xcode export --archive-path .asc/artifacts/Nimble.xcarchive --export-options ExportOptions.plist --overwrite --ipa-path .asc/artifacts/Nimble.ipa --output json" },
+      { "name": "publish", "if": "SUBMIT", "run": "asc publish appstore --app $IOS_APP_ID --ipa .asc/artifacts/Nimble.ipa --version $VERSION --wait --confirm --output json" }
+    ] }
+  }
+}

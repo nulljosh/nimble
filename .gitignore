@@ -6,3 +6,4 @@ DerivedData/
 *.dSYM.zip
 *.dSYM
 dist/
+.asc/artifacts/
