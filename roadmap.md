@@ -30,3 +30,6 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 ## Ingested 2026-08-18
 - [ ] Add more thorough tests, making sure results are more filtered.
 - [ ] Build out Windows/Linux apps + Android. (iOS, macOS, and web already exist.)
+
+## Ingested 2026-08-22
+- [ ] Ship iOS and Mac apps — right now only web is available.
