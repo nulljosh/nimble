@@ -76,3 +76,8 @@ Measured at 1,677 lines of app code with real search, result and context-menu UI
 the Workers AI backend. Substantive enough to clear Guideline 4.2, unlike Newsline.
 - [ ] Ship to the App Store **after** the 2026-08-22 resubmissions (Healstack, Lexly Mac, Sparkjar Mac) come back approved — a clean approval streak makes creating a new app record much safer on an account with a 5.6 suspension in its history.
 - [ ] Full new-app checklist: create the ASC app record (browser-only, use the asc-app-create-ui skill), register the bundle ID, signing assets, screenshots, metadata, App Privacy answers, then `asc validate` before submitting.
+
+## Found while capturing screenshots — 2026-08-23
+- [x] iOS ran letterboxed at 320x480 — `INFOPLIST_KEY_UILaunchScreen: {}` is silently dropped by xcodegen; switched to `INFOPLIST_KEY_UILaunchScreen_Generation: YES`. Now 440x956. FIXED.
+- [ ] The in-app "What's New" sheet is hardcoded to **v1.2.0** ("Nimble is now available as an iOS companion app") while MARKETING_VERSION is 1.0.0, and it covers the whole screen on first launch. Wire it to the real version or retire it before shipping — it will also block every screenshot.
+- [ ] Screenshots still to capture. App is installed and running full-screen on the iPhone 17 Pro Max sim (6.9", the size Apple requires). Flow: dismiss the What's New sheet, then type a math query (offline path), a factual query (Worker path) and a definition, capturing each. Save to `screenshots/` (gitignored).
