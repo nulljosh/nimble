@@ -46,6 +46,9 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
+        # Mirrors the macOS target. Its absence is the real cause of ITMS-90242
+        # on upload, which reads like a signing failure but is not.
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_UILaunchScreen: {}
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
