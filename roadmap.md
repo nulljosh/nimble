@@ -34,6 +34,36 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 ## Ingested 2026-08-22
 - [ ] Ship iOS and Mac apps — right now only web is available.
 
+## App Store launch — status 2026-08-23
+
+**Name RESOLVED: "Nimble Answers".** Bare "Nimble" is held by Nimble, Inc. Apple's
+app-name namespace is exact-match *at record creation*, so the New App form refuses a
+taken name — the earlier 2026-08-04 decision to "keep the name, revisit only if App
+Review rejects" was wrong; review never gets a say. Verified free 2026-08-23:
+Nimble Answers / Nimble Search / Nimble Ask / Nimble Facts. On-device name stays
+"Nimble" (Guideline 2.3.8 only requires the two be similar).
+
+DONE this session:
+- iOS target now sets `LSApplicationCategoryType` (was missing; real cause of ITMS-90242).
+- iOS build green against `generic/platform=iOS Simulator`.
+- Privacy policy written and live: **https://heyitsmejosh.com/nimble/privacy.html** (verified 200 with correct title).
+  Trap: `https://nimble.heyitsmejosh.com/privacy.html` also returns 200 but serves the
+  *landing page* via a catch-all. Do not use that URL — App Review would see the wrong document.
+- Metadata authored under `metadata/` (app-info + version/1.0.0), lengths validated.
+
+REMAINING, in order:
+- [ ] **Create the ASC app record** — browser-only, `asc-app-create-ui` skill. Name "Nimble Answers", bundle `com.nulljosh.nimble.ios` (already registered, NU796452Z2). Known friction: the New App dialog's Primary Language Ember Power Select widget resists automation — expect to need Joshua for two clicks rather than burning attempts.
+- [ ] Apply `metadata/` to the record, set marketingUrl + supportUrl to https://heyitsmejosh.com.
+- [ ] App Privacy questionnaire: the question text is transmitted to DuckDuckGo, Wikipedia and the Workers AI service, **not linked to identity**, no tracking. Under-declaring is a rejection.
+- [ ] Screenshots — none exist yet. Use the `appstore-screenshots` / `asc-shots-pipeline` skills at the iPhone 11 Pro Max / 14 Plus sizes.
+- [ ] Add `.asc/workflow.json` with a `ship-ios` workflow modelled on Healstack's (known-good shape).
+- [ ] Archive → export → upload. Verify with `asc builds uploads list`; `asc publish` reports false successes.
+- [ ] `asc validate --app <id> --version 1.0.0` until zero blocking errors.
+- [ ] Run it on a simulator before submitting — test a math query (offline path) and a factual query (Worker path). Do not submit on a compile alone.
+- [ ] **GATE: submit only after Healstack 2.3.5, Lexly Mac 1.1.4 and Sparkjar Mac 1.0.1 are approved.** Creating a new app record is the highest-scrutiny ASC action and this account has a 5.6 suspension in its history.
+
+Plan file: `~/.claude/plans/tldr-shorter-and-you-cryptic-reef.md`
+
 ## Approved to ship — 2026-08-22
 Measured at 1,677 lines of app code with real search, result and context-menu UI over
 the Workers AI backend. Substantive enough to clear Guideline 4.2, unlike Newsline.
