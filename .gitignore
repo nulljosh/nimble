@@ -7,3 +7,4 @@ DerivedData/
 *.dSYM
 dist/
 .asc/artifacts/
+screenshots/
