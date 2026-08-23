@@ -33,3 +33,9 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 
 ## Ingested 2026-08-22
 - [ ] Ship iOS and Mac apps — right now only web is available.
+
+## Approved to ship — 2026-08-22
+Measured at 1,677 lines of app code with real search, result and context-menu UI over
+the Workers AI backend. Substantive enough to clear Guideline 4.2, unlike Newsline.
+- [ ] Ship to the App Store **after** the 2026-08-22 resubmissions (Healstack, Lexly Mac, Sparkjar Mac) come back approved — a clean approval streak makes creating a new app record much safer on an account with a 5.6 suspension in its history.
+- [ ] Full new-app checklist: create the ASC app record (browser-only, use the asc-app-create-ui skill), register the bundle ID, signing assets, screenshots, metadata, App Privacy answers, then `asc validate` before submitting.
