@@ -16,7 +16,8 @@ Inspired by the original [Nimble](https://github.com/Maybulb/Nimble) (Electron +
 - **Instant answers** — DuckDuckGo → Wikipedia, prioritized for questions
 - **Offline math** — arithmetic, trig, sqrt, log, powers, pi
 - **8 themes** — orange, red, yellow, green, blue, purple, pink, contrast
-- No API keys required · no telemetry · 26 tests passing
+- **In-app updates** — checks GitHub Releases daily, plus a manual check in Preferences
+- No API keys required · no telemetry · 34 tests
 
 > MenuBarExtra disabled (macOS Tahoe beta bug). Re-enabled when the SDK stabilizes.
 
@@ -29,6 +30,19 @@ Inspired by the original [Nimble](https://github.com/Maybulb/Nimble) (Electron +
 | Web | Static page, no backend — [web/index.html](web/index.html) |
 
 <img src="docs/screenshots/ios-search.jpg" width="240">
+
+## Installing the Mac app
+
+Download the latest `.zip` from [Releases](https://github.com/nulljosh/nimble/releases/latest), unzip, drag `Nimble.app` to `/Applications`.
+
+Releases from v1.0.1 on are Developer ID-signed and notarized, so they open on first
+launch. The v1.0.0 build was signed with a development certificate only — macOS
+quarantines it and it has to be approved under System Settings → Privacy & Security →
+"Open Anyway". If you are on that build, updating clears it.
+
+Maintainers: build releases with `scripts/release-macos.sh`, which signs, notarizes,
+staples and packages in one pass. It needs a Developer ID Application certificate and a
+`notarytool` credential profile — see the header of the script.
 
 ## Architecture
 

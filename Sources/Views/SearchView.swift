@@ -4,6 +4,7 @@ struct SearchView: View {
     @Environment(AppState.self) private var state
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isInputFocused: Bool
+    @State private var showSettings = false
 
     var body: some View {
         @Bindable var state = state
@@ -84,11 +85,25 @@ struct SearchView: View {
                 ThemePickerView()
                     .environment(state)
                 Spacer()
-                Text("Nimble v1.0")
-                    .font(.system(size: 9, weight: .medium))
-                    .foregroundStyle(Color.white.opacity(0.2))
-                    .tracking(0.8)
-                    .textCase(.uppercase)
+                if let newVersion = state.updates.availableVersion {
+                    // Only surfaced once a check has actually found something newer —
+                    // the bar reads as the version label the rest of the time.
+                    Button(action: { state.updates.openUpdate() }) {
+                        Text("Update to v\(newVersion)")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(state.theme.color)
+                            .tracking(0.8)
+                            .textCase(.uppercase)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Download Nimble \(newVersion)")
+                } else {
+                    Text("Nimble v\(Bundle.main.marketingVersion)")
+                        .font(.system(size: 9, weight: .medium))
+                        .foregroundStyle(Color.white.opacity(0.2))
+                        .tracking(0.8)
+                        .textCase(.uppercase)
+                }
                 Spacer()
                 HStack(spacing: 10) {
                     Button(action: { state.copyResultText() }) {
@@ -99,7 +114,7 @@ struct SearchView: View {
                     .buttonStyle(.plain)
                     .help("Copy Result")
                     .accessibilityLabel("Copy Result")
-                    Button(action: {}) {
+                    Button(action: { showSettings.toggle() }) {
                         Text("⚙")
                             .font(.system(size: 13))
                             .foregroundStyle(Color.white.opacity(0.3))
@@ -107,6 +122,11 @@ struct SearchView: View {
                     .buttonStyle(.plain)
                     .help("Preferences")
                     .accessibilityLabel("Preferences")
+                    // The gear used to be inert on click — the settings pane it opens
+                    // already existed, nothing ever presented it.
+                    .popover(isPresented: $showSettings, arrowEdge: .bottom) {
+                        SettingsView().environment(state)
+                    }
                     .contextMenu {
                         ContextMenuView().environment(state)
                     }
@@ -141,6 +161,7 @@ struct SearchView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
         .onAppear { isInputFocused = true }
+        .task { await state.checkForUpdatesIfDue() }
         .contextMenu { ContextMenuView().environment(state) }
     }
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+- feat(macos): in-app updates — daily background check against GitHub Releases, manual
+  "Check for Updates" in Preferences, the gear context menu and the app menu, and an
+  "Update to vX" button in the bottom bar when one is found
+- feat(macos): `scripts/release-macos.sh` — Developer ID signing, notarization and
+  stapling, so downloads stop needing "Open Anyway" under Privacy & Security
+- fix(macos): removed the empty bar above the search field (titlebar strip the window
+  kept reserving); the gear button now opens Preferences instead of doing nothing
+- fix(ios): paint the theme background into the status-bar area — the app was rendering a
+  black strip across the top
+- feat(web): landing page gained the iPhone screenshot in a device frame; footer "love"
+  is now a thumping red heart
+
 ## [v1.0.0] — 2026-07-29
 
 - Reset versioning to 1.0 across macOS/iOS/web as the first real cross-platform release

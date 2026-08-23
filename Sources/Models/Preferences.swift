@@ -6,6 +6,9 @@ struct PreferencesData: Codable {
     var launchOnStartup: Bool = false
     var centerWindow: Bool = false
     var defaultSuggestions: Bool = true
+    var automaticUpdates: Bool = true
+    /// Unix time of the last successful update check; 0 means "never checked".
+    var lastUpdateCheck: Double = 0
 }
 
 final class Preferences {

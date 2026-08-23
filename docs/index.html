@@ -161,6 +161,43 @@ a:hover { text-decoration: underline; }
   color: rgba(255,255,255,0.8);
 }
 
+/* Screenshot — the real app, framed so its dark UI reads as product, not as a
+   murky rectangle floating on the yellow. */
+.shot-section {
+  padding: 4rem 0;
+  text-align: center;
+  background: var(--yellow);
+}
+
+.shot-section h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.shot-section p {
+  font-size: 1rem;
+  color: rgba(0,0,0,0.6);
+  max-width: 420px;
+  margin: 0 auto 2.5rem;
+}
+
+.phone {
+  width: 260px;
+  margin: 0 auto;
+  padding: 10px;
+  background: var(--dark);
+  border-radius: 34px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+}
+
+.phone img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 26px;
+}
+
 /* Features */
 .features {
   padding: 4rem 0;
@@ -258,6 +295,27 @@ footer {
 footer a { color: var(--light); }
 footer a:hover { color: var(--dark); }
 
+/* Footer heart */
+.heart {
+  color: #e0245e;
+  font-size: 1.15em;
+  line-height: 1;
+  font-style: normal;
+  display: inline-block;
+  transform-origin: center;
+  animation: thump 1.2s ease-in-out infinite;
+}
+
+@keyframes thump {
+  0%, 28%, 70%, 100% { transform: scale(1); }
+  14% { transform: scale(1.35); }
+  42% { transform: scale(1.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heart { animation: none; }
+}
+
 .credit {
   margin-top: 0.5rem;
   font-size: 0.8rem;
@@ -302,6 +360,16 @@ footer a:hover { color: var(--dark); }
         <p>Canada is a country in North America. Its ten provinces and three territories extend from the Atlantic Ocean to the Pacific Ocean and northward into the Arctic Ocean, covering 9.98 million square kilometres. Population: approximately 40.1 million.</p>
       </div>
       <div class="mockup-credit">powered by Wikipedia</div>
+    </div>
+  </div>
+</section>
+
+<section class="shot-section">
+  <div class="container">
+    <h2>On your iPhone, too.</h2>
+    <p>The same answer engine, same eight themes — math still runs offline.</p>
+    <div class="phone">
+      <img src="screenshots/ios-search.jpg" width="369" height="554" alt="Nimble on iPhone answering &quot;Ten plus ten&quot; with 20, computed offline.">
     </div>
   </div>
 </section>
@@ -363,7 +431,7 @@ footer a:hover { color: var(--dark); }
 <footer>
   <div class="container">
     <p>Nimble &mdash; by <a href="https://heyitsmejosh.com">Joshua Trommel</a></p>
-    <p class="credit">Originally created by <a href="https://maybulb.com">Maybulb</a>. Rebuilt with love.</p>
+    <p class="credit">Originally created by <a href="https://maybulb.com">Maybulb</a>. Rebuilt with <span class="heart" role="img" aria-label="love">&hearts;</span></p>
   </div>
 </footer>
 

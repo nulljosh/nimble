@@ -58,6 +58,9 @@ struct SettingsView: View {
 
                 Toggle("Default Suggestions", isOn: $state.defaultSuggestions)
                     .onChange(of: state.defaultSuggestions) { state.savePreferences() }
+
+                Toggle("Check for Updates Automatically", isOn: $state.automaticUpdates)
+                    .onChange(of: state.automaticUpdates) { state.savePreferences() }
             }
             .font(.system(size: 12))
             .toggleStyle(.switch)
@@ -65,14 +68,38 @@ struct SettingsView: View {
 
             Divider()
 
-            HStack {
-                Text("Version")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Version")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(Bundle.main.marketingVersion)
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                }
+
+                HStack {
+                    if let newVersion = state.updates.availableVersion {
+                        Button("Download \(newVersion)") { state.updates.openUpdate() }
+                            .font(.system(size: 12))
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
+                    } else {
+                        Button("Check for Updates") {
+                            Task { await state.checkForUpdatesNow() }
+                        }
+                        .font(.system(size: 12))
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                        .disabled(state.updates.isChecking)
+                    }
+                    Spacer()
+                    Text(state.updates.statusText)
+                        .font(.system(size: 10))
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(1)
+                }
             }
 
             Divider()
