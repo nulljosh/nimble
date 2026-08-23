@@ -73,6 +73,13 @@ final class AppState {
     var launchOnStartup: Bool = false
     var centerWindow: Bool = false
     var defaultSuggestions: Bool = true
+    /// Only acted on by the Mac build — the iOS app updates through the App Store —
+    /// but stored on both so the preferences file has one shape.
+    var automaticUpdates: Bool = true
+    private var lastUpdateCheck: Double = 0
+    #if os(macOS)
+    let updates = UpdateChecker()
+    #endif
 
     var queryText: String = ""
     var result: QueryResult = .none
@@ -96,6 +103,8 @@ final class AppState {
         launchOnStartup = p.launchOnStartup
         centerWindow = p.centerWindow
         defaultSuggestions = p.defaultSuggestions
+        automaticUpdates = p.automaticUpdates
+        lastUpdateCheck = p.lastUpdateCheck
     }
 
     func savePreferences() {
@@ -104,11 +113,32 @@ final class AppState {
             mathEnabled: mathEnabled,
             launchOnStartup: launchOnStartup,
             centerWindow: centerWindow,
-            defaultSuggestions: defaultSuggestions
+            defaultSuggestions: defaultSuggestions,
+            automaticUpdates: automaticUpdates,
+            lastUpdateCheck: lastUpdateCheck
         )
         prefs.save(p)
         applyLaunchOnStartup()
     }
+
+    #if os(macOS)
+    /// Launch-time check: silent, at most once per `UpdateChecker.automaticInterval`,
+    /// and only when the user has left automatic checks on.
+    func checkForUpdatesIfDue() async {
+        guard automaticUpdates else { return }
+        if let checkedAt = await updates.checkIfDue(lastCheck: lastUpdateCheck) {
+            lastUpdateCheck = checkedAt
+            savePreferences()
+        }
+    }
+
+    /// The "Check for Updates…" button: always runs, and reports even when up to date.
+    func checkForUpdatesNow() async {
+        await updates.check()
+        lastUpdateCheck = Date().timeIntervalSince1970
+        savePreferences()
+    }
+    #endif
 
     func applyLaunchOnStartup() {
         #if os(macOS)

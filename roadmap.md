@@ -81,3 +81,52 @@ the Workers AI backend. Substantive enough to clear Guideline 4.2, unlike Newsli
 - [x] iOS ran letterboxed at 320x480 — `INFOPLIST_KEY_UILaunchScreen: {}` is silently dropped by xcodegen; switched to `INFOPLIST_KEY_UILaunchScreen_Generation: YES`. Now 440x956. FIXED.
 - [ ] The in-app "What's New" sheet is hardcoded to **v1.2.0** ("Nimble is now available as an iOS companion app") while MARKETING_VERSION is 1.0.0, and it covers the whole screen on first launch. Wire it to the real version or retire it before shipping — it will also block every screenshot.
 - [ ] Screenshots still to capture. App is installed and running full-screen on the iPhone 17 Pro Max sim (6.9", the size Apple requires). Flow: dismiss the What's New sheet, then type a math query (offline path), a factual query (Worker path) and a definition, capturing each. Save to `screenshots/` (gitignored).
+
+## Maybulb-clone refinements — 2026-08-23
+
+Shipped this session:
+- [x] Landing page: `love` → a red `&hearts;` that thumps (1.2s two-beat, disabled under
+      `prefers-reduced-motion`).
+- [x] Landing page: added the iPhone shot in a device frame on a yellow band. The shot
+      read as a dark smear because its top 108px were pure black — the iOS app was not
+      painting its background into the status-bar area. Cropped that band off the asset
+      and fixed the cause (below).
+- [x] iOS: theme background moved from the inner `VStack` to the `NavigationStack`, and
+      the empty root nav bar hidden. That black strip above the search field is gone.
+- [x] macOS: the bar at the top of the window was the titlebar strip the scene kept
+      reserving. Added `.windowResizability(.contentSize)` plus `fullSizeContentView` /
+      no toolbar / no titlebar separator, and dropped the manual 56pt frame clamp that
+      was fighting the content height. Empty File and Help menus replaced too.
+- [x] macOS: the gear button was inert — `SettingsView` existed but nothing presented
+      it. It now opens as a popover.
+- [x] macOS signing: v1.0.0 shipped with a development certificate, which is why the app
+      had to be approved under Privacy & Security. `scripts/release-macos.sh` +
+      `ExportOptions-macOS.plist` + `ENABLE_HARDENED_RUNTIME` do Developer ID signing,
+      notarization and stapling in one pass.
+- [x] Updates: `UpdateChecker` polls the GitHub Releases API — automatic once a day
+      (toggleable), manual from Preferences, the ⚙ context menu and the app menu. A newer
+      version shows as an accent-coloured "UPDATE TO Vx.y.z" in the bottom bar.
+
+Still open:
+- [ ] **Verify on a Mac.** No Swift toolchain in the session that wrote this, so none of
+      the macOS/iOS changes above are compiled or run. `xcodegen generate && xcodebuild
+      test` before releasing.
+- [ ] **Real auto-update (Sparkle).** What shipped is check-and-notify: it downloads
+      nothing and replaces nothing. In-place updates need a helper process and a signed
+      appcast — Sparkle, once Developer ID signing is in place.
+- [ ] **Recapture the iOS screenshot** after the safe-area fix, at 6.9" instead of the
+      369px asset in `docs/screenshots/`, and drop the crop.
+- [ ] Unit conversion is dead code: `QueryResult.convert` renders in `ResultView` and
+      copies in `AppState`, but nothing ever produces it. The original Nimble converts
+      units, so this is a real parity gap.
+- [ ] No global hotkey and no menu bar item (MenuBarExtra is still disabled for the Tahoe
+      bug), so Nimble cannot be summoned the way the original was. Biggest functional gap
+      against the source app.
+- [ ] No graphing. The original leaned on Wolfram|Alpha for plots; DDG + Wikipedia have
+      no equivalent.
+- [ ] `maybulb.com` is blocked by this environment's network egress policy, so the clone
+      could not be diffed against the live site this session. Known gaps from the earlier
+      pass and from search: the source page carries a third press quote (ifun.de, in
+      German) that `docs/index.html` does not, and their Europa Typekit face is
+      approximated by the Avenir Next stack in `tokens.css`. Re-check the live site from
+      an unblocked machine before calling the landing page done.

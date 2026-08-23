@@ -38,6 +38,21 @@ struct ContextMenuView: View {
                     get: { state.defaultSuggestions },
                     set: { state.defaultSuggestions = $0; state.savePreferences() }
                 ))
+                Toggle("Check for Updates Automatically", isOn: Binding(
+                    get: { state.automaticUpdates },
+                    set: { state.automaticUpdates = $0; state.savePreferences() }
+                ))
+            }
+
+            Divider()
+
+            if let newVersion = state.updates.availableVersion {
+                Button("Download Nimble \(newVersion)…") { state.updates.openUpdate() }
+            } else {
+                Button(state.updates.isChecking ? "Checking for Updates…" : "Check for Updates…") {
+                    Task { await state.checkForUpdatesNow() }
+                }
+                .disabled(state.updates.isChecking)
             }
 
             Divider()

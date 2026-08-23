@@ -92,15 +92,20 @@ struct SearchView: View {
                 .padding(.vertical, 12)
                 .overlay(alignment: .top) { Divider().opacity(0.07) }
             }
-            // Mirrors the web app: the theme owns the surface, and `.primary`/`.secondary`
-            // follow it via colorScheme instead of every view hardcoding white-on-dark.
-            .background(state.theme.backgroundColor.ignoresSafeArea())
-            .environment(\.colorScheme, state.theme.colorScheme)
             .onAppear {
                 guard whatsNewSeenVersion == whatsNewVersion else { return }
                 isInputFocused = true
             }
+            // No title on the root screen, so the empty bar was only ever a black
+            // strip above the search field.
+            .toolbar(.hidden, for: .navigationBar)
         }
+        // Mirrors the web app: the theme owns the surface, and `.primary`/`.secondary`
+        // follow it via colorScheme instead of every view hardcoding white-on-dark.
+        // On the NavigationStack rather than its content — inside, the status-bar area
+        // stayed unpainted and rendered black.
+        .background(state.theme.backgroundColor.ignoresSafeArea())
+        .environment(\.colorScheme, state.theme.colorScheme)
     }
 
     private var sourceText: String {

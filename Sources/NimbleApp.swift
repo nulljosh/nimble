@@ -12,7 +12,23 @@ struct NimbleApp: App {
                 .onAppear { configureWindow() }
         }
         .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: 660, height: 56)
+        // Without this the window keeps a titlebar-sized strip above the search bar —
+        // the empty bar at the top of the HUD. `.contentSize` makes the frame hug the
+        // view, which is also what lets it grow when a result appears.
+        .windowResizability(.contentSize)
+        .commands {
+            CommandGroup(replacing: .appInfo) {
+                Button("About Nimble") { NSApp.orderFrontStandardAboutPanel(nil) }
+                Divider()
+                Button("Check for Updates…") {
+                    Task { await appState.checkForUpdatesNow() }
+                }
+                .disabled(appState.updates.isChecking)
+            }
+            // Nothing to create, and no help book to open — both menus were empty.
+            CommandGroup(replacing: .newItem) {}
+            CommandGroup(replacing: .help) {}
+        }
     }
 
     private func configureWindow() {
@@ -27,11 +43,11 @@ struct NimbleApp: App {
                 window.backgroundColor = .clear
                 window.isOpaque = false
                 window.hasShadow = true
-                // Shrink to just the search bar height
-                var frame = window.frame
-                frame.size.height = 56
-                frame.origin.y += (window.frame.height - 56)
-                window.setFrame(frame, display: true, animate: false)
+                // The three that actually remove the bar: content draws under the
+                // titlebar, no toolbar row, no hairline where the titlebar ended.
+                window.styleMask.insert(.fullSizeContentView)
+                window.toolbar = nil
+                window.titlebarSeparatorStyle = .none
             }
         }
     }

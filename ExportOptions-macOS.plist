@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Direct distribution (GitHub Releases), not the Mac App Store. This is the
+         method that produces a Developer ID-signed app Gatekeeper will accept once
+         it has also been notarized — see scripts/release-macos.sh. -->
+    <key>method</key>
+    <string>developer-id</string>
+    <key>teamID</key>
+    <string>QMM486NPYC</string>
+    <key>signingStyle</key>
+    <string>automatic</string>
+</dict>
+</plist>
