@@ -490,12 +490,18 @@ footer a:hover { color: var(--dark); }
     row.className = 'ask-row' + (r % 2 ? ' right' : '');
     row.style.setProperty('--dur', (58 + r * 11) + 's');
     var slice = asks.slice(r * per, (r + 1) * per);
-    slice.concat(slice).forEach(function (a) {  // doubled: the keyframes loop at half the track
-      var s = document.createElement('span');
-      s.textContent = a;
-      row.appendChild(s);
-    });
+    var fill = function () {
+      slice.forEach(function (a) {
+        var s = document.createElement('span');
+        s.textContent = a;
+        row.appendChild(s);
+      });
+    };
+    fill();
     wall.appendChild(row);
+    // One pass has to outrun the viewport or the -50% loop shows a gap on wide screens.
+    for (var n = 0; n < 8 && row.scrollWidth < window.innerWidth; n++) fill();
+    row.innerHTML += row.innerHTML;  // doubled: the keyframes loop at half the track
   }
 })();
 </script>
