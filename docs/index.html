@@ -43,9 +43,39 @@ a:hover { text-decoration: underline; }
 
 /* Hero */
 .hero {
+  position: relative; isolation: isolate; overflow: hidden;
   text-align: center;
   padding: 6rem 0 4rem;
   background: var(--yellow);
+}
+.hero .container { position: relative; z-index: 2; }
+
+/* a slow-drifting wall of things you can ask Nimble */
+.hero-wall {
+  position: absolute; inset: -12%; z-index: 0;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px;
+  pointer-events: none; user-select: none;
+}
+.ask-col { display: flex; min-width: 0; flex-direction: column; gap: 12px; }
+.ask-col span {
+  display: block; padding: 10px 16px; border-radius: 100px;
+  background: rgba(255,255,255,0.55);
+  font-size: 0.9rem; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.ask-col.up   { animation: wall-up   var(--dur) linear infinite; }
+.ask-col.down { animation: wall-down var(--dur) linear infinite; }
+@keyframes wall-up   { from { transform: translateY(0); }    to { transform: translateY(-50%); } }
+@keyframes wall-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .ask-col { animation: none; } }
+
+/* semi-transparent yellow over the wall, so the copy stays readable */
+.hero::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 62% at 50% 45%, var(--yellow) 25%, transparent 80%),
+    linear-gradient(var(--yellow), transparent 28%, transparent 64%, var(--yellow) 97%),
+    color-mix(in srgb, var(--yellow) 55%, transparent);
 }
 
 .hero-icon {
@@ -325,6 +355,7 @@ footer a:hover { color: var(--dark); }
 <body>
 
 <section class="hero">
+  <div class="hero-wall" id="askWall" aria-hidden="true"></div>
   <div class="container">
     <div class="hero-icon">
       <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nimble">
@@ -434,6 +465,40 @@ footer a:hover { color: var(--dark); }
     <p class="credit">Originally created by <a href="https://maybulb.com">Maybulb</a>. Rebuilt with <span class="heart" role="img" aria-label="love">&hearts;</span></p>
   </div>
 </footer>
+
+<script>
+// Wall of example queries drifting behind the hero. Purely decorative.
+(function () {
+  var asks = [
+    '2^16 + 42', 'Population of Canada', 'define ephemeral', 'speed of light',
+    '15% of 89.40', 'Who was Ada Lovelace?', '180 lb in kg', 'What is a black hole?',
+    'sqrt(1764)', 'capital of Peru', 'define laconic', 'distance to the Moon',
+    '(3 + 4) * 12', 'What is DNS?', '72 F in C', 'Marie Curie',
+    'define quixotic', 'height of Mount Everest', '1024 / 16', 'What is RSA?',
+    '30 mi in km', 'Who wrote Dune?', 'define obviate', 'boiling point of water'
+  ];
+  var wall = document.getElementById('askWall');
+  if (!wall) return;
+  for (var i = asks.length - 1; i > 0; i--) {  // shuffle so the wall differs each visit
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = asks[i]; asks[i] = asks[j]; asks[j] = t;
+  }
+  var cols = window.innerWidth < 700 ? 2 : 4;
+  var per = Math.floor(asks.length / cols);
+  for (var c = 0; c < cols; c++) {
+    var col = document.createElement('div');
+    col.className = 'ask-col ' + (c % 2 ? 'down' : 'up');
+    col.style.setProperty('--dur', (46 + c * 9) + 's');
+    var slice = asks.slice(c * per, (c + 1) * per);
+    slice.concat(slice).forEach(function (a) {  // doubled: the keyframes loop at -50%
+      var s = document.createElement('span');
+      s.textContent = a;
+      col.appendChild(s);
+    });
+    wall.appendChild(col);
+  }
+})();
+</script>
 
 </body>
 </html>
