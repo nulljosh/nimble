@@ -52,30 +52,29 @@ a:hover { text-decoration: underline; }
 
 /* a slow-drifting wall of things you can ask Nimble */
 .hero-wall {
-  position: absolute; inset: -12%; z-index: 0;
-  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px;
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center; gap: 1.1rem;
   pointer-events: none; user-select: none;
 }
-.ask-col { display: flex; min-width: 0; flex-direction: column; gap: 12px; }
-.ask-col span {
-  display: block; padding: 10px 16px; border-radius: 100px;
-  background: rgba(255,255,255,0.55);
-  font-size: 0.9rem; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
+.ask-row {
+  display: flex; flex: none; width: max-content; white-space: nowrap;
+  font-size: clamp(1.05rem, 2.8vw, 1.9rem);
+  font-weight: 700; letter-spacing: var(--tracking-tight);
+  color: rgba(0, 0, 0, 0.16);
+  animation: ask-left var(--dur) linear infinite;
 }
-.ask-col.up   { animation: wall-up   var(--dur) linear infinite; }
-.ask-col.down { animation: wall-down var(--dur) linear infinite; }
-@keyframes wall-up   { from { transform: translateY(0); }    to { transform: translateY(-50%); } }
-@keyframes wall-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .ask-col { animation: none; } }
+.ask-row.right { animation-name: ask-right; }
+.ask-row span::after { content: '\00B7'; margin: 0 1.5rem; }
+@keyframes ask-left  { from { transform: translateX(0); }    to { transform: translateX(-50%); } }
+@keyframes ask-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) { .ask-row { animation: none; } }
 
-/* semi-transparent yellow over the wall, so the copy stays readable */
+/* Semi-transparent yellow over the questions: solid under the copy, clear at the edges. */
 .hero::after {
   content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 62% at 50% 45%, var(--yellow) 25%, transparent 80%),
-    linear-gradient(var(--yellow), transparent 28%, transparent 64%, var(--yellow) 97%),
-    color-mix(in srgb, var(--yellow) 55%, transparent);
+    radial-gradient(ellipse 62% 58% at 50% 48%, var(--yellow) 38%, transparent 78%),
+    linear-gradient(var(--yellow), transparent 22%, transparent 78%, var(--yellow));
 }
 
 .hero-icon {
@@ -467,35 +466,36 @@ footer a:hover { color: var(--dark); }
 </footer>
 
 <script>
-// Wall of example queries drifting behind the hero. Purely decorative.
+// Ticker of things Nimble answers, drifting behind the hero. Decorative.
 (function () {
   var asks = [
-    '2^16 + 42', 'Population of Canada', 'define ephemeral', 'speed of light',
-    '15% of 89.40', 'Who was Ada Lovelace?', '180 lb in kg', 'What is a black hole?',
+    '2^16 + 42', 'population of Canada', 'define ephemeral', 'speed of light',
+    '15% of 89.40', 'who was Ada Lovelace', '180 lb in kg', 'what is a black hole',
     'sqrt(1764)', 'capital of Peru', 'define laconic', 'distance to the Moon',
-    '(3 + 4) * 12', 'What is DNS?', '72 F in C', 'Marie Curie',
-    'define quixotic', 'height of Mount Everest', '1024 / 16', 'What is RSA?',
-    '30 mi in km', 'Who wrote Dune?', 'define obviate', 'boiling point of water'
+    '(3 + 4) * 12', 'what is DNS', '72 F in C', 'Marie Curie',
+    'define quixotic', 'height of Everest', '1024 / 16', 'what is RSA',
+    '30 mi in km', 'who wrote Dune', 'define obviate', 'boiling point of water',
+    '9! / 7!', 'GDP of Japan', 'define palimpsest', 'when did Apollo 11 land',
+    '2.5 TB in GB', 'half-life of carbon-14'
   ];
   var wall = document.getElementById('askWall');
   if (!wall) return;
-  for (var i = asks.length - 1; i > 0; i--) {  // shuffle so the wall differs each visit
+  for (var i = asks.length - 1; i > 0; i--) {  // shuffle so the ticker differs each visit
     var j = Math.floor(Math.random() * (i + 1));
     var t = asks[i]; asks[i] = asks[j]; asks[j] = t;
   }
-  var cols = window.innerWidth < 700 ? 2 : 4;
-  var per = Math.floor(asks.length / cols);
-  for (var c = 0; c < cols; c++) {
-    var col = document.createElement('div');
-    col.className = 'ask-col ' + (c % 2 ? 'down' : 'up');
-    col.style.setProperty('--dur', (46 + c * 9) + 's');
-    var slice = asks.slice(c * per, (c + 1) * per);
-    slice.concat(slice).forEach(function (a) {  // doubled: the keyframes loop at -50%
+  var rows = 5, per = Math.floor(asks.length / rows);
+  for (var r = 0; r < rows; r++) {
+    var row = document.createElement('div');
+    row.className = 'ask-row' + (r % 2 ? ' right' : '');
+    row.style.setProperty('--dur', (58 + r * 11) + 's');
+    var slice = asks.slice(r * per, (r + 1) * per);
+    slice.concat(slice).forEach(function (a) {  // doubled: the keyframes loop at half the track
       var s = document.createElement('span');
       s.textContent = a;
-      col.appendChild(s);
+      row.appendChild(s);
     });
-    wall.appendChild(col);
+    wall.appendChild(row);
   }
 })();
 </script>
