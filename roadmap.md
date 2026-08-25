@@ -67,7 +67,7 @@ REMAINING, in order:
 - [ ] Archive → export → upload. Verify with `asc builds uploads list`; `asc publish` reports false successes.
 - [ ] `asc validate --app <id> --version 1.0.0` until zero blocking errors.
 - [ ] Run it on a simulator before submitting — test a math query (offline path) and a factual query (Worker path). Do not submit on a compile alone.
-- [ ] **GATE: submit only after Healstack 2.3.5, Lexly Mac 1.1.4 and Sparkjar Mac 1.0.1 are approved.** Creating a new app record is the highest-scrutiny ASC action and this account has a 5.6 suspension in its history.
+- [ ] **GATE — 1 of 3 met as of 2026-08-25.** Sparkjar macOS **1.0.1 is APPROVED and live** (READY_FOR_SALE). Still pending: Healstack iOS 2.3.5 and Lexly macOS 1.1.4, both WAITING_FOR_REVIEW. Note the 5.6 caution below is milder than written: per the account history, 5.6 fires on bulk *thin new* records, not submission frequency — and nine records are currently in the queue with no incident. Original note follows:
 
 Plan file: `~/.claude/plans/tldr-shorter-and-you-cryptic-reef.md`
 
@@ -78,7 +78,7 @@ the Workers AI backend. Substantive enough to clear Guideline 4.2, unlike Newsli
 - [ ] Full new-app checklist: create the ASC app record (browser-only, use the asc-app-create-ui skill), register the bundle ID, signing assets, screenshots, metadata, App Privacy answers, then `asc validate` before submitting.
 
 ## Found while capturing screenshots — 2026-08-23
-- [ ] The in-app "What's New" sheet is hardcoded to **v1.2.0** ("Nimble is now available as an iOS companion app") while MARKETING_VERSION is 1.0.0, and it covers the whole screen on first launch. Wire it to the real version or retire it before shipping — it will also block every screenshot.
+- [ ] **CONFIRMED still true 2026-08-25:** `Sources/iOS/WhatsNewSheet.swift:3` hardcodes `let whatsNewVersion = "1.2.0"` while `project.yml` sets `MARKETING_VERSION: "1.0.0"` — a version that has never existed. Root-cause fix is to read the version from the bundle rather than re-hardcoding it, so it cannot drift again. Original note follows:
 - [ ] Screenshots still to capture. App is installed and running full-screen on the iPhone 17 Pro Max sim (6.9", the size Apple requires). Flow: dismiss the What's New sheet, then type a math query (offline path), a factual query (Worker path) and a definition, capturing each. Save to `screenshots/` (gitignored).
 
 ## Maybulb-clone refinements — 2026-08-23
