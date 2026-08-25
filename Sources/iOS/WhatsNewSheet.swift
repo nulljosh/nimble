@@ -1,6 +1,8 @@
 import SwiftUI
 
-let whatsNewVersion = "1.2.0"
+// ponytail: read from the bundle so this can't drift from MARKETING_VERSION again -
+// it was pinned at "1.2.0" while the project shipped 1.0.0, a version that never existed.
+let whatsNewVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 private let whatsNewBullets = [
     "Nimble is now available as an iOS companion app",
 ]
