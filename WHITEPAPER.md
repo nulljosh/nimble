@@ -1,6 +1,6 @@
 # Nimble Technical Whitepaper
 
-**v1.3.0** | July 2026
+**v1.3.0** | August 2026
 
 Nimble is a native macOS instant-answer search bar: type a query, get a
 direct answer (math result, definition, or factual snippet) instead of a page
@@ -14,7 +14,9 @@ query into one of three types before deciding where the answer comes from:
 1. **Math** — evaluated entirely offline via `NSExpression`, no network call.
    Covers arithmetic and standard operator precedence.
 2. **Definition** — routed to the Wikipedia REST API for a summary extract.
-3. **Factual** — routed to the DuckDuckGo Instant Answer API.
+3. **Factual** — routed to the DuckDuckGo Instant Answer API, with a Gemma
+   model on Cloudflare Workers AI behind it for queries the instant-answer
+   endpoint has nothing for.
 
 Classification happens before any network request fires, so math queries
 resolve instantly with zero latency and no external dependency.
@@ -33,9 +35,9 @@ on a macOS Tahoe beta SDK bug, re-enable once the SDK stabilizes.
 
 ## Security / Privacy
 
-Math queries never leave the device. Definition/factual queries go to
-DuckDuckGo and Wikipedia's public APIs only — no API keys, no user accounts,
-no query logging.
+Math queries never leave the device. Definition and factual queries go to
+Wikipedia, DuckDuckGo, and the project's own Cloudflare Worker — no user
+accounts and no query logging.
 
 ## License
 
