@@ -155,45 +155,49 @@ a:hover { text-decoration: underline; }
   color: var(--dark);
 }
 
-/* Mockup */
+/* Mockup — the Mac app. Colours are taken off the real iOS screenshot below
+   so the two read as one product; the old light-gold panel looked like a
+   different app sitting above its own screenshot. */
 .mockup-section {
   padding: 4rem 0;
   text-align: center;
 }
 
 .mockup {
-  max-width: 380px;
+  --panel: #14161f;
+  --panel-line: #262a36;
+  --panel-text: #f2f3f5;
+  --panel-mid: #9aa0ab;
+  --panel-gold: #d4a72c;
+  max-width: 420px;
   margin: 0 auto;
-  border: 1px solid #e0e0e0;
+  background: var(--panel);
   border-radius: 10px;
   overflow: hidden;
   text-align: left;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
 }
 
+/* The query row, laid out like the app: accent glass, then what you typed. */
 .mockup-bar {
-  background: var(--orange);
-  padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--panel-line);
 }
 
 .mockup-input {
   flex: 1;
   font-family: var(--font);
-  font-size: 14px;
-  color: rgba(255,255,255,0.7);
+  font-size: 15px;
+  color: var(--panel-text);
 }
 
-.mockup-btn-icon {
-  width: 28px;
-  height: 28px;
-  background: #fff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.8;
+.mockup-caret {
+  width: 2px;
+  height: 17px;
+  background: var(--yellow);
 }
 
 .mockup-result {
@@ -201,21 +205,32 @@ a:hover { text-decoration: underline; }
 }
 .mockup-result h4 {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--panel-text);
   margin-bottom: 6px;
 }
 .mockup-result p {
   font-size: 13px;
-  color: var(--mid);
-  line-height: 1.5;
+  color: var(--panel-mid);
+  line-height: 1.55;
+}
+
+/* Small caps gold label, the same one the app puts under an answer. */
+.mockup-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--panel-gold);
+  margin-bottom: 8px;
 }
 
 .mockup-credit {
-  background: var(--orange);
-  padding: 5px 14px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--panel-line);
   text-align: right;
   font-size: 11px;
-  color: rgba(255,255,255,0.8);
+  color: var(--panel-mid);
 }
 
 /* Screenshot — the real app, framed so its dark UI reads as product, not as a
@@ -423,14 +438,14 @@ footer a:hover { color: var(--dark); }
   <div class="container">
     <div class="mockup">
       <div class="mockup-bar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffca30" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <span class="mockup-input">Population of Canada</span>
-        <div class="mockup-btn-icon">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#b08300" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </div>
+        <span class="mockup-caret" aria-hidden="true"></span>
       </div>
       <div class="mockup-result">
+        <div class="mockup-label">Answer</div>
         <h4>Canada</h4>
-        <p>Canada is a country in North America. Its ten provinces and three territories extend from the Atlantic Ocean to the Pacific Ocean and northward into the Arctic Ocean, covering 9.98 million square kilometres. Population: approximately 40.1 million.</p>
+        <p>A country in North America. Its ten provinces and three territories run from the Atlantic to the Pacific and north into the Arctic, covering 9.98 million square kilometres. Population: approximately 40.1 million.</p>
       </div>
       <div class="mockup-credit">powered by Wikipedia</div>
     </div>
@@ -449,7 +464,7 @@ footer a:hover { color: var(--dark); }
 
 <section class="features">
   <div class="container">
-    <h2>Nimble allows you to access a massive amount of knowledge whenever you need it.</h2>
+    <h2>Answers, not ten blue links.</h2>
     <div class="features-grid">
       <div class="feature">
         <h3>Instant Math</h3>
