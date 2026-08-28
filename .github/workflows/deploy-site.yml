@@ -1,0 +1,38 @@
+# nimble.heyitsmejosh.com was deployed by hand -- `build-site.sh && wrangler pages
+# deploy dist` from a laptop -- so it silently fell weeks behind docs/. GitHub Pages
+# auto-deploys docs/ and the custom domain did not, which is why the two disagreed.
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'web/**'
+      - 'scripts/build-site.sh'
+      - '.github/workflows/deploy-site.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Composes dist/: landing page at /, search app at /app.
+      - run: scripts/build-site.sh
+
+      - name: Verify the hero animation made it into dist/
+        run: |
+          grep -q '@keyframes drift' dist/index.html
+          test -f dist/app/index.html
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=nimble --branch=main
