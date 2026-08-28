@@ -68,7 +68,7 @@ enum QueryResult: Equatable {
 @MainActor
 @Observable
 final class AppState {
-    var theme: NimbleTheme = .orange
+    var theme: NimbleTheme = .yellow  // brand yellow #FFCA30, same ink as tokens.css --yellow
     var mathEnabled: Bool = true
     var launchOnStartup: Bool = false
     var centerWindow: Bool = false
@@ -98,7 +98,7 @@ final class AppState {
 
     func loadPreferences() {
         let p = prefs.load()
-        theme = NimbleTheme(rawValue: p.theme) ?? .orange
+        theme = NimbleTheme(rawValue: p.theme) ?? .yellow
         mathEnabled = p.mathEnabled
         launchOnStartup = p.launchOnStartup
         centerWindow = p.centerWindow
