@@ -127,16 +127,26 @@ instead of hardcoding "Gemma" for every branch. Two real problems found while do
       (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) the original question independently and
       take the majority. Same call count, better answer.
 
-## Deploy pipeline bug — FIXED 2026-08-28
+## Deploy pipeline — BLOCKED ON JOSHUA (2026-08-28)
 
-`.github/workflows/deploy-site.yml` had never actually deployed. Its wrangler step was
-guarded by `if: env.CF_API_TOKEN != ''` so a missing secret left main green instead of
-red, and the repo had no secrets at all — every run reported success while skipping the
-deploy. That is the exact "silently fell weeks behind" failure the workflow's own header
-comment describes; the guard reintroduced it.
+`.github/workflows/deploy-site.yml` has never deployed. Its wrangler step was guarded by
+`if: env.CF_API_TOKEN != ''`, so with no repo secret every run went green while shipping
+nothing — the exact "silently fell weeks behind" failure the workflow header describes.
 
-Fixed: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` are now repo secrets, and the
-guard is a hard failure so a missing secret turns main red instead of quietly no-opping.
+Fixed the silence: the guard is now a hard failure, so main goes **red** until real
+credentials exist. Red is correct here — the site genuinely is not auto-deploying.
 
-- [ ] Optional hardening: the token now in Actions is the account-wide one from
-      `secrets.fish`. A Pages-Edit-only token would be the better thing to mint for this.
+Root cause of why it cannot be fixed from this machine: there is no Cloudflare API token
+to give CI. `secrets.fish` has only `CLOUDFLARE_DNS_TOKEN` (DNS scope), and its own
+comment notes the name `CLOUDFLARE_API_TOKEN` is deliberately avoided because wrangler
+then skips OAuth and fails for lack of Workers scope. Local `wrangler pages deploy` works
+only because it falls back to the saved OAuth session in `~/.wrangler` — CI has no such
+session.
+
+- [ ] **Joshua:** mint a Pages-Edit-scoped API token in the Cloudflare dashboard, then
+      `gh secret set CLOUDFLARE_API_TOKEN --repo nulljosh/nimble` and
+      `gh secret set CLOUDFLARE_ACCOUNT_ID` (= `14c849d102ecc38b5fae54d9b22deec4`).
+      Main goes green again the moment both exist.
+
+Until then ship by hand (works, uses the OAuth session):
+`bash scripts/build-site.sh && npx wrangler pages deploy dist --project-name=nimble --branch=main`
