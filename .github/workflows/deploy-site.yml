@@ -31,7 +31,10 @@ jobs:
           grep -q '@keyframes drift' dist/index.html
           test -f dist/app/index.html
 
+      # Skip rather than fail when the token is not set yet, so a missing
+      # secret leaves main green instead of red on every push.
       - uses: cloudflare/wrangler-action@v3
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
