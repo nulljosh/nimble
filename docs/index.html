@@ -50,31 +50,46 @@ a:hover { text-decoration: underline; }
 }
 .hero .container { position: relative; z-index: 2; }
 
-/* a slow-drifting wall of things you can ask Nimble */
-.hero-wall {
-  position: absolute; inset: 0; z-index: 0; overflow: hidden;
-  display: flex; flex-direction: column; justify-content: center; gap: 1.1rem;
+/* A drifting field of bulbs and magnifiers: the two halves of "instant answers".
+   Inset past the edges so icons drift in and out rather than popping at the border. */
+.hero-float {
+  position: absolute; inset: -48px; z-index: 0;
+  /* --yellow-deep, the same ink as the mockup's search icon. Black here goes
+     muddy grey against the yellow; the brand gold stays warm. */
+  color: rgba(176, 131, 0, 0.55);
   pointer-events: none; user-select: none;
 }
-.ask-row {
-  display: flex; flex: none; width: max-content; white-space: nowrap;
-  font-size: clamp(1.05rem, 2.8vw, 1.9rem);
-  font-weight: 700; letter-spacing: var(--tracking-tight);
-  color: rgba(0, 0, 0, 0.16);
-  animation: ask-left var(--dur) linear infinite;
+/* Two nested elements because drift and rock are both `transform` and would
+   otherwise overwrite each other: the div translates, the svg inside it rotates. */
+.float {
+  position: absolute;
+  width: var(--size); height: var(--size);
+  /* centre on the grid point; a translate(-50%) here would collide with drift */
+  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
+  animation: drift var(--dur, 16s) ease-in-out var(--delay, 0s) infinite alternate;
 }
-.ask-row.right { animation-name: ask-right; }
-.ask-row span::after { content: '\00B7'; margin: 0 1.5rem; }
-@keyframes ask-left  { from { transform: translateX(0); }    to { transform: translateX(-50%); } }
-@keyframes ask-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
-@media (prefers-reduced-motion: reduce) { .ask-row { animation: none; } }
+.float svg {
+  display: block; width: 100%; height: 100%;
+  /* fill/stroke are inherited, so they cross into the <use> shadow tree.
+     A selector like `.float circle` would not — it cannot reach inside. */
+  fill: none; stroke: currentColor; stroke-width: 1.75;
+  stroke-linecap: round; stroke-linejoin: round;
+  animation: bob var(--bdur, 12s) ease-in-out var(--bdelay, 0s) infinite alternate;
+}
+/* No `from`, so each icon eases out of wherever it was placed. The custom
+   properties resolve before interpolation, so one keyframe serves every icon.
+   The fallbacks matter: a missing or unitless var invalidates the whole
+   declaration and the icon silently stops moving. */
+@keyframes drift { to { transform: translate(var(--dx, 0px), var(--dy, 0px)); } }
+@keyframes bob { from { transform: rotate(calc(var(--rot, 0deg) * -1)); } to { transform: rotate(var(--rot, 0deg)); } }
+@media (prefers-reduced-motion: reduce) { .float, .float svg { animation: none; } }
 
-/* Semi-transparent yellow over the questions: solid under the copy, clear at the edges. */
+/* Semi-transparent yellow over the icons: solid under the copy, clear at the edges. */
 .hero::after {
   content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background:
-    radial-gradient(ellipse 62% 58% at 50% 48%, var(--yellow) 38%, transparent 78%),
-    linear-gradient(var(--yellow), transparent 22%, transparent 78%, var(--yellow));
+    radial-gradient(ellipse 56% 50% at 50% 46%, var(--yellow) 20%, transparent 76%),
+    linear-gradient(var(--yellow), transparent 14%, transparent 86%, var(--yellow));
 }
 
 .hero-icon {
@@ -353,8 +368,23 @@ footer a:hover { color: var(--dark); }
 </head>
 <body>
 
+<!-- Icon sprite for the hero field. Sized 0 rather than display:none, which
+     would stop <use> from rendering the symbols in some browsers. -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-bulb" viewBox="0 0 24 24">
+    <path vector-effect="non-scaling-stroke" d="M12 2.75a6 6 0 0 0-3.4 10.94c.53.37.87.95.95 1.59l.15 1.22h4.6l.15-1.22c.08-.64.42-1.22.95-1.59A6 6 0 0 0 12 2.75Z"/>
+    <path vector-effect="non-scaling-stroke" d="M9.7 19.4h4.6"/>
+    <path vector-effect="non-scaling-stroke" d="M10.7 21.8h2.6"/>
+  </symbol>
+  <!-- same geometry as the mockup search icon further down the page -->
+  <symbol id="i-search" viewBox="0 0 24 24">
+    <circle vector-effect="non-scaling-stroke" cx="11" cy="11" r="8"/>
+    <path vector-effect="non-scaling-stroke" d="M21 21l-4.35-4.35"/>
+  </symbol>
+</svg>
+
 <section class="hero">
-  <div class="hero-wall" id="askWall" aria-hidden="true"></div>
+  <div class="hero-float" id="heroFloat" aria-hidden="true"></div>
   <div class="container">
     <div class="hero-icon">
       <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nimble">
@@ -466,42 +496,52 @@ footer a:hover { color: var(--dark); }
 </footer>
 
 <script>
-// Ticker of things Nimble answers, drifting behind the hero. Decorative.
+// Field of bulbs and magnifiers drifting behind the hero. Decorative.
 (function () {
-  var asks = [
-    '2^16 + 42', 'population of Canada', 'define ephemeral', 'speed of light',
-    '15% of 89.40', 'who was Ada Lovelace', '180 lb in kg', 'what is a black hole',
-    'sqrt(1764)', 'capital of Peru', 'define laconic', 'distance to the Moon',
-    '(3 + 4) * 12', 'what is DNS', '72 F in C', 'Marie Curie',
-    'define quixotic', 'height of Everest', '1024 / 16', 'what is RSA',
-    '30 mi in km', 'who wrote Dune', 'define obviate', 'boiling point of water',
-    '9! / 7!', 'GDP of Japan', 'define palimpsest', 'when did Apollo 11 land',
-    '2.5 TB in GB', 'half-life of carbon-14'
-  ];
-  var wall = document.getElementById('askWall');
-  if (!wall) return;
-  for (var i = asks.length - 1; i > 0; i--) {  // shuffle so the ticker differs each visit
-    var j = Math.floor(Math.random() * (i + 1));
-    var t = asks[i]; asks[i] = asks[j]; asks[j] = t;
-  }
-  var rows = 5, per = Math.floor(asks.length / rows);
+  var field = document.getElementById('heroFloat');
+  if (!field) return;
+  var rand = function (a, b) { return a + Math.random() * (b - a); };
+  // One icon per cell of a jittered grid; purely random placement clumps and
+  // leaves bald patches, which reads as a bug rather than as scattering.
+  // A phone hero is tall and narrow, so it needs its own grid and smaller
+  // icons — the desktop numbers leave a bare column down one side.
+  var narrow = window.innerWidth < 640;
+  var cols = narrow ? 4 : Math.max(3, Math.min(7, Math.round(window.innerWidth / 190)));
+  var rows = narrow ? 5 : 4;
+  var minSize = narrow ? 18 : 28, maxSize = narrow ? 34 : 56;
   for (var r = 0; r < rows; r++) {
-    var row = document.createElement('div');
-    row.className = 'ask-row' + (r % 2 ? ' right' : '');
-    row.style.setProperty('--dur', (58 + r * 11) + 's');
-    var slice = asks.slice(r * per, (r + 1) * per);
-    var fill = function () {
-      slice.forEach(function (a) {
-        var s = document.createElement('span');
-        s.textContent = a;
-        row.appendChild(s);
-      });
-    };
-    fill();
-    wall.appendChild(row);
-    // One pass has to outrun the viewport or the -50% loop shows a gap on wide screens.
-    for (var n = 0; n < 8 && row.scrollWidth < window.innerWidth; n++) fill();
-    row.innerHTML += row.innerHTML;  // doubled: the keyframes loop at half the track
+    for (var c = 0; c < cols; c++) {
+      var el = document.createElement('div');
+      var x = (c + rand(0.15, 0.85)) / cols * 100;
+      var y = (r + rand(0.15, 0.85)) / rows * 100;
+      // Fade toward the middle, where the headline and buttons live. Derived
+      // from position rather than random, so it re-tunes itself at any width
+      // as the copy reflows — the scrim alone cannot track that.
+      var nx = (x - 50) / 50, ny = (y - 50) / 50;
+      var edge = Math.min(1, Math.sqrt(nx * nx + ny * ny));
+      el.className = 'float';
+      el.style.left = x.toFixed(2) + '%';
+      el.style.top = y.toFixed(2) + '%';
+      el.style.opacity = (0.3 + 0.7 * edge).toFixed(2);
+      el.style.setProperty('--size', rand(minSize, maxSize).toFixed(1) + 'px');
+      // Signed magnitude, so no icon draws a near-zero path and sits dead still.
+      el.style.setProperty('--dx', (rand(12, 26) * (Math.random() < 0.5 ? -1 : 1)).toFixed(1) + 'px');
+      el.style.setProperty('--dy', (rand(10, 22) * (Math.random() < 0.5 ? -1 : 1)).toFixed(1) + 'px');
+      el.style.setProperty('--rot', rand(4, 10).toFixed(1) + 'deg');
+      // Negative delays start every icon mid-flight, so the field is already
+      // in motion on load and nothing moves in lockstep with anything else.
+      el.style.setProperty('--dur', rand(12, 26).toFixed(1) + 's');
+      el.style.setProperty('--delay', (-rand(0, 26)).toFixed(1) + 's');
+      el.style.setProperty('--bdur', rand(7, 16).toFixed(1) + 's');
+      el.style.setProperty('--bdelay', (-rand(0, 16)).toFixed(1) + 's');
+      // innerHTML, not createElement('svg') — that yields an unknown HTML
+      // element that never renders. Position is set with left/top rather than
+      // a transform, so `animation: none` under reduced motion leaves each
+      // icon in its scattered slot instead of stacking them all at the origin.
+      el.innerHTML = '<svg viewBox="0 0 24 24"><use href="#' +
+        (Math.random() < 0.5 ? 'i-bulb' : 'i-search') + '"/></svg>';
+      field.appendChild(el);
+    }
   }
 })();
 </script>

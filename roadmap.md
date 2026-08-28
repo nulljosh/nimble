@@ -112,4 +112,4 @@ Still open:
 
 ## From Apple Notes (imported 2026-08-25)
 
-- [ ] Hero background should be an animation matching the theme of the project, similar to Bookrank, Lexly, Healstack. (User believes this was already done — verify first.)
+- [x] Hero background should be an animation matching the theme of the project, similar to Bookrank, Lexly, Healstack. DONE 2026-08-28 — verified as asked: an animation *was* already there (the Bookrank-style ticker of sample questions), which is why it read as done. It did not read as an animation on the page, though: the `.hero::after` radial scrim is solid `--yellow` across roughly the middle 26–74% of the hero width, so only the left and right margins ever showed, at `rgba(0,0,0,0.16)` — faint grey text at the edges. Replaced the text ticker with a drifting field of lightbulbs and magnifying glasses (bulb = answer, magnifier = search) in `--yellow-deep` ink, and pulled the scrim's solid core back from 38% to 20% so the field actually registers. Icons are placed on a jittered grid and fade toward the centre by distance, so the headline stays clear at any width as the copy reflows.
