@@ -62,24 +62,34 @@ struct NimbleApp: App {
                 window.hasShadow = true
                 // The three that actually remove the bar: content draws under the
                 // titlebar, no toolbar row, no hairline where the titlebar ended.
-                window.styleMask.insert(.fullSizeContentView)
+                // There is no titlebar to style away: the pale strip was
+                // _NSTitlebarDecorationView inside NSTitlebarContainerView, and hiding
+                // those views does not stick because SwiftUI rebuilds them on layout.
+                // Dropping .titled deletes the container outright. .resizable stays in
+                // the mask because NSWindow only returns canBecomeKey for a titled or
+                // resizable window, and without key status the search field cannot
+                // focus — the window still hugs its content via .windowResizability.
+                window.styleMask = [.resizable, .fullSizeContentView]
                 window.toolbar = nil
                 window.titlebarSeparatorStyle = .none
-                // The pale strip above the search field was the titlebar container
-                // still drawing its own material. Transparent titlebar + hidden buttons
-                // is not enough; the container view itself has to be hidden. Walk up
-                // from a button rather than naming a private class.
-                // Hide ONLY the container — every other ancestor up the chain is
-                // shared with the content view, so hiding them blanks the window.
-                var view = window.standardWindowButton(.closeButton)?.superview
-                while let current = view {
-                    if current.className.contains("TitlebarContainer") {
-                        current.isHidden = true
-                        break
-                    }
-                    view = current.superview
+                // TEMP DIAGNOSTIC
+                guard window.contentView != nil else { continue }
+                var log = "WIN \(window.className) frame=\(window.frame) content=\(window.contentView!.frame) mask=\(window.styleMask.rawValue)\n"
+                log += "canBecomeKey=\(window.canBecomeKey) isKey=\(window.isKeyWindow)\n"
+                func dump(_ v: NSView, _ d: Int) {
+                    log += String(repeating: "  ", count: d) + "\(v.className) frame=\(v.frame) hidden=\(v.isHidden) opaque=\(v.isOpaque)\n"
+                    if d < 3 { for sub in v.subviews { dump(sub, d + 1) } }
                 }
+                if let themeFrame = window.contentView?.superview { dump(themeFrame, 0) }
+                try? log.appendOrWrite(to: "/tmp/nimble-diag.txt")
             }
         }
+    }
+}
+
+private extension String {
+    func appendOrWrite(to path: String) throws {
+        let existing = (try? String(contentsOfFile: path, encoding: .utf8)) ?? ""
+        try (existing + self).write(toFile: path, atomically: true, encoding: .utf8)
     }
 }

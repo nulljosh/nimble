@@ -7,6 +7,11 @@
 <meta name="description" content="Native instant-answer search. Math offline, knowledge via Wikipedia & DuckDuckGo.">
 <meta name="theme-color" content="#ffca30">
 <link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="tokens.css">
 <style>
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -133,6 +138,7 @@ async function search(query){
 $("#f").addEventListener("submit", e => { e.preventDefault(); search(q.value.trim()); });
 
 addEventListener("load", () => setTimeout(() => $("#splash").classList.add("hide"), 250));
+addEventListener("load", () => navigator.serviceWorker?.register("/sw.js"));
 </script>
 </body>
 </html>

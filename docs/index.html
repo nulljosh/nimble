@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nimble — Instant Answers from Your Menubar</title>
-<meta name="description" content="A native macOS menubar app for instant answers. Math, knowledge, definitions — one keystroke away. Free and open source.">
+<meta name="description" content="Instant answers on Mac, iPhone, Windows, Android and the web. Math, knowledge, definitions — one keystroke away. Free and open source.">
 <meta name="theme-color" content="#ffca30">
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="tokens.css">
@@ -154,6 +154,17 @@ a:hover { text-decoration: underline; }
   background: var(--yellow);
   color: var(--dark);
 }
+
+.install { padding: 64px 0; }
+.install h2 { text-align: center; }
+.install-lead { text-align: center; margin: 0 auto 2.5rem; max-width: 34rem; }
+.install-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1.5rem;
+}
+.install-card h3 { margin-bottom: 0.4rem; }
+.install-card p { margin-bottom: 1rem; }
 
 /* Mockup — the Mac app. Colours are taken off the real iOS screenshot below
    so the two read as one product; the old light-gold panel looked like a
@@ -425,10 +436,11 @@ footer a:hover { color: var(--dark); }
       </svg>
     </div>
     <h1>Nimble</h1>
-    <p>Instant answers — math, facts, definitions. On the web, Mac, and iPhone.</p>
+    <p>Instant answers — math, facts, definitions. On Mac, iPhone, Windows, Android and the web.</p>
     <div class="hero-buttons">
       <a href="https://nimble.heyitsmejosh.com/app" class="btn btn-dark">Launch web app</a>
       <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-outline">Download for Mac</a>
+      <a href="#install" class="btn btn-outline">Windows &amp; Android</a>
       <a href="https://github.com/nulljosh/nimble" class="btn btn-outline">Source</a>
     </div>
   </div>
@@ -475,8 +487,8 @@ footer a:hover { color: var(--dark); }
         <p>An AI answer layer first, then DuckDuckGo Instant Answers and Wikipedia. No API keys required.</p>
       </div>
       <div class="feature">
-        <h3>Web, Mac &amp; iPhone</h3>
-        <p>The same answer engine on every surface. Start on one, finish on another.</p>
+        <h3>Every platform</h3>
+        <p>Mac, iPhone, Windows, Android and the web. The same answer engine on every surface.</p>
       </div>
       <div class="feature">
         <h3>8 Themes</h3>
@@ -489,6 +501,35 @@ footer a:hover { color: var(--dark); }
       <div class="feature">
         <h3>Open Source</h3>
         <p>MIT licensed. No telemetry. Your queries stay on your machine.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install" class="install">
+  <div class="container">
+    <h2>Install it anywhere.</h2>
+    <p class="install-lead">On Windows and Android, Nimble installs straight from the browser &mdash; no store, no download, no runtime. It gets a real window, its own icon, and the offline math keeps working with no connection.</p>
+    <div class="install-grid">
+      <div class="install-card">
+        <h3>Windows</h3>
+        <p>Open the web app in Edge or Chrome, then <strong>Install Nimble</strong> from the address bar. It lands in the Start Menu like any other app.</p>
+        <a href="https://nimble.heyitsmejosh.com/" class="btn btn-dark">Open &amp; install</a>
+      </div>
+      <div class="install-card">
+        <h3>Android</h3>
+        <p>Open the web app in Chrome, then <strong>Add to Home screen</strong>. Full screen, no browser chrome, works offline.</p>
+        <a href="https://nimble.heyitsmejosh.com/" class="btn btn-dark">Open &amp; install</a>
+      </div>
+      <div class="install-card">
+        <h3>Mac</h3>
+        <p>A native SwiftUI menu bar app, signed and notarized. One keystroke from anywhere.</p>
+        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark">Download for Mac</a>
+      </div>
+      <div class="install-card">
+        <h3>Linux</h3>
+        <p>Same as Windows &mdash; install the web app from Chrome or Chromium and it runs as a standalone window.</p>
+        <a href="https://nimble.heyitsmejosh.com/" class="btn btn-dark">Open &amp; install</a>
       </div>
     </div>
   </div>

@@ -29,7 +29,10 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 
 ## Ingested 2026-08-18
 - [ ] Add more thorough tests, making sure results are more filtered.
-- [ ] Build out Windows/Linux apps + Android. (iOS, macOS, and web already exist.)
+- [x] Build out Windows/Linux apps + Android. **DONE 2026-08-28** — shipped as a PWA rather than a third implementation: `web/` now has a manifest, PNG icons and a cache-first service worker, so Windows, Linux and Android all install the web app as a standalone windowed app with offline math working. Landing page has an "Install it anywhere" section. Store presence is the only thing left and is optional:
+  - Play Store: `npx @bubblewrap/cli init --manifest https://nimble.heyitsmejosh.com/manifest.webmanifest` then `bubblewrap build` (Trusted Web Activity). Needs `web/.well-known/assetlinks.json` deployed, plus the $25 Play Console fee.
+  - Microsoft Store: pwabuilder.com → MSIX. $19 dev account.
+  - Not ported to the web app: the macOS global hotkey (no PWA equivalent) and the 8 themes (`tokens.css` already has the token layer if it ever matters).
 
 ## Ingested 2026-08-22
 - [ ] Ship iOS and Mac apps — right now only web is available.
