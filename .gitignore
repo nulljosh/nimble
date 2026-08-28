@@ -11,3 +11,11 @@ screenshots/
 .wrangler/
 .vercel/
 .DS_Store
+
+# Kotlin Multiplatform
+kmp/.gradle/
+kmp/build/
+kmp/*/build/
+kmp/local.properties
+kmp/keystore.properties
+kmp/*.jks
