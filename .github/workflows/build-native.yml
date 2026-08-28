@@ -1,0 +1,49 @@
+name: Build native apps
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'kmp/**'
+      - '.github/workflows/build-native.yml'
+  workflow_dispatch:
+
+jobs:
+  # jpackage only builds an installer for the OS it runs on, so the Windows .msi
+  # cannot be produced from a Mac -- this job is the only way to get one.
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build the Windows installer
+        working-directory: kmp
+        run: ./gradlew packageMsi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nimble-windows-msi
+          path: kmp/composeApp/build/compose/binaries/main/msi/*.msi
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Test the shared engine
+        working-directory: kmp
+        run: ./gradlew :shared:jvmTest
+      - name: Build the APK
+        working-directory: kmp
+        run: ./gradlew :composeApp:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nimble-android-apk
+          path: kmp/composeApp/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

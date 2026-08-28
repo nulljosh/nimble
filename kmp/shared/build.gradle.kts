@@ -6,11 +6,7 @@ plugins {
 
 kotlin {
     jvm()
-    androidLibrary {
-        namespace = "com.nulljosh.nimble.shared"
-        compileSdk = 35
-        minSdk = 26
-    }
+    androidTarget()
 
     sourceSets {
         commonMain.dependencies {
@@ -25,4 +21,10 @@ kotlin {
         jvmMain.dependencies { implementation(libs.ktor.cio) }
         androidMain.dependencies { implementation(libs.ktor.okhttp) }
     }
+}
+
+android {
+    namespace = "com.nulljosh.nimble.shared"
+    compileSdk = 36
+    defaultConfig { minSdk = 26 }
 }
