@@ -8,3 +8,6 @@ DerivedData/
 dist/
 .asc/artifacts/
 screenshots/
+.wrangler/
+.vercel/
+.DS_Store
