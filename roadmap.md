@@ -150,3 +150,19 @@ session.
 
 Until then ship by hand (works, uses the OAuth session):
 `bash scripts/build-site.sh && npx wrangler pages deploy dist --project-name=nimble --branch=main`
+
+## Requested 2026-08-28 — more platforms, after native lands
+
+Ordered deliberately: these come **after** the native Windows/Android apps are done, not
+instead of them.
+
+- [ ] **Java version.** Worth noting the overlap before building it: the Compose
+      Multiplatform desktop app now in `kmp/` is already a JVM app — Kotlin compiles to
+      the same bytecode and it ships as a normal JVM binary. So "a Java version" is either
+      (a) a plain-Java/Swing or JavaFX UI over the same shared engine, which is a real,
+      separate thing, or (b) already covered. Confirm which is wanted before writing it.
+- [ ] **Electron version.** None exists today. Worth knowing the history: the *original*
+      Maybulb Nimble was Electron + Wolfram|Alpha and was deprecated in 2020; this project
+      was the from-scratch native rebuild of it. An Electron build would wrap `web/`, which
+      is already a complete app and already installs as a PWA on Windows, Linux and
+      Android. The one thing it would add over the PWA is a global hotkey on Linux/Windows.
