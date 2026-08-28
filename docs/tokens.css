@@ -20,8 +20,15 @@
   --bg-accent: var(--yellow);
   --line: #e0e0e0;
 
-  /* Type — Europa is Maybulb's licensed Typekit face; this is its own fallback stack. */
-  --font: "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Type — all sans, and the last stop is the generic `sans-serif`, so there is
+     no path down this list that lands on a serif.
+     Europa is Maybulb's face, licensed through Adobe Typekit: a kit is bound to
+     their account and domains, so we cannot serve it. Naming it first costs
+     nothing and picks it up for anyone who has it installed locally; everyone
+     else gets Avenir Next, the closest geometric humanist sans that actually
+     ships on macOS/iOS. No webfont is loaded — the page makes zero font
+     requests, and that is deliberate. */
+  --font: "Europa", "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --fw-regular: 400;
   --fw-bold: 700;
   --lh: 1.6;
