@@ -82,6 +82,11 @@ struct NimbleApp: App {
                 }
                 if let themeFrame = window.contentView?.superview { dump(themeFrame, 0) }
                 try? log.appendOrWrite(to: "/tmp/nimble-diag.txt")
+                let w = window
+                DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+                    let f = w.firstResponder?.className ?? "nil"
+                    try? "LATER isKey=\(w.isKeyWindow) canBecomeKey=\(w.canBecomeKey) firstResponder=\(f)\n".appendOrWrite(to: "/tmp/nimble-diag.txt")
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
 // ponytail: cache-first over a fixed file list. Bump CACHE to ship an update.
 const CACHE = "nimble-v1";
-const FILES = ["/", "/index.html", "/tokens.css", "/icon.svg", "/manifest.webmanifest"];
+const FILES = ["/app/", "/app/index.html", "/app/tokens.css", "/app/icon.svg", "/app/manifest.webmanifest"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

@@ -138,7 +138,7 @@ async function search(query){
 $("#f").addEventListener("submit", e => { e.preventDefault(); search(q.value.trim()); });
 
 addEventListener("load", () => setTimeout(() => $("#splash").classList.add("hide"), 250));
-addEventListener("load", () => navigator.serviceWorker?.register("/sw.js"));
+addEventListener("load", () => navigator.serviceWorker?.register("/app/sw.js"));
 </script>
 </body>
 </html>
