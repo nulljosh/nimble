@@ -35,10 +35,15 @@ jobs:
           grep -q '@keyframes drift' dist/index.html
           test -f dist/app/index.html
 
-      # Skip rather than fail when the token is not set yet, so a missing
-      # secret leaves main green instead of red on every push.
+      # Fail loudly. This used to `if: env.CF_API_TOKEN != ''` so a missing
+      # secret left main green -- which meant every run reported success while
+      # deploying nothing, and the site fell weeks behind exactly as the header
+      # above describes. A green check has to mean the site actually shipped.
+      - name: Require the deploy credentials
+        run: |
+          test -n "$CF_API_TOKEN" || { echo "::error::CLOUDFLARE_API_TOKEN is not set; nothing would deploy"; exit 1; }
+
       - uses: cloudflare/wrangler-action@v3
-        if: env.CF_API_TOKEN != ''
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
