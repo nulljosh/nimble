@@ -20,6 +20,10 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # The `secrets` context is not available in a step-level `if`, so surface
+    # the token as env first and test that instead.
+    env:
+      CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -34,7 +38,7 @@ jobs:
       # Skip rather than fail when the token is not set yet, so a missing
       # secret leaves main green instead of red on every push.
       - uses: cloudflare/wrangler-action@v3
-        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}
+        if: env.CF_API_TOKEN != ''
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
