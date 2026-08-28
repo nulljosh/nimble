@@ -126,3 +126,24 @@ instead of hardcoding "Gemma" for every branch. Two real problems found while do
       Gemma's — a model arbitrating a dispute it is a party to. Ask a third model
       (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) the original question independently and
       take the majority. Same call count, better answer.
+
+## Deploy pipeline bug (found 2026-08-28)
+
+`.github/workflows/deploy-site.yml` has **never actually deployed**. Its wrangler step is
+guarded by `if: env.CF_API_TOKEN != ''` so a missing secret leaves main green instead of
+red — and `nulljosh/nimble` has no repo secrets at all, so every run reports success while
+skipping the deploy. This is the exact "silently fell weeks behind" failure the workflow's
+own header comment describes; the guard reintroduced it.
+
+- [ ] Set `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` as repo secrets
+      (`gh secret set CLOUDFLARE_API_TOKEN --repo nulljosh/nimble`). Account id is
+      `14c849d102ecc38b5fae54d9b22deec4`. Left for Joshua: the local
+      `CLOUDFLARE_API_TOKEN` in `secrets.fish` is account-wide, and putting an
+      account-wide token in Actions is a scope call worth making deliberately — a
+      Pages-Edit-only token is the better thing to mint for this.
+- [ ] Once set, flip the guard to a hard failure so a missing secret turns main red
+      instead of quietly no-opping.
+
+Until then the site ships by hand:
+`bash scripts/build-site.sh && CLOUDFLARE_API_TOKEN=... npx wrangler pages deploy dist --project-name=nimble --branch=main`
+(done manually for the PWA release; live and verified on nimble.heyitsmejosh.com).

@@ -4,7 +4,6 @@ struct SearchView: View {
     @Environment(AppState.self) private var state
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isInputFocused: Bool
-    @State private var showSettings = false
 
     var body: some View {
         @Bindable var state = state
@@ -12,6 +11,17 @@ struct SearchView: View {
         VStack(spacing: 0) {
             // Search bar
             HStack(spacing: 12) {
+                // Close sits top-left, where every other Mac window puts it — it used
+                // to be the last item in the bottom-right status row.
+                Button(action: { NSApplication.shared.terminate(nil) }) {
+                    Text("✕")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.red.opacity(0.7))
+                }
+                .buttonStyle(.plain)
+                .help("Quit Nimble")
+                .accessibilityLabel("Quit Nimble")
+
                 // Accent-colored search icon
                 Canvas { ctx, size in
                     let accent = state.theme.color
@@ -82,8 +92,8 @@ struct SearchView: View {
 
             // Bottom bar
             HStack {
-                ThemePickerView()
-                    .environment(state)
+                // Theme lives in Settings only — the swatch here duplicated the grid
+                // in SettingsView. (iOS keeps its inline picker: no menu bar there.)
                 Spacer()
                 if let newVersion = state.updates.availableVersion {
                     // Only surfaced once a check has actually found something newer —
@@ -114,30 +124,6 @@ struct SearchView: View {
                     .buttonStyle(.plain)
                     .help("Copy Result")
                     .accessibilityLabel("Copy Result")
-                    Button(action: { showSettings.toggle() }) {
-                        Text("⚙")
-                            .font(.system(size: 13))
-                            .foregroundStyle(Color.white.opacity(0.3))
-                    }
-                    .buttonStyle(.plain)
-                    .help("Preferences")
-                    .accessibilityLabel("Preferences")
-                    // The gear used to be inert on click — the settings pane it opens
-                    // already existed, nothing ever presented it.
-                    .popover(isPresented: $showSettings, arrowEdge: .bottom) {
-                        SettingsView().environment(state)
-                    }
-                    .contextMenu {
-                        ContextMenuView().environment(state)
-                    }
-                    Button(action: { NSApplication.shared.terminate(nil) }) {
-                        Text("✕")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.red.opacity(0.7))
-                    }
-                    .buttonStyle(.plain)
-                    .help("Quit Nimble")
-                    .accessibilityLabel("Quit Nimble")
                 }
             }
             .padding(.horizontal, 14)
