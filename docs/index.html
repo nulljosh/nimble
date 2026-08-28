@@ -82,6 +82,19 @@ a:hover { text-decoration: underline; }
    declaration and the icon silently stops moving. */
 @keyframes drift { to { transform: translate(var(--dx, 0px), var(--dy, 0px)); } }
 @keyframes bob { from { transform: rotate(calc(var(--rot, 0deg) * -1)); } to { transform: rotate(var(--rot, 0deg)); } }
+/* Answered queries scattered among the icons: the product actually working.
+   A zero-size anchor with centred grid content centres the pair on its grid
+   point and overflows evenly both ways — translate(-50%) would collide with
+   drift, and the text width is not known up front. */
+.float.ask {
+  width: 0; height: 0; margin: 0;
+  display: grid; place-content: center;
+  font-size: var(--fs, 14px); line-height: 1.3;
+  text-align: center; white-space: nowrap;
+}
+.float.ask .q { font-weight: 400; opacity: 0.72; }
+.float.ask .a { font-weight: 700; letter-spacing: var(--tracking-tight); }
+
 @media (prefers-reduced-motion: reduce) { .float, .float svg { animation: none; } }
 
 /* Semi-transparent yellow over the icons: solid under the copy, clear at the edges. */
@@ -496,17 +509,70 @@ footer a:hover { color: var(--dark); }
 </footer>
 
 <script>
-// Field of bulbs and magnifiers drifting behind the hero. Decorative.
+// Field of bulbs, magnifiers and answered queries drifting behind the hero.
 (function () {
   var field = document.getElementById('heroFloat');
-  if (!field) return;
+  var hero = document.querySelector('.hero');
+  if (!field || !hero) return;
+
+  // Real questions with their real answers — this is the product demoing
+  // itself, so every one of these has to actually be right.
+  var pairs = [
+    ['2^16 + 42', '65,578'],
+    ['sqrt(1764)', '42'],
+    ['15% of 89.40', '13.41'],
+    ['9! / 7!', '72'],
+    ['1024 / 16', '64'],
+    ['180 lb in kg', '81.6 kg'],
+    ['72 \u00B0F in \u00B0C', '22.2 \u00B0C'],
+    ['30 mi in km', '48.3 km'],
+    ['2.5 TB in GB', '2,500 GB'],
+    ['define ephemeral', 'fleeting, short-lived'],
+    ['define laconic', 'using very few words'],
+    ['define obviate', 'to make unnecessary'],
+    ['speed of light', '299,792,458 m/s'],
+    ['capital of Peru', 'Lima'],
+    ['who wrote Dune', 'Frank Herbert'],
+    ['population of Canada', '40.1 million'],
+    ['height of Everest', '8,849 m'],
+    ['distance to the Moon', '384,400 km'],
+    ['boiling point of water', '100 \u00B0C'],
+    ['when did Apollo 11 land', 'July 20, 1969'],
+    ['half-life of carbon-14', '5,730 years'],
+    ['who was Ada Lovelace', 'the first programmer']
+  ];
+  for (var i = pairs.length - 1; i > 0; i--) {  // shuffle so the hero differs each visit
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = pairs[i]; pairs[i] = pairs[j]; pairs[j] = t;
+  }
+
   var rand = function (a, b) { return a + Math.random() * (b - a); };
-  // One icon per cell of a jittered grid; purely random placement clumps and
-  // leaves bald patches, which reads as a bug rather than as scattering.
-  // A phone hero is tall and narrow, so it needs its own grid and smaller
-  // icons — the desktop numbers leave a bare column down one side.
   var narrow = window.innerWidth < 640;
-  var cols = narrow ? 4 : Math.max(3, Math.min(7, Math.round(window.innerWidth / 190)));
+  var setDrift = function (el) {
+    // Signed magnitude, so no item draws a near-zero path and sits dead still.
+    var dx = rand(12, 26) * (Math.random() < 0.5 ? -1 : 1);
+    var dy = rand(10, 22) * (Math.random() < 0.5 ? -1 : 1);
+    el.style.setProperty('--dx', dx.toFixed(1) + 'px');
+    el.style.setProperty('--dy', dy.toFixed(1) + 'px');
+    // Negative delays start every item mid-flight, so the field is already
+    // in motion on load and nothing moves in lockstep with anything else.
+    el.style.setProperty('--dur', rand(12, 26).toFixed(1) + 's');
+    el.style.setProperty('--delay', (-rand(0, 26)).toFixed(1) + 's');
+    return { x: Math.abs(dx), y: Math.abs(dy) };
+  };
+  // Fade toward the middle, where the headline and buttons live. Derived from
+  // position rather than random, so it re-tunes itself at any width as the
+  // copy reflows — the scrim alone cannot track that.
+  var edgeAt = function (x, y) {
+    var nx = (x - 50) / 50, ny = (y - 50) / 50;
+    return Math.min(1, Math.sqrt(nx * nx + ny * ny));
+  };
+
+  // ---- Icons: one per cell of a jittered grid. Purely random placement
+  // clumps and leaves bald patches, which reads as a bug, not as scattering.
+  // A phone hero is tall and narrow, so it gets its own grid and smaller
+  // icons — the desktop numbers leave a bare column down one side.
+  var cols = narrow ? 3 : Math.max(3, Math.min(7, Math.round(window.innerWidth / 190)));
   var rows = narrow ? 5 : 4;
   var minSize = narrow ? 18 : 28, maxSize = narrow ? 34 : 56;
   for (var r = 0; r < rows; r++) {
@@ -514,34 +580,87 @@ footer a:hover { color: var(--dark); }
       var el = document.createElement('div');
       var x = (c + rand(0.15, 0.85)) / cols * 100;
       var y = (r + rand(0.15, 0.85)) / rows * 100;
-      // Fade toward the middle, where the headline and buttons live. Derived
-      // from position rather than random, so it re-tunes itself at any width
-      // as the copy reflows — the scrim alone cannot track that.
-      var nx = (x - 50) / 50, ny = (y - 50) / 50;
-      var edge = Math.min(1, Math.sqrt(nx * nx + ny * ny));
       el.className = 'float';
       el.style.left = x.toFixed(2) + '%';
       el.style.top = y.toFixed(2) + '%';
-      el.style.opacity = (0.3 + 0.7 * edge).toFixed(2);
+      el.style.opacity = (0.3 + 0.7 * edgeAt(x, y)).toFixed(2);
       el.style.setProperty('--size', rand(minSize, maxSize).toFixed(1) + 'px');
-      // Signed magnitude, so no icon draws a near-zero path and sits dead still.
-      el.style.setProperty('--dx', (rand(12, 26) * (Math.random() < 0.5 ? -1 : 1)).toFixed(1) + 'px');
-      el.style.setProperty('--dy', (rand(10, 22) * (Math.random() < 0.5 ? -1 : 1)).toFixed(1) + 'px');
       el.style.setProperty('--rot', rand(4, 10).toFixed(1) + 'deg');
-      // Negative delays start every icon mid-flight, so the field is already
-      // in motion on load and nothing moves in lockstep with anything else.
-      el.style.setProperty('--dur', rand(12, 26).toFixed(1) + 's');
-      el.style.setProperty('--delay', (-rand(0, 26)).toFixed(1) + 's');
       el.style.setProperty('--bdur', rand(7, 16).toFixed(1) + 's');
       el.style.setProperty('--bdelay', (-rand(0, 16)).toFixed(1) + 's');
+      setDrift(el);
       // innerHTML, not createElement('svg') — that yields an unknown HTML
       // element that never renders. Position is set with left/top rather than
       // a transform, so `animation: none` under reduced motion leaves each
-      // icon in its scattered slot instead of stacking them all at the origin.
+      // item in its scattered slot instead of stacking them all at the origin.
       el.innerHTML = '<svg viewBox="0 0 24 24"><use href="#' +
         (Math.random() < 0.5 ? 'i-bulb' : 'i-search') + '"/></svg>';
       field.appendChild(el);
     }
+  }
+
+  // ---- Answered queries. An icon can sit anywhere and still read, but words
+  // cannot: over the headline they are unreadable, over the buttons they look
+  // broken, and over each other they turn to mush. So rather than tune
+  // percentages per breakpoint, place each pair against the real measured
+  // boxes and keep the ones that land clear. Self-tuning at any width.
+  var blockers = [];
+  ['.hero-icon', '.hero h1', '.hero p', '.hero-buttons'].forEach(function (sel) {
+    var n = hero.querySelector(sel);
+    if (n) blockers.push(n.getBoundingClientRect());
+  });
+  var bounds = hero.getBoundingClientRect();
+  var clear = function (box) {
+    if (box.left < bounds.left + 6 || box.right > bounds.right - 6) return false;
+    if (box.top < bounds.top + 6 || box.bottom > bounds.bottom - 6) return false;
+    for (var i = 0; i < blockers.length; i++) {
+      var b = blockers[i];
+      if (box.right > b.left - 14 && box.left < b.right + 14 &&
+          box.bottom > b.top - 14 && box.top < b.bottom + 14) return false;
+    }
+    return true;
+  };
+
+  // On a phone the copy runs the full width, so only the short pairs have
+  // anywhere to go at all.
+  if (narrow) {
+    pairs = pairs.filter(function (p) { return p[0].length <= 17 && p[1].length <= 15; });
+  }
+  var want = Math.min(pairs.length, narrow ? 3 : Math.round(window.innerWidth / 220));
+  for (var n = 0; n < want; n++) {
+    var ask = document.createElement('div');
+    ask.className = 'float ask';
+    ask.style.setProperty('--fs', (narrow ? rand(10.5, 12) : rand(12.5, 16)).toFixed(1) + 'px');
+    var slack = setDrift(ask);
+    ask.innerHTML = '<span class="q"></span><span class="a"></span>';
+    // textContent, not string concatenation, so the copy stays data and never
+    // becomes markup.
+    ask.firstChild.textContent = pairs[n][0];
+    ask.lastChild.textContent = pairs[n][1];
+    field.appendChild(ask);
+
+    var placed = false;
+    for (var tries = 0; tries < 40 && !placed; tries++) {
+      var ax = rand(8, 92), ay = rand(6, 94);
+      if (edgeAt(ax, ay) < 0.45) continue;  // keep them off the middle
+      ask.style.left = ax.toFixed(2) + '%';
+      ask.style.top = ay.toFixed(2) + '%';
+      // Grow the box by the drift amplitude: it has to stay clear for the
+      // whole travel, not just where it happens to sit when measured.
+      var m = ask.getBoundingClientRect();
+      var box = { left: m.left - slack.x, right: m.right + slack.x,
+                  top: m.top - slack.y, bottom: m.bottom + slack.y };
+      if (clear(box)) {
+        // Words need more contrast than a shape does to stay readable.
+        ask.style.opacity = (0.55 + 0.45 * edgeAt(ax, ay)).toFixed(2);
+        // Block out the travel, not the snapshot: rect() reports wherever the
+        // drift has this pair right now, so storing that lets the next one
+        // settle somewhere they later drift through each other.
+        blockers.push(box);
+        placed = true;
+      }
+    }
+    if (!placed) { field.removeChild(ask); break; }  // hero is full; stop here
   }
 })();
 </script>
