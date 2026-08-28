@@ -106,10 +106,9 @@ Still open:
       an unblocked machine before calling the landing page done.
 - [ ] **Stale `dist/index.html` duplicate** — `docs/index.html` is the canonical source (GitHub Pages serves from docs/), but a diverged copy at `dist/index.html` remains (still says "Global Hotkey", missing the animated "what you can ask" ticker and scrim from the 2026-08-24 hero rewrite). Should be deleted or generated from a build step; currently kept in sync by hand and keeps drifting.
 
-## Worker answer engine — found 2026-08-28
+## Worker answer engine — 2026-08-28
 
-The source label under an answer now names the models that actually ran ("Gemma + Qwen"),
-instead of hardcoding "Gemma" for every branch. Two real problems found while doing it:
+**The source label under an answer now names the models that actually ran** ("Gemma + Qwen"), instead of hardcoding "Gemma" for every branch (commit ae0817d). Two real problems found and still open:
 
 - [ ] **The agreement test is exact string equality** (`worker/worker.js`,
       `qwenAnswer === gemmaAnswer`). Two models never emit byte-identical sentences, so
@@ -126,6 +125,10 @@ instead of hardcoding "Gemma" for every branch. Two real problems found while do
       Gemma's — a model arbitrating a dispute it is a party to. Ask a third model
       (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) the original question independently and
       take the majority. Same call count, better answer.
+
+## UI Polish — DONE 2026-08-28
+
+Removed the pale translucent titlebar strip (commit 68a5197) that had been annoying for months. Three attempts: first two guesses, then dumped the NSView hierarchy to identify _NSTitlebarDecorationView inside NSTitlebarContainerView; fix was dropping `.titled` from window style mask + clipping content view to radius 14. Re-enabled MenuBarExtra (Tahoe SDK bug is fixed post-release). Added global hotkey Opt+Space via Carbon RegisterEventHotKey (no Accessibility prompt needed). Moved Settings to menu bar (Nimble > Settings with Cmd-comma hotkey). Removed theme swatch from HUD (SettingsView already has the full grid). Changed default theme from orange to brand yellow #FFCA30. All 34 tests pass.
 
 ## Deploy pipeline — BLOCKED ON JOSHUA (2026-08-28)
 
