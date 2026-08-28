@@ -19,8 +19,6 @@ Inspired by the original [Nimble](https://github.com/Maybulb/Nimble) (Electron +
 - **In-app updates** — checks GitHub Releases daily, plus a manual check in Preferences
 - No API keys required · no telemetry · 34 tests
 
-> MenuBarExtra disabled (macOS Tahoe beta bug). Re-enabled when the SDK stabilizes.
-
 ## Platforms
 
 | | |

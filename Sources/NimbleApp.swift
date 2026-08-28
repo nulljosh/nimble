@@ -3,13 +3,17 @@ import SwiftUI
 @main
 struct NimbleApp: App {
     @State private var appState = AppState()
+    @Environment(\.openWindow) private var openWindow
 
     var body: some Scene {
         Window("Nimble", id: "main") {
             SearchView()
                 .environment(appState)
                 .background(VisualEffectView(material: .hudWindow, blendingMode: .behindWindow))
-                .onAppear { configureWindow() }
+                .onAppear {
+                    configureWindow()
+                    GlobalHotkey.register { GlobalHotkey.toggleNimble { showMain() } }
+                }
         }
         .windowStyle(.hiddenTitleBar)
         // Without this the window keeps a titlebar-sized strip above the search bar —
@@ -29,6 +33,19 @@ struct NimbleApp: App {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(replacing: .help) {}
         }
+
+        MenuBarExtra("Nimble", systemImage: "magnifyingglass") {
+            Button("Open Nimble") { showMain() }
+                .keyboardShortcut(" ", modifiers: .option)
+            Divider()
+            Button("Quit Nimble") { NSApp.terminate(nil) }
+                .keyboardShortcut("q")
+        }
+    }
+
+    private func showMain() {
+        openWindow(id: "main")
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     private func configureWindow() {
@@ -48,6 +65,20 @@ struct NimbleApp: App {
                 window.styleMask.insert(.fullSizeContentView)
                 window.toolbar = nil
                 window.titlebarSeparatorStyle = .none
+                // The pale strip above the search field was the titlebar container
+                // still drawing its own material. Transparent titlebar + hidden buttons
+                // is not enough; the container view itself has to be hidden. Walk up
+                // from a button rather than naming a private class.
+                // Hide ONLY the container — every other ancestor up the chain is
+                // shared with the content view, so hiding them blanks the window.
+                var view = window.standardWindowButton(.closeButton)?.superview
+                while let current = view {
+                    if current.className.contains("TitlebarContainer") {
+                        current.isHidden = true
+                        break
+                    }
+                    view = current.superview
+                }
             }
         }
     }

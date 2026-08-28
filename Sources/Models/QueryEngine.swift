@@ -332,7 +332,7 @@ final class QueryEngine: Sendable {
 
     // General answer engine: one Gemma call for any factual question. Replaces the
     // old per-shape Wikidata handlers (which dumped every historical officeholder).
-    private struct ProxyResponse: Codable { let answer: String? }
+    private struct ProxyResponse: Codable { let answer: String?; let source: String? }
 
     private func queryLLM(_ input: String, session: URLSession) async -> QueryResult? {
         guard let url = URL(string: Self.answerProxyURL) else { return nil }
@@ -347,7 +347,9 @@ final class QueryEngine: Sendable {
             let decoded = try JSONDecoder().decode(ProxyResponse.self, from: data)
             guard let answer = decoded.answer?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !answer.isEmpty, answer.uppercased() != "UNKNOWN" else { return nil }
-            return .text(heading: nil, body: answer, source: "Gemma", sourceURL: nil, imageURL: nil)
+            // The proxy names the models that answered; "Nimble" covers a worker that
+            // predates the source field.
+            return .text(heading: nil, body: answer, source: decoded.source ?? "Nimble", sourceURL: nil, imageURL: nil)
         } catch {
             return nil
         }

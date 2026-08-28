@@ -82,7 +82,7 @@ struct ResultView: View {
                 Text(message)
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
-                if let searchURL, let url = URL(string: searchURL) {
+                if let searchURL, URL(string: searchURL) != nil {
                     Button("Search on DuckDuckGo →") { state.openInDDG() }
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(state.theme.color.opacity(0.85))

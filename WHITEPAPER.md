@@ -30,8 +30,8 @@ resolve instantly with zero latency and no external dependency.
 
 ## Platform
 
-SwiftUI, macOS 14+. `MenuBarExtra` integration is currently disabled — blocked
-on a macOS Tahoe beta SDK bug, re-enable once the SDK stabilizes.
+SwiftUI, macOS 14+. A `MenuBarExtra` item and a global ⌥Space hotkey summon the
+window from anywhere.
 
 ## Security / Privacy
 

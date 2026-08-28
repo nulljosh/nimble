@@ -44,10 +44,12 @@ export default {
 
     const [qwenAnswer, gemmaAnswer] = await Promise.all([ask(QWEN), ask(GEMMA)]);
 
+    // The client shows `source` under the answer, so it has to name the models that
+    // actually produced it — it used to hardcode "Gemma" for all four branches.
     if (qwenAnswer === "UNKNOWN" && gemmaAnswer === "UNKNOWN") return json({ answer: "UNKNOWN" });
-    if (qwenAnswer === "UNKNOWN") return json({ answer: gemmaAnswer });
-    if (gemmaAnswer === "UNKNOWN") return json({ answer: qwenAnswer });
-    if (qwenAnswer === gemmaAnswer) return json({ answer: qwenAnswer });
+    if (qwenAnswer === "UNKNOWN") return json({ answer: gemmaAnswer, source: "Gemma" });
+    if (gemmaAnswer === "UNKNOWN") return json({ answer: qwenAnswer, source: "Qwen" });
+    if (qwenAnswer === gemmaAnswer) return json({ answer: qwenAnswer, source: "Gemma + Qwen" });
 
     // Both models answered but disagree/differ in wording — synthesize one sentence.
     const synthesis = await env.AI.run(QWEN, {
@@ -68,7 +70,7 @@ export default {
 
     const answer =
       (synthesis?.response || synthesis?.choices?.[0]?.message?.content || "").trim() || qwenAnswer;
-    return json({ answer });
+    return json({ answer, source: "Gemma + Qwen" });
   },
 };
 

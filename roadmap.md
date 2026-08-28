@@ -78,7 +78,6 @@ the Workers AI backend. Substantive enough to clear Guideline 4.2, unlike Newsli
 - [ ] Full new-app checklist: create the ASC app record (browser-only, use the asc-app-create-ui skill), register the bundle ID, signing assets, screenshots, metadata, App Privacy answers, then `asc validate` before submitting.
 
 ## Found while capturing screenshots — 2026-08-23
-- [ ] **CONFIRMED still true 2026-08-25:** `Sources/iOS/WhatsNewSheet.swift:3` hardcodes `let whatsNewVersion = "1.2.0"` while `project.yml` sets `MARKETING_VERSION: "1.0.0"` — a version that has never existed. Root-cause fix is to read the version from the bundle rather than re-hardcoding it, so it cannot drift again. Original note follows:
 - [ ] Screenshots still to capture. App is installed and running full-screen on the iPhone 17 Pro Max sim (6.9", the size Apple requires). Flow: dismiss the What's New sheet, then type a math query (offline path), a factual query (Worker path) and a definition, capturing each. Save to `screenshots/` (gitignored).
 
 ## Maybulb-clone refinements — 2026-08-23
@@ -86,9 +85,6 @@ the Workers AI backend. Substantive enough to clear Guideline 4.2, unlike Newsli
 Shipped this session:
 
 Still open:
-- [ ] **Verify on a Mac.** No Swift toolchain in the session that wrote this, so none of
-      the macOS/iOS changes above are compiled or run. `xcodegen generate && xcodebuild
-      test` before releasing.
 - [ ] **Real auto-update (Sparkle).** What shipped is check-and-notify: it downloads
       nothing and replaces nothing. In-place updates need a helper process and a signed
       appcast — Sparkle, once Developer ID signing is in place.
@@ -97,9 +93,6 @@ Still open:
 - [ ] Unit conversion is dead code: `QueryResult.convert` renders in `ResultView` and
       copies in `AppState`, but nothing ever produces it. The original Nimble converts
       units, so this is a real parity gap.
-- [ ] No global hotkey and no menu bar item (MenuBarExtra is still disabled for the Tahoe
-      bug), so Nimble cannot be summoned the way the original was. Biggest functional gap
-      against the source app.
 - [ ] No graphing. The original leaned on Wolfram|Alpha for plots; DDG + Wikipedia have
       no equivalent.
 - [ ] `maybulb.com` is blocked by this environment's network egress policy, so the clone
@@ -109,3 +102,24 @@ Still open:
       approximated by the Avenir Next stack in `tokens.css`. Re-check the live site from
       an unblocked machine before calling the landing page done.
 - [ ] **Stale `dist/index.html` duplicate** — `docs/index.html` is the canonical source (GitHub Pages serves from docs/), but a diverged copy at `dist/index.html` remains (still says "Global Hotkey", missing the animated "what you can ask" ticker and scrim from the 2026-08-24 hero rewrite). Should be deleted or generated from a build step; currently kept in sync by hand and keeps drifting.
+
+## Worker answer engine — found 2026-08-28
+
+The source label under an answer now names the models that actually ran ("Gemma + Qwen"),
+instead of hardcoding "Gemma" for every branch. Two real problems found while doing it:
+
+- [ ] **The agreement test is exact string equality** (`worker/worker.js`,
+      `qwenAnswer === gemmaAnswer`). Two models never emit byte-identical sentences, so
+      the synthesis call fires on nearly every query — the "rare" fallback is the common
+      path, and it doubles wall time. Normalize (lowercase, strip punctuation, compare
+      token sets) before deciding they disagree.
+- [ ] **`QueryEngine.query` is a waterfall** (`Sources/Models/QueryEngine.swift:356`): it
+      fully awaits the LLM, then DDG, then Wikipedia — three sequential network legs.
+      This, not the models, is why hard questions feel slow; the worker itself answers in
+      ~5.6s measured. Start all three with `async let` and keep the same preference order.
+      Also raise `timeoutIntervalForRequest` from 8s, which is a trap against a 5-15s
+      backend.
+- [ ] **A real tiebreaker.** On disagreement, Qwen currently rewrites its own answer plus
+      Gemma's — a model arbitrating a dispute it is a party to. Ask a third model
+      (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) the original question independently and
+      take the majority. Same call count, better answer.

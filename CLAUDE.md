@@ -23,5 +23,3 @@ Instant-answer search: macOS menu bar app, iOS app, and a static web app. Query 
 xcodegen generate && open Nimble.xcodeproj
 scripts/release-macos.sh   # signed + notarized Mac release zip
 ```
-
-> MenuBarExtra disabled (macOS Tahoe beta bug). Re-enabled when SDK stabilizes.
