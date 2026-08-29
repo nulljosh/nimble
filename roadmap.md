@@ -29,9 +29,6 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 
 ## Ingested 2026-08-18
 - [ ] Add more thorough tests, making sure results are more filtered.
-- [x] Build out Windows/Linux apps + Android. **DONE 2026-08-28** — Joshua requested real native Windows and Android apps instead of the PWA. Built them from one Kotlin codebase using Kotlin Multiplatform + Compose Multiplatform (`kmp/` directory). Produces a 59MB Windows MSI installer and a 12MB Android APK — both real native binaries with Skia rendering and no web view. Ported the entire Swift QueryEngine to Kotlin. Thirty tests pass (commit 3537ba1). See **Native Kotlin Multiplatform apps** section below.
-  - [x] ~~Play Store via bubblewrap~~ — superseded by native APK.
-  - [x] ~~Microsoft Store via pwabuilder~~ — superseded by native MSI.
   - [ ] Play Store submission: requires Android keystore + $25 Play Console fee.
   - [ ] Microsoft Store submission: requires MSIX + $19 dev account.
 
@@ -146,7 +143,6 @@ Thirty tests pass, including a live check of the Gemma/DDG/Wikipedia network cha
 - `brew install --cask temurin@17` reports exit 0 and installs nothing (JDK casks require sudo/admin password). The `openjdk@17` formula works without sudo but is keg-only; must set `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` explicitly.
 
 **Still open:**
-- [x] **Fix the "2 + 2 banana" parser bug in Mac and iOS apps** — DONE 2026-08-28. Replaced all three `NSExpression` call sites in `Sources/Models/QueryEngine.swift` with a tokenizer + recursive-descent parser that must consume the entire input. Also fixed a crash found on the same path: `NSExpression(format:)` threw an uncatchable `NSInvalidArgumentException` on `"2 + 2 pi"`. Regression tests in `Tests/QueryEngineTests.swift`; 24 tests pass, both schemes build.
 - [ ] Play Store submission (requires Android keystore + $25 Play Console fee).
 - [ ] Microsoft Store submission (requires MSIX signing + $19 dev account).
 
