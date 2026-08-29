@@ -189,3 +189,12 @@ instead of them.
       was the from-scratch native rebuild of it. An Electron build would wrap `web/`, which
       is already a complete app and already installs as a PWA on Windows, Linux and
       Android. The one thing it would add over the PWA is a global hotkey on Linux/Windows.
+
+## Blocked on Joshua: site deploy has no Cloudflare token
+The "Deploy site" workflow fails at the credential guard because the repo has
+no secrets at all. The only working local token (CLOUDFLARE_DNS_TOKEN) is
+DNS-only -- it returns an empty account list, so it cannot deploy Pages.
+Fix: mint a token with Cloudflare Pages:Edit at
+https://dash.cloudflare.com/profile/api-tokens, then
+`gh secret set CLOUDFLARE_API_TOKEN -R nulljosh/nimble` (and CLOUDFLARE_ACCOUNT_ID
+if the workflow wants it).
