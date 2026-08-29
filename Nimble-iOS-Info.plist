@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- The launch screen mirrors docs/splash.html: the badge on brand yellow.
+	     Both values are asset-catalog names in Sources/iOS/Assets.xcassets, not
+	     literals — UILaunchScreen takes asset names, never a hex string.
+
+	     This dict cannot be expressed as build settings. Xcode defines exactly one
+	     launch-screen setting, INFOPLIST_KEY_UILaunchScreen_Generation, and it only
+	     ever synthesises an EMPTY dict; there is no INFOPLIST_KEY_ for UIColorName
+	     or UIImageName (grep the iPhoneOS platform specs — nothing else exists).
+	     Setting them anyway builds clean and silently produces UILaunchScreen={}.
+	     So the key comes from this file, GENERATE_INFOPLIST_FILE stays YES, and
+	     Xcode merges the INFOPLIST_KEY_* settings on top of it.
+
+	     Supplying a real UILaunchScreen is also what keeps the app off the 320x480
+	     compatibility path, so _Generation is redundant now and has been dropped. -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+		<key>UIImageName</key>
+		<string>LaunchIcon</string>
+	</dict>
+</dict>
+</plist>
