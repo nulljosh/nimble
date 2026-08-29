@@ -29,10 +29,11 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 
 ## Ingested 2026-08-18
 - [ ] Add more thorough tests, making sure results are more filtered.
-- [x] Build out Windows/Linux apps + Android. **DONE 2026-08-28** — shipped as a PWA rather than a third implementation: `web/` now has a manifest, PNG icons and a cache-first service worker, so Windows, Linux and Android all install the web app as a standalone windowed app with offline math working. Landing page has an "Install it anywhere" section. Store presence is the only thing left and is optional:
-  - Play Store: `npx @bubblewrap/cli init --manifest https://nimble.heyitsmejosh.com/manifest.webmanifest` then `bubblewrap build` (Trusted Web Activity). Needs `web/.well-known/assetlinks.json` deployed, plus the $25 Play Console fee.
-  - Microsoft Store: pwabuilder.com → MSIX. $19 dev account.
-  - Not ported to the web app: the macOS global hotkey (no PWA equivalent) and the 8 themes (`tokens.css` already has the token layer if it ever matters).
+- [x] Build out Windows/Linux apps + Android. **DONE 2026-08-28** — Joshua requested real native Windows and Android apps instead of the PWA. Built them from one Kotlin codebase using Kotlin Multiplatform + Compose Multiplatform (`kmp/` directory). Produces a 59MB Windows MSI installer and a 12MB Android APK — both real native binaries with Skia rendering and no web view. Ported the entire Swift QueryEngine to Kotlin. Thirty tests pass (commit 3537ba1). See **Native Kotlin Multiplatform apps** section below.
+  - [x] ~~Play Store via bubblewrap~~ — superseded by native APK.
+  - [x] ~~Microsoft Store via pwabuilder~~ — superseded by native MSI.
+  - [ ] Play Store submission: requires Android keystore + $25 Play Console fee.
+  - [ ] Microsoft Store submission: requires MSIX + $19 dev account.
 
 ## Ingested 2026-08-22
 - [ ] Ship iOS and Mac apps — right now only web is available.
@@ -129,6 +130,25 @@ Still open:
 ## UI Polish — DONE 2026-08-28
 
 Removed the pale translucent titlebar strip (commit 68a5197) that had been annoying for months. Three attempts: first two guesses, then dumped the NSView hierarchy to identify _NSTitlebarDecorationView inside NSTitlebarContainerView; fix was dropping `.titled` from window style mask + clipping content view to radius 14. Re-enabled MenuBarExtra (Tahoe SDK bug is fixed post-release). Added global hotkey Opt+Space via Carbon RegisterEventHotKey (no Accessibility prompt needed). Moved Settings to menu bar (Nimble > Settings with Cmd-comma hotkey). Removed theme swatch from HUD (SettingsView already has the full grid). Changed default theme from orange to brand yellow #FFCA30. All 34 tests pass.
+
+## Native Kotlin Multiplatform apps — DONE 2026-08-28
+
+Joshua rejected the PWA and wanted real native Windows and Android apps. Built them from one Kotlin codebase using Kotlin Multiplatform (KMP) + Compose Multiplatform, producing two real native binaries with Skia rendering and no web view (commits 3537ba1, ebed3ed).
+
+Ported the entire Swift QueryEngine (classification, natural-language math, question preprocessing, Gemma/DDG/Wikipedia chain) to Kotlin. Wrote `Expr.kt`, a hand-written expression parser, to replace NSExpression (which has no Kotlin equivalent). The new parser dropped two hacks the Swift version uses (regex-rewriting every 'x' to '*', appending '.0' to integers to force float division), and in the process **caught a real bug in the shipping Swift apps**: the expression "2 + 2 banana" evaluates to 4 on Mac and iOS because NSExpression parses the prefix and ignores trailing junk. The Kotlin parser rejects it and properly errors. **This is a genuine open bug in the existing applications** and should be added to the Mac/iOS version as a high-priority fix.
+
+Thirty tests pass, including a live check of the Gemma/DDG/Wikipedia network chain. CI is green on both jobs: `nimble-windows-msi` (59MB) and `nimble-android-apk` (12MB). GitHub Actions workflow is `.github/workflows/build-native.yml` (run 33207541613).
+
+**Toolchain traps** (all of which cost real time — worth recording so the next session doesn't rediscover them):
+- AGP 9 refuses to load alongside the KMP plugin and has no KMP *application* plugin, so the app module must use AGP 8.x.
+- AGP 8.x requires Gradle <= 9.5.0; Gradle 9.6 removed an internal API it depends on. The wrapper is pinned to 9.5.0 deliberately.
+- Compose 1.12 wants compileSdk 37, which the Android SDK manager will not fetch yet, so pinned Compose to 1.11.1 on compileSdk 36.
+- `brew install --cask temurin@17` reports exit 0 and installs nothing (JDK casks require sudo/admin password). The `openjdk@17` formula works without sudo but is keg-only; must set `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` explicitly.
+
+**Still open:**
+- [ ] **Fix the "2 + 2 banana" parser bug in Mac and iOS apps** — NSExpression silently parses the prefix and ignores junk. The Kotlin parser rejects it. Likely fix: add an `isValidExpression()` check before evaluating, or validate that the parsed expression consumed the entire input string. This is a real correctness issue and should not ship.
+- [ ] Play Store submission (requires Android keystore + $25 Play Console fee).
+- [ ] Microsoft Store submission (requires MSIX signing + $19 dev account).
 
 ## Deploy pipeline — BLOCKED ON JOSHUA (2026-08-28)
 
