@@ -146,7 +146,7 @@ Thirty tests pass, including a live check of the Gemma/DDG/Wikipedia network cha
 - `brew install --cask temurin@17` reports exit 0 and installs nothing (JDK casks require sudo/admin password). The `openjdk@17` formula works without sudo but is keg-only; must set `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` explicitly.
 
 **Still open:**
-- [ ] **Fix the "2 + 2 banana" parser bug in Mac and iOS apps** — NSExpression silently parses the prefix and ignores junk. The Kotlin parser rejects it. Likely fix: add an `isValidExpression()` check before evaluating, or validate that the parsed expression consumed the entire input string. This is a real correctness issue and should not ship.
+- [x] **Fix the "2 + 2 banana" parser bug in Mac and iOS apps** — DONE 2026-08-28. Replaced all three `NSExpression` call sites in `Sources/Models/QueryEngine.swift` with a tokenizer + recursive-descent parser that must consume the entire input. Also fixed a crash found on the same path: `NSExpression(format:)` threw an uncatchable `NSInvalidArgumentException` on `"2 + 2 pi"`. Regression tests in `Tests/QueryEngineTests.swift`; 24 tests pass, both schemes build.
 - [ ] Play Store submission (requires Android keystore + $25 Play Console fee).
 - [ ] Microsoft Store submission (requires MSIX signing + $19 dev account).
 

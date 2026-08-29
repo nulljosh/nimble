@@ -113,4 +113,28 @@ final class QueryEngineTests: XCTestCase {
             XCTFail("Expected text, list, or error result")
         }
     }
+
+    // Regression: NSExpression parsed the valid prefix and silently ignored the
+    // rest, so "2 + 2 banana" answered 4. The parser must consume the whole input.
+    func testTrailingJunkIsRejected() {
+        XCTAssertNil(engine.evaluateMath("2 + 2 banana"))
+        XCTAssertNil(engine.evaluateMath("sqrt(9)log"))
+        XCTAssertNil(engine.evaluateMath("sqrt(9) banana"))
+        XCTAssertNil(engine.evaluateMath("6 * 7 and then some"))
+    }
+
+    // Regression: NSExpression(format:) threw an uncatchable
+    // NSInvalidArgumentException on malformed input, crashing the app.
+    func testMalformedInputDoesNotCrash() {
+        XCTAssertNil(engine.evaluateMath("2 + 2 pi"))
+        XCTAssertNil(engine.evaluateMath("2 +"))
+        XCTAssertNil(engine.evaluateMath("(2 + 2"))
+        XCTAssertNil(engine.evaluateMath("* 4"))
+    }
+
+    func testValidExpressionsStillEvaluate() {
+        XCTAssertEqual(engine.evaluateMath("2 + 2"), "4")
+        XCTAssertEqual(engine.evaluateMath("2 x 3"), "6")
+        XCTAssertEqual(engine.evaluateMath("2 * pi"), "6.2831853072")
+    }
 }

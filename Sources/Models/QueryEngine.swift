@@ -135,148 +135,197 @@ final class QueryEngine: Sendable {
     }
 
     func evaluateMath(_ input: String) -> String? {
-        var expr = input.trimmingCharacters(in: .whitespaces)
+        let expr = input.trimmingCharacters(in: .whitespaces)
         guard !expr.isEmpty else { return nil }
 
-        // Try natural language math first ("whats nine plus ten" -> "9 + 10")
-        if let nlExpr = parseNaturalLanguageMath(expr) {
-            if let result = evaluateNumericExpression(nlExpr) {
-                return result
+        // Parse the literal expression first; the parser must consume the whole
+        // string, so trailing junk ("2 + 2 banana", "sqrt(9)log") is rejected
+        // rather than silently ignored.
+        if let value = Self.evaluateExpression(expr) { return formatResult(value) }
+
+        // Then natural language ("whats nine plus ten" -> "9 + 10").
+        if let nl = parseNaturalLanguageMath(expr), let value = Self.evaluateExpression(nl) {
+            return formatResult(value)
+        }
+        return nil
+    }
+
+    /// Evaluates a complete arithmetic expression, or returns nil if the input is
+    /// not one. Replaces NSExpression, which both ignored trailing junk and threw
+    /// an uncatchable NSInvalidArgumentException on malformed input.
+    static func evaluateExpression(_ input: String) -> Double? {
+        guard let tokens = MathLexer.tokenize(input) else { return nil }
+        // A bare number is not a calculation ("42" must stay a search query).
+        guard tokens.count > 1 else { return nil }
+        var parser = MathParser(tokens: tokens)
+        guard let value = parser.parseExpression(), parser.isAtEnd, value.isFinite else { return nil }
+        return value
+    }
+
+    enum MathToken: Equatable {
+        case number(Double)
+        case op(Character)      // + - * / % ^
+        case function(String)   // sqrt sin cos tan log ln abs
+        case lparen, rparen
+    }
+
+    enum MathLexer {
+        static let functions = ["sqrt", "sin", "cos", "tan", "log", "ln", "abs"]
+
+        /// Returns nil on the first character that is not part of a math
+        /// expression -- this is what makes trailing junk a hard failure.
+        static func tokenize(_ input: String) -> [MathToken]? {
+            var tokens: [MathToken] = []
+            let chars = Array(input.lowercased())
+            var i = 0
+            while i < chars.count {
+                let c = chars[i]
+                if c == " " || c == "," || c == "_" { i += 1; continue }
+                if c.isNumber || c == "." {
+                    var j = i
+                    while j < chars.count, chars[j].isNumber || chars[j] == "." { j += 1 }
+                    // Scientific notation: 1e5, 2.5e-3
+                    if j < chars.count, chars[j] == "e",
+                       j + 1 < chars.count,
+                       chars[j + 1].isNumber || ((chars[j + 1] == "+" || chars[j + 1] == "-")
+                                                 && j + 2 < chars.count && chars[j + 2].isNumber) {
+                        j += chars[j + 1].isNumber ? 1 : 2
+                        while j < chars.count, chars[j].isNumber { j += 1 }
+                    }
+                    guard let value = Double(String(chars[i..<j])) else { return nil }
+                    tokens.append(.number(value))
+                    i = j
+                    continue
+                }
+                if c.isLetter {
+                    var j = i
+                    while j < chars.count, chars[j].isLetter { j += 1 }
+                    let word = String(chars[i..<j])
+                    if functions.contains(word) {
+                        tokens.append(.function(word))
+                    } else if word == "pi" {
+                        tokens.append(.number(Double.pi))
+                    } else if word == "e" {
+                        tokens.append(.number(M.E))
+                    } else if word == "x" {
+                        // "2 x 3" spelling of multiplication
+                        tokens.append(.op("*"))
+                    } else if word == "mod" {
+                        tokens.append(.op("%"))
+                    } else {
+                        return nil
+                    }
+                    i = j
+                    continue
+                }
+                switch c {
+                case "+", "-", "*", "/", "%", "^": tokens.append(.op(c))
+                case "(": tokens.append(.lparen)
+                case ")": tokens.append(.rparen)
+                default: return nil
+                }
+                i += 1
             }
+            return tokens.isEmpty ? nil : tokens
         }
+    }
 
-        // Reject natural language: strip math tokens, check what's left
-        var testStr = expr.lowercased()
-        let mathFunctions = ["sqrt", "sin", "cos", "tan", "log", "ln", "abs", "pow", "mod", "pi"]
-        for fn in mathFunctions {
-            testStr = testStr.replacingOccurrences(of: fn, with: "")
-        }
-        // After removing math functions, only math chars should remain
-        let mathAllowed = CharacterSet(charactersIn: "0123456789.+-*/^%() ,eE")
-            .union(.whitespaces)
-        let isLikelyMath = testStr.unicodeScalars.allSatisfy { mathAllowed.contains($0) }
-        if !isLikelyMath { return nil }
+    /// expression := term (("+" | "-") term)*
+    /// term       := power (("*" | "/" | "%") power)*
+    /// power      := unary ("^" power)?        -- right associative
+    /// unary      := ("+" | "-")* primary
+    /// primary    := number | "(" expression ")" | function "(" expression ")"
+    struct MathParser {
+        let tokens: [MathToken]
+        var pos = 0
 
-        // Reject if it's just a bare number with no operation
-        let hasOperation = expr.contains(where: { "+-*/^%".contains($0) })
-            || mathFunctions.contains(where: { expr.lowercased().contains($0 + "(") })
-            || expr.lowercased() == "pi" || expr.lowercased() == "e"
-        guard hasOperation else { return nil }
+        init(tokens: [MathToken]) { self.tokens = tokens }
 
-        // Pre-process constants
-        expr = expr.replacingOccurrences(of: "\\bpi\\b", with: String(Double.pi), options: .regularExpression)
-        if expr.lowercased() == "e" { return formatResult(M.E) }
+        var isAtEnd: Bool { pos >= tokens.count }
+        private var current: MathToken? { pos < tokens.count ? tokens[pos] : nil }
 
-        // Try function evaluator first (sqrt, sin, cos, tan, log, ln, abs, pow)
-        if let funcResult = evaluateWithFunctions(expr) {
-            return formatResult(funcResult)
-        }
-
-        // Fall back to NSExpression for basic arithmetic
-        let cleaned = expr
-            .replacingOccurrences(of: "x", with: "*")
-            .replacingOccurrences(of: "X", with: "*")
-            .replacingOccurrences(of: "^", with: "**")
-
-        // NSExpression doesn't support %, handle modulo manually
-        if cleaned.contains("%") {
-            let parts = cleaned.components(separatedBy: "%")
-            if parts.count == 2,
-               let lhs = evaluateSimple(parts[0].trimmingCharacters(in: .whitespaces)),
-               let rhs = evaluateSimple(parts[1].trimmingCharacters(in: .whitespaces)),
-               rhs != 0 {
-                return formatResult(lhs.truncatingRemainder(dividingBy: rhs))
-            }
+        private mutating func match(_ operators: Set<Character>) -> Character? {
+            if case let .op(c)? = current, operators.contains(c) { pos += 1; return c }
             return nil
         }
 
-        // Validate remaining chars
-        let validChars = CharacterSet(charactersIn: "0123456789.+-*/(). ")
-        let isValid = cleaned.unicodeScalars.allSatisfy { validChars.contains($0) }
-        guard isValid else { return nil }
-
-        // Force floating point by ensuring at least one number has a decimal
-        let floatCleaned = cleaned.replacingOccurrences(
-            of: #"\b(\d+)\b"#,
-            with: "$1.0",
-            options: .regularExpression
-        )
-
-        let expression = NSExpression(format: floatCleaned)
-        if let result = expression.expressionValue(with: nil, context: nil) as? NSNumber {
-            return formatResult(result.doubleValue)
-        }
-
-        return nil
-    }
-
-    private func evaluateWithFunctions(_ input: String) -> Double? {
-        let expr = input.trimmingCharacters(in: .whitespaces)
-
-        // sqrt(x)
-        if let match = expr.range(of: #"sqrt\((.+)\)"#, options: .regularExpression) {
-            let inner = String(expr[match]).replacingOccurrences(of: "sqrt(", with: "").dropLast()
-            if let val = evaluateSimple(String(inner)) {
-                return sqrt(val)
+        mutating func parseExpression() -> Double? {
+            guard var lhs = parseTerm() else { return nil }
+            while let op = match(["+", "-"]) {
+                guard let rhs = parseTerm() else { return nil }
+                lhs = op == "+" ? lhs + rhs : lhs - rhs
             }
+            return lhs
         }
 
-        // sin(x), cos(x), tan(x) -- radians
-        for (name, fn) in [("sin", sin), ("cos", cos), ("tan", tan)] as [(String, (Double) -> Double)] {
-            let pattern = "\(name)\\((.+)\\)"
-            if let match = expr.range(of: pattern, options: .regularExpression) {
-                let inner = String(expr[match]).replacingOccurrences(of: "\(name)(", with: "").dropLast()
-                if let val = evaluateSimple(String(inner)) {
-                    return fn(val)
+        private mutating func parseTerm() -> Double? {
+            guard var lhs = parsePower() else { return nil }
+            while let op = match(["*", "/", "%"]) {
+                guard let rhs = parsePower() else { return nil }
+                switch op {
+                case "*": lhs *= rhs
+                case "/":
+                    guard rhs != 0 else { return nil }
+                    lhs /= rhs
+                default:
+                    guard rhs != 0 else { return nil }
+                    lhs = lhs.truncatingRemainder(dividingBy: rhs)
                 }
             }
+            return lhs
         }
 
-        // log(x) = log10, ln(x) = natural log
-        if let match = expr.range(of: #"ln\((.+)\)"#, options: .regularExpression) {
-            let inner = String(expr[match]).replacingOccurrences(of: "ln(", with: "").dropLast()
-            if let val = evaluateSimple(String(inner)) {
-                return log(val)
+        private mutating func parsePower() -> Double? {
+            guard let base = parseUnary() else { return nil }
+            if match(["^"]) != nil {
+                guard let exponent = parsePower() else { return nil }
+                return pow(base, exponent)
+            }
+            return base
+        }
+
+        private mutating func parseUnary() -> Double? {
+            if let op = match(["+", "-"]) {
+                guard let value = parseUnary() else { return nil }
+                return op == "-" ? -value : value
+            }
+            return parsePrimary()
+        }
+
+        private mutating func parsePrimary() -> Double? {
+            switch current {
+            case let .number(value)?:
+                pos += 1
+                return value
+            case .lparen?:
+                pos += 1
+                guard let value = parseExpression(), current == .rparen else { return nil }
+                pos += 1
+                return value
+            case let .function(name)?:
+                pos += 1
+                guard current == .lparen else { return nil }
+                pos += 1
+                guard let arg = parseExpression(), current == .rparen else { return nil }
+                pos += 1
+                return MathParser.apply(name, arg)
+            default:
+                return nil
             }
         }
-        if let match = expr.range(of: #"log\((.+)\)"#, options: .regularExpression) {
-            let inner = String(expr[match]).replacingOccurrences(of: "log(", with: "").dropLast()
-            if let val = evaluateSimple(String(inner)) {
-                return log10(val)
+
+        private static func apply(_ name: String, _ x: Double) -> Double? {
+            switch name {
+            case "sqrt": return x < 0 ? nil : sqrt(x)
+            case "sin": return sin(x)
+            case "cos": return cos(x)
+            case "tan": return tan(x)
+            case "log": return x <= 0 ? nil : log10(x)
+            case "ln": return x <= 0 ? nil : log(x)
+            case "abs": return abs(x)
+            default: return nil
             }
         }
-
-        // abs(x)
-        if let match = expr.range(of: #"abs\((.+)\)"#, options: .regularExpression) {
-            let inner = String(expr[match]).replacingOccurrences(of: "abs(", with: "").dropLast()
-            if let val = evaluateSimple(String(inner)) {
-                return abs(val)
-            }
-        }
-
-        // x^y (power)
-        if expr.contains("^") {
-            let parts = expr.components(separatedBy: "^")
-            if parts.count == 2, let base = evaluateSimple(parts[0].trimmingCharacters(in: .whitespaces)),
-               let exp = evaluateSimple(parts[1].trimmingCharacters(in: .whitespaces)) {
-                return pow(base, exp)
-            }
-        }
-
-        return nil
-    }
-
-    private func evaluateSimple(_ expr: String) -> Double? {
-        // Try direct double parse
-        if let val = Double(expr) { return val }
-
-        // Try NSExpression
-        let cleaned = expr.replacingOccurrences(of: "x", with: "*").replacingOccurrences(of: "X", with: "*")
-        let expression = NSExpression(format: cleaned)
-        if let result = expression.expressionValue(with: nil, context: nil) as? NSNumber {
-            return result.doubleValue
-        }
-        return nil
     }
 
     private func formatResult(_ value: Double) -> String {
@@ -542,32 +591,6 @@ final class QueryEngine: Sendable {
         guard isMath else { return nil }
 
         return text
-    }
-
-    private func evaluateNumericExpression(_ expr: String) -> String? {
-        // Reuse existing evaluateMath logic on the converted expression
-        var e = expr
-        e = e.replacingOccurrences(of: "\\bpi\\b", with: String(Double.pi), options: .regularExpression)
-
-        if let funcResult = evaluateWithFunctions(e) {
-            return formatResult(funcResult)
-        }
-
-        let cleaned = e
-            .replacingOccurrences(of: "^", with: "**")
-        let validChars = CharacterSet(charactersIn: "0123456789.+-*/(). ")
-        let isValid = cleaned.unicodeScalars.allSatisfy { validChars.contains($0) }
-        guard isValid else { return nil }
-
-        let floatCleaned = cleaned.replacingOccurrences(
-            of: #"\b(\d+)\b"#, with: "$1.0", options: .regularExpression
-        )
-
-        let expression = NSExpression(format: floatCleaned)
-        if let result = expression.expressionValue(with: nil, context: nil) as? NSNumber {
-            return formatResult(result.doubleValue)
-        }
-        return nil
     }
 
     func randomSuggestion(useDefaults: Bool) -> String {
