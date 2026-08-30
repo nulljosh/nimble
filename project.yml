@@ -60,7 +60,8 @@ targets:
         # Without any UILaunchScreen key at all iOS runs the app letterboxed in
         # 320x480 compatibility mode instead of at native resolution.
         INFOPLIST_FILE: Nimble-iOS-Info.plist
-        TARGETED_DEVICE_FAMILY: "1"
+        # Universal: iPad was never excluded for a design reason, only never enabled.
+        TARGETED_DEVICE_FAMILY: "1,2"
         CODE_SIGN_STYLE: Automatic
         # Without an entitlements file the signed bundle carries no
         # application-identifier while the embedded profile does — Apple rejects
