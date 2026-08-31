@@ -33,18 +33,18 @@
   #splash svg{width:64px;height:64px;animation:spin .9s ease-in-out infinite alternate}
   input{flex:1;background:transparent;border:0;outline:0;color:var(--text);font-family:var(--font);font-size:1.4rem;padding:.9rem 0}
   input::placeholder{color:var(--text-light)}
-  button{background:transparent;border:0;color:var(--accent);font-family:var(--font);font-weight:var(--fw-bold);padding:0 .4rem;cursor:pointer;font-size:1rem}
+  button{background:transparent;border:0;color: var(--link, var(--accent));font-family:var(--font);font-weight:var(--fw-bold);padding:0 .4rem;cursor:pointer;font-size:1rem}
   button:disabled{opacity:.4;cursor:default}
   .result{margin-top:1.6rem;flex:1;display:none}
   .result.show{display:block}
   .result h2{font-size:1.3rem;margin-bottom:var(--s1)}
-  .result .big{font-size:2.4rem;font-weight:var(--fw-bold);color:var(--accent)}
+  .result .big{font-size:2.4rem;font-weight:var(--fw-bold);color: var(--link, var(--accent))}
   .result p{color:var(--text);line-height:var(--lh)}
   .result .src{margin-top:.9rem;font-size:.8rem;color:var(--mid)}
-  .result .src a{color:var(--accent);text-decoration:none}
+  .result .src a{color: var(--link, var(--accent));text-decoration:none}
   .result img{max-width:120px;border-radius:var(--radius-card);float:right;margin:0 0 .6rem .8rem}
   .hint{text-align:center;color:var(--mid);font-size:.8rem;padding:var(--s2) 0}
-  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:-3px}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color: var(--link, var(--accent));border-radius:50%;animation:spin .6s linear infinite;vertical-align:-3px}
   @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
@@ -130,7 +130,7 @@ async function search(query){
       render(`${hit.img?`<img src="${hit.img}" alt="">`:""}<h2>${hit.title.replace(/</g,"&lt;")}</h2><p>${hit.body.replace(/</g,"&lt;")}</p>`
         + `<div class="src">Source: ${hit.url?`<a href="${hit.url}" target="_blank" rel="noopener">${hit.src}</a>`:hit.src}</div>`);
     } else {
-      render(`<p>No instant answer found. <a class="src" href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank" rel="noopener" style="color:var(--accent)">Search the web →</a></p>`);
+      render(`<p>No instant answer found. <a class="src" href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank" rel="noopener" style="color: var(--link, var(--accent))">Search the web →</a></p>`);
     }
   } finally { go.disabled = false; }
 }
