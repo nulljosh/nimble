@@ -230,7 +230,9 @@ a:hover { text-decoration: underline; }
   50%  { opacity: 0; transform: translateY(12px); filter: blur(3px); }
   100% { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
-@media (prefers-reduced-motion: reduce) { .mockup-ghost.swap { animation: none; } }
+.mockup-result.swap { animation: result-in 500ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes result-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .mockup-ghost.swap, .mockup-result.swap { animation: none; } }
 
 .mockup-caret {
   width: 2px;
@@ -756,12 +758,13 @@ footer a:hover { color: var(--dark); }
   fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
     examples=list.sort(function(){return Math.random()-0.5;}); idx=0;
   }).catch(function(){});
+  // 8s keeps a visitor well under the worker's 20/min AI cap (math/units are offline).
   setInterval(function(){
-    if(q.value) return;
+    if(q.value || document.hidden) return;
     idx=(idx+1)%examples.length;
     g.classList.remove('swap'); void g.offsetWidth; g.classList.add('swap');
-    setTimeout(function(){ g.textContent=examples[idx]; }, 330);
-  }, 3800);
+    setTimeout(function(){ g.textContent=examples[idx]; run(); }, 330);
+  }, 8000);
   q.addEventListener('input',function(){ g.classList.toggle('off', !!q.value); });
   async function run(){
     var query=(q.value||g.textContent).trim(); if(!query) return;
@@ -772,6 +775,7 @@ footer a:hover { color: var(--dark); }
     else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; c.textContent='powered by Curvely'; }
     else if(a.kind==='text'){ h+=(a.title.toLowerCase()===query.toLowerCase()?'':'<h4>'+esc(a.title)+'</h4>')+'<p>'+esc(a.body)+'</p>'; c.textContent='powered by '+a.src; }
     else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
+    r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
     r.innerHTML=h;
   }
   f.addEventListener('submit',function(e){e.preventDefault();run();});
