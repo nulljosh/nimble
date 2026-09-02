@@ -1,0 +1,26 @@
+{
+  "run_id": "ship-ios-20260902T142805Z-77a85f84",
+  "workflow": "ship-ios",
+  "workflow_file": "/Users/joshua/Documents/Code/nimble/.asc/workflow.json",
+  "definition_hash": "2db56b0ff2fe31c1aa9621430f925ea1e60715b1aa31b067f9693b5133491919",
+  "status": "error",
+  "failed_step": "export",
+  "hooks": {
+    "before_all": {
+      "command": "asc auth status",
+      "status": "ok"
+    }
+  },
+  "steps": {
+    "ship-ios[1]": {
+      "name": "bump",
+      "status": "ok"
+    },
+    "ship-ios[2]": {
+      "name": "archive",
+      "status": "ok"
+    }
+  },
+  "created_at": "2026-09-02T14:28:05Z",
+  "updated_at": "2026-09-02T14:28:33Z"
+}

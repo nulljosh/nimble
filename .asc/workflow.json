@@ -3,7 +3,7 @@
   // App record does not exist yet — create it first (asc-app-create-ui skill),
   // then put its ID in IOS_APP_ID below. SUBMIT stays false until the
   // 2026-08-22 resubmissions are approved; see roadmap.md.
-  "env": { "IOS_APP_ID": "", "VERSION": "1.0.0", "SUBMIT": "false" },
+  "env": { "IOS_APP_ID": "6807858746", "VERSION": "1.0.0", "SUBMIT": "false" },
   "before_all": "asc auth status",
   "workflows": {
     "ship-ios": { "description": "Bump, archive, export, upload iOS", "steps": [

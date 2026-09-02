@@ -22,7 +22,7 @@ targets:
         buildPhase: resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble
+        PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios
         GENERATE_INFOPLIST_FILE: YES
         # Required for notarization, which is what stops downloads landing in
         # "unidentified developer" jail. scripts/release-macos.sh does the rest.

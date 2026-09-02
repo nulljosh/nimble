@@ -19,3 +19,4 @@ kmp/*/build/
 kmp/local.properties
 kmp/keystore.properties
 kmp/*.jks
+signing/
