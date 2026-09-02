@@ -92,19 +92,21 @@ final class QueryEngine: Sendable {
     }()
 
     private static let defaultSuggestions = [
+        "(3 + 5) * 12",
+        "1 mile to feet",
+        "10 km to miles",
+        "100 - 37",
+        "1024 * 1024",
+        "15% of 240",
+        "180 C to F",
+        "2 hours to seconds",
+        "2^10",
+        "255 in binary",
         "256 / 8",
-        "How big is the Atlantic Ocean?",
-        "Distance from Earth to Mars",
-        "Population of Canada",
-        "Speed of light in km/h",
-        "What is the meaning of life?",
-        "21st digit of pi?",
-        "Convert 100 Fahrenheit to Celsius",
-        "GDP of Japan",
-        "Who founded Apple?",
-        "Atomic weight of gold",
-        "How far is the moon?",
-        "Binary representation of 255"
+        "3 cups to ml",
+        "500 MB to GB",
+        "7 factorial",
+        "Atomic number of carbon"
     ]
 
     func classifyQuery(_ input: String) -> QueryType {
