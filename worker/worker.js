@@ -15,16 +15,18 @@ export default {
     const isDDG = req.method === "GET" && url.searchParams.has("ddg");
     if (req.method !== "POST" && !isDDG) return new Response("POST only", { status: 405, headers: CORS });
 
-    // Public endpoint, and every request bills Workers AI. Throttle per client IP.
-    const ip = req.headers.get("cf-connecting-ip") || "unknown";
-    const { success } = await env.RATE_LIMITER.limit({ key: ip });
-    if (!success) return json({ error: "rate limited" }, 429);
-
     if (isDDG) {
       const ddgQ = url.searchParams.get("ddg").slice(0, 500);
       const r = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(ddgQ)}&format=json&no_html=1&skip_disambig=1`);
       return new Response(await r.text(), { status: r.status, headers: { "content-type": "application/json", ...CORS } });
     }
+
+    // Public endpoint, and every AI request bills Workers AI. Throttle per client IP.
+    // DDG proxying above is free and stays outside the limit: a page load used to spend
+    // two of the 20/min on itself and a few reloads knocked the whole engine offline.
+    const ip = req.headers.get("cf-connecting-ip") || "unknown";
+    const { success } = await env.RATE_LIMITER.limit({ key: ip });
+    if (!success) return json({ error: "rate limited" }, 429);
 
     let q;
     try {

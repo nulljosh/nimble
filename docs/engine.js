@@ -84,6 +84,20 @@ async function wiki(query){
   return null;
 }
 
+// "define X" must never fall through to Wikipedia search: that turns "define nimble"
+// into a game studio. Wiktionary is deterministic, CORS-open, and needs no key.
+async function dictionary(query){
+  const w = /^(?:define|definition of|meaning of)\s+(.+)$/i.exec(query.trim())?.[1];
+  if(!w) return null;
+  try{
+    const d = await (await fetch(`https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(w.toLowerCase())}`)).json();
+    const m = d?.en?.[0], def = m?.definitions?.[0]?.definition?.replace(/<[^>]+>/g,"").trim();
+    if(!def) return null;
+    return {title:w, body:`(${m.partOfSpeech.toLowerCase()}) ${def}`, src:"Wiktionary", url:`https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`};
+  }catch{}
+  return null;
+}
+
 async function gemma(query){
   try{
     const res = await fetch(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({q:query})});
@@ -105,6 +119,6 @@ async function answer(query){
   if(svg) return {kind:"graph", expr:ge, svg};
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const [ai, dd] = await Promise.all([gemma(query), ddg(query)]);
-  const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await wiki(query));
+  const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await dictionary(query) || await wiki(query));
   return hit ? {kind:"text", ...hit} : {kind:"none"};
 }
