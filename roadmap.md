@@ -23,7 +23,7 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 
 ## From Apple Notes (imported 2026-08-11)
 - [ ] iOS app must mirror the website in functionality + UI (incl. shopping)
-- [ ] Site needs a landing/marketing page, currently it drops straight into the app with no preview
+- [x] Site needs a landing/marketing page, currently it drops straight into the app with no preview (DONE 2026-09-02: 126 verified example queries, clickable answers linking to sources or web search, animated cycling fetches next answer before swap)
 
 > Resume note (2026-08-11): a `wip: partial work from /work notes ingest` commit holds unfinished, unverified changes for the items above. Review `git show HEAD` before building on it, it was committed mid-flight, not reviewed, and is unpushed.
 
