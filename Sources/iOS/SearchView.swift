@@ -46,6 +46,8 @@ struct SearchView: View {
 
                 if state.result != .none {
                     Divider().opacity(0.1)
+                    // ponytail: result sits mid-screen instead of hugging the field over a wall of white
+                    Spacer()
 
                     ResultView()
                         .environment(state)
