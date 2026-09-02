@@ -165,7 +165,7 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme) {
                     }
                     Text(answer.body, color = theme.text, fontSize = 16.sp, textDecoration = TextDecoration.Underline)
                     Spacer(Modifier.height(12.dp))
-                    Text("Source: ${answer.source} \u2197", color = theme.muted, fontSize = 12.sp)
+                    Text("Source: ${answer.source}", color = theme.muted, fontSize = 12.sp)
                 }
             }
 
