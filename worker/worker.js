@@ -8,12 +8,23 @@ const SYSTEM =
 
 export default {
   async fetch(req, env) {
-    if (req.method !== "POST") return new Response("POST only", { status: 405 });
+    if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
+    const url = new URL(req.url);
+    // Browsers can't call DuckDuckGo's JSON API directly (no CORS), so the web
+    // app fetches it through here. Native apps still hit DDG themselves.
+    const isDDG = req.method === "GET" && url.searchParams.has("ddg");
+    if (req.method !== "POST" && !isDDG) return new Response("POST only", { status: 405, headers: CORS });
 
     // Public endpoint, and every request bills Workers AI. Throttle per client IP.
     const ip = req.headers.get("cf-connecting-ip") || "unknown";
     const { success } = await env.RATE_LIMITER.limit({ key: ip });
     if (!success) return json({ error: "rate limited" }, 429);
+
+    if (isDDG) {
+      const ddgQ = url.searchParams.get("ddg").slice(0, 500);
+      const r = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(ddgQ)}&format=json&no_html=1&skip_disambig=1`);
+      return new Response(await r.text(), { status: r.status, headers: { "content-type": "application/json", ...CORS } });
+    }
 
     let q;
     try {
@@ -74,9 +85,15 @@ export default {
   },
 };
 
+const CORS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, OPTIONS",
+  "access-control-allow-headers": "content-type",
+};
+
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...CORS },
   });
 }

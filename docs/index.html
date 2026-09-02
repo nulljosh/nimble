@@ -221,6 +221,7 @@ a:hover { text-decoration: underline; }
 .mockup-result {
   padding: 16px;
 }
+.mockup-big { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; color: var(--panel-text); margin: 2px 0 4px; }
 .mockup-result h4 {
   font-size: 15px;
   font-weight: 700;
@@ -731,10 +732,10 @@ footer a:hover { color: var(--dark); }
     var query=q.value.trim(); if(!query) return;
     r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>'; c.textContent='';
     var a=await answer(query), h='<div class="mockup-label">Answer</div>';
-    if(a.kind==='convert'){ h+='<h4>'+a.to+' '+esc(a.toUnit)+'</h4><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; c.textContent='computed offline'; }
-    else if(a.kind==='math'){ h+='<h4>'+a.value+'</h4>'; c.textContent='computed offline'; }
+    if(a.kind==='convert'){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; c.textContent='computed offline'; }
+    else if(a.kind==='math'){ h+='<div class="mockup-big">'+a.value+'</div>'; c.textContent='computed offline'; }
     else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; c.textContent='powered by Curvely'; }
-    else if(a.kind==='text'){ h+='<h4>'+esc(a.title)+'</h4><p>'+esc(a.body)+'</p>'; c.textContent='powered by '+a.src; }
+    else if(a.kind==='text'){ h+=(a.title.toLowerCase()===query.toLowerCase()?'':'<h4>'+esc(a.title)+'</h4>')+'<p>'+esc(a.body)+'</p>'; c.textContent='powered by '+a.src; }
     else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
     r.innerHTML=h;
   }

@@ -35,7 +35,20 @@ Context kept only so the risk is known, not as a task: maybulb.com is a real thi
 ## Ingested 2026-08-22
 - [ ] Ship iOS and Mac apps, right now only web is available.
 
-## App Store launch, status 2026-08-23
+## App Store launch, SUBMITTED 2026-09-02
+
+ASC record **6807858746 "Nimble Answers"**, one Universal Purchase record, bundle
+`com.nulljosh.nimble.ios` on both targets (macOS target repointed to it). iOS 1.0.0 and
+macOS 1.0.0 are both WAITING_FOR_REVIEW. Everything below this heading is history.
+
+What it took, for the next fresh record: manual-signing profiles via `asc signing fetch
+--create-missing` (automatic signing cannot mint them headlessly), `ExportOptions.plist` (iOS)
+and `ExportOptions-mac.plist` (macOS) are manual-signing now. The macOS pkg was rejected once for
+missing `com.apple.security.app-sandbox`, fixed by `Nimble-macOS.entitlements`. iPad screenshot is
+required because TARGETED_DEVICE_FAMILY is 1,2. Primary language is en-CA, so `metadata/` and
+screenshot dirs use `en-CA`. Landing page now links the native MSI/APK on the GitHub release.
+
+## App Store launch, status 2026-08-23 (historical)
 
 **Name RESOLVED: "Nimble Answers".** Bare "Nimble" is held by Nimble, Inc. Apple's
 app-name namespace is exact-match *at record creation*, so the New App form refuses a

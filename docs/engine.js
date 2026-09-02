@@ -57,13 +57,13 @@ async function graph(expr){
     let d="",prev=null;
     for(const p of pts){ d+=(prev===null||p.x-prev>(x1-x0)/50?"M":"L")+X(p.x).toFixed(1)+" "+Y(p.y).toFixed(1); prev=p.x; }
     const ax=(y0<=0&&y1>=0?`<line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}"/>`:"")+(x0<=0&&x1>=0?`<line y1="0" y2="${H}" x1="${X(0)}" x2="${X(0)}"/>`:"");
-    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><g stroke="currentColor" stroke-opacity=".3">${ax}</g><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/></svg>`;
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><g stroke="currentColor" stroke-opacity=".3">${ax}</g><path d="${d}" fill="none" stroke="var(--accent, #ffca30)" stroke-width="2" stroke-linejoin="round"/></svg>`;
   }catch{ return null; }
 }
 
 async function ddg(query){
   try{
-    const d = await (await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`)).json();
+    const d = await (await fetch(`${ANSWER_PROXY}/?ddg=${encodeURIComponent(query)}`)).json();
     const heading = d.Heading || query;
     if(d.Answer) return {title:heading, body:d.Answer, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
     if(d.AbstractText) return {title:heading, body:d.AbstractText, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
@@ -90,7 +90,7 @@ async function gemma(query){
     if(!res.ok) return null;
     const d = await res.json();
     const a = (d.answer||"").trim();
-    if(a && a.toUpperCase()!=="UNKNOWN") return {title:query, body:a, src:"Nimble AI"};
+    if(a && a.toUpperCase()!=="UNKNOWN") return {title:query, body:a, src:d.source||"Nimble AI"};
   }catch{}
   return null;
 }
