@@ -22,6 +22,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -154,13 +156,17 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme) {
             )
 
             is Answer.Text -> {
-                answer.heading?.let {
-                    Text(it, color = theme.text, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.height(8.dp))
+                // Whole answer opens its source; AI answers have none, so fall back to a web search.
+                val uriHandler = LocalUriHandler.current
+                Column(Modifier.clickable { answer.sourceUrl?.let(uriHandler::openUri) }) {
+                    answer.heading?.let {
+                        Text(it, color = theme.text, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(8.dp))
+                    }
+                    Text(answer.body, color = theme.text, fontSize = 16.sp, textDecoration = TextDecoration.Underline)
+                    Spacer(Modifier.height(12.dp))
+                    Text("Source: ${answer.source} \u2197", color = theme.muted, fontSize = 12.sp)
                 }
-                Text(answer.body, color = theme.text, fontSize = 16.sp)
-                Spacer(Modifier.height(12.dp))
-                Text("Source: ${answer.source}", color = theme.muted, fontSize = 12.sp)
             }
 
             is Answer.Miss -> Text(answer.message, color = theme.muted, fontSize = 16.sp)

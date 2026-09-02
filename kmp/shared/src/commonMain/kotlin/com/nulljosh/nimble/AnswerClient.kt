@@ -54,7 +54,8 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
 
-        gemma(input)?.let { return it }
+        // AI answers have no source page; give them a web search so every answer opens somewhere.
+        gemma(input)?.let { return it.copy(sourceUrl = "https://duckduckgo.com/?q=${input.encodeURLParameter()}") }
 
         val (ddgQuery, wikiQuery) = QueryEngine.preprocess(input)
         ddg(ddgQuery)?.let { return it }

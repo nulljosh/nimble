@@ -11,8 +11,12 @@ struct ResultView: View {
         case .math(let value):
             MathResultView(value: value, accent: state.theme.color)
 
-        case .text(let heading, let body, _, _, let imageURL):
+        case .text(let heading, let body, _, let sourceURL, let imageURL):
+            // Whole answer opens its source; AI answers have none, so fall back to a web search.
+            let encoded = state.queryText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            let destination = URL(string: sourceURL ?? "") ?? URL(string: "https://duckduckgo.com/?q=\(encoded)")!
             ScrollView {
+                Link(destination: destination) {
                 HStack(alignment: .top, spacing: 14) {
                     if let imageURL, let url = URL(string: imageURL) {
                         AsyncImage(url: url) { phase in
@@ -33,13 +37,15 @@ struct ResultView: View {
                         Text(body)
                             .font(.system(size: 13))
                             .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
+                            .underline(true, color: state.theme.color.opacity(0.6))
                             .lineSpacing(3)
                             .lineLimit(nil)
                     }
                 }
                 .padding(.horizontal, 18)
                 .padding(.vertical, 14)
+                }
+                .buttonStyle(.plain)
             }
             .frame(maxHeight: 300)
             .transition(.opacity.combined(with: .move(edge: .top)))
