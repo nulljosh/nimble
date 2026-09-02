@@ -758,25 +758,34 @@ footer a:hover { color: var(--dark); }
   fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
     examples=list.sort(function(){return Math.random()-0.5;}); idx=0;
   }).catch(function(){});
+  async function render(query){
+    var a=await answer(query), h='<div class="mockup-label">Answer</div>', credit='';
+    if(a.kind==='convert'){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit='computed offline'; }
+    else if(a.kind==='math'){ h+='<div class="mockup-big">'+a.value+'</div>'; credit='computed offline'; }
+    else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit='powered by Curvely'; }
+    else if(a.kind==='text'){ h+=(a.title.toLowerCase()===query.toLowerCase()?'':'<h4>'+esc(a.title)+'</h4>')+'<p>'+esc(a.body)+'</p>'; credit='powered by '+a.src; }
+    else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
+    return {h:h, credit:credit};
+  }
+  function show(res){
+    r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
+    r.innerHTML=res.h; c.textContent=res.credit;
+  }
+  // Fetch the next answer first, then swap placeholder and answer together.
   // 8s keeps a visitor well under the worker's 20/min AI cap (math/units are offline).
-  setInterval(function(){
+  setInterval(async function(){
     if(q.value || document.hidden) return;
+    var next=examples[(idx+1)%examples.length], res=await render(next);
+    if(q.value) return;
     idx=(idx+1)%examples.length;
     g.classList.remove('swap'); void g.offsetWidth; g.classList.add('swap');
-    setTimeout(function(){ g.textContent=examples[idx]; run(); }, 330);
+    setTimeout(function(){ g.textContent=next; show(res); }, 330);
   }, 8000);
   q.addEventListener('input',function(){ g.classList.toggle('off', !!q.value); });
   async function run(){
     var query=(q.value||g.textContent).trim(); if(!query) return;
     r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>'; c.textContent='';
-    var a=await answer(query), h='<div class="mockup-label">Answer</div>';
-    if(a.kind==='convert'){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; c.textContent='computed offline'; }
-    else if(a.kind==='math'){ h+='<div class="mockup-big">'+a.value+'</div>'; c.textContent='computed offline'; }
-    else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; c.textContent='powered by Curvely'; }
-    else if(a.kind==='text'){ h+=(a.title.toLowerCase()===query.toLowerCase()?'':'<h4>'+esc(a.title)+'</h4>')+'<p>'+esc(a.body)+'</p>'; c.textContent='powered by '+a.src; }
-    else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
-    r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
-    r.innerHTML=h;
+    show(await render(query));
   }
   f.addEventListener('submit',function(e){e.preventDefault();run();});
   run();
