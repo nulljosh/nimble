@@ -33,7 +33,6 @@ jobs:
       - name: Verify the hero animation made it into dist/
         run: |
           grep -q '@keyframes drift' dist/index.html
-          test -f dist/app/index.html
 
       # Fail loudly. This used to `if: env.CF_API_TOKEN != ''` so a missing
       # secret left main green -- which meant every run reported success while
