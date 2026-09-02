@@ -51,7 +51,7 @@ a:hover { text-decoration: underline; }
 .hero {
   position: relative; isolation: isolate; overflow: hidden;
   text-align: center;
-  padding: 6rem 0 4rem;
+  padding: clamp(3rem, 10vw, 6rem) 0 4rem;
   background: var(--yellow);
 }
 .hero .container { position: relative; z-index: 2; }
