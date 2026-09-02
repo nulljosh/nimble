@@ -212,6 +212,26 @@ a:hover { text-decoration: underline; }
   color: var(--panel-text);
 }
 
+.mockup-field { flex: 1; position: relative; display: flex; }
+.mockup-field .mockup-input { width: 100%; }
+/* Rotating example queries. A span rather than ::placeholder so it can animate. */
+.mockup-ghost {
+  position: absolute; inset: 0;
+  display: flex; align-items: center;
+  pointer-events: none;
+  font-size: 15px; color: var(--panel-mid);
+  white-space: nowrap; overflow: hidden;
+}
+.mockup-ghost.swap { animation: ghost-swap 700ms cubic-bezier(.22,1,.36,1) both; }
+.mockup-ghost.off { display: none; }
+@keyframes ghost-swap {
+  0%   { opacity: 1; transform: translateY(0); filter: blur(0); }
+  40%  { opacity: 0; transform: translateY(-10px); filter: blur(3px); }
+  50%  { opacity: 0; transform: translateY(12px); filter: blur(3px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@media (prefers-reduced-motion: reduce) { .mockup-ghost.swap { animation: none; } }
+
 .mockup-caret {
   width: 2px;
   height: 17px;
@@ -448,7 +468,10 @@ footer a:hover { color: var(--dark); }
     <form class="mockup" id="demo" autocomplete="off">
       <div class="mockup-bar">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffca30" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input class="mockup-input" id="demoQ" value="define nimble" aria-label="Ask Nimble" spellcheck="false">
+        <div class="mockup-field">
+          <input class="mockup-input" id="demoQ" value="" aria-label="Ask Nimble" spellcheck="false">
+          <span class="mockup-ghost" id="demoG" aria-hidden="true">define nimble</span>
+        </div>
         <span class="mockup-caret" aria-hidden="true"></span>
       </div>
       <div class="mockup-result" id="demoR">
@@ -726,10 +749,22 @@ footer a:hover { color: var(--dark); }
 <script>
 // Live demo: the same engine the app ships.
 (function(){
-  var f=document.getElementById('demo'), q=document.getElementById('demoQ'), r=document.getElementById('demoR'), c=document.getElementById('demoC');
+  var f=document.getElementById('demo'), q=document.getElementById('demoQ'), r=document.getElementById('demoR'), c=document.getElementById('demoC'), g=document.getElementById('demoG');
   var esc=function(t){return String(t).replace(/</g,'&lt;');};
+  // Example queries cycle through the empty field; return runs whichever is showing.
+  var examples=[g.textContent], idx=0;
+  fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
+    examples=list.sort(function(){return Math.random()-0.5;}); idx=0;
+  }).catch(function(){});
+  setInterval(function(){
+    if(q.value) return;
+    idx=(idx+1)%examples.length;
+    g.classList.remove('swap'); void g.offsetWidth; g.classList.add('swap');
+    setTimeout(function(){ g.textContent=examples[idx]; }, 330);
+  }, 3800);
+  q.addEventListener('input',function(){ g.classList.toggle('off', !!q.value); });
   async function run(){
-    var query=q.value.trim(); if(!query) return;
+    var query=(q.value||g.textContent).trim(); if(!query) return;
     r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>'; c.textContent='';
     var a=await answer(query), h='<div class="mockup-label">Answer</div>';
     if(a.kind==='convert'){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; c.textContent='computed offline'; }
