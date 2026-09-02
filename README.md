@@ -4,22 +4,24 @@
 
 ![version](https://img.shields.io/badge/version-v1.0.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
-Instant-answer search for macOS, iOS, and the web. Classifies your query — math, factual, or definition — and answers in one sentence. Math runs fully offline; everything else goes to a pair of open models and falls back to DuckDuckGo and Wikipedia.
+Ask a question. Get one sentence back.
+
+Nimble works out what you meant, math, fact or definition, and answers in a line. Math never leaves the device. Everything else goes to two open models at once, and if they both give up, DuckDuckGo and Wikipedia catch it.
 
 **[nimble.heyitsmejosh.com →](https://nimble.heyitsmejosh.com)**
 
-Inspired by the original [Nimble](https://github.com/Maybulb/Nimble) (Electron + Wolfram|Alpha, deprecated 2020) — rebuilt native, from scratch.
+The original [Nimble](https://github.com/Maybulb/Nimble) was Electron plus Wolfram|Alpha and died in 2020. This one is native, and written from scratch.
 
 ## Features
 
-- **Smart classification** — math / factual / definition intent detection
-- **Two models, one answer** — Gemma and Qwen3 answer in parallel on Cloudflare Workers AI; matching answers pass through, differing ones are synthesized into a single sentence. The label under an answer names the models that produced it.
-- **Falls back, never fails** — DuckDuckGo → Wikipedia when the models return UNKNOWN
-- **Offline math** — arithmetic, trig, sqrt, log, powers, pi
-- **Summon from anywhere** — ⌥Space global hotkey, plus a menu bar item
-- **8 themes** — orange, red, yellow, green, blue, purple, pink, contrast
-- **In-app updates** — checks GitHub Releases daily, plus a manual check in Preferences
-- No API keys required · no telemetry · 34 tests
+- **Knows what you meant.** Math, fact or definition, sorted before it answers.
+- **Two models, one answer.** Gemma and Qwen3 run in parallel on Cloudflare Workers AI. If they agree, you get it. If they don't, the two are folded into one sentence. The label under the answer names who said it.
+- **Falls back. Never fails.** DuckDuckGo, then Wikipedia, when the models say UNKNOWN.
+- **Math offline.** Arithmetic, trig, sqrt, log, powers, pi. No network.
+- **Summon it anywhere.** ⌥Space, or the menu bar.
+- **8 themes.** Orange, red, yellow, green, blue, purple, pink, contrast.
+- **Updates itself.** Checks GitHub Releases daily. Or check by hand in Preferences.
+- No API keys. No telemetry. 34 tests.
 
 ## Platforms
 
@@ -27,7 +29,7 @@ Inspired by the original [Nimble](https://github.com/Maybulb/Nimble) (Electron +
 |---|---|
 | macOS | Native SwiftUI HUD + menu bar item, ⌥Space to summon |
 | iOS | Native SwiftUI app |
-| Web | Single page — [web/index.html](web/index.html), same answer engine |
+| Web | One page, [web/index.html](web/index.html). Same engine |
 
 <img src="docs/screenshots/ios-search.jpg" width="240">
 
@@ -35,20 +37,19 @@ Inspired by the original [Nimble](https://github.com/Maybulb/Nimble) (Electron +
 
 Download the latest `.zip` from [Releases](https://github.com/nulljosh/nimble/releases/latest), unzip, drag `Nimble.app` to `/Applications`.
 
-Releases from v1.0.1 on are Developer ID-signed and notarized, so they open on first
-launch. The v1.0.0 build was signed with a development certificate only — macOS
-quarantines it and it has to be approved under System Settings → Privacy & Security →
-"Open Anyway". If you are on that build, updating clears it.
+From v1.0.1 on, releases are Developer ID signed and notarized. They open first try.
+The v1.0.0 build was signed with a development certificate only, so macOS quarantines it.
+Approve it under System Settings, Privacy & Security, "Open Anyway". Or just update.
 
-Maintainers: build releases with `scripts/release-macos.sh`, which signs, notarizes,
-staples and packages in one pass. It needs a Developer ID Application certificate and a
-`notarytool` credential profile — see the header of the script.
+Maintainers: `scripts/release-macos.sh` signs, notarizes, staples and packages in one
+pass. It needs a Developer ID Application certificate and a `notarytool` credential
+profile. The script header explains both.
 
 ## Answer engine
 
-`worker/worker.js` is a Cloudflare Worker with a Workers AI binding — **no API key
-anywhere**, in the binary or the repo. It runs `@cf/google/gemma-4-26b-a4b-it` and
-`@cf/qwen/qwen3-30b-a3b-fp8` in parallel, rate-limited to 20 req/min per IP.
+`worker/worker.js` is a Cloudflare Worker with a Workers AI binding. **There is no API key
+anywhere.** Not in the binary, not in the repo. It runs `@cf/google/gemma-4-26b-a4b-it` and
+`@cf/qwen/qwen3-30b-a3b-fp8` side by side, capped at 20 requests a minute per IP.
 
 ```bash
 cd worker && npx wrangler deploy
@@ -58,7 +59,7 @@ cd worker && npx wrangler deploy
 
 <img src="architecture.svg" width="600">
 
-See [roadmap.md](roadmap.md) for open work.
+Open work is in [roadmap.md](roadmap.md).
 
 ## Development
 
