@@ -201,3 +201,5 @@ instead of them.
 
 ## Landing page (2026-09-02)
 - [ ] Mac menu bar screenshot for the landing page and README. Needs a real popover capture; the hero only shows the iPhone shot today.
+
+- Clickable results (open source URL, web search fallback for AI answers): live on landing 2026-09-02; port to macOS/iOS/KMP
