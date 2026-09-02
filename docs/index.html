@@ -230,6 +230,8 @@ a:hover { text-decoration: underline; }
   50%  { opacity: 0; transform: translateY(12px); filter: blur(3px); }
   100% { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
+.mockup-link { display: block; color: inherit; text-decoration: none; }
+.mockup-link:hover p, .mockup-link:hover h4 { text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
 .mockup-result.swap { animation: result-in 500ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes result-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .mockup-ghost.swap, .mockup-result.swap { animation: none; } }
@@ -763,7 +765,13 @@ footer a:hover { color: var(--dark); }
     if(a.kind==='convert'){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit='computed offline'; }
     else if(a.kind==='math'){ h+='<div class="mockup-big">'+a.value+'</div>'; credit='computed offline'; }
     else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit='powered by Curvely'; }
-    else if(a.kind==='text'){ h+=(a.title.toLowerCase()===query.toLowerCase()?'':'<h4>'+esc(a.title)+'</h4>')+'<p>'+esc(a.body)+'</p>'; credit='powered by '+a.src; }
+    else if(a.kind==='text'){
+      // Click through to the source; AI answers have none, so fall back to a web search.
+      var href=a.url||'https://duckduckgo.com/?q='+encodeURIComponent(query);
+      h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,'&quot;')+'" target="_blank" rel="noopener">'
+        +(a.title.toLowerCase()===query.toLowerCase()?'':'<h4>'+esc(a.title)+'</h4>')+'<p>'+esc(a.body)+'</p></a>';
+      credit='powered by '+a.src+' \u2197';
+    }
     else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
     return {h:h, credit:credit};
   }
