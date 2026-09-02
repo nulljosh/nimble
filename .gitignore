@@ -20,3 +20,6 @@ kmp/local.properties
 kmp/keystore.properties
 kmp/*.jks
 signing/
+.asc/shots/
+.asc/artifacts/
+.asc/dd/

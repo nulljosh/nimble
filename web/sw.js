@@ -1,7 +1,7 @@
 // ponytail: network-first for pages, cache-first for the hashed assets they name.
 // Bump CACHE to evict everything a previous version stored.
-const CACHE = "nimble-v3";
-const FILES = ["/app/", "/app/index.html", "/app/tokens.css", "/app/icon.svg", "/app/manifest.webmanifest"];
+const CACHE = "nimble-v4";
+const FILES = ["/app/", "/app/index.html", "/app/tokens.css", "/app/engine.js", "/app/icon.svg", "/app/manifest.webmanifest"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

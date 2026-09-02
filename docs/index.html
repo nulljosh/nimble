@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nimble — Instant Answers from Your Menubar</title>
+<meta property="og:title" content="Nimble">
+<meta property="og:description" content="Ask a question. Get one sentence back. Math, units and graphs offline; facts from two open models with a source.">
+<meta property="og:image" content="https://nimble.heyitsmejosh.com/screenshots/ios-search.jpg">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:url" content="https://nimble.heyitsmejosh.com/">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="description" content="Instant answers on Mac, iPhone, Windows, Android and the web. Math, knowledge, definitions — one keystroke away. Free and open source.">
 <meta name="theme-color" content="#ffca30">
 <link rel="icon" href="icon.svg">
@@ -174,6 +180,8 @@ a:hover { text-decoration: underline; }
   text-align: center;
 }
 
+.hero .mockup { margin: 2rem auto; text-align: left; }
+.hero .mockup p { max-width: none; margin: 0; color: var(--panel-mid); font-size: 13px; }
 .mockup {
   --panel: #14161f;
   --panel-line: #262a36;
@@ -200,6 +208,10 @@ a:hover { text-decoration: underline; }
 
 .mockup-input {
   flex: 1;
+  background: none;
+  border: 0;
+  outline: 0;
+  padding: 0;
   font-family: var(--font);
   font-size: 15px;
   color: var(--panel-text);
@@ -436,30 +448,23 @@ footer a:hover { color: var(--dark); }
       </svg>
     </div>
     <h1>Nimble</h1>
-    <p>Instant answers — math, facts, definitions. On Mac, iPhone, Windows, Android and the web.</p>
-    <div class="hero-buttons">
-      <a href="https://nimble.heyitsmejosh.com/app" class="btn btn-dark">Launch web app</a>
-      <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-outline">Download for Mac</a>
-      <a href="#install" class="btn btn-outline">Windows &amp; Android</a>
-      <a href="https://github.com/nulljosh/nimble" class="btn btn-outline">Source</a>
-    </div>
-  </div>
-</section>
-
-<section class="mockup-section">
-  <div class="container">
-    <div class="mockup">
+    <p>Ask a question. Get one sentence back.</p>
+    <form class="mockup" id="demo" autocomplete="off">
       <div class="mockup-bar">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffca30" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span class="mockup-input">Population of Canada</span>
+        <input class="mockup-input" id="demoQ" value="Distance from Earth to Mars" aria-label="Ask Nimble" spellcheck="false">
         <span class="mockup-caret" aria-hidden="true"></span>
       </div>
-      <div class="mockup-result">
+      <div class="mockup-result" id="demoR">
         <div class="mockup-label">Answer</div>
-        <h4>Canada</h4>
-        <p>A country in North America. Its ten provinces and three territories run from the Atlantic to the Pacific and north into the Arctic, covering 9.98 million square kilometres. Population: approximately 40.1 million.</p>
+        <p>Press return.</p>
       </div>
-      <div class="mockup-credit">powered by Wikipedia</div>
+      <div class="mockup-credit" id="demoC">live demo, the real engine</div>
+    </form>
+    <div class="hero-buttons">
+      <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset="macOS.zip">Download for Mac</a>
+      <a href="#install" class="btn btn-outline">Windows &amp; Android</a>
+      <a href="https://github.com/nulljosh/nimble" class="btn btn-outline">Source</a>
     </div>
   </div>
 </section>
@@ -467,9 +472,9 @@ footer a:hover { color: var(--dark); }
 <section class="shot-section">
   <div class="container">
     <h2>On your iPhone, too.</h2>
-    <p>The same answer engine, same eight themes — math still runs offline.</p>
+    <p>The same engine as this page, with eight themes. Math and units still run offline.</p>
     <div class="phone">
-      <img src="screenshots/ios-search.jpg" width="369" height="554" alt="Nimble on iPhone answering &quot;Ten plus ten&quot; with 20, computed offline.">
+      <img src="screenshots/ios-search.jpg" width="369" height="554" alt="Nimble on iPhone answering answering &quot;Ten plus ten&quot; with 20, computed offline.quot;sqrt(144) * 3 + 2^5answering &quot;Ten plus ten&quot; with 20, computed offline.quot; with 68, computed offline.">
     </div>
   </div>
 </section>
@@ -479,20 +484,20 @@ footer a:hover { color: var(--dark); }
     <h2>Answers, not ten blue links.</h2>
     <div class="features-grid">
       <div class="feature">
-        <h3>Instant Math</h3>
-        <p>Arithmetic and expressions evaluated locally. No network needed.</p>
+        <h3>Math and units, offline</h3>
+        <p>Arithmetic, trig, powers, and unit conversion evaluated on the device. No network needed.</p>
       </div>
       <div class="feature">
-        <h3>Knowledge Search</h3>
-        <p>An AI answer layer first, then DuckDuckGo Instant Answers and Wikipedia. No API keys required.</p>
+        <h3>Two models, one sentence</h3>
+        <p>Gemma and Qwen answer in parallel. Numbers are cross-checked against DuckDuckGo, and Wikipedia catches the rest.</p>
       </div>
       <div class="feature">
         <h3>Every platform</h3>
-        <p>Mac, iPhone, Windows, Android and the web. The same answer engine on every surface.</p>
+        <p>Mac, iPhone, Windows, Android, and this page. The same answer engine on every surface.</p>
       </div>
       <div class="feature">
-        <h3>8 Themes</h3>
-        <p>Orange, red, yellow, green, blue, purple, pink, high contrast.</p>
+        <h3>Graphs</h3>
+        <p>Type <em>y = x^2</em> or <em>plot sin(x)</em> and get the curve. 8 themes to draw it in.</p>
       </div>
       <div class="feature">
         <h3>Native macOS</h3>
@@ -500,7 +505,7 @@ footer a:hover { color: var(--dark); }
       </div>
       <div class="feature">
         <h3>Open Source</h3>
-        <p>MIT licensed. No telemetry. Your queries stay on your machine.</p>
+        <p>MIT licensed. No telemetry, no accounts, no API keys. Math and units never leave your device.</p>
       </div>
     </div>
   </div>
@@ -514,17 +519,17 @@ footer a:hover { color: var(--dark); }
       <div class="install-card">
         <h3>Windows</h3>
         <p>A native installer. Lands in the Start Menu like any other app.</p>
-        <a href="https://github.com/nulljosh/nimble/releases/latest/download/Nimble-1.0.0.msi" class="btn btn-dark">Download for Windows</a>
+        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".msi">Download for Windows</a>
       </div>
       <div class="install-card">
         <h3>Android</h3>
         <p>A native APK. Full screen, works offline.</p>
-        <a href="https://github.com/nulljosh/nimble/releases/latest/download/Nimble-1.0.0.apk" class="btn btn-dark">Download for Android</a>
+        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".apk">Download for Android</a>
       </div>
       <div class="install-card">
         <h3>Mac</h3>
         <p>A native SwiftUI menu bar app, signed and notarized. One keystroke from anywhere.</p>
-        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark">Download for Mac</a>
+        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset="macOS.zip">Download for Mac</a>
       </div>
       <div class="install-card">
         <h3>Linux</h3>
@@ -721,5 +726,33 @@ footer a:hover { color: var(--dark); }
 })();
 </script>
 
+<script src="engine.js"></script>
+<script>
+// Live demo: the same engine the app ships.
+(function(){
+  var f=document.getElementById('demo'), q=document.getElementById('demoQ'), r=document.getElementById('demoR'), c=document.getElementById('demoC');
+  var esc=function(t){return String(t).replace(/</g,'&lt;');};
+  async function run(){
+    var query=q.value.trim(); if(!query) return;
+    r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>'; c.textContent='';
+    var a=await answer(query), h='<div class="mockup-label">Answer</div>';
+    if(a.kind==='convert'){ h+='<h4>'+a.to+' '+esc(a.toUnit)+'</h4><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; c.textContent='computed offline'; }
+    else if(a.kind==='math'){ h+='<h4>'+a.value+'</h4>'; c.textContent='computed offline'; }
+    else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; c.textContent='powered by Curvely'; }
+    else if(a.kind==='text'){ h+='<h4>'+esc(a.title)+'</h4><p>'+esc(a.body)+'</p>'; c.textContent='powered by '+a.src; }
+    else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
+    r.innerHTML=h;
+  }
+  f.addEventListener('submit',function(e){e.preventDefault();run();});
+  run();
+})();
+// Point download buttons at the latest release assets.
+fetch('https://api.github.com/repos/nulljosh/nimble/releases/latest').then(function(r){return r.json();}).then(function(rel){
+  document.querySelectorAll('[data-asset]').forEach(function(a){
+    var hit=(rel.assets||[]).find(function(x){return x.name.endsWith(a.dataset.asset);});
+    if(hit) a.href=hit.browser_download_url;
+  });
+}).catch(function(){});
+</script>
 </body>
 </html>

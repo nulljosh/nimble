@@ -31,7 +31,7 @@ The original [Nimble](https://github.com/Maybulb/Nimble) was Electron plus Wolfr
 |---|---|
 | macOS | Native SwiftUI HUD + menu bar item, ⌥Space to summon |
 | iOS | Native SwiftUI app |
-| Web | One page, [web/index.html](web/index.html). Same engine |
+| Web | The landing page is the app: [docs/index.html](docs/index.html) + [docs/engine.js](docs/engine.js) |
 
 <img src="docs/screenshots/ios-search.jpg" width="240">
 
