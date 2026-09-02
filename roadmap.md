@@ -198,3 +198,6 @@ instead of them.
       was the from-scratch native rebuild of it. An Electron build would wrap `web/`, which
       is already a complete app and already installs as a PWA on Windows, Linux and
       Android. The one thing it would add over the PWA is a global hotkey on Linux/Windows.
+
+## Landing page (2026-09-02)
+- [ ] Mac menu bar screenshot for the landing page and README. Needs a real popover capture; the hero only shows the iPhone shot today.
