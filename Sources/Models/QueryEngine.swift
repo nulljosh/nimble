@@ -411,10 +411,17 @@ final class QueryEngine: Sendable {
 
         // Gemma first for a crisp one-line answer; fall back to DDG/Wikipedia when the
         // key is unreachable or Gemma returns UNKNOWN (keeps a no-key offline degrade).
-        if let llm = await queryLLM(input, session: session) { return llm }
-
         let (ddgInput, wikiInput) = preprocessQuery(input)
+        async let llm = queryLLM(input, session: session)
         async let ddg = queryDDG(ddgInput, session: session)
+        if let llmResult = await llm {
+            // A model's number is a guess with no source. If DDG has a sourced answer
+            // for a numeric question, prefer it; otherwise the one-liner stands.
+            if case .text(_, let body, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
+               let sourced = await ddg { return sourced }
+            return llmResult
+        }
+
         async let wiki = queryWikipedia(wikiInput, session: session)
         if let ddgResult = await ddg { return ddgResult }
         if let wikiResult = await wiki { return wikiResult }

@@ -138,3 +138,31 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertEqual(engine.evaluateMath("2 * pi"), "6.2831853072")
     }
 }
+
+// MARK: - Units and graphs
+
+extension QueryEngineTests {
+    func testConvertLength() {
+        guard case .convert(let from, let to, let fu, let tu)? = engine.convert("5 miles to km") else { return XCTFail() }
+        XCTAssertEqual(from, "5"); XCTAssertEqual(fu, "miles"); XCTAssertEqual(tu, "km")
+        XCTAssertEqual(Double(to)!, 8.04672, accuracy: 1e-5)
+    }
+
+    func testConvertTemperatureAndHowMany() {
+        XCTAssertEqual(QueryEngine.convertValue(100, from: "f", to: "c")!, 37.7778, accuracy: 1e-3)
+        guard case .convert(let from, _, let fu, let tu)? = engine.convert("how many feet in 3 meters") else { return XCTFail() }
+        XCTAssertEqual((from, fu, tu).0, "3"); XCTAssertEqual(fu, "meters"); XCTAssertEqual(tu, "feet")
+    }
+
+    func testConvertRejectsMixedDimensions() {
+        XCTAssertNil(engine.convert("5 miles to kg"))
+        XCTAssertNil(engine.convert("who is the ceo of apple"))
+    }
+
+    func testGraphExpression() {
+        XCTAssertEqual(engine.graphExpression("y = x^2"), "x^2")
+        XCTAssertEqual(engine.graphExpression("plot sin(x)"), "sin(x)")
+        XCTAssertNil(engine.graphExpression("2 + 2"))
+        XCTAssertNil(engine.graphExpression("graph the economy"))
+    }
+}

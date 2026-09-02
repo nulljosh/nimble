@@ -113,6 +113,7 @@ struct SearchView: View {
         case .math: return "mathjs"
         case .text(_, _, let source, _, _): return source
         case .list(_, let source): return source
+        case .graph: return "Curvely"
         default: return ""
         }
     }

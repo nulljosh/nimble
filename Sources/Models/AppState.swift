@@ -53,6 +53,7 @@ enum QueryResult: Equatable {
     case error(String, searchURL: String?)
     case color(String)
     case convert(from: String, to: String, fromUnit: String, toUnit: String)
+    case graph(expr: String, points: [CGPoint])
 
     static func == (lhs: QueryResult, rhs: QueryResult) -> Bool {
         switch (lhs, rhs) {
@@ -60,6 +61,8 @@ enum QueryResult: Equatable {
         case let (.math(a), .math(b)): return a == b
         case let (.error(a, _), .error(b, _)): return a == b
         case let (.color(a), .color(b)): return a == b
+        case let (.convert(a, b, c, d), .convert(e, f, g, h)): return (a, b, c, d) == (e, f, g, h)
+        case let (.graph(a, _), .graph(b, _)): return a == b
         default: return false
         }
     }
@@ -163,7 +166,11 @@ final class AppState {
         let encoded = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? text
         searchURL = "https://duckduckgo.com/?q=\(encoded)"
 
-        // Try math first
+        // Units, then math, both offline
+        if let converted = queryEngine.convert(text) {
+            result = converted
+            return
+        }
         if mathEnabled {
             if let mathResult = queryEngine.evaluateMath(text) {
                 result = .math(mathResult)
@@ -171,12 +178,15 @@ final class AppState {
             }
         }
 
-        // Query DDG + Wikipedia
         result = .loading
         let engine = queryEngine
+        let graphExpr = queryEngine.graphExpression(text)
         Task { @MainActor [weak self] in
-            let queryResult = await engine.query(text)
-            self?.result = queryResult
+            if let graphExpr, let graph = await engine.sampleGraph(graphExpr) {
+                self?.result = graph
+                return
+            }
+            self?.result = await engine.query(text)
         }
     }
 
@@ -197,6 +207,7 @@ final class AppState {
         case .error(let msg, _): text = msg
         case .color(let hex): text = hex
         case .convert(let from, let to, let fromUnit, let toUnit): text = "\(from) \(fromUnit) = \(to) \(toUnit)"
+        case .graph(let expr, _): text = "y = \(expr)"
         default: return
         }
         #if os(macOS)

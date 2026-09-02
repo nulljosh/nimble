@@ -77,6 +77,9 @@ struct ResultView: View {
         case .convert(let from, let to, let fromUnit, let toUnit):
             ConvertResultView(from: from, to: to, fromUnit: fromUnit, toUnit: toUnit, accent: state.theme.color)
 
+        case .graph(let expr, let points):
+            GraphResultView(expr: expr, points: points, accent: state.theme.color)
+
         case .error(let message, let searchURL):
             VStack(spacing: 10) {
                 Text(message)
@@ -94,6 +97,48 @@ struct ResultView: View {
             .frame(maxWidth: .infinity)
             .transition(.opacity)
         }
+    }
+}
+
+// MARK: - Graph
+
+private struct GraphResultView: View {
+    let expr: String
+    let points: [CGPoint]
+    let accent: Color
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Canvas { ctx, size in
+                let xs = points.map(\.x), ys = points.map(\.y)
+                guard let x0 = xs.min(), let x1 = xs.max(), let y0 = ys.min(), let y1 = ys.max(), x1 > x0 else { return }
+                let ySpan = max(y1 - y0, 1e-9)
+                func pt(_ p: CGPoint) -> CGPoint {
+                    CGPoint(x: (p.x - x0) / (x1 - x0) * size.width,
+                            y: size.height - (p.y - y0) / ySpan * size.height)
+                }
+                var axes = Path()
+                if y0 <= 0, y1 >= 0 { let y = pt(CGPoint(x: x0, y: 0)).y; axes.move(to: CGPoint(x: 0, y: y)); axes.addLine(to: CGPoint(x: size.width, y: y)) }
+                if x0 <= 0, x1 >= 0 { let x = pt(CGPoint(x: 0, y: y0)).x; axes.move(to: CGPoint(x: x, y: 0)); axes.addLine(to: CGPoint(x: x, y: size.height)) }
+                ctx.stroke(axes, with: .color(.secondary.opacity(0.4)), lineWidth: 1)
+                var curve = Path()
+                // Break the line where sampled neighbours are far apart (asymptotes).
+                var pen = false
+                for (i, p) in points.enumerated() {
+                    let jump = i > 0 && abs(p.x - points[i - 1].x) > (x1 - x0) / 50
+                    if !pen || jump { curve.move(to: pt(p)); pen = true } else { curve.addLine(to: pt(p)) }
+                }
+                ctx.stroke(curve, with: .color(accent), style: StrokeStyle(lineWidth: 2, lineJoin: .round))
+            }
+            .frame(height: 160)
+            .padding(.horizontal, 20)
+            Text("y = \(expr)")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.secondary)
+                .textSelection(.enabled)
+        }
+        .padding(.vertical, 14)
+        .transition(.opacity)
     }
 }
 
