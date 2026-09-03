@@ -455,7 +455,7 @@ final class QueryEngine: Sendable {
                 let source = ddg.abstractSource ?? "DuckDuckGo"
                 let sourceURL = ddg.abstractURL
                 let imageURL = ddg.image.flatMap { $0.isEmpty ? nil : "https://duckduckgo.com\($0)" }
-                return .text(heading: ddg.heading, body: abstract, source: source, sourceURL: sourceURL, imageURL: imageURL)
+                return .text(heading: ddg.heading, body: firstSentence(abstract), source: source, sourceURL: sourceURL, imageURL: imageURL)
             }
 
             if let topics = ddg.relatedTopics, !topics.isEmpty {
@@ -530,7 +530,7 @@ final class QueryEngine: Sendable {
 
             return .text(
                 heading: wiki.title,
-                body: extract,
+                body: firstSentence(extract),
                 source: "Wikipedia",
                 sourceURL: wiki.contentUrls?.desktop?.page,
                 imageURL: wiki.thumbnail?.source
@@ -606,4 +606,13 @@ final class QueryEngine: Sendable {
         let pool = useDefaults ? Self.suggestions : Self.defaultSuggestions
         return pool.randomElement() ?? "Search anything..."
     }
+}
+
+// ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
+func firstSentence(_ text: String) -> String {
+    let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
+    if let r = t.range(of: #"(?<=[.!?])\s+(?=[A-Z0-9"(])"#, options: .regularExpression) {
+        return String(t[..<r.lowerBound])
+    }
+    return t
 }

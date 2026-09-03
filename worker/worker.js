@@ -44,7 +44,7 @@ export default {
           { role: "user", content: `${q} /no_think` },
         ],
         temperature: 0,
-        max_tokens: 600,
+        max_tokens: 80, // ponytail: neurons bill per token; a sentence never needs 600
       })
         .then((d) => {
           const msg = d?.choices?.[0]?.message;

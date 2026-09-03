@@ -61,12 +61,15 @@ async function graph(expr){
   }catch{ return null; }
 }
 
+// ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
+const first = (t) => t.trim().split(/(?<=[.!?])\s+(?=[A-Z0-9"(])/)[0];
+
 async function ddg(query){
   try{
     const d = await (await fetch(`${ANSWER_PROXY}/?ddg=${encodeURIComponent(query)}`)).json();
     const heading = d.Heading || query;
     if(d.Answer) return {title:heading, body:d.Answer, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
-    if(d.AbstractText) return {title:heading, body:d.AbstractText, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
+    if(d.AbstractText) return {title:heading, body:first(d.AbstractText), src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
     if(d.Definition) return {title:heading, body:d.Definition, src:d.DefinitionSource||"DuckDuckGo", url:d.DefinitionURL};
   }catch{}
   return null;
@@ -79,7 +82,7 @@ async function wiki(query){
     if(!hit) return null;
     const sum = await (await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hit.title)}`)).json();
     if(!sum.extract) return null;
-    return {title:sum.title, body:sum.extract, src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null};
+    return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null};
   }catch{}
   return null;
 }

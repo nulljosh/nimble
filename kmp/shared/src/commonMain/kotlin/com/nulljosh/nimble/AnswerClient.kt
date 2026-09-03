@@ -115,7 +115,7 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         d.abstractText?.takeIf { it.isNotEmpty() }?.let {
             return@runCatchingNull Answer.Text(
                 d.heading,
-                it,
+                firstSentence(it),
                 d.abstractSource ?: "DuckDuckGo",
                 d.abstractUrl,
                 d.image?.takeIf { img -> img.isNotEmpty() }?.let { img -> "https://duckduckgo.com$img" }
@@ -153,10 +153,14 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         val url = "https://en.wikipedia.org/api/rest_v1/page/summary/${titlePath.encodeURLPathPart()}"
         val w = lenientJson.decodeFromString<WikiSummary>(http.get(url).bodyAsText())
         val extract = w.extract?.takeIf { it.isNotEmpty() } ?: return@runCatchingNull null
-        Answer.Text(w.title, extract, "Wikipedia", w.contentUrls?.desktop?.page, w.thumbnail?.source)
+        Answer.Text(w.title, firstSentence(extract), "Wikipedia", w.contentUrls?.desktop?.page, w.thumbnail?.source)
     }
 }
 
 /** Network and parse failures are misses, not crashes -- every stage can fall through. */
 private inline fun <T> runCatchingNull(block: () -> T?): T? =
     try { block() } catch (_: Throwable) { null }
+
+// ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
+private val sentenceBreak = Regex("""(?<=[.!?])\s+(?=[A-Z0-9"(])""")
+internal fun firstSentence(text: String): String = text.trim().split(sentenceBreak, limit = 2)[0]
