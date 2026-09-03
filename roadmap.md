@@ -203,4 +203,4 @@ instead of them.
 
 - Clickable results (source URL, web search fallback for AI answers): landing + macOS/iOS + KMP 2026-09-02
 
-- [ ] macOS 1.0.0 REJECTED 2026-09-02 (submission 7745557c). Reason unread: `asc web review show --app 6807858746` (2FA code was fed to /tmp/asc2fa; session may now be valid). iOS 1.0.0 still WAITING_FOR_REVIEW.
+- [ ] macOS 1.0.0 REJECTED 2026-09-02 (submission 7745557c). Guideline 2.4.5(vii): "The app updates itself outside of the Mac App Store" — find and remove the in-app update check (Sparkle/version-check/GitHub releases ping) from the macOS build, rebuild, resubmit. iOS 1.0.0 still WAITING_FOR_REVIEW.
