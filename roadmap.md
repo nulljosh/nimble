@@ -202,3 +202,5 @@ instead of them.
 - [ ] Mac menu bar screenshot for the landing page and README. Needs a real popover capture; the hero only shows the iPhone shot today.
 
 - Clickable results (source URL, web search fallback for AI answers): landing + macOS/iOS + KMP 2026-09-02
+
+- [ ] macOS 1.0.0 REJECTED 2026-09-02 (submission 7745557c). Reason unread: `asc web review show --app 6807858746` (2FA code was fed to /tmp/asc2fa; session may now be valid). iOS 1.0.0 still WAITING_FOR_REVIEW.
