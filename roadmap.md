@@ -203,4 +203,4 @@ instead of them.
 
 - Clickable results (source URL, web search fallback for AI answers): landing + macOS/iOS + KMP 2026-09-02
 
-- [ ] macOS 1.0.0 REJECTED 2026-09-02 for 2.4.5(vii); updater removed + archive OK; `asc xcode export` rejected flags (no --ipa-path/--wait combo for pkg). NEXT: export via xcodebuild -exportArchive -exportOptionsPlist ExportOptions-mac.plist, then `asc review submit --app 6807858746 --version 1.0.0 --build-id <new> --confirm`. iOS 1.0.0 still WAITING_FOR_REVIEW.
+- [ ] macOS 1.0.0 REJECTED 2026-09-02 for 2.4.5(vii); updater removed; build 202609022006 uploaded via xcodebuild destination=upload 2026-09-02 evening. NEXT: wait for processing, then `asc review submit --app 6807858746 --version 1.0.0 --build-id <id> --confirm` (find id: asc builds list --platform MAC_OS).
