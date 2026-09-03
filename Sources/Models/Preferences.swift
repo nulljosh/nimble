@@ -40,3 +40,9 @@ final class Preferences {
         }
     }
 }
+
+extension Bundle {
+    var marketingVersion: String {
+        infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+    }
+}
