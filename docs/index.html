@@ -18,6 +18,7 @@
 <meta name="theme-color" content="#ffca30">
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="devices.css">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -195,23 +196,15 @@ a:hover { text-decoration: underline; }
   min-height: 420px;
   display: flex; flex-direction: column;
 }
-.hero .phone { margin: 2rem auto; }
-.hero .mockup { margin: 0; }
-.mockup-status { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px 4px; font-size: 12px; font-weight: 600; color: var(--panel-text); }
+.hero .device { margin: 2rem auto; }
+.device-screen { display: flex; flex-direction: column; }
+.hero .mockup, .mockup { flex: 1; border-radius: 0; min-height: 0; margin: 0; }
+.device-mac, .device-windows { --device-w: 480px; }
+.device-mac .mockup, .device-windows .mockup { min-height: 300px; }
+.mockup-status { display: flex; align-items: center; justify-content: space-between; padding: 16px 30px 4px; font-size: 12px; font-weight: 600; color: var(--panel-text); }
 .mockup-status span:last-child { font-size: 6px; color: #c8ccd2; letter-spacing: 2px; }
-.mockup-island { width: 78px; height: 24px; border-radius: 12px; background: #000; }
 .mockup-result { flex: 1; }
-/* Device variants. The phone frame is the default; desktops get a window. */
-[data-device=android] .mockup-island { display: none; }
-[data-device=android] .mockup, [data-device=android] .phone img { border-radius: 14px; }
-[data-device=android] .phone { border-radius: 20px; }
-[data-device=mac] .phone, [data-device=windows] .phone { width: 440px; max-width: 100%; padding: 0; border-radius: 12px; background: none; }
-[data-device=mac] .mockup, [data-device=windows] .mockup { border-radius: 12px; min-height: 300px; box-shadow: 0 0 0 1px var(--panel-line); }
-[data-device=mac] .mockup-status, [data-device=windows] .mockup-status { padding: 10px 14px; border-bottom: 1px solid var(--panel-line); }
-[data-device=mac] .mockup-status span, [data-device=windows] .mockup-status span { display: none; }
-[data-device=mac] .mockup-status::before { content: ''; width: 12px; height: 12px; border-radius: 50%; background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840; }
-[data-device=windows] .mockup-status { justify-content: flex-end; }
-[data-device=windows] .mockup-status::before { content: '\2014  \25A1  \2715'; font-size: 11px; letter-spacing: 6px; color: var(--panel-mid); }
+.device-mac .mockup-status, .device-windows .mockup-status { display: none; }
 .demo-caption { font-size: 0.9rem; color: rgba(0,0,0,0.55); margin-top: -0.5rem; }
 
 /* The query row, laid out like the app: accent glass, then what you typed. */
@@ -299,21 +292,6 @@ a:hover { text-decoration: underline; }
   color: var(--panel-mid);
 }
 
-.phone {
-  width: 260px;
-  margin: 0 auto;
-  padding: 10px;
-  background: var(--dark);
-  border-radius: 34px;
-  box-shadow: 0 18px 40px rgba(0,0,0,0.25);
-}
-
-.phone img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 26px;
-}
 
 /* Features */
 .features {
@@ -468,9 +446,10 @@ footer a:hover { color: var(--dark); }
     </div>
     <h1>Nimble</h1>
     <p>Ask a question. Get one sentence back.</p>
-    <div class="phone">
+    <div class="device device-iphone" id="demoFrame" data-title="Nimble">
+    <div class="device-screen">
     <form class="mockup" id="demo" autocomplete="off">
-      <div class="mockup-status" aria-hidden="true"><span>9:41</span><span class="mockup-island"></span><span>&#9679;&#9679;&#9679;&#9679;</span></div>
+      <div class="mockup-status" aria-hidden="true"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;</span></div>
       <div class="mockup-bar">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e69a1e" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <div class="mockup-field">
@@ -485,6 +464,7 @@ footer a:hover { color: var(--dark); }
       </div>
       <div class="mockup-credit" id="demoC">live demo, the real engine</div>
     </form>
+    </div>
     </div>
     <p class="demo-caption">This is the <span id="demoDev">iPhone</span> app, running the real engine. Type anything.</p>
     <div class="hero-buttons">
@@ -743,6 +723,7 @@ footer a:hover { color: var(--dark); }
 (function(){
   var names={iphone:'iPhone',android:'Android',mac:'Mac',windows:'Windows'}, dev=document.documentElement.dataset.device;
   document.getElementById('demoDev').textContent=names[dev]||'iPhone';
+  document.getElementById('demoFrame').className='device device-'+(names[dev]?dev:'iphone');
   var b=document.querySelector('.hero-buttons .btn-dark');
   if(dev==='windows'){b.textContent='Download for Windows';b.dataset.asset='.msi';}
   else if(dev==='android'){b.textContent='Download for Android';b.dataset.asset='.apk';}
