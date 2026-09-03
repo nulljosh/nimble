@@ -81,7 +81,6 @@ final class AppState {
     var automaticUpdates: Bool = true
     private var lastUpdateCheck: Double = 0
     #if os(macOS)
-    let updates = UpdateChecker()
     #endif
 
     var queryText: String = ""
@@ -123,25 +122,6 @@ final class AppState {
         prefs.save(p)
         applyLaunchOnStartup()
     }
-
-    #if os(macOS)
-    /// Launch-time check: silent, at most once per `UpdateChecker.automaticInterval`,
-    /// and only when the user has left automatic checks on.
-    func checkForUpdatesIfDue() async {
-        guard automaticUpdates else { return }
-        if let checkedAt = await updates.checkIfDue(lastCheck: lastUpdateCheck) {
-            lastUpdateCheck = checkedAt
-            savePreferences()
-        }
-    }
-
-    /// The "Check for Updates…" button: always runs, and reports even when up to date.
-    func checkForUpdatesNow() async {
-        await updates.check()
-        lastUpdateCheck = Date().timeIntervalSince1970
-        savePreferences()
-    }
-    #endif
 
     func applyLaunchOnStartup() {
         #if os(macOS)

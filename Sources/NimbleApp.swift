@@ -22,13 +22,7 @@ struct NimbleApp: App {
         .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .appInfo) {
-                Button("About Nimble") { NSApp.orderFrontStandardAboutPanel(nil) }
-                Divider()
-                Button("Check for Updates…") {
-                    Task { await appState.checkForUpdatesNow() }
-                }
-                .disabled(appState.updates.isChecking)
-            }
+                Button("About Nimble") { NSApp.orderFrontStandardAboutPanel(nil) }            }
             // Nothing to create, and no help book to open — both menus were empty.
             CommandGroup(replacing: .newItem) {}
             CommandGroup(replacing: .help) {}

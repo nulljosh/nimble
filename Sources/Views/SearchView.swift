@@ -95,25 +95,11 @@ struct SearchView: View {
                 // Theme lives in Settings only — the swatch here duplicated the grid
                 // in SettingsView. (iOS keeps its inline picker: no menu bar there.)
                 Spacer()
-                if let newVersion = state.updates.availableVersion {
-                    // Only surfaced once a check has actually found something newer —
-                    // the bar reads as the version label the rest of the time.
-                    Button(action: { state.updates.openUpdate() }) {
-                        Text("Update to v\(newVersion)")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(state.theme.color)
-                            .tracking(0.8)
-                            .textCase(.uppercase)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Download Nimble \(newVersion)")
-                } else {
                     Text("Nimble v\(Bundle.main.marketingVersion)")
                         .font(.system(size: 9, weight: .medium))
                         .foregroundStyle(Color.white.opacity(0.2))
                         .tracking(0.8)
                         .textCase(.uppercase)
-                }
                 Spacer()
                 HStack(spacing: 10) {
                     Button(action: { state.copyResultText() }) {
@@ -147,7 +133,6 @@ struct SearchView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
         .onAppear { isInputFocused = true }
-        .task { await state.checkForUpdatesIfDue() }
         .contextMenu { ContextMenuView().environment(state) }
     }
 
