@@ -1,6 +1,16 @@
 // Nimble answer engine. Shared by the web app (/app) and the landing page demo.
 const ANSWER_PROXY = "https://nimble-answers.trommatic.workers.dev";
 
+// Every network source goes through here: hard timeout, non-2xx = null, bad JSON = null.
+// A dead upstream costs one timeout, never a hung answer. TIMEOUT_MS is the calibration knob.
+const TIMEOUT_MS = 6000;
+async function getJSON(url, opts){
+  try{
+    const r = await fetch(url, {...opts, signal: AbortSignal.timeout(TIMEOUT_MS)});
+    return r.ok ? await r.json() : null;
+  }catch{ return null; }
+}
+
 // --- offline math ---
 // ponytail: whitelist-guarded eval over Math.*; upgrade to a real parser if untrusted input ever matters.
 function tryMath(s){
@@ -48,9 +58,8 @@ function graphExpr(s){
 }
 async function graph(expr){
   try{
-    const r=await fetch("https://curvely.heyitsmejosh.com/api/sample",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({expr,from:-10,to:10,samples:200})});
-    if(!r.ok) return null;
-    const pts=(await r.json()).points.filter(p=>Number.isFinite(p.y)); if(pts.length<3) return null;
+    const res=await getJSON("https://curvely.heyitsmejosh.com/api/sample",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({expr,from:-10,to:10,samples:200})});
+    const pts=(res?.points||[]).filter(p=>Number.isFinite(p.y)); if(pts.length<3) return null;
     const W=480,H=200, xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
     const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys), ys_=Math.max(y1-y0,1e-9);
     const X=x=>(x-x0)/(x1-x0)*W, Y=y=>H-(y-y0)/ys_*H;
@@ -62,29 +71,31 @@ async function graph(expr){
 }
 
 // ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
-const first = (t) => t.trim().split(/(?<=[.!?])\s+(?=[A-Z0-9"(])/)[0];
+// Don't split after a short capitalized abbreviation (Mr., Dr., St., Ver.).
+const first = (t) => t.trim().split(/(?<![A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/)[0];
 
 async function ddg(query){
-  try{
-    const d = await (await fetch(`${ANSWER_PROXY}/?ddg=${encodeURIComponent(query)}`)).json();
+  const d = await getJSON(`${ANSWER_PROXY}/?ddg=${encodeURIComponent(query)}`);
+  if(d){
     const heading = d.Heading || query;
     if(d.Answer) return {title:heading, body:d.Answer, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
     if(d.AbstractText) return {title:heading, body:first(d.AbstractText), src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
     if(d.Definition) return {title:heading, body:d.Definition, src:d.DefinitionSource||"DuckDuckGo", url:d.DefinitionURL};
-  }catch{}
+  }
   return null;
 }
 
 async function wiki(query){
-  try{
-    const s = await (await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=1&origin=*`)).json();
-    const hit = s?.query?.search?.[0];
-    if(!hit) return null;
-    const sum = await (await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(hit.title)}`)).json();
-    if(!sum.extract) return null;
-    return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null};
-  }catch{}
-  return null;
+  const s = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=1&origin=*`);
+  let title = s?.query?.search?.[0]?.title;
+  if(!title){ // fulltext search down or empty: prefix search is a separate endpoint
+    const o = await getJSON(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&format=json&origin=*`);
+    title = o?.[1]?.[0];
+  }
+  if(!title) return null;
+  const sum = await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+  if(!sum?.extract || sum.type==="disambiguation") return null;
+  return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null};
 }
 
 // "define X" must never fall through to Wikipedia search: that turns "define nimble"
@@ -92,23 +103,58 @@ async function wiki(query){
 async function dictionary(query){
   const w = /^(?:define|definition of|meaning of)\s+(.+)$/i.exec(query.trim())?.[1];
   if(!w) return null;
-  try{
-    const d = await (await fetch(`https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(w.toLowerCase())}`)).json();
-    const m = d?.en?.[0], def = m?.definitions?.[0]?.definition?.replace(/<[^>]+>/g,"").trim();
-    if(!def) return null;
-    return {title:w, body:`(${m.partOfSpeech.toLowerCase()}) ${def}`, src:"Wiktionary", url:`https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`};
-  }catch{}
+  const d = await getJSON(`https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(w.toLowerCase())}`);
+  const m = d?.en?.[0], def = m?.definitions?.[0]?.definition?.replace(/<[^>]+>/g,"").trim();
+  if(def) return {title:w, body:`(${m.partOfSpeech.toLowerCase()}) ${def}`, src:"Wiktionary", url:`https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`};
+  // Wiktionary miss or down: Free Dictionary API, same shape, no key.
+  const f = await getJSON(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w.toLowerCase())}`);
+  const mm = f?.[0]?.meanings?.[0], fd = mm?.definitions?.[0]?.definition;
+  if(fd) return {title:w, body:`(${mm.partOfSpeech}) ${fd}`, src:"Free Dictionary", url:f[0].sourceUrls?.[0]};
   return null;
 }
 
+// --- currency ("100 usd to eur") via Frankfurter (ECB rates, CORS-open, no key) ---
+function currencyExpr(s){
+  const m=/^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$/i.exec(s.trim());
+  return m && !U[m[2].toLowerCase()] && !U[m[3].toLowerCase()] ? {v:+m[1],from:m[2].toUpperCase(),to:m[3].toUpperCase()} : null;
+}
+async function currency(query){
+  const c=currencyExpr(query); if(!c) return null;
+  const d=await getJSON(`https://api.frankfurter.dev/v1/latest?base=${c.from}&symbols=${c.to}`)
+       || await getJSON(`https://open.er-api.com/v6/latest/${c.from}`); // fallback: same rate map shape
+  const rate=d?.rates?.[c.to]; if(!rate) return null;
+  return {kind:"convert", from:String(c.v), fromUnit:c.from, to:(c.v*rate).toFixed(2), toUnit:c.to, src:d.base?"Frankfurter":"ExchangeRate-API"};
+}
+
+// --- weather / local time via Open-Meteo (geocoding + forecast, no key) ---
+async function geocode(place){
+  const g=await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(place)}&count=1&language=en`);
+  return g?.results?.[0]||null;
+}
+async function weather(query){
+  const place=/^(?:what(?:'s| is) the )?weather (?:in|for|at) (.+?)\??$/i.exec(query.trim())?.[1]; if(!place) return null;
+  const loc=await geocode(place); if(!loc) return null;
+  const w=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m`);
+  const c=w?.current; if(!c) return null;
+  const sky={0:"clear",1:"mostly clear",2:"partly cloudy",3:"overcast",45:"fog",48:"fog",51:"drizzle",53:"drizzle",55:"drizzle",61:"rain",63:"rain",65:"heavy rain",71:"snow",73:"snow",75:"heavy snow",80:"showers",81:"showers",82:"heavy showers",95:"thunderstorm"}[c.weather_code]||"";
+  return {title:`${loc.name}${loc.country?", "+loc.country:""}`, body:`${Math.round(c.temperature_2m)}°C${sky?", "+sky:""}, wind ${Math.round(c.wind_speed_10m)} km/h.`, src:"Open-Meteo", url:"https://open-meteo.com"};
+}
+async function localTime(query){
+  const place=/^(?:what(?:'s| is) the )?(?:current )?time (?:in|at) (.+?)\??$/i.exec(query.trim())?.[1]; if(!place) return null;
+  const loc=await geocode(place); if(!loc?.timezone) return null;
+  try{ return {title:`${loc.name}${loc.country?", "+loc.country:""}`, body:new Intl.DateTimeFormat("en",{timeZone:loc.timezone,hour:"numeric",minute:"2-digit",weekday:"long"}).format(new Date())+".", src:loc.timezone}; }
+  catch{ return null; }
+}
+
 async function gemma(query){
-  try{
-    const res = await fetch(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({q:query})});
-    if(!res.ok) return null;
-    const d = await res.json();
-    const a = (d.answer||"").trim();
-    if(a && a.toUpperCase()!=="UNKNOWN") return {title:query, body:a, src:d.source||"Nimble AI"};
-  }catch{}
+  const d = await getJSON(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({q:query})});
+  const a = (d?.answer||"").trim();
+  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src:d.source||"Nimble AI"} : null;
+}
+
+// First non-null wins, in order. Sources are functions so a throw in one never kills the chain.
+async function firstOf(query, fns){
+  for(const fn of fns){ const r = await fn(query).catch(()=>null); if(r) return r; }
   return null;
 }
 
@@ -120,8 +166,15 @@ async function answer(query){
   if(m !== null) return {kind:"math", value:m};
   const ge = graphExpr(query), svg = ge && await graph(ge);
   if(svg) return {kind:"graph", expr:ge, svg};
+  // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
+  const cur = await currency(query).catch(()=>null);
+  if(cur) return cur;
+  const live = await firstOf(query, [dictionary, weather, localTime]);
+  if(live) return {kind:"text", ...live};
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
-  const [ai, dd] = await Promise.all([gemma(query), ddg(query)]);
-  const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await dictionary(query) || await wiki(query));
+  const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
+  const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await firstOf(query, [wiki]));
   return hit ? {kind:"text", ...hit} : {kind:"none"};
 }
+
+if(typeof module!=="undefined") module.exports={tryMath,tryConvert,convertValue,graphExpr,currencyExpr,first,answer,getJSON};
