@@ -72,7 +72,7 @@ async function graph(expr){
 
 // ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
 // Don't split after a short capitalized abbreviation (Mr., Dr., St., Ver.).
-const first = (t) => t.trim().split(/(?<![A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/)[0];
+const first = (t) => t.trim().split(/(?<!\b[A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/)[0];
 
 async function ddg(query){
   const d = await getJSON(`${ANSWER_PROXY}/?ddg=${encodeURIComponent(query)}`);
