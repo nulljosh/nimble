@@ -204,3 +204,10 @@ instead of them.
 - Clickable results (source URL, web search fallback for AI answers): landing + macOS/iOS + KMP 2026-09-02
 
 - [ ] macOS 1.0.0 REJECTED 2026-09-02 for 2.4.5(vii); updater removed; build 202609022006 uploaded via xcodebuild destination=upload 2026-09-02 evening. NEXT: wait for processing, then `asc review submit --app 6807858746 --version 1.0.0 --build-id <id> --confirm` (find id: asc builds list --platform MAC_OS).
+
+## TUI pilot (2026-09-05)
+- `nimble-tui` SwiftPM target (SwiftTUI, github.com/rensbreur/SwiftTUI) added. `swift build && ./.build/debug/nimble-tui "<query>"` renders the answer as a bordered terminal card, reusing the same `QueryEngine`/`QueryResult` as the macOS/iOS apps.
+- Requires a real TTY (SwiftTUI reads window size via ioctl) — doesn't run under piped/non-interactive shells.
+- Extracted `QueryResult` out of `AppState.swift` into its own Foundation/CoreGraphics-only `QueryResult.swift` so the TUI target isn't forced to import SwiftUI.
+- Static render only, not a REPL — see `tui/main.swift` comment for why.
+- This is app #1 of the fleet-wide "all apps support TUI" ask. Not rolled out further yet — pattern (extract shared logic to a SwiftUI-free file, new SwiftPM target depending on SwiftTUI) should port cleanly to other Swift apps with a headless model layer (curvely, numen, wordroot, etc).

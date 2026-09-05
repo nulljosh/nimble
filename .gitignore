@@ -23,3 +23,4 @@ signing/
 .asc/shots/
 .asc/artifacts/
 .asc/dd/
+.build/
