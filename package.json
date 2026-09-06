@@ -1,1 +1,8 @@
-{"name":"nimble","private":true,"scripts":{"test":"node --test test/"}}
+{
+  "name": "nimble",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/"
+  },
+  "description": "Nimble, fast note capture for iOS and macOS"
+}
