@@ -13,7 +13,7 @@
 ## From Apple Notes (imported 2026-08-04)
 - [ ] **Logo provenance, needs a decision.** maybulb.com is a real third party (a three-person studio) whose own shipping macOS product is *also* called Nimble ("a simple but powerful Wolfram|Alpha menubar client"), and `maybulb.com/img/logo.svg` is their titled "Bulby" artwork. Shipping a byte-copy of their logo under the same product name is a trademark exposure and a likely App Review rejection, so the mark that landed is an original bulb in the same spirit (their `#ffca30` yellow, black rounded-square badge) rather than their file. Their yellow + Avenir/Europa fallback stack are not protectable and were used as asked. Decide whether to (a) keep the original bulb, (b) rename the app to clear the collision, or (c) get written permission from Maybulb. Same question already flagged for wiretext ("find a custom name rather than copying the name from the source idea").
 - [ ] Re-upload the new icon to App Store Connect once the two app records exist (blocked on the Ember Power Select issue under **App Store submission** above).
-- [ ] `docs/splash.html` still isn't wired as an iOS LaunchScreen, web-only splash.
+- [x] `docs/splash.html` mirrored as iOS LaunchScreen via Nimble-iOS-Info.plist + LaunchBackground/LaunchIcon assets (verified 2026-09-06).
 
 ## Decision 2026-08-04
 
