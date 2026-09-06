@@ -1,0 +1,40 @@
+# Builds the real Windows/Linux/Android binaries from kmp/. The .msi and .deb can only be
+# produced on their own OS, which is why this runs on GitHub and not the Mac.
+name: native release
+on:
+  workflow_dispatch:
+  push:
+    tags: ["native-v*"]
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, task: packageMsi, glob: "**/*.msi" }
+          - { os: ubuntu-latest,  task: packageDeb, glob: "**/*.deb" }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - run: ./gradlew :composeApp:${{ matrix.task }} --no-daemon
+        working-directory: kmp
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.task }}
+          path: kmp/composeApp/build/compose/binaries/**/${{ matrix.glob }}
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: android-actions/setup-android@v3
+      # ponytail: debug APK, sideloadable today. assembleRelease once a keystore is in secrets.
+      - run: ./gradlew :composeApp:assembleDebug --no-daemon
+        working-directory: kmp
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: kmp/composeApp/build/outputs/apk/debug/*.apk
