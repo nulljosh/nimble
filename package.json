@@ -4,5 +4,5 @@
   "scripts": {
     "test": "node --test test/"
   },
-  "description": "Nimble, fast note capture for iOS and macOS"
+  "description": "Ask a question, get one sentence back. Math on-device, facts from open models."
 }
