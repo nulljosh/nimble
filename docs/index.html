@@ -197,8 +197,14 @@ a:hover { text-decoration: underline; }
   display: flex; flex-direction: column;
 }
 .hero .device { margin: 2rem auto; }
-/* ponytail: on phones the 280px frame is taller than the viewport; scale it to fit under the tagline. */
-@media (max-height: 820px) { .hero .device-iphone, .hero .device-android { --device-w: min(280px, calc(55svh * 9 / 19.5)); } }
+/* ponytail: on phones the 280px frame is taller than the viewport; tighten the header and scale the frame so it fits under the tagline. */
+@media (max-height: 820px) and (max-width: 600px) {
+  .hero { padding-top: 2rem; }
+  .hero-icon { width: 72px; margin-bottom: 1.25rem; }
+  .hero p { margin-bottom: 1.5rem; }
+  .hero .device { margin: 0 auto 1.5rem; }
+  .hero .device-iphone, .hero .device-android { --device-w: min(280px, calc(58svh * 9 / 19.5)); }
+}
 .device-screen { display: flex; flex-direction: column; }
 .hero .mockup, .mockup { flex: 1; border-radius: 0; min-height: 0; margin: 0; }
 .device-mac, .device-windows { --device-w: 480px; }
