@@ -65,6 +65,21 @@ struct SettingsView: View {
             Divider()
 
             VStack(alignment: .leading, spacing: 6) {
+                Text("AI ENGINE")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .tracking(1)
+                AIEngineSettings(state: state)
+                    .textFieldStyle(.roundedBorder)
+                    .labelsHidden()
+            }
+            .font(.system(size: 12))
+            .controlSize(.small)
+            .onDisappear { state.savePreferences() }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text("Version")
                         .font(.system(size: 12))

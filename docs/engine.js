@@ -146,10 +146,41 @@ async function localTime(query){
   catch{ return null; }
 }
 
+// --- AI engine (settings) ---
+// Nimble is the free house proxy. The others call the vendor straight from the browser with
+// the visitor's own key, stored in localStorage and sent nowhere else.
+const SYSTEM = "Answer in one short factual sentence. No preamble, no markdown. If you do not know, reply exactly UNKNOWN.";
+const ENGINES = {
+  nimble:{name:"Nimble (free)", model:"", base:ANSWER_PROXY},
+  claude:{name:"Claude", key:true, model:"claude-opus-5", base:"https://api.anthropic.com"},
+  openai:{name:"OpenAI", key:true, model:"gpt-5", base:"https://api.openai.com"},
+  ollama:{name:"Ollama (local)", model:"llama3.1:8b", base:"http://localhost:11434"},
+};
+function aiConfig(){
+  try{ return {engine:"nimble", apiKey:"", model:"", baseURL:"", ...JSON.parse(localStorage.getItem("nimble.ai")||"{}")}; }
+  catch{ return {engine:"nimble", apiKey:"", model:"", baseURL:""}; }
+}
+function saveAIConfig(c){ try{ localStorage.setItem("nimble.ai", JSON.stringify(c)); }catch{} }
 async function gemma(query){
-  const d = await getJSON(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({q:query})});
-  const a = (d?.answer||"").trim();
-  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src:d.source||"Nimble AI"} : null;
+  let c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
+  if(e.key && !c.apiKey){ c = {engine:"nimble"}; e = ENGINES.nimble; } // no key = free proxy
+  const base = c.baseURL || e.base, model = c.model || e.model, H = {"Content-Type":"application/json"};
+  let d, text, src;
+  if(c.engine==="claude" && e===ENGINES.claude){
+    d = await getJSON(base+"/v1/messages", {method:"POST", headers:{...H, "x-api-key":c.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model, max_tokens:256, system:SYSTEM, messages:[{role:"user", content:query}]})});
+    text = (d?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(""); src = model;
+  }else if(e===ENGINES.openai || e===ENGINES.ollama){
+    // Ollama speaks the OpenAI chat shape at /v1 (needs OLLAMA_ORIGINS set for the browser).
+    d = await getJSON(base+"/v1/chat/completions", {method:"POST", headers:{...H, ...(c.apiKey?{Authorization:"Bearer "+c.apiKey}:{})},
+      body:JSON.stringify({model, max_tokens:256, messages:[{role:"system", content:SYSTEM},{role:"user", content:query}]})});
+    text = d?.choices?.[0]?.message?.content; src = model;
+  }else{
+    d = await getJSON(ANSWER_PROXY, {method:"POST", headers:H, body:JSON.stringify({q:query})});
+    text = d?.answer; src = d?.source||"Nimble AI";
+  }
+  const a = (text||"").trim();
+  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src} : null;
 }
 
 // First non-null wins, in order. Sources are functions so a throw in one never kills the chain.

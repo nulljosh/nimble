@@ -57,6 +57,7 @@ final class AppState {
     /// but stored on both so the preferences file has one shape.
     var automaticUpdates: Bool = true
     private var lastUpdateCheck: Double = 0
+    var ai: AIConfig = AIConfig()
     #if os(macOS)
     #endif
 
@@ -84,6 +85,7 @@ final class AppState {
         defaultSuggestions = p.defaultSuggestions
         automaticUpdates = p.automaticUpdates
         lastUpdateCheck = p.lastUpdateCheck
+        ai = p.ai ?? AIConfig()
     }
 
     func savePreferences() {
@@ -94,7 +96,8 @@ final class AppState {
             centerWindow: centerWindow,
             defaultSuggestions: defaultSuggestions,
             automaticUpdates: automaticUpdates,
-            lastUpdateCheck: lastUpdateCheck
+            lastUpdateCheck: lastUpdateCheck,
+            ai: ai
         )
         prefs.save(p)
         applyLaunchOnStartup()
@@ -137,13 +140,14 @@ final class AppState {
 
         result = .loading
         let engine = queryEngine
+        let ai = self.ai
         let graphExpr = queryEngine.graphExpression(text)
         Task { @MainActor [weak self] in
             if let graphExpr, let graph = await engine.sampleGraph(graphExpr) {
                 self?.result = graph
                 return
             }
-            self?.result = await engine.query(text)
+            self?.result = await engine.query(text, ai: ai)
         }
     }
 

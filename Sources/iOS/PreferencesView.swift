@@ -36,6 +36,11 @@ struct PreferencesView: View {
                 ))
             }
 
+            Section("AI Engine") {
+                AIEngineSettings(state: state)
+            }
+            .onDisappear { state.savePreferences() }
+
             Section {
                 Button("Copy Result") { state.copyResultText() }
                 Button("Copy Search Link") { state.copySearchLink() }

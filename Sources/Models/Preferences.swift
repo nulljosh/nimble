@@ -9,6 +9,9 @@ struct PreferencesData: Codable {
     var automaticUpdates: Bool = true
     /// Unix time of the last successful update check; 0 means "never checked".
     var lastUpdateCheck: Double = 0
+    /// Which model answers questions and, for paid engines, the user's own key.
+    /// Optional so prefs files written before this field still decode.
+    var ai: AIConfig? = nil
 }
 
 final class Preferences {

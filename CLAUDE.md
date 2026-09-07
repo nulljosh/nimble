@@ -7,9 +7,10 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - SwiftUI (macOS 14+ / iOS 17+), @Observable
 - QueryEngine: classifyQuery() enum, NSExpression math eval (native); same logic reimplemented in JS in `docs/engine.js`
 - Answer proxy: Cloudflare Worker + Workers AI binding (no API key), Gemma + Qwen3 in parallel, synthesized on disagreement; returns `{answer, source}` and the UI shows `source`
+- AI engine is user-selectable in Settings (`Sources/Models/AIEngine.swift`, `ENGINES` in `engine.js`): Nimble proxy (default, free), Claude, OpenAI, Ollama. Keys stay on device (prefs file / localStorage), calls go straight to the vendor; no key = silent fallback to the proxy
 - DuckDuckGo Instant Answer API + Wikipedia REST API as fallback
 - macOS window is borderless (`styleMask = [.resizable, .fullSizeContentView]`), dropping `.titled` is what removes the titlebar strip; do not restore it
-- 34 tests (QueryEngine + Preferences + UpdateChecker)
+- 36 tests (QueryEngine + Preferences + UpdateChecker + AIConfig)
 
 ## Structure
 - `Sources/Models/QueryEngine.swift`: classification, math eval, API queries
@@ -20,7 +21,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - `worker/worker.js`: answer proxy, `npx wrangler deploy` from `worker/`
 - `docs/`: landing page with the live engine (`engine.js`), deployed via Cloudflare Pages to `nimble.heyitsmejosh.com`; `/app/*` redirects to `/`
 - `docs/index.html`: marketing/landing page, deployed via GitHub Pages (default `nulljosh.github.io/nimble` URL, the custom domain is taken by the web app)
-- `Tests/`: 34 tests
+- `Tests/`: 36 tests
 
 ## Build
 ```bash

@@ -79,9 +79,6 @@ enum QueryType {
 }
 
 final class QueryEngine: Sendable {
-    // Gemma answer proxy (Cloudflare Worker holds the key; nothing secret ships here).
-    private static let answerProxyURL = "https://nimble-answers.trommatic.workers.dev"
-
     private static let suggestions: [String] = {
         guard let url = Bundle.main.url(forResource: "suggestions", withExtension: "json"),
               let data = try? Data(contentsOf: url),
@@ -383,30 +380,20 @@ final class QueryEngine: Sendable {
 
     // General answer engine: one Gemma call for any factual question. Replaces the
     // old per-shape Wikidata handlers (which dumped every historical officeholder).
-    private struct ProxyResponse: Codable { let answer: String?; let source: String? }
-
-    private func queryLLM(_ input: String, session: URLSession) async -> QueryResult? {
-        guard let url = URL(string: Self.answerProxyURL) else { return nil }
-        var req = URLRequest(url: url)
-        req.httpMethod = "POST"
-        req.setValue("application/json", forHTTPHeaderField: "content-type")
-        req.httpBody = try? JSONSerialization.data(withJSONObject: ["q": input])
-
+    private func queryLLM(_ input: String, session: URLSession, ai: AIConfig) async -> QueryResult? {
+        // A misconfigured engine (Claude with no key) falls back to the free proxy.
+        guard let req = ai.request(for: input) ?? AIConfig().request(for: input) else { return nil }
         do {
             let (data, response) = try await session.data(for: req)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
-            let decoded = try JSONDecoder().decode(ProxyResponse.self, from: data)
-            guard let answer = decoded.answer?.trimmingCharacters(in: .whitespacesAndNewlines),
-                  !answer.isEmpty, answer.uppercased() != "UNKNOWN" else { return nil }
-            // The proxy names the models that answered; "Nimble" covers a worker that
-            // predates the source field.
-            return .text(heading: nil, body: answer, source: decoded.source ?? "Nimble", sourceURL: nil, imageURL: nil)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200,
+                  let (answer, source) = ai.parse(data) else { return nil }
+            return .text(heading: nil, body: answer, source: source, sourceURL: nil, imageURL: nil)
         } catch {
             return nil
         }
     }
 
-    func query(_ input: String) async -> QueryResult {
+    func query(_ input: String, ai: AIConfig = AIConfig()) async -> QueryResult {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 8
         let session = URLSession(configuration: config)
@@ -414,7 +401,7 @@ final class QueryEngine: Sendable {
         // Gemma first for a crisp one-line answer; fall back to DDG/Wikipedia when the
         // key is unreachable or Gemma returns UNKNOWN (keeps a no-key offline degrade).
         let (ddgInput, wikiInput) = preprocessQuery(input)
-        async let llm = queryLLM(input, session: session)
+        async let llm = queryLLM(input, session: session, ai: ai)
         async let ddg = queryDDG(ddgInput, session: session)
         if let llmResult = await llm {
             // A model's number is a guess with no source. If DDG has a sourced answer
