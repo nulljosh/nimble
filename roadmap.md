@@ -2,16 +2,21 @@
 
 ## Open for contribution
 
-**Make the tiebreaker neutral.** In `worker/worker.js`, when Gemma and Qwen
-disagree, Qwen is asked to synthesize one answer from both — a model
-arbitrating a dispute it's a party to, biased toward its own wording.
+**Fix trailing-junk math parsing on Swift/iOS/macOS.** `NSExpression` parses
+"2 + 2 banana" as `4` on Mac and iOS because it silently ignores trailing junk
+after a valid prefix, instead of rejecting the whole expression. The
+hand-written Kotlin parser built for the KMP apps (Windows/Android) already
+rejects it correctly — this is a real cross-platform parity gap, not a
+hypothetical one.
 
-Fix, in `worker/worker.js`: instead of asking Qwen to merge the two answers,
-ask a third, independent model (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`)
-the original question on its own, then take the majority of the three (or,
-if all three differ, fall back to today's Qwen-synthesis behavior). Same call
-count, no new dependency. Keep everything else as-is: same `{ answer, source
-}` shape, same rate limiting, same CORS. Ship as a PR against main.
+Fix, in `Sources/Models/QueryEngine.swift`'s math-eval path: after
+`NSExpression` parses successfully, re-render the matched prefix and confirm
+it consumed the entire trimmed input (or add an explicit tokenizer check)
+before returning a result; otherwise fall through past the math branch the
+same way an unparseable expression already does. Port the same check to
+`QueryEngine.swift`'s only call site — no changes needed to `docs/engine.js`
+or the Kotlin parser, both already correct. Keep the 36 existing tests green
+and add one for "2 + 2 banana" returning non-math. Ship as a PR against main.
 
 ## Open for contribution: bigger features (a few days each)
 
@@ -53,20 +58,14 @@ count, no new dependency. Keep everything else as-is: same `{ answer, source
   copies in `AppState`, but nothing ever produces it. The original Nimble did
   convert units, so this is a real parity gap.
 - No graphing. The original leaned on Wolfram|Alpha for plots; DDG + Wikipedia have no equivalent.
-- Stale `dist/index.html`. `docs/index.html` is the canonical landing page (GitHub
-  Pages serves from `docs/`), but a diverged copy at `dist/index.html` still exists.
-  Delete it or generate it from a build step.
 - `QueryEngine.query` (`Sources/Models/QueryEngine.swift:400`) already starts
   the LLM and DDG concurrently via `async let`, but Wikipedia only starts
   after the LLM comes back empty — a real fallback leg, not the three-way
   waterfall this used to describe. Low priority: start `wiki` alongside
   `llm`/`ddg` from the top so a cold LLM doesn't add a third sequential hop.
   Also raise `timeoutIntervalForRequest` from 8s — too short against a
-  5-15s backend. (Tiebreaker neutrality moved to "Open for contribution" above.)
-- Known Swift/Kotlin parity bug: `NSExpression` parses "2 + 2 banana" as `4` on
-  Mac and iOS because it silently ignores trailing junk after a valid prefix. The
-  hand-written Kotlin parser (built for the KMP apps) rejects it correctly. Worth
-  porting the fix back to the Swift apps.
+  5-15s backend. (Tiebreaker neutrality shipped; trailing-junk math parity
+  moved to "Open for contribution" above.)
 - More platforms, after native Windows/Android ship:
   - Java version — mostly moot. The KMP desktop app already ships as a JVM
     binary. "A Java version" only means something new if it's a plain-Java/Swing
@@ -105,6 +104,11 @@ count, no new dependency. Keep everything else as-is: same `{ answer, source
   gets a say. On-device name stays "Nimble" (Guideline 2.3.8 only requires the two be similar).
 
 ## Shipped
+
+- **Neutral tiebreaker (2026-09-10):** `worker/worker.js` used to let Qwen
+  arbitrate its own disagreement with Gemma. Now a third independent model
+  (llama-3.3-70b) weighs in and majority wins; Qwen-synthesis only fires on a
+  true 3-way split. PR: nulljosh/nimble#5.
 
 - **Agreement check normalized (2026-09-10):** `worker/worker.js` compared
   model answers with exact string equality, making the synthesis fallback the
