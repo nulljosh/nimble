@@ -5,7 +5,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 
 ## Stack
 - SwiftUI (macOS 14+ / iOS 17+), @Observable
-- QueryEngine: classifyQuery() enum, NSExpression math eval (native); same logic reimplemented in JS in `docs/engine.js`
+- QueryEngine: classifyQuery() enum, hand-written MathLexer/MathParser eval (replaced NSExpression, which silently ignored trailing junk); same logic reimplemented in JS in `docs/engine.js`
 - Answer proxy: Cloudflare Worker + Workers AI binding (no API key), Gemma + Qwen3 in parallel, synthesized on disagreement; returns `{answer, source}` and the UI shows `source`
 - AI engine is user-selectable in Settings (`Sources/Models/AIEngine.swift`, `ENGINES` in `engine.js`): Nimble proxy (default, free), Claude, OpenAI, Ollama. Keys stay on device (prefs file / localStorage), calls go straight to the vendor; no key = silent fallback to the proxy
 - DuckDuckGo Instant Answer API + Wikipedia REST API as fallback
