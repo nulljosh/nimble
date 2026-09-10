@@ -116,9 +116,13 @@ final class QueryEngine: Sendable {
     }
 
     private func isMathQuery(_ q: String) -> Bool {
+        // A math function name alone is decisive ("sqrt 9").
         if q.range(of: "\\b(square root|sqrt|sin|cos|tan|log|ln|absolute|power|exponent|factorial|percentage|modulo|mod)\\b", options: .regularExpression) != nil {
             return true
         }
+        // Otherwise require BOTH an operator/operator-word AND a number/number-word
+        // ("plus" alone or "9" alone isn't math), and reject phrasing that's asking
+        // *about* math rather than doing it ("question about 9 plus 10").
         let hasOperator = q.range(of: "[+\\-*/^%]|times|divided|multiplied|plus|minus|squared|cubed", options: .regularExpression) != nil
         let hasNumber = q.range(of: "\\d|zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million", options: .regularExpression) != nil
         return hasOperator && hasNumber && q.range(of: "^(ask|answer|question|about|to)\\b", options: .regularExpression) == nil
