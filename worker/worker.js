@@ -62,7 +62,7 @@ export default {
     if (qwenAnswer === "UNKNOWN" && gemmaAnswer === "UNKNOWN") return json({ answer: "UNKNOWN" });
     if (qwenAnswer === "UNKNOWN") return json({ answer: gemmaAnswer, source: "Gemma" });
     if (gemmaAnswer === "UNKNOWN") return json({ answer: qwenAnswer, source: "Qwen" });
-    if (qwenAnswer === gemmaAnswer) return json({ answer: qwenAnswer, source: "Gemma + Qwen" });
+    if (normalize(qwenAnswer) === normalize(gemmaAnswer)) return json({ answer: qwenAnswer, source: "Gemma + Qwen" });
 
     // Both models answered but disagree/differ in wording — synthesize one sentence.
     const synthesis = await env.AI.run(QWEN, {
@@ -92,6 +92,13 @@ const CORS = {
   "access-control-allow-methods": "GET, POST, OPTIONS",
   "access-control-allow-headers": "content-type",
 };
+
+// Two models rarely emit byte-identical sentences even when they agree, so lowercase +
+// strip punctuation + collapse whitespace before comparing, instead of paying for a
+// synthesis call on every near-duplicate answer.
+function normalize(s) {
+  return s.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim();
+}
 
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
