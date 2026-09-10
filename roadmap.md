@@ -1,5 +1,21 @@
 # Nimble roadmap
 
+## Open for contribution (2026-09-10)
+
+**Fix current-officeholder queries.** "Who is the current president" — DDG and
+Wikipedia return the *office* page, not the incumbent, so the answer comes back
+wrong or UNKNOWN.
+
+Repo: nulljosh/nimble, file `worker/worker.js`. The fix: when the DDG/Wikipedia
+fallback would fire, route the query through Gemma or Qwen on Workers AI
+first (`env.AI`, already wired in this file, no key needed) before falling
+back further. Detect "current officeholder" style questions (who is the
+current/present X) and prefer the model answer over the office-page result
+for those. Keep everything else in the file exactly as-is: same
+`{ answer, source }` shape, same rate limiting, same CORS.
+
+Ship it as a PR against main.
+
 ## Security (2026-08-17)
 - **Public answer proxy rate-limited**: The public Cloudflare Workers AI proxy endpoint had no authentication or rate-limiting, exposed to abuse. Added per-IP 20 requests/minute limit in wrangler.jsonc (commit 0105db9), deployed live.
 
