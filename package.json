@@ -4,5 +4,10 @@
   "scripts": {
     "test": "node --test 'test/*.test.*js'"
   },
-  "description": "Ask a question, get one sentence back. Math on-device, facts from open models."
+  "description": "Ask a question, get one sentence back. Math on-device, facts from open models.",
+  "keywords": [
+    "nlp",
+    "ai",
+    "question-answering"
+  ]
 }
