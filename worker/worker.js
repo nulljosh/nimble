@@ -3,6 +3,7 @@
 // POST { "q": "who is the ceo of apple" } -> { "answer": "Tim Cook." } or { "answer": "UNKNOWN" }
 const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
+const LLAMA = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 const SYSTEM =
   "Answer in one short factual sentence. No preamble, no markdown. If you do not know, reply exactly UNKNOWN.";
 // "Who is the current president" etc: models often hedge into UNKNOWN on time-sensitive
@@ -72,7 +73,15 @@ export default {
     if (gemmaAnswer === "UNKNOWN") return json({ answer: qwenAnswer, source: "Qwen" });
     if (normalize(qwenAnswer) === normalize(gemmaAnswer)) return json({ answer: qwenAnswer, source: "Gemma + Qwen" });
 
-    // Both models answered but disagree/differ in wording — synthesize one sentence.
+    // Qwen and Gemma disagree. Rather than let Qwen arbitrate its own dispute, ask a third,
+    // independent model and take the majority — neutral, same call count either way.
+    const llamaAnswer = await ask(LLAMA);
+    if (llamaAnswer !== "UNKNOWN") {
+      if (normalize(llamaAnswer) === normalize(qwenAnswer)) return json({ answer: qwenAnswer, source: "Qwen + Llama" });
+      if (normalize(llamaAnswer) === normalize(gemmaAnswer)) return json({ answer: gemmaAnswer, source: "Gemma + Llama" });
+    }
+
+    // All three differ (or Llama came back UNKNOWN) — fall back to synthesizing one sentence.
     const synthesis = await env.AI.run(QWEN, {
       messages: [
         {
