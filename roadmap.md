@@ -1,228 +1,163 @@
 # Nimble roadmap
 
-## Open for contribution (2026-09-10)
+## Open for contribution
 
 **Fix current-officeholder queries.** "Who is the current president" — DDG and
-Wikipedia return the *office* page, not the incumbent, so the answer comes back
+Wikipedia return the office page, not the incumbent, so the answer comes back
 wrong or UNKNOWN.
 
-Repo: nulljosh/nimble, file `worker/worker.js`. The fix: when the DDG/Wikipedia
-fallback would fire, route the query through Gemma or Qwen on Workers AI
-first (`env.AI`, already wired in this file, no key needed) before falling
-back further. Detect "current officeholder" style questions (who is the
-current/present X) and prefer the model answer over the office-page result
-for those. Keep everything else in the file exactly as-is: same
-`{ answer, source }` shape, same rate limiting, same CORS.
+Fix, in `worker/worker.js`: when the DDG/Wikipedia fallback would fire, route
+the query through Gemma or Qwen on Workers AI first (`env.AI`, already wired
+in this file, no key needed). Detect "who is the current/present X" style
+questions and prefer the model's answer over the office-page result for
+those. Keep everything else in the file as-is: same `{ answer, source }`
+shape, same rate limiting, same CORS. Ship as a PR against main.
 
-Ship it as a PR against main.
+## Open for contribution: bigger features (a few days each)
 
-## Security (2026-08-17)
-- **Public answer proxy rate-limited**: The public Cloudflare Workers AI proxy endpoint had no authentication or rate-limiting, exposed to abuse. Added per-IP 20 requests/minute limit in wrangler.jsonc (commit 0105db9), deployed live.
+- **Search history.** Local-only log of past questions and answers, browsable and
+  re-runnable, with a clear-history action. Store in Core Data or a flat JSON
+  file (macOS/iOS), localStorage (web). No sync, no server — this is not
+  account data.
+- **Voice input.** Tap the mic (or hold a hotkey) and speak the question instead
+  of typing it. `SFSpeechRecognizer` on macOS/iOS; Web Speech API on the web app.
+  Feeds straight into the existing `QueryEngine`, no new answer path needed.
+- **Shareable answer cards.** Turn an answer into an image (question, answer,
+  source) for sharing — `ImageRenderer` on macOS/iOS, `<canvas>` export on web.
+  Nimble has no social feature today; this is the whole thing.
+- **Follow-up questions.** Let a query reference the previous answer ("and in
+  celsius?", "who was before him?") by carrying the last Q&A as context into the
+  next Worker call. Needs a short-lived conversation state (last N turns) and a
+  system prompt tweak in `worker/worker.js` to use it when present.
+- **Widget / Live Activity (iOS) and menu bar quick-ask (macOS).** A home-screen
+  widget showing the last answer plus a quick-entry field; on macOS, ask
+  straight from the menu bar dropdown without opening the HUD.
 
 ## Open
-- Current-officeholder queries ("who is the current president"), DDG + Wikipedia return the *office* page, not the incumbent. Fix is a Gemma call via the Cloudflare Worker proxy (`worker/worker.js`, merged); blocked on deploying the Worker with a Gemma API key.
-- Sync iOS UI polish to match the web app's classification/theming (mostly there, web is the newest surface).
-- **App Store submission**: bundle IDs now registered (`com.nulljosh.nimble` macOS id `XM9AAAAYS6`, `com.nulljosh.nimble.ios` id `NU796452Z2`, both via `asc bundle-ids create`). Still blocked on creating the two ASC app records via browser (asc-app-create-ui skill), the New App dialog's "Primary Language" field is a custom Ember Power Select widget that isn't responding to standard click/select/keyboard automation (tried native `<select>` value-set, click+arrow-keys, and clicking the rendered option directly; all silently no-op). Needs either a fresh automation approach or the user picking Primary Language + Bundle ID manually (2 clicks) before handing back for the rest (SKU, User Access, Create, then archive/upload/metadata/screenshots/pricing/submit). GitHub release is the distribution channel until then.
-- **Custom domain**: `nimble.heyitsmejosh.com` is taken by the web app; landing page needs its own, e.g. `nimbleapp.com` (maybulb.com is already owned by someone else on the team). User will buy in a few weeks, check availability/price via Vercel domain tools when ready, confirm cost before purchasing.
-- **Design system + landing page/splash screen**: DONE 2026-08-02, pulled maybulb.com's actual CSS (`#ffca30` yellow, black text, Avenir Next stack, flat pill-free buttons, 2px yellow section dividers) and applied it to `docs/index.html` (buttons/dividers/font restyled to match). Added `docs/splash.html` loading screen (yellow bg, pulsing icon mark). Not yet wired as an iOS LaunchScreen, web-only splash for now.
 
-## From Apple Notes (imported 2026-08-04)
-- [ ] **Logo provenance, needs a decision.** maybulb.com is a real third party (a three-person studio) whose own shipping macOS product is *also* called Nimble ("a simple but powerful Wolfram|Alpha menubar client"), and `maybulb.com/img/logo.svg` is their titled "Bulby" artwork. Shipping a byte-copy of their logo under the same product name is a trademark exposure and a likely App Review rejection, so the mark that landed is an original bulb in the same spirit (their `#ffca30` yellow, black rounded-square badge) rather than their file. Their yellow + Avenir/Europa fallback stack are not protectable and were used as asked. Decide whether to (a) keep the original bulb, (b) rename the app to clear the collision, or (c) get written permission from Maybulb. Same question already flagged for wiretext ("find a custom name rather than copying the name from the source idea").
-- [ ] Re-upload the new icon to App Store Connect once the two app records exist (blocked on the Ember Power Select issue under **App Store submission** above).
+- Sync iOS UI polish to match the web app (mostly there, web is the newest surface).
+- Custom domain for the landing page. `nimble.heyitsmejosh.com` is taken by the web
+  app. Candidate: `nimbleapp.com`. Joshua buys when ready.
+- Mac menu bar screenshot for the landing page and README (only the iPhone shot exists today).
+- Play Store submission: needs an Android keystore and the $25 Play Console fee.
+- Microsoft Store submission: needs MSIX signing and the $19 dev account.
+- Logo provenance decision. maybulb.com is a real three-person studio whose own
+  shipping macOS app is also called Nimble, and their `logo.svg` is titled artwork
+  ("Bulby"). Nimble's mark is an original bulb in their color/shape spirit, not a
+  copy of their file. Decide: keep the original mark, rename to clear the
+  collision, or get written permission from Maybulb.
+- Real auto-update (Sparkle). What's shipped today only checks and notifies — it
+  downloads and replaces nothing. In-place updates need a signed appcast and a
+  helper process, once Developer ID signing is in place.
+- Unit conversion is dead code. `QueryResult.convert` renders in `ResultView` and
+  copies in `AppState`, but nothing ever produces it. The original Nimble did
+  convert units, so this is a real parity gap.
+- No graphing. The original leaned on Wolfram|Alpha for plots; DDG + Wikipedia have no equivalent.
+- Stale `dist/index.html`. `docs/index.html` is the canonical landing page (GitHub
+  Pages serves from `docs/`), but a diverged copy at `dist/index.html` still exists.
+  Delete it or generate it from a build step.
+- Worker answer engine has three known issues:
+  - Agreement check is exact string equality (`worker/worker.js`,
+    `qwenAnswer === gemmaAnswer`). Two models rarely emit byte-identical sentences,
+    so the "rare" synthesis fallback is actually the common path and doubles wall
+    time. Normalize (lowercase, strip punctuation, compare token sets) before
+    deciding they disagree.
+  - `QueryEngine.query` (`Sources/Models/QueryEngine.swift:356`) awaits the LLM,
+    then DDG, then Wikipedia in sequence — three network legs back to back. The
+    worker itself answers in ~5.6s; the waterfall, not the models, is why hard
+    questions feel slow. Start all three with `async let` and keep the same
+    preference order. Also raise `timeoutIntervalForRequest` from 8s — too short
+    against a 5-15s backend.
+  - The tiebreaker isn't neutral: on disagreement, Qwen rewrites its own answer
+    plus Gemma's — a model arbitrating a dispute it's a party to. Ask a third
+    model (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) the same question
+    independently and take the majority. Same call count, better answer.
+- Known Swift/Kotlin parity bug: `NSExpression` parses "2 + 2 banana" as `4` on
+  Mac and iOS because it silently ignores trailing junk after a valid prefix. The
+  hand-written Kotlin parser (built for the KMP apps) rejects it correctly. Worth
+  porting the fix back to the Swift apps.
+- More platforms, after native Windows/Android ship:
+  - Java version — mostly moot. The KMP desktop app already ships as a JVM
+    binary. "A Java version" only means something new if it's a plain-Java/Swing
+    or JavaFX UI over the same engine. Confirm that's actually wanted before building it.
+  - Electron version — none exists. The *original* Maybulb Nimble was Electron +
+    Wolfram|Alpha, deprecated 2020; this project is the from-scratch native
+    rebuild of it. An Electron build would just wrap `web/`, which already
+    installs as a PWA on Windows/Linux/Android. The only thing it adds is a
+    global hotkey on Linux/Windows.
+- iOS app should mirror the website's full functionality and UI, shopping included.
+- More thorough tests, tighter result filtering.
 
-## Decision 2026-08-04
+## Blocked on Joshua
 
-Rename decision REVERSED by Joshua 2026-08-04: **Nimble keeps its name.** Do not rename it; do not re-raise this unprompted.
+- **Deploy pipeline is dead.** `.github/workflows/deploy-site.yml` has no
+  Cloudflare API token to give CI, so it can't auto-deploy the site.
+  `secrets.fish` only has `CLOUDFLARE_DNS_TOKEN` (DNS-scoped); naming a token
+  `CLOUDFLARE_API_TOKEN` breaks wrangler's OAuth on purpose, so that path is
+  closed. The workflow now fails loudly (was silently green while shipping
+  nothing). Fix: mint a Pages-Edit-scoped API token in the Cloudflare dashboard,
+  then `gh secret set CLOUDFLARE_API_TOKEN --repo nulljosh/nimble` and
+  `gh secret set CLOUDFLARE_ACCOUNT_ID` (`14c849d102ecc38b5fae54d9b22deec4`).
+  Until then, deploy by hand:
+  `bash scripts/build-site.sh && npx wrangler pages deploy dist --project-name=nimble --branch=main`
 
-Context kept only so the risk is known, not as a task: maybulb.com is a real third-party studio whose own shipping macOS product is also called Nimble. The practical exposure is an App Store name collision at submission time. If App Review ever rejects on the name, that is the moment to revisit, and `asc-name-creator` is the tool for it. The bulb mark shipped here is original work in their spirit, not their artwork, so it carries no separate risk.
+## Decisions on the record
 
-## From Apple Notes (imported 2026-08-11)
-- [ ] iOS app must mirror the website in functionality + UI (incl. shopping)
+- **Nimble keeps its name** (2026-08-04, reversed the same day the name-collision
+  question first came up; do not re-raise unprompted). The real exposure is an
+  App Store name collision at submission time — `asc-name-creator` is the tool if
+  App Review ever rejects on it. The shipped bulb mark is original work, not a
+  copy of Maybulb's file, so it carries no separate risk on its own.
+- **App Store name resolved: "Nimble Answers."** Bare "Nimble" is held by Nimble,
+  Inc., and Apple's app-name namespace is exact-match at record creation — the
+  "keep the name, revisit only if rejected" plan didn't hold, since review never
+  gets a say. On-device name stays "Nimble" (Guideline 2.3.8 only requires the two be similar).
 
-> Resume note (2026-08-11): a `wip: partial work from /work notes ingest` commit holds unfinished, unverified changes for the items above. Review `git show HEAD` before building on it, it was committed mid-flight, not reviewed, and is unpushed.
+## Shipped
 
-## Ingested 2026-08-18
-- [ ] Add more thorough tests, making sure results are more filtered.
-  - [ ] Play Store submission: requires Android keystore + $25 Play Console fee.
-  - [ ] Microsoft Store submission: requires MSIX + $19 dev account.
-
-## Ingested 2026-08-22
-- [ ] Ship iOS and Mac apps, right now only web is available.
-
-## App Store launch, SUBMITTED 2026-09-02
-
-ASC record **6807858746 "Nimble Answers"**, one Universal Purchase record, bundle
-`com.nulljosh.nimble.ios` on both targets (macOS target repointed to it). iOS 1.0.0 and
-macOS 1.0.0 are both WAITING_FOR_REVIEW. Everything below this heading is history.
-
-What it took, for the next fresh record: manual-signing profiles via `asc signing fetch
---create-missing` (automatic signing cannot mint them headlessly), `ExportOptions.plist` (iOS)
-and `ExportOptions-mac.plist` (macOS) are manual-signing now. The macOS pkg was rejected once for
-missing `com.apple.security.app-sandbox`, fixed by `Nimble-macOS.entitlements`. iPad screenshot is
-required because TARGETED_DEVICE_FAMILY is 1,2. Primary language is en-CA, so `metadata/` and
-screenshot dirs use `en-CA`. Landing page now links the native MSI/APK on the GitHub release.
-
-## App Store launch, status 2026-08-23 (historical)
-
-**Name RESOLVED: "Nimble Answers".** Bare "Nimble" is held by Nimble, Inc. Apple's
-app-name namespace is exact-match *at record creation*, so the New App form refuses a
-taken name, the earlier 2026-08-04 decision to "keep the name, revisit only if App
-Review rejects" was wrong; review never gets a say. Verified free 2026-08-23:
-Nimble Answers / Nimble Search / Nimble Ask / Nimble Facts. On-device name stays
-"Nimble" (Guideline 2.3.8 only requires the two be similar).
-
-DONE this session:
-- iOS target now sets `LSApplicationCategoryType` (was missing; real cause of ITMS-90242).
-- iOS build green against `generic/platform=iOS Simulator`.
-- Privacy policy written and live: **https://heyitsmejosh.com/nimble/privacy.html** (verified 200 with correct title).
-  Trap: `https://nimble.heyitsmejosh.com/privacy.html` also returns 200 but serves the
-  *landing page* via a catch-all. Do not use that URL, App Review would see the wrong document.
-- Metadata authored under `metadata/` (app-info + version/1.0.0), lengths validated.
-
-Verified 2026-08-23 by running it: `asc xcode archive` **succeeds**, `asc xcode export`
-**fails** with `No profiles for 'com.nulljosh.nimble.ios' were found`. Automatic signing
-cannot mint a distribution profile until the App Store Connect record exists, so the
-record gates the entire build pipeline, not just metadata. Do not attempt to build and
-upload before creating it. `.asc/workflow.json` and `ExportOptions.plist` are in place
-and ready; fill in `IOS_APP_ID` once the record exists, then `asc workflow run ship-ios`.
-
-REMAINING, in order:
-- [ ] **Create the ASC app record**, browser-only, `asc-app-create-ui` skill. Name "Nimble Answers", bundle `com.nulljosh.nimble.ios` (already registered, NU796452Z2). Known friction: the New App dialog's Primary Language Ember Power Select widget resists automation, expect to need Joshua for two clicks rather than burning attempts.
-- [ ] Apply `metadata/` to the record, set marketingUrl + supportUrl to https://heyitsmejosh.com.
-- [ ] App Privacy questionnaire: the question text is transmitted to DuckDuckGo, Wikipedia and the Workers AI service, **not linked to identity**, no tracking. Under-declaring is a rejection.
-- [ ] Screenshots, none exist yet. Use the `appstore-screenshots` / `asc-shots-pipeline` skills at the iPhone 11 Pro Max / 14 Plus sizes.
-- [ ] Add `.asc/workflow.json` with a `ship-ios` workflow modelled on Healstack's (known-good shape).
-- [ ] Archive → export → upload. Verify with `asc builds uploads list`; `asc publish` reports false successes.
-- [ ] `asc validate --app <id> --version 1.0.0` until zero blocking errors.
-- [ ] Run it on a simulator before submitting, test a math query (offline path) and a factual query (Worker path). Do not submit on a compile alone.
-- [ ] **GATE, 1 of 3 met as of 2026-08-25.** Sparkjar macOS **1.0.1 is APPROVED and live** (READY_FOR_SALE). Still pending: Healstack iOS 2.3.5 and Lexly macOS 1.1.4, both WAITING_FOR_REVIEW. Note the 5.6 caution below is milder than written: per the account history, 5.6 fires on bulk *thin new* records, not submission frequency, and nine records are currently in the queue with no incident. Original note follows:
-
-Plan file: `~/.claude/plans/tldr-shorter-and-you-cryptic-reef.md`
-
-## Approved to ship, 2026-08-22
-Measured at 1,677 lines of app code with real search, result and context-menu UI over
-the Workers AI backend. Substantive enough to clear Guideline 4.2, unlike Newsline.
-- [ ] Ship to the App Store **after** the 2026-08-22 resubmissions (Healstack, Lexly Mac, Sparkjar Mac) come back approved, a clean approval streak makes creating a new app record much safer on an account with a 5.6 suspension in its history.
-- [ ] Full new-app checklist: create the ASC app record (browser-only, use the asc-app-create-ui skill), register the bundle ID, signing assets, screenshots, metadata, App Privacy answers, then `asc validate` before submitting.
-
-## Found while capturing screenshots, 2026-08-23
-- [ ] Screenshots still to capture. App is installed and running full-screen on the iPhone 17 Pro Max sim (6.9", the size Apple requires). Flow: dismiss the What's New sheet, then type a math query (offline path), a factual query (Worker path) and a definition, capturing each. Save to `screenshots/` (gitignored).
-
-## Maybulb-clone refinements, 2026-08-23
-
-Shipped this session:
-
-Still open:
-- [ ] **Real auto-update (Sparkle).** What shipped is check-and-notify: it downloads
-      nothing and replaces nothing. In-place updates need a helper process and a signed
-      appcast, Sparkle, once Developer ID signing is in place.
-- [ ] **Recapture the iOS screenshot** after the safe-area fix, at 6.9" instead of the
-      369px asset in `docs/screenshots/`, and drop the crop.
-- [ ] Unit conversion is dead code: `QueryResult.convert` renders in `ResultView` and
-      copies in `AppState`, but nothing ever produces it. The original Nimble converts
-      units, so this is a real parity gap.
-- [ ] No graphing. The original leaned on Wolfram|Alpha for plots; DDG + Wikipedia have
-      no equivalent.
-- [ ] `maybulb.com` is blocked by this environment's network egress policy, so the clone
-      could not be diffed against the live site this session. Known gaps from the earlier
-      pass and from search: the source page carries a third press quote (ifun.de, in
-      German) that `docs/index.html` does not, and their Europa Typekit face is
-      approximated by the Avenir Next stack in `tokens.css`. Re-check the live site from
-      an unblocked machine before calling the landing page done.
-- [ ] **Stale `dist/index.html` duplicate**, `docs/index.html` is the canonical source (GitHub Pages serves from docs/), but a diverged copy at `dist/index.html` remains (still says "Global Hotkey", missing the animated "what you can ask" ticker and scrim from the 2026-08-24 hero rewrite). Should be deleted or generated from a build step; currently kept in sync by hand and keeps drifting.
-
-## Worker answer engine, 2026-08-28
-
-**The source label under an answer now names the models that actually ran** ("Gemma + Qwen"), instead of hardcoding "Gemma" for every branch (commit ae0817d). Two real problems found and still open:
-
-- [ ] **The agreement test is exact string equality** (`worker/worker.js`,
-      `qwenAnswer === gemmaAnswer`). Two models never emit byte-identical sentences, so
-      the synthesis call fires on nearly every query, the "rare" fallback is the common
-      path, and it doubles wall time. Normalize (lowercase, strip punctuation, compare
-      token sets) before deciding they disagree.
-- [ ] **`QueryEngine.query` is a waterfall** (`Sources/Models/QueryEngine.swift:356`): it
-      fully awaits the LLM, then DDG, then Wikipedia, three sequential network legs.
-      This, not the models, is why hard questions feel slow; the worker itself answers in
-      ~5.6s measured. Start all three with `async let` and keep the same preference order.
-      Also raise `timeoutIntervalForRequest` from 8s, which is a trap against a 5-15s
-      backend.
-- [ ] **A real tiebreaker.** On disagreement, Qwen currently rewrites its own answer plus
-      Gemma's, a model arbitrating a dispute it is a party to. Ask a third model
-      (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) the original question independently and
-      take the majority. Same call count, better answer.
-
-## UI Polish, DONE 2026-08-28
-
-Removed the pale translucent titlebar strip (commit 68a5197) that had been annoying for months. Three attempts: first two guesses, then dumped the NSView hierarchy to identify _NSTitlebarDecorationView inside NSTitlebarContainerView; fix was dropping `.titled` from window style mask + clipping content view to radius 14. Re-enabled MenuBarExtra (Tahoe SDK bug is fixed post-release). Added global hotkey Opt+Space via Carbon RegisterEventHotKey (no Accessibility prompt needed). Moved Settings to menu bar (Nimble > Settings with Cmd-comma hotkey). Removed theme swatch from HUD (SettingsView already has the full grid). Changed default theme from orange to brand yellow #FFCA30. All 34 tests pass.
-
-## Native Kotlin Multiplatform apps, DONE 2026-08-28
-
-Joshua rejected the PWA and wanted real native Windows and Android apps. Built them from one Kotlin codebase using Kotlin Multiplatform (KMP) + Compose Multiplatform, producing two real native binaries with Skia rendering and no web view (commits 3537ba1, ebed3ed).
-
-Ported the entire Swift QueryEngine (classification, natural-language math, question preprocessing, Gemma/DDG/Wikipedia chain) to Kotlin. Wrote `Expr.kt`, a hand-written expression parser, to replace NSExpression (which has no Kotlin equivalent). The new parser dropped two hacks the Swift version uses (regex-rewriting every 'x' to '*', appending '.0' to integers to force float division), and in the process **caught a real bug in the shipping Swift apps**: the expression "2 + 2 banana" evaluates to 4 on Mac and iOS because NSExpression parses the prefix and ignores trailing junk. The Kotlin parser rejects it and properly errors. **This is a genuine open bug in the existing applications** and should be added to the Mac/iOS version as a high-priority fix.
-
-Thirty tests pass, including a live check of the Gemma/DDG/Wikipedia network chain. CI is green on both jobs: `nimble-windows-msi` (59MB) and `nimble-android-apk` (12MB). GitHub Actions workflow is `.github/workflows/build-native.yml` (run 33207541613).
-
-**Toolchain traps** (all of which cost real time, worth recording so the next session doesn't rediscover them):
-- AGP 9 refuses to load alongside the KMP plugin and has no KMP *application* plugin, so the app module must use AGP 8.x.
-- AGP 8.x requires Gradle <= 9.5.0; Gradle 9.6 removed an internal API it depends on. The wrapper is pinned to 9.5.0 deliberately.
-- Compose 1.12 wants compileSdk 37, which the Android SDK manager will not fetch yet, so pinned Compose to 1.11.1 on compileSdk 36.
-- `brew install --cask temurin@17` reports exit 0 and installs nothing (JDK casks require sudo/admin password). The `openjdk@17` formula works without sudo but is keg-only; must set `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home` explicitly.
-
-**Still open:**
-- [ ] Play Store submission (requires Android keystore + $25 Play Console fee).
-- [ ] Microsoft Store submission (requires MSIX signing + $19 dev account).
-
-## Deploy pipeline, BLOCKED ON JOSHUA (2026-08-28)
-
-`.github/workflows/deploy-site.yml` has never deployed. Its wrangler step was guarded by
-`if: env.CF_API_TOKEN != ''`, so with no repo secret every run went green while shipping
-nothing, the exact "silently fell weeks behind" failure the workflow header describes.
-
-Fixed the silence: the guard is now a hard failure, so main goes **red** until real
-credentials exist. Red is correct here, the site genuinely is not auto-deploying.
-
-Root cause of why it cannot be fixed from this machine: there is no Cloudflare API token
-to give CI. `secrets.fish` has only `CLOUDFLARE_DNS_TOKEN` (DNS scope), and its own
-comment notes the name `CLOUDFLARE_API_TOKEN` is deliberately avoided because wrangler
-then skips OAuth and fails for lack of Workers scope. Local `wrangler pages deploy` works
-only because it falls back to the saved OAuth session in `~/.wrangler`, CI has no such
-session.
-
-- [ ] **Joshua:** mint a Pages-Edit-scoped API token in the Cloudflare dashboard, then
-      `gh secret set CLOUDFLARE_API_TOKEN --repo nulljosh/nimble` and
-      `gh secret set CLOUDFLARE_ACCOUNT_ID` (= `14c849d102ecc38b5fae54d9b22deec4`).
-      Main goes green again the moment both exist.
-
-Until then ship by hand (works, uses the OAuth session):
-`bash scripts/build-site.sh && npx wrangler pages deploy dist --project-name=nimble --branch=main`
-
-## Requested 2026-08-28, more platforms, after native lands
-
-Ordered deliberately: these come **after** the native Windows/Android apps are done, not
-instead of them.
-
-- [ ] **Java version.** Worth noting the overlap before building it: the Compose
-      Multiplatform desktop app now in `kmp/` is already a JVM app, Kotlin compiles to
-      the same bytecode and it ships as a normal JVM binary. So "a Java version" is either
-      (a) a plain-Java/Swing or JavaFX UI over the same shared engine, which is a real,
-      separate thing, or (b) already covered. Confirm which is wanted before writing it.
-- [ ] **Electron version.** None exists today. Worth knowing the history: the *original*
-      Maybulb Nimble was Electron + Wolfram|Alpha and was deprecated in 2020; this project
-      was the from-scratch native rebuild of it. An Electron build would wrap `web/`, which
-      is already a complete app and already installs as a PWA on Windows, Linux and
-      Android. The one thing it would add over the PWA is a global hotkey on Linux/Windows.
-
-## Landing page (2026-09-02)
-- [ ] Mac menu bar screenshot for the landing page and README. Needs a real popover capture; the hero only shows the iPhone shot today.
-
-- Clickable results (source URL, web search fallback for AI answers): landing + macOS/iOS + KMP 2026-09-02
-
-- [ ] macOS 1.0.0 REJECTED 2026-09-02 for 2.4.5(vii); updater removed; build 202609022006 uploaded via xcodebuild destination=upload 2026-09-02 evening. NEXT: wait for processing, then `asc review submit --app 6807858746 --version 1.0.0 --build-id <id> --confirm` (find id: asc builds list --platform MAC_OS).
-
-## TUI pilot (2026-09-05)
-- `nimble-tui` SwiftPM target (SwiftTUI, github.com/rensbreur/SwiftTUI) added. `swift build && ./.build/debug/nimble-tui "<query>"` renders the answer as a bordered terminal card, reusing the same `QueryEngine`/`QueryResult` as the macOS/iOS apps.
-- Requires a real TTY (SwiftTUI reads window size via ioctl) — doesn't run under piped/non-interactive shells.
-- Extracted `QueryResult` out of `AppState.swift` into its own Foundation/CoreGraphics-only `QueryResult.swift` so the TUI target isn't forced to import SwiftUI.
-- Static render only, not a REPL — see `tui/main.swift` comment for why.
-- This is app #1 of the fleet-wide "all apps support TUI" ask. Not rolled out further yet — pattern (extract shared logic to a SwiftUI-free file, new SwiftPM target depending on SwiftTUI) should port cleanly to other Swift apps with a headless model layer (curvely, numen, wordroot, etc).
+- **Security (2026-08-17):** public answer proxy was unauthenticated and
+  unthrottled. Added a per-IP 20 requests/minute limit in `wrangler.jsonc`, live.
+- **Design system + landing/splash screen (2026-08-02):** pulled maybulb.com's
+  real CSS (`#ffca30` yellow, black text, Avenir Next, flat pill-free buttons, 2px
+  yellow dividers) into `docs/index.html`, added `docs/splash.html`. Not yet wired
+  as an iOS LaunchScreen — web-only splash for now.
+- **App Store launch (submitted 2026-09-02):** ASC record 6807858746 "Nimble
+  Answers," one Universal Purchase record, bundle `com.nulljosh.nimble.ios` on
+  both targets. iOS 1.0.0 and macOS 1.0.0 both went to WAITING_FOR_REVIEW.
+  Signing needed manual profiles via `asc signing fetch --create-missing`
+  (automatic signing can't mint them headlessly); macOS was rejected once for
+  missing `com.apple.security.app-sandbox`, fixed via
+  `Nimble-macOS.entitlements`. iPad screenshot required because
+  `TARGETED_DEVICE_FAMILY` is 1,2. Primary language en-CA.
+- **macOS 1.0.0 rejection fix (2026-09-02):** rejected for 2.4.5(vii); updater
+  removed, rebuilt, reuploaded.
+- **UI polish (2026-08-28):** removed the pale translucent titlebar strip
+  (dropped `.titled` from the window style mask, clipped content view to radius
+  14). Re-enabled `MenuBarExtra`. Added global hotkey ⌥Space via Carbon
+  `RegisterEventHotKey` (no Accessibility prompt). Moved Settings into the menu
+  bar (Cmd-comma). Default theme changed orange → brand yellow `#FFCA30`. All 34
+  tests pass.
+- **Native Kotlin Multiplatform apps (2026-08-28):** real native Windows and
+  Android builds (KMP + Compose Multiplatform, Skia rendering, no web view),
+  ported the whole Swift `QueryEngine` to Kotlin including a hand-written
+  expression parser (`Expr.kt`) replacing `NSExpression`. CI green on
+  `nimble-windows-msi` (59MB) and `nimble-android-apk` (12MB).
+  Toolchain notes: AGP 9 doesn't support KMP's application plugin, so the app
+  module is pinned to AGP 8.x, which in turn needs Gradle <= 9.5.0 (9.6 dropped
+  an API it needs). Compose pinned to 1.11.1 on compileSdk 36 (1.12 wants
+  compileSdk 37, not yet fetchable). `brew install --cask temurin@17` silently
+  installs nothing without sudo; used `openjdk@17` formula instead with
+  `JAVA_HOME` set explicitly.
+- **Source labeling fix (2026-08-28):** the answer's source label now names the
+  models that actually ran ("Gemma + Qwen") instead of hardcoding "Gemma" for
+  every branch.
+- **Clickable results (2026-09-02):** source URL + web search fallback for AI
+  answers, shipped across landing, macOS/iOS, and KMP.
+- **TUI pilot (2026-09-05):** `nimble-tui` SwiftPM target using SwiftTUI
+  (rensbreur/SwiftTUI). `swift build && ./.build/debug/nimble-tui "<query>"`
+  renders the answer as a bordered terminal card, reusing the same
+  `QueryEngine`/`QueryResult` as the macOS/iOS apps. Needs a real TTY. Extracted
+  `QueryResult` into its own Foundation/CoreGraphics-only file so the TUI target
+  doesn't need SwiftUI. Static render, not a REPL. First app in the fleet-wide
+  TUI rollout; the extraction pattern should port cleanly to other Swift apps
+  with a headless model layer.
