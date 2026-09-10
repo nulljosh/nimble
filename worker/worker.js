@@ -5,6 +5,13 @@ const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 const SYSTEM =
   "Answer in one short factual sentence. No preamble, no markdown. If you do not know, reply exactly UNKNOWN.";
+// "Who is the current president" etc: models often hedge into UNKNOWN on time-sensitive
+// officeholder questions, which sends the client to DDG/Wikipedia's static office page
+// instead of an incumbent's name. Push the model to commit to its best-known answer instead.
+const CURRENT_OFFICE_RE = /\bwho\s+is\s+the\s+(?:current|present)\b/i;
+const CURRENT_OFFICE_SYSTEM =
+  "Answer in one short factual sentence naming the person, not the office. No preamble, no markdown. " +
+  "Give your best-known answer even if your information could be outdated; only reply UNKNOWN if you have no idea at all.";
 
 export default {
   async fetch(req, env) {
@@ -37,10 +44,11 @@ export default {
     if (typeof q !== "string" || !q.trim()) return json({ error: "empty q" }, 400);
     if (q.length > 500) return json({ error: "too long" }, 400);
 
+    const system = CURRENT_OFFICE_RE.test(q) ? CURRENT_OFFICE_SYSTEM : SYSTEM;
     const ask = (model) =>
       env.AI.run(model, {
         messages: [
-          { role: "system", content: SYSTEM },
+          { role: "system", content: system },
           { role: "user", content: `${q} /no_think` },
         ],
         temperature: 0,
