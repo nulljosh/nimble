@@ -5,7 +5,6 @@
 Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any one.
 
 - **Bug:** iOS UI is behind the web app's polish. Sync it up (web is the newest surface).
-- **Bug:** no graphing. Original Nimble leaned on Wolfram|Alpha for plots; DDG + Wikipedia have no equivalent today.
 - **Bug:** tests are thin and result filtering is loose. Tighten both.
 - **UI/UX:** Mac menu bar screenshot missing from landing page and README (only the iPhone shot exists).
 - **Feature:** search history. Local-only, browsable, re-runnable, with clear-history. Core Data/flat JSON (macOS/iOS), localStorage (web). No sync, no server.
