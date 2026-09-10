@@ -2,16 +2,17 @@
 
 ## Open for contribution
 
-**Fix current-officeholder queries.** "Who is the current president" — DDG and
-Wikipedia return the office page, not the incumbent, so the answer comes back
-wrong or UNKNOWN.
+**Fix the agreement check.** `worker/worker.js` compares Gemma's and Qwen's
+answers with exact string equality (`qwenAnswer === gemmaAnswer`). Two models
+rarely emit byte-identical sentences, so the "rare" synthesis fallback is
+actually the common path — it doubles wall time on most queries for no real
+gain in accuracy.
 
-Fix, in `worker/worker.js`: when the DDG/Wikipedia fallback would fire, route
-the query through Gemma or Qwen on Workers AI first (`env.AI`, already wired
-in this file, no key needed). Detect "who is the current/present X" style
-questions and prefer the model's answer over the office-page result for
-those. Keep everything else in the file as-is: same `{ answer, source }`
-shape, same rate limiting, same CORS. Ship as a PR against main.
+Fix, in `worker/worker.js`: before the `===` check, normalize both answers
+(lowercase, strip punctuation, compare token sets or a simple similarity
+threshold) and treat near-identical answers as agreement, skipping the
+synthesis call. Keep everything else as-is: same `{ answer, source }` shape,
+same rate limiting, same CORS. Ship as a PR against main.
 
 ## Open for contribution: bigger features (a few days each)
 
@@ -56,12 +57,8 @@ shape, same rate limiting, same CORS. Ship as a PR against main.
 - Stale `dist/index.html`. `docs/index.html` is the canonical landing page (GitHub
   Pages serves from `docs/`), but a diverged copy at `dist/index.html` still exists.
   Delete it or generate it from a build step.
-- Worker answer engine has three known issues:
-  - Agreement check is exact string equality (`worker/worker.js`,
-    `qwenAnswer === gemmaAnswer`). Two models rarely emit byte-identical sentences,
-    so the "rare" synthesis fallback is actually the common path and doubles wall
-    time. Normalize (lowercase, strip punctuation, compare token sets) before
-    deciding they disagree.
+- Worker answer engine has two more known issues (agreement check moved to
+  "Open for contribution" above):
   - `QueryEngine.query` (`Sources/Models/QueryEngine.swift:356`) awaits the LLM,
     then DDG, then Wikipedia in sequence — three network legs back to back. The
     worker itself answers in ~5.6s; the waterfall, not the models, is why hard
@@ -114,6 +111,12 @@ shape, same rate limiting, same CORS. Ship as a PR against main.
   gets a say. On-device name stays "Nimble" (Guideline 2.3.8 only requires the two be similar).
 
 ## Shipped
+
+- **Current-officeholder queries fixed (2026-09-10):** `worker/worker.js` now
+  detects "who is the current/present X" and swaps in a system prompt that
+  pushes Gemma/Qwen to commit to their best-known answer instead of hedging
+  into UNKNOWN, which used to send the client to DDG/Wikipedia's static office
+  page. PR: nulljosh/nimble#3.
 
 - **Security (2026-08-17):** public answer proxy was unauthenticated and
   unthrottled. Added a per-IP 20 requests/minute limit in `wrangler.jsonc`, live.
