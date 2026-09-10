@@ -2,17 +2,16 @@
 
 ## Open for contribution
 
-**Fix the agreement check.** `worker/worker.js` compares Gemma's and Qwen's
-answers with exact string equality (`qwenAnswer === gemmaAnswer`). Two models
-rarely emit byte-identical sentences, so the "rare" synthesis fallback is
-actually the common path — it doubles wall time on most queries for no real
-gain in accuracy.
+**Make the tiebreaker neutral.** In `worker/worker.js`, when Gemma and Qwen
+disagree, Qwen is asked to synthesize one answer from both — a model
+arbitrating a dispute it's a party to, biased toward its own wording.
 
-Fix, in `worker/worker.js`: before the `===` check, normalize both answers
-(lowercase, strip punctuation, compare token sets or a simple similarity
-threshold) and treat near-identical answers as agreement, skipping the
-synthesis call. Keep everything else as-is: same `{ answer, source }` shape,
-same rate limiting, same CORS. Ship as a PR against main.
+Fix, in `worker/worker.js`: instead of asking Qwen to merge the two answers,
+ask a third, independent model (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`)
+the original question on its own, then take the majority of the three (or,
+if all three differ, fall back to today's Qwen-synthesis behavior). Same call
+count, no new dependency. Keep everything else as-is: same `{ answer, source
+}` shape, same rate limiting, same CORS. Ship as a PR against main.
 
 ## Open for contribution: bigger features (a few days each)
 
@@ -57,18 +56,13 @@ same rate limiting, same CORS. Ship as a PR against main.
 - Stale `dist/index.html`. `docs/index.html` is the canonical landing page (GitHub
   Pages serves from `docs/`), but a diverged copy at `dist/index.html` still exists.
   Delete it or generate it from a build step.
-- Worker answer engine has two more known issues (agreement check moved to
-  "Open for contribution" above):
-  - `QueryEngine.query` (`Sources/Models/QueryEngine.swift:356`) awaits the LLM,
-    then DDG, then Wikipedia in sequence — three network legs back to back. The
-    worker itself answers in ~5.6s; the waterfall, not the models, is why hard
-    questions feel slow. Start all three with `async let` and keep the same
-    preference order. Also raise `timeoutIntervalForRequest` from 8s — too short
-    against a 5-15s backend.
-  - The tiebreaker isn't neutral: on disagreement, Qwen rewrites its own answer
-    plus Gemma's — a model arbitrating a dispute it's a party to. Ask a third
-    model (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) the same question
-    independently and take the majority. Same call count, better answer.
+- `QueryEngine.query` (`Sources/Models/QueryEngine.swift:400`) already starts
+  the LLM and DDG concurrently via `async let`, but Wikipedia only starts
+  after the LLM comes back empty — a real fallback leg, not the three-way
+  waterfall this used to describe. Low priority: start `wiki` alongside
+  `llm`/`ddg` from the top so a cold LLM doesn't add a third sequential hop.
+  Also raise `timeoutIntervalForRequest` from 8s — too short against a
+  5-15s backend. (Tiebreaker neutrality moved to "Open for contribution" above.)
 - Known Swift/Kotlin parity bug: `NSExpression` parses "2 + 2 banana" as `4` on
   Mac and iOS because it silently ignores trailing junk after a valid prefix. The
   hand-written Kotlin parser (built for the KMP apps) rejects it correctly. Worth
@@ -111,6 +105,11 @@ same rate limiting, same CORS. Ship as a PR against main.
   gets a say. On-device name stays "Nimble" (Guideline 2.3.8 only requires the two be similar).
 
 ## Shipped
+
+- **Agreement check normalized (2026-09-10):** `worker/worker.js` compared
+  model answers with exact string equality, making the synthesis fallback the
+  common path instead of the rare one. Now normalizes (lowercase, strip
+  punctuation, collapse whitespace) before comparing. PR: nulljosh/nimble#4.
 
 - **Current-officeholder queries fixed (2026-09-10):** `worker/worker.js` now
   detects "who is the current/present X" and swaps in a system prompt that
