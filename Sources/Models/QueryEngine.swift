@@ -399,14 +399,17 @@ final class QueryEngine: Sendable {
 
     func query(_ input: String, ai: AIConfig = AIConfig()) async -> QueryResult {
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 8
+        config.timeoutIntervalForRequest = 15
         let session = URLSession(configuration: config)
 
         // Gemma first for a crisp one-line answer; fall back to DDG/Wikipedia when the
         // key is unreachable or Gemma returns UNKNOWN (keeps a no-key offline degrade).
+        // All three start together so a cold LLM call doesn't add a sequential hop in
+        // front of Wikipedia — only the preference order (llm > ddg > wiki) is sequential.
         let (ddgInput, wikiInput) = preprocessQuery(input)
         async let llm = queryLLM(input, session: session, ai: ai)
         async let ddg = queryDDG(ddgInput, session: session)
+        async let wiki = queryWikipedia(wikiInput, session: session)
         if let llmResult = await llm {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.
@@ -415,7 +418,6 @@ final class QueryEngine: Sendable {
             return llmResult
         }
 
-        async let wiki = queryWikipedia(wikiInput, session: session)
         if let ddgResult = await ddg { return ddgResult }
         if let wikiResult = await wiki { return wikiResult }
 
