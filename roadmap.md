@@ -2,18 +2,11 @@
 
 ## Open for contribution
 
-**Start Wikipedia alongside the LLM and DDG, not after.** In
-`Sources/Models/QueryEngine.swift:query()`, `llm` and `ddg` already run
-concurrently via `async let`, but `wiki` isn't declared until after the LLM
-result comes back empty — so a cold/slow LLM call adds a real sequential hop
-before Wikipedia even starts, on top of the ~8s request timeout that's short
-against a 5-15s backend.
-
-Fix, in `Sources/Models/QueryEngine.swift`'s `query()`: move the `async let
-wiki = queryWikipedia(...)` line up next to `llm`/`ddg` so it starts
-immediately, keep the same preference order (llm > ddg > wiki) when awaiting
-results, and raise `config.timeoutIntervalForRequest` from `8` to something
-closer to 15. Keep the 36 existing tests green. Ship as a PR against main.
+No small, well-scoped single-PR gaps left as of 2026-09-10 — every remaining
+item below is either a multi-day feature, a decision only Joshua can make, or
+blocked on him directly (money, dashboard-only steps, domain purchase). Next
+contribution-sized work starts from "Open for contribution: bigger features"
+below.
 
 ## Open for contribution: bigger features (a few days each)
 
@@ -90,6 +83,12 @@ closer to 15. Keep the 36 existing tests green. Ship as a PR against main.
   gets a say. On-device name stays "Nimble" (Guideline 2.3.8 only requires the two be similar).
 
 ## Shipped
+
+- **Wikipedia starts in parallel (2026-09-10):** `QueryEngine.query()` only
+  started the Wikipedia fetch after the LLM came back empty, adding a real
+  sequential hop on a cold LLM call. Now starts alongside `llm`/`ddg` via
+  `async let`; request timeout raised 8s → 15s to match the worker's actual
+  response time. PR: nulljosh/nimble#6.
 
 - **Roadmap corrections (2026-09-10):** three listed gaps turned out to be
   already fixed or never real — no code changed, just removed the stale
