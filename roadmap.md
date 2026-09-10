@@ -2,73 +2,37 @@
 
 ## Open for contribution
 
-No small, well-scoped single-PR gaps left as of 2026-09-10 — every remaining
-item below is either a multi-day feature, a decision only Joshua can make, or
-blocked on him directly (money, dashboard-only steps, domain purchase). Next
-contribution-sized work starts from "Open for contribution: bigger features"
-below.
+Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any one.
 
-## Open for contribution: bigger features (a few days each)
-
-- **Search history.** Local-only log of past questions and answers, browsable and
-  re-runnable, with a clear-history action. Store in Core Data or a flat JSON
-  file (macOS/iOS), localStorage (web). No sync, no server — this is not
-  account data.
-- **Voice input.** Tap the mic (or hold a hotkey) and speak the question instead
-  of typing it. `SFSpeechRecognizer` on macOS/iOS; Web Speech API on the web app.
-  Feeds straight into the existing `QueryEngine`, no new answer path needed.
-- **Shareable answer cards.** Turn an answer into an image (question, answer,
-  source) for sharing — `ImageRenderer` on macOS/iOS, `<canvas>` export on web.
-  Nimble has no social feature today; this is the whole thing.
-- **Follow-up questions.** Let a query reference the previous answer ("and in
-  celsius?", "who was before him?") by carrying the last Q&A as context into the
-  next Worker call. Needs a short-lived conversation state (last N turns) and a
-  system prompt tweak in `worker/worker.js` to use it when present.
-- **Widget / Live Activity (iOS) and menu bar quick-ask (macOS).** A home-screen
-  widget showing the last answer plus a quick-entry field; on macOS, ask
-  straight from the menu bar dropdown without opening the HUD.
-
-## Open
-
-- Sync iOS UI polish to match the web app (mostly there, web is the newest surface).
-- Custom domain for the landing page. `nimble.heyitsmejosh.com` is taken by the web
-  app. Candidate: `nimbleapp.com`. Joshua buys when ready.
-- Mac menu bar screenshot for the landing page and README (only the iPhone shot exists today).
-- Play Store submission: needs an Android keystore and the $25 Play Console fee.
-- Microsoft Store submission: needs MSIX signing and the $19 dev account.
-- Logo provenance decision. maybulb.com is a real three-person studio whose own
-  shipping macOS app is also called Nimble, and their `logo.svg` is titled artwork
-  ("Bulby"). Nimble's mark is an original bulb in their color/shape spirit, not a
-  copy of their file. Decide: keep the original mark, rename to clear the
-  collision, or get written permission from Maybulb.
-- Real auto-update (Sparkle). What's shipped today only checks and notifies — it
-  downloads and replaces nothing. In-place updates need a signed appcast and a
-  helper process, once Developer ID signing is in place.
-- No graphing. The original leaned on Wolfram|Alpha for plots; DDG + Wikipedia have no equivalent.
-- More platforms, after native Windows/Android ship:
-  - Java version — mostly moot. The KMP desktop app already ships as a JVM
-    binary. "A Java version" only means something new if it's a plain-Java/Swing
-    or JavaFX UI over the same engine. Confirm that's actually wanted before building it.
-  - Electron version — none exists. The *original* Maybulb Nimble was Electron +
-    Wolfram|Alpha, deprecated 2020; this project is the from-scratch native
-    rebuild of it. An Electron build would just wrap `web/`, which already
-    installs as a PWA on Windows/Linux/Android. The only thing it adds is a
-    global hotkey on Linux/Windows.
-- iOS app should mirror the website's full functionality and UI, shopping included.
-- More thorough tests, tighter result filtering.
+- **Bug:** iOS UI is behind the web app's polish. Sync it up (web is the newest surface).
+- **Bug:** no graphing. Original Nimble leaned on Wolfram|Alpha for plots; DDG + Wikipedia have no equivalent today.
+- **Bug:** tests are thin and result filtering is loose. Tighten both.
+- **UI/UX:** Mac menu bar screenshot missing from landing page and README (only the iPhone shot exists).
+- **Feature:** search history. Local-only, browsable, re-runnable, with clear-history. Core Data/flat JSON (macOS/iOS), localStorage (web). No sync, no server.
+- **Feature:** voice input. Mic tap or hotkey speaks the question. `SFSpeechRecognizer` (macOS/iOS), Web Speech API (web). Feeds the existing `QueryEngine` directly.
+- **Feature:** shareable answer cards. Render question+answer+source as an image — `ImageRenderer` (macOS/iOS), `<canvas>` (web). Nimble has no social feature today.
+- **Feature:** follow-up questions. Let a query reference the last answer ("and in celsius?"). Needs short-lived conversation state (last N turns) + a `worker/worker.js` prompt tweak.
+- **Feature:** widget / Live Activity (iOS) and menu bar quick-ask (macOS) — last answer plus a quick-entry field, no HUD needed.
+- **Feature:** iOS app should mirror the website's full functionality, shopping included.
+- **Platform:** Java version, only if a plain-Java/Swing or JavaFX UI over the engine is actually wanted (KMP desktop already ships a JVM binary).
+- **Platform:** Electron version — would just wrap `web/`, which already installs as a PWA. Only real gain is a global hotkey on Linux/Windows.
 
 ## Blocked on Joshua
 
-- **Deploy pipeline is dead.** `.github/workflows/deploy-site.yml` has no
-  Cloudflare API token to give CI, so it can't auto-deploy the site.
-  `secrets.fish` only has `CLOUDFLARE_DNS_TOKEN` (DNS-scoped); naming a token
-  `CLOUDFLARE_API_TOKEN` breaks wrangler's OAuth on purpose, so that path is
-  closed. The workflow now fails loudly (was silently green while shipping
-  nothing). Fix: mint a Pages-Edit-scoped API token in the Cloudflare dashboard,
-  then `gh secret set CLOUDFLARE_API_TOKEN --repo nulljosh/nimble` and
-  `gh secret set CLOUDFLARE_ACCOUNT_ID` (`14c849d102ecc38b5fae54d9b22deec4`).
-  Until then, deploy by hand:
-  `bash scripts/build-site.sh && npx wrangler pages deploy dist --project-name=nimble --branch=main`
+- **Deploy pipeline is dead.** No Cloudflare API token for CI (`secrets.fish` only
+  has the DNS-scoped one on purpose). Fix: mint a Pages-Edit token in the
+  Cloudflare dashboard, then `gh secret set CLOUDFLARE_API_TOKEN --repo
+  nulljosh/nimble` and `gh secret set CLOUDFLARE_ACCOUNT_ID`
+  (`14c849d102ecc38b5fae54d9b22deec4`). Until then: `bash scripts/build-site.sh
+  && npx wrangler pages deploy dist --project-name=nimble --branch=main`.
+- **Custom domain.** `nimble.heyitsmejosh.com` is taken by the web app. Candidate: `nimbleapp.com`. Buy when ready.
+- **Play Store.** Needs an Android keystore + $25 Play Console fee.
+- **Microsoft Store.** Needs MSIX signing + $19 dev account.
+- **Logo provenance decision.** maybulb.com ships their own app called Nimble with
+  a titled "Bulby" mark; ours is original work in the same spirit, not a copy.
+  Decide: keep the mark, rename, or get written permission.
+- **Real auto-update (Sparkle).** Today's updater only checks and notifies. In-place
+  updates need a signed appcast + helper process once Developer ID signing is set up.
 
 ## Decisions on the record
 
