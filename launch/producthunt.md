@@ -1,4 +1,4 @@
-# Product Hunt — Nimble Answers
+# Product Hunt, Nimble Answers
 
 ## Name
 Nimble Answers

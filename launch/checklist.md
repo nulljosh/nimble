@@ -1,4 +1,4 @@
-# Launch checklist — Nimble Answers (Joshua's manual steps)
+# Launch checklist, Nimble Answers (Joshua's manual steps)
 
 - [ ] Product Hunt: create the post from launch/producthunt.md, pick a launch day, submit for a hunter if not self-hunting.
 - [ ] Hacker News: post launch/hn.md manually to Show HN when ready (never auto-posted).

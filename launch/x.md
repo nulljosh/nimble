@@ -1,4 +1,4 @@
-# X thread — Nimble Answers
+# X thread, Nimble Answers
 
 1/
 Built a search bar that skips the search results.

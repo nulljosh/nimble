@@ -1,4 +1,4 @@
-# Reddit checklist — Nimble Answers
+# Reddit checklist, Nimble Answers
 
 Subreddits picked (4): r/SideProject, r/macapps, r/productivity, r/webdev.
 
@@ -12,7 +12,7 @@ Skipped and why:
 
 Before posting, ask Joshua, don't guess:
 - Karma/account-age minimums on r/SideProject and r/macapps (both sometimes gate posts).
-- r/macapps pinned self-promo/weekly thread — check whether a standalone post is even allowed this week, or if it should go in the megathread instead.
+- r/macapps pinned self-promo/weekly thread, check whether a standalone post is even allowed this week, or if it should go in the megathread instead.
 - Confirm flair requirements per sub (some subs require a specific post flair before submitting).
 
 Posting order suggestion: r/SideProject first (lowest gate), then r/macapps, then r/productivity and r/webdev spaced a few days apart.

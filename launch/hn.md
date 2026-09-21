@@ -1,3 +1,5 @@
+Skip: no technical hook
+
 # Hacker News
 
 ## Title (<=80 chars)
