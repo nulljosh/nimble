@@ -66,6 +66,28 @@ struct SearchView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 13)
 
+            // Inline rather than an alert: the HUD is a borderless window with nothing to hang a sheet on.
+            if state.askingAIConsent {
+                Divider().opacity(0.1)
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Send your question to an AI service?")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack {
+                        Spacer()
+                        Button("Don't Allow") { state.answerAIConsent(false) }
+                            .keyboardShortcut(.cancelAction)
+                        Button("Allow") { state.answerAIConsent(true) }
+                            .keyboardShortcut(.defaultAction)
+                    }
+                }
+                .padding(.horizontal, 18)
+                .padding(.vertical, 13)
+            }
+
             // Results
             if state.result != .none {
                 Divider().opacity(0.1).padding(.horizontal, 0)

@@ -144,16 +144,11 @@ final class AppState {
             }
         }
 
-        // ponytail: iOS only, the Mac HUD has no prompt yet; mirror it there before the next Mac release
-        #if os(iOS)
         if aiConsent == nil {
             askingAIConsent = true
             return
         }
         let useLLM = aiConsent == true
-        #else
-        let useLLM = true
-        #endif
 
         result = .loading
         let engine = queryEngine
@@ -170,6 +165,7 @@ final class AppState {
 
     func answerAIConsent(_ allowed: Bool) {
         aiConsent = allowed
+        askingAIConsent = false
         savePreferences()
         performQuery()
     }

@@ -57,7 +57,17 @@ struct SettingsView: View {
                     .onChange(of: state.launchOnStartup) { state.savePreferences() }
 
                 Toggle("Default Suggestions", isOn: $state.defaultSuggestions)
-                    .onChange(of: state.defaultSuggestions) { state.savePreferences() }            }
+                    .onChange(of: state.defaultSuggestions) { state.savePreferences() }
+
+                Toggle("AI Answers", isOn: Binding(
+                    get: { state.aiConsent == true },
+                    set: { state.aiConsent = $0; state.savePreferences() }
+                ))
+                Text("When on, the text you type is sent to \(state.aiRecipient). Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             .font(.system(size: 12))
             .toggleStyle(.switch)
             .controlSize(.small)
