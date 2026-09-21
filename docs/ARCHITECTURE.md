@@ -56,6 +56,10 @@ Answer pipeline:
 | `.github/workflows/` | CI/CD: build + test on push, release on tags |
 | `Tests/PreferencesTests.swift` | Preferences persistence (load/save), theme colors, AI config |
 | `Tests/QueryEngineTests.swift` | Query evaluation: 150+ cases (arithmetic, trig, functions, edge cases) |
+| `test/engine.test.js` | Node tests for JavaScript QueryEngine: math evaluation, unit conversion, currency parsing, graph expression parsing, first-sentence extraction, safe JSON fetching (offline by default, LIVE=1 for real API) |
+| `scripts/build-site.sh` | Site assembly: copies `docs/` to `dist/` for static deployment (no bundler) |
+| `scripts/bump-version.sh` | Version bump utility: updates MARKETING_VERSION in project.yml and version badges in README/CLAUDE across macOS, iOS, and web app repos |
+| `scripts/release-macos.sh` | macOS release build: archives, Developer ID-signs, notarizes with Apple, staples the ticket, and zips for GitHub release (gatekeeper-opens-on-first-launch) |
 | `vite.config.js` | Vite config for web app builds (if applicable) |
 | `wrangler.toml` | Cloudflare Worker config for the answer proxy |
 | `project.yml` | Project configuration (if using xcodegen) |
