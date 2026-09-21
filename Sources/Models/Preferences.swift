@@ -12,6 +12,8 @@ struct PreferencesData: Codable {
     /// Which model answers questions and, for paid engines, the user's own key.
     /// Optional so prefs files written before this field still decode.
     var ai: AIConfig? = nil
+    /// Answer to the AI data-sharing prompt; nil means "not asked yet".
+    var aiConsent: Bool? = nil
 }
 
 final class Preferences {

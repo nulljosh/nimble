@@ -35,7 +35,7 @@ strong { color: var(--dark); }
 <body>
 <div class="container">
   <h1>Privacy Policy</h1>
-  <p class="updated">Nimble Answers &middot; Last updated 23 August 2026</p>
+  <p class="updated">Nimble Answers &middot; Last updated 21 September 2026</p>
 
   <p><strong>Nimble Answers has no accounts, no sign-in, no analytics and no advertising.
   Nothing about you is collected, stored or sold.</strong> The app is not able to identify
@@ -46,7 +46,8 @@ strong { color: var(--dark); }
   information the app does not already have.</p>
   <ul>
     <li><strong>Math stays on your device.</strong> Arithmetic and related calculations are evaluated locally. Nothing is sent.</li>
-    <li><strong>Factual and definition questions are sent</strong> to DuckDuckGo's Instant Answer API and to Wikipedia, and where those cannot answer, to the app's own answering service at <code>nimble-answers.trommatic.workers.dev</code>, which runs on Cloudflare Workers AI.</li>
+    <li><strong>Factual and definition questions are sent</strong> to DuckDuckGo's Instant Answer API and to Wikipedia.</li>
+    <li><strong>AI answers need your permission.</strong> The first time you search, the app asks before sending anything to an AI service. If you allow it, your question text goes to the app's own answering service at <code>nimble-answers.trommatic.workers.dev</code>, which runs Google's Gemma and Alibaba's Qwen models on Cloudflare Workers AI. If you pick Claude or OpenAI in Settings and enter your own key, the question goes to Anthropic or OpenAI instead. If you don't allow it, nothing is sent to any AI service. You can change your answer in Settings at any time.</li>
   </ul>
   <p>These requests carry your question and nothing else. No identifier, no account, no
   device fingerprint, no location, no contacts, no history of what you asked before.</p>
@@ -59,7 +60,7 @@ strong { color: var(--dark); }
   removed when you delete the app.</p>
 
   <h2>Third parties</h2>
-  <p>DuckDuckGo, Wikipedia and Cloudflare each receive the question text when a request
+  <p>DuckDuckGo, Wikipedia, Cloudflare and, if you chose them, Anthropic or OpenAI each receive the question text when a request
   reaches them, and each handles that request under its own privacy policy. The app shares
   nothing with them beyond the question itself.</p>
 

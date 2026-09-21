@@ -101,6 +101,12 @@ struct SearchView: View {
             // No title on the root screen, so the empty bar was only ever a black
             // strip above the search field.
             .toolbar(.hidden, for: .navigationBar)
+            .alert("Send your question to an AI service?", isPresented: $state.askingAIConsent) {
+                Button("Allow") { state.answerAIConsent(true) }
+                Button("Don't Allow", role: .cancel) { state.answerAIConsent(false) }
+            } message: {
+                Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
+            }
         }
         // Mirrors the web app: the theme owns the surface, and `.primary`/`.secondary`
         // follow it via colorScheme instead of every view hardcoding white-on-dark.

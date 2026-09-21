@@ -36,6 +36,15 @@ struct PreferencesView: View {
                 ))
             }
 
+            Section {
+                Toggle("AI Answers", isOn: Binding(
+                    get: { state.aiConsent == true },
+                    set: { state.aiConsent = $0; state.savePreferences() }
+                ))
+            } footer: {
+                Text("When on, the text you type is sent to \(state.aiRecipient). Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.")
+            }
+
             Section("AI Engine") {
                 AIEngineSettings(state: state)
             }

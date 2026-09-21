@@ -28,6 +28,12 @@ final class PreferencesTests: XCTestCase {
         XCTAssertFalse(decoded.defaultSuggestions)
     }
 
+    func testAIConsentDefaultsToNotAsked() throws {
+        XCTAssertNil(PreferencesData().aiConsent)
+        let old = try JSONDecoder().decode(PreferencesData.self, from: Data(#"{"theme":"blue","mathEnabled":true,"launchOnStartup":false,"centerWindow":false,"defaultSuggestions":true,"automaticUpdates":true,"lastUpdateCheck":0}"#.utf8))
+        XCTAssertNil(old.aiConsent)
+    }
+
     func testOldPrefsFileWithoutAIDecodes() throws {
         let data = Data(#"{"theme":"blue","mathEnabled":true,"launchOnStartup":false,"centerWindow":false,"defaultSuggestions":true,"automaticUpdates":true,"lastUpdateCheck":0}"#.utf8)
         let decoded = try JSONDecoder().decode(PreferencesData.self, from: data)

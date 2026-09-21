@@ -58,6 +58,10 @@ final class AppState {
     var automaticUpdates: Bool = true
     private var lastUpdateCheck: Double = 0
     var ai: AIConfig = AIConfig()
+    /// App Review 5.1.2(i): no query reaches an AI service until the user says yes.
+    /// nil = not asked yet, false = answers come from DuckDuckGo and Wikipedia only.
+    var aiConsent: Bool? = nil
+    var askingAIConsent = false
     #if os(macOS)
     #endif
 
@@ -86,6 +90,7 @@ final class AppState {
         automaticUpdates = p.automaticUpdates
         lastUpdateCheck = p.lastUpdateCheck
         ai = p.ai ?? AIConfig()
+        aiConsent = p.aiConsent
     }
 
     func savePreferences() {
@@ -97,7 +102,8 @@ final class AppState {
             defaultSuggestions: defaultSuggestions,
             automaticUpdates: automaticUpdates,
             lastUpdateCheck: lastUpdateCheck,
-            ai: ai
+            ai: ai,
+            aiConsent: aiConsent
         )
         prefs.save(p)
         applyLaunchOnStartup()
@@ -138,6 +144,17 @@ final class AppState {
             }
         }
 
+        // ponytail: iOS only, the Mac HUD has no prompt yet; mirror it there before the next Mac release
+        #if os(iOS)
+        if aiConsent == nil {
+            askingAIConsent = true
+            return
+        }
+        let useLLM = aiConsent == true
+        #else
+        let useLLM = true
+        #endif
+
         result = .loading
         let engine = queryEngine
         let ai = self.ai
@@ -147,7 +164,23 @@ final class AppState {
                 self?.result = graph
                 return
             }
-            self?.result = await engine.query(text, ai: ai)
+            self?.result = await engine.query(text, ai: ai, useLLM: useLLM)
+        }
+    }
+
+    func answerAIConsent(_ allowed: Bool) {
+        aiConsent = allowed
+        savePreferences()
+        performQuery()
+    }
+
+    /// Who receives the query, named in the consent prompt.
+    var aiRecipient: String {
+        switch ai.engine {
+        case .nimble: return "Nimble's answer service, which runs Google Gemma and Alibaba Qwen models on Cloudflare Workers AI"
+        case .claude: return "Anthropic (Claude)"
+        case .openai: return "OpenAI"
+        case .ollama: return "your own Ollama server"
         }
     }
 
