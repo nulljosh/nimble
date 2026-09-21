@@ -7,5 +7,5 @@
 </style><text x="44" y="11" font-size="10">Lines of real code</text><line x1="44" y1="26" x2="464" y2="26" class="g"/><text x="40" y="29" font-size="9" text-anchor="end">4973</text><line x1="44" y1="97" x2="464" y2="97" class="g"/><text x="40" y="100" font-size="9" text-anchor="end">2486</text>
 <line x1="44" y1="26" x2="44" y2="166"/><line x1="44" y1="166" x2="464" y2="166"/>
 <polyline points="44,161 52,142 60,128 69,113 77,107 86,102 94,104 102,99 111,99 119,98 128,97 136,96 144,94 153,94 161,93 170,90 178,84 186,79 195,75 203,71 212,71 220,68 228,66 237,66 245,67 254,50 262,44 270,43 279,40 287,39 296,35 304,29 312,31 321,36 329,35 338,35 346,34 354,33 363,33 371,35 380,41 388,43 396,43 405,39 413,36 422,31 430,31 438,28 447,27 455,26 464,27" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-<text x="44" y="182" font-size="10">Jun 16</text><text x="464" y="182" font-size="10" text-anchor="end">Sep 12</text>
-<text x="44" y="196" font-size="10" font-weight="600">4,941 lines &#183; 176 commits since Jun 16 2026</text></svg>
+<text x="44" y="182" font-size="10">Jun 16</text><text x="464" y="182" font-size="10" text-anchor="end">Sep 20</text>
+<text x="44" y="196" font-size="10" font-weight="600">4,942 lines &#183; 91% documented &#183; 181 commits since Jun 16 2026</text></svg>
