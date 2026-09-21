@@ -12,6 +12,8 @@ Nimble works out what you meant, math, fact or definition, and answers in a line
 
 The original [Nimble](https://github.com/Maybulb/Nimble) was Electron plus Wolfram|Alpha and died in 2020. This one is native, and written from scratch.
 
+<img src="progress.svg" width="460">
+
 ## Features
 
 - **Knows what you meant.** Math, fact or definition, sorted before it answers.
