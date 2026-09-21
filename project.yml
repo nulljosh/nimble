@@ -31,6 +31,7 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
   Nimble-iOS:
     type: application
     platform: iOS
@@ -53,6 +54,7 @@ targets:
         # Mirrors the macOS target. Its absence is the real cause of ITMS-90242
         # on upload, which reads like a signing failure but is not.
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         # UILaunchScreen is a dict, and no INFOPLIST_KEY_ can express one -- the
         # only launch-screen setting Xcode defines is _Generation, which just
         # synthesises an EMPTY dict. So the real key comes from this hand-written
