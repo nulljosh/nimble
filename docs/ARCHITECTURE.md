@@ -52,6 +52,13 @@ Answer pipeline:
 | `worker/worker.js` | Cloudflare Worker answer proxy: calls Workers AI (Gemma + Qwen3 in parallel), synthesizes on disagreement |
 | `kmp/composeApp/src/*/` | Android/desktop Kotlin Multiplatform: common SearchScreen, platform-specific entry points |
 | `tui/` (Swift TUI variant, not deployed) | Terminal UI using SwiftTUI |
+| `tui/main.swift` | CLI entry: fetches from `/api/sample` endpoint, renders results as text cards |
+| `.github/workflows/` | CI/CD: build + test on push, release on tags |
+| `Tests/PreferencesTests.swift` | Preferences persistence (load/save), theme colors, AI config |
+| `Tests/QueryEngineTests.swift` | Query evaluation: 150+ cases (arithmetic, trig, functions, edge cases) |
+| `vite.config.js` | Vite config for web app builds (if applicable) |
+| `wrangler.toml` | Cloudflare Worker config for the answer proxy |
+| `project.yml` | Project configuration (if using xcodegen) |
 
 ## Query classification
 
