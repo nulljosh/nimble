@@ -40,7 +40,9 @@ The original [Nimble](https://github.com/Maybulb/Nimble) was Electron plus Wolfr
 
 ## Installing the Mac app
 
-Download the latest `.zip` from [Releases](https://github.com/nulljosh/nimble/releases/latest), unzip, drag `Nimble.app` to `/Applications`.
+Get it on the [Mac App Store](https://apps.apple.com/app/nimble-answers/id6807858746). It updates itself there.
+
+Or download the latest `.zip` from [Releases](https://github.com/nulljosh/nimble/releases/latest), unzip, drag `Nimble.app` to `/Applications`.
 
 From v1.0.1 on, releases are Developer ID signed and notarized. They open first try.
 The v1.0.0 build was signed with a development certificate only, so macOS quarantines it.
