@@ -4,7 +4,8 @@
 
 Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any one.
 
-- **Ship:** macOS 1.0.1. The AI consent prompt is in the Mac code (commit 22dd137) but the live 1.0.0 build lacks it. Apple rejected iOS under 5.1.2(i), iOS was fixed and resubmitted (WAITING_FOR_REVIEW), ship the Mac build before they flag it too. The web app has no prompt yet.
+- **Ship:** when iOS 1.0.0 is approved, add the iOS App Store link to the README and landing page (the Mac link is already there).
+- **Bug:** the web app sends questions to the AI with no consent prompt. iOS and Mac ask first; web should too.
 - **Bug:** iOS UI is behind the web app's polish. Sync it up (web is the newest surface).
 - **Bug:** tests are thin and result filtering is loose. Tighten both.
 - **UI/UX:** Mac menu bar screenshot missing from landing page and README (only the iPhone shot exists).
