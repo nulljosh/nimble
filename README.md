@@ -40,7 +40,7 @@ The original [Nimble](https://github.com/Maybulb/Nimble) was Electron plus Wolfr
 
 ## Installing the Mac app
 
-Get it on the [Mac App Store](https://apps.apple.com/app/nimble-answers/id6807858746). It updates itself there.
+Get it on the [App Store](https://apps.apple.com/app/nimble-answers/id6807858746) for iPhone and Mac. It updates itself there.
 
 Or download the latest `.zip` from [Releases](https://github.com/nulljosh/nimble/releases/latest), unzip, drag `Nimble.app` to `/Applications`.
 
