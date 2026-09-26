@@ -4,7 +4,6 @@
 
 Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any one.
 
-- **Ship:** when iOS 1.0.0 is approved, add the iOS App Store link to the README and landing page (the Mac link is already there).
 - **Bug:** the web app sends questions to the AI with no consent prompt. iOS and Mac ask first; web should too.
 - **Bug:** iOS UI is behind the web app's polish. Sync it up (web is the newest surface).
 - **Bug:** tests are thin and result filtering is loose. Tighten both.
@@ -48,6 +47,8 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any
   gets a say. On-device name stays "Nimble" (Guideline 2.3.8 only requires the two be similar).
 
 ## Shipped
+
+- **iOS App Store link published (2026-09-24):** iOS 1.0.0 approved by App Review and went live on the App Store. README and landing page updated with App Store links for both iPhone and Mac using the same Universal Purchase ID (6807858746).
 
 - **Wikipedia starts in parallel (2026-09-10):** `QueryEngine.query()` only
   started the Wikipedia fetch after the LLM came back empty, adding a real
