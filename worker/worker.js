@@ -13,12 +13,18 @@ const SYSTEM =
 async function freshContext(q) {
   try {
     const r = await fetch(
-      "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&exsentences=5&format=json&formatversion=2&gsrsearch=" +
+      "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&format=json&formatversion=2&gsrsearch=" +
         encodeURIComponent(q),
       { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" } },
     );
     const pages = (await r.json())?.query?.pages || [];
-    return pages.map((p) => `${p.title}: ${p.extract || ""}`).join("\n\n").slice(0, 4000);
+    // Officeholder intros bury "The current prime minister is X" ten sentences deep, so keep
+    // the lead plus any sentence naming who holds something now.
+    const trim = (t = "") => {
+      const sents = t.split(/(?<=[.!?])\s+/);
+      return [...sents.slice(0, 4), ...sents.slice(4).filter((x) => /\b(current|incumbent|since)\b/i.test(x))].join(" ");
+    };
+    return pages.map((p) => `${p.title}: ${trim(p.extract)}`).join("\n\n").slice(0, 6000);
   } catch {
     return "";
   }
@@ -59,7 +65,7 @@ export default {
     const today = new Date().toISOString().slice(0, 10);
     const system =
       `${SYSTEM} Today is ${today}. Your training data is out of date; when the reference text below ` +
-      `covers the question, trust it over your memory.` + (context ? `\n\nReference (live Wikipedia):\n${context}` : "");
+      `covers the question, trust it over your memory. Never mention the reference text.` + (context ? `\n\nReference (live Wikipedia):\n${context}` : "");
     const ask = (model) =>
       env.AI.run(model, {
         messages: [
@@ -74,6 +80,9 @@ export default {
           // Reasoning models sometimes hit max_tokens mid-thought and leave content null;
           // fall back to the last sentence of the reasoning trace.
           const text = d?.response || msg?.content || msg?.reasoning?.split(/(?<=[.!?])\s+/).pop() || "";
+          // Models narrate the grounding ("not mentioned in the provided reference") instead of
+          // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
+          if (/\b(reference|provided (text|context))\b/i.test(text)) return "UNKNOWN";
           return text.trim() || "UNKNOWN";
         })
         .catch(() => "UNKNOWN");
