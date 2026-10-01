@@ -563,6 +563,25 @@ footer a:hover { color: var(--dark); }
   </div>
 </section>
 
+<!-- Email capture. Posts to authmail.heyitsmejosh.com/signup (Resend "General" audience). No JS: the Worker 303s back to #signed-up. -->
+<form class="jb-signup" action="https://authmail.heyitsmejosh.com/signup" method="post">
+  <label for="jb-email">New apps and updates, no spam.</label>
+  <input id="jb-email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required maxlength="254">
+  <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="jb-hp">
+  <button type="submit">Subscribe</button>
+  <p id="signed-up" class="jb-msg" role="status">You're on the list.</p>
+  <p id="signup-failed" class="jb-msg" role="status">That email didn't work. Try again?</p>
+</form>
+<style>
+.jb-signup{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:460px;margin:40px auto;padding:0 16px;font:inherit;color:inherit}
+.jb-signup label{flex-basis:100%;text-align:center;opacity:.7}
+.jb-signup input[type=email]{flex:1;min-width:200px;padding:10px 12px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font:inherit}
+.jb-signup button{padding:10px 16px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.jb-hp{position:absolute;left:-9999px;width:1px;height:1px}
+.jb-msg{display:none;flex-basis:100%;text-align:center;margin:4px 0 0}
+.jb-msg:target{display:block}
+</style>
+
 <footer>
   <div class="container">
     <p>Nimble &mdash; by <a href="https://heyitsmejosh.com">Joshua Trommel</a></p>
