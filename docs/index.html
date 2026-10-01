@@ -256,8 +256,8 @@ a:hover { text-decoration: underline; }
   100% { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 .mockup-link { display: block; color: inherit; text-decoration: none; }
-.mockup-link p, .mockup-link h4 { text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
-.mockup-link:hover p, .mockup-link:hover h4 { color: var(--panel-text); }
+.mockup-link p, .mockup-link h3 { text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
+.mockup-link:hover p, .mockup-link:hover h3 { color: var(--panel-text); }
 .mockup-result.swap { animation: result-in 500ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes result-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .mockup-ghost.swap, .mockup-result.swap { animation: none; } }
@@ -272,7 +272,7 @@ a:hover { text-decoration: underline; }
   padding: 16px;
 }
 .mockup-big { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; color: var(--panel-text); margin: 2px 0 4px; }
-.mockup-result h4 {
+.mockup-result h3 {
   font-size: 15px;
   font-weight: 700;
   color: var(--panel-text);
@@ -388,16 +388,20 @@ a:hover { text-decoration: underline; }
   margin: 0 auto 2rem;
 }
 
+.oss p a {
+  text-decoration: underline;
+}
+
 /* Footer */
 footer {
   padding: 2rem 0;
   text-align: center;
   border-top: 1px solid #eee;
   font-size: 0.85rem;
-  color: var(--light);
+  color: #4a4844;
 }
 
-footer a { color: var(--light); }
+footer a { color: #4a4844; text-decoration: underline; }
 footer a:hover { color: var(--dark); }
 
 /* Footer heart */
@@ -440,6 +444,8 @@ footer a:hover { color: var(--dark); }
     <path vector-effect="non-scaling-stroke" d="M21 21l-4.35-4.35"/>
   </symbol>
 </svg>
+
+<main>
 
 <section class="hero">
   <div class="hero-float" id="heroFloat" aria-hidden="true"></div>
@@ -582,9 +588,11 @@ footer a:hover { color: var(--dark); }
 .jb-msg:target{display:block}
 </style>
 
+</main>
+
 <footer>
   <div class="container">
-    <p>Nimble &mdash; by <a href="https://heyitsmejosh.com">Joshua Trommel</a></p>
+    <p>Nimble - by <a href="https://heyitsmejosh.com">Joshua Trommel</a></p>
     <p class="credit">Originally created by <a href="https://maybulb.com">Maybulb</a>. Rebuilt with <svg class="heart" role="img" aria-label="love" viewBox="0 0 24 28" width="18" height="21"><path fill="#ffca30" d="M12 18C7 14 3 11.2 3 7.2A4.6 4.6 0 0 1 12 5a4.6 4.6 0 0 1 9 2.2c0 4-4 6.8-9 10.8z"/><path fill="none" stroke="#ffca30" stroke-width="2" stroke-linecap="round" d="M9 21h6M9.5 24h5"/><path fill="#ffca30" d="M10.5 26h3l-1.5 2z"/></svg></p>
   </div>
 </footer>
@@ -774,7 +782,7 @@ footer a:hover { color: var(--dark); }
       // Click through to the source; AI answers have none, so fall back to a web search.
       var href=a.url||'https://duckduckgo.com/?q='+encodeURIComponent(query);
       h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,'&quot;')+'" target="_blank" rel="noopener">'
-        +(a.title.toLowerCase()===query.toLowerCase()?'':'<h4>'+esc(a.title)+'</h4>')+'<p>'+esc(a.body)+'</p></a>';
+        +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3>'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
       credit='powered by '+a.src;
     }
     else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
