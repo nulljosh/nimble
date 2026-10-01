@@ -48,6 +48,8 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any
 
 ## Shipped
 
+- **Offline mode (2026-10-01):** graphs sample on device via QueryEngine/Compute.swift and docs/engine.js, not Curvely API. iOS and macOS use NWPathMonitor for instant network detection, show "You're offline. Math, units and graphs still work." Web app gained docs/sw.js service worker. Cleanup: removed root icon.svg, unused entitlements, gitignored ASC logs. 38 Swift and 8 JS tests green. Commit 131f5a9.
+
 - **iOS App Store link published (2026-09-24):** iOS 1.0.0 approved by App Review and went live on the App Store. README and landing page updated with App Store links for both iPhone and Mac using the same Universal Purchase ID (6807858746).
 
 - **Wikipedia starts in parallel (2026-09-10):** `QueryEngine.query()` only
