@@ -1,1 +1,1 @@
-/Users/joshua/Documents/Code/nimble/CLAUDE.md
+CLAUDE.md
