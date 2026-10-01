@@ -727,7 +727,8 @@ footer a:hover { color: var(--dark); }
 })();
 </script>
 
-<script src="engine.js?v=aiengine"></script>
+<script src="engine.js?v=offline"></script>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <script>
 // Live demo: the same engine the app ships.
 (function(){
@@ -748,7 +749,8 @@ footer a:hover { color: var(--dark); }
     var a=await answer(query), h='<div class="mockup-label">Answer</div>', credit='';
     if(a.kind==='convert'){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit='computed offline'; }
     else if(a.kind==='math'){ h+='<div class="mockup-big">'+a.value+'</div>'; credit='computed offline'; }
-    else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit='powered by Curvely'; }
+    else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit='computed offline'; }
+    else if(a.kind==='offline'){ h+='<p>You\'re offline. Math, units and graphs still work.</p>'; }
     else if(a.kind==='text'){
       // Click through to the source; AI answers have none, so fall back to a web search.
       var href=a.url||'https://duckduckgo.com/?q='+encodeURIComponent(query);

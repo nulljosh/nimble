@@ -13,7 +13,7 @@ Web app: `docs/index.html` (HTML + `docs/engine.js`) runs the same QueryEngine l
 Answer pipeline:
 1. **Math**: local `QueryEngine.evaluateMath()` (hand-written lexer + parser, replaces NSExpression which silently dropped trailing input)
 2. **Conversion**: local unit table + math (e.g., "5 miles in km")
-3. **Graphing**: fetch points from Curvely's `/api/sample` endpoint
+3. **Graphing**: sample y over x in [-10, 10] with the math parser, on device
 4. **Factual/definition**: DuckDuckGo Instant Answer API, fallback to Wikipedia search
 5. **AI fallback**: user's chosen engine (Nimble proxy on Workers AI, Claude, OpenAI, or Ollama)
 
@@ -24,7 +24,7 @@ Answer pipeline:
 | `Sources/NimbleApp.swift` | macOS app entry: borderless HUD window, global hotkey registration, menu bar extra, settings scene |
 | `Sources/iOS/NimbleApp.swift` | iOS app entry: window group, share button, what's-new sheet |
 | `Sources/Models/QueryEngine.swift` | Query classification (math/factual/definition), DuckDuckGo + Wikipedia API calls, math evaluation |
-| `Sources/Models/QueryEngine+Compute.swift` | Math evaluation: unit conversion, graph sampling via Curvely API |
+| `Sources/Models/QueryEngine+Compute.swift` | Math evaluation: unit conversion, offline graph sampling |
 | `Sources/Models/AppState.swift` | Observable state: query, result, theme, AI engine, preferences load/save, placeholder rotation |
 | `Sources/Models/AIEngine.swift` | AI engine enum (nimble, claude, openai, ollama) with display names and request formatting |
 | `Sources/Models/Preferences.swift` | Preferences struct: theme, math/math-update toggles, launch on startup (macOS), update check interval |
@@ -43,6 +43,7 @@ Answer pipeline:
 | `Sources/iOS/WhatsNewSheet.swift` | Modal sheet on version bump: title, bullet features, dismiss |
 | `docs/index.html` | Landing page: hero, mockup (device frame), "try it" demo, features, privacy link, GitHub link |
 | `docs/engine.js` | JavaScript port of QueryEngine: tryMath, tryConvert, tryGraph, fallback to answer proxy |
+| `docs/sw.js` | Service worker: network first, cached shell when offline |
 | `docs/privacy.html` | Privacy policy: no accounts, no tracking, no data retention |
 | `docs/splash.html` | Static splash screen (used by early PWA or app opening) |
 | `docs/tokens.css` | Nimble design tokens: imports shared Jaybulb palette, adds theme aliases |

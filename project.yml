@@ -70,8 +70,6 @@ targets:
         # application-identifier while the embedded profile does — Apple rejects
         # that combination for TestFlight with ITMS-90886. Hand-committed rather
         # than generated via xcodegen `entitlements.properties` (drops keys).
-        # NB: Resources/Nimble.entitlements is a macOS-flavoured file that is
-        # bundled as a *resource* and never wired to signing — not this one.
         CODE_SIGN_ENTITLEMENTS: Nimble-iOS.entitlements
   NimbleTests:
     type: bundle.unit-test

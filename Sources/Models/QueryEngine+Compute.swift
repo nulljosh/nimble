@@ -2,7 +2,7 @@ import Foundation
 import CoreGraphics
 
 // Wolfram-shaped queries the LLM answers badly: unit conversion and graphing.
-// Both run before the answer engine. Graph points come from Curvely's public API.
+// Both run before the answer engine, fully offline.
 extension QueryEngine {
 
     // MARK: - Units
@@ -85,20 +85,15 @@ extension QueryEngine {
         return q
     }
 
-    private struct Sample: Decodable { struct P: Decodable { let x: Double; let y: Double? }; let points: [P] }
-
-    func sampleGraph(_ expr: String, session: URLSession = .shared) async -> QueryResult? {
-        guard let url = URL(string: "https://curvely.heyitsmejosh.com/api/sample") else { return nil }
-        var req = URLRequest(url: url)
-        req.httpMethod = "POST"
-        req.setValue("application/json", forHTTPHeaderField: "content-type")
-        req.httpBody = try? JSONSerialization.data(withJSONObject: ["expr": expr, "from": -10, "to": 10, "samples": 200])
-        guard let (data, resp) = try? await session.data(for: req),
-              (resp as? HTTPURLResponse)?.statusCode == 200,
-              let s = try? JSONDecoder().decode(Sample.self, from: data) else { return nil }
-        let pts = s.points.compactMap { p -> CGPoint? in
-            guard let y = p.y, y.isFinite else { return nil }
-            return CGPoint(x: p.x, y: y)
+    /// Samples y over x in [-10, 10] with the same parser as the calculator. No network.
+    func sampleGraph(_ expr: String) -> QueryResult? {
+        let pts = (0...200).compactMap { i -> CGPoint? in
+            let x = -10 + Double(i) / 10
+            // Substitute x, then make implicit multiplication explicit: 2(x), (x)(x), 3sin(x).
+            let s = expr.replacingOccurrences(of: "x", with: "(\(x))", options: .regularExpression)
+                .replacingOccurrences(of: "(?<=[0-9)])\\s*(?=[a-z(])", with: "*", options: .regularExpression)
+            guard let y = Self.evaluateExpression(s) else { return nil }
+            return CGPoint(x: x, y: y)
         }
         guard pts.count > 2 else { return nil }
         return .graph(expr: expr, points: pts)

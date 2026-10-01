@@ -1,9 +1,17 @@
 import SwiftUI
+import Network
 #if os(macOS)
 import ServiceManagement
 #else
 import UIKit
 #endif
+
+// Started once at launch; currentPath is live from then on.
+private let pathMonitor: NWPathMonitor = {
+    let m = NWPathMonitor()
+    m.start(queue: .global(qos: .utility))
+    return m
+}()
 
 enum NimbleTheme: String, CaseIterable, Codable {
     case orange, red, yellow, green, blue, purple, pink, contrast
@@ -75,6 +83,7 @@ final class AppState {
     private var placeholderTimer: Timer?
 
     init() {
+        _ = pathMonitor
         loadPreferences()
         rotatePlaceholder()
         startPlaceholderTimer()
@@ -144,6 +153,17 @@ final class AppState {
             }
         }
 
+        if let graphExpr = queryEngine.graphExpression(text), let graph = queryEngine.sampleGraph(graphExpr) {
+            result = graph
+            return
+        }
+
+        // Fail fast offline instead of spinning through three request timeouts.
+        guard pathMonitor.currentPath.status == .satisfied else {
+            result = .error("You're offline. Math, units and graphs still work.", searchURL: nil)
+            return
+        }
+
         if aiConsent == nil {
             askingAIConsent = true
             return
@@ -153,12 +173,7 @@ final class AppState {
         result = .loading
         let engine = queryEngine
         let ai = self.ai
-        let graphExpr = queryEngine.graphExpression(text)
         Task { @MainActor [weak self] in
-            if let graphExpr, let graph = await engine.sampleGraph(graphExpr) {
-                self?.result = graph
-                return
-            }
             self?.result = await engine.query(text, ai: ai, useLLM: useLLM)
         }
     }

@@ -1,4 +1,4 @@
-<img src="icon.svg" width="80" style="border-radius:18px">
+<img src="docs/icon.svg" width="80" style="border-radius:18px">
 
 # Nimble
 
@@ -19,8 +19,9 @@ The original [Nimble](https://github.com/Maybulb/Nimble) was Electron plus Wolfr
 - **Knows what you meant.** Math, fact or definition, sorted before it answers.
 - **Two models, one answer.** Gemma and Qwen3 run in parallel on Cloudflare Workers AI. If they agree, you get it. If they don't, the two are folded into one sentence. The label under the answer names who said it.
 - **Falls back. Never fails.** DuckDuckGo, then Wikipedia, when the models say UNKNOWN.
-- **Math and units offline.** Arithmetic, trig, sqrt, log, powers, pi, and unit conversion ("5 miles to km", "100 F to C"). No network.
-- **Graphs.** "y = x^2" or "plot sin(x)" draws the curve, sampled by Curvely.
+- **Works offline.** Math, units and graphs never touch the network, the web app loads from cache, and a question asked offline says so right away instead of spinning.
+- **Math and units.** Arithmetic, trig, sqrt, log, powers, pi, and unit conversion ("5 miles to km", "100 F to C"). No network.
+- **Graphs.** "y = x^2" or "plot sin(x)" draws the curve, sampled on device.
 - **Numbers get a source.** A model's number is a guess, so numeric answers are cross-checked against DuckDuckGo and the sourced one wins.
 - **Summon it anywhere.** ⌥Space, or the menu bar.
 - **8 themes.** Orange, red, yellow, green, blue, purple, pink, contrast.

@@ -49,17 +49,24 @@ function tryConvert(s){
   return {from:t(v),to:t(out),fromUnit:from,toUnit:to};
 }
 
-// --- graph (points from Curvely's public API) ---
+// --- graph (sampled locally with tryMath, works offline) ---
 function graphExpr(s){
   let q=s.trim().toLowerCase();
   const verb=/^(plot|graph|draw|sketch)\s+/.test(q); q=q.replace(/^(plot|graph|draw|sketch)\s+/,"");
   const y=/^(y|f\(x\))\s*=\s*/.test(q); q=q.replace(/^(y|f\(x\))\s*=\s*/,"");
   return (verb||y) && q.includes("x") && /^[0-9a-z+\-*/^(). ]+$/.test(q) ? q : null;
 }
-async function graph(expr){
+function samplePoints(expr){
+  const pts=[];
+  for(let i=0;i<=200;i++){ const x=-10+i/10;
+    // Substitute x, then make implicit multiplication explicit: 2(x), (x)(x), 3sin(x).
+    const y=tryMath(expr.replace(/x/g,`(${x})`).replace(/(?<=[0-9)])\s*(?=[a-z(])/g,"*"));
+    if(y!==null) pts.push({x,y}); }
+  return pts;
+}
+function graph(expr){
   try{
-    const res=await getJSON("https://curvely.heyitsmejosh.com/api/sample",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({expr,from:-10,to:10,samples:200})});
-    const pts=(res?.points||[]).filter(p=>Number.isFinite(p.y)); if(pts.length<3) return null;
+    const pts=samplePoints(expr); if(pts.length<3) return null;
     const W=480,H=200, xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
     const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys), ys_=Math.max(y1-y0,1e-9);
     const X=x=>(x-x0)/(x1-x0)*W, Y=y=>H-(y-y0)/ys_*H;
@@ -195,8 +202,9 @@ async function answer(query){
   if(c) return {kind:"convert", ...c};
   const m = tryMath(query);
   if(m !== null) return {kind:"math", value:m};
-  const ge = graphExpr(query), svg = ge && await graph(ge);
+  const ge = graphExpr(query), svg = ge && graph(ge);
   if(svg) return {kind:"graph", expr:ge, svg};
+  if(typeof navigator!=="undefined" && navigator.onLine===false) return {kind:"offline"};
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
@@ -208,4 +216,4 @@ async function answer(query){
   return hit ? {kind:"text", ...hit} : {kind:"none"};
 }
 
-if(typeof module!=="undefined") module.exports={tryMath,tryConvert,convertValue,graphExpr,currencyExpr,first,answer,getJSON};
+if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,currencyExpr,first,answer,getJSON};

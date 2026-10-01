@@ -52,3 +52,10 @@ test("live sources", { skip: !process.env.LIVE }, async () => {
   assert.equal((await E.answer("define nimble")).src, "Wiktionary");
   assert.equal((await E.answer("Alan Turing")).kind, "text");
 });
+
+test("graph samples offline", () => {
+  const pts = E.samplePoints("2x^2");
+  assert.equal(pts.length, 201);
+  assert.equal(pts[0].y, 200);
+  assert.ok(Math.abs(E.samplePoints("3sin(x)")[100].y) < 1e-9);
+});

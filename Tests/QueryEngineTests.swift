@@ -165,4 +165,12 @@ extension QueryEngineTests {
         XCTAssertNil(engine.graphExpression("2 + 2"))
         XCTAssertNil(engine.graphExpression("graph the economy"))
     }
+
+    func testSampleGraphOffline() {
+        guard case let .graph(_, pts)? = engine.sampleGraph("2x^2") else { return XCTFail("no graph") }
+        XCTAssertEqual(pts.count, 201)
+        XCTAssertEqual(pts.first?.y ?? 0, 200, accuracy: 1e-9)  // 2 * (-10)^2
+        guard case let .graph(_, sine)? = engine.sampleGraph("3sin(x)") else { return XCTFail("no sine") }
+        XCTAssertEqual(sine[100].y, 0, accuracy: 1e-9)
+    }
 }
