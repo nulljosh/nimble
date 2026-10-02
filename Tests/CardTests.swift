@@ -30,7 +30,7 @@ final class CardTests: XCTestCase {
 
     func testEtymologyCard() {
         let card = QueryEngine.etymologyCard(word: "nimble", ancestor: "nymyl", relation: "derived", langCode: "enm")
-        XCTAssertEqual(card, .card(big: "nimble", unit: "enm", sub: "Derived from nymyl",
+        XCTAssertEqual(card, .card(big: "nimble", unit: "", sub: "Derived from nymyl, Middle English",
                                    source: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=nimble"))
     }
 

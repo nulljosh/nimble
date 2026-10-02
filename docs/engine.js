@@ -152,6 +152,7 @@ async function dictionary(query){
 const card=(big,unit,sub,src,url)=>({kind:"card", big:String(big), unit, sub, src, url});
 
 // Etymology card via wordroot's public API.
+const LANG={enm:"Middle English",ang:"Old English",la:"Latin",fr:"French",fro:"Old French",frm:"Middle French",grc:"Ancient Greek",el:"Greek",non:"Old Norse",de:"German",gmh:"Middle High German",goh:"Old High German",nl:"Dutch",dum:"Middle Dutch",it:"Italian",es:"Spanish",pt:"Portuguese",ar:"Arabic",he:"Hebrew",sa:"Sanskrit",ja:"Japanese",zh:"Chinese","gem-pro":"Proto-Germanic","ine-pro":"Proto-Indo-European","itc-pro":"Proto-Italic"};
 async function etymology(query){
   const m = /^(?:origin|etymology|root|where\s+does\s+the\s+word)\s+(?:of\s+)?(?:the\s+word\s+)?(.+?)(?:\s+come\s+from)?\s*\??$/i.exec(query.trim());
   if(!m) return null;
@@ -159,8 +160,10 @@ async function etymology(query){
   const e = await getJSON(`https://wordroot.heyitsmejosh.com/api/etymology/${encodeURIComponent(w.toLowerCase())}`);
   if(!e?.etymology?.length) return null;
   const first = e.etymology[0];
-  const sub = `${first.relation.charAt(0).toUpperCase() + first.relation.slice(1)} from ${first.ancestor}`;
-  return card(w, e.etymology[0].langCode || "etymology", sub, "Wordroot", `https://wordroot.heyitsmejosh.com/#search=${encodeURIComponent(w)}`);
+  // The language belongs in the sub line as a name, not inline after the word as a code.
+  const lang = LANG[first.langCode] || first.langCode;
+  const sub = `${first.relation.charAt(0).toUpperCase() + first.relation.slice(1)} from ${first.ancestor}${lang ? ", " + lang : ""}`;
+  return card(w, "", sub, "Wordroot", `https://wordroot.heyitsmejosh.com/#search=${encodeURIComponent(w)}`);
 }
 
 // --- currency ("100 usd to eur") via Frankfurter (ECB rates, CORS-open, no key) ---
@@ -347,7 +350,7 @@ async function renderAnswer(query, opts){
   else if(a.kind==="card"){
     // Same markup as convert; the whole card opens its source like a text answer does.
     const href=esc(a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query)).replace(/"/g,"&quot;");
-    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big">'+esc(a.big)+(a.unit[0]==="°"?"":" ")+esc(a.unit)+'</div><p>'+esc(a.sub)+'</p></a>';
+    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big">'+esc(a.big)+(a.unit?(a.unit[0]==="°"?"":" ")+esc(a.unit):"")+'</div><p>'+esc(a.sub)+'</p></a>';
     credit="powered by "+a.src;
   }
   else if(a.kind==="math"){ h+='<div class="mockup-big">'+a.value+'</div>'; credit="computed offline"; }

@@ -72,9 +72,9 @@ test("etymology is a card", async () => {
   setup();
   try {
     const a = await E.answer("etymology of nimble");
-    assert.deepEqual(a, { kind: "card", big: "nimble", unit: "enm", sub: "Derived from nymyl", src: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=nimble" });
+    assert.deepEqual(a, { kind: "card", big: "nimble", unit: "", sub: "Derived from nymyl, Middle English", src: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=nimble" });
     const r = await E.renderAnswer("etymology of nimble");
-    assert.match(r.h, /mockup-big">nimble enm</);
+    assert.match(r.h, /mockup-big">nimble</);
     assert.match(r.h, /<p>Derived from nymyl<\/p>/);
     assert.equal(r.credit, "powered by Wordroot");
     assert.equal(r.kind, "card");

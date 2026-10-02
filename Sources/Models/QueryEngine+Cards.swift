@@ -42,10 +42,14 @@ extension QueryEngine {
 
     // MARK: - Builders (pure, so the tests need no network)
 
+    static let langNames: [String: String] = ["enm": "Middle English", "ang": "Old English", "la": "Latin", "fr": "French", "fro": "Old French", "frm": "Middle French", "grc": "Ancient Greek", "el": "Greek", "non": "Old Norse", "de": "German", "gmh": "Middle High German", "goh": "Old High German", "nl": "Dutch", "dum": "Middle Dutch", "it": "Italian", "es": "Spanish", "pt": "Portuguese", "ar": "Arabic", "he": "Hebrew", "sa": "Sanskrit", "ja": "Japanese", "zh": "Chinese", "gem-pro": "Proto-Germanic", "ine-pro": "Proto-Indo-European", "itc-pro": "Proto-Italic"]
+
     static func etymologyCard(word: String, ancestor: String, relation: String, langCode: String) -> QueryResult {
         let relationCapitalized = relation.prefix(1).uppercased() + relation.dropFirst()
-        let sub = "\(relationCapitalized) from \(ancestor)"
-        return .card(big: word, unit: langCode, sub: sub, source: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=\(word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word)")
+        // The language belongs in the sub line as a name, not inline after the word as a code.
+        let lang = langNames[langCode] ?? langCode
+        let sub = "\(relationCapitalized) from \(ancestor)" + (lang.isEmpty ? "" : ", \(lang)")
+        return .card(big: word, unit: "", sub: sub, source: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=\(word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word)")
     }
 
     static func weatherCard(place: String, country: String?, temp: Double, code: Int, wind: Double) -> QueryResult {
