@@ -29,8 +29,8 @@ submit if a session is live. Model tags route the subagent.
 - [x] /languages sweep: i18n for every surface, a11y basics, VoiceOver labels. [Sonnet]
 - [x] KMP parity: cards + voice where the platform allows. Windows and Android show etymology, weather, time and currency cards; Android has the mic (RecognizerIntent), desktop has none. [Sonnet]
 - [x] Landing to A+ against Plank: calm hero, generated numbers only, retina check at 4x. [Opus]
-- [ ] Docs 100%: ARCHITECTURE.md rows for every source file, architecture.svg refreshed. [Haiku]
-- [ ] TUI builds again: `swift build` at the root compiles with AIEngine.swift and Turns.swift in the target, and test.yml builds it so it cannot rot. [Haiku]
+- [x] Docs 100%: ARCHITECTURE.md rows for every source file, architecture.svg refreshed. [Haiku]
+- [x] TUI builds again: `swift build` at the root compiles with AIEngine.swift and Turns.swift in the target, and test.yml builds it so it cannot rot. [Haiku]
 
 Rules for the loop: usage line at or above 88% on any window means /checkpoint
 and stop. One subagent at a time, 10 minute cap, worktree not needed. Mac zip is

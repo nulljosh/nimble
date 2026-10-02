@@ -19,6 +19,13 @@ jobs:
           node-version: 22
       - run: node --test 'test/*.test.*js'
 
+  tui:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift build
+
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 5

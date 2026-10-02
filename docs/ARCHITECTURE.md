@@ -21,7 +21,7 @@ Answer pipeline:
 
 | File | What it owns |
 |---|---|
-| `Sources/NimbleApp.swift` | macOS app entry: borderless HUD window, global hotkey registration, menu bar extra, settings scene |
+| `Sources/NimbleApp.swift` | Shared app root: @main entry, window registration, global hotkey setup (macOS), app state initialization |
 | `Sources/iOS/NimbleApp.swift` | iOS app entry: window group, share button, what's-new sheet |
 | `Sources/Models/QueryEngine.swift` | Query classification (math/factual/definition), DuckDuckGo + Wikipedia API calls, math evaluation |
 | `Sources/Models/QueryEngine+Compute.swift` | Math evaluation: unit conversion, offline graph sampling |
@@ -29,7 +29,9 @@ Answer pipeline:
 | `Sources/Models/AIEngine.swift` | AI engine enum (nimble, claude, openai, ollama) with display names and request formatting |
 | `Sources/Models/Preferences.swift` | Preferences struct: theme, math/math-update toggles, launch on startup (macOS), update check interval |
 | `Sources/Models/QueryResult.swift` | Result enum: none, loading, math, text, definition, color, convert, graph |
-| `Sources/Models/UpdateChecker.swift` | macOS-only: checks GitHub Releases for new versions |
+| `Sources/Models/QueryEngine+Cards.swift` | Weather, currency, local time and etymology cards: pattern matching and API calls for factual queries |
+| `Sources/Models/SearchHistory.swift` | Local search history persistence: newest first, deduped, last 50 entries, JSON file in Application Support |
+| `Sources/Models/Turns.swift` | TurnBuffer for follow-up memory: tracks last three Q/A pairs in memory for contextual follow-ups like "in celsius?" |
 | `Sources/Views/SearchView.swift` | macOS search UI: text input, result display, accessibility focus management |
 | `Sources/Views/ResultView.swift` | Result rendering: math, text with source link, definitions, colors, conversions, graphs |
 | `Sources/Views/ContextMenuView.swift` | Right-click menu: theme picker, AI engine selector, settings link |
@@ -69,6 +71,8 @@ Answer pipeline:
 | `tui/` (Swift TUI variant, not deployed) | Terminal UI using SwiftTUI |
 | `tui/main.swift` | CLI entry: fetches from `/api/sample` endpoint, renders results as text cards |
 | `.github/workflows/` | CI/CD: build + test on push, release on tags |
+| `functions/api/[[route]].js` | Cloudflare Functions API endpoint: `/sample` route returns cached sample queries, `/ask` routes to answer tools |
+| `functions/lib/tools.js` | Shared answer tools definition: query classification, math eval, conversions, graphs; called by both API routes and MCP |
 | `Tests/PreferencesTests.swift` | Preferences persistence (load/save), theme colors, AI config |
 | `Tests/QueryEngineTests.swift` | Query evaluation: 150+ cases (arithmetic, trig, functions, edge cases) |
 | `Tests/QuickAskTests.swift` | App group round trip for the widget, plus an ImageRenderer snapshot of the menu bar quick ask |
