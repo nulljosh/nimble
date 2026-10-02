@@ -50,7 +50,12 @@ extension QueryEngine {
             let g = (1...3).map { ns.substring(with: match.range(at: $0)) }
             let (value, from, to) = i == 0 ? (g[0], g[1], g[2]) : (g[1], g[2], g[0])
             guard let v = Double(value), let out = Self.convertValue(v, from: from, to: to) else { return nil }
-            return .convert(from: Self.trim(v), to: Self.trim(out), fromUnit: from, toUnit: to)
+            // "180 c to f" reads back as °C and °F, not the letters that were typed.
+            let deg = ["c": "°C", "f": "°F", "k": "K"]
+            let temp = Self.units[from]?.dim == "temp"
+            return .convert(from: Self.trim(v), to: Self.trim(out),
+                            fromUnit: temp ? deg[String(from.prefix(1))] ?? from : from,
+                            toUnit: temp ? deg[String(to.prefix(1))] ?? to : to)
         }
         return nil
     }

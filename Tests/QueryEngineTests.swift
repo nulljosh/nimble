@@ -157,6 +157,8 @@ extension QueryEngineTests {
 
     func testConvertRejectsMixedDimensions() {
         XCTAssertNil(engine.convert("5 miles to kg"))
+        guard case .convert(_, let f, let cu, let fu)? = engine.convert("180 c to f") else { return XCTFail() }
+        XCTAssertEqual(f, "356"); XCTAssertEqual(cu, "°C"); XCTAssertEqual(fu, "°F")
         XCTAssertNil(engine.convert("who is the ceo of apple"))
     }
 

@@ -59,7 +59,10 @@ echo "==> Verifying signature"
 codesign --verify --strict --verbose=2 "$APP"
 # Fails loudly if the hardened runtime flag did not make it into the signature —
 # notarization would reject it a few minutes later anyway.
-codesign -d --verbose=2 "$APP" 2>&1 | grep -q "flags=.*runtime" \
+# Capture, don't pipe: under pipefail, grep -q quitting early SIGPIPEs codesign
+# and the pipeline "fails" on a perfectly good signature.
+sig=$(codesign -d --verbose=2 "$APP" 2>&1)
+[[ "$sig" == *"flags="*"(runtime)"* ]] \
   || { echo "hardened runtime missing from signature"; exit 1; }
 
 echo "==> Notarizing (this waits on Apple, usually a few minutes)"
