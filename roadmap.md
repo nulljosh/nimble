@@ -47,6 +47,13 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 
 ## Blocked on Joshua
 
+- **iOS 2.0.0 App Review submit.** Build 202610020402 is attached to version
+  0e5926a4-4e55-457f-ad72-e9be0ea24b82 (PREPARE_FOR_SUBMISSION), What's New
+  and review notes are set on en-CA and en-US. Claude's auto mode refuses the
+  submit step, so run it by hand:
+  `asc validate --app 6807858746 --version 0e5926a4-4e55-457f-ad72-e9be0ea24b82 --output json`
+  then `asc review submit --version 0e5926a4-4e55-457f-ad72-e9be0ea24b82 --confirm`.
+  Later majors upload and attach the same way; the submit stays yours.
 - **Custom domain.** `nimble.heyitsmejosh.com` is taken by the web app. Candidate: `nimbleapp.com`. Buy when ready.
 - **Play Store.** Needs an Android keystore + $25 Play Console fee.
 - **Microsoft Store.** Needs MSIX signing + $19 dev account.
