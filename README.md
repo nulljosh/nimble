@@ -16,6 +16,7 @@ Math, units and graphs answer on the device. Everything else goes to two open mo
 <img src="docs/screenshots/ios-graph.jpg" width="180">
 <img src="docs/screenshots/ios-math-dark.jpg" width="180">
 </p>
+<img src="docs/screenshots/mac-dark.jpg" width="480">
 
 ## Get it
 

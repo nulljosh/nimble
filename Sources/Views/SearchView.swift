@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(AppState.self) private var state
+    @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isInputFocused: Bool
 
@@ -145,13 +146,19 @@ struct SearchView: View {
         .background(
             ZStack {
                 VisualEffectView(material: .popover, blendingMode: .behindWindow)
+                // The adaptive material is a flat grey in dark mode; the old HUD ink brings the depth back.
+                if scheme == .dark { Color(red: 0.07, green: 0.07, blue: 0.118).opacity(0.55) }
             }
         )
         // Follows the system appearance; the .popover material adapts with it.
         .preferredColorScheme(state.theme.colorScheme)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.primary.opacity(0.1), lineWidth: 1))
-        .onAppear { isInputFocused = true }
+        .onAppear {
+            // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
+            if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery() }
+            isInputFocused = true
+        }
         .contextMenu { ContextMenuView().environment(state) }
     }
 
