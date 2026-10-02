@@ -26,7 +26,8 @@ a { color: inherit; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: var(--tracking-tight); text-decoration: none; }
 .brand img { width: 30px; height: 30px; border-radius: 8px; }
 .top nav a { font-size: 14px; color: var(--text-mid); text-decoration: none; margin-left: 18px; }
-.top nav a:hover { color: var(--text); }
+.top nav a:hover, .top nav button:hover { color: var(--text); }
+.top nav button { border: 0; background: none; font: inherit; font-size: 14px; color: var(--text-mid); margin-left: 18px; cursor: pointer; }
 
 main { flex: 1; width: 100%; max-width: 640px; margin: 0 auto; padding: 8vh 20px 40px; }
 h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: 1.1; margin-bottom: 24px; text-align: center; }
@@ -61,6 +62,10 @@ form { position: relative; }
 .card svg { width: 100%; height: auto; color: var(--yellow-deep); }
 .mockup-link { display: block; text-decoration: none; }
 .mockup-link p { text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 4px; color: var(--text); }
+.consent-actions { display: flex; gap: 10px; margin-top: 16px; }
+.consent-actions button { border: 1px solid var(--line); background: none; color: var(--text); border-radius: 10px; padding: 9px 16px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+.consent-actions .consent-yes { border-color: transparent; background: var(--yellow); color: #000; }
+.consent-actions .consent-no:hover { border-color: var(--yellow-deep); }
 .credit { margin-top: 14px; font-size: 12px; color: var(--text-light); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 24px; }
@@ -75,7 +80,7 @@ form { position: relative; }
 <body>
 <header class="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
-  <nav><a href="/#install">Get the app</a><a href="https://github.com/nulljosh/nimble">Source</a></nav>
+  <nav><button type="button" id="ai" aria-live="polite"></button><a href="/#install">Get the app</a><a href="https://github.com/nulljosh/nimble">Source</a></nav>
 </header>
 <main>
   <h1>Ask anything.</h1>
@@ -106,6 +111,25 @@ form { position: relative; }
     r.innerHTML=res.h+(res.credit?'<div class="credit">'+res.credit+'</div>':'');
   }
   f.addEventListener('submit',function(e){ e.preventDefault(); run(); });
+  // AI switch: on = the model may answer, off = DuckDuckGo and Wikipedia only, ask = not chosen yet.
+  var ai=document.getElementById('ai');
+  function paintAI(){
+    var c=aiConsent();
+    ai.textContent='AI: '+(c==='yes'?'on':c==='no'?'off':'ask');
+    ai.title=c===null?'Not chosen yet. Click to choose.':'Click to turn AI answers '+(c==='yes'?'off':'on');
+  }
+  paintAI();
+  ai.addEventListener('click',function(){
+    var c=aiConsent();
+    if(c===null){ r.hidden=false; r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient()); return; }
+    aiConsent(c==='yes'?'no':'yes'); paintAI();
+  });
+  // The consent card lives inside the result; Allow and Don't allow re-run the same question.
+  r.addEventListener('click',function(e){
+    var b=e.target.closest('[data-consent]'); if(!b) return;
+    aiConsent(b.dataset.consent); paintAI();
+    if(q.value.trim()) run(q.value); else r.hidden=true;
+  });
   fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
     list.sort(function(){return Math.random()-0.5;}).slice(0,6).forEach(function(s){
       var b=document.createElement('button'); b.type='button'; b.textContent=s;

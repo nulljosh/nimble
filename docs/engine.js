@@ -196,6 +196,31 @@ function aiConfig(){
   catch{ return {engine:"nimble", apiKey:"", model:"", baseURL:""}; }
 }
 function saveAIConfig(c){ try{ localStorage.setItem("nimble.ai", JSON.stringify(c)); }catch{} }
+// --- AI consent (same rule as the native apps) ---
+// unset = ask, "no" = DuckDuckGo and Wikipedia only, "yes" = the model may answer.
+// Outside a browser (the /api and /mcp workers) there is no localStorage and the caller
+// asked for an answer on purpose, so that side counts as "yes".
+let memConsent = null; // fallback when storage is blocked, so a choice still lasts the page
+function aiConsent(v){
+  if(typeof localStorage==="undefined") return "yes";
+  if(v!==undefined){
+    memConsent = v;
+    try{ v ? localStorage.setItem("nimble.aiConsent", v) : localStorage.removeItem("nimble.aiConsent"); }catch{}
+    return v;
+  }
+  try{ const s = localStorage.getItem("nimble.aiConsent"); return s==="yes"||s==="no" ? s : null; }
+  catch{ return memConsent; }
+}
+// Who receives the question, named in the consent card. Mirrors AppState.aiRecipient.
+function aiRecipient(){
+  const c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
+  switch(e.key && !c.apiKey ? "nimble" : c.engine){
+    case "claude": return "Anthropic (Claude)";
+    case "openai": return "OpenAI";
+    case "ollama": return "your own Ollama server";
+    default: return "Nimble's answer service, which runs Google Gemma and Alibaba Qwen models on Cloudflare Workers AI";
+  }
+}
 async function gemma(query){
   let c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
   if(e.key && !c.apiKey){ c = {engine:"nimble"}; e = ENGINES.nimble; } // no key = free proxy
@@ -224,8 +249,9 @@ async function firstOf(query, fns){
   return null;
 }
 
-// One call, one normalized answer. kind: convert | math | graph | text | none
-async function answer(query){
+// One call, one normalized answer. kind: convert | math | graph | text | consent | none
+// opts.ifUnset: what to assume while consent is unset ("no" for the landing demo's examples).
+async function answer(query, opts={}){
   const c = tryConvert(query);
   if(c) return {kind:"convert", ...c};
   const m = tryMath(query);
@@ -238,19 +264,34 @@ async function answer(query){
   if(cur) return cur;
   const live = await firstOf(query, [dictionary, weather, localTime]);
   if(live) return {kind:"text", ...live};
+  const consent = aiConsent() || opts.ifUnset || null;
+  if(consent===null) return {kind:"consent", recipient:aiRecipient()};
+  if(consent==="no"){
+    const hit = await firstOf(query, [ddg, wiki]);
+    return hit ? {kind:"text", ...hit} : {kind:"none"};
+  }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
   const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await firstOf(query, [wiki]));
   return hit ? {kind:"text", ...hit} : {kind:"none"};
 }
 
-// Answer as HTML, shared by the landing demo and /app. Returns {h, credit}.
-async function renderAnswer(query){
+// The consent card, same words as the native prompt. Pages wire the buttons by data-consent.
+function consentHTML(recipient){
   const esc=t=>String(t).replace(/</g,"&lt;");
-  const a=await answer(query); let h='<div class="mockup-label">Answer</div>', credit='';
+  return '<div class="mockup-label">Before I answer</div><h3>Send your question to an AI service?</h3><p>To answer, Nimble sends the text you type, and nothing else, to '+esc(recipient)
+    +'. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don\'t allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.</p>'
+    +'<div class="consent-actions"><button type="button" class="consent-yes" data-consent="yes">Allow</button><button type="button" class="consent-no" data-consent="no">Don\'t allow</button></div>';
+}
+
+// Answer as HTML, shared by the landing demo and /app. Returns {h, credit}.
+async function renderAnswer(query, opts){
+  const esc=t=>String(t).replace(/</g,"&lt;");
+  const a=await answer(query, opts); let h='<div class="mockup-label">Answer</div>', credit='';
   if(a.kind==="convert"){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit="computed offline"; }
   else if(a.kind==="math"){ h+='<div class="mockup-big">'+a.value+'</div>'; credit="computed offline"; }
   else if(a.kind==="graph"){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit="computed offline"; }
+  else if(a.kind==="consent"){ h=consentHTML(a.recipient); }
   else if(a.kind==="offline"){ h+="<p>You're offline. Math, units and graphs still work.</p>"; }
   else if(a.kind==="text"){
     // Click through to the source; AI answers have none, so fall back to a web search.
@@ -263,4 +304,4 @@ async function renderAnswer(query){
   return {h, credit};
 }
 
-if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON};
+if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient};
