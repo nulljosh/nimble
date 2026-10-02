@@ -148,6 +148,11 @@ struct SearchView: View {
         // stayed unpainted and rendered black.
         .background(Color(uiColor: .systemBackground).ignoresSafeArea())
         .preferredColorScheme(state.theme.colorScheme)
+        // nimble://ask from the widget: land with the caret in the field.
+        .onOpenURL { url in
+            guard url.scheme == "nimble" else { return }
+            Task { try? await Task.sleep(for: .milliseconds(300)); isInputFocused = true }
+        }
         .tint(state.theme.color)  // caret and toolbar in the theme accent, not system blue
     }
 

@@ -4,6 +4,7 @@ import Network
 import ServiceManagement
 #else
 import UIKit
+import WidgetKit
 #endif
 
 // Started once at launch; currentPath is live from then on.
@@ -134,20 +135,20 @@ final class AppState {
         // Units, then math, both offline
         if let converted = queryEngine.convert(text) {
             result = converted
-            history.add(text)
+            remember(text)
             return
         }
         if mathEnabled {
             if let mathResult = queryEngine.evaluateMath(text) {
                 result = .math(mathResult)
-                history.add(text)
+                remember(text)
                 return
             }
         }
 
         if let graphExpr = queryEngine.graphExpression(text), let graph = queryEngine.sampleGraph(graphExpr) {
             result = graph
-            history.add(text)
+            remember(text)
             return
         }
 
@@ -165,7 +166,7 @@ final class AppState {
             Task { @MainActor [weak self] in
                 if let card = await engine.card(text) {
                     self?.result = card
-                    self?.history.add(text)
+                    self?.remember(text)
                 } else {
                     self?.result = .none
                     self?.askAnswerEngine(text)
@@ -192,10 +193,21 @@ final class AppState {
             self?.result = answer
             switch answer {
             case .error, .none, .loading: break
-            default: self?.history.add(text)
+            default: self?.remember(text)
             }
             if useLLM, case .text(_, let body, _, _, _) = answer { self?.turns.add(text, body) }
         }
+    }
+
+    /// Every answered question goes to history, and on iOS to the widget too.
+    private func remember(_ text: String) {
+        history.add(text)
+        #if os(iOS)
+        if let answer = result.copyText {
+            SharedAnswer.save(question: text, answer: answer)
+            WidgetCenter.shared.reloadAllTimelines()
+        }
+        #endif
     }
 
     /// Clearing history also forgets the follow-up context.

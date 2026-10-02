@@ -34,14 +34,12 @@ struct NimbleApp: App {
             SettingsView().environment(appState)
         }
 
+        // A window, not a menu: ask from the menu bar without summoning the HUD.
         MenuBarExtra("Nimble", systemImage: "magnifyingglass") {
-            Button("Open Nimble") { showMain() }
-                .keyboardShortcut(" ", modifiers: .option)
-            SettingsLink { Text("Settings…") }
-            Divider()
-            Button("Quit Nimble") { NSApp.terminate(nil) }
-                .keyboardShortcut("q")
+            QuickAskView(openMain: showMain)
+                .environment(appState)
         }
+        .menuBarExtraStyle(.window)
     }
 
     private func showMain() {

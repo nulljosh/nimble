@@ -79,6 +79,28 @@ targets:
         # that combination for TestFlight with ITMS-90886. Hand-committed rather
         # than generated via xcodegen `entitlements.properties` (drops keys).
         CODE_SIGN_ENTITLEMENTS: Nimble-iOS.entitlements
+    dependencies:
+      - target: NimbleWidget
+  # Home screen widget: the last answer, tap to ask. Reads the app group the app writes.
+  NimbleWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Widget
+        excludes:
+          - "*.plist"
+          - "*.entitlements"
+      - path: Sources/Models/SharedAnswer.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios.widget
+        PRODUCT_NAME: NimbleWidget
+        INFOPLIST_FILE: Widget/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Nimble
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Widget/NimbleWidget.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"
   NimbleTests:
     type: bundle.unit-test
     platform: macOS

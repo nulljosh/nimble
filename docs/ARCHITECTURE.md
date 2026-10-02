@@ -39,6 +39,9 @@ Answer pipeline:
 | `Sources/Views/ThemePickerView.swift` | Theme circle button: toggles settings visibility on click |
 | `Sources/Views/VisualEffectView.swift` | macOS HUD glass background wrapping NSVisualEffectView |
 | `Sources/macOS/GlobalHotkey.swift` | Carbon RegisterEventHotKey wrapper for ⌥Space system-wide hotkey |
+| `Sources/macOS/QuickAskView.swift` | Menu bar window: search field, the answer at 360pt, Open Nimble / Settings / Quit; shares the HUD's AppState |
+| `Sources/Models/SharedAnswer.swift` | Last question and answer in the `group.com.nulljosh.nimble` app group, written by iOS after each answer, read by the widget |
+| `Widget/NimbleWidget.swift` | iOS home screen widget, small and medium: last answer, tap opens `nimble://ask` with the field focused |
 | `Sources/iOS/SearchView.swift` | iOS search UI: large search bar, results below in a scroll view, nav stack for context |
 | `Sources/iOS/PreferencesView.swift` | iOS settings list: theme, AI engine, math toggle, about links |
 | `Sources/iOS/WhatsNewSheet.swift` | Modal sheet on version bump: title, bullet features, dismiss |
@@ -58,6 +61,7 @@ Answer pipeline:
 | `.github/workflows/` | CI/CD: build + test on push, release on tags |
 | `Tests/PreferencesTests.swift` | Preferences persistence (load/save), theme colors, AI config |
 | `Tests/QueryEngineTests.swift` | Query evaluation: 150+ cases (arithmetic, trig, functions, edge cases) |
+| `Tests/QuickAskTests.swift` | App group round trip for the widget, plus an ImageRenderer snapshot of the menu bar quick ask |
 | `test/engine.test.js` | Node tests for JavaScript QueryEngine: math evaluation, unit conversion, currency parsing, graph expression parsing, first-sentence extraction, safe JSON fetching (offline by default, LIVE=1 for real API) |
 | `scripts/build-site.sh` | Site assembly: copies `docs/` to `dist/` for static deployment (no bundler) |
 | `scripts/bump-version.sh` | Version bump utility: updates MARKETING_VERSION in project.yml and version badges in README/CLAUDE across macOS, iOS, and web app repos |
