@@ -4,9 +4,9 @@ import SwiftUI
 // it was pinned at "1.2.0" while the project shipped 1.0.0, a version that never existed.
 let whatsNewVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 private let whatsNewBullets = [
-    "Recent questions, on every surface, never leaving the device",
-    "Follow-ups: ask \"and in celsius?\" and Nimble remembers",
-    "Clear your history any time",
+    "Weather, currency, time and word origins come back as cards",
+    "Share any answer as a yellow card",
+    "A home screen widget with your last answer",
 ]
 
 struct WhatsNewSheet: View {

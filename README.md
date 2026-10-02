@@ -2,7 +2,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v3.3.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v4.0.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -15,6 +15,7 @@ Math, units and graphs answer on the device. Everything else goes to two open mo
 <img src="docs/screenshots/ios-convert.jpg" width="180">
 <img src="docs/screenshots/ios-graph.jpg" width="180">
 <img src="docs/screenshots/ios-math-dark.jpg" width="180">
+<img src="docs/screenshots/ios-card.jpg" width="180">
 </p>
 <img src="docs/screenshots/mac-dark.jpg" width="480">
 
