@@ -343,7 +343,7 @@ main > section:not(.hero) h2 {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 3rem;
 }
 
@@ -516,10 +516,6 @@ footer {
       <div class="feature">
         <h3 data-i18n="Graphs">Graphs</h3>
         <p>Type <em>y = x^2</em> or <em>plot sin(x)</em> and get the curve, sampled on device.</p>
-      </div>
-      <div class="feature">
-        <h3 data-i18n="Every platform">Every platform</h3>
-        <p>Native on Mac and iPhone, SwiftUI, no Electron. Windows, Android and this page run the same engine. Light and dark follow your system.</p>
       </div>
     </div>
   </div>
@@ -769,7 +765,7 @@ footer {
   if (narrow) {
     pairs = pairs.filter(function (p) { return p[0].length <= 17 && p[1].length <= 15; });
   }
-  var want = Math.min(pairs.length, narrow ? 1 : Math.floor(window.innerWidth / 480));
+  var want = narrow ? 0 : Math.min(pairs.length, Math.floor(window.innerWidth / 480));  // phones get icons only
   for (var n = 0; n < want; n++) {
     var ask = document.createElement('div');
     ask.className = 'float ask';
