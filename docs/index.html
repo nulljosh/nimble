@@ -141,6 +141,11 @@ a:hover { text-decoration: underline; }
   margin-bottom: 1rem;
 }
 
+.hero-version {
+  font-variant: var(--caption); letter-spacing: 0.08em;
+  font-size: 0.85rem !important; color: rgba(0,0,0,0.5) !important;
+  margin: -0.25rem auto 1.25rem !important; min-height: 1.2em;
+}
 .hero p {
   font-size: clamp(1rem, 2.5vw, 1.2rem);
   color: rgba(0,0,0,0.6);
@@ -473,6 +478,7 @@ footer a:hover { color: var(--dark); }
   </header>
   <div class="container hero-copy">
     <h1>Ask a question. Get one sentence back.</h1>
+    <p class="hero-version" id="ver" aria-live="polite"></p>
     <p>Math and units answer on your device. Everything else, one sentence with a source.</p>
     <div class="hero-buttons">
       <a href="/app" class="btn btn-dark">Open the web app</a>
@@ -665,8 +671,9 @@ footer a:hover { color: var(--dark); }
   // clumps and leaves bald patches, which reads as a bug, not as scattering.
   // A phone hero is tall and narrow, so it gets its own grid and smaller
   // icons, the desktop numbers leave a bare column down one side.
-  var cols = narrow ? 3 : Math.max(3, Math.min(7, Math.round(window.innerWidth / 190)));
-  var rows = narrow ? 5 : 4;
+  // Sparse on purpose: the field is texture behind the copy, not the subject.
+  var cols = narrow ? 2 : Math.max(3, Math.min(5, Math.round(window.innerWidth / 280)));
+  var rows = narrow ? 4 : 3;
   var minSize = narrow ? 18 : 28, maxSize = narrow ? 34 : 56;
   for (var r = 0; r < rows; r++) {
     for (var c = 0; c < cols; c++) {
@@ -676,7 +683,7 @@ footer a:hover { color: var(--dark); }
       el.className = 'float';
       el.style.left = x.toFixed(2) + '%';
       el.style.top = y.toFixed(2) + '%';
-      el.style.opacity = (0.3 + 0.7 * edgeAt(x, y)).toFixed(2);
+      el.style.opacity = (0.2 + 0.55 * edgeAt(x, y)).toFixed(2);
       el.style.setProperty('--size', rand(minSize, maxSize).toFixed(1) + 'px');
       el.style.setProperty('--rot', rand(4, 10).toFixed(1) + 'deg');
       el.style.setProperty('--bdur', rand(7, 16).toFixed(1) + 's');
@@ -698,7 +705,7 @@ footer a:hover { color: var(--dark); }
   // percentages per breakpoint, place each pair against the real measured
   // boxes and keep the ones that land clear. Self-tuning at any width.
   var blockers = [];
-  ['.hero-nav', '.hero h1', '.hero-copy > p', '.hero-buttons', '.hero .device'].forEach(function (sel) {
+  ['.hero-nav', '.hero h1', '.hero-copy > p', '.hero-version', '.hero-buttons', '.hero .device'].forEach(function (sel) {
     var n = hero.querySelector(sel);
     if (n) blockers.push(n.getBoundingClientRect());
   });
@@ -719,7 +726,7 @@ footer a:hover { color: var(--dark); }
   if (narrow) {
     pairs = pairs.filter(function (p) { return p[0].length <= 17 && p[1].length <= 15; });
   }
-  var want = Math.min(pairs.length, narrow ? 3 : Math.round(window.innerWidth / 220));
+  var want = Math.min(pairs.length, narrow ? 2 : Math.round(window.innerWidth / 320));
   for (var n = 0; n < want; n++) {
     var ask = document.createElement('div');
     ask.className = 'float ask';
@@ -745,7 +752,7 @@ footer a:hover { color: var(--dark); }
                   top: m.top - slack.y, bottom: m.bottom + slack.y };
       if (clear(box)) {
         // Words need more contrast than a shape does to stay readable.
-        ask.style.opacity = (0.55 + 0.45 * edgeAt(ax, ay)).toFixed(2);
+        ask.style.opacity = (0.45 + 0.4 * edgeAt(ax, ay)).toFixed(2);
         // Block out the travel, not the snapshot: rect() reports wherever the
         // drift has this pair right now, so storing that lets the next one
         // settle somewhere they later drift through each other.
@@ -800,6 +807,7 @@ footer a:hover { color: var(--dark); }
 })();
 // Point download buttons at the latest release assets.
 fetch('https://api.github.com/repos/nulljosh/nimble/releases/latest').then(function(r){return r.json();}).then(function(rel){
+  if(rel.tag_name) document.getElementById('ver').textContent=rel.tag_name;
   document.querySelectorAll('[data-asset]').forEach(function(a){
     var hit=(rel.assets||[]).find(function(x){return x.name.endsWith(a.dataset.asset);});
     if(hit) a.href=hit.browser_download_url;
