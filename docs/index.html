@@ -408,6 +408,38 @@ a:hover { text-decoration: underline; }
   text-decoration: underline;
 }
 
+/* For agents */
+.agents {
+  padding: 4rem 0;
+  text-align: center;
+  border-top: 1px solid var(--line);
+}
+
+.agents h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.agents p {
+  font-size: 1rem;
+  color: var(--mid);
+  max-width: 480px;
+  margin: 0 auto 1.5rem;
+}
+
+.agents code {
+  display: block;
+  max-width: 560px;
+  margin: 0 auto 0.75rem;
+  padding: 0.7rem 1rem;
+  background: var(--color-bg2);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
 /* Footer */
 footer {
   padding: 2rem 0;
@@ -590,6 +622,15 @@ footer {
     <h2>Free &amp; Open Source</h2>
     <p>Nimble is MIT licensed. A ground-up rewrite of the original <a href="https://github.com/Maybulb/Nimble">Maybulb/Nimble</a> in native SwiftUI. No API keys, no accounts, no subscriptions.</p>
     <a href="https://github.com/nulljosh/nimble" class="btn btn-dark">View on GitHub</a>
+  </div>
+</section>
+
+<section class="agents" id="agents">
+  <div class="container">
+    <h2>For agents</h2>
+    <p>Nimble has a REST API and an MCP server. Same four tools: answer, convert, math, graph.</p>
+    <code>curl https://nimble.heyitsmejosh.com/api/answer?q=5+miles+to+km</code>
+    <code>https://nimble.heyitsmejosh.com/mcp</code>
   </div>
 </section>
 

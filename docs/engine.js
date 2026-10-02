@@ -12,14 +12,40 @@ async function getJSON(url, opts){
 }
 
 // --- offline math ---
-// ponytail: whitelist-guarded eval over Math.*; upgrade to a real parser if untrusted input ever matters.
+// A small recursive-descent evaluator over the whitelisted text. No eval and no Function:
+// Cloudflare Workers forbid both, and the agent API at /api runs this same engine there.
+const MATH_FNS = new Set(["sqrt","sin","cos","tan","log","log2","log10","abs","round","floor","ceil","cbrt"]);
+function evalMath(src){
+  const tk = src.match(/Math\.[A-Za-z0-9]+|\d+\.?\d*|\.\d+|\*\*|[-+*\/(),]/g) || [];
+  if(tk.join("") !== src.replace(/\s+/g,"")) throw 0;
+  let i = 0;
+  const peek = () => tk[i], next = () => tk[i++];
+  const expr = () => { let v = term(); while(peek()==="+"||peek()==="-") v = next()==="+" ? v+term() : v-term(); return v; };
+  const term = () => { let v = unary(); while(peek()==="*"||peek()==="/") v = next()==="*" ? v*unary() : v/unary(); return v; };
+  const unary = () => peek()==="-" ? (i++, -unary()) : peek()==="+" ? (i++, unary()) : power();
+  const power = () => { const b = atom(); return peek()==="**" ? (i++, b**unary()) : b; };
+  const atom = () => {
+    const t = next();
+    if(t===undefined) throw 0;
+    if(t==="("){ const v = expr(); if(next()!==")") throw 0; return v; }
+    if(t==="Math.PI") return Math.PI;
+    if(t==="Math.E") return Math.E;
+    if(t.startsWith("Math.")){
+      const f = t.slice(5);
+      if(!MATH_FNS.has(f) || next()!=="(") throw 0;
+      const v = expr(); if(next()!==")") throw 0; return Math[f](v);
+    }
+    const n = Number(t); if(Number.isNaN(n)) throw 0; return n;
+  };
+  const v = expr(); if(i!==tk.length) throw 0; return v;
+}
 function tryMath(s){
   const t = s.trim().toLowerCase().replace(/([\d.]+)\s*%\s*of\s*/g,"$1/100*").replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E")
     .replace(/\b(sqrt|sin|cos|tan|log|log2|log10|abs|round|floor|ceil|cbrt)\b/g,"Math.$1")
     .replace(/\bln\b/g,"Math.log");
   if(!/^[0-9+\-*/(). ,]*(Math\.[a-z0-9]+|[0-9+\-*/(). ,])*$/.test(t)) return null;
   if(!/[0-9]/.test(t) || !/[+\-*/]|Math\./.test(t)) return null;
-  try{ const v = Function('"use strict";return ('+t+')')();
+  try{ const v = evalMath(t);
     return (typeof v==="number" && isFinite(v)) ? v : null; }
   catch{ return null; }
 }
@@ -237,4 +263,4 @@ async function renderAnswer(query){
   return {h, credit};
 }
 
-if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,currencyExpr,first,answer,getJSON};
+if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON};

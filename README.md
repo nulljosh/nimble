@@ -34,6 +34,8 @@ Math, units and graphs answer on the device. Everything else goes to two open mo
 2. Dictionary, weather, local time and currency: pattern-gated live sources.
 3. Everything else: Gemma and Qwen3 run side by side on Cloudflare Workers AI through `worker/worker.js`. Agree and you get it; disagree and the two are folded into one sentence. Numbers are cross-checked against DuckDuckGo. Both give up and Wikipedia answers.
 
+Agents get the same engine at `https://nimble.heyitsmejosh.com/api/answer?q=5+miles+to+km` and over MCP at `https://nimble.heyitsmejosh.com/mcp`. Tools: answer, convert, math, graph.
+
 Every answer names its source. Light and dark follow the system. 8 accent themes.
 
 ## Development
