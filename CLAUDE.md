@@ -23,6 +23,10 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - `docs/index.html`: marketing/landing page, deployed via GitHub Pages (default `nulljosh.github.io/nimble` URL, the custom domain is taken by the web app)
 - `Tests/`: 48 tests
 
+## The loop
+
+See `docs/LOOP-HANDOFF.md` (complete at v5.0.0). The loop shipped five majors 1.0 to 5.0 in one session. Two bug fixes remain in roadmap.md and can be picked up anytime; no blockers.
+
 ## Build
 ```bash
 xcodegen generate && open Nimble.xcodeproj

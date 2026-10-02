@@ -7,30 +7,7 @@ when every slice under it is checked: tag, GitHub release (notarized Mac zip,
 msi, apk), landing + README + whitepaper + screenshots synced, What's New, ASC
 submit if a session is live. Model tags route the subagent.
 
-### v2.0 Agents
-- [x] `functions/api/[[route]].js` + `functions/mcp.js` on the Pages site, house pattern from wordroot/sidewise: tools `answer`, `convert`, `math`, `graph`, all backed by `docs/engine.js`. Document on the landing (one short section) and README. [Sonnet]
-- [x] Web asks before sending a question to the AI, same wording as iOS and Mac; remembered in localStorage. [Sonnet]
-- [x] `/app?q=` deep links from the landing demo's "open in app" and from the API docs. Tests for both tools and the consent gate. [Haiku]
-
-### v3.0 Memory
-- [x] Search history on web: localStorage, last 50, re-runnable, clearable, never leaves the device. Shows under the field on /app when it is empty, replaces the chips once there is history. [Sonnet]
-- [x] Search history on iOS and Mac: flat JSON in Application Support, same rules, listed in the empty state where the Try list sits. [Sonnet]
-- [x] Follow-up questions: "and in celsius?" sees the last three turns. Worker prompt carries them; native and web send them. [Sonnet]
-- [x] History in the KMP app so Windows and Android match. [Sonnet]
-
-### v4.0 Cards
-- [x] Weather, currency and local time render as cards (big number, small label), not sentences, on every surface. Pull the layout from the convert card. [Sonnet]
-- [x] Etymology card via wordroot's public API when the question is "origin of X" or "etymology of X". [Haiku]
-- [x] Shareable answer image: ImageRenderer on iOS/Mac, canvas on web, Jaybulb tokens, no text in the icon. [Sonnet]
-- [x] iOS widget (last answer + quick ask) and Mac menu-bar quick-ask field. [Opus]
-
 ### v5.0 Everywhere
-- [x] Voice input: SFSpeechRecognizer on iOS/Mac, Web Speech on web, feeds QueryEngine. [Sonnet]
-- [x] /languages sweep: i18n for every surface, a11y basics, VoiceOver labels. [Sonnet]
-- [x] KMP parity: cards + voice where the platform allows. Windows and Android show etymology, weather, time and currency cards; Android has the mic (RecognizerIntent), desktop has none. [Sonnet]
-- [x] Landing to A+ against Plank: calm hero, generated numbers only, retina check at 4x. [Opus]
-- [x] Docs 100%: ARCHITECTURE.md rows for every source file, architecture.svg refreshed. [Haiku]
-- [x] TUI builds again: `swift build` at the root compiles with AIEngine.swift and Turns.swift in the target, and test.yml builds it so it cannot rot. [Haiku]
 
 Rules for the loop: usage line at or above 88% on any window means /checkpoint
 and stop. One subagent at a time, 10 minute cap, worktree not needed. Mac zip is
