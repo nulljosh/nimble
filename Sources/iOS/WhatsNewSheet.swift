@@ -6,7 +6,7 @@ let whatsNewVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] 
 private let whatsNewBullets = [
     "Ask out loud: tap the mic",
     "Nimble speaks English, French, Spanish, Chinese and Punjabi",
-    "Cards and voice on Windows and Android too",
+    "Cards for weather, currency, time and word origins",
 ]
 
 struct WhatsNewSheet: View {

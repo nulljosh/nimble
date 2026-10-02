@@ -30,7 +30,8 @@ for (const lng of locales) console.log(`  ${lng}: ${translated(lng)}/${keys.leng
 // web's {n}/{s} tokens are rewritten to the printf specifiers Swift generates.
 const swiftKey = (k) => k.replace(/\{n\d*\}/g, "%lld").replace(/\{s\}/g, "%@");
 const strings = {};
-for (const k of keys) {
+// App Review 2.3.10: the iOS binary must not mention other platforms, so their download labels stay web-only.
+for (const k of keys.filter((k) => !/^Download for (Windows|Android)$/.test(k))) {
   const localizations = {};
   for (const lng of locales) {
     const v = lng === sourceLanguage ? src[k][sourceLanguage] : src[k][lng];
