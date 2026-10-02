@@ -49,7 +49,7 @@ struct AIConfig: Codable, Equatable, Sendable {
 
     /// Builds the vendor request for `question`. Nil when the engine has no usable config
     /// (e.g. Claude picked but no key) so the caller can fall back to the free proxy.
-    func request(for question: String) -> URLRequest? {
+    func request(for question: String, turns: TurnBuffer = TurnBuffer()) -> URLRequest? {
         if engine.needsKey && apiKey.isEmpty { return nil }
         let base = resolvedBaseURL
         var req: URLRequest
@@ -58,22 +58,22 @@ struct AIConfig: Codable, Equatable, Sendable {
         case .nimble:
             guard let url = URL(string: base) else { return nil }
             req = URLRequest(url: url)
-            body = ["q": question]
+            body = ["q": question, "turns": turns.payload]
         case .claude:
             guard let url = URL(string: base + "/v1/messages") else { return nil }
             req = URLRequest(url: url)
             req.setValue(apiKey, forHTTPHeaderField: "x-api-key")
             req.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
             body = ["model": resolvedModel, "max_tokens": 256, "system": Self.systemPrompt,
-                    "messages": [["role": "user", "content": question]]]
+                    "messages": turns.messages + [["role": "user", "content": question]]]
         case .openai, .ollama:
             // Ollama speaks the OpenAI chat shape at /v1, so one branch covers both.
             guard let url = URL(string: base + "/v1/chat/completions") else { return nil }
             req = URLRequest(url: url)
             if !apiKey.isEmpty { req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization") }
             body = ["model": resolvedModel, "max_tokens": 256,
-                    "messages": [["role": "system", "content": Self.systemPrompt],
-                                 ["role": "user", "content": question]]]
+                    "messages": [["role": "system", "content": Self.systemPrompt]] + turns.messages
+                                 + [["role": "user", "content": question]]]
         }
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "content-type")

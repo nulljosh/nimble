@@ -15,7 +15,7 @@ submit if a session is live. Model tags route the subagent.
 ### v3.0 Memory
 - [x] Search history on web: localStorage, last 50, re-runnable, clearable, never leaves the device. Shows under the field on /app when it is empty, replaces the chips once there is history. [Sonnet]
 - [x] Search history on iOS and Mac: flat JSON in Application Support, same rules, listed in the empty state where the Try list sits. [Sonnet]
-- [ ] Follow-up questions: "and in celsius?" sees the last three turns. Worker prompt carries them; native and web send them. [Sonnet]
+- [x] Follow-up questions: "and in celsius?" sees the last three turns. Worker prompt carries them; native and web send them. [Sonnet]
 - [ ] History in the KMP app so Windows and Android match. [Sonnet]
 
 ### v4.0 Cards

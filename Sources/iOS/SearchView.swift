@@ -82,7 +82,7 @@ struct SearchView: View {
                                     .tracking(1.2)
                                     .foregroundStyle(state.theme.color)
                                 Spacer()
-                                Button("Clear") { state.history.clear() }
+                                Button("Clear") { state.clearHistory() }
                                     .font(.system(size: 11))
                                     .foregroundStyle(.secondary)
                                     .buttonStyle(.plain)

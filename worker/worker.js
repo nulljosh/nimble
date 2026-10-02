@@ -1,6 +1,7 @@
 // Nimble answer proxy. Runs Gemma + Qwen in parallel on Cloudflare Workers AI
 // (no external API key needed) and synthesizes one answer.
-// POST { "q": "who is the ceo of apple" } -> { "answer": "Tim Cook." } or { "answer": "UNKNOWN" }
+// POST { "q": "who is the ceo of apple", "turns": [{"q": "...", "a": "..."}] } -> { "answer": "Tim Cook." } or { "answer": "UNKNOWN" }
+// turns is optional: the last three exchanges, so "and in celsius?" has something to refer to.
 const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 const LLAMA = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
@@ -30,6 +31,16 @@ async function freshContext(q) {
   }
 }
 
+// Follow-up context from the client: at most 3 {q, a} string pairs, each side cut to 300 chars.
+// Anything else is dropped. Never logged.
+function cleanTurns(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((t) => t && typeof t.q === "string" && typeof t.a === "string" && t.q.trim() && t.a.trim())
+    .slice(-3)
+    .map((t) => ({ q: t.q.slice(0, 300), a: t.a.slice(0, 300) }));
+}
+
 export default {
   async fetch(req, env) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
@@ -52,16 +63,19 @@ export default {
     const { success } = await env.RATE_LIMITER.limit({ key: ip });
     if (!success) return json({ error: "rate limited" }, 429);
 
-    let q;
+    let q, turns;
     try {
-      q = (await req.json()).q;
+      const body = await req.json();
+      q = body.q;
+      turns = cleanTurns(body.turns);
     } catch {
       return json({ error: "bad json" }, 400);
     }
     if (typeof q !== "string" || !q.trim()) return json({ error: "empty q" }, 400);
     if (q.length > 500) return json({ error: "too long" }, 400);
 
-    const context = await freshContext(q);
+    // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
+    const context = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
     const today = new Date().toISOString().slice(0, 10);
     const system =
       `${SYSTEM} Today is ${today}. Your training data is out of date; when the reference text below ` +
@@ -70,6 +84,10 @@ export default {
       env.AI.run(model, {
         messages: [
           { role: "system", content: system },
+          ...turns.flatMap((t) => [
+            { role: "user", content: `${t.q} /no_think` },
+            { role: "assistant", content: t.a },
+          ]),
           { role: "user", content: `${q} /no_think` },
         ],
         temperature: 0,
@@ -114,7 +132,7 @@ export default {
         },
         {
           role: "user",
-          content: `Question: ${q}\nAnswer A: ${qwenAnswer}\nAnswer B: ${gemmaAnswer}`,
+          content: `${turns.map((t) => `Earlier: ${t.q} -> ${t.a}\n`).join("")}Question: ${q}\nAnswer A: ${qwenAnswer}\nAnswer B: ${gemmaAnswer}`,
         },
       ],
       temperature: 0,

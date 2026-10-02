@@ -221,6 +221,19 @@ function aiRecipient(){
     default: return "Nimble's answer service, which runs Google Gemma and Alibaba Qwen models on Cloudflare Workers AI";
   }
 }
+// --- Follow-ups: the last three AI exchanges, memory only, so "and in celsius?" has context ---
+const TURNS_MAX = 3, turnList = [];
+const turns = {
+  list(){ return turnList.map(t=>({...t})); },
+  add(q, a){
+    if(typeof localStorage==="undefined") return; // the /api and /mcp workers serve many callers, so they keep no memory
+    q = String(q||"").trim(); a = String(a||"").trim(); if(!q || !a) return;
+    turnList.push({q, a}); while(turnList.length>TURNS_MAX) turnList.shift();
+  },
+  clear(){ turnList.length = 0; },
+};
+// Earlier exchanges as chat messages, oldest first, ahead of the new question.
+const turnMessages = () => turnList.flatMap(t=>[{role:"user", content:t.q}, {role:"assistant", content:t.a}]);
 async function gemma(query){
   let c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
   if(e.key && !c.apiKey){ c = {engine:"nimble"}; e = ENGINES.nimble; } // no key = free proxy
@@ -228,15 +241,15 @@ async function gemma(query){
   let d, text, src;
   if(c.engine==="claude" && e===ENGINES.claude){
     d = await getJSON(base+"/v1/messages", {method:"POST", headers:{...H, "x-api-key":c.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model, max_tokens:256, system:SYSTEM, messages:[{role:"user", content:query}]})});
+      body:JSON.stringify({model, max_tokens:256, system:SYSTEM, messages:[...turnMessages(), {role:"user", content:query}]})});
     text = (d?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(""); src = model;
   }else if(e===ENGINES.openai || e===ENGINES.ollama){
     // Ollama speaks the OpenAI chat shape at /v1 (needs OLLAMA_ORIGINS set for the browser).
     d = await getJSON(base+"/v1/chat/completions", {method:"POST", headers:{...H, ...(c.apiKey?{Authorization:"Bearer "+c.apiKey}:{})},
-      body:JSON.stringify({model, max_tokens:256, messages:[{role:"system", content:SYSTEM},{role:"user", content:query}]})});
+      body:JSON.stringify({model, max_tokens:256, messages:[{role:"system", content:SYSTEM}, ...turnMessages(), {role:"user", content:query}]})});
     text = d?.choices?.[0]?.message?.content; src = model;
   }else{
-    d = await getJSON(ANSWER_PROXY, {method:"POST", headers:H, body:JSON.stringify({q:query})});
+    d = await getJSON(ANSWER_PROXY, {method:"POST", headers:H, body:JSON.stringify({q:query, turns:turns.list()})});
     text = d?.answer; src = d?.source||"Nimble AI";
   }
   const a = (text||"").trim();
@@ -273,6 +286,7 @@ async function answer(query, opts={}){
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
   const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await firstOf(query, [wiki]));
+  if(hit) turns.add(query, hit.body);
   return hit ? {kind:"text", ...hit} : {kind:"none"};
 }
 
@@ -301,7 +315,7 @@ const searchHistory = {
       localStorage.setItem(HISTORY_KEY, JSON.stringify([{q, t:Date.now()}, ...rest].slice(0,HISTORY_MAX)));
     }catch{}
   },
-  clear(){ try{ localStorage.removeItem(HISTORY_KEY); }catch{} },
+  clear(){ turns.clear(); try{ localStorage.removeItem(HISTORY_KEY); }catch{} },
 };
 
 // Answer as HTML, shared by the landing demo and /app. Returns {h, credit, kind}.
@@ -328,4 +342,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,history:searchHistory};
+if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,history:searchHistory,turns};

@@ -386,9 +386,9 @@ final class QueryEngine: Sendable {
 
     // General answer engine: one Gemma call for any factual question. Replaces the
     // old per-shape Wikidata handlers (which dumped every historical officeholder).
-    private func queryLLM(_ input: String, session: URLSession, ai: AIConfig) async -> QueryResult? {
+    private func queryLLM(_ input: String, session: URLSession, ai: AIConfig, turns: TurnBuffer) async -> QueryResult? {
         // A misconfigured engine (Claude with no key) falls back to the free proxy.
-        guard let req = ai.request(for: input) ?? AIConfig().request(for: input) else { return nil }
+        guard let req = ai.request(for: input, turns: turns) ?? AIConfig().request(for: input, turns: turns) else { return nil }
         do {
             let (data, response) = try await session.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200,
@@ -399,7 +399,7 @@ final class QueryEngine: Sendable {
         }
     }
 
-    func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true) async -> QueryResult {
+    func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer()) async -> QueryResult {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         let session = URLSession(configuration: config)
@@ -409,7 +409,7 @@ final class QueryEngine: Sendable {
         // All three start together so a cold LLM call doesn't add a sequential hop in
         // front of Wikipedia — only the preference order (llm > ddg > wiki) is sequential.
         let (ddgInput, wikiInput) = preprocessQuery(input)
-        async let llm: QueryResult? = useLLM ? await queryLLM(input, session: session, ai: ai) : nil
+        async let llm: QueryResult? = useLLM ? await queryLLM(input, session: session, ai: ai, turns: turns) : nil
         async let ddg = queryDDG(ddgInput, session: session)
         async let wiki = queryWikipedia(wikiInput, session: session)
         if let llmResult = await llm {

@@ -68,6 +68,8 @@ final class AppState {
     private let queryEngine = QueryEngine()
     private let prefs = Preferences()
     let history = SearchHistory()
+    /// Last three AI exchanges for follow-ups. Memory only, never saved.
+    private(set) var turns = TurnBuffer()
     private var placeholderTimer: Timer?
 
     init() {
@@ -164,14 +166,22 @@ final class AppState {
         result = .loading
         let engine = queryEngine
         let ai = self.ai
+        let turns = self.turns
         Task { @MainActor [weak self] in
-            let answer = await engine.query(text, ai: ai, useLLM: useLLM)
+            let answer = await engine.query(text, ai: ai, useLLM: useLLM, turns: turns)
             self?.result = answer
             switch answer {
             case .error, .none, .loading: break
             default: self?.history.add(text)
             }
+            if useLLM, case .text(_, let body, _, _, _) = answer { self?.turns.add(text, body) }
         }
+    }
+
+    /// Clearing history also forgets the follow-up context.
+    func clearHistory() {
+        history.clear()
+        turns.clear()
     }
 
     func answerAIConsent(_ allowed: Bool) {
