@@ -50,22 +50,6 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 
 ## Blocked on Joshua
 
-- **iOS 3.0.0 App Review submit.** The one editable iOS version is
-  0e5926a4-4e55-457f-ad72-e9be0ea24b82, renamed from the never-submitted 2.0.0
-  draft to 3.0.0 with build 202610020424 attached and What's New on en-CA and
-  en-US. Claude's auto mode refuses the submit step, so run it by hand:
-  `asc validate --app 6807858746 --version 0e5926a4-4e55-457f-ad72-e9be0ea24b82 --output json`
-  then `asc review submit --version 0e5926a4-4e55-457f-ad72-e9be0ea24b82 --confirm`.
-  Until it is submitted, each major reuses this draft (rename + attach); the submit stays yours.
-- **iOS 4.0.0 build needs the App Group on the profile.** The widget (4.0.0) uses
-  `group.com.nulljosh.nimble`; the automatic "iOS Team Provisioning Profile" does not
-  carry App Groups yet and neither ASC key on this Mac is accepted by Xcode as a
-  bearer for `-allowProvisioningUpdates`. One-time fix: open Nimble.xcodeproj in
-  Xcode signed in to the team, let it register the App Group on both bundle ids
-  (`com.nulljosh.nimble.ios`, `com.nulljosh.nimble.ios.widget`) and regenerate the
-  profiles, then `asc workflow run ship-ios VERSION:4.0.0` and attach the build to
-  the 3.0.0 draft (`asc versions update --version-id 0e5926a4-4e55-457f-ad72-e9be0ea24b82 --version 4.0.0`,
-  `asc versions attach-build ...`). Mac, Windows, Android and web 4.0.0 are all out.
 - **Custom domain.** `nimble.heyitsmejosh.com` is taken by the web app. Candidate: `nimbleapp.com`. Buy when ready.
 - **Play Store.** Needs an Android keystore + $25 Play Console fee.
 - **Microsoft Store.** Needs MSIX signing + $19 dev account.
