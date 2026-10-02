@@ -13,7 +13,8 @@ submit if a session is live. Model tags route the subagent.
 - [x] `/app?q=` deep links from the landing demo's "open in app" and from the API docs. Tests for both tools and the consent gate. [Haiku]
 
 ### v3.0 Memory
-- [ ] Search history on web (localStorage), iOS and Mac (flat JSON in Application Support): last 50, re-runnable, clearable, never leaves the device. [Sonnet]
+- [ ] Search history on web: localStorage, last 50, re-runnable, clearable, never leaves the device. Shows under the field on /app when it is empty, replaces the chips once there is history. [Sonnet]
+- [ ] Search history on iOS and Mac: flat JSON in Application Support, same rules, listed in the empty state where the Try list sits. [Sonnet]
 - [ ] Follow-up questions: "and in celsius?" sees the last three turns. Worker prompt carries them; native and web send them. [Sonnet]
 - [ ] History in the KMP app so Windows and Android match. [Sonnet]
 

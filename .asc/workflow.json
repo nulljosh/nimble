@@ -1,9 +1,8 @@
 {
   // Release automation. Run: asc workflow run ship-ios VERSION:1.0.0
-  // App record does not exist yet — create it first (asc-app-create-ui skill),
-  // then put its ID in IOS_APP_ID below. SUBMIT stays false until the
-  // 2026-08-22 resubmissions are approved; see roadmap.md.
-  "env": { "IOS_APP_ID": "6807858746", "VERSION": "1.0.0", "SUBMIT": "false" },
+  // iOS 1.0.0 was approved 2026-09-24, so SUBMIT:true is the normal path:
+  //   asc workflow run ship-ios VERSION:2.0.0 SUBMIT:true
+  "env": { "IOS_APP_ID": "6807858746", "VERSION": "2.0.0", "SUBMIT": "false" },
   "before_all": "asc auth status",
   "workflows": {
     "ship-ios": { "description": "Bump, archive, export, upload iOS", "steps": [
