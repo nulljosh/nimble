@@ -2,7 +2,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v4.4.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v5.0.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -38,6 +38,10 @@ Math, units and graphs answer on the device. Everything else goes to two open mo
 Agents get the same engine at `https://nimble.heyitsmejosh.com/api/answer?q=5+miles+to+km` and over MCP at `https://nimble.heyitsmejosh.com/mcp`. Tools: answer, convert, math, graph.
 
 Every answer names its source. Light and dark follow the system. 8 accent themes.
+
+## What else it does
+
+Weather, currency, local time and word origins come back as cards. Recent questions sit under the field on every surface and never leave the device. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. A home screen widget keeps your last answer on iPhone; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Five languages: English, French, Spanish, Chinese, Punjabi.
 
 ## Development
 

@@ -40,6 +40,8 @@ re-notarized only at majors. `native-v*` tags are Joshua's to force-push.
 
 Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any one.
 
+- **Bug:** iOS weather card for "weather in Vancouver" renders three dots where the temperature goes; Paris and Tokyo render, the Mac HUD renders Vancouver fine. `CardResultView` gets `big` from `weatherCard`; find what differs for that one value.
+- **Bug:** `SharedAnswer.write` (widget) runs before an async card lands, so the widget shows the previous answer after a weather, currency or time question. Write after the card is set.
 - **Bug:** iOS UI is behind the web app's polish. Sync it up (web is the newest surface).
 - **Bug:** tests are thin and result filtering is loose. Tighten both.
 - **Feature:** iOS app should mirror the website's full functionality, shopping included.

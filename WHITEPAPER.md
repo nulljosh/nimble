@@ -1,6 +1,6 @@
 # Nimble Technical Whitepaper
 
-**v4.4.0** | October 2026
+**v5.0.0** | October 2026
 
 Ask a question. Get one sentence back.
 
@@ -48,6 +48,11 @@ to arithmetic. Definition and factual queries go to Wikipedia, DuckDuckGo, and
 the project's own Cloudflare Worker, no user accounts and no query logging,
 because a search bar people summon reflexively shouldn't carry a memory of
 every question asked.
+
+## What changed in 5.0
+
+One night of releases, 2.0 to 5.0. 2.0 opened the engine to agents: REST at /api and MCP at /mcp on the same code the app runs, and the web app started asking before a question goes to a model. 3.0 gave Nimble a memory: recent questions on every surface, stored on the device, and follow-ups that carry the last three turns. 4.0 turned live answers into cards (weather, currency, time, word origins), added a share image, a widget and a menu bar quick ask. 5.0 made it reach everywhere: voice on web, iPhone, Mac and Android, five languages, cards on Windows and Android, and a landing page with room to breathe.
+
 
 ## License
 
