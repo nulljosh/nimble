@@ -19,7 +19,8 @@
 /* iPhone: titanium band, black bezel, Dynamic Island, home indicator, side buttons */
 .device-iphone, .device-android {
   --device-w: 280px;
-  --r: calc(var(--device-w) * 0.185);
+  /* round() keeps every derived length on a whole pixel, so edges stay crisp at 2x */
+  --r: round(calc(var(--device-w) * 0.185), 1px);
   width: var(--device-w);
   padding: 3px;
   border-radius: var(--r);
@@ -30,7 +31,7 @@
     0 14px 28px -14px rgba(0,0,0,.35);
 }
 .device-iphone .device-screen, .device-android .device-screen {
-  border: calc(var(--device-w) * 0.032) solid #060606;
+  border: round(calc(var(--device-w) * 0.032), 1px) solid #060606;
   border-radius: calc(var(--r) - 3px);
   aspect-ratio: 9 / 19.5;
   background: #000;
@@ -39,15 +40,15 @@
 /* Dynamic Island */
 .device-iphone .device-screen::before {
   content: ''; position: absolute; z-index: 2; left: 50%; transform: translateX(-50%);
-  top: calc(var(--device-w) * 0.028);
-  width: calc(var(--device-w) * 0.30); height: calc(var(--device-w) * 0.085);
+  top: round(calc(var(--device-w) * 0.028), 1px);
+  width: round(calc(var(--device-w) * 0.30), 2px); height: round(calc(var(--device-w) * 0.085), 1px);
   border-radius: 999px; background: #000;
 }
 /* Home indicator: white, inverted over light content */
 .device-iphone .device-screen::after, .device-android .device-screen::after {
   content: ''; position: absolute; z-index: 2; left: 50%; transform: translateX(-50%);
-  bottom: calc(var(--device-w) * 0.022);
-  width: calc(var(--device-w) * 0.36); height: 4px; border-radius: 2px;
+  bottom: round(calc(var(--device-w) * 0.022), 1px);
+  width: round(calc(var(--device-w) * 0.36), 2px); height: 4px; border-radius: 2px;
   background: #fff; mix-blend-mode: difference; opacity: .85;
 }
 /* Buttons: action + volume on the left, power on the right */

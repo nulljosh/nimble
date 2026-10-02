@@ -57,7 +57,7 @@ a:hover { text-decoration: underline; }
 .hero {
   position: relative; isolation: isolate; overflow: hidden;
   text-align: center;
-  padding: 1.25rem 0 4rem;
+  padding: 1.5rem 0 6rem;
   background: var(--yellow);
   --dark: #000;  /* the hero stays yellow in dark mode, so its ink stays black */
 }
@@ -69,7 +69,7 @@ a:hover { text-decoration: underline; }
   position: absolute; inset: -48px; z-index: 0;
   /* --yellow-deep, the same ink as the mockup's search icon. Black here goes
      muddy grey against the yellow; the brand gold stays warm. */
-  color: rgba(176, 131, 0, 0.55);
+  color: rgba(176, 131, 0, 0.4);
   pointer-events: none; user-select: none;
 }
 /* Two nested elements because drift and rock are both `transform` and would
@@ -124,33 +124,35 @@ a:hover { text-decoration: underline; }
   max-width: 1080px; margin: 0 auto; padding: 0 1.5rem;
 }
 .hero-brand { display: flex; align-items: center; gap: 10px; color: #000; font-weight: 700; font-size: 1.15rem; letter-spacing: var(--tracking-tight); }
-.hero-brand svg { width: 34px; height: 34px; }
+.hero-brand svg { width: 40px; height: 40px; } /* 40px puts every rect of the 200 grid on a whole pixel */
 .hero-nav nav { display: flex; align-items: center; gap: 1.25rem; font-size: 0.95rem; }
 .hero-nav nav a { color: rgba(0,0,0,0.7); }
 .hero-nav nav a:hover { color: #000; text-decoration: none; }
 .hero-nav nav .btn { color: var(--yellow); }
-@media (max-width: 600px) { .hero-nav nav a:not(.btn) { display: none; } }
-.hero-copy { padding-top: clamp(2.5rem, 8vw, 4.5rem); }
+@media (max-width: 600px) { .hero-nav nav a:not(.btn), .hero-brand span { display: none; } }
+.hero-copy { padding-top: 6rem; max-width: 880px; } /* room for the headline's second line at full size */
 
 .hero h1 {
   font-size: clamp(2.5rem, 7vw, 4rem);
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-tight);
   line-height: 1.1;
+  text-wrap: balance;
   color: var(--dark);
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .hero-version {
   font-variant: var(--caption); letter-spacing: 0.08em;
   font-size: 0.85rem !important; color: rgba(0,0,0,0.5) !important;
-  margin: -0.25rem auto 1.25rem !important; min-height: 1.2em;
+  margin: 0 auto 1.5rem !important; min-height: 1.2em;
 }
 .hero p {
   font-size: clamp(1rem, 2.5vw, 1.2rem);
   color: rgba(0,0,0,0.6);
   max-width: 440px;
-  margin: 0 auto 2.5rem;
+  text-wrap: balance;
+  margin: 0 auto 3rem;
 }
 
 .hero-buttons {
@@ -179,20 +181,22 @@ a:hover { text-decoration: underline; }
 .hero .btn-dark { color: var(--yellow); }
 
 .btn-outline {
-  background: var(--yellow);
+  background: none;
   color: var(--dark);
 }
 
-.install { padding: 64px 0; }
-.install h2 { text-align: center; }
-.install-lead { text-align: center; margin: 0 auto 2.5rem; max-width: 34rem; }
+.install .container { max-width: 960px; }
 .install-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 3rem;
 }
-.install-card h3 { margin-bottom: 0.4rem; }
-.install-card p { margin-bottom: 1rem; }
+/* Equal heights: the copy grows, so every card's links sit on one line. */
+.install-card { display: flex; flex-direction: column; }
+.install-card h3 { font-size: 1.1rem; letter-spacing: var(--tracking-tight); margin-bottom: 0.4rem; }
+.install-card p { flex: 1; color: var(--mid); margin-bottom: 1.5rem; }
+.install-links { display: flex; align-items: baseline; gap: 1.5rem; }
+.install-links .btn:not(.btn-dark) { padding-left: 0; padding-right: 0; }
 
 /* Mockup, the Mac app. Colours are taken off the real iOS screenshot below
    so the two read as one product; the old light-gold panel looked like a
@@ -213,7 +217,7 @@ a:hover { text-decoration: underline; }
   min-height: 420px;
   display: flex; flex-direction: column;
 }
-.hero .device { margin: 3rem auto 1.5rem; }
+.hero .device { margin: 4rem auto 1.5rem; }
 /* ponytail: on phones the 280px frame is taller than the viewport; tighten the header and scale the frame so it fits under the tagline. */
 @media (max-height: 820px) and (max-width: 600px) {
   .hero p { margin-bottom: 1.5rem; }
@@ -228,7 +232,7 @@ a:hover { text-decoration: underline; }
 .mockup-status span:last-child { font-size: 6px; color: var(--panel-mid); letter-spacing: 2px; }
 .mockup-result { flex: 1; }
 .device-mac .mockup-status, .device-windows .mockup-status { display: none; }
-.demo-caption { font-size: 0.9rem; color: rgba(0,0,0,0.55); margin-top: -0.5rem; }
+.hero .demo-caption { font-variant: var(--caption); letter-spacing: 0.06em; font-size: 0.9rem; color: rgba(0,0,0,0.55); max-width: none; margin: 1rem auto 0; }
 .demo-caption a { color: inherit; text-decoration: underline; }
 
 /* The query row, laid out like the app: accent glass, then what you typed. */
@@ -251,7 +255,7 @@ a:hover { text-decoration: underline; }
 }
 .mockup-input:focus-visible { outline: none; }
 .mockup-bar:focus-within { box-shadow: 0 0 0 2px var(--yellow-deep, #e69a1e); }
-:focus-visible { outline: 2px solid #e69a1e; outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--yellow-deep); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
 .mockup-field { flex: 1; position: relative; display: flex; }
@@ -325,24 +329,22 @@ a:hover { text-decoration: underline; }
 }
 
 
-/* Features */
-.features {
-  padding: 4rem 0;
-  border-top: 2px solid var(--yellow);
-}
-
-.features h2 {
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
-  letter-spacing: var(--tracking-tight);
+/* Every section after the hero: one padding, one hairline, one headline. */
+main > section:not(.hero) { padding: 6rem 0; border-top: var(--rule); }
+main > section:not(.hero) h2 {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.15;
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
 }
+@media (max-width: 600px) { main > section:not(.hero) { padding: 4rem 0; } .hero-copy { padding-top: 4rem; } }
 
 .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2.5rem 3rem;
+  gap: 3rem;
 }
 
 .feature h3 {
@@ -353,104 +355,41 @@ a:hover { text-decoration: underline; }
 }
 
 .feature p {
-  font-size: 1rem;
   color: var(--mid);
   line-height: 1.55;
 }
 
 /* Quotes */
-.quotes {
-  padding: 4rem 0;
-  border-top: 2px solid var(--yellow);
-}
+.quote { text-align: center; max-width: 34rem; margin: 0 auto 3rem; }
+.quote:last-child { margin-bottom: 0; }
+.quote p { font-size: 1.1rem; line-height: 1.5; margin-bottom: 0.5rem; }
+.quote cite { font-style: normal; font-variant: var(--caption); letter-spacing: 0.06em; font-size: 0.9rem; }
 
-.quotes h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.quote {
-  margin-bottom: 1.5rem;
-  padding-left: 1.5rem;
-  border-left: 3px solid var(--yellow);
-}
-
-.quote p {
-  font-size: 0.95rem;
+/* Open source and agents */
+.oss, .agents { text-align: center; }
+.oss h2, .agents h2 { margin-bottom: 1.5rem; }
+.oss p, .agents p {
   color: var(--mid);
-  font-style: italic;
-  line-height: 1.5;
-  margin-bottom: 0.25rem;
-}
-
-.quote cite {
-  font-size: 0.85rem;
-  color: var(--light);
-  font-style: normal;
-}
-
-/* Open Source */
-.oss {
-  padding: 4rem 0;
-  text-align: center;
-  background: var(--color-bg2);
-  border-top: 2px solid var(--yellow);
-}
-
-.oss h2 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.oss p {
-  font-size: 1rem;
-  color: var(--mid);
-  max-width: 480px;
+  max-width: 30rem;
   margin: 0 auto 2rem;
 }
-
-.oss p a {
-  text-decoration: underline;
-}
-
-/* For agents */
-.agents {
-  padding: 4rem 0;
-  text-align: center;
-  border-top: 1px solid var(--line);
-}
-
-.agents h2 {
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-}
-
-.agents p {
-  font-size: 1rem;
-  color: var(--mid);
-  max-width: 480px;
-  margin: 0 auto 1.5rem;
-}
-
+.oss p a { text-decoration: underline; }
 .agents code {
   display: block;
   max-width: 560px;
   margin: 0 auto 0.75rem;
-  padding: 0.7rem 1rem;
+  padding: 0.75rem 1rem;
   background: var(--color-bg2);
   border-radius: 10px;
   font: inherit;
   font-size: 0.9rem;
   overflow-wrap: anywhere;
 }
+.agents p:last-child { margin: 1.5rem auto 0; }
 
 /* Footer */
 footer {
-  padding: 2rem 0;
+  padding: 4rem 0;
   text-align: center;
   border-top: 1px solid var(--line);
   font-size: 0.85rem;
@@ -527,11 +466,11 @@ footer {
         <rect x="80" y="130" width="40" height="32" rx="8" fill="#ffca30"/>
         <rect x="80" y="140" width="40" height="5" fill="#000"/>
         <rect x="80" y="150" width="40" height="5" fill="#000"/>
-      </svg>Nimble</a>
+      </svg><span>Nimble</span></a>
     <nav><a href="#features" data-i18n="Features">Features</a><a href="#install" data-i18n="Download">Download</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a><a class="btn btn-dark" href="/app" data-i18n="Open app">Open app</a></nav>
   </header>
   <div class="container hero-copy">
-    <h1 data-i18n="Ask a question. Get one sentence back.">Ask a question. Get one sentence back.</h1>
+    <h1 data-i18n="Ask a question. Get one sentence back.">Ask a question.<br>Get one sentence back.</h1>
     <p class="hero-version" id="ver" aria-live="polite"></p>
     <p data-i18n="Math and units answer on your device. Everything else, one sentence with a source.">Math and units answer on your device. Everything else, one sentence with a source.</p>
     <div class="hero-buttons">
@@ -558,7 +497,7 @@ footer {
     </form>
     </div>
     </div>
-    <p class="demo-caption">The <span id="demoDev">iPhone</span> app, running the real engine. Type anything.</p>
+    <p class="demo-caption">Fig. 1 &middot; The <span id="demoDev">iPhone</span> app, running the real engine. Type anything.</p>
   </div>
 </section>
 
@@ -589,23 +528,24 @@ footer {
 <section id="install" class="install">
   <div class="container">
     <h2>Install it anywhere.</h2>
-    <p class="install-lead">Real native apps on every platform. No web view, no runtime, and the offline math keeps working with no connection.</p>
     <div class="install-grid">
+      <div class="install-card">
+        <h3>iPhone and Mac</h3>
+        <p>Native SwiftUI, on the App Store. On the Mac it lives in the menu bar, one keystroke from anywhere.</p>
+        <div class="install-links">
+          <a href="https://apps.apple.com/app/nimble-answers/id6807858746" class="btn btn-dark">App Store</a>
+          <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn" data-asset="macOS.zip">Direct download</a>
+        </div>
+      </div>
       <div class="install-card">
         <h3>Windows</h3>
         <p>A native installer. Lands in the Start Menu like any other app.</p>
-        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".msi" data-i18n="Download for Windows">Download for Windows</a>
+        <div class="install-links"><a href="https://github.com/nulljosh/nimble/releases/latest" class="btn" data-asset=".msi" data-i18n="Download for Windows">Download for Windows</a></div>
       </div>
       <div class="install-card">
         <h3>Android</h3>
         <p>A native APK. Full screen, works offline.</p>
-        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".apk" data-i18n="Download for Android">Download for Android</a>
-      </div>
-      <div class="install-card">
-        <h3>iPhone and Mac</h3>
-        <p>Native SwiftUI, on the App Store. On the Mac it lives in the menu bar, one keystroke from anywhere.</p>
-        <a href="https://apps.apple.com/app/nimble-answers/id6807858746" class="btn btn-dark">App Store</a>
-        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn" data-asset="macOS.zip">Direct download</a>
+        <div class="install-links"><a href="https://github.com/nulljosh/nimble/releases/latest" class="btn" data-asset=".apk" data-i18n="Download for Android">Download for Android</a></div>
       </div>
     </div>
   </div>
@@ -640,7 +580,7 @@ footer {
     <code>curl https://nimble.heyitsmejosh.com/api/answer?q=5+miles+to+km</code>
     <code>https://nimble.heyitsmejosh.com/mcp</code>
     <code>https://nimble.heyitsmejosh.com/app?q=5+miles+to+km</code>
-    <p style="font-size: 0.9rem; color: var(--mid); margin-top: 0.75rem;">Deep link: open the web app on an answer.</p>
+    <p>Deep link: open the web app on an answer.</p>
   </div>
 </section>
 
@@ -654,7 +594,7 @@ footer {
   <p id="signup-failed" class="jb-msg" role="status">That email didn't work. Try again?</p>
 </form>
 <style>
-.jb-signup{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:460px;margin:40px auto;padding:0 16px;font:inherit;color:inherit}
+.jb-signup{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:460px;margin:0 auto;padding:6rem 16px 8rem;font:inherit;color:inherit}
 .jb-signup label{flex-basis:100%;text-align:center;opacity:.7}
 .jb-signup input[type=email]{flex:1;min-width:200px;padding:10px 12px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font:inherit}
 .jb-signup button{padding:10px 16px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font:inherit;cursor:pointer}
@@ -786,7 +726,7 @@ footer {
       el.className = 'float';
       el.style.left = x.toFixed(2) + '%';
       el.style.top = y.toFixed(2) + '%';
-      el.style.opacity = (0.2 + 0.55 * edgeAt(x, y)).toFixed(2);
+      el.style.opacity = (0.15 + 0.45 * edgeAt(x, y)).toFixed(2);
       el.style.setProperty('--size', rand(minSize, maxSize).toFixed(1) + 'px');
       el.style.setProperty('--rot', rand(4, 10).toFixed(1) + 'deg');
       el.style.setProperty('--bdur', rand(7, 16).toFixed(1) + 's');
@@ -829,7 +769,7 @@ footer {
   if (narrow) {
     pairs = pairs.filter(function (p) { return p[0].length <= 17 && p[1].length <= 15; });
   }
-  var want = Math.min(pairs.length, narrow ? 2 : Math.round(window.innerWidth / 320));
+  var want = Math.min(pairs.length, narrow ? 1 : Math.floor(window.innerWidth / 480));
   for (var n = 0; n < want; n++) {
     var ask = document.createElement('div');
     ask.className = 'float ask';
@@ -850,12 +790,14 @@ footer {
       ask.style.top = ay.toFixed(2) + '%';
       // Grow the box by the drift amplitude: it has to stay clear for the
       // whole travel, not just where it happens to sit when measured.
-      var m = ask.getBoundingClientRect();
-      var box = { left: m.left - slack.x, right: m.right + slack.x,
-                  top: m.top - slack.y, bottom: m.bottom + slack.y };
+      // Measure the words, not the anchor: the anchor is zero-size, so its
+      // own rect is a point and every pair used to pass as clear.
+      var q = ask.firstChild.getBoundingClientRect(), a = ask.lastChild.getBoundingClientRect();
+      var box = { left: Math.min(q.left, a.left) - slack.x, right: Math.max(q.right, a.right) + slack.x,
+                  top: q.top - slack.y, bottom: a.bottom + slack.y };
       if (clear(box)) {
         // Words need more contrast than a shape does to stay readable.
-        ask.style.opacity = (0.45 + 0.4 * edgeAt(ax, ay)).toFixed(2);
+        ask.style.opacity = (0.4 + 0.3 * edgeAt(ax, ay)).toFixed(2);
         // Block out the travel, not the snapshot: rect() reports wherever the
         // drift has this pair right now, so storing that lets the next one
         // settle somewhere they later drift through each other.

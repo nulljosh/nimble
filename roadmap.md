@@ -28,7 +28,7 @@ submit if a session is live. Model tags route the subagent.
 - [x] Voice input: SFSpeechRecognizer on iOS/Mac, Web Speech on web, feeds QueryEngine. [Sonnet]
 - [x] /languages sweep: i18n for every surface, a11y basics, VoiceOver labels. [Sonnet]
 - [x] KMP parity: cards + voice where the platform allows. Windows and Android show etymology, weather, time and currency cards; Android has the mic (RecognizerIntent), desktop has none. [Sonnet]
-- [ ] Landing to A+ against Plank: calm hero, generated numbers only, retina check at 4x. [Opus]
+- [x] Landing to A+ against Plank: calm hero, generated numbers only, retina check at 4x. [Opus]
 - [ ] Docs 100%: ARCHITECTURE.md rows for every source file, architecture.svg refreshed. [Haiku]
 - [ ] TUI builds again: `swift build` at the root compiles with AIEngine.swift and Turns.swift in the target, and test.yml builds it so it cannot rot. [Haiku]
 
