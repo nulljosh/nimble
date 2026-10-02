@@ -7,7 +7,7 @@
 (function(u,d){d=/Android/.test(u)?'android':/iPhone|iPad/.test(u)?'iphone':/Windows/.test(u)?'windows':/Mac/.test(u)?'mac':'iphone';document.documentElement.dataset.device=d})(navigator.userAgent);
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Nimble — Instant Answers from Your Menubar</title>
+<title>Nimble. One sentence back.</title>
 <meta property="og:title" content="Nimble">
 <meta property="og:description" content="Ask a question. Get one sentence back. Math, units and graphs offline; facts from two open models with a source.">
 <meta property="og:image" content="https://nimble.heyitsmejosh.com/og.png">
@@ -15,7 +15,7 @@
 <meta property="og:url" content="https://nimble.heyitsmejosh.com/">
 <link rel="canonical" href="https://nimble.heyitsmejosh.com/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="description" content="Instant answers on Mac, iPhone, Windows, Android and the web. Math, knowledge, definitions — one keystroke away. Free and open source.">
+<meta name="description" content="Instant answers on Mac, iPhone, Windows, Android and the web. Math, facts and definitions, one keystroke away. Free and open source.">
 <meta name="theme-color" content="#ffca30">
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="tokens.css">
@@ -84,7 +84,7 @@ a:hover { text-decoration: underline; }
 .float svg {
   display: block; width: 100%; height: 100%;
   /* fill/stroke are inherited, so they cross into the <use> shadow tree.
-     A selector like `.float circle` would not — it cannot reach inside. */
+     A selector like `.float circle` would not, it cannot reach inside. */
   fill: none; stroke: currentColor; stroke-width: 1.75;
   stroke-linecap: round; stroke-linejoin: round;
   animation: bob var(--bdur, 12s) ease-in-out var(--bdelay, 0s) infinite alternate;
@@ -97,7 +97,7 @@ a:hover { text-decoration: underline; }
 @keyframes bob { from { transform: rotate(calc(var(--rot, 0deg) * -1)); } to { transform: rotate(var(--rot, 0deg)); } }
 /* Answered queries scattered among the icons: the product actually working.
    A zero-size anchor with centred grid content centres the pair on its grid
-   point and overflows evenly both ways — translate(-50%) would collide with
+   point and overflows evenly both ways, translate(-50%) would collide with
    drift, and the text width is not known up front. */
 .float.ask {
   width: 0; height: 0; margin: 0;
@@ -189,18 +189,18 @@ a:hover { text-decoration: underline; }
 .install-card h3 { margin-bottom: 0.4rem; }
 .install-card p { margin-bottom: 1rem; }
 
-/* Mockup — the Mac app. Colours are taken off the real iOS screenshot below
+/* Mockup, the Mac app. Colours are taken off the real iOS screenshot below
    so the two read as one product; the old light-gold panel looked like a
    different app sitting above its own screenshot. */
 .hero .mockup { margin: 2rem auto; text-align: left; }
 .hero .mockup p { max-width: none; margin: 0; color: var(--panel-mid); font-size: 13px; }
 .mockup {
-  /* ponytail: light iOS surface, the screenshot this replaced */
-  --panel: #fff;
-  --panel-line: #eceef1;
-  --panel-text: #111;
-  --panel-mid: #8a8f98;
-  --panel-gold: #e69a1e;
+  /* The real app follows the system appearance, so the frame does too. */
+  --panel: var(--bg);
+  --panel-line: var(--line);
+  --panel-text: var(--text);
+  --panel-mid: var(--text-mid);
+  --panel-gold: var(--yellow-deep);
   background: var(--panel);
   border-radius: 26px;
   overflow: hidden;
@@ -220,7 +220,7 @@ a:hover { text-decoration: underline; }
 .device-mac, .device-windows { --device-w: 480px; }
 .device-mac .mockup, .device-windows .mockup { min-height: 300px; }
 .mockup-status { display: flex; align-items: center; justify-content: space-between; padding: 16px 30px 4px; font-size: 12px; font-weight: 600; color: var(--panel-text); }
-.mockup-status span:last-child { font-size: 6px; color: #c8ccd2; letter-spacing: 2px; }
+.mockup-status span:last-child { font-size: 6px; color: var(--panel-mid); letter-spacing: 2px; }
 .mockup-result { flex: 1; }
 .device-mac .mockup-status, .device-windows .mockup-status { display: none; }
 .demo-caption { font-size: 0.9rem; color: rgba(0,0,0,0.55); margin-top: -0.5rem; }
@@ -319,7 +319,8 @@ a:hover { text-decoration: underline; }
 }
 
 .features h2 {
-  font-size: 1.8rem;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: var(--tracking-tight);
   font-weight: 700;
   text-align: center;
   margin-bottom: 2.5rem;
@@ -327,20 +328,21 @@ a:hover { text-decoration: underline; }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2.5rem 3rem;
 }
 
 .feature h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.3rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  margin-bottom: 0.4rem;
 }
 
 .feature p {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--mid);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 /* Quotes */
@@ -471,7 +473,7 @@ footer a:hover { color: var(--dark); }
   </header>
   <div class="container hero-copy">
     <h1>Ask a question. Get one sentence back.</h1>
-    <p>Math, units and graphs answer offline. Everything else comes from two open models with a source. Mac, iPhone, Windows, Android and the web.</p>
+    <p>Math and units answer on your device. Everything else, one sentence with a source.</p>
     <div class="hero-buttons">
       <a href="/app" class="btn btn-dark">Open the web app</a>
       <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-outline" data-asset="macOS.zip" id="dl">Download for Mac</a>
@@ -506,27 +508,19 @@ footer a:hover { color: var(--dark); }
     <div class="features-grid">
       <div class="feature">
         <h3>Math and units, offline</h3>
-        <p>Arithmetic, trig, powers, and unit conversion evaluated on the device. No network needed.</p>
+        <p>Arithmetic, trig, powers, percentages and unit conversion, evaluated on the device. No network needed.</p>
       </div>
       <div class="feature">
         <h3>Two models, one sentence</h3>
-        <p>Gemma and Qwen answer in parallel, grounded in live Wikipedia so answers stay current. Numbers are cross-checked against DuckDuckGo, and Wikipedia catches the rest.</p>
-      </div>
-      <div class="feature">
-        <h3>Every platform</h3>
-        <p>Mac, iPhone, Windows, Android, and this page. The same answer engine on every surface.</p>
+        <p>Gemma and Qwen answer in parallel, grounded in live Wikipedia. Numbers are cross-checked against DuckDuckGo. Every answer names its source.</p>
       </div>
       <div class="feature">
         <h3>Graphs</h3>
-        <p>Type <em>y = x^2</em> or <em>plot sin(x)</em> and get the curve. 8 themes to draw it in.</p>
+        <p>Type <em>y = x^2</em> or <em>plot sin(x)</em> and get the curve, sampled on device.</p>
       </div>
       <div class="feature">
-        <h3>Native macOS</h3>
-        <p>SwiftUI and MenuBarExtra. No Electron. Light and fast.</p>
-      </div>
-      <div class="feature">
-        <h3>Open Source</h3>
-        <p>MIT licensed. No telemetry, no accounts, no API keys. Math and units never leave your device.</p>
+        <h3>Every platform</h3>
+        <p>Native on Mac and iPhone, SwiftUI, no Electron. Windows, Android and this page run the same engine. Light and dark follow your system.</p>
       </div>
     </div>
   </div>
@@ -548,8 +542,8 @@ footer a:hover { color: var(--dark); }
         <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".apk">Download for Android</a>
       </div>
       <div class="install-card">
-        <h3>Mac</h3>
-        <p>A native SwiftUI menu bar app, signed and notarized. One keystroke from anywhere.</p>
+        <h3>iPhone and Mac</h3>
+        <p>Native SwiftUI, on the App Store. On the Mac it lives in the menu bar, one keystroke from anywhere.</p>
         <a href="https://apps.apple.com/app/nimble-answers/id6807858746" class="btn btn-dark">App Store</a>
         <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn" data-asset="macOS.zip">Direct download</a>
       </div>
@@ -614,7 +608,7 @@ footer a:hover { color: var(--dark); }
   var hero = document.querySelector('.hero');
   if (!field || !hero) return;
 
-  // Real questions with their real answers — this is the product demoing
+  // Real questions with their real answers, this is the product demoing
   // itself, so every one of these has to actually be right.
   var pairs = [
     ['2^16 + 42', '65,578'],
@@ -661,7 +655,7 @@ footer a:hover { color: var(--dark); }
   };
   // Fade toward the middle, where the headline and buttons live. Derived from
   // position rather than random, so it re-tunes itself at any width as the
-  // copy reflows — the scrim alone cannot track that.
+  // copy reflows, the scrim alone cannot track that.
   var edgeAt = function (x, y) {
     var nx = (x - 50) / 50, ny = (y - 50) / 50;
     return Math.min(1, Math.sqrt(nx * nx + ny * ny));
@@ -670,7 +664,7 @@ footer a:hover { color: var(--dark); }
   // ---- Icons: one per cell of a jittered grid. Purely random placement
   // clumps and leaves bald patches, which reads as a bug, not as scattering.
   // A phone hero is tall and narrow, so it gets its own grid and smaller
-  // icons — the desktop numbers leave a bare column down one side.
+  // icons, the desktop numbers leave a bare column down one side.
   var cols = narrow ? 3 : Math.max(3, Math.min(7, Math.round(window.innerWidth / 190)));
   var rows = narrow ? 5 : 4;
   var minSize = narrow ? 18 : 28, maxSize = narrow ? 34 : 56;
@@ -688,7 +682,7 @@ footer a:hover { color: var(--dark); }
       el.style.setProperty('--bdur', rand(7, 16).toFixed(1) + 's');
       el.style.setProperty('--bdelay', (-rand(0, 16)).toFixed(1) + 's');
       setDrift(el);
-      // innerHTML, not createElement('svg') — that yields an unknown HTML
+      // innerHTML, not createElement('svg'), that yields an unknown HTML
       // element that never renders. Position is set with left/top rather than
       // a transform, so `animation: none` under reduced motion leaves each
       // item in its scattered slot instead of stacking them all at the origin.

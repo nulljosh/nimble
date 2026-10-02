@@ -11,7 +11,7 @@ struct SearchView: View {
         VStack(spacing: 0) {
             // Search bar
             HStack(spacing: 12) {
-                // Close sits top-left, where every other Mac window puts it — it used
+                // Close sits top-left, where every other Mac window puts it, it used
                 // to be the last item in the bottom-right status row.
                 Button(action: { NSApplication.shared.terminate(nil) }) {
                     Text("✕")
@@ -114,7 +114,7 @@ struct SearchView: View {
 
             // Bottom bar
             HStack {
-                // Theme lives in Settings only — the swatch here duplicated the grid
+                // Theme lives in Settings only, the swatch here duplicated the grid
                 // in SettingsView. (iOS keeps its inline picker: no menu bar there.)
                 Spacer()
                     Text("Nimble v\(Bundle.main.marketingVersion)")

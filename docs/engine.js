@@ -46,7 +46,9 @@ function tryConvert(s){
   else { m=q.match(/^how many\s+([a-z/]+)\s+(?:are\s+)?in\s+(-?\d+(?:\.\d+)?)\s*°?\s*([a-z/]+)\??$/); if(!m) return null; [,to,v,from]=m; }
   const out=convertValue(+v,from,to); if(out===null) return null;
   const t=n=>(+(+n).toFixed(6)).toString();
-  return {from:t(v),to:t(out),fromUnit:from,toUnit:to};
+  // "180 c to f" reads back as °C and °F, not the letters that were typed.
+  const T={c:"\u00B0C",f:"\u00B0F",k:"K"}, temp=U[from]&&U[from][1]==="temp";
+  return {from:t(v),to:t(out),fromUnit:temp?T[from[0]]:from,toUnit:temp?T[to[0]]:to};
 }
 
 // --- graph (sampled locally with tryMath, works offline) ---
@@ -73,7 +75,7 @@ function graph(expr){
     let d="",prev=null;
     for(const p of pts){ d+=(prev===null||p.x-prev>(x1-x0)/50?"M":"L")+X(p.x).toFixed(1)+" "+Y(p.y).toFixed(1); prev=p.x; }
     const ax=(y0<=0&&y1>=0?`<line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}"/>`:"")+(x0<=0&&x1>=0?`<line y1="0" y2="${H}" x1="${X(0)}" x2="${X(0)}"/>`:"");
-    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><g stroke="currentColor" stroke-opacity=".3">${ax}</g><path d="${d}" fill="none" stroke="var(--accent, #ffca30)" stroke-width="2" stroke-linejoin="round"/></svg>`;
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><g stroke="currentColor" stroke-opacity=".3">${ax}</g><path d="${d}" fill="none" stroke="var(--yellow-deep, #ffca30)" stroke-width="2" stroke-linejoin="round"/></svg>`;
   }catch{ return null; }
 }
 

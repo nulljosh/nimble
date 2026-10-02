@@ -39,7 +39,7 @@ Every answer names its source. Light and dark follow the system. 8 accent themes
 
 ```bash
 xcodegen generate && open Nimble.xcodeproj   # macOS + iOS
-node --test test/                            # web engine
+node --test 'test/*.test.*js'               # web engine
 cd worker && npx wrangler deploy             # answer proxy
 scripts/release-macos.sh                     # signed, notarized Mac zip
 ```

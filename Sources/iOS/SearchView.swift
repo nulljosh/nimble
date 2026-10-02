@@ -137,7 +137,7 @@ struct SearchView: View {
             }
         }
         // Light/dark follows the system, like the web app; the theme is only the accent.
-        // On the NavigationStack rather than its content — inside, the status-bar area
+        // On the NavigationStack rather than its content, inside, the status-bar area
         // stayed unpainted and rendered black.
         .background(Color(uiColor: .systemBackground).ignoresSafeArea())
         .preferredColorScheme(state.theme.colorScheme)

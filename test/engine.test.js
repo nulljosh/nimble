@@ -7,6 +7,7 @@ test("math", () => {
   assert.equal(E.tryMath("sqrt(16)*2"), 8);
   assert.equal(E.tryMath("2^10"), 1024);
   assert.equal(E.tryMath("12% of 250"), 30);
+  assert.deepEqual(E.tryConvert("180 C to F"), {from:"180", to:"356", fromUnit:"\u00B0C", toUnit:"\u00B0F"});
   assert.equal(E.tryMath("hello"), null);
   assert.equal(E.tryMath("process.exit()"), null);
   assert.equal(E.tryMath("1/0"), null);

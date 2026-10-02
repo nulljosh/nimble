@@ -48,7 +48,7 @@ final class AppState {
     var launchOnStartup: Bool = false
     var centerWindow: Bool = false
     var defaultSuggestions: Bool = true
-    /// Only acted on by the Mac build — the iOS app updates through the App Store —
+    /// Only acted on by the Mac build, the iOS app updates through the App Store , 
     /// but stored on both so the preferences file has one shape.
     var automaticUpdates: Bool = true
     private var lastUpdateCheck: Double = 0
