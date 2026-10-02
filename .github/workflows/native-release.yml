@@ -30,7 +30,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: "17" }
-      - uses: android-actions/setup-android@v3
+      # ubuntu-latest ships the Android SDK at ANDROID_HOME; setup-android@v3
+      # tries to install the retired 'tools' package and fails the job.
       # ponytail: debug APK, sideloadable today. assembleRelease once a keystore is in secrets.
       - run: ./gradlew :composeApp:assembleDebug --no-daemon
         working-directory: kmp
