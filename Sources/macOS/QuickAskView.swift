@@ -17,11 +17,12 @@ struct QuickAskView: View {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
                 if fieldStandIn {
                     Text(state.queryText).font(.system(size: 15))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
-                    TextField(state.voice.listening ? "Listening" : state.currentPlaceholder, text: $state.queryText)
+                    TextField(state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder, text: $state.queryText)
                         .textFieldStyle(.plain)
                         .font(.system(size: 15))
                         .focused($focused)

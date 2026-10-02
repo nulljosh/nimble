@@ -141,6 +141,7 @@ private struct GraphResultView: View {
             }
             .frame(height: 160)
             .padding(.horizontal, 20)
+            .accessibilityHidden(true)
             Text("y = \(expr)")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)

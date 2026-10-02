@@ -244,12 +244,15 @@ a:hover { text-decoration: underline; }
   flex: 1;
   background: none;
   border: 0;
-  outline: 0;
   padding: 0;
   font-family: var(--font);
   font-size: 15px;
   color: var(--panel-text);
 }
+.mockup-input:focus-visible { outline: none; }
+.mockup-bar:focus-within { box-shadow: 0 0 0 2px var(--yellow-deep, #e69a1e); }
+:focus-visible { outline: 2px solid #e69a1e; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
 .mockup-field { flex: 1; position: relative; display: flex; }
 .mockup-field .mockup-input { width: 100%; }
@@ -525,15 +528,15 @@ footer {
         <rect x="80" y="140" width="40" height="5" fill="#000"/>
         <rect x="80" y="150" width="40" height="5" fill="#000"/>
       </svg>Nimble</a>
-    <nav><a href="#features">Features</a><a href="#install">Download</a><a href="https://github.com/nulljosh/nimble">Source</a><a class="btn btn-dark" href="/app">Open app</a></nav>
+    <nav><a href="#features" data-i18n="Features">Features</a><a href="#install" data-i18n="Download">Download</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a><a class="btn btn-dark" href="/app" data-i18n="Open app">Open app</a></nav>
   </header>
   <div class="container hero-copy">
-    <h1>Ask a question. Get one sentence back.</h1>
+    <h1 data-i18n="Ask a question. Get one sentence back.">Ask a question. Get one sentence back.</h1>
     <p class="hero-version" id="ver" aria-live="polite"></p>
-    <p>Math and units answer on your device. Everything else, one sentence with a source.</p>
+    <p data-i18n="Math and units answer on your device. Everything else, one sentence with a source.">Math and units answer on your device. Everything else, one sentence with a source.</p>
     <div class="hero-buttons">
-      <a href="/app" class="btn btn-dark">Open the web app</a>
-      <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-outline" data-asset="macOS.zip" id="dl">Download for Mac</a>
+      <a href="/app" class="btn btn-dark" data-i18n="Open the web app">Open the web app</a>
+      <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-outline" data-asset="macOS.zip" id="dl" data-i18n="Download for Mac">Download for Mac</a>
     </div>
     <div class="device device-iphone" id="demoFrame" data-title="Nimble">
     <div class="device-screen">
@@ -561,22 +564,22 @@ footer {
 
 <section class="features" id="features">
   <div class="container">
-    <h2>Answers, not ten blue links.</h2>
+    <h2 data-i18n="Answers, not ten blue links.">Answers, not ten blue links.</h2>
     <div class="features-grid">
       <div class="feature">
-        <h3>Math and units, offline</h3>
+        <h3 data-i18n="Math and units, offline">Math and units, offline</h3>
         <p>Arithmetic, trig, powers, percentages and unit conversion, evaluated on the device. No network needed.</p>
       </div>
       <div class="feature">
-        <h3>Two models, one sentence</h3>
+        <h3 data-i18n="Two models, one sentence">Two models, one sentence</h3>
         <p>Gemma and Qwen answer in parallel, grounded in live Wikipedia. Numbers are cross-checked against DuckDuckGo. Every answer names its source.</p>
       </div>
       <div class="feature">
-        <h3>Graphs</h3>
+        <h3 data-i18n="Graphs">Graphs</h3>
         <p>Type <em>y = x^2</em> or <em>plot sin(x)</em> and get the curve, sampled on device.</p>
       </div>
       <div class="feature">
-        <h3>Every platform</h3>
+        <h3 data-i18n="Every platform">Every platform</h3>
         <p>Native on Mac and iPhone, SwiftUI, no Electron. Windows, Android and this page run the same engine. Light and dark follow your system.</p>
       </div>
     </div>
@@ -591,12 +594,12 @@ footer {
       <div class="install-card">
         <h3>Windows</h3>
         <p>A native installer. Lands in the Start Menu like any other app.</p>
-        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".msi">Download for Windows</a>
+        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".msi" data-i18n="Download for Windows">Download for Windows</a>
       </div>
       <div class="install-card">
         <h3>Android</h3>
         <p>A native APK. Full screen, works offline.</p>
-        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".apk">Download for Android</a>
+        <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".apk" data-i18n="Download for Android">Download for Android</a>
       </div>
       <div class="install-card">
         <h3>iPhone and Mac</h3>
@@ -865,6 +868,7 @@ footer {
 })();
 </script>
 
+<script src="i18n.js"></script>
 <script src="engine.js?v=offline"></script>
 <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <script>
@@ -874,8 +878,8 @@ footer {
   document.getElementById('demoDev').textContent=names[dev]||'iPhone';
   document.getElementById('demoFrame').className='device device-'+(names[dev]?dev:'iphone');
   var b=document.getElementById('dl');
-  if(dev==='windows'){b.textContent='Download for Windows';b.dataset.asset='.msi';}
-  else if(dev==='android'){b.textContent='Download for Android';b.dataset.asset='.apk';}
+  if(dev==='windows'){b.dataset.i18n='Download for Windows';b.textContent=I18N.t('Download for Windows');b.dataset.asset='.msi';}
+  else if(dev==='android'){b.dataset.i18n='Download for Android';b.textContent=I18N.t('Download for Android');b.dataset.asset='.apk';}
   var f=document.getElementById('demo'), q=document.getElementById('demoQ'), r=document.getElementById('demoR'), c=document.getElementById('demoC'), g=document.getElementById('demoG');
   // Example queries cycle through the empty field; return runs whichever is showing.
   var examples=[g.textContent], idx=0;

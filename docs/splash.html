@@ -18,10 +18,11 @@
   .mark svg { width: 96px; height: 96px; animation: pulse 1.4s ease-in-out infinite; }
   .mark h1 { margin-top: 16px; font-size: 1.4rem; font-weight: var(--fw-bold); color: var(--black); letter-spacing: var(--tracking-tight); }
   @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.94); opacity: 0.7; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 </style>
 </head>
 <body>
-  <div class="mark">
+  <main class="mark">
     <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nimble">
       <rect width="200" height="200" rx="44" fill="#000"/>
       <circle cx="100" cy="80" r="44" fill="#ffca30"/>
@@ -31,6 +32,6 @@
       <rect x="80" y="150" width="40" height="5" fill="#000"/>
     </svg>
     <h1>Nimble</h1>
-  </div>
+  </main>
 </body>
 </html>

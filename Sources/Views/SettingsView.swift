@@ -29,6 +29,7 @@ struct SettingsView: View {
                                             Image(systemName: "checkmark")
                                                 .font(.system(size: 10, weight: .bold))
                                                 .foregroundStyle(theme == .yellow ? .black : .white)
+                                                .accessibilityHidden(true)
                                         }
                                     }
                                 Text(theme.displayName)

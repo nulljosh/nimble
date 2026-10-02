@@ -38,12 +38,15 @@ form { position: relative; }
   background: var(--color-bg2); border: 1px solid var(--line); border-radius: 16px;
   padding: 16px 18px;
 }
-.field:focus-within { border-color: var(--yellow-deep); }
 .field svg { flex: none; }
 .field input {
-  flex: 1; min-width: 0; border: 0; outline: 0; background: none;
+  flex: 1; min-width: 0; border: 0; background: none;
   font: inherit; font-size: 18px; color: var(--text);
 }
+/* The ring sits on the whole field, not the text inside it. */
+.field input:focus-visible { outline: none; }
+.field:focus-within { border-color: var(--yellow-deep); box-shadow: 0 0 0 2px var(--yellow-deep); }
+:focus-visible { outline: 2px solid var(--yellow-deep); outline-offset: 2px; }
 .field input::placeholder { color: var(--text-light); }
 .mic {
   flex: none; display: grid; place-items: center; width: 28px; height: 28px; margin: -4px 0; padding: 0;
@@ -51,7 +54,6 @@ form { position: relative; }
 }
 .mic:hover { color: var(--text); }
 .mic.on { color: var(--yellow-deep); }
-.mic:focus-visible { outline: 2px solid var(--yellow-deep); outline-offset: 2px; }
 .go {
   flex: none; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer;
   background: var(--yellow); color: #000; font: inherit; font-weight: 700; font-size: 14px;
@@ -61,7 +63,7 @@ form { position: relative; }
 .card[hidden] { display: none; }
 .card.swap { animation: in 400ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .card.swap { animation: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 .mockup-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow-deep); margin-bottom: 10px; }
 .mockup-big { font-size: clamp(2rem, 8vw, 3rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 6px; overflow-wrap: anywhere; }
 .card p { font-size: 17px; color: var(--text-mid); }
@@ -105,29 +107,32 @@ form { position: relative; }
 <body>
 <header class="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
-  <nav><button type="button" id="ai" aria-live="polite"></button><a href="/#install">Get the app</a><a href="https://github.com/nulljosh/nimble">Source</a></nav>
+  <nav><button type="button" id="ai" aria-live="polite"></button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
 <main>
-  <h1>Ask anything.</h1>
+  <h1 data-i18n="Ask anything.">Ask anything.</h1>
   <form id="f" autocomplete="off">
     <label class="field">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="color:var(--yellow-deep)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="q" type="text" enterkeyhint="go" aria-label="Ask Nimble" placeholder="define nimble" autofocus spellcheck="false">
-      <button class="go" type="submit">Ask</button>
+      <input id="q" type="text" enterkeyhint="go" aria-label="Ask Nimble" data-i18n-aria-label="Ask Nimble" placeholder="define nimble" autofocus spellcheck="false">
+      <button class="go" type="submit" data-i18n="Ask">Ask</button>
     </label>
   </form>
   <section class="card" id="r" aria-live="polite" hidden></section>
   <div class="chips" id="chips"></div>
-  <section class="recent" id="recent" aria-label="Recent searches" hidden>
-    <div class="recent-head"><div class="mockup-label">Recent</div><button type="button" id="clear">Clear</button></div>
+  <section class="recent" id="recent" aria-label="Recent searches" data-i18n-aria-label="Recent searches" hidden>
+    <div class="recent-head"><div class="mockup-label" data-i18n="Recent">Recent</div><button type="button" id="clear" data-i18n="Clear">Clear</button></div>
     <ul class="recent-list" id="recent-list"></ul>
   </section>
-  <p class="hint">Math, units and graphs work offline. Everything else gets one sentence and a source.</p>
+  <p class="hint" data-i18n="Math, units and graphs work offline. Everything else gets one sentence and a source.">Math, units and graphs work offline. Everything else gets one sentence and a source.</p>
   <img id="shareDebug" alt="" style="display:block;width:100%;margin-top:20px">
 </main>
+<script src="i18n.js"></script>
 <script src="engine.js?v=offline"></script>
 <script>
-(function(){
+// Everything below speaks the visitor's language, so it starts once the locale has loaded.
+I18N.ready.then(function(){
+var T=I18N.t;
   var f=document.getElementById('f'), q=document.getElementById('q'), r=document.getElementById('r'), chips=document.getElementById('chips');
   var last=null, shot=location.search.indexOf('share=1')>-1; // last: the answer on screen, for Share. shot: screenshots only
   var hist=searchHistory, recent=document.getElementById('recent'), recentList=document.getElementById('recent-list');
@@ -146,14 +151,14 @@ form { position: relative; }
   async function run(query){
     query=(query||q.value||q.placeholder).trim(); if(!query) return;
     q.value=query; r.hidden=false;
-    r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>';
+    r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><p>'+T('Thinking…')+'</p>';
     // Shareable: /app?q=... opens straight onto the answer.
     history.replaceState(null,'','?q='+encodeURIComponent(query));
-    var res=await renderAnswer(query);
+    var res=await renderAnswer(query,{t:T});
     if(q.value.trim()!==query) return;  // a newer question already went out
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
     last={q:query, a:res.a};
-    var share=shareText(res.a)?'<button type="button" data-share>Share</button>':'';
+    var share=shareText(res.a)?'<button type="button" data-share>'+T('Share')+'</button>':'';
     r.innerHTML=res.h+(res.credit||share?'<div class="credit"><span>'+res.credit+'</span>'+share+'</div>':'');
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
     if(['consent','none','offline'].indexOf(res.kind)<0){ hist.add(query); paintRecent(); }
@@ -186,8 +191,8 @@ form { position: relative; }
       var l=listenLabel(state);
       mic.classList.toggle('on',state==='listening');
       mic.setAttribute('aria-pressed',state==='listening'?'true':'false');
-      mic.setAttribute('aria-label',l.button); mic.title=l.button;
-      if(l.placeholder){ if(usual===null) usual=q.placeholder; q.placeholder=l.placeholder; }
+      mic.setAttribute('aria-label',T(l.button)); mic.title=T(l.button);
+      if(l.placeholder){ if(usual===null) usual=q.placeholder; q.placeholder=T(l.placeholder); }
       else if(usual!==null){ q.placeholder=usual; usual=null; }
     };
     paintMic('idle');
@@ -211,13 +216,13 @@ form { position: relative; }
   var ai=document.getElementById('ai');
   function paintAI(){
     var c=aiConsent();
-    ai.textContent='AI: '+(c==='yes'?'on':c==='no'?'off':'ask');
-    ai.title=c===null?'Not chosen yet. Click to choose.':'Click to turn AI answers '+(c==='yes'?'off':'on');
+    ai.textContent=T(c==='yes'?'AI: on':c==='no'?'AI: off':'AI: ask');
+    ai.title=T(c===null?'Not chosen yet. Click to choose.':c==='yes'?'Click to turn AI answers off':'Click to turn AI answers on');
   }
   paintAI();
   ai.addEventListener('click',function(){
     var c=aiConsent();
-    if(c===null){ r.hidden=false; r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient()); return; }
+    if(c===null){ r.hidden=false; r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient(),T); return; }
     aiConsent(c==='yes'?'no':'yes'); paintAI();
   });
   // The consent card lives inside the result; Allow and Don't allow re-run the same question.
@@ -237,7 +242,7 @@ form { position: relative; }
   if(location.search.indexOf('seed=1')>-1) ['5 miles to km','capital of Canada','sqrt(144)'].forEach(function(s){ hist.add(s); }); // screenshots only
   paintRecent();
   var start=new URLSearchParams(location.search).get('q'); if(start) run(start);
-})();
+});
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});
 </script>
 </body>

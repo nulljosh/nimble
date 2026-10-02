@@ -18,6 +18,7 @@ struct PreferencesView: View {
                             Spacer()
                             if state.theme == theme {
                                 Image(systemName: "checkmark")
+                                    .accessibilityHidden(true)
                             }
                         }
                     }

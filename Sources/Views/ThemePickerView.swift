@@ -12,6 +12,8 @@ struct ThemePickerView: View {
                 .overlay(Circle().stroke(Color.primary.opacity(0.3), lineWidth: 2))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Theme")
+        .accessibilityValue(state.theme.displayName)
         .scaleEffect(showPopover ? 1.1 : 1.0)
         .animation(.spring(duration: 0.2, bounce: 0.4), value: showPopover)
         .popover(isPresented: $showPopover, arrowEdge: .bottom) {
@@ -28,6 +30,7 @@ struct ThemePickerView: View {
                             .overlay(Circle().stroke(state.theme == t ? Color.primary : Color.clear, lineWidth: 2))
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(t.displayName)
                 }
             }
             .padding(10)

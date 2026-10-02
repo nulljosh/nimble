@@ -1,0 +1,576 @@
+{
+  "_meta": {
+    "sourceLanguage": "en",
+    "locales": [
+      "en",
+      "fr",
+      "es",
+      "zh",
+      "pa"
+    ]
+  },
+  "Ask anything.": {
+    "en": "Ask anything.",
+    "fr": "Demandez n'importe quoi.",
+    "es": "Pregunta lo que quieras.",
+    "zh": "想问什么都行。",
+    "pa": "ਕੁਝ ਵੀ ਪੁੱਛੋ।"
+  },
+  "Ask": {
+    "en": "Ask",
+    "fr": "Demander",
+    "es": "Preguntar",
+    "zh": "提问",
+    "pa": "ਪੁੱਛੋ"
+  },
+  "Ask Nimble": {
+    "en": "Ask Nimble",
+    "fr": "Demander à Nimble",
+    "es": "Pregunta a Nimble",
+    "zh": "问 Nimble",
+    "pa": "Nimble ਨੂੰ ਪੁੱਛੋ"
+  },
+  "Get the app": {
+    "en": "Get the app",
+    "fr": "Obtenir l'app",
+    "es": "Descargar la app",
+    "zh": "获取应用",
+    "pa": "ਐਪ ਲਵੋ"
+  },
+  "Source": {
+    "en": "Source",
+    "fr": "Source",
+    "es": "Código",
+    "zh": "源码",
+    "pa": "ਸਰੋਤ"
+  },
+  "Recent": {
+    "en": "Recent",
+    "fr": "Récents",
+    "es": "Recientes",
+    "zh": "最近",
+    "pa": "ਹਾਲੀਆ"
+  },
+  "Recent searches": {
+    "en": "Recent searches",
+    "fr": "Recherches récentes",
+    "es": "Búsquedas recientes",
+    "zh": "最近的搜索",
+    "pa": "ਹਾਲੀਆ ਖੋਜਾਂ"
+  },
+  "Clear": {
+    "en": "Clear",
+    "fr": "Effacer",
+    "es": "Borrar",
+    "zh": "清除",
+    "pa": "ਮਿਟਾਓ"
+  },
+  "Answer": {
+    "en": "Answer",
+    "fr": "Réponse",
+    "es": "Respuesta",
+    "zh": "答案",
+    "pa": "ਜਵਾਬ"
+  },
+  "Thinking…": {
+    "en": "Thinking…",
+    "fr": "Je réfléchis…",
+    "es": "Pensando…",
+    "zh": "思考中…",
+    "pa": "ਸੋਚ ਰਿਹਾ ਹਾਂ…"
+  },
+  "Share": {
+    "en": "Share",
+    "fr": "Partager",
+    "es": "Compartir",
+    "zh": "分享",
+    "pa": "ਸਾਂਝਾ ਕਰੋ"
+  },
+  "Math, units and graphs work offline. Everything else gets one sentence and a source.": {
+    "en": "Math, units and graphs work offline. Everything else gets one sentence and a source.",
+    "fr": "Calculs, unités et graphiques fonctionnent hors ligne. Le reste tient en une phrase, avec sa source.",
+    "es": "Las cuentas, unidades y gráficas funcionan sin conexión. Lo demás recibe una frase y su fuente.",
+    "zh": "数学、单位换算和图表可离线使用。其他问题给你一句话和出处。",
+    "pa": "ਹਿਸਾਬ, ਇਕਾਈਆਂ ਅਤੇ ਗ੍ਰਾਫ਼ ਬਿਨਾਂ ਇੰਟਰਨੈੱਟ ਦੇ ਚੱਲਦੇ ਹਨ। ਬਾਕੀ ਸਭ ਲਈ ਇੱਕ ਵਾਕ ਅਤੇ ਇੱਕ ਸਰੋਤ ਮਿਲਦਾ ਹੈ।"
+  },
+  "Stop listening": {
+    "en": "Stop listening",
+    "fr": "Arrêter l'écoute",
+    "es": "Dejar de escuchar",
+    "zh": "停止聆听",
+    "pa": "ਸੁਣਨਾ ਬੰਦ ਕਰੋ"
+  },
+  "Ask by voice": {
+    "en": "Ask by voice",
+    "fr": "Demander à la voix",
+    "es": "Preguntar por voz",
+    "zh": "语音提问",
+    "pa": "ਆਵਾਜ਼ ਨਾਲ ਪੁੱਛੋ"
+  },
+  "Listening": {
+    "en": "Listening",
+    "fr": "J'écoute",
+    "es": "Escuchando",
+    "zh": "正在聆听",
+    "pa": "ਸੁਣ ਰਿਹਾ ਹਾਂ"
+  },
+  "AI: on": {
+    "en": "AI: on",
+    "fr": "IA : activée",
+    "es": "IA: sí",
+    "zh": "AI：开",
+    "pa": "AI: ਚਾਲੂ"
+  },
+  "AI: off": {
+    "en": "AI: off",
+    "fr": "IA : désactivée",
+    "es": "IA: no",
+    "zh": "AI：关",
+    "pa": "AI: ਬੰਦ"
+  },
+  "AI: ask": {
+    "en": "AI: ask",
+    "fr": "IA : demander",
+    "es": "IA: preguntar",
+    "zh": "AI：询问",
+    "pa": "AI: ਪੁੱਛੋ"
+  },
+  "Not chosen yet. Click to choose.": {
+    "en": "Not chosen yet. Click to choose.",
+    "fr": "Pas encore choisi. Cliquez pour choisir.",
+    "es": "Aún sin elegir. Haz clic para elegir.",
+    "zh": "尚未选择。点击进行选择。",
+    "pa": "ਅਜੇ ਚੁਣਿਆ ਨਹੀਂ। ਚੁਣਨ ਲਈ ਕਲਿੱਕ ਕਰੋ।"
+  },
+  "Click to turn AI answers off": {
+    "en": "Click to turn AI answers off",
+    "fr": "Cliquez pour désactiver les réponses de l'IA",
+    "es": "Haz clic para desactivar las respuestas de IA",
+    "zh": "点击关闭 AI 回答",
+    "pa": "AI ਜਵਾਬ ਬੰਦ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ"
+  },
+  "Click to turn AI answers on": {
+    "en": "Click to turn AI answers on",
+    "fr": "Cliquez pour activer les réponses de l'IA",
+    "es": "Haz clic para activar las respuestas de IA",
+    "zh": "点击开启 AI 回答",
+    "pa": "AI ਜਵਾਬ ਚਾਲੂ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ"
+  },
+  "Before I answer": {
+    "en": "Before I answer",
+    "fr": "Avant de répondre",
+    "es": "Antes de responder",
+    "zh": "回答之前",
+    "pa": "ਜਵਾਬ ਦੇਣ ਤੋਂ ਪਹਿਲਾਂ"
+  },
+  "Send your question to an AI service?": {
+    "en": "Send your question to an AI service?",
+    "fr": "Envoyer votre question à un service d'IA ?",
+    "es": "¿Enviar tu pregunta a un servicio de IA?",
+    "zh": "把你的问题发送给 AI 服务？",
+    "pa": "ਕੀ ਤੁਹਾਡਾ ਸਵਾਲ ਕਿਸੇ AI ਸੇਵਾ ਨੂੰ ਭੇਜਣਾ ਹੈ?",
+    "review": true
+  },
+  "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.": {
+    "en": "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.",
+    "fr": "Pour répondre, Nimble envoie le texte que vous saisissez, et rien d'autre, à {s}. Aucun compte, contact, position ni identifiant n'est envoyé, et Nimble n'en garde aucune trace. Si vous refusez, les réponses viennent uniquement de DuckDuckGo et de Wikipédia. Vous pouvez changer cela à tout moment dans l'app web.",
+    "es": "Para responder, Nimble envía el texto que escribes, y nada más, a {s}. No se envía ninguna cuenta, contacto, ubicación ni identificador, y Nimble no guarda ningún registro. Si no lo permites, las respuestas vienen solo de DuckDuckGo y Wikipedia. Puedes cambiarlo cuando quieras en la app web.",
+    "zh": "为了回答，Nimble 只会把你输入的文字发送给 {s}，不发送其他任何内容。不会发送账号、联系人、位置或标识符，Nimble 也不会保留任何记录。如果你不允许，答案将只来自 DuckDuckGo 和维基百科。你可以随时在网页版中更改。",
+    "pa": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, {s} ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ, ਸੰਪਰਕ, ਟਿਕਾਣਾ ਜਾਂ ਪਛਾਣ ਨਹੀਂ ਭੇਜੀ ਜਾਂਦੀ, ਅਤੇ Nimble ਇਸ ਦਾ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਦਾ। ਜੇ ਤੁਸੀਂ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੇ, ਤਾਂ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਤੁਸੀਂ ਇਹ ਕਦੇ ਵੀ ਵੈੱਬ ਐਪ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
+    "review": true
+  },
+  "powered by {s}": {
+    "en": "powered by {s}",
+    "fr": "propulsé par {s}",
+    "es": "con tecnología de {s}",
+    "zh": "由 {s} 提供",
+    "pa": "{s} ਦੁਆਰਾ"
+  },
+  "Allow": {
+    "en": "Allow",
+    "fr": "Autoriser",
+    "es": "Permitir",
+    "zh": "允许",
+    "pa": "ਇਜਾਜ਼ਤ ਦਿਓ"
+  },
+  "Don't allow": {
+    "en": "Don't allow",
+    "fr": "Ne pas autoriser",
+    "es": "No permitir",
+    "zh": "不允许",
+    "pa": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ"
+  },
+  "computed offline": {
+    "en": "computed offline",
+    "fr": "calculé hors ligne",
+    "es": "calculado sin conexión",
+    "zh": "离线计算",
+    "pa": "ਔਫ਼ਲਾਈਨ ਗਿਣਿਆ"
+  },
+  "You're offline. Math, units and graphs still work.": {
+    "en": "You're offline. Math, units and graphs still work.",
+    "fr": "Vous êtes hors ligne. Les calculs, unités et graphiques fonctionnent toujours.",
+    "es": "Estás sin conexión. Las cuentas, unidades y gráficas siguen funcionando.",
+    "zh": "你已离线。数学、单位换算和图表仍可使用。",
+    "pa": "ਤੁਸੀਂ ਔਫ਼ਲਾਈਨ ਹੋ। ਹਿਸਾਬ, ਇਕਾਈਆਂ ਅਤੇ ਗ੍ਰਾਫ਼ ਹਾਲੇ ਵੀ ਚੱਲਦੇ ਹਨ।"
+  },
+  "No instant answer. Try a question, a sum, or \"5 miles to km\".": {
+    "en": "No instant answer. Try a question, a sum, or \"5 miles to km\".",
+    "fr": "Pas de réponse instantanée. Essayez une question, un calcul ou \"5 miles to km\".",
+    "es": "Sin respuesta instantánea. Prueba con una pregunta, una suma o \"5 miles to km\".",
+    "zh": "没有即时答案。试试提问、算式，或 \"5 miles to km\"。",
+    "pa": "ਤੁਰੰਤ ਜਵਾਬ ਨਹੀਂ ਮਿਲਿਆ। ਕੋਈ ਸਵਾਲ, ਜੋੜ, ਜਾਂ \"5 miles to km\" ਅਜ਼ਮਾਓ।"
+  },
+  "Features": {
+    "en": "Features",
+    "fr": "Fonctionnalités",
+    "es": "Funciones",
+    "zh": "功能",
+    "pa": "ਫੀਚਰ"
+  },
+  "Download": {
+    "en": "Download",
+    "fr": "Télécharger",
+    "es": "Descargar",
+    "zh": "下载",
+    "pa": "ਡਾਊਨਲੋਡ"
+  },
+  "Open app": {
+    "en": "Open app",
+    "fr": "Ouvrir l'app",
+    "es": "Abrir app",
+    "zh": "打开应用",
+    "pa": "ਐਪ ਖੋਲ੍ਹੋ"
+  },
+  "Ask a question. Get one sentence back.": {
+    "en": "Ask a question. Get one sentence back.",
+    "fr": "Posez une question. Recevez une phrase.",
+    "es": "Haz una pregunta. Recibe una frase.",
+    "zh": "提个问题，得到一句话。",
+    "pa": "ਸਵਾਲ ਪੁੱਛੋ। ਇੱਕ ਵਾਕ ਵਿੱਚ ਜਵਾਬ ਲਵੋ।"
+  },
+  "Math and units answer on your device. Everything else, one sentence with a source.": {
+    "en": "Math and units answer on your device. Everything else, one sentence with a source.",
+    "fr": "Les calculs et les unités se font sur votre appareil. Le reste, une phrase avec sa source.",
+    "es": "Las cuentas y unidades se resuelven en tu dispositivo. Lo demás, una frase con su fuente.",
+    "zh": "数学和单位换算在你的设备上完成。其他问题，给你一句带出处的话。",
+    "pa": "ਹਿਸਾਬ ਅਤੇ ਇਕਾਈਆਂ ਤੁਹਾਡੇ ਡਿਵਾਈਸ ਉੱਤੇ ਹੱਲ ਹੁੰਦੇ ਹਨ। ਬਾਕੀ ਸਭ ਲਈ ਸਰੋਤ ਸਮੇਤ ਇੱਕ ਵਾਕ।"
+  },
+  "Open the web app": {
+    "en": "Open the web app",
+    "fr": "Ouvrir l'app web",
+    "es": "Abrir la app web",
+    "zh": "打开网页版",
+    "pa": "ਵੈੱਬ ਐਪ ਖੋਲ੍ਹੋ"
+  },
+  "Download for Mac": {
+    "en": "Download for Mac",
+    "fr": "Télécharger pour Mac",
+    "es": "Descargar para Mac",
+    "zh": "下载 Mac 版",
+    "pa": "Mac ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ"
+  },
+  "Download for Windows": {
+    "en": "Download for Windows",
+    "fr": "Télécharger pour Windows",
+    "es": "Descargar para Windows",
+    "zh": "下载 Windows 版",
+    "pa": "Windows ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ"
+  },
+  "Download for Android": {
+    "en": "Download for Android",
+    "fr": "Télécharger pour Android",
+    "es": "Descargar para Android",
+    "zh": "下载 Android 版",
+    "pa": "Android ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ"
+  },
+  "Answers, not ten blue links.": {
+    "en": "Answers, not ten blue links.",
+    "fr": "Des réponses, pas dix liens bleus.",
+    "es": "Respuestas, no diez enlaces azules.",
+    "zh": "要答案，不要十条蓝色链接。",
+    "pa": "ਜਵਾਬ, ਦਸ ਨੀਲੇ ਲਿੰਕ ਨਹੀਂ।"
+  },
+  "Math and units, offline": {
+    "en": "Math and units, offline",
+    "fr": "Calculs et unités, hors ligne",
+    "es": "Cuentas y unidades, sin conexión",
+    "zh": "数学与单位，离线可用",
+    "pa": "ਹਿਸਾਬ ਅਤੇ ਇਕਾਈਆਂ, ਔਫ਼ਲਾਈਨ"
+  },
+  "Two models, one sentence": {
+    "en": "Two models, one sentence",
+    "fr": "Deux modèles, une phrase",
+    "es": "Dos modelos, una frase",
+    "zh": "两个模型，一句话",
+    "pa": "ਦੋ ਮਾਡਲ, ਇੱਕ ਵਾਕ"
+  },
+  "Graphs": {
+    "en": "Graphs",
+    "fr": "Graphiques",
+    "es": "Gráficas",
+    "zh": "图表",
+    "pa": "ਗ੍ਰਾਫ਼"
+  },
+  "Every platform": {
+    "en": "Every platform",
+    "fr": "Toutes les plateformes",
+    "es": "Todas las plataformas",
+    "zh": "全平台",
+    "pa": "ਹਰ ਪਲੇਟਫਾਰਮ"
+  },
+  "About Nimble": {
+    "en": "About Nimble",
+    "fr": "À propos de Nimble",
+    "es": "Acerca de Nimble",
+    "zh": "关于 Nimble",
+    "pa": "Nimble ਬਾਰੇ"
+  },
+  "Open Nimble": {
+    "en": "Open Nimble",
+    "fr": "Ouvrir Nimble",
+    "es": "Abrir Nimble",
+    "zh": "打开 Nimble",
+    "pa": "Nimble ਖੋਲ੍ਹੋ"
+  },
+  "Settings…": {
+    "en": "Settings…",
+    "fr": "Réglages…",
+    "es": "Ajustes…",
+    "zh": "设置…",
+    "pa": "ਸੈਟਿੰਗਾਂ…"
+  },
+  "Settings": {
+    "en": "Settings",
+    "fr": "Réglages",
+    "es": "Ajustes",
+    "zh": "设置",
+    "pa": "ਸੈਟਿੰਗਾਂ"
+  },
+  "Quit": {
+    "en": "Quit",
+    "fr": "Quitter",
+    "es": "Salir",
+    "zh": "退出",
+    "pa": "ਬੰਦ ਕਰੋ"
+  },
+  "Quit Nimble": {
+    "en": "Quit Nimble",
+    "fr": "Quitter Nimble",
+    "es": "Salir de Nimble",
+    "zh": "退出 Nimble",
+    "pa": "Nimble ਬੰਦ ਕਰੋ"
+  },
+  "Copy Result": {
+    "en": "Copy Result",
+    "fr": "Copier le résultat",
+    "es": "Copiar resultado",
+    "zh": "拷贝结果",
+    "pa": "ਨਤੀਜਾ ਕਾਪੀ ਕਰੋ"
+  },
+  "Copy result": {
+    "en": "Copy result",
+    "fr": "Copier le résultat",
+    "es": "Copiar resultado",
+    "zh": "拷贝结果",
+    "pa": "ਨਤੀਜਾ ਕਾਪੀ ਕਰੋ"
+  },
+  "Copy Search Link": {
+    "en": "Copy Search Link",
+    "fr": "Copier le lien de recherche",
+    "es": "Copiar enlace de búsqueda",
+    "zh": "拷贝搜索链接",
+    "pa": "ਖੋਜ ਲਿੰਕ ਕਾਪੀ ਕਰੋ"
+  },
+  "Open in DuckDuckGo": {
+    "en": "Open in DuckDuckGo",
+    "fr": "Ouvrir dans DuckDuckGo",
+    "es": "Abrir en DuckDuckGo",
+    "zh": "在 DuckDuckGo 中打开",
+    "pa": "DuckDuckGo ਵਿੱਚ ਖੋਲ੍ਹੋ"
+  },
+  "Search on DuckDuckGo →": {
+    "en": "Search on DuckDuckGo →",
+    "fr": "Chercher sur DuckDuckGo →",
+    "es": "Buscar en DuckDuckGo →",
+    "zh": "在 DuckDuckGo 上搜索 →",
+    "pa": "DuckDuckGo ਉੱਤੇ ਖੋਜੋ →"
+  },
+  "Preferences": {
+    "en": "Preferences",
+    "fr": "Préférences",
+    "es": "Preferencias",
+    "zh": "偏好设置",
+    "pa": "ਪਸੰਦਾਂ"
+  },
+  "Theme": {
+    "en": "Theme",
+    "fr": "Thème",
+    "es": "Tema",
+    "zh": "主题",
+    "pa": "ਥੀਮ"
+  },
+  "THEME": {
+    "en": "THEME",
+    "fr": "THÈME",
+    "es": "TEMA",
+    "zh": "主题",
+    "pa": "ਥੀਮ"
+  },
+  "PREFERENCES": {
+    "en": "PREFERENCES",
+    "fr": "PRÉFÉRENCES",
+    "es": "PREFERENCIAS",
+    "zh": "偏好设置",
+    "pa": "ਪਸੰਦਾਂ"
+  },
+  "AI ENGINE": {
+    "en": "AI ENGINE",
+    "fr": "MOTEUR D'IA",
+    "es": "MOTOR DE IA",
+    "zh": "AI 引擎",
+    "pa": "AI ਇੰਜਣ"
+  },
+  "AI Engine": {
+    "en": "AI Engine",
+    "fr": "Moteur d'IA",
+    "es": "Motor de IA",
+    "zh": "AI 引擎",
+    "pa": "AI ਇੰਜਣ"
+  },
+  "TRY": {
+    "en": "TRY",
+    "fr": "ESSAYER",
+    "es": "PRUEBA",
+    "zh": "试试",
+    "pa": "ਅਜ਼ਮਾਓ"
+  },
+  "RECENT": {
+    "en": "RECENT",
+    "fr": "RÉCENTS",
+    "es": "RECIENTES",
+    "zh": "最近",
+    "pa": "ਹਾਲੀਆ"
+  },
+  "RESULT": {
+    "en": "RESULT",
+    "fr": "RÉSULTAT",
+    "es": "RESULTADO",
+    "zh": "结果",
+    "pa": "ਨਤੀਜਾ"
+  },
+  "Version": {
+    "en": "Version",
+    "fr": "Version",
+    "es": "Versión",
+    "zh": "版本",
+    "pa": "ਵਰਜਨ"
+  },
+  "Offline Math": {
+    "en": "Offline Math",
+    "fr": "Calculs hors ligne",
+    "es": "Cálculo sin conexión",
+    "zh": "离线数学",
+    "pa": "ਔਫ਼ਲਾਈਨ ਹਿਸਾਬ"
+  },
+  "Offline math": {
+    "en": "Offline math",
+    "fr": "Calculs hors ligne",
+    "es": "Cálculo sin conexión",
+    "zh": "离线数学",
+    "pa": "ਔਫ਼ਲਾਈਨ ਹਿਸਾਬ"
+  },
+  "Launch on Startup": {
+    "en": "Launch on Startup",
+    "fr": "Lancer au démarrage",
+    "es": "Abrir al iniciar",
+    "zh": "开机启动",
+    "pa": "ਸ਼ੁਰੂ ਹੁੰਦੇ ਹੀ ਖੋਲ੍ਹੋ"
+  },
+  "Default Suggestions": {
+    "en": "Default Suggestions",
+    "fr": "Suggestions par défaut",
+    "es": "Sugerencias predeterminadas",
+    "zh": "默认建议",
+    "pa": "ਮੂਲ ਸੁਝਾਅ"
+  },
+  "AI Answers": {
+    "en": "AI Answers",
+    "fr": "Réponses de l'IA",
+    "es": "Respuestas de IA",
+    "zh": "AI 回答",
+    "pa": "AI ਜਵਾਬ"
+  },
+  "Model": {
+    "en": "Model",
+    "fr": "Modèle",
+    "es": "Modelo",
+    "zh": "模型",
+    "pa": "ਮਾਡਲ"
+  },
+  "Server": {
+    "en": "Server",
+    "fr": "Serveur",
+    "es": "Servidor",
+    "zh": "服务器",
+    "pa": "ਸਰਵਰ"
+  },
+  "Engine": {
+    "en": "Engine",
+    "fr": "Moteur",
+    "es": "Motor",
+    "zh": "引擎",
+    "pa": "ਇੰਜਣ"
+  },
+  "Got it": {
+    "en": "Got it",
+    "fr": "Compris",
+    "es": "Entendido",
+    "zh": "知道了",
+    "pa": "ਸਮਝ ਗਿਆ"
+  },
+  "What's new in {s}": {
+    "en": "What's new in {s}",
+    "fr": "Nouveautés de la version {s}",
+    "es": "Novedades de {s}",
+    "zh": "{s} 的新功能",
+    "pa": "{s} ਵਿੱਚ ਨਵਾਂ ਕੀ ਹੈ"
+  },
+  "Don't Allow": {
+    "en": "Don't Allow",
+    "fr": "Ne pas autoriser",
+    "es": "No permitir",
+    "zh": "不允许",
+    "pa": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ"
+  },
+  "Share answer as image": {
+    "en": "Share answer as image",
+    "fr": "Partager la réponse en image",
+    "es": "Compartir la respuesta como imagen",
+    "zh": "将答案分享为图片",
+    "pa": "ਜਵਾਬ ਨੂੰ ਤਸਵੀਰ ਵਜੋਂ ਸਾਂਝਾ ਕਰੋ"
+  },
+  "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.": {
+    "en": "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.",
+    "fr": "Lorsque c'est activé, le texte que vous saisissez est envoyé à {s}. Rien d'autre n'est envoyé. Lorsque c'est désactivé, les réponses viennent uniquement de DuckDuckGo et de Wikipédia.",
+    "es": "Si está activado, el texto que escribes se envía a {s}. No se envía nada más. Si está desactivado, las respuestas vienen solo de DuckDuckGo y Wikipedia.",
+    "zh": "开启后，你输入的文字会发送给 {s}，不发送其他任何内容。关闭后，答案只来自 DuckDuckGo 和维基百科。",
+    "pa": "ਚਾਲੂ ਹੋਣ 'ਤੇ ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ {s} ਨੂੰ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਹੋਰ ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ। ਬੰਦ ਹੋਣ 'ਤੇ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ।",
+    "review": true
+  },
+  "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.": {
+    "en": "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.",
+    "fr": "Pour répondre, Nimble envoie le texte que vous saisissez, et rien d'autre, à {s}. Aucun compte, contact, position ni identifiant n'est envoyé, et Nimble n'en garde aucune trace. Si vous refusez, les réponses viennent uniquement de DuckDuckGo et de Wikipédia. Vous pouvez changer cela dans Réglages.",
+    "es": "Para responder, Nimble envía el texto que escribes, y nada más, a {s}. No se envía ninguna cuenta, contacto, ubicación ni identificador, y Nimble no guarda ningún registro. Si no lo permites, las respuestas vienen solo de DuckDuckGo y Wikipedia. Puedes cambiarlo en Ajustes.",
+    "zh": "为了回答，Nimble 只会把你输入的文字发送给 {s}，不发送其他任何内容。不会发送账号、联系人、位置或标识符，Nimble 也不会保留任何记录。如果你不允许，答案将只来自 DuckDuckGo 和维基百科。你可以随时在“设置”中更改。",
+    "pa": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, {s} ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ, ਸੰਪਰਕ, ਟਿਕਾਣਾ ਜਾਂ ਪਛਾਣ ਨਹੀਂ ਭੇਜੀ ਜਾਂਦੀ, ਅਤੇ Nimble ਇਸ ਦਾ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਦਾ। ਜੇ ਤੁਸੀਂ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੇ, ਤਾਂ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਤੁਸੀਂ ਇਹ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
+    "review": true
+  },
+  "Your key stays on this device and is sent only to {s}.": {
+    "en": "Your key stays on this device and is sent only to {s}.",
+    "fr": "Votre clé reste sur cet appareil et n'est envoyée qu'à {s}.",
+    "es": "Tu clave se queda en este dispositivo y solo se envía a {s}.",
+    "zh": "你的密钥保存在此设备上，只会发送给 {s}。",
+    "pa": "ਤੁਹਾਡੀ ਕੁੰਜੀ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਹੀ ਰਹਿੰਦੀ ਹੈ ਅਤੇ ਸਿਰਫ਼ {s} ਨੂੰ ਭੇਜੀ ਜਾਂਦੀ ਹੈ।"
+  }
+}

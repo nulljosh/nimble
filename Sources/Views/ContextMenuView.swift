@@ -16,6 +16,7 @@ struct ContextMenuView: View {
                             Text(theme.displayName)
                             if state.theme == theme {
                                 Image(systemName: "checkmark")
+                                    .accessibilityHidden(true)
                             }
                         }
                     }

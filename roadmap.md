@@ -26,7 +26,7 @@ submit if a session is live. Model tags route the subagent.
 
 ### v5.0 Everywhere
 - [x] Voice input: SFSpeechRecognizer on iOS/Mac, Web Speech on web, feeds QueryEngine. [Sonnet]
-- [ ] /languages sweep: i18n for every surface, a11y basics, VoiceOver labels. [Sonnet]
+- [x] /languages sweep: i18n for every surface, a11y basics, VoiceOver labels. [Sonnet]
 - [ ] KMP parity: cards + voice where the platform allows. [Sonnet]
 - [ ] Landing to A+ against Plank: calm hero, generated numbers only, retina check at 4x. [Opus]
 - [ ] Docs 100%: ARCHITECTURE.md rows for every source file, architecture.svg refreshed. [Haiku]

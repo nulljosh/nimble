@@ -315,12 +315,16 @@ async function answer(query, opts={}){
 }
 
 // The consent card, same words as the native prompt. Pages wire the buttons by data-consent.
-function consentHTML(recipient){
+// t is the page's translator (I18N.t); without one the English below is used as is.
+function consentHTML(recipient, t){
   const esc=t=>String(t).replace(/</g,"&lt;");
-  return '<div class="mockup-label">Before I answer</div><h3>Send your question to an AI service?</h3><p>To answer, Nimble sends the text you type, and nothing else, to '+esc(recipient)
-    +'. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don\'t allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.</p>'
-    +'<div class="consent-actions"><button type="button" class="consent-yes" data-consent="yes">Allow</button><button type="button" class="consent-no" data-consent="no">Don\'t allow</button></div>';
+  const T=t||plain;
+  return '<div class="mockup-label">'+T("Before I answer")+'</div><h3>'+T("Send your question to an AI service?")+'</h3><p>'
+    +T("To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.",{s:esc(recipient)})+'</p>'
+    +'<div class="consent-actions"><button type="button" class="consent-yes" data-consent="yes">'+T("Allow")+'</button><button type="button" class="consent-no" data-consent="no">'+T("Don't allow")+'</button></div>';
 }
+// English fallback for the translator hook: fills {name} slots and nothing else.
+function plain(key, vars){ let s=key; if(vars) for(const k in vars) s=s.split("{"+k+"}").join(vars[k]); return s; }
 
 // --- Search history: this device only, newest first, de-duplicated, last 50 ---
 // Named searchHistory because a page global called history is window.history. Exported as history.
@@ -343,28 +347,30 @@ const searchHistory = {
 };
 
 // Answer as HTML, shared by the landing demo and /app. Returns {h, credit, kind}.
+// opts.t is an optional translator (the page's I18N.t); the API workers pass none and get English.
 async function renderAnswer(query, opts){
   const esc=t=>String(t).replace(/</g,"&lt;");
-  const a=await answer(query, opts); let h='<div class="mockup-label">Answer</div>', credit='';
-  if(a.kind==="convert"){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit="computed offline"; }
+  const T=(opts&&opts.t)||plain;
+  const a=await answer(query, opts); let h='<div class="mockup-label">'+T("Answer")+'</div>', credit='';
+  if(a.kind==="convert"){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="card"){
     // Same markup as convert; the whole card opens its source like a text answer does.
     const href=esc(a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query)).replace(/"/g,"&quot;");
     h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big">'+esc(a.big)+(a.unit?(a.unit[0]==="°"?"":" ")+esc(a.unit):"")+'</div><p>'+esc(a.sub)+'</p></a>';
-    credit="powered by "+a.src;
+    credit=T("powered by {s}",{s:a.src});
   }
-  else if(a.kind==="math"){ h+='<div class="mockup-big">'+a.value+'</div>'; credit="computed offline"; }
-  else if(a.kind==="graph"){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit="computed offline"; }
-  else if(a.kind==="consent"){ h=consentHTML(a.recipient); }
-  else if(a.kind==="offline"){ h+="<p>You're offline. Math, units and graphs still work.</p>"; }
+  else if(a.kind==="math"){ h+='<div class="mockup-big">'+a.value+'</div>'; credit=T("computed offline"); }
+  else if(a.kind==="graph"){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit=T("computed offline"); }
+  else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
+  else if(a.kind==="offline"){ h+="<p>"+T("You're offline. Math, units and graphs still work.")+"</p>"; }
   else if(a.kind==="text"){
     // Click through to the source; AI answers have none, so fall back to a web search.
     const href=a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query);
     h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
       +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3>'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
-    credit="powered by "+a.src;
+    credit=T("powered by {s}",{s:a.src});
   }
-  else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
+  else { h+="<p>"+T('No instant answer. Try a question, a sum, or "5 miles to km".')+"</p>"; }
   return {h, credit, kind:a.kind, a};
 }
 

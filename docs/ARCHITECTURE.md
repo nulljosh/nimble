@@ -49,7 +49,9 @@ Answer pipeline:
 | `Sources/iOS/WhatsNewSheet.swift` | Modal sheet on version bump: title, bullet features, dismiss |
 | `docs/index.html` | Landing page: hero, mockup (device frame), "try it" demo, features, privacy link, GitHub link |
 | `docs/engine.js` | JavaScript port of QueryEngine: tryMath, tryConvert, tryGraph, fallback to answer proxy; `listenLabel` words for the web mic |
-| `docs/sw.js` | Service worker: network first, cached shell when offline |
+| `docs/sw.js` | Service worker: network first, cached shell when offline; precaches `i18n.js` and every locale |
+| `docs/i18n.js` | Web i18n runtime: picks the language (`?lang=`, saved choice, browser), swaps `data-i18n` text and `data-i18n-aria-label`/`title`/`placeholder` attributes, sets `<html lang>`, exposes `I18N.t` for dynamic strings |
+| `docs/locales/*.json` | Generated per-language strings for en, fr, es, zh, pa; never hand edited |
 | `docs/privacy.html` | Privacy policy: no accounts, no tracking, no data retention |
 | `docs/splash.html` | Static splash screen (used by early PWA or app opening) |
 | `docs/tokens.css` | Nimble design tokens: imports shared Jaybulb palette, adds theme aliases |
@@ -65,6 +67,10 @@ Answer pipeline:
 | `Tests/QueryEngineTests.swift` | Query evaluation: 150+ cases (arithmetic, trig, functions, edge cases) |
 | `Tests/QuickAskTests.swift` | App group round trip for the widget, plus an ImageRenderer snapshot of the menu bar quick ask |
 | `test/engine.test.js` | Node tests for JavaScript QueryEngine: math evaluation, unit conversion, currency parsing, graph expression parsing, first-sentence extraction, safe JSON fetching (offline by default, LIVE=1 for real API) |
+| `i18n/strings.json` | The one master of every UI string, keyed by the English literal, translated for en, fr, es, zh, pa |
+| `Resources/Localizable.xcstrings` | Generated String Catalog both app targets build; `Text("literal")` resolves against it |
+| `scripts/i18n-gen.mjs` | Zero-dependency generator: `i18n/strings.json` to `docs/locales/*.json` and `Resources/Localizable.xcstrings` |
+| `test/i18n.test.js` | Every locale has every master key with real text, markup keys exist, the offline shell caches the locales |
 | `scripts/build-site.sh` | Site assembly: copies `docs/` to `dist/` for static deployment (no bundler) |
 | `scripts/bump-version.sh` | Version bump utility: updates MARKETING_VERSION in project.yml and version badges in README/CLAUDE across macOS, iOS, and web app repos |
 | `scripts/release-macos.sh` | macOS release build: archives, Developer ID-signs, notarizes with Apple, staples the ticket, and zips for GitHub release (gatekeeper-opens-on-first-launch) |

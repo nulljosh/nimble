@@ -6,6 +6,11 @@ struct MicButton: View {
     @Environment(AppState.self) private var state
     var size: CGFloat = 16
 
+    /// A ternary of two literals is a plain String, which the catalog never sees.
+    private func micLabel(_ listening: Bool) -> String {
+        listening ? String(localized: "Stop listening") : String(localized: "Ask by voice")
+    }
+
     var body: some View {
         let voice = state.voice
         if voice.offered {
@@ -17,8 +22,8 @@ struct MicButton: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(voice.listening ? "Stop listening" : "Ask by voice")
-            .help(voice.listening ? "Stop listening" : "Ask by voice")
+            .accessibilityLabel(micLabel(voice.listening))
+            .help(micLabel(voice.listening))
             .onDisappear { voice.cancel() }
         }
     }

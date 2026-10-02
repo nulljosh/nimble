@@ -52,6 +52,9 @@ targets:
           - "ContextMenuView.swift"
           - "SettingsView.swift"
       - path: Sources/iOS
+      # The same String Catalog the Mac target picks up through Resources, generated from i18n/strings.json
+      - path: Resources/Localizable.xcstrings
+        buildPhase: resources
       - path: Nimble.icon
       - path: docs/icon-512.png
         buildPhase: resources

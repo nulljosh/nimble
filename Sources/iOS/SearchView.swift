@@ -22,8 +22,9 @@ struct SearchView: View {
                         ctx.stroke(line, with: .color(accent.opacity(0.9)), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
                     }
                     .frame(width: 20, height: 20)
+                    .accessibilityHidden(true)
 
-                    TextField("", text: $state.queryText, prompt: Text(state.voice.listening ? "Listening" : state.currentPlaceholder).foregroundStyle(.secondary))
+                    TextField("", text: $state.queryText, prompt: Text(state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder).foregroundStyle(.secondary))
                         .textFieldStyle(.plain)
                         .font(.system(size: 22, weight: .light))
                         .foregroundStyle(.primary)
