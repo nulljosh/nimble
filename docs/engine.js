@@ -148,6 +148,9 @@ async function dictionary(query){
   return null;
 }
 
+// A card is one big number, a small label under it and one quiet line: {kind:"card", big, unit, sub, src, url}.
+const card=(big,unit,sub,src,url)=>({kind:"card", big:String(big), unit, sub, src, url});
+
 // --- currency ("100 usd to eur") via Frankfurter (ECB rates, CORS-open, no key) ---
 function currencyExpr(s){
   const m=/^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$/i.exec(s.trim());
@@ -158,7 +161,9 @@ async function currency(query){
   const d=await getJSON(`https://api.frankfurter.dev/v1/latest?base=${c.from}&symbols=${c.to}`)
        || await getJSON(`https://open.er-api.com/v6/latest/${c.from}`); // fallback: same rate map shape
   const rate=d?.rates?.[c.to]; if(!rate) return null;
-  return {kind:"convert", from:String(c.v), fromUnit:c.from, to:(c.v*rate).toFixed(2), toUnit:c.to, src:d.base?"Frankfurter":"ExchangeRate-API"};
+  const fmt=n=>n.toLocaleString("en",{minimumFractionDigits:2,maximumFractionDigits:2});
+  return card(fmt(c.v*rate), c.to, `${c.v.toLocaleString("en")} ${c.from} at today's rate`,
+    d.base?"Frankfurter":"ExchangeRate-API", d.base?"https://frankfurter.dev":"https://www.exchangerate-api.com");
 }
 
 // --- weather / local time via Open-Meteo (geocoding + forecast, no key) ---
@@ -172,13 +177,17 @@ async function weather(query){
   const w=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m`);
   const c=w?.current; if(!c) return null;
   const sky={0:"clear",1:"mostly clear",2:"partly cloudy",3:"overcast",45:"fog",48:"fog",51:"drizzle",53:"drizzle",55:"drizzle",61:"rain",63:"rain",65:"heavy rain",71:"snow",73:"snow",75:"heavy snow",80:"showers",81:"showers",82:"heavy showers",95:"thunderstorm"}[c.weather_code]||"";
-  return {title:`${loc.name}${loc.country?", "+loc.country:""}`, body:`${Math.round(c.temperature_2m)}°C${sky?", "+sky:""}, wind ${Math.round(c.wind_speed_10m)} km/h.`, src:"Open-Meteo", url:"https://open-meteo.com"};
+  return card(Math.round(c.temperature_2m), "°C", [loc.name, loc.country, sky, `wind ${Math.round(c.wind_speed_10m)} km/h`].filter(Boolean).join(", "), "Open-Meteo", "https://open-meteo.com");
 }
 async function localTime(query){
   const place=/^(?:what(?:'s| is) the )?(?:current )?time (?:in|at) (.+?)\??$/i.exec(query.trim())?.[1]; if(!place) return null;
   const loc=await geocode(place); if(!loc?.timezone) return null;
-  try{ return {title:`${loc.name}${loc.country?", "+loc.country:""}`, body:new Intl.DateTimeFormat("en",{timeZone:loc.timezone,hour:"numeric",minute:"2-digit",weekday:"long"}).format(new Date())+".", src:loc.timezone}; }
-  catch{ return null; }
+  try{
+    const now=new Date(), tz=loc.timezone;
+    const big=new Intl.DateTimeFormat("en-GB",{timeZone:tz,hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(now);
+    const day=new Intl.DateTimeFormat("en",{timeZone:tz,weekday:"long",month:"long",day:"numeric"}).format(now);
+    return card(big, loc.name, `${day}, ${tz}`, "Open-Meteo", "https://open-meteo.com");
+  }catch{ return null; }
 }
 
 // --- AI engine (settings) ---
@@ -262,7 +271,7 @@ async function firstOf(query, fns){
   return null;
 }
 
-// One call, one normalized answer. kind: convert | math | graph | text | consent | none
+// One call, one normalized answer. kind: convert | math | graph | card | text | consent | none
 // opts.ifUnset: what to assume while consent is unset ("no" for the landing demo's examples).
 async function answer(query, opts={}){
   const c = tryConvert(query);
@@ -276,7 +285,7 @@ async function answer(query, opts={}){
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
   const live = await firstOf(query, [dictionary, weather, localTime]);
-  if(live) return {kind:"text", ...live};
+  if(live) return live.kind==="card" ? live : {kind:"text", ...live};
   const consent = aiConsent() || opts.ifUnset || null;
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};
   if(consent==="no"){
@@ -323,6 +332,12 @@ async function renderAnswer(query, opts){
   const esc=t=>String(t).replace(/</g,"&lt;");
   const a=await answer(query, opts); let h='<div class="mockup-label">Answer</div>', credit='';
   if(a.kind==="convert"){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit="computed offline"; }
+  else if(a.kind==="card"){
+    // Same markup as convert; the whole card opens its source like a text answer does.
+    const href=esc(a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query)).replace(/"/g,"&quot;");
+    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big">'+esc(a.big)+(a.unit[0]==="°"?"":" ")+esc(a.unit)+'</div><p>'+esc(a.sub)+'</p></a>';
+    credit="powered by "+a.src;
+  }
   else if(a.kind==="math"){ h+='<div class="mockup-big">'+a.value+'</div>'; credit="computed offline"; }
   else if(a.kind==="graph"){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit="computed offline"; }
   else if(a.kind==="consent"){ h=consentHTML(a.recipient); }
@@ -342,4 +357,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,history:searchHistory,turns};

@@ -32,7 +32,7 @@ const qArg = (description) => ({
 export const TOOLS = [
   {
     name: 'answer',
-    description: 'One short answer to a question. Units, math and graphs are computed here; currency, dictionary, weather, local time and facts come from live sources.',
+    description: 'One short answer to a question. Units, math and graphs are computed here; currency, dictionary, weather, local time and facts come from live sources. Currency, weather and local time return a card: {kind: "card", big, unit, sub, src, url}.',
     inputSchema: qArg('The question, e.g. "5 miles to km" or "weather in Vancouver".'),
   },
   {

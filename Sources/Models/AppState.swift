@@ -157,6 +157,26 @@ final class AppState {
             return
         }
 
+        // Weather, currency and local time are plain lookups, no AI, so no consent is needed.
+        // If the lookup misses, the normal answer path takes over.
+        if queryEngine.isCardQuery(text) {
+            result = .loading
+            let engine = queryEngine
+            Task { @MainActor [weak self] in
+                if let card = await engine.card(text) {
+                    self?.result = card
+                    self?.history.add(text)
+                } else {
+                    self?.result = .none
+                    self?.askAnswerEngine(text)
+                }
+            }
+            return
+        }
+        askAnswerEngine(text)
+    }
+
+    private func askAnswerEngine(_ text: String) {
         if aiConsent == nil {
             askingAIConsent = true
             return
@@ -212,17 +232,7 @@ final class AppState {
     }
 
     func copyResultText() {
-        let text: String
-        switch result {
-        case .math(let s): text = s
-        case .text(_, let body, _, _, _): text = body
-        case .list(let items, _): text = items.joined(separator: "\n")
-        case .error(let msg, _): text = msg
-        case .color(let hex): text = hex
-        case .convert(let from, let to, let fromUnit, let toUnit): text = "\(from) \(fromUnit) = \(to) \(toUnit)"
-        case .graph(let expr, _): text = "y = \(expr)"
-        default: return
-        }
+        guard let text = result.copyText else { return }
         #if os(macOS)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)

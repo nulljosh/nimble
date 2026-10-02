@@ -20,6 +20,7 @@ func describe(_ result: QueryResult) -> String {
     case .convert(let from, let to, let fromUnit, let toUnit):
         return "\(from) \(fromUnit) = \(to) \(toUnit)"
     case .graph(let expr, _): return "graph: \(expr)"
+    case .card: return result.copyText ?? ""
     }
 }
 

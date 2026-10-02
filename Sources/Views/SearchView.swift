@@ -200,13 +200,14 @@ struct SearchView: View {
         case .text(_, _, let source, _, _): return source
         case .list(_, let source): return source
         case .graph: return "Computed offline"
+        case .card(_, _, _, let source, _): return source
         default: return ""
         }
     }
 
     private func openSource() {
         switch state.result {
-        case .text(_, _, _, let url, _):
+        case .text(_, _, _, let url, _), .card(_, _, _, _, let url):
             if let url, let u = URL(string: url) { NSWorkspace.shared.open(u) }
         default:
             state.openInDDG()

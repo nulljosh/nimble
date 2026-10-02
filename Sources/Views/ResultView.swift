@@ -83,6 +83,9 @@ struct ResultView: View {
         case .convert(let from, let to, let fromUnit, let toUnit):
             ConvertResultView(from: from, to: to, fromUnit: fromUnit, toUnit: toUnit, accent: state.theme.color)
 
+        case .card(let big, let unit, let sub, _, _):
+            CardResultView(big: big, unit: unit, sub: sub, accent: state.theme.color)
+
         case .graph(let expr, let points):
             GraphResultView(expr: expr, points: points, accent: state.theme.color)
 
@@ -242,6 +245,32 @@ private struct ConvertResultView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)
         .padding(.horizontal, 20)
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+}
+
+// MARK: - Card (weather, currency, local time)
+
+private struct CardResultView: View {
+    let big: String
+    let unit: String
+    let sub: String
+    let accent: Color
+    @State private var appeared = false
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text(big).font(.system(size: 40, weight: .semibold)).foregroundStyle(.primary)
+                .scaleEffect(appeared ? 1.0 : 0.88)
+                .onAppear { withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true } }
+            Text(unit).font(.system(size: 11)).foregroundStyle(accent.opacity(0.6)).tracking(0.5).textCase(.uppercase)
+            Text(sub).font(.system(size: 12)).foregroundStyle(.secondary).multilineTextAlignment(.center).padding(.top, 6)
+        }
+        .textSelection(.enabled)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .padding(.horizontal, 20)
+        .accessibilityElement(children: .combine)
         .transition(.opacity.combined(with: .move(edge: .top)))
     }
 }

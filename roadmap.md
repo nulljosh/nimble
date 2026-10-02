@@ -19,7 +19,7 @@ submit if a session is live. Model tags route the subagent.
 - [x] History in the KMP app so Windows and Android match. [Sonnet]
 
 ### v4.0 Cards
-- [ ] Weather, currency and local time render as cards (big number, small label), not sentences, on every surface. Pull the layout from the convert card. [Sonnet]
+- [x] Weather, currency and local time render as cards (big number, small label), not sentences, on every surface. Pull the layout from the convert card. [Sonnet]
 - [ ] Etymology card via wordroot's public API when the question is "origin of X" or "etymology of X". [Haiku]
 - [ ] Shareable answer image: ImageRenderer on iOS/Mac, canvas on web, Jaybulb tokens, no text in the icon. [Sonnet]
 - [ ] iOS widget (last answer + quick ask) and Mac menu-bar quick-ask field. [Opus]

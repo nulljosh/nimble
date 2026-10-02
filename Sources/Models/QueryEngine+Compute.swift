@@ -70,7 +70,7 @@ extension QueryEngine {
         return v * a.factor / b.factor
     }
 
-    private static func trim(_ v: Double) -> String {
+    static func trim(_ v: Double) -> String {
         let s = String(format: "%.6f", v)
         return s.replacingOccurrences(of: "0+$", with: "", options: .regularExpression)
             .replacingOccurrences(of: "\\.$", with: "", options: .regularExpression)

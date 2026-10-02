@@ -54,9 +54,9 @@ test("offline answer kinds", async () => {
 });
 
 test("live sources", { skip: !process.env.LIVE }, async () => {
-  const cur = await E.answer("100 usd to eur"); assert.equal(cur.kind, "convert"); assert.match(cur.to, /^\d+\.\d\d$/);
+  const cur = await E.answer("100 usd to eur"); assert.equal(cur.kind, "card"); assert.match(cur.big, /^[\d,]+\.\d\d$/);
   assert.equal((await E.answer("weather in Vancouver")).src, "Open-Meteo");
-  assert.match((await E.answer("time in Tokyo")).src, /Tokyo/);
+  assert.match((await E.answer("time in Tokyo")).big, /^\d\d:\d\d$/);
   assert.equal((await E.answer("define nimble")).src, "Wiktionary");
   assert.equal((await E.answer("Alan Turing")).kind, "text");
 });
