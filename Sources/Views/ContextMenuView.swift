@@ -41,6 +41,8 @@ struct ContextMenuView: View {
 
             Divider()
             Button("Copy Result") { state.copyResultText() }
+            Button("Share") { state.shareResultImage() }
+                .disabled(state.result.shareContent == nil)
             Button("Copy Search Link") { state.copySearchLink() }
             Button("Open in DuckDuckGo") { state.openInDDG() }
 

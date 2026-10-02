@@ -33,6 +33,7 @@ Answer pipeline:
 | `Sources/Views/SearchView.swift` | macOS search UI: text input, result display, accessibility focus management |
 | `Sources/Views/ResultView.swift` | Result rendering: math, text with source link, definitions, colors, conversions, graphs |
 | `Sources/Views/ContextMenuView.swift` | Right-click menu: theme picker, AI engine selector, settings link |
+| `Sources/Views/ShareCard.swift` | The answer as a 1200x630 yellow PNG card via ImageRenderer; iOS share button, Mac "Share" menu item |
 | `Sources/Views/SettingsView.swift` | macOS settings: theme picker, math toggle, launch on startup, automatic updates, update check now button |
 | `Sources/Views/AIEngineSettings.swift` | Reusable AI engine picker + key/model input fields (used by macOS settings and iOS preferences) |
 | `Sources/Views/ThemePickerView.swift` | Theme circle button: toggles settings visibility on click |

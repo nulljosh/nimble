@@ -68,7 +68,9 @@ form { position: relative; }
 .consent-actions button { border: 1px solid var(--line); background: none; color: var(--text); border-radius: 10px; padding: 9px 16px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
 .consent-actions .consent-yes { border-color: transparent; background: var(--yellow); color: #000; }
 .consent-actions .consent-no:hover { border-color: var(--yellow-deep); }
-.credit { margin-top: 14px; font-size: 12px; color: var(--text-light); }
+.credit { margin-top: 14px; font-size: 12px; color: var(--text-light); display: flex; align-items: baseline; gap: 14px; }
+.credit button { border: 0; background: none; padding: 0; font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.credit button:hover { color: var(--text); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 24px; }
 .chips[hidden] { display: none; }
@@ -114,11 +116,13 @@ form { position: relative; }
     <ul class="recent-list" id="recent-list"></ul>
   </section>
   <p class="hint">Math, units and graphs work offline. Everything else gets one sentence and a source.</p>
+  <img id="shareDebug" alt="" style="display:block;width:100%;margin-top:20px">
 </main>
 <script src="engine.js?v=offline"></script>
 <script>
 (function(){
   var f=document.getElementById('f'), q=document.getElementById('q'), r=document.getElementById('r'), chips=document.getElementById('chips');
+  var last=null, shot=location.search.indexOf('share=1')>-1; // last: the answer on screen, for Share. shot: screenshots only
   var hist=searchHistory, recent=document.getElementById('recent'), recentList=document.getElementById('recent-list');
   // Recent searches replace the suggestion chips once there is any history. textContent only, never HTML.
   function paintRecent(){
@@ -141,8 +145,26 @@ form { position: relative; }
     var res=await renderAnswer(query);
     if(q.value.trim()!==query) return;  // a newer question already went out
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
-    r.innerHTML=res.h+(res.credit?'<div class="credit">'+res.credit+'</div>':'');
+    last={q:query, a:res.a};
+    var share=shareText(res.a)?'<button type="button" data-share>Share</button>':'';
+    r.innerHTML=res.h+(res.credit||share?'<div class="credit"><span>'+res.credit+'</span>'+share+'</div>':'');
+    if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
     if(['consent','none','offline'].indexOf(res.kind)<0){ hist.add(query); paintRecent(); }
+  }
+  // Share sheet with the PNG where the browser can, a download of nimble-answer.png where it can't.
+  async function shareAnswer(){
+    if(!last) return;
+    try{
+      var blob=await shareImage(last.q,last.a); if(!blob) return;
+      var file=new File([blob],'nimble-answer.png',{type:'image/png'});
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        try{ await navigator.share({files:[file]}); return; }
+        catch(err){ if(err && err.name==='AbortError') return; }
+      }
+      var url=URL.createObjectURL(blob), a=document.createElement('a');
+      a.href=url; a.download='nimble-answer.png'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+    }catch(err){}
   }
   f.addEventListener('submit',function(e){ e.preventDefault(); run(); });
   // AI switch: on = the model may answer, off = DuckDuckGo and Wikipedia only, ask = not chosen yet.
@@ -160,6 +182,7 @@ form { position: relative; }
   });
   // The consent card lives inside the result; Allow and Don't allow re-run the same question.
   r.addEventListener('click',function(e){
+    if(e.target.closest('[data-share]')){ shareAnswer(); return; }
     var b=e.target.closest('[data-consent]'); if(!b) return;
     aiConsent(b.dataset.consent); paintAI();
     if(q.value.trim()) run(q.value); else r.hidden=true;

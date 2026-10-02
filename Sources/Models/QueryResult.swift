@@ -42,4 +42,14 @@ enum QueryResult: Equatable {
         case .none, .loading: return nil
         }
     }
+
+    /// What the share image says and who gets the credit; nil when there is no answer to share.
+    var shareContent: (text: String, source: String)? {
+        guard let text = copyText else { return nil }
+        switch self {
+        case .none, .loading, .error: return nil
+        case .math, .convert, .graph, .color: return (text, "Computed offline")
+        case .text(_, _, let source, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
+        }
+    }
 }

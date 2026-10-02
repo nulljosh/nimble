@@ -105,6 +105,8 @@ struct SearchView: View {
                         .environment(state)
                     Spacer()
                     HStack(spacing: 14) {
+                        ShareAnswerButton()
+                            .environment(state)
                         Button(action: { state.copyResultText() }) {
                             Image(systemName: "doc.on.doc")
                                 .font(.system(size: 14))

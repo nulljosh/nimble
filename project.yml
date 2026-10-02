@@ -22,6 +22,9 @@ targets:
         buildPhase: resources
       # Icon Composer bundle; Xcode builds the legacy sizes from it
       - path: Nimble.icon
+      # The bulb on the share card, read from the web's own copy so there is one file
+      - path: docs/icon-512.png
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios
@@ -48,6 +51,8 @@ targets:
           - "SettingsView.swift"
       - path: Sources/iOS
       - path: Nimble.icon
+      - path: docs/icon-512.png
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios

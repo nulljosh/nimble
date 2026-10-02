@@ -365,11 +365,85 @@ async function renderAnswer(query, opts){
     credit="powered by "+a.src;
   }
   else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
-  return {h, credit, kind:a.kind};
+  return {h, credit, kind:a.kind, a};
+}
+
+// --- Share card: the answer as a 1200x630 PNG, yellow, one question, one answer, one source ---
+// What the card says for each answer kind; null when there is nothing worth sharing.
+function shareText(a){
+  if(!a) return null;
+  switch(a.kind){
+    case "math": return typeof a.value==="number" && isFinite(a.value) ? String(+a.value.toPrecision(12)) : null;
+    case "convert": return a.to+" "+a.toUnit;
+    case "graph": return "y = "+a.expr;
+    case "card": return a.big+(a.unit?(a.unit[0]==="\u00B0"?"":" ")+a.unit:"")+(a.sub?", "+a.sub:"");
+    case "text": return a.body ? first(a.body) : null;
+    default: return null;
+  }
+}
+const shareSource = a => ["math","convert","graph"].includes(a?.kind) ? "Computed offline" : (a?.src||"");
+
+// Greedy word wrap; a word wider than the line is cut by character so nothing ever clips.
+function wrapLines(ctx, text, width){
+  const lines=[]; let line="";
+  for(const w of String(text).split(/\s+/)){
+    const t=line?line+" "+w:w;
+    if(ctx.measureText(t).width<=width){ line=t; continue; }
+    if(line) lines.push(line);
+    line=w;
+    while(ctx.measureText(line).width>width && line.length>1){
+      let n=line.length-1; while(n>1 && ctx.measureText(line.slice(0,n)).width>width) n--;
+      lines.push(line.slice(0,n)); line=line.slice(n);
+    }
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+const SHARE_FONT = '-apple-system, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif';
+function shareMark(){
+  return new Promise(res=>{
+    try{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src="icon-512.png"; }catch{ res(null); }
+  });
+}
+// Draws the card on an offscreen canvas. Resolves a PNG Blob, or null where there is no canvas.
+async function shareImage(query, answer){
+  try{
+    const text=shareText(answer);
+    if(!text || typeof document==="undefined") return null;
+    const W=1200, H=630, M=72, BOX=W-2*M;
+    const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+    const ctx=cv.getContext("2d"); if(!ctx) return null;
+    const mark=await shareMark();
+    const spacing=(px,em)=>{ if("letterSpacing" in ctx) ctx.letterSpacing=(px*em)+"px"; };
+    ctx.fillStyle="#ffca30"; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#000"; ctx.textBaseline="alphabetic"; ctx.textAlign="left";
+    // Question: 36px, 400, top-left, two lines at most.
+    ctx.font="400 36px "+SHARE_FONT; spacing(36,0);
+    const q=wrapLines(ctx,query,BOX), qs=q.slice(0,2);
+    if(q.length>2){ let l=qs[1]; while(l.length>1 && ctx.measureText(l+"\u2026").width>BOX) l=l.slice(0,-1); qs[1]=l.trimEnd()+"\u2026"; }
+    qs.forEach((l,i)=>ctx.fillText(l,M,M+27+i*44));
+    // Answer: up to 96px, 700, tight, centred vertically; shrinks until it fits.
+    const maxH=280, top=H/2; // 160 below the question, 502 above the footer: 280 fits either side of centre
+    let size=96, lines, lh;
+    for(; size>=28; size-=4){
+      ctx.font="700 "+size+"px "+SHARE_FONT; spacing(size,-0.02);
+      lines=wrapLines(ctx,text,BOX); lh=Math.round(size*1.1);
+      if(lines.length*lh<=maxH) break;
+    }
+    const y0=top-(lines.length*lh)/2+size*0.82;
+    lines.forEach((l,i)=>ctx.fillText(l,M,y0+i*lh));
+    // Footer: source small caps bottom-left, the bulb 56px bottom-right.
+    const fy=H-M-28;
+    spacing(0,0); ctx.fillStyle="rgba(0,0,0,0.6)"; ctx.textBaseline="middle";
+    if("fontVariantCaps" in ctx){ ctx.font="500 28px "+SHARE_FONT; ctx.fontVariantCaps="all-small-caps"; spacing(28,0.08); /* font resets the caps variant, so it goes second */ ctx.fillText(shareSource(answer),M,fy); ctx.fontVariantCaps="normal"; }
+    else { ctx.font="500 18px "+SHARE_FONT; ctx.fillText(shareSource(answer).toUpperCase(),M,fy); }
+    if(mark){ ctx.imageSmoothingQuality="high"; ctx.drawImage(mark,W-M-56,H-M-56,56,56); }
+    return await new Promise(res=>cv.toBlob(b=>res(b||null),"image/png"));
+  }catch{ return null; }
 }
 
 function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,history:searchHistory,turns};
