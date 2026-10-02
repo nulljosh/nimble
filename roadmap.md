@@ -16,7 +16,7 @@ submit if a session is live. Model tags route the subagent.
 - [x] Search history on web: localStorage, last 50, re-runnable, clearable, never leaves the device. Shows under the field on /app when it is empty, replaces the chips once there is history. [Sonnet]
 - [x] Search history on iOS and Mac: flat JSON in Application Support, same rules, listed in the empty state where the Try list sits. [Sonnet]
 - [x] Follow-up questions: "and in celsius?" sees the last three turns. Worker prompt carries them; native and web send them. [Sonnet]
-- [ ] History in the KMP app so Windows and Android match. [Sonnet]
+- [x] History in the KMP app so Windows and Android match. [Sonnet]
 
 ### v4.0 Cards
 - [ ] Weather, currency and local time render as cards (big number, small label), not sentences, on every surface. Pull the layout from the convert card. [Sonnet]

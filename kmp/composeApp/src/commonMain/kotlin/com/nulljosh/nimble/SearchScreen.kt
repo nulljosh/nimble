@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier) {
+fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier) {
     val client = remember { AnswerClient() }
     val scope = rememberCoroutineScope()
 
@@ -50,21 +50,32 @@ fun SearchScreen(modifier: Modifier = Modifier) {
     var query by remember { mutableStateOf("") }
     var answer by remember { mutableStateOf<Answer?>(null) }
     var loading by remember { mutableStateOf(false) }
+    var recent by remember { mutableStateOf(history.list()) }
     val placeholder = remember { QueryEngine.randomSuggestion() }
 
-    fun submit() {
-        val q = query.trim()
+    // Only a real answer is worth remembering; a miss is not.
+    fun record(q: String, a: Answer) {
+        if (a is Answer.Miss) return
+        history.add(q)
+        recent = history.list()
+    }
+
+    fun submit(text: String = query) {
+        val q = text.trim()
         if (q.isEmpty()) return
+        query = q
         // Math resolves synchronously and offline; no spinner for something instant.
         val offline = QueryEngine.evaluateMath(q)
         if (offline != null) {
-            answer = Answer.Math(offline)
+            answer = Answer.Math(offline).also { record(q, it) }
             return
         }
         loading = true
         scope.launch {
-            answer = client.query(q)
+            val a = client.query(q)
+            answer = a
             loading = false
+            record(q, a)
         }
     }
 
@@ -89,7 +100,10 @@ fun SearchScreen(modifier: Modifier = Modifier) {
 
         TextField(
             value = query,
-            onValueChange = { query = it },
+            onValueChange = {
+                query = it
+                if (it.isBlank()) answer = null
+            },
             placeholder = { Text(placeholder, color = theme.muted, fontSize = 18.sp) },
             singleLine = true,
             textStyle = LocalTextStyle.current.copy(fontSize = 20.sp),
@@ -112,7 +126,16 @@ fun SearchScreen(modifier: Modifier = Modifier) {
         Box(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())) {
             when {
                 loading -> CircularProgressIndicator(color = theme.accent, modifier = Modifier.size(28.dp))
-                else -> answer?.let { ResultCard(it, theme) }
+                answer != null -> answer?.let { ResultCard(it, theme) }
+                query.isBlank() && recent.isNotEmpty() -> RecentList(
+                    entries = recent.take(8),
+                    theme = theme,
+                    onPick = { submit(it) },
+                    onClear = {
+                        history.clear()
+                        recent = emptyList()
+                    },
+                )
             }
         }
 
@@ -122,6 +145,42 @@ fun SearchScreen(modifier: Modifier = Modifier) {
             fontSize = 12.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+    }
+}
+
+@Composable
+private fun RecentList(
+    entries: List<HistoryEntry>,
+    theme: NimbleTheme,
+    onPick: (String) -> Unit,
+    onClear: () -> Unit,
+) {
+    Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "RECENT",
+                color = theme.accent,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                "Clear",
+                color = theme.muted,
+                fontSize = 12.sp,
+                modifier = Modifier.clickable(onClick = onClear).padding(vertical = 4.dp)
+            )
+        }
+        for (e in entries) {
+            Text(
+                e.q,
+                color = theme.text,
+                fontSize = 16.sp,
+                maxLines = 1,
+                modifier = Modifier.fillMaxWidth().clickable { onPick(e.q) }.padding(vertical = 10.dp)
+            )
+        }
     }
 }
 

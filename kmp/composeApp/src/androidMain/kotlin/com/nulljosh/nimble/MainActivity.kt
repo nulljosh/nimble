@@ -10,6 +10,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContent { MaterialTheme { SearchScreen() } }
+        val history = SearchHistory(PrefsHistoryStorage(this), System::currentTimeMillis)
+        setContent { MaterialTheme { SearchScreen(history) } }
     }
 }
