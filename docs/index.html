@@ -417,8 +417,22 @@ footer {
   color: var(--mid);
 }
 
-footer a { color: var(--mid); text-decoration: underline; }
-footer a:hover { color: var(--dark); }
+  /* Footer directory: four columns, two-by-two on phones. */
+  footer .foot-rule { display: flex; align-items: center; gap: 16px; max-width: 880px; margin: 0 auto; padding: 14px 20px 28px; font-size: 13px; letter-spacing: .06em; font-weight: 500; color: var(--mid); }
+  footer .foot-rule::before { content: ""; order: 1; flex: 1; height: 1px; background: var(--line); }
+  footer .foot-rule > :first-child { order: 0; }
+  footer .foot-rule > :last-child { order: 2; }
+  @media (max-width: 520px) { footer .foot-rule { flex-wrap: wrap; justify-content: center; gap: 10px 16px; } footer .foot-rule::before { order: -1; flex-basis: 100%; } }
+  .foot-dir { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px 24px; max-width: 880px; margin: 0 auto; padding: 0 20px 28px; text-align: left; }
+  .foot-col h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--dark); letter-spacing: 0.02em; }
+  .foot-col ul { list-style: none; margin: 0; padding: 0; }
+  .foot-col a { position: relative; display: inline-block; padding: 5px 0; margin: 0; color: var(--mid); text-decoration: none; font-size: 13px; line-height: 1.35; }
+  .foot-col a::after { content: ""; position: absolute; top: 50%; left: 0; transform: translateY(-50%); width: 100%; height: 44px; min-width: 44px; }
+  .foot-col a:hover { color: var(--dark); text-decoration: underline; }
+  .foot-bar { max-width: 880px; margin: 0 auto; padding: 18px 20px 0; border-top: 1px solid var(--line); }
+  .foot-bar .foot-meta { margin: 0; text-align: left; color: var(--mid); font-size: 12.5px; line-height: 1.9; }
+  .foot-bar .foot-meta a { color: var(--mid); }
+  @media (max-width: 700px) { .foot-dir { grid-template-columns: repeat(2, 1fr); } }
 
 /* Footer heart */
 .heart {
@@ -444,7 +458,7 @@ footer a:hover { color: var(--dark); }
 }
 </style>
 </head>
-<body>
+<body id="top">
 
 <!-- Icon sprite for the hero field. Sized 0 rather than display:none, which
      would stop <use> from rendering the symbols in some browsers. -->
@@ -601,9 +615,47 @@ footer a:hover { color: var(--dark); }
 </main>
 
 <footer>
-  <div class="container">
-    <p>Nimble - by <a href="https://heyitsmejosh.com">Joshua Trommel</a></p>
-    <p class="credit">Originally created by <a href="https://maybulb.com">Maybulb</a>. Rebuilt with <svg class="heart" role="img" aria-label="love" viewBox="0 0 24 28" width="18" height="21"><path fill="#ffca30" d="M12 18C7 14 3 11.2 3 7.2A4.6 4.6 0 0 1 12 5a4.6 4.6 0 0 1 9 2.2c0 4-4 6.8-9 10.8z"/><path fill="none" stroke="#ffca30" stroke-width="2" stroke-linecap="round" d="M9 21h6M9.5 24h5"/><path fill="#ffca30" d="M10.5 26h3l-1.5 2z"/></svg></p>
+  <div class="foot-rule" aria-hidden="true"><span>Nimble</span><span>Ask a question. Get one sentence back.</span></div>
+  <nav class="foot-dir" aria-label="Footer">
+    <div class="foot-col">
+      <h3>Nimble</h3>
+      <ul>
+        <li><a href="/app">Open the web app</a></li>
+        <li><a href="https://github.com/nulljosh/nimble/releases">Releases</a></li>
+        <li><a href="https://github.com/nulljosh/nimble/blob/main/CHANGELOG.md">Changelog</a></li>
+        <li><a href="https://github.com/nulljosh/nimble/blob/main/roadmap.md">Roadmap</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h3>Explore</h3>
+      <ul>
+        <li><a href="#demo">Try it live</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#install">Install</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h3>Developers</h3>
+      <ul>
+        <li><a href="https://github.com/nulljosh/nimble">Source</a></li>
+        <li><a href="https://github.com/nulljosh/nimble/blob/main/docs/ARCHITECTURE.md">Architecture</a></li>
+        <li><a href="https://github.com/nulljosh/nimble/blob/main/SECURITY.md">Security</a></li>
+        <li><a href="https://github.com/nulljosh/nimble/blob/main/CONTRIBUTING.md">Contributing</a></li>
+        <li><a href="https://github.com/nulljosh/nimble/issues">Report a bug</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h3>Project</h3>
+      <ul>
+        <li><a href="privacy.html">Privacy</a></li>
+        <li><a href="https://github.com/nulljosh/nimble/blob/main/LICENSE">License (MIT)</a></li>
+        <li><a href="https://heyitsmejosh.com">Portfolio</a></li>
+        <li><a href="#top">Back to top</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="foot-bar">
+    <p class="foot-meta">Nimble <span id="footver"></span> &middot; MIT License &middot; &copy; 2026 Joshua Trommel &middot; Originally created by <a href="https://maybulb.com">Maybulb</a> &middot; Made with <span aria-hidden="true">&hearts;</span> in Vancouver, BC</p>
   </div>
 </footer>
 
@@ -807,7 +859,7 @@ footer a:hover { color: var(--dark); }
 })();
 // Point download buttons at the latest release assets.
 fetch('https://api.github.com/repos/nulljosh/nimble/releases/latest').then(function(r){return r.json();}).then(function(rel){
-  if(rel.tag_name) document.getElementById('ver').textContent=rel.tag_name;
+  if(rel.tag_name) document.getElementById('ver').textContent=rel.tag_name;document.getElementById('footver').textContent=rel.tag_name;
   document.querySelectorAll('[data-asset]').forEach(function(a){
     var hit=(rel.assets||[]).find(function(x){return x.name.endsWith(a.dataset.asset);});
     if(hit) a.href=hit.browser_download_url;
