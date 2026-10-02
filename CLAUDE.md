@@ -1,5 +1,5 @@
 # Nimble
-v1.0.0
+v1.1.0
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Gemma + Qwen3 on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 
@@ -19,7 +19,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - `Sources/Views/SearchView.swift`: macOS search UI, `Sources/iOS/SearchView.swift`, iOS
 - `Sources/macOS/GlobalHotkey.swift`: ⌥Space summon via Carbon RegisterEventHotKey
 - `worker/worker.js`: answer proxy, `npx wrangler deploy` from `worker/`
-- `docs/`: landing page with the live engine (`engine.js`), deployed via Cloudflare Pages to `nimble.heyitsmejosh.com`; `/app/*` redirects to `/`
+- `docs/`: landing page with the live engine (`engine.js`), deployed via Cloudflare Pages to `nimble.heyitsmejosh.com`; the full web app is `docs/app.html`, served at `/app`
 - `docs/index.html`: marketing/landing page, deployed via GitHub Pages (default `nulljosh.github.io/nimble` URL, the custom domain is taken by the web app)
 - `Tests/`: 38 tests
 

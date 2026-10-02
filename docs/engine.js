@@ -14,7 +14,7 @@ async function getJSON(url, opts){
 // --- offline math ---
 // ponytail: whitelist-guarded eval over Math.*; upgrade to a real parser if untrusted input ever matters.
 function tryMath(s){
-  const t = s.trim().toLowerCase().replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E")
+  const t = s.trim().toLowerCase().replace(/([\d.]+)\s*%\s*of\s*/g,"$1/100*").replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E")
     .replace(/\b(sqrt|sin|cos|tan|log|log2|log10|abs|round|floor|ceil|cbrt)\b/g,"Math.$1")
     .replace(/\bln\b/g,"Math.log");
   if(!/^[0-9+\-*/(). ,]*(Math\.[a-z0-9]+|[0-9+\-*/(). ,])*$/.test(t)) return null;
@@ -214,6 +214,25 @@ async function answer(query){
   const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
   const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await firstOf(query, [wiki]));
   return hit ? {kind:"text", ...hit} : {kind:"none"};
+}
+
+// Answer as HTML, shared by the landing demo and /app. Returns {h, credit}.
+async function renderAnswer(query){
+  const esc=t=>String(t).replace(/</g,"&lt;");
+  const a=await answer(query); let h='<div class="mockup-label">Answer</div>', credit='';
+  if(a.kind==="convert"){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit="computed offline"; }
+  else if(a.kind==="math"){ h+='<div class="mockup-big">'+a.value+'</div>'; credit="computed offline"; }
+  else if(a.kind==="graph"){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit="computed offline"; }
+  else if(a.kind==="offline"){ h+="<p>You're offline. Math, units and graphs still work.</p>"; }
+  else if(a.kind==="text"){
+    // Click through to the source; AI answers have none, so fall back to a web search.
+    const href=a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query);
+    h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
+      +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3>'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
+    credit="powered by "+a.src;
+  }
+  else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
+  return {h, credit};
 }
 
 if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,currencyExpr,first,answer,getJSON};

@@ -7,8 +7,8 @@ settings:
     # and signing fails with "requires a development team".
     DEVELOPMENT_TEAM: QMM486NPYC
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.1.0"
+    CURRENT_PROJECT_VERSION: "2"
 targets:
   Nimble:
     type: application
@@ -20,6 +20,8 @@ targets:
           - "iOS/**"
       - path: Resources
         buildPhase: resources
+      # Icon Composer bundle; Xcode builds the legacy sizes from it
+      - path: Nimble.icon
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios
@@ -28,7 +30,7 @@ targets:
         # "unidentified developer" jail. scripts/release-macos.sh does the rest.
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_ENTITLEMENTS: Nimble-macOS.entitlements
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_APPICON_NAME: Nimble
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
@@ -45,11 +47,12 @@ targets:
           - "ContextMenuView.swift"
           - "SettingsView.swift"
       - path: Sources/iOS
+      - path: Nimble.icon
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios
         GENERATE_INFOPLIST_FILE: YES
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_APPICON_NAME: Nimble
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         # Mirrors the macOS target. Its absence is the real cause of ITMS-90242
         # on upload, which reads like a signing failure but is not.

@@ -7,7 +7,7 @@ DerivedData/
 *.dSYM
 dist/
 .asc/artifacts/
-screenshots/
+/screenshots/
 .wrangler/
 .vercel/
 .DS_Store

@@ -6,6 +6,7 @@ test("math", () => {
   assert.equal(E.tryMath("2+2"), 4);
   assert.equal(E.tryMath("sqrt(16)*2"), 8);
   assert.equal(E.tryMath("2^10"), 1024);
+  assert.equal(E.tryMath("12% of 250"), 30);
   assert.equal(E.tryMath("hello"), null);
   assert.equal(E.tryMath("process.exit()"), null);
   assert.equal(E.tryMath("1/0"), null);

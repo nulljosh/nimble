@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Nimble</title>
+<meta name="description" content="Ask a question. Get one sentence back.">
+<meta name="theme-color" content="#ffca30">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="stylesheet" href="tokens.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--text); font-family: var(--font);
+  -webkit-font-smoothing: antialiased; line-height: 1.5;
+  display: flex; flex-direction: column; min-height: 100svh;
+}
+a { color: inherit; }
+.top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: max(14px, env(safe-area-inset-top)) 20px 14px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: var(--tracking-tight); text-decoration: none; }
+.brand img { width: 30px; height: 30px; border-radius: 8px; }
+.top nav a { font-size: 14px; color: var(--text-mid); text-decoration: none; margin-left: 18px; }
+.top nav a:hover { color: var(--text); }
+
+main { flex: 1; width: 100%; max-width: 640px; margin: 0 auto; padding: 8vh 20px 40px; }
+h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: 1.1; margin-bottom: 24px; text-align: center; }
+
+form { position: relative; }
+.field {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--color-bg2); border: 1px solid var(--line); border-radius: 16px;
+  padding: 16px 18px;
+}
+.field:focus-within { border-color: var(--yellow-deep); }
+.field svg { flex: none; }
+.field input {
+  flex: 1; min-width: 0; border: 0; outline: 0; background: none;
+  font: inherit; font-size: 18px; color: var(--text);
+}
+.field input::placeholder { color: var(--text-light); }
+.go {
+  flex: none; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer;
+  background: var(--yellow); color: #000; font: inherit; font-weight: 700; font-size: 14px;
+}
+
+.card { margin-top: 20px; padding: 22px; border: 1px solid var(--line); border-radius: 16px; min-height: 120px; }
+.card[hidden] { display: none; }
+.card.swap { animation: in 400ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .card.swap { animation: none; } }
+.mockup-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow-deep); margin-bottom: 10px; }
+.mockup-big { font-size: clamp(2rem, 8vw, 3rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 6px; overflow-wrap: anywhere; }
+.card p { font-size: 17px; color: var(--text-mid); }
+.card h3 { font-size: 19px; font-weight: 700; margin-bottom: 6px; }
+.card svg { width: 100%; height: auto; color: var(--yellow-deep); }
+.mockup-link { display: block; text-decoration: none; }
+.mockup-link p { text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 4px; color: var(--text); }
+.credit { margin-top: 14px; font-size: 12px; color: var(--text-light); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 24px; }
+.chips button {
+  border: 1px solid var(--line); background: none; color: var(--text-mid); border-radius: 999px;
+  padding: 7px 13px; font: inherit; font-size: 14px; cursor: pointer;
+}
+.chips button:hover { color: var(--text); border-color: var(--yellow-deep); }
+.hint { text-align: center; font-size: 13px; color: var(--text-light); margin-top: 28px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
+  <nav><a href="/#install">Get the app</a><a href="https://github.com/nulljosh/nimble">Source</a></nav>
+</header>
+<main>
+  <h1>Ask anything.</h1>
+  <form id="f" autocomplete="off">
+    <label class="field">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="color:var(--yellow-deep)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="q" type="text" enterkeyhint="go" aria-label="Ask Nimble" placeholder="define nimble" autofocus spellcheck="false">
+      <button class="go" type="submit">Ask</button>
+    </label>
+  </form>
+  <section class="card" id="r" aria-live="polite" hidden></section>
+  <div class="chips" id="chips"></div>
+  <p class="hint">Math, units and graphs work offline. Everything else gets one sentence and a source.</p>
+</main>
+<script src="engine.js?v=offline"></script>
+<script>
+(function(){
+  var f=document.getElementById('f'), q=document.getElementById('q'), r=document.getElementById('r'), chips=document.getElementById('chips');
+  async function run(query){
+    query=(query||q.value||q.placeholder).trim(); if(!query) return;
+    q.value=query; r.hidden=false;
+    r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>';
+    // Shareable: /app?q=... opens straight onto the answer.
+    history.replaceState(null,'','?q='+encodeURIComponent(query));
+    var res=await renderAnswer(query);
+    if(q.value.trim()!==query) return;  // a newer question already went out
+    r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
+    r.innerHTML=res.h+(res.credit?'<div class="credit">'+res.credit+'</div>':'');
+  }
+  f.addEventListener('submit',function(e){ e.preventDefault(); run(); });
+  fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
+    list.sort(function(){return Math.random()-0.5;}).slice(0,6).forEach(function(s){
+      var b=document.createElement('button'); b.type='button'; b.textContent=s;
+      b.onclick=function(){ run(s); }; chips.appendChild(b);
+    });
+    q.placeholder=list[6]||q.placeholder;
+  }).catch(function(){});
+  var start=new URLSearchParams(location.search).get('q'); if(start) run(start);
+})();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});
+</script>
+</body>
+</html>

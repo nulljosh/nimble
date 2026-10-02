@@ -12,6 +12,7 @@ final class QueryEngineTests: XCTestCase {
 
     func testMultiplication() {
         XCTAssertEqual(engine.evaluateMath("6 * 7"), "42")
+        XCTAssertEqual(engine.evaluateMath("15% of 240"), "36")
     }
 
     func testDivision() {

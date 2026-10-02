@@ -1,86 +1,55 @@
-<img src="docs/icon.svg" width="80" style="border-radius:18px">
+<img src="docs/icon-512.png" width="80">
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v1.0.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v1.1.0-blue) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
-Nimble works out what you meant, math, fact or definition, and answers in a line. Math never leaves the device. Everything else goes to two open models at once, and if they both give up, DuckDuckGo and Wikipedia catch it.
+Math, units and graphs answer on the device. Everything else goes to two open models at once, and DuckDuckGo and Wikipedia catch what they miss. No API keys, no accounts, no telemetry.
 
-**[nimble.heyitsmejosh.com →](https://nimble.heyitsmejosh.com)**
+**[nimble.heyitsmejosh.com →](https://nimble.heyitsmejosh.com)** · **[Open the web app →](https://nimble.heyitsmejosh.com/app)**
 
-The original [Nimble](https://github.com/Maybulb/Nimble) was Electron plus Wolfram|Alpha and died in 2020. This one is native, and written from scratch.
+<p>
+<img src="docs/screenshots/ios-home.jpg" width="180">
+<img src="docs/screenshots/ios-convert.jpg" width="180">
+<img src="docs/screenshots/ios-graph.jpg" width="180">
+<img src="docs/screenshots/ios-math-dark.jpg" width="180">
+</p>
 
-<img src="progress.svg" width="460">
-
-## Features
-
-- **Knows what you meant.** Math, fact or definition, sorted before it answers.
-- **Two models, one answer.** Gemma and Qwen3 run in parallel on Cloudflare Workers AI. If they agree, you get it. If they don't, the two are folded into one sentence. The label under the answer names who said it.
-- **Falls back. Never fails.** DuckDuckGo, then Wikipedia, when the models say UNKNOWN.
-- **Works offline.** Math, units and graphs never touch the network, the web app loads from cache, and a question asked offline says so right away instead of spinning.
-- **Math and units.** Arithmetic, trig, sqrt, log, powers, pi, and unit conversion ("5 miles to km", "100 F to C"). No network.
-- **Graphs.** "y = x^2" or "plot sin(x)" draws the curve, sampled on device.
-- **Numbers get a source.** A model's number is a guess, so numeric answers are cross-checked against DuckDuckGo and the sourced one wins.
-- **Summon it anywhere.** ⌥Space, or the menu bar.
-- **8 themes.** Orange, red, yellow, green, blue, purple, pink, contrast.
-- **Updates itself.** Checks GitHub Releases daily. Or check by hand in Preferences.
-- No API keys. No telemetry. 34 tests.
-
-## Platforms
+## Get it
 
 | | |
 |---|---|
-| macOS | Native SwiftUI HUD + menu bar item, ⌥Space to summon |
-| iOS | Native SwiftUI app |
-| Web | The landing page is the app: [docs/index.html](docs/index.html) + [docs/engine.js](docs/engine.js) |
-| Terminal | `swift build && ./.build/debug/nimble-tui "your question"` — see [tui/](tui/) |
+| iPhone and Mac | [App Store](https://apps.apple.com/app/nimble-answers/id6807858746) |
+| Mac, direct | [Latest release](https://github.com/nulljosh/nimble/releases/latest), signed and notarized. ⌥Space summons it |
+| Windows, Android | `.msi` and `.apk` on the same release |
+| Web | [nimble.heyitsmejosh.com/app](https://nimble.heyitsmejosh.com/app), works offline once loaded |
+| Terminal | `swift build && ./.build/debug/nimble-tui "your question"` |
 
-<img src="docs/screenshots/ios-search.jpg" width="240">
+## How it answers
 
-## Installing the Mac app
+1. Units, math and graphs: evaluated on the device. `5 miles to km`, `15% of 240`, `plot sin(x)`.
+2. Dictionary, weather, local time and currency: pattern-gated live sources.
+3. Everything else: Gemma and Qwen3 run side by side on Cloudflare Workers AI through `worker/worker.js`. Agree and you get it; disagree and the two are folded into one sentence. Numbers are cross-checked against DuckDuckGo. Both give up and Wikipedia answers.
 
-Get it on the [App Store](https://apps.apple.com/app/nimble-answers/id6807858746) for iPhone and Mac. It updates itself there.
-
-Or download the latest `.zip` from [Releases](https://github.com/nulljosh/nimble/releases/latest), unzip, drag `Nimble.app` to `/Applications`.
-
-From v1.0.1 on, releases are Developer ID signed and notarized. They open first try.
-The v1.0.0 build was signed with a development certificate only, so macOS quarantines it.
-Approve it under System Settings, Privacy & Security, "Open Anyway". Or just update.
-
-Maintainers: `scripts/release-macos.sh` signs, notarizes, staples and packages in one
-pass. It needs a Developer ID Application certificate and a `notarytool` credential
-profile. The script header explains both.
-
-## Answer engine
-
-`worker/worker.js` is a Cloudflare Worker with a Workers AI binding. **There is no API key
-anywhere.** Not in the binary, not in the repo. It runs `@cf/google/gemma-4-26b-a4b-it` and
-`@cf/qwen/qwen3-30b-a3b-fp8` side by side, capped at 20 requests a minute per IP.
-
-```bash
-cd worker && npx wrangler deploy
-```
-
-## Architecture
-
-<img src="architecture.svg" width="600">
-
-Open work is in [roadmap.md](roadmap.md).
+Every answer names its source. Light and dark follow the system. 8 accent themes.
 
 ## Development
 
 ```bash
-xcodegen generate && open Nimble.xcodeproj
+xcodegen generate && open Nimble.xcodeproj   # macOS + iOS
+node --test test/                            # web engine
+cd worker && npx wrangler deploy             # answer proxy
+scripts/release-macos.sh                     # signed, notarized Mac zip
 ```
 
-Requires Xcode + xcodegen.
+The landing page is the web app: `docs/index.html` + `docs/app.html` + `docs/engine.js`, deployed to Cloudflare Pages on push. The app icon is `Nimble.icon`, an Icon Composer bundle.
+
+<img src="architecture.svg" width="600">
+
+Open work is in [roadmap.md](roadmap.md). Design notes in the [whitepaper](WHITEPAPER.md).
 
 ## License
 
 MIT 2026 Joshua Trommel
-
-## Whitepaper
-
-[Technical whitepaper](WHITEPAPER.md)

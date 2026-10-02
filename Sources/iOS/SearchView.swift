@@ -4,6 +4,7 @@ struct SearchView: View {
     @Environment(AppState.self) private var state
     @FocusState private var isInputFocused: Bool
     @AppStorage("whats_new_seen_version") private var whatsNewSeenVersion = ""
+    @State private var tries: [String] = []
 
     var body: some View {
         @Bindable var state = state
@@ -22,7 +23,7 @@ struct SearchView: View {
                     }
                     .frame(width: 20, height: 20)
 
-                    TextField("", text: $state.queryText, prompt: Text(state.currentPlaceholder).foregroundStyle(.tertiary))
+                    TextField("", text: $state.queryText, prompt: Text(state.currentPlaceholder).foregroundStyle(.secondary))
                         .textFieldStyle(.plain)
                         .font(.system(size: 22, weight: .light))
                         .foregroundStyle(.primary)
@@ -65,6 +66,31 @@ struct SearchView: View {
                         .padding(.bottom, 8)
                         .padding(.top, 2)
                     }
+                } else {
+                    // Empty state: a few real questions to tap, instead of a blank wall.
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("TRY")
+                            .font(.system(size: 11, weight: .bold))
+                            .tracking(1.2)
+                            .foregroundStyle(state.theme.color)
+                        ForEach(tries, id: \.self) { q in
+                            Button {
+                                state.queryText = q
+                                state.performQuery()
+                            } label: {
+                                Text(q)
+                                    .font(.system(size: 17))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 18)
+                    .padding(.top, 28)
+                    .onAppear {
+                        if tries.isEmpty { tries = Array(Set((0..<12).map { _ in state.randomSuggestion() })).prefix(4).map { $0 } }
+                    }
                 }
 
                 Spacer()
@@ -95,6 +121,8 @@ struct SearchView: View {
                 .overlay(alignment: .top) { Divider().opacity(0.07) }
             }
             .onAppear {
+                // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
+                if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery() }
                 guard whatsNewSeenVersion == whatsNewVersion else { return }
                 isInputFocused = true
             }
@@ -108,17 +136,17 @@ struct SearchView: View {
                 Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
             }
         }
-        // Mirrors the web app: the theme owns the surface, and `.primary`/`.secondary`
-        // follow it via colorScheme instead of every view hardcoding white-on-dark.
+        // Light/dark follows the system, like the web app; the theme is only the accent.
         // On the NavigationStack rather than its content — inside, the status-bar area
         // stayed unpainted and rendered black.
-        .background(state.theme.backgroundColor.ignoresSafeArea())
-        .environment(\.colorScheme, state.theme.colorScheme)
+        .background(Color(uiColor: .systemBackground).ignoresSafeArea())
+        .preferredColorScheme(state.theme.colorScheme)
+        .tint(state.theme.color)  // caret and toolbar in the theme accent, not system blue
     }
 
     private var sourceText: String {
         switch state.result {
-        case .math: return "mathjs"
+        case .math, .convert: return "Computed offline"
         case .text(_, _, let source, _, _): return source
         case .list(_, let source): return source
         case .graph: return "Computed offline"

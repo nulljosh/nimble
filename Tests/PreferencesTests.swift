@@ -68,11 +68,9 @@ final class PreferencesTests: XCTestCase {
 
     func testThemeColors() {
         for theme in NimbleTheme.allCases {
-            // Just verify these don't crash
             _ = theme.color
-            _ = theme.backgroundColor
-            _ = theme.textColor
-            _ = theme.inputTextColor
+            // Only Contrast pins dark; every other theme follows the system.
+            XCTAssertEqual(theme.colorScheme, theme == .contrast ? .dark : nil)
         }
     }
 

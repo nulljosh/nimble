@@ -50,7 +50,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .tracking(1)
 
-                Toggle("Offline Math (mathjs)", isOn: $state.mathEnabled)
+                Toggle("Offline math", isOn: $state.mathEnabled)
                     .onChange(of: state.mathEnabled) { state.savePreferences() }
 
                 Toggle("Launch on Startup", isOn: $state.launchOnStartup)

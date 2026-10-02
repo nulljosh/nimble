@@ -26,7 +26,7 @@
 /* Page-local aliases onto the design system (tokens.css) */
 :root {
   --orange: var(--yellow-deep);
-  --dark: var(--black);
+  --dark: var(--text);
   --mid: var(--text-mid);
   --light: var(--text-light);
 }
@@ -57,8 +57,9 @@ a:hover { text-decoration: underline; }
 .hero {
   position: relative; isolation: isolate; overflow: hidden;
   text-align: center;
-  padding: clamp(3rem, 10vw, 6rem) 0 4rem;
+  padding: 1.25rem 0 4rem;
   background: var(--yellow);
+  --dark: #000;  /* the hero stays yellow in dark mode, so its ink stays black */
 }
 .hero .container { position: relative; z-index: 2; }
 
@@ -117,10 +118,19 @@ a:hover { text-decoration: underline; }
     linear-gradient(var(--yellow), transparent 14%, transparent 86%, var(--yellow));
 }
 
-.hero-icon {
-  width: 120px;
-  margin: 0 auto 2rem;
+.hero-nav {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 1080px; margin: 0 auto; padding: 0 1.5rem;
 }
+.hero-brand { display: flex; align-items: center; gap: 10px; color: #000; font-weight: 700; font-size: 1.15rem; letter-spacing: var(--tracking-tight); }
+.hero-brand svg { width: 34px; height: 34px; }
+.hero-nav nav { display: flex; align-items: center; gap: 1.25rem; font-size: 0.95rem; }
+.hero-nav nav a { color: rgba(0,0,0,0.7); }
+.hero-nav nav a:hover { color: #000; text-decoration: none; }
+.hero-nav nav .btn { color: var(--yellow); }
+@media (max-width: 600px) { .hero-nav nav a:not(.btn) { display: none; } }
+.hero-copy { padding-top: clamp(2.5rem, 8vw, 4.5rem); }
 
 .hero h1 {
   font-size: clamp(2.5rem, 7vw, 4rem);
@@ -159,8 +169,9 @@ a:hover { text-decoration: underline; }
 
 .btn-dark {
   background: var(--dark);
-  color: var(--yellow);
+  color: var(--bg);
 }
+.hero .btn-dark { color: var(--yellow); }
 
 .btn-outline {
   background: var(--yellow);
@@ -197,11 +208,9 @@ a:hover { text-decoration: underline; }
   min-height: 420px;
   display: flex; flex-direction: column;
 }
-.hero .device { margin: 2rem auto; }
+.hero .device { margin: 3rem auto 1.5rem; }
 /* ponytail: on phones the 280px frame is taller than the viewport; tighten the header and scale the frame so it fits under the tagline. */
 @media (max-height: 820px) and (max-width: 600px) {
-  .hero { padding-top: 2rem; }
-  .hero-icon { width: 72px; margin-bottom: 1.25rem; }
   .hero p { margin-bottom: 1.5rem; }
   .hero .device { margin: 0 auto 1.5rem; }
   .hero .device-iphone, .hero .device-android { --device-w: min(280px, calc(58svh * 9 / 19.5)); }
@@ -371,7 +380,7 @@ a:hover { text-decoration: underline; }
 .oss {
   padding: 4rem 0;
   text-align: center;
-  background: #fafafa;
+  background: var(--color-bg2);
   border-top: 2px solid var(--yellow);
 }
 
@@ -396,12 +405,12 @@ a:hover { text-decoration: underline; }
 footer {
   padding: 2rem 0;
   text-align: center;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--line);
   font-size: 0.85rem;
-  color: #4a4844;
+  color: var(--mid);
 }
 
-footer a { color: #4a4844; text-decoration: underline; }
+footer a { color: var(--mid); text-decoration: underline; }
 footer a:hover { color: var(--dark); }
 
 /* Footer heart */
@@ -449,18 +458,24 @@ footer a:hover { color: var(--dark); }
 
 <section class="hero">
   <div class="hero-float" id="heroFloat" aria-hidden="true"></div>
-  <div class="container">
-    <div class="hero-icon">
-      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nimble">
+  <header class="hero-nav">
+    <a class="hero-brand" href="/"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nimble">
         <rect width="200" height="200" rx="44" fill="#000"/>
         <circle cx="100" cy="80" r="44" fill="#ffca30"/>
         <rect x="85" y="110" width="30" height="26" fill="#ffca30"/>
         <rect x="80" y="130" width="40" height="32" rx="8" fill="#ffca30"/>
         <rect x="80" y="140" width="40" height="5" fill="#000"/>
         <rect x="80" y="150" width="40" height="5" fill="#000"/>
-      </svg>
-    </div>
+      </svg>Nimble</a>
+    <nav><a href="#features">Features</a><a href="#install">Download</a><a href="https://github.com/nulljosh/nimble">Source</a><a class="btn btn-dark" href="/app">Open app</a></nav>
+  </header>
+  <div class="container hero-copy">
     <h1>Ask a question. Get one sentence back.</h1>
+    <p>Math, units and graphs answer offline. Everything else comes from two open models with a source. Mac, iPhone, Windows, Android and the web.</p>
+    <div class="hero-buttons">
+      <a href="/app" class="btn btn-dark">Open the web app</a>
+      <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-outline" data-asset="macOS.zip" id="dl">Download for Mac</a>
+    </div>
     <div class="device device-iphone" id="demoFrame" data-title="Nimble">
     <div class="device-screen">
     <form class="mockup" id="demo" autocomplete="off">
@@ -481,16 +496,11 @@ footer a:hover { color: var(--dark); }
     </form>
     </div>
     </div>
-    <p class="demo-caption">This is the <span id="demoDev">iPhone</span> app, running the real engine. Type anything.</p>
-    <div class="hero-buttons">
-      <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset="macOS.zip">Download for Mac</a>
-      <a href="#install" class="btn btn-outline">Windows &amp; Android</a>
-      <a href="https://github.com/nulljosh/nimble" class="btn btn-outline">Source</a>
-    </div>
+    <p class="demo-caption">The <span id="demoDev">iPhone</span> app, running the real engine. Type anything, or <a href="/app">open the full web app</a>.</p>
   </div>
 </section>
 
-<section class="features">
+<section class="features" id="features">
   <div class="container">
     <h2>Answers, not ten blue links.</h2>
     <div class="features-grid">
@@ -694,7 +704,7 @@ footer a:hover { color: var(--dark); }
   // percentages per breakpoint, place each pair against the real measured
   // boxes and keep the ones that land clear. Self-tuning at any width.
   var blockers = [];
-  ['.hero-icon', '.hero h1', '.hero p', '.hero-buttons'].forEach(function (sel) {
+  ['.hero-nav', '.hero h1', '.hero-copy > p', '.hero-buttons', '.hero .device'].forEach(function (sel) {
     var n = hero.querySelector(sel);
     if (n) blockers.push(n.getBoundingClientRect());
   });
@@ -762,32 +772,15 @@ footer a:hover { color: var(--dark); }
   var names={iphone:'iPhone',android:'Android',mac:'Mac',windows:'Windows'}, dev=document.documentElement.dataset.device;
   document.getElementById('demoDev').textContent=names[dev]||'iPhone';
   document.getElementById('demoFrame').className='device device-'+(names[dev]?dev:'iphone');
-  var b=document.querySelector('.hero-buttons .btn-dark');
+  var b=document.getElementById('dl');
   if(dev==='windows'){b.textContent='Download for Windows';b.dataset.asset='.msi';}
   else if(dev==='android'){b.textContent='Download for Android';b.dataset.asset='.apk';}
   var f=document.getElementById('demo'), q=document.getElementById('demoQ'), r=document.getElementById('demoR'), c=document.getElementById('demoC'), g=document.getElementById('demoG');
-  var esc=function(t){return String(t).replace(/</g,'&lt;');};
   // Example queries cycle through the empty field; return runs whichever is showing.
   var examples=[g.textContent], idx=0;
   fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
     examples=list.sort(function(){return Math.random()-0.5;}); idx=0;
   }).catch(function(){});
-  async function render(query){
-    var a=await answer(query), h='<div class="mockup-label">Answer</div>', credit='';
-    if(a.kind==='convert'){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit='computed offline'; }
-    else if(a.kind==='math'){ h+='<div class="mockup-big">'+a.value+'</div>'; credit='computed offline'; }
-    else if(a.kind==='graph'){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit='computed offline'; }
-    else if(a.kind==='offline'){ h+='<p>You\'re offline. Math, units and graphs still work.</p>'; }
-    else if(a.kind==='text'){
-      // Click through to the source; AI answers have none, so fall back to a web search.
-      var href=a.url||'https://duckduckgo.com/?q='+encodeURIComponent(query);
-      h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,'&quot;')+'" target="_blank" rel="noopener">'
-        +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3>'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
-      credit='powered by '+a.src;
-    }
-    else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
-    return {h:h, credit:credit};
-  }
   function show(res){
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
     r.innerHTML=res.h; c.textContent=res.credit;
@@ -796,7 +789,7 @@ footer a:hover { color: var(--dark); }
   // 8s keeps a visitor well under the worker's 20/min AI cap (math/units are offline).
   setInterval(async function(){
     if(q.value || document.hidden) return;
-    var next=examples[(idx+1)%examples.length], res=await render(next);
+    var next=examples[(idx+1)%examples.length], res=await renderAnswer(next);
     if(q.value) return;
     idx=(idx+1)%examples.length;
     g.classList.remove('swap'); void g.offsetWidth; g.classList.add('swap');
@@ -806,7 +799,7 @@ footer a:hover { color: var(--dark); }
   async function run(){
     var query=(q.value||g.textContent).trim(); if(!query) return;
     r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>'; c.textContent='';
-    show(await render(query));
+    show(await renderAnswer(query));
   }
   f.addEventListener('submit',function(e){e.preventDefault();run();});
   run();

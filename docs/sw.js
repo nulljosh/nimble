@@ -1,7 +1,7 @@
 // Offline shell: network first so deploys show up immediately, cache as the fallback.
 // ponytail: same-origin GETs only; the answer sources are cross-origin and need the network anyway.
-const CACHE = "nimble-v1";
-self.addEventListener("install", e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "engine.js?v=offline", "tokens.css", "devices.css", "suggestions.json", "icon.svg", "manifest.webmanifest"]))); });
+const CACHE = "nimble-v2";
+self.addEventListener("install", e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./", "app", "icon-512.png", "engine.js?v=offline", "tokens.css", "devices.css", "suggestions.json", "icon.svg", "manifest.webmanifest"]))); });
 self.addEventListener("activate", e => e.waitUntil(self.clients.claim()));
 self.addEventListener("fetch", e => {
   const r = e.request;

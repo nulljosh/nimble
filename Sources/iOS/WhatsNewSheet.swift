@@ -4,7 +4,9 @@ import SwiftUI
 // it was pinned at "1.2.0" while the project shipped 1.0.0, a version that never existed.
 let whatsNewVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 private let whatsNewBullets = [
-    "Nimble is now available as an iOS companion app",
+    "A new glass icon, made in Icon Composer",
+    "Tap a suggestion to see what Nimble can do",
+    "Percentages like 15% of 240 answer offline",
 ]
 
 struct WhatsNewSheet: View {
@@ -20,13 +22,13 @@ struct WhatsNewSheet: View {
             }
             .sheet(isPresented: $isPresented) {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("What's New in v\(whatsNewVersion)")
+                    Text("What's new in \(whatsNewVersion)")
                         .font(.title2.bold())
 
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(whatsNewBullets, id: \.self) { bullet in
                             HStack(alignment: .top, spacing: 8) {
-                                Text("•")
+                                Circle().fill(Color(red: 1.0, green: 0.79, blue: 0.19)).frame(width: 6, height: 6).padding(.top, 8)
                                 Text(bullet)
                             }
                         }
@@ -43,6 +45,9 @@ struct WhatsNewSheet: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
+                    .tint(Color(red: 1.0, green: 0.79, blue: 0.19))  // brand yellow, not system blue
+                    .foregroundStyle(.black)
+                    .controlSize(.large)
                 }
                 .padding(24)
                 .background(GeometryReader { geo in

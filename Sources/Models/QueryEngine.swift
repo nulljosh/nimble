@@ -138,7 +138,9 @@ final class QueryEngine: Sendable {
     }
 
     func evaluateMath(_ input: String) -> String? {
+        // "15% of 240" -> "15/100*240"; bare % stays modulo.
         let expr = input.trimmingCharacters(in: .whitespaces)
+            .replacingOccurrences(of: "([\\d.]+)\\s*%\\s*of\\s*", with: "$1/100*", options: [.regularExpression, .caseInsensitive])
         guard !expr.isEmpty else { return nil }
 
         // Parse the literal expression first; the parser must consume the whole

@@ -37,7 +37,7 @@ struct SearchView: View {
                 TextField(state.currentPlaceholder, text: $state.queryText)
                     .textFieldStyle(.plain)
                     .font(.system(size: 22, weight: .light))
-                    .foregroundStyle(Color.white.opacity(0.92))
+                    .foregroundStyle(Color.primary.opacity(0.92))
                     .focused($isInputFocused)
                     .onSubmit { state.performQuery() }
                     .onKeyPress(.tab) {
@@ -55,12 +55,12 @@ struct SearchView: View {
                 } else if !state.queryText.isEmpty {
                     Text("↩")
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(Color.white.opacity(0.3))
+                        .foregroundStyle(Color.primary.opacity(0.3))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Color.white.opacity(0.07))
+                        .background(Color.primary.opacity(0.07))
                         .clipShape(RoundedRectangle(cornerRadius: 4))
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.primary.opacity(0.1), lineWidth: 1))
                 }
             }
             .padding(.horizontal, 18)
@@ -102,7 +102,7 @@ struct SearchView: View {
                         Button(action: openSource) {
                             Text(sourceText)
                                 .font(.system(size: 10))
-                                .foregroundStyle(Color.white.opacity(0.2))
+                                .foregroundStyle(Color.primary.opacity(0.2))
                         }
                         .buttonStyle(.plain)
                     }
@@ -119,7 +119,7 @@ struct SearchView: View {
                 Spacer()
                     Text("Nimble v\(Bundle.main.marketingVersion)")
                         .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(Color.white.opacity(0.2))
+                        .foregroundStyle(Color.primary.opacity(0.2))
                         .tracking(0.8)
                         .textCase(.uppercase)
                 Spacer()
@@ -127,7 +127,7 @@ struct SearchView: View {
                     Button(action: { state.copyResultText() }) {
                         Text("⎘")
                             .font(.system(size: 13))
-                            .foregroundStyle(Color.white.opacity(0.3))
+                            .foregroundStyle(Color.primary.opacity(0.3))
                     }
                     .buttonStyle(.plain)
                     .help("Copy Result")
@@ -144,23 +144,20 @@ struct SearchView: View {
         .fixedSize(horizontal: false, vertical: true)
         .background(
             ZStack {
-                VisualEffectView(material: .hudWindow, blendingMode: .behindWindow)
-                Color(red: 0.07, green: 0.07, blue: 0.118).opacity(0.78)
+                VisualEffectView(material: .popover, blendingMode: .behindWindow)
             }
         )
-        // The macOS popover is always the dark HUD surface regardless of theme, so pin
-        // the subtree's scheme — that keeps `.primary`/`.secondary` in the shared
-        // ResultView resolving light-on-dark here while iOS follows its theme.
-        .environment(\.colorScheme, .dark)
+        // Follows the system appearance; the .popover material adapts with it.
+        .preferredColorScheme(state.theme.colorScheme)
         .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.1), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.primary.opacity(0.1), lineWidth: 1))
         .onAppear { isInputFocused = true }
         .contextMenu { ContextMenuView().environment(state) }
     }
 
     private var sourceText: String {
         switch state.result {
-        case .math: return "mathjs"
+        case .math, .convert: return "Computed offline"
         case .text(_, _, let source, _, _): return source
         case .list(_, let source): return source
         case .graph: return "Computed offline"

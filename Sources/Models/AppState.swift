@@ -25,26 +25,13 @@ enum NimbleTheme: String, CaseIterable, Codable {
         case .blue: Color(red: 0.16, green: 0.49, blue: 0.91)
         case .purple: Color(red: 0.38, green: 0.02, blue: 0.69)
         case .pink: Color(red: 0.82, green: 0.02, blue: 0.63)
-        case .contrast: Color.white
+        case .contrast: Color.primary
         }
     }
 
-    var backgroundColor: Color {
-        self == .contrast ? .black : .white
-    }
-
-    var textColor: Color {
-        self == .contrast ? .white : .primary
-    }
-
-    var inputTextColor: Color {
-        .white
-    }
-
-    /// Drives SwiftUI's semantic colors (`.primary`/`.secondary`) so views can stop
-    /// hardcoding white and still read correctly on each theme's own background.
-    var colorScheme: ColorScheme {
-        self == .contrast ? .dark : .light
+    /// nil follows the system light/dark setting; only Contrast pins dark.
+    var colorScheme: ColorScheme? {
+        self == .contrast ? .dark : nil
     }
 
     var displayName: String {
@@ -194,6 +181,8 @@ final class AppState {
         case .ollama: return "your own Ollama server"
         }
     }
+
+    func randomSuggestion() -> String { queryEngine.randomSuggestion(useDefaults: defaultSuggestions) }
 
     func rotatePlaceholder() {
         currentPlaceholder = queryEngine.randomSuggestion(useDefaults: defaultSuggestions)
