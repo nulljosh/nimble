@@ -1,7 +1,7 @@
 // node --test  (offline: only convert, math and graph go through callTool here)
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { callTool, ToolError, UnknownTool, TOOLS, TOOL_NAMES } from '../docs/functions/lib/tools.js';
+import { callTool, ToolError, UnknownTool, TOOLS, TOOL_NAMES } from '../functions/lib/tools.js';
 
 test('tool list', () => {
   assert.deepEqual(TOOL_NAMES, ['answer', 'convert', 'math', 'graph']);

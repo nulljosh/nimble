@@ -6,7 +6,7 @@
 // navigator and localStorage, so the server imports it as is. Its math is a parser, not
 // eval, because Workers forbid eval.
 
-import engine from '../../engine.js';
+import engine from '../../docs/engine.js';
 
 const { answer, tryConvert, tryMath, graphExpr, graph } = engine;
 

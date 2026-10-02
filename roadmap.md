@@ -8,7 +8,7 @@ msi, apk), landing + README + whitepaper + screenshots synced, What's New, ASC
 submit if a session is live. Model tags route the subagent.
 
 ### v2.0 Agents
-- [ ] `functions/api/[[route]].js` + `functions/mcp.js` on the Pages site, house pattern from wordroot/sidewise: tools `answer`, `convert`, `math`, `graph`, all backed by `docs/engine.js`. Document on the landing (one short section) and README. [Sonnet]
+- [x] `functions/api/[[route]].js` + `functions/mcp.js` on the Pages site, house pattern from wordroot/sidewise: tools `answer`, `convert`, `math`, `graph`, all backed by `docs/engine.js`. Document on the landing (one short section) and README. [Sonnet]
 - [ ] Web asks before sending a question to the AI, same wording as iOS and Mac; remembered in localStorage. [Sonnet]
 - [ ] `/app?q=` deep links from the landing demo's "open in app" and from the API docs. Tests for both tools and the consent gate. [Haiku]
 
