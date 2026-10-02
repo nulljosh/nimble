@@ -284,7 +284,27 @@ function consentHTML(recipient){
     +'<div class="consent-actions"><button type="button" class="consent-yes" data-consent="yes">Allow</button><button type="button" class="consent-no" data-consent="no">Don\'t allow</button></div>';
 }
 
-// Answer as HTML, shared by the landing demo and /app. Returns {h, credit}.
+// --- Search history: this device only, newest first, de-duplicated, last 50 ---
+// Named searchHistory because a page global called history is window.history. Exported as history.
+const HISTORY_KEY = "nimble.history", HISTORY_MAX = 50;
+const searchHistory = {
+  list(){
+    try{
+      const a = JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
+      return Array.isArray(a) ? a.filter(e=>e && typeof e.q==="string" && e.q).slice(0,HISTORY_MAX) : [];
+    }catch{ return []; }
+  },
+  add(query){
+    const q = String(query||"").trim(); if(!q) return;
+    try{
+      const rest = this.list().filter(e=>e.q.toLowerCase()!==q.toLowerCase());
+      localStorage.setItem(HISTORY_KEY, JSON.stringify([{q, t:Date.now()}, ...rest].slice(0,HISTORY_MAX)));
+    }catch{}
+  },
+  clear(){ try{ localStorage.removeItem(HISTORY_KEY); }catch{} },
+};
+
+// Answer as HTML, shared by the landing demo and /app. Returns {h, credit, kind}.
 async function renderAnswer(query, opts){
   const esc=t=>String(t).replace(/</g,"&lt;");
   const a=await answer(query, opts); let h='<div class="mockup-label">Answer</div>', credit='';
@@ -301,11 +321,11 @@ async function renderAnswer(query, opts){
     credit="powered by "+a.src;
   }
   else { h+='<p>No instant answer. Try a question, a sum, or "5 miles to km".</p>'; }
-  return {h, credit};
+  return {h, credit, kind:a.kind};
 }
 
 function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink};
+if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,history:searchHistory};

@@ -69,11 +69,25 @@ form { position: relative; }
 .credit { margin-top: 14px; font-size: 12px; color: var(--text-light); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 24px; }
+.chips[hidden] { display: none; }
 .chips button {
   border: 1px solid var(--line); background: none; color: var(--text-mid); border-radius: 999px;
   padding: 7px 13px; font: inherit; font-size: 14px; cursor: pointer;
 }
 .chips button:hover { color: var(--text); border-color: var(--yellow-deep); }
+.recent { margin-top: 24px; }
+.recent[hidden] { display: none; }
+.recent-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.recent-head .mockup-label { margin-bottom: 0; }
+.recent-head button { border: 0; background: none; font: inherit; font-size: 13px; color: var(--text-light); cursor: pointer; padding: 0; }
+.recent-head button:hover { color: var(--text); }
+.recent-list { list-style: none; }
+.recent-list button {
+  display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none;
+  font: inherit; font-size: 16px; color: var(--text-mid); padding: 11px 0; cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.recent-list button:hover { color: var(--text); }
 .hint { text-align: center; font-size: 13px; color: var(--text-light); margin-top: 28px; }
 </style>
 </head>
@@ -93,12 +107,29 @@ form { position: relative; }
   </form>
   <section class="card" id="r" aria-live="polite" hidden></section>
   <div class="chips" id="chips"></div>
+  <section class="recent" id="recent" aria-label="Recent searches" hidden>
+    <div class="recent-head"><div class="mockup-label">Recent</div><button type="button" id="clear">Clear</button></div>
+    <ul class="recent-list" id="recent-list"></ul>
+  </section>
   <p class="hint">Math, units and graphs work offline. Everything else gets one sentence and a source.</p>
 </main>
 <script src="engine.js?v=offline"></script>
 <script>
 (function(){
   var f=document.getElementById('f'), q=document.getElementById('q'), r=document.getElementById('r'), chips=document.getElementById('chips');
+  var hist=searchHistory, recent=document.getElementById('recent'), recentList=document.getElementById('recent-list');
+  // Recent searches replace the suggestion chips once there is any history. textContent only, never HTML.
+  function paintRecent(){
+    var items=hist.list().slice(0,8);
+    recent.hidden=!items.length; chips.hidden=items.length>0;
+    recentList.textContent='';
+    items.forEach(function(e){
+      var li=document.createElement('li'), b=document.createElement('button');
+      b.type='button'; b.textContent=e.q; b.title=e.q; b.onclick=function(){ run(e.q); };
+      li.appendChild(b); recentList.appendChild(li);
+    });
+  }
+  document.getElementById('clear').addEventListener('click',function(){ hist.clear(); paintRecent(); });
   async function run(query){
     query=(query||q.value||q.placeholder).trim(); if(!query) return;
     q.value=query; r.hidden=false;
@@ -109,6 +140,7 @@ form { position: relative; }
     if(q.value.trim()!==query) return;  // a newer question already went out
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
     r.innerHTML=res.h+(res.credit?'<div class="credit">'+res.credit+'</div>':'');
+    if(['consent','none','offline'].indexOf(res.kind)<0){ hist.add(query); paintRecent(); }
   }
   f.addEventListener('submit',function(e){ e.preventDefault(); run(); });
   // AI switch: on = the model may answer, off = DuckDuckGo and Wikipedia only, ask = not chosen yet.
@@ -137,6 +169,8 @@ form { position: relative; }
     });
     q.placeholder=list[6]||q.placeholder;
   }).catch(function(){});
+  if(location.search.indexOf('seed=1')>-1) ['5 miles to km','capital of Canada','sqrt(144)'].forEach(function(s){ hist.add(s); }); // screenshots only
+  paintRecent();
   var start=new URLSearchParams(location.search).get('q'); if(start) run(start);
 })();
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});
