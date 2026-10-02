@@ -21,12 +21,13 @@ struct QuickAskView: View {
                     Text(state.queryText).font(.system(size: 15))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
-                    TextField(state.currentPlaceholder, text: $state.queryText)
+                    TextField(state.voice.listening ? "Listening" : state.currentPlaceholder, text: $state.queryText)
                         .textFieldStyle(.plain)
                         .font(.system(size: 15))
                         .focused($focused)
                         .onSubmit { state.performQuery() }
                 }
+                if !fieldStandIn { MicButton(size: 13).environment(state) }
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 11)

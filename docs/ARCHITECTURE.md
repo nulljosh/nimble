@@ -40,13 +40,15 @@ Answer pipeline:
 | `Sources/Views/VisualEffectView.swift` | macOS HUD glass background wrapping NSVisualEffectView |
 | `Sources/macOS/GlobalHotkey.swift` | Carbon RegisterEventHotKey wrapper for ⌥Space system-wide hotkey |
 | `Sources/macOS/QuickAskView.swift` | Menu bar window: search field, the answer at 360pt, Open Nimble / Settings / Quit; shares the HUD's AppState |
+| `Sources/Models/Voice.swift` | The mic: SFSpeechRecognizer + AVAudioEngine, words stream into the field, the question runs after 1.5 s of quiet or a second tap; reads permission without prompting, a denied one hides the button |
+| `Sources/Views/MicButton.swift` | Mic button at the trailing edge of the iOS field, the Mac HUD and the menu bar field; theme colour while listening |
 | `Sources/Models/SharedAnswer.swift` | Last question and answer in the `group.com.nulljosh.nimble` app group, written by iOS after each answer, read by the widget |
 | `Widget/NimbleWidget.swift` | iOS home screen widget, small and medium: last answer, tap opens `nimble://ask` with the field focused |
 | `Sources/iOS/SearchView.swift` | iOS search UI: large search bar, results below in a scroll view, nav stack for context |
 | `Sources/iOS/PreferencesView.swift` | iOS settings list: theme, AI engine, math toggle, about links |
 | `Sources/iOS/WhatsNewSheet.swift` | Modal sheet on version bump: title, bullet features, dismiss |
 | `docs/index.html` | Landing page: hero, mockup (device frame), "try it" demo, features, privacy link, GitHub link |
-| `docs/engine.js` | JavaScript port of QueryEngine: tryMath, tryConvert, tryGraph, fallback to answer proxy |
+| `docs/engine.js` | JavaScript port of QueryEngine: tryMath, tryConvert, tryGraph, fallback to answer proxy; `listenLabel` words for the web mic |
 | `docs/sw.js` | Service worker: network first, cached shell when offline |
 | `docs/privacy.html` | Privacy policy: no accounts, no tracking, no data retention |
 | `docs/splash.html` | Static splash screen (used by early PWA or app opening) |

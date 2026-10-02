@@ -72,9 +72,17 @@ final class AppState {
     /// Last three AI exchanges for follow-ups. Memory only, never saved.
     private(set) var turns = TurnBuffer()
     private var placeholderTimer: Timer?
+    #if canImport(Speech)
+    /// The mic: words stream into the field, the question runs when you stop.
+    let voice = Voice()
+    #endif
 
     init() {
         _ = pathMonitor
+        #if canImport(Speech)
+        voice.onTranscript = { [weak self] in self?.queryText = $0 }
+        voice.onFinish = { [weak self] in self?.queryText = $0; self?.performQuery() }
+        #endif
         loadPreferences()
         rotatePlaceholder()
         startPlaceholderTimer()

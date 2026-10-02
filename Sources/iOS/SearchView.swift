@@ -23,7 +23,7 @@ struct SearchView: View {
                     }
                     .frame(width: 20, height: 20)
 
-                    TextField("", text: $state.queryText, prompt: Text(state.currentPlaceholder).foregroundStyle(.secondary))
+                    TextField("", text: $state.queryText, prompt: Text(state.voice.listening ? "Listening" : state.currentPlaceholder).foregroundStyle(.secondary))
                         .textFieldStyle(.plain)
                         .font(.system(size: 22, weight: .light))
                         .foregroundStyle(.primary)
@@ -41,6 +41,8 @@ struct SearchView: View {
                             .rotationEffect(.degrees(-90))
                             .animation(.linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
                     }
+
+                    MicButton().environment(state)
                 }
                 .padding(.horizontal, 18)
                 .padding(.vertical, 13)

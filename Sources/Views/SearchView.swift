@@ -35,7 +35,7 @@ struct SearchView: View {
                 }
                 .frame(width: 20, height: 20)
 
-                TextField(state.currentPlaceholder, text: $state.queryText)
+                TextField(state.voice.listening ? "Listening" : state.currentPlaceholder, text: $state.queryText)
                     .textFieldStyle(.plain)
                     .font(.system(size: 22, weight: .light))
                     .foregroundStyle(Color.primary.opacity(0.92))
@@ -63,6 +63,8 @@ struct SearchView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                         .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.primary.opacity(0.1), lineWidth: 1))
                 }
+
+                MicButton().environment(state)
             }
             .padding(.horizontal, 18)
             .padding(.vertical, 13)

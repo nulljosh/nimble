@@ -442,8 +442,15 @@ async function shareImage(query, answer){
   }catch{ return null; }
 }
 
+// Words for the mic button by state. Only "listening" changes the field's placeholder; "" keeps the usual one.
+function listenLabel(state){
+  return state==="listening"
+    ? {button:"Stop listening", placeholder:"Listening"}
+    : {button:"Ask by voice", placeholder:""};
+}
+
 function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,listenLabel,history:searchHistory,turns};

@@ -37,6 +37,8 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Nimble turns what you say into a question. Nothing is kept."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Nimble listens only while you hold the mic."
   Nimble-iOS:
     type: application
     platform: iOS
@@ -63,6 +65,8 @@ targets:
         # on upload, which reads like a signing failure but is not.
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Nimble turns what you say into a question. Nothing is kept."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Nimble listens only while you hold the mic."
         # UILaunchScreen is a dict, and no INFOPLIST_KEY_ can express one -- the
         # only launch-screen setting Xcode defines is _Generation, which just
         # synthesises an EMPTY dict. So the real key comes from this hand-written
