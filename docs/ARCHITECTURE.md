@@ -60,6 +60,12 @@ Answer pipeline:
 | `Package.swift` | Swift Package manifest: macOS/iOS targets, SwiftTUI for TUI variant |
 | `worker/worker.js` | Cloudflare Worker answer proxy: calls Workers AI (Gemma + Qwen3 in parallel), synthesizes on disagreement |
 | `kmp/composeApp/src/*/` | Android/desktop Kotlin Multiplatform: common SearchScreen, platform-specific entry points |
+| `kmp/shared/src/commonMain/.../Cards.kt` | Etymology, weather, local time and currency cards: the four gates, pure card builders, and `CardClient` (Ktor, Open-Meteo, Frankfurter with the open.er-api fallback, wordroot); same wording as `engine.js` and `QueryEngine+Cards.swift` |
+| `kmp/shared/src/{jvmMain,androidMain}/.../ZonedClock.kt` | `zonedClock` actuals: wall time and day in a geocoded zone through java.time |
+| `kmp/shared/src/commonTest/.../CardsTest.kt` | The four gates and every card builder from canned JSON, no network |
+| `kmp/composeApp/src/commonMain/.../CardResult.kt` | The card layout: 34sp number, unit in the accent colour, quiet line, source |
+| `kmp/composeApp/src/commonMain/.../Voice.kt` | `Voice` hook and the 20dp stroke `MicButton`; desktop passes no Voice so it shows no mic |
+| `kmp/composeApp/src/androidMain/.../AndroidVoice.kt` | `rememberVoice`: system speech dialog through `RecognizerIntent`, first result fills the field and runs |
 | `tui/` (Swift TUI variant, not deployed) | Terminal UI using SwiftTUI |
 | `tui/main.swift` | CLI entry: fetches from `/api/sample` endpoint, renders results as text cards |
 | `.github/workflows/` | CI/CD: build + test on push, release on tags |

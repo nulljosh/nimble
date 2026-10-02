@@ -19,6 +19,8 @@ import kotlinx.serialization.json.Json
 
 sealed class Answer {
     data class Math(val value: String) : Answer()
+    /** Etymology, weather, local time or currency: one big number and a quiet line. */
+    data class CardAnswer(val card: Card) : Answer()
     data class Text(
         val heading: String?,
         val body: String,
@@ -30,11 +32,13 @@ sealed class Answer {
 }
 
 /**
- * Gemma proxy -> DuckDuckGo -> Wikipedia, same chain and same endpoints as the Swift and
+ * Math -> cards (etymology, weather, time, currency) -> Gemma proxy -> DuckDuckGo -> Wikipedia, same chain and same endpoints as the Swift and
  * web implementations. Every stage returns null on failure so the next one gets a turn;
  * a dead network degrades to Miss rather than throwing.
  */
 class AnswerClient(private val http: HttpClient = defaultClient()) {
+
+    private val cards = CardClient(http)
 
     companion object {
         // The Cloudflare Worker holds the key; nothing secret ships in the app.
@@ -53,6 +57,9 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
 
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
+
+        // Pattern-gated live cards come before the AI, same order as the web: etymology, weather, time, currency.
+        cards.card(input)?.let { return Answer.CardAnswer(it) }
 
         // AI answers have no source page; give them a web search so every answer opens somewhere.
         gemma(input)?.let { return it.copy(sourceUrl = "https://duckduckgo.com/?q=${input.encodeURLParameter()}") }

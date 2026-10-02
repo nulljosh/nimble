@@ -15,6 +15,7 @@ fun main() = application {
         title = "Nimble",
         state = rememberWindowState(size = DpSize(760.dp, 560.dp)),
     ) {
+        // No mic on desktop: the JVM has no speech recognizer, so no Voice is passed.
         MaterialTheme { SearchScreen(history) }
     }
 }

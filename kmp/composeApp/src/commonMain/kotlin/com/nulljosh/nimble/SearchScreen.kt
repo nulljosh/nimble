@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 @Composable
-fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier) {
+fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: Voice? = null) {
     val client = remember { AnswerClient() }
     val scope = rememberCoroutineScope()
 
@@ -109,6 +109,10 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier) {
             textStyle = LocalTextStyle.current.copy(fontSize = 20.sp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { submit() }),
+            // The mic sits at the trailing edge; the first transcript fills the field and runs.
+            trailingIcon = if (voice != null) {
+                { MicButton(theme.muted) { voice.listen { heard -> submit(heard) } } }
+            } else null,
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
@@ -213,6 +217,8 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme) {
                 fontSize = 44.sp,
                 fontWeight = FontWeight.Bold
             )
+
+            is Answer.CardAnswer -> CardResult(answer.card, theme)
 
             is Answer.Text -> {
                 // Whole answer opens its source; AI answers have none, so fall back to a web search.

@@ -11,6 +11,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val history = SearchHistory(PrefsHistoryStorage(this), System::currentTimeMillis)
-        setContent { MaterialTheme { SearchScreen(history) } }
+        setContent { MaterialTheme { SearchScreen(history, voice = rememberVoice()) } }
     }
 }
