@@ -113,6 +113,38 @@ struct SearchView: View {
                 }
             }
 
+            // Recent searches, only while the HUD has no answer on screen.
+            if state.result == .none, !state.history.entries.isEmpty, !state.askingAIConsent {
+                Divider().opacity(0.1)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("RECENT")
+                            .font(.system(size: 10, weight: .bold))
+                            .tracking(1.2)
+                            .foregroundStyle(state.theme.color)
+                        Spacer()
+                        Button("Clear") { state.history.clear() }
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                            .buttonStyle(.plain)
+                    }
+                    ForEach(state.history.entries.prefix(5), id: \.q) { e in
+                        Button {
+                            state.queryText = e.q
+                            state.performQuery()
+                        } label: {
+                            Text(e.q)
+                                .font(.system(size: 13))
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 10)
+            }
+
             // Bottom bar
             HStack {
                 // Theme lives in Settings only, the swatch here duplicated the grid

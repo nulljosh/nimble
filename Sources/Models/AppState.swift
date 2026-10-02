@@ -67,6 +67,7 @@ final class AppState {
 
     private let queryEngine = QueryEngine()
     private let prefs = Preferences()
+    let history = SearchHistory()
     private var placeholderTimer: Timer?
 
     init() {
@@ -131,17 +132,20 @@ final class AppState {
         // Units, then math, both offline
         if let converted = queryEngine.convert(text) {
             result = converted
+            history.add(text)
             return
         }
         if mathEnabled {
             if let mathResult = queryEngine.evaluateMath(text) {
                 result = .math(mathResult)
+                history.add(text)
                 return
             }
         }
 
         if let graphExpr = queryEngine.graphExpression(text), let graph = queryEngine.sampleGraph(graphExpr) {
             result = graph
+            history.add(text)
             return
         }
 
@@ -161,7 +165,12 @@ final class AppState {
         let engine = queryEngine
         let ai = self.ai
         Task { @MainActor [weak self] in
-            self?.result = await engine.query(text, ai: ai, useLLM: useLLM)
+            let answer = await engine.query(text, ai: ai, useLLM: useLLM)
+            self?.result = answer
+            switch answer {
+            case .error, .none, .loading: break
+            default: self?.history.add(text)
+            }
         }
     }
 

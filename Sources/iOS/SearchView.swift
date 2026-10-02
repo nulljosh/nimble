@@ -67,22 +67,27 @@ struct SearchView: View {
                         .padding(.top, 2)
                     }
                 } else {
-                    // Empty state: a few real questions to tap, instead of a blank wall.
+                    // Empty state: recent searches once there are any, else a few real questions to tap.
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("TRY")
-                            .font(.system(size: 11, weight: .bold))
-                            .tracking(1.2)
-                            .foregroundStyle(state.theme.color)
-                        ForEach(tries, id: \.self) { q in
-                            Button {
-                                state.queryText = q
-                                state.performQuery()
-                            } label: {
-                                Text(q)
-                                    .font(.system(size: 17))
+                        if state.history.entries.isEmpty {
+                            Text("TRY")
+                                .font(.system(size: 11, weight: .bold))
+                                .tracking(1.2)
+                                .foregroundStyle(state.theme.color)
+                            ForEach(tries, id: \.self) { q in tapRow(q) }
+                        } else {
+                            HStack {
+                                Text("RECENT")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .tracking(1.2)
+                                    .foregroundStyle(state.theme.color)
+                                Spacer()
+                                Button("Clear") { state.history.clear() }
+                                    .font(.system(size: 11))
                                     .foregroundStyle(.secondary)
+                                    .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
+                            ForEach(state.history.entries.prefix(8), id: \.q) { e in tapRow(e.q) }
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -142,6 +147,18 @@ struct SearchView: View {
         .background(Color(uiColor: .systemBackground).ignoresSafeArea())
         .preferredColorScheme(state.theme.colorScheme)
         .tint(state.theme.color)  // caret and toolbar in the theme accent, not system blue
+    }
+
+    private func tapRow(_ q: String) -> some View {
+        Button {
+            state.queryText = q
+            state.performQuery()
+        } label: {
+            Text(q)
+                .font(.system(size: 17))
+                .foregroundStyle(.secondary)
+        }
+        .buttonStyle(.plain)
     }
 
     private var sourceText: String {
