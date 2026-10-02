@@ -28,11 +28,21 @@ final class CardTests: XCTestCase {
                                    source: "Open-Meteo", url: "https://open-meteo.com"))
     }
 
+    func testEtymologyCard() {
+        let card = QueryEngine.etymologyCard(word: "nimble", ancestor: "nymyl", relation: "derived", langCode: "enm")
+        XCTAssertEqual(card, .card(big: "nimble", unit: "enm", sub: "Derived from nymyl",
+                                   source: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=nimble"))
+    }
+
     func testCardRouting() {
         let engine = QueryEngine()
         XCTAssertTrue(engine.isCardQuery("weather in Vancouver"))
         XCTAssertTrue(engine.isCardQuery("What's the time in Tokyo?"))
         XCTAssertTrue(engine.isCardQuery("100 usd to cad"))
+        XCTAssertTrue(engine.isCardQuery("etymology of nimble"))
+        XCTAssertTrue(engine.isCardQuery("origin of nimble"))
+        XCTAssertTrue(engine.isCardQuery("root of nimble"))
+        XCTAssertTrue(engine.isCardQuery("where does the word nimble come from"))
         XCTAssertFalse(engine.isCardQuery("who wrote Dune"))
     }
 }

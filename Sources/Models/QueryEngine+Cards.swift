@@ -8,7 +8,7 @@ extension QueryEngine {
     // MARK: - Routing
 
     private enum Ask {
-        case weather(String), time(String), currency(amount: Double, from: String, to: String)
+        case weather(String), time(String), currency(amount: Double, from: String, to: String), etymology(String)
     }
 
     private static func ask(_ input: String) -> Ask? {
@@ -18,6 +18,7 @@ extension QueryEngine {
                 .firstMatch(in: q, range: NSRange(q.startIndex..., in: q)) else { return nil }
             return (1..<m.numberOfRanges).map { (q as NSString).substring(with: m.range(at: $0)) }
         }
+        if let g = groups(#"^(?:origin|etymology|root|where\s+does\s+the\s+word)\s+(?:of\s+)?(?:the\s+word\s+)?(.+?)(?:\s+come\s+from)?\s*\??$"#) { return .etymology(g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
         if let g = groups(#"^(?:what(?:'s| is) the )?weather (?:in|for|at) (.+?)\??$"#) { return .weather(g[0]) }
         if let g = groups(#"^(?:what(?:'s| is) the )?(?:current )?time (?:in|at) (.+?)\??$"#) { return .time(g[0]) }
         if let g = groups(#"^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$"#),
@@ -31,6 +32,7 @@ extension QueryEngine {
 
     func card(_ input: String, session: URLSession = .shared) async -> QueryResult? {
         switch Self.ask(input) {
+        case .etymology(let word): return await etymologyCard(word, session)
         case .weather(let place): return await weatherCard(place, session)
         case .time(let place): return await timeCard(place, session)
         case .currency(let amount, let from, let to): return await currencyCard(amount, from, to, session)
@@ -39,6 +41,12 @@ extension QueryEngine {
     }
 
     // MARK: - Builders (pure, so the tests need no network)
+
+    static func etymologyCard(word: String, ancestor: String, relation: String, langCode: String) -> QueryResult {
+        let relationCapitalized = relation.prefix(1).uppercased() + relation.dropFirst()
+        let sub = "\(relationCapitalized) from \(ancestor)"
+        return .card(big: word, unit: langCode, sub: sub, source: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=\(word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word)")
+    }
 
     static func weatherCard(place: String, country: String?, temp: Double, code: Int, wind: Double) -> QueryResult {
         let sky = [0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "fog", 48: "fog",
@@ -74,6 +82,12 @@ extension QueryEngine {
 
     // MARK: - Fetchers
 
+    private struct Etymology: Decodable {
+        struct Ancestor: Decodable {
+            let relation: String, langCode: String, ancestor: String
+        }
+        let word: String, language: String, etymology: [Ancestor]
+    }
     private struct Geo: Decodable {
         struct Place: Decodable { let name: String; let country: String?; let latitude: Double; let longitude: Double; let timezone: String? }
         let results: [Place]?
@@ -119,5 +133,12 @@ extension QueryEngine {
             return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: "ExchangeRate-API", url: "https://www.exchangerate-api.com")
         }
         return nil
+    }
+
+    private func etymologyCard(_ word: String, _ session: URLSession) async -> QueryResult? {
+        let encoded = word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word
+        guard let e = await fetch(Etymology.self, "https://wordroot.heyitsmejosh.com/api/etymology/\(encoded)", session),
+              let first = e.etymology.first else { return nil }
+        return Self.etymologyCard(word: word, ancestor: first.ancestor, relation: first.relation, langCode: first.langCode)
     }
 }

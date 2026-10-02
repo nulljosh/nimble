@@ -151,6 +151,18 @@ async function dictionary(query){
 // A card is one big number, a small label under it and one quiet line: {kind:"card", big, unit, sub, src, url}.
 const card=(big,unit,sub,src,url)=>({kind:"card", big:String(big), unit, sub, src, url});
 
+// Etymology card via wordroot's public API.
+async function etymology(query){
+  const m = /^(?:origin|etymology|root|where\s+does\s+the\s+word)\s+(?:of\s+)?(?:the\s+word\s+)?(.+?)(?:\s+come\s+from)?\s*\??$/i.exec(query.trim());
+  if(!m) return null;
+  const w = m[1].trim();
+  const e = await getJSON(`https://wordroot.heyitsmejosh.com/api/etymology/${encodeURIComponent(w.toLowerCase())}`);
+  if(!e?.etymology?.length) return null;
+  const first = e.etymology[0];
+  const sub = `${first.relation.charAt(0).toUpperCase() + first.relation.slice(1)} from ${first.ancestor}`;
+  return card(w, e.etymology[0].langCode || "etymology", sub, "Wordroot", `https://wordroot.heyitsmejosh.com/#search=${encodeURIComponent(w)}`);
+}
+
 // --- currency ("100 usd to eur") via Frankfurter (ECB rates, CORS-open, no key) ---
 function currencyExpr(s){
   const m=/^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$/i.exec(s.trim());
@@ -284,7 +296,7 @@ async function answer(query, opts={}){
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
-  const live = await firstOf(query, [dictionary, weather, localTime]);
+  const live = await firstOf(query, [etymology, dictionary, weather, localTime]);
   if(live) return live.kind==="card" ? live : {kind:"text", ...live};
   const consent = aiConsent() || opts.ifUnset || null;
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};

@@ -8,6 +8,7 @@ const canned = {
   "geocoding-api.open-meteo.com": { results: [{ name: "Vancouver", country: "Canada", latitude: 49.25, longitude: -123.12, timezone: "America/Vancouver" }] },
   "api.open-meteo.com": { current: { temperature_2m: 11.6, weather_code: 3, wind_speed_10m: 12.2 } },
   "api.frankfurter.dev": { base: "USD", rates: { CAD: 1.3712 } },
+  "wordroot.heyitsmejosh.com": { word: "nimble", language: "English", etymology: [{ relation: "derived", langCode: "enm", ancestor: "nymyl" }] },
 };
 
 function setup() {
@@ -65,4 +66,29 @@ test("a failed lookup is not a card", async () => {
   globalThis.fetch = async () => ({ ok: false });
   try { assert.notEqual((await E.answer("weather in Nowhere", { ifUnset: "no" })).kind, "card"); }
   finally { teardown(); }
+});
+
+test("etymology is a card", async () => {
+  setup();
+  try {
+    const a = await E.answer("etymology of nimble");
+    assert.deepEqual(a, { kind: "card", big: "nimble", unit: "enm", sub: "Derived from nymyl", src: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=nimble" });
+    const r = await E.renderAnswer("etymology of nimble");
+    assert.match(r.h, /mockup-big">nimble enm</);
+    assert.match(r.h, /<p>Derived from nymyl<\/p>/);
+    assert.equal(r.credit, "powered by Wordroot");
+    assert.equal(r.kind, "card");
+  } finally { teardown(); }
+});
+
+test("etymology matches origin, root, where does the word patterns", async () => {
+  setup();
+  try {
+    const tests = ["origin of nimble", "etymology of nimble", "root of nimble", "where does the word nimble come from"];
+    for (const q of tests) {
+      const a = await E.answer(q);
+      assert.equal(a.kind, "card", `Failed for: ${q}`);
+      assert.equal(a.big, "nimble");
+    }
+  } finally { teardown(); }
 });
