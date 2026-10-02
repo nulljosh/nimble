@@ -1,30 +1,51 @@
 # Nimble roadmap
 
+## Loop to v5 (overnight 2026-10-02, one subagent at a time)
+
+Each line is one shippable slice: tests green, push, minor bump. A major closes
+when every slice under it is checked: tag, GitHub release (notarized Mac zip,
+msi, apk), landing + README + whitepaper + screenshots synced, What's New, ASC
+submit if a session is live. Model tags route the subagent.
+
+### v2.0 Agents
+- [ ] `functions/api/[[route]].js` + `functions/mcp.js` on the Pages site, house pattern from wordroot/sidewise: tools `answer`, `convert`, `math`, `graph`, all backed by `docs/engine.js`. Document on the landing (one short section) and README. [Sonnet]
+- [ ] Web asks before sending a question to the AI, same wording as iOS and Mac; remembered in localStorage. [Sonnet]
+- [ ] `/app?q=` deep links from the landing demo's "open in app" and from the API docs. Tests for both tools and the consent gate. [Haiku]
+
+### v3.0 Memory
+- [ ] Search history on web (localStorage), iOS and Mac (flat JSON in Application Support): last 50, re-runnable, clearable, never leaves the device. [Sonnet]
+- [ ] Follow-up questions: "and in celsius?" sees the last three turns. Worker prompt carries them; native and web send them. [Sonnet]
+- [ ] History in the KMP app so Windows and Android match. [Sonnet]
+
+### v4.0 Cards
+- [ ] Weather, currency and local time render as cards (big number, small label), not sentences, on every surface. Pull the layout from the convert card. [Sonnet]
+- [ ] Etymology card via wordroot's public API when the question is "origin of X" or "etymology of X". [Haiku]
+- [ ] Shareable answer image: ImageRenderer on iOS/Mac, canvas on web, Jaybulb tokens, no text in the icon. [Sonnet]
+- [ ] iOS widget (last answer + quick ask) and Mac menu-bar quick-ask field. [Opus]
+
+### v5.0 Everywhere
+- [ ] Voice input: SFSpeechRecognizer on iOS/Mac, Web Speech on web, feeds QueryEngine. [Sonnet]
+- [ ] /languages sweep: i18n for every surface, a11y basics, VoiceOver labels. [Sonnet]
+- [ ] KMP parity: cards + voice where the platform allows. [Sonnet]
+- [ ] Landing to A+ against Plank: calm hero, generated numbers only, retina check at 4x. [Opus]
+- [ ] Docs 100%: ARCHITECTURE.md rows for every source file, architecture.svg refreshed. [Haiku]
+
+Rules for the loop: usage line at or above 88% on any window means /checkpoint
+and stop. One subagent at a time, 10 minute cap, worktree not needed. Mac zip is
+re-notarized only at majors. `native-v*` tags are Joshua's to force-push.
+
 ## Open for contribution
 
-Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any one.
+Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any one.
 
-- **Bug:** the web app sends questions to the AI with no consent prompt. iOS and Mac ask first; web should too.
 - **Bug:** iOS UI is behind the web app's polish. Sync it up (web is the newest surface).
 - **Bug:** tests are thin and result filtering is loose. Tighten both.
-- **UI/UX:** Mac menu bar screenshot missing from landing page and README (only the iPhone shot exists).
-- **Feature:** search history. Local-only, browsable, re-runnable, with clear-history. Core Data/flat JSON (macOS/iOS), localStorage (web). No sync, no server.
-- **Feature:** voice input. Mic tap or hotkey speaks the question. `SFSpeechRecognizer` (macOS/iOS), Web Speech API (web). Feeds the existing `QueryEngine` directly.
-- **Feature:** shareable answer cards. Render question+answer+source as an image — `ImageRenderer` (macOS/iOS), `<canvas>` (web). Nimble has no social feature today.
-- **Feature:** follow-up questions. Let a query reference the last answer ("and in celsius?"). Needs short-lived conversation state (last N turns) + a `worker/worker.js` prompt tweak.
-- **Feature:** widget / Live Activity (iOS) and menu bar quick-ask (macOS) — last answer plus a quick-entry field, no HUD needed.
 - **Feature:** iOS app should mirror the website's full functionality, shopping included.
 - **Platform:** Java version, only if a plain-Java/Swing or JavaFX UI over the engine is actually wanted (KMP desktop already ships a JVM binary).
-- **Platform:** Electron version — would just wrap `web/`, which already installs as a PWA. Only real gain is a global hotkey on Linux/Windows.
+- **Platform:** Electron version, would just wrap `web/`, which already installs as a PWA. Only real gain is a global hotkey on Linux/Windows.
 
 ## Blocked on Joshua
 
-- **Deploy pipeline is dead.** No Cloudflare API token for CI (`secrets.fish` only
-  has the DNS-scoped one on purpose). Fix: mint a Pages-Edit token in the
-  Cloudflare dashboard, then `gh secret set CLOUDFLARE_API_TOKEN --repo
-  nulljosh/nimble` and `gh secret set CLOUDFLARE_ACCOUNT_ID`
-  (`14c849d102ecc38b5fae54d9b22deec4`). Until then: `bash scripts/build-site.sh
-  && npx wrangler pages deploy dist --project-name=nimble --branch=main`.
 - **Custom domain.** `nimble.heyitsmejosh.com` is taken by the web app. Candidate: `nimbleapp.com`. Buy when ready.
 - **Play Store.** Needs an Android keystore + $25 Play Console fee.
 - **Microsoft Store.** Needs MSIX signing + $19 dev account.
@@ -38,11 +59,11 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any
 
 - **Nimble keeps its name** (2026-08-04, reversed the same day the name-collision
   question first came up; do not re-raise unprompted). The real exposure is an
-  App Store name collision at submission time — `asc-name-creator` is the tool if
+  App Store name collision at submission time, `asc-name-creator` is the tool if
   App Review ever rejects on it. The shipped bulb mark is original work, not a
   copy of Maybulb's file, so it carries no separate risk on its own.
 - **App Store name resolved: "Nimble Answers."** Bare "Nimble" is held by Nimble,
-  Inc., and Apple's app-name namespace is exact-match at record creation — the
+  Inc., and Apple's app-name namespace is exact-match at record creation, the
   "keep the name, revisit only if rejected" plan didn't hold, since review never
   gets a say. On-device name stays "Nimble" (Guideline 2.3.8 only requires the two be similar).
 
@@ -59,12 +80,12 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any
   response time. PR: nulljosh/nimble#6.
 
 - **Roadmap corrections (2026-09-10):** three listed gaps turned out to be
-  already fixed or never real — no code changed, just removed the stale
+  already fixed or never real, no code changed, just removed the stale
   claims. Trailing-junk math ("2 + 2 banana") is already rejected by the
   hand-written `MathLexer`/`MathParser` that replaced `NSExpression` (the
   comment at `QueryEngine.swift:156` documents the switch; `nimble/CLAUDE.md`
   still says "NSExpression math eval" and needs the same correction). Unit
-  conversion isn't dead code — `AppState.performQuery()` calls
+  conversion isn't dead code, `AppState.performQuery()` calls
   `queryEngine.convert(text)`, implemented in `QueryEngine+Compute.swift`.
   `dist/index.html` doesn't exist on disk (gitignored, regenerated by
   `scripts/build-site.sh`), so there's nothing stale to delete.
@@ -90,7 +111,7 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together — grab any
 - **Design system + landing/splash screen (2026-08-02):** pulled maybulb.com's
   real CSS (`#ffca30` yellow, black text, Avenir Next, flat pill-free buttons, 2px
   yellow dividers) into `docs/index.html`, added `docs/splash.html`. Not yet wired
-  as an iOS LaunchScreen — web-only splash for now.
+  as an iOS LaunchScreen, web-only splash for now.
 - **App Store launch (submitted 2026-09-02):** ASC record 6807858746 "Nimble
   Answers," one Universal Purchase record, bundle `com.nulljosh.nimble.ios` on
   both targets. iOS 1.0.0 and macOS 1.0.0 both went to WAITING_FOR_REVIEW.
