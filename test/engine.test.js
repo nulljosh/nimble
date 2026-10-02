@@ -32,6 +32,12 @@ test("graph expr", () => {
   assert.equal(E.graphExpr("plot 2+2"), null);
 });
 
+test("app link builder", () => {
+  assert.equal(E.appLink("5 miles to km"), "/app?q=5%20miles%20to%20km");
+  assert.equal(E.appLink("what is pi?"), "/app?q=what%20is%20pi%3F");
+  assert.equal(E.appLink("2^10"), "/app?q=2%5E10");
+});
+
 test("first sentence", () => {
   assert.equal(E.first("Tim Cook is CEO. He joined in 1998."), "Tim Cook is CEO.");
   assert.equal(E.first("Ver. 2.0 shipped. Then more."), "Ver. 2.0 shipped.");

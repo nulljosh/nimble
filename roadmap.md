@@ -10,7 +10,7 @@ submit if a session is live. Model tags route the subagent.
 ### v2.0 Agents
 - [x] `functions/api/[[route]].js` + `functions/mcp.js` on the Pages site, house pattern from wordroot/sidewise: tools `answer`, `convert`, `math`, `graph`, all backed by `docs/engine.js`. Document on the landing (one short section) and README. [Sonnet]
 - [x] Web asks before sending a question to the AI, same wording as iOS and Mac; remembered in localStorage. [Sonnet]
-- [ ] `/app?q=` deep links from the landing demo's "open in app" and from the API docs. Tests for both tools and the consent gate. [Haiku]
+- [x] `/app?q=` deep links from the landing demo's "open in app" and from the API docs. Tests for both tools and the consent gate. [Haiku]
 
 ### v3.0 Memory
 - [ ] Search history on web (localStorage), iOS and Mac (flat JSON in Application Support): last 50, re-runnable, clearable, never leaves the device. [Sonnet]

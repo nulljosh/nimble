@@ -304,4 +304,8 @@ async function renderAnswer(query, opts){
   return {h, credit};
 }
 
-if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient};
+function appLink(query){
+  return "/app?q="+encodeURIComponent(query);
+}
+
+if(typeof module!=="undefined") module.exports={tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink};

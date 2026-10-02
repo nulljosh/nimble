@@ -634,6 +634,8 @@ footer {
     <p>Nimble has a REST API and an MCP server. Same four tools: answer, convert, math, graph.</p>
     <code>curl https://nimble.heyitsmejosh.com/api/answer?q=5+miles+to+km</code>
     <code>https://nimble.heyitsmejosh.com/mcp</code>
+    <code>https://nimble.heyitsmejosh.com/app?q=5+miles+to+km</code>
+    <p style="font-size: 0.9rem; color: var(--mid); margin-top: 0.75rem;">Deep link: open the web app on an answer.</p>
   </div>
 </section>
 
@@ -880,7 +882,17 @@ footer {
   }).catch(function(){});
   function show(res){
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
-    r.innerHTML=res.h; c.textContent=res.credit;
+    r.innerHTML=res.h;
+    c.textContent=res.credit;
+    // Add "Open in app" link to the credit line when a query is shown
+    if(q.value.trim()){
+      var link=document.createElement('a');
+      link.href=appLink(q.value);
+      link.textContent='Open in app';
+      link.style.marginLeft='12px';
+      link.style.textDecoration='underline';
+      c.appendChild(link);
+    }
   }
   // Fetch the next answer first, then swap placeholder and answer together.
   // 8s keeps a visitor well under the worker's 20/min AI cap (math/units are offline).
