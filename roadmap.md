@@ -133,3 +133,9 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
   doesn't need SwiftUI. Static render, not a REPL. First app in the fleet-wide
   TUI rollout; the extraction pattern should port cleanly to other Swift apps
   with a headless model layer.
+
+## Ingested 2026-10-03
+- [ ] Landing page is missing the iOS link.
+- [ ] Needs better QA testing and filtering of queries. Screenshots (from Joshua's phone, Oct 3): "Who is the president of the United States" returned raw model text ("The instructions say: 'If you do not know, reply exactly UNKNOWN'", source Gemma); "Who created you" returned the Wikipedia YouTube article; "What's nine plus ten" returned the Wikipedia Vine (service) article; "X=5+5. Solve for x." answered x=10 via Qwen (correct).
+- [ ] Better font size and formatting of answers.
+- [ ] Still unable to answer simple current questions. It should answer with information about our portfolio and a link to (note cut off here; link target unknown. The portfolio site? Confirm.)
