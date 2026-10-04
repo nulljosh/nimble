@@ -818,6 +818,7 @@ footer {
   var b=document.getElementById('dl');
   if(dev==='windows'){b.dataset.i18n='Download for Windows';b.textContent=I18N.t('Download for Windows');b.dataset.asset='.msi';}
   else if(dev==='android'){b.dataset.i18n='Download for Android';b.textContent=I18N.t('Download for Android');b.dataset.asset='.apk';}
+  else if(dev==='iphone'){b.removeAttribute('data-i18n');b.removeAttribute('data-asset');b.textContent='App Store';b.href='https://apps.apple.com/app/nimble-answers/id6807858746';}
   var f=document.getElementById('demo'), q=document.getElementById('demoQ'), r=document.getElementById('demoR'), c=document.getElementById('demoC'), g=document.getElementById('demoG');
   // Example queries cycle through the empty field; return runs whichever is showing.
   var examples=[g.textContent], idx=0;
