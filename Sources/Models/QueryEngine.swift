@@ -399,7 +399,16 @@ final class QueryEngine: Sendable {
         }
     }
 
+    /// "Who made you" is about Nimble, not the Wikipedia article the words happen to match.
+    /// Mirrors `identity()` in docs/engine.js.
+    func identityAnswer(_ input: String) -> QueryResult? {
+        let pattern = "^(who (made|created|built|invented|wrote|developed|designed) (you|nimble)|who are you|what are you|who is (nimble|your (creator|maker)))\\s*\\??$"
+        guard input.trimmingCharacters(in: .whitespaces).range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil else { return nil }
+        return .text(heading: nil, body: "Nimble is an instant-answer app made by Joshua Trommel. More of his work is at heyitsmejosh.com.", source: "Nimble", sourceURL: nil, imageURL: nil)
+    }
+
     func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer()) async -> QueryResult {
+        if let me = identityAnswer(input) { return me }
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         let session = URLSession(configuration: config)

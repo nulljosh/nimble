@@ -4,6 +4,12 @@ import XCTest
 final class QueryEngineTests: XCTestCase {
     let engine = QueryEngine()
 
+    func testIdentityAnswer() {
+        guard case .text(_, let body, _, _, _)? = engine.identityAnswer("Who created you") else { return XCTFail("no answer") }
+        XCTAssertTrue(body.contains("Joshua Trommel"))
+        XCTAssertNil(engine.identityAnswer("who created the telephone"))
+    }
+
     // MARK: - Basic arithmetic
 
     func testBasicAddition() {
