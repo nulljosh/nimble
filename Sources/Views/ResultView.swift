@@ -31,14 +31,14 @@ struct ResultView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         if let heading, !heading.isEmpty {
                             Text(heading)
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(.primary)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(.secondary)
                         }
+                        // The answer is the point of the app: big, full contrast, no underline.
                         Text(body)
-                            .font(.system(size: 13))
-                            .foregroundStyle(.secondary)
-                            .underline(true, color: state.theme.color.opacity(0.6))
-                            .lineSpacing(3)
+                            .font(.system(size: 17))
+                            .foregroundStyle(.primary)
+                            .lineSpacing(4)
                             .lineLimit(nil)
                     }
                 }
