@@ -140,5 +140,4 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 - [ ] Still unable to answer simple current questions. It should answer with information about our portfolio and a link to (note cut off here; link target unknown. The portfolio site? Confirm.)
 
 ## Ingested 2026-10-05
-- [ ] Simplify name.
-- [ ] Remove answers.
+- [x] Simplify name. Remove answers. Read as one item: store name "Nimble Answers" is now "Nimble" in metadata/app-info/en-CA.json (2026-10-05). Unprobed against Apple: maybulb ships an app called Nimble, so if the next submit rejects the name, pick another single word (asc-name-creator).
