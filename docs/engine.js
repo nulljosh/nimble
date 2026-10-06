@@ -39,8 +39,17 @@ function evalMath(src){
   };
   const v = expr(); if(i!==tk.length) throw 0; return v;
 }
+// "what's nine plus ten" is math, not a Wikipedia search for Vine. Spoken numbers 0-20, the
+// tens and the usual operator words; anything left over fails the whitelist below.
+// ponytail: no "twenty one" compounds, add when someone asks for one
+const WORD_NUM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,thousand:1000,million:1e6};
+function spokenMath(s){
+  return s.toLowerCase().replace(/[?!]+$/,"").replace(/^\s*(what(?:'s|\u2019s| is)|whats|calculate|compute|how much is|solve|evaluate)\s+/,"")
+    .replace(/\b(multiplied by|times)\b/g,"*").replace(/\bdivided by\b/g,"/").replace(/\bto the power of\b/g,"^").replace(/\bplus\b/g,"+").replace(/\bminus\b/g,"-")
+    .replace(/\b[a-z]+\b/g,w=>w in WORD_NUM ? WORD_NUM[w] : w);
+}
 function tryMath(s){
-  const t = s.trim().toLowerCase().replace(/([\d.]+)\s*%\s*of\s*/g,"$1/100*").replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E")
+  const t = spokenMath(s).trim().replace(/([\d.]+)\s*%\s*of\s*/g,"$1/100*").replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E")
     .replace(/\b(sqrt|sin|cos|tan|log|log2|log10|abs|round|floor|ceil|cbrt)\b/g,"Math.$1")
     .replace(/\bln\b/g,"Math.log");
   if(!/^[0-9+\-*/(). ,]*(Math\.[a-z0-9]+|[0-9+\-*/(). ,])*$/.test(t)) return null;
@@ -280,6 +289,13 @@ async function gemma(query){
   return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src} : null;
 }
 
+// "Who made you" is about us, not the Wikipedia article for whatever the words match (it used to
+// return YouTube). Answered locally, no model call.
+async function identity(query){
+  if(!/^(who (made|created|built|invented|wrote|developed|designed) (you|nimble)|who are you|what are you|who is (nimble|your (creator|maker)))\s*\??$/i.test(query.trim())) return null;
+  return {title:query, body:"Nimble is an instant-answer app made by Joshua Trommel. More of his work is at heyitsmejosh.com.", src:"Nimble"};
+}
+
 // First non-null wins, in order. Sources are functions so a throw in one never kills the chain.
 async function firstOf(query, fns){
   for(const fn of fns){ const r = await fn(query).catch(()=>null); if(r) return r; }
@@ -299,7 +315,7 @@ async function answer(query, opts={}){
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
-  const live = await firstOf(query, [etymology, dictionary, weather, localTime]);
+  const live = await firstOf(query, [identity, etymology, dictionary, weather, localTime]);
   if(live) return live.kind==="card" ? live : {kind:"text", ...live};
   const consent = aiConsent() || opts.ifUnset || null;
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};
@@ -459,4 +475,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={identity,shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,listenLabel,history:searchHistory,turns};

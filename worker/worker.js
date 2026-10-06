@@ -100,7 +100,8 @@ export default {
           const text = d?.response || msg?.content || msg?.reasoning?.split(/(?<=[.!?])\s+/).pop() || "";
           // Models narrate the grounding ("not mentioned in the provided reference") instead of
           // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
-          if (/\b(reference|provided (text|context))\b/i.test(text)) return "UNKNOWN";
+          // The same goes for the model quoting its own rules back ("The instructions say: ... reply exactly UNKNOWN").
+          if (/\b(reference|provided (text|context))\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b/i.test(text)) return "UNKNOWN";
           return text.trim() || "UNKNOWN";
         })
         .catch(() => "UNKNOWN");

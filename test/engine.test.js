@@ -13,6 +13,14 @@ test("math", () => {
   assert.equal(E.tryMath("1/0"), null);
 });
 
+test("spoken math and identity", async () => {
+  assert.equal(E.tryMath("What's nine plus ten?"), 19);
+  assert.equal(E.tryMath("what is 9 times 3"), 27);
+  assert.equal(E.tryMath("who is the one"), null);
+  assert.match((await E.identity("Who created you")).body, /Joshua Trommel/);
+  assert.equal(await E.identity("who created the telephone"), null);
+});
+
 test("units", () => {
   assert.equal(E.tryConvert("10 km to miles").to, "6.213712");
   assert.equal(E.tryConvert("how many cups in 2 liters").to, "8.453506");
