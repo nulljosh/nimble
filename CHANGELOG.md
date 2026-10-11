@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [5.1.0] - 2026-10-11
+
+- feat: ask about a website ("what's primitive.dev?") and get its own description, scraped
+  from the page (title, meta description, headline, first paragraph) instead of a Wikipedia guess
+- feat: Samantha, a local engine (oMLX on this Mac) with live Wikipedia grounding; on the Mac
+  app she answers first when running, with the free engine as fallback
+- feat(ios, macos): the web app's look (cream, hairline cards, yellow Ask)
+- fix: models no longer echo "As of today, <date>"; web proxy timeout 6s to 15s; Wikipedia list
+  articles skipped as answers; grounding retries once; site questions skip the AI consent card
+- fix: Claude engine default is claude-opus-5-5
+
 - feat(macos): in-app updates — daily background check against GitHub Releases, manual
   "Check for Updates" in Preferences, the gear context menu and the app menu, and an
   "Update to vX" button in the bottom bar when one is found

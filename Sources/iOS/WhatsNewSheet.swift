@@ -4,9 +4,9 @@ import SwiftUI
 // it was pinned at "1.2.0" while the project shipped 1.0.0, a version that never existed.
 let whatsNewVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 private let whatsNewBullets = [
-    "Ask out loud: tap the mic",
-    "Nimble speaks English, French, Spanish, Chinese and Punjabi",
-    "Cards for weather, currency, time and word origins",
+    "Ask about any website and get what it does, read from the site itself",
+    "A fresh look: the same warm design as the web app",
+    "Sharper answers on current events, checked against live sources",
 ]
 
 struct WhatsNewSheet: View {
