@@ -430,7 +430,7 @@ final class QueryEngine: Sendable {
     func identityAnswer(_ input: String) -> QueryResult? {
         let pattern = "^(who (made|created|built|invented|wrote|developed|designed) (you|nimble)|who are you|what are you|who is (nimble|your (creator|maker)))\\s*\\??$"
         guard input.trimmingCharacters(in: .whitespaces).range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil else { return nil }
-        return .text(heading: nil, body: "Nimble is an instant-answer app made by Joshua Trommel. More of his work is at heyitsmejosh.com.", source: "Nimble", sourceURL: nil, imageURL: nil)
+        return .text(heading: nil, body: "Nimble is an instant-answer app made by Joshua Trommel. More of his work is at jaybulb.com.", source: "Nimble", sourceURL: nil, imageURL: nil)
     }
 
     /// "What's primitive.dev?" is about a website; Wikipedia matched the nearest word instead.

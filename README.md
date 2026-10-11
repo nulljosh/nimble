@@ -10,7 +10,7 @@ Ask a question. Get one sentence back.
 
 Math, units and graphs answer on the device. Everything else goes to two open models at once, and DuckDuckGo and Wikipedia catch what they miss. No API keys, no accounts, no telemetry.
 
-**[nimble.heyitsmejosh.com →](https://nimble.heyitsmejosh.com)** · **[Open the web app →](https://nimble.heyitsmejosh.com/app)**
+**[nimble.jaybulb.com →](https://nimble.jaybulb.com)** · **[Open the web app →](https://nimble.jaybulb.com/app)**
 
 <p>
 <img src="docs/screenshots/ios-home.jpg" width="180">
@@ -28,7 +28,7 @@ Math, units and graphs answer on the device. Everything else goes to two open mo
 | iPhone and Mac | [App Store](https://apps.apple.com/app/nimble-answers/id6807858746) |
 | Mac, direct | [Latest release](https://github.com/nulljosh/nimble/releases/latest), signed and notarized. ⌥Space summons it |
 | Windows, Android | `.msi` and `.apk` on the same release |
-| Web | [nimble.heyitsmejosh.com/app](https://nimble.heyitsmejosh.com/app), works offline once loaded |
+| Web | [nimble.jaybulb.com/app](https://nimble.jaybulb.com/app), works offline once loaded |
 | Terminal | `swift build && ./.build/debug/nimble-tui "your question"` |
 
 ## How it answers
@@ -37,7 +37,7 @@ Math, units and graphs answer on the device. Everything else goes to two open mo
 2. Dictionary, weather, local time and currency: pattern-gated live sources.
 3. Everything else: Gemma and Qwen3 run side by side on Cloudflare Workers AI through `worker/worker.js`. Agree and you get it; disagree and the two are folded into one sentence. Numbers are cross-checked against DuckDuckGo. Both give up and Wikipedia answers.
 
-Agents get the same engine at `https://nimble.heyitsmejosh.com/api/answer?q=5+miles+to+km` and over MCP at `https://nimble.heyitsmejosh.com/mcp`. Tools: answer, convert, math, graph.
+Agents get the same engine at `https://nimble.jaybulb.com/api/answer?q=5+miles+to+km` and over MCP at `https://nimble.jaybulb.com/mcp`. Tools: answer, convert, math, graph.
 
 Every answer names its source. Light and dark follow the system. 8 accent themes.
 

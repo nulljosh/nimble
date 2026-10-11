@@ -49,7 +49,7 @@ extension QueryEngine {
         // The language belongs in the sub line as a name, not inline after the word as a code.
         let lang = langNames[langCode] ?? langCode
         let sub = "\(relationCapitalized) from \(ancestor)" + (lang.isEmpty ? "" : ", \(lang)")
-        return .card(big: word, unit: "", sub: sub, source: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=\(word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word)")
+        return .card(big: word, unit: "", sub: sub, source: "Wordroot", url: "https://wordroot.jaybulb.com/#search=\(word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word)")
     }
 
     static func weatherCard(place: String, country: String?, temp: Double, code: Int, wind: Double) -> QueryResult {
@@ -141,7 +141,7 @@ extension QueryEngine {
 
     private func etymologyCard(_ word: String, _ session: URLSession) async -> QueryResult? {
         let encoded = word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word
-        guard let e = await fetch(Etymology.self, "https://wordroot.heyitsmejosh.com/api/etymology/\(encoded)", session),
+        guard let e = await fetch(Etymology.self, "https://wordroot.jaybulb.com/api/etymology/\(encoded)", session),
               let first = e.etymology.first else { return nil }
         return Self.etymologyCard(word: word, ancestor: first.ancestor, relation: first.relation, langCode: first.langCode)
     }

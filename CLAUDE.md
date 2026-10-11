@@ -19,7 +19,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - `Sources/Views/SearchView.swift`: macOS search UI, `Sources/iOS/SearchView.swift`, iOS
 - `Sources/macOS/GlobalHotkey.swift`: ⌥Space summon via Carbon RegisterEventHotKey
 - `worker/worker.js`: answer proxy, `npx wrangler deploy` from `worker/`
-- `docs/`: landing page with the live engine (`engine.js`), deployed via Cloudflare Pages to `nimble.heyitsmejosh.com`; the full web app is `docs/app.html`, served at `/app`
+- `docs/`: landing page with the live engine (`engine.js`), deployed via Cloudflare Pages to `nimble.jaybulb.com`; the full web app is `docs/app.html`, served at `/app`
 - `docs/index.html`: marketing/landing page, deployed via GitHub Pages (default `nulljosh.github.io/nimble` URL, the custom domain is taken by the web app)
 - `Tests/`: 48 tests
 

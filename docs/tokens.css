@@ -1,3 +1,3 @@
 /* Nimble design system — thin aliases onto the shared Jaybulb tokens. */
-@import url("https://heyitsmejosh.com/tokens.css");
+@import url("https://jaybulb.com/tokens.css");
 :root{--yellow:var(--bulb);--yellow-deep:var(--bulb-deep);--black:#000;--white:#fff;--text:var(--color-text);--text-mid:var(--color-soft);--text-light:var(--color-secondary);--on-yellow-mid:rgba(0,0,0,0.6);--bg:var(--color-bg);--bg-accent:var(--bulb);--line:var(--color-hairline);--font:var(--font-body);--fw-regular:400;--fw-bold:700;--lh:1.6;--tracking-tight:-0.02em;--s1:0.5rem;--s2:1rem;--s3:1.5rem;--s4:2.5rem;--s5:4rem;--radius:0;--radius-card:0;--divider:var(--rule);}

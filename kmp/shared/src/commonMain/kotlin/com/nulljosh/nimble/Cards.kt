@@ -88,7 +88,7 @@ object Cards {
         // The language belongs in the sub line as a name, not inline after the word as a code.
         val lang = langNames[langCode] ?: langCode
         val sub = "$relationCapitalized from $ancestor" + if (lang.isEmpty()) "" else ", $lang"
-        return Card(word, "", sub, "Wordroot", "https://wordroot.heyitsmejosh.com/#search=${word.encodeURLParameter()}")
+        return Card(word, "", sub, "Wordroot", "https://wordroot.jaybulb.com/#search=${word.encodeURLParameter()}")
     }
 
     fun weatherCard(place: String, country: String?, temp: Double, code: Int?, wind: Double): Card {
@@ -194,7 +194,7 @@ class CardClient(private val http: HttpClient) {
             ?.let(Cards::placeFromJson)
 
     private suspend fun etymology(word: String): Card? {
-        val body = fetch("https://wordroot.heyitsmejosh.com/api/etymology/${word.lowercase().encodeURLPathPart()}") ?: return null
+        val body = fetch("https://wordroot.jaybulb.com/api/etymology/${word.lowercase().encodeURLPathPart()}") ?: return null
         return Cards.etymologyFromJson(word, body)
     }
 

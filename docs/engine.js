@@ -189,13 +189,13 @@ async function etymology(query){
   const m = /^(?:origin|etymology|root|where\s+does\s+the\s+word)\s+(?:of\s+)?(?:the\s+word\s+)?(.+?)(?:\s+come\s+from)?\s*\??$/i.exec(query.trim());
   if(!m) return null;
   const w = m[1].trim();
-  const e = await getJSON(`https://wordroot.heyitsmejosh.com/api/etymology/${encodeURIComponent(w.toLowerCase())}`);
+  const e = await getJSON(`https://wordroot.jaybulb.com/api/etymology/${encodeURIComponent(w.toLowerCase())}`);
   if(!e?.etymology?.length) return null;
   const first = e.etymology[0];
   // The language belongs in the sub line as a name, not inline after the word as a code.
   const lang = LANG[first.langCode] || first.langCode;
   const sub = `${first.relation.charAt(0).toUpperCase() + first.relation.slice(1)} from ${first.ancestor}${lang ? ", " + lang : ""}`;
-  return card(w, "", sub, "Wordroot", `https://wordroot.heyitsmejosh.com/#search=${encodeURIComponent(w)}`);
+  return card(w, "", sub, "Wordroot", `https://wordroot.jaybulb.com/#search=${encodeURIComponent(w)}`);
 }
 
 // --- currency ("100 usd to eur") via Frankfurter (ECB rates, CORS-open, no key) ---
@@ -331,7 +331,7 @@ async function gemma(query){
 // return YouTube). Answered locally, no model call.
 async function identity(query){
   if(!/^(who (made|created|built|invented|wrote|developed|designed) (you|nimble)|who are you|what are you|who is (nimble|your (creator|maker)))\s*\??$/i.test(query.trim())) return null;
-  return {title:query, body:"Nimble is an instant-answer app made by Joshua Trommel. More of his work is at heyitsmejosh.com.", src:"Nimble"};
+  return {title:query, body:"Nimble is an instant-answer app made by Joshua Trommel. More of his work is at jaybulb.com.", src:"Nimble"};
 }
 
 // First non-null wins, in order. Sources are functions so a throw in one never kills the chain.

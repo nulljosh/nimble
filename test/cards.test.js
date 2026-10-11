@@ -8,7 +8,7 @@ const canned = {
   "geocoding-api.open-meteo.com": { results: [{ name: "Vancouver", country: "Canada", latitude: 49.25, longitude: -123.12, timezone: "America/Vancouver" }] },
   "api.open-meteo.com": { current: { temperature_2m: 11.6, weather_code: 3, wind_speed_10m: 12.2 } },
   "api.frankfurter.dev": { base: "USD", rates: { CAD: 1.3712 } },
-  "wordroot.heyitsmejosh.com": { word: "nimble", language: "English", etymology: [{ relation: "derived", langCode: "enm", ancestor: "nymyl" }] },
+  "wordroot.jaybulb.com": { word: "nimble", language: "English", etymology: [{ relation: "derived", langCode: "enm", ancestor: "nymyl" }] },
 };
 
 function setup() {
@@ -72,7 +72,7 @@ test("etymology is a card", async () => {
   setup();
   try {
     const a = await E.answer("etymology of nimble");
-    assert.deepEqual(a, { kind: "card", big: "nimble", unit: "", sub: "Derived from nymyl, Middle English", src: "Wordroot", url: "https://wordroot.heyitsmejosh.com/#search=nimble" });
+    assert.deepEqual(a, { kind: "card", big: "nimble", unit: "", sub: "Derived from nymyl, Middle English", src: "Wordroot", url: "https://wordroot.jaybulb.com/#search=nimble" });
     const r = await E.renderAnswer("etymology of nimble");
     assert.match(r.h, /mockup-big">nimble</);
     assert.match(r.h, /<p>Derived from nymyl, Middle English<\/p>/);

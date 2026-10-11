@@ -1,4 +1,4 @@
-# nimble.heyitsmejosh.com was deployed by hand -- `build-site.sh && wrangler pages
+# nimble.jaybulb.com was deployed by hand -- `build-site.sh && wrangler pages
 # deploy dist` from a laptop -- so it silently fell weeks behind docs/. GitHub Pages
 # auto-deploys docs/ and the custom domain did not, which is why the two disagreed.
 name: Deploy site

@@ -62,7 +62,7 @@ class CardsTest {
     fun etymologyCardNamesTheLanguage() {
         val body = """{"word":"salary","language":"en","etymology":[{"relation":"inherited","langCode":"enm","ancestor":"salarie"},{"relation":"borrowed","langCode":"la","ancestor":"salarium"}]}"""
         assertEquals(
-            Card("salary", "", "Inherited from salarie, Middle English", "Wordroot", "https://wordroot.heyitsmejosh.com/#search=salary"),
+            Card("salary", "", "Inherited from salarie, Middle English", "Wordroot", "https://wordroot.jaybulb.com/#search=salary"),
             Cards.etymologyFromJson("salary", body),
         )
     }
