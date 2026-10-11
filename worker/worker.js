@@ -130,7 +130,10 @@ export default {
           // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
           // The same goes for the model quoting its own rules back ("The instructions say: ... reply exactly UNKNOWN").
           if (/\b(reference|provided (text|context))\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b/i.test(text)) return "UNKNOWN";
-          return text.trim() || "UNKNOWN";
+          // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
+          // The date is ours, not the answer's; drop the preamble and recapitalize.
+          const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "");
+          return clean ? clean[0].toUpperCase() + clean.slice(1) : "UNKNOWN";
         })
         .catch(() => "UNKNOWN");
 
