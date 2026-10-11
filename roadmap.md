@@ -20,7 +20,7 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 - [x] [Haiku] 5.2 Dark-mode screenshots of iOS and Mac reviewed and fixed; add to `screenshots/`.
 - [x] [Sonnet] 5.2 Kotlin engine (Android, Windows, Linux) gets the site lookup, the "As of today" cleanup and list-article skipping, so every platform answers alike.
 - [x] [Haiku] 5.2 iPhone font and keyboard check, Dynamic Type at the largest sizes, VoiceOver pass on the new cards.
-- [ ] [Haiku] 5.3 Flit everywhere: the mascot (docs/mascot/flit.svg, grade A) goes on the landing hero, the README header, the web app and native empty states, and the 404; a waving/hover variant for the landing. Push him to A+ with Joshua's grades.
+- [x] [Haiku] 5.3 Flit everywhere: the mascot (docs/mascot/flit.svg, grade A) goes on the landing hero, the README header, the web app and native empty states, and the 404; a waving/hover variant for the landing. Push him to A+ with Joshua's grades.
 - [ ] [Sonnet] 5.3 Samantha picker: Mac Preferences shows whether she is running, her model and her last latency; one-click start via `omlx start`.
 - [ ] [Sonnet] 5.3 Site answers show a favicon and the page's own name; handle JS-only pages by falling back to the og:description and a one-line "this site loads with JavaScript" note.
 

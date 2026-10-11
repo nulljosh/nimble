@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [5.3.0] - 2026-10-11
+
+- feat: search history syncs between iPhone and Mac through iCloud (question text and time only)
+- feat: Flit on the landing (wing beat, bob, blink), the web app and native empty states, the 404 and the README; Flit hums in the answer card while an answer loads on web, iPhone and Mac
+- feat: dictionary answers show the first two senses so the everyday meaning is on screen
+- fix: every link moved to jaybulb.com; landing badge follows the newest GitHub release and each download takes the newest release that carries its file
+
 ## [5.2.0] - 2026-10-11
 
 - feat: the question exam lives in the repo (`npm run exam`, 95 live questions) and runs nightly in CI, opening an issue on any miss
