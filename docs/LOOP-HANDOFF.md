@@ -1,44 +1,37 @@
-# Nimble loop handoff (2026-10-02, evening)
+# Nimble loop handoff (2026-10-11, evening)
 
 ## What the loop is
 
-Ship Nimble 5.0.0 feature by feature. One subagent per slice (1.0 icon, 2.0 API, 3.0 memory, 4.0 cards, 5.0 voice), tests green, push, version bump. Each major closes with tag, GitHub release (notarized Mac zip, Windows msi, Android apk), landing + README + whitepaper synced, screenshots updated, What's New filed, ASC submit if iOS is in the release.
+Keep Nimble moving after 5.0.0 with one small, shippable slice at a time: fix what App Review or Joshua's phone turns up, ship each as a patch with tests green, and close every release with a tag, a GitHub release (notarized Mac zip, msi, apk), synced landing and docs, fresh screenshots and What's New. Joshua's standing goal: zero open issues, zero stale branches, all PRs merged, and UI, UX, accessibility and language at A+.
 
 ## Where things stand
 
-Loop complete at 5.0.0 (2026-10-02). iOS 5.0.0 submitted WAITING_FOR_REVIEW. macOS live. Web live. Windows and Android via KMP.
-
-- 1.0.0: Foundation (icon, web app, dark mode, offline percentages)
-- 1.1.0: Glass icon via Icon Composer, /app web experience, 15% offline answers
-- 2.0.0: REST /api and MCP /mcp endpoints backed by live QueryEngine, web consent prompt
-- 3.0.0: Device-local search history (clearable), follow-up questions carrying last three turns
-- 4.0.0: Answer cards (weather, currency, time, word origins), share-as-card, iPhone widget, menu-bar quick-ask
-- 5.0.0: Voice in web/iOS/macOS/Windows/Android, five languages (en, fr, es, zh, pa), landing A grade, docs 100%, TUI fixed
-
-Both bugs closed 2026-10-11: Vancouver weather renders fine on iPhone (the dots were the loading spinner on a slow fetch), and the widget write already runs after the card lands.
-
-5.0.1 (2026-10-11): fresh App Store screenshots, and the Mac HUD now takes keyboard focus, drags by its background, and no longer crashes on system windows.
-
-No blocked items.
+- Current version is 5.0.1 (2026-10-11). 5.0.0 was the last major.
+- iOS 5.0.1 and macOS 5.0.1 are in App Review, submitted 2026-10-11 with fresh iPhone, iPad and Mac screenshots. Apple blocks lowering a version, so 5.0.1 is the next number.
+- Mac fixes in 5.0.1: the search window takes keyboard focus, drags by its background, and no longer crashes on system remote-view windows. 66 unit tests green.
+- The two loop bugs are closed: the Vancouver weather card renders fine on iPhone, and the widget updates after the card lands.
+- GitHub release v5.0.1 has the notarized Mac zip. The native-v5.0.1 tag is pushed, so CI builds the msi and apk.
+- Landing page and web app pass axe with zero violations in light and dark. The live version badge reads v5.0.1.
+- All 78 native strings carry en, fr, es, zh and pa.
+- Three remote branches are merged but still exist: footer-directory, claude/landing-hero-animation-6sxcw5 and claude/landing-page-background-animation-hck14g. The permission classifier blocked deleting them, so Joshua has to delete them or allow it.
+- One open roadmap item: query QA and filtering. Joshua's Oct 3 phone screenshots show raw model text for "who is the president", and Wikipedia articles for "who created you" and "nine plus ten".
 
 ## Next, in order
 
-If resuming the loop:
-
-1. File the two bugs as GitHub issues (weather card Vancouver dots, widget lag)
-2. Fix and ship one at a time (one-line fixes likely)
-3. Loop to 5.1.0 for bug fixes only, or move to the "Open for contribution" feature list
-
-If not resuming the loop, leave the bugs in roadmap.md; they are low impact and listed for community contribution.
+1. Check the App Review state of iOS and macOS 5.0.1. If either is rejected, fix the stated reason and resubmit.
+2. Fix the query failures from the Oct 3 screenshots, one test each, then ship the next patch.
+3. Confirm the iOS search view font and formatting, since the roadmap notes it was not checked on iOS.
+4. Re-run axe on the landing page and web app after each UI change.
+5. Ask Joshua to delete the three merged remote branches, or allow it.
 
 ## Restart prompt
 
 ```
 /loop /check ~/Documents/Code/nimble
 
-Loop: Nimble bug fixes. Find the two open bugs in roadmap.md ("weather card for Vancouver", "widget lags one answer"). File as GitHub issues if not already filed. Assign one to yourself, fix and test green locally with `npm test` and `swift build -c release` for native. Push and bump version. If the other bug is a one-liner, grab that too and ship as 5.0.1. Cap: 15 min per bug, stop and return if either hits the cap.
+Loop: Nimble. First check the App Review state of iOS and macOS 5.0.1 with asc, and resubmit with the fix if either was rejected. Then fix the query failures in roadmap.md (raw model text for "who is the president", Wikipedia articles for "who created you" and "nine plus ten"), one test each, unit tests green, push, bump the version with a timestamp-safe Mac build number. Then check the iOS search view font, and run axe on the landing page and web app. Remind Joshua to delete the three merged remote branches. Ping after each round. Stop only at zero open issues, zero stale branches, all PRs merged, and A+ on UI, UX, accessibility and language.
 ```
 
 ---
 
-Loop status: complete. Restarting should hit two minor bug fixes and close them out, then the roadmap moves to feature work ("Open for contribution" items like the Java/Electron ports).
+Loop status: live. Current state is 5.0.1 in App Review. The next work is the query QA fixes.

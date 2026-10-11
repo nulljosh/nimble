@@ -25,7 +25,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 
 ## The loop
 
-See `docs/LOOP-HANDOFF.md` (complete at v5.0.0). The loop shipped five majors 1.0 to 5.0 in one session. Two bug fixes remain in roadmap.md and can be picked up anytime; no blockers.
+See `docs/LOOP-HANDOFF.md` (current state at 5.0.1, 2026-10-11). The loop shipped five majors 1.0 to 5.0 in one session, then 5.0.1. Open: query QA in roadmap.md, three merged remote branches Joshua has to delete, and the zero-issue goal; no blockers.
 
 ## Build
 ```bash
