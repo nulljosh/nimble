@@ -105,6 +105,16 @@ form { position: relative; }
 .hint { text-align: center; font-size: 13px; color: var(--text-mid); margin-top: 28px; }
 .flit { display: block; width: 96px; height: 96px; margin: 24px auto 0; opacity: 0.9; }
 .flit[hidden] { display: none; }
+/* While an answer is on its way, Flit hums in the card: wing beat plus a bob. Stops the moment
+   the answer replaces her. Off under reduced motion. */
+.thinking { display: flex; align-items: center; gap: 16px; }
+.thinking svg { flex: none; width: 72px; height: 72px; overflow: visible; animation: flit-bob 1.2s ease-in-out infinite alternate; }
+.thinking .flit-wing { transform-box: fill-box; transform-origin: 90% 10%; animation: flit-flap 0.22s ease-in-out infinite alternate; }
+.thinking .flit-eye { transform-box: fill-box; transform-origin: center; animation: flit-blink 4s ease-in-out infinite; }
+@keyframes flit-bob { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+@keyframes flit-flap { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+@keyframes flit-blink { 0%, 100% { transform: scaleY(1); } 2% { transform: scaleY(0.1); } 4% { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .thinking svg, .thinking .flit-wing, .thinking .flit-eye { animation: none; } }
 </style>
 </head>
 <body>
@@ -154,10 +164,11 @@ var T=I18N.t;
     });
   }
   document.getElementById('clear').addEventListener('click',function(){ hist.clear(); paintRecent(); });
+  var FLIT='<svg viewBox="0 0 240 240" aria-hidden="true" focusable="false"><ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" fill="#8a6412"/><ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" fill="#8a6412"/><ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" fill="#8a6412" opacity="0.5"/><ellipse cx="108" cy="154" rx="54" ry="46" fill="#ffca30"/><path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" fill="#ffe27a"/><circle cx="156" cy="104" r="52" fill="#ffca30"/><path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" fill="#8a6412"/><circle cx="180" cy="126" r="9" fill="#e07a3f" opacity="0.35"/><path d="M203 98 L232 108 L203 118 Z" fill="#8a6412" stroke="#8a6412" stroke-width="5" stroke-linejoin="round"/><g class="flit-eye"><circle cx="170" cy="100" r="18" fill="#1f1b16"/><circle cx="176" cy="93" r="6.5" fill="#fff8e1"/><circle cx="164" cy="108" r="3" fill="#fff8e1"/></g><g class="flit-wing"><ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" fill="#8a6412"/><ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" fill="#a67c1e"/></g></svg>';
   async function run(query){
     query=(query||q.value||q.placeholder).trim(); if(!query) return;
     q.value=query; r.hidden=false; paintFlit();
-    r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><p>'+T('Thinking…')+'</p>';
+    r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><div class="thinking">'+FLIT+'<p>'+T('Thinking…')+'</p></div>';
     // Shareable: /app?q=... opens straight onto the answer.
     history.replaceState(null,'','?q='+encodeURIComponent(query));
     var res=await renderAnswer(query,{t:T});
