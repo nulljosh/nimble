@@ -168,7 +168,10 @@ async function dictionary(query){
   const w = /^(?:define|definition of|meaning of)\s+(.+)$/i.exec(query.trim())?.[1];
   if(!w) return null;
   const d = await getJSON(`https://en.wiktionary.org/api/rest_v1/page/definition/${encodeURIComponent(w.toLowerCase())}`);
-  const m = d?.en?.[0], def = m?.definitions?.[0]?.definition?.replace(/<[^>]+>/g,"").trim();
+  // Wiktionary lists senses by history, not use ("nimble": "adept at taking or grasping" first),
+  // so show the first two: the everyday meaning is nearly always one of them.
+  const m = d?.en?.[0], senses = (m?.definitions||[]).map(x=>x.definition?.replace(/<[^>]+>/g,"").trim().replace(/\.$/,"")).filter(Boolean).slice(0,2);
+  const def = senses.length>1 ? `${senses[0]}; ${senses[1][0].toLowerCase()}${senses[1].slice(1)}.` : senses[0] ? `${senses[0]}.` : null;
   if(def) return {title:w, body:`(${m.partOfSpeech.toLowerCase()}) ${def}`, src:"Wiktionary", url:`https://en.wiktionary.org/wiki/${encodeURIComponent(w)}`};
   // Wiktionary miss or down: Free Dictionary API, same shape, no key.
   const f = await getJSON(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(w.toLowerCase())}`);
