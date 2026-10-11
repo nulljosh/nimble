@@ -1,0 +1,21 @@
+# Nightly question exam against the live engine. A miss opens (or comments on) one issue.
+name: Exam
+on:
+  schedule: [{cron: '17 9 * * *'}]
+  workflow_dispatch:
+permissions: {contents: read, issues: write}
+jobs:
+  exam:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: node test/exam.js | tee exam.txt
+      - if: failure()
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          body="$(tail -3 exam.txt)"
+          n=$(gh issue list --label exam --state open --json number -q '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$body"; else gh issue create --label exam --title "Nightly exam has misses" --body "$body" || gh issue create --title "Nightly exam has misses" --body "$body"; fi

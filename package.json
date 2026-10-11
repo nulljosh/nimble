@@ -2,7 +2,8 @@
   "name": "nimble",
   "private": true,
   "scripts": {
-    "test": "node --test 'test/*.test.*js'"
+    "test": "node --test 'test/*.test.*js'",
+    "exam": "node test/exam.js"
   },
   "description": "Ask a question, get one sentence back. Math on-device, facts from open models.",
   "keywords": [
