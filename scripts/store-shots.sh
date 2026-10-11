@@ -23,8 +23,8 @@ xcrun simctl status_bar "$id" override --time 9:41 --batteryState charged --batt
 xcrun simctl install "$id" "$app"
 mkdir -p "$out"
 i=0
-# The consent answer is pre-set so the AI card does not block the answer shots.
-for q in "what's primitive.dev?" "180 C to F" "who is the prime minister of canada" "weather in vancouver"; do
+# Queries are all answerable without an AI service, so the consent card never lands in a store shot.
+for q in "what's primitive.dev?" "180 C to F" "plot sin(x)" "weather in vancouver"; do
   i=$((i+1))
   xcrun simctl terminate "$id" "$bundle" 2>/dev/null || true
   xcrun simctl launch "$id" "$bundle" -shot "$q" -whats_new_seen_version "$ver" >/dev/null

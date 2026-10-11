@@ -64,6 +64,13 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 
 ### v10 A+
 
+Joshua's v10 direction (2026-10-11): the whole app goes premium. Decide between a paid app on the
+App Store ($1, the house rule) or a $1 one-time unlock, with offline mode as the headline premium
+feature and a real domain (getnimbleapp.com or nimbleapp.com; buy via /buy-domain when the name is
+settled). Web stays free with the $1 unlock through Stripe. Decide pricing shape at v8 (private
+mode is the premium feature), buy the domain at v9, flip the switch at v10.
+
+
 - [ ] [Opus] Publish the benchmark: a 1000-question exam across math, science, history, politics, news, sites, units, definitions, with method and results for Nimble, Samantha and the BYO engines, reproducible from the repo.
 - [ ] [Sonnet] Reliability: answer p50 under 2s and p95 under 6s on the free engine, graceful degradation tested with every upstream (Wikipedia, DDG, Workers AI) down in turn.
 - [ ] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces.

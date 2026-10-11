@@ -1,7 +1,7 @@
 import Foundation
 
 struct PreferencesData: Codable {
-    var theme: String = "orange"
+    var theme: String = "yellow"  // brand yellow, same ink as tokens.css --yellow
     var mathEnabled: Bool = true
     var launchOnStartup: Bool = false
     var centerWindow: Bool = false

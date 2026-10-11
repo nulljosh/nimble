@@ -7,7 +7,7 @@
   "workflows": {
     "ship-ios": { "description": "Bump, archive, export, upload iOS", "steps": [
       { "name": "bump", "run": "asc xcode version edit --version \"$VERSION\" --build-number \"$(date +%Y%m%d%H%M)\"" },
-      { "name": "archive", "run": "asc xcode archive --project Nimble.xcodeproj --scheme Nimble-iOS --archive-path .asc/artifacts/Nimble.xcarchive --overwrite --xcodebuild-flag=-skipPackagePluginValidation --output json" },
+      { "name": "archive", "run": "asc xcode archive --project Nimble.xcodeproj --scheme Nimble-iOS --archive-path .asc/artifacts/Nimble.xcarchive --overwrite --xcodebuild-flag=-skipPackagePluginValidation --xcodebuild-flag=-allowProvisioningUpdates --output json" },
       { "name": "export", "run": "asc xcode export --archive-path .asc/artifacts/Nimble.xcarchive --export-options ExportOptions.plist --overwrite --ipa-path .asc/artifacts/Nimble.ipa --output json" },
       { "name": "publish", "if": "SUBMIT", "run": "asc publish appstore --app $IOS_APP_ID --ipa .asc/artifacts/Nimble.ipa --version $VERSION --wait --confirm --output json" }
     ] }
