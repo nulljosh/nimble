@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ResultView: View {
     @Environment(AppState.self) private var state
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         switch state.result {
@@ -9,14 +10,14 @@ struct ResultView: View {
             EmptyView()
 
         case .math(let value):
-            MathResultView(value: value, accent: state.theme.color)
+            AnswerCard(shareText: state.result.copyText) {
+                MathResultView(value: value)
+            } footer: {
+                Text("computed offline")
+            }
 
-        case .text(let heading, let body, _, let sourceURL, let imageURL):
-            // Whole answer opens its source; AI answers have none, so fall back to a web search.
-            let encoded = state.queryText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            let destination = URL(string: sourceURL ?? "") ?? URL(string: "https://duckduckgo.com/?q=\(encoded)")!
-            ScrollView {
-                Link(destination: destination) {
+        case .text(let heading, let body, let source, let sourceURL, let imageURL):
+            AnswerCard(shareText: state.result.copyText) {
                 HStack(alignment: .top, spacing: 14) {
                     if let imageURL, let url = URL(string: imageURL) {
                         AsyncImage(url: url) { phase in
@@ -24,80 +25,76 @@ struct ResultView: View {
                                 image.resizable().aspectRatio(contentMode: .fill)
                                     .frame(width: 56, height: 56)
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                                    .opacity(0.9)
                             }
                         }
                     }
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 8) {
                         if let heading, !heading.isEmpty {
                             Text(heading)
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(.secondary)
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundStyle(Color.soft)
                         }
-                        // The answer is the point of the app: big, full contrast, no underline.
                         Text(body)
-                            .font(.system(size: 17))
-                            .foregroundStyle(.primary)
-                            .lineSpacing(4)
-                            .lineLimit(nil)
+                            .font(.system(size: 19))
+                            .foregroundStyle(Color.text)
+                            .lineSpacing(7)
+                            .textSelection(.enabled)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 14)
-                }
-                .buttonStyle(.plain)
+            } footer: {
+                // AI answers have no source page, so the link falls back to a web search.
+                link(String(localized: "powered by \(source)"), to: sourceURL ?? state.searchURL)
             }
-            .frame(maxHeight: 300)
-            .transition(.opacity.combined(with: .move(edge: .top)))
 
-        case .list(let items, _):
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                        HStack(spacing: 12) {
-                            Text("\(index + 1)")
-                                .font(.system(size: 9, weight: .semibold))
-                                .foregroundStyle(state.theme.color.opacity(0.7))
-                                .frame(width: 16)
-                            Text(item)
-                                .font(.system(size: 13))
-                                .foregroundStyle(.secondary)
-                                .textSelection(.enabled)
-                                .lineLimit(3)
-                        }
-                        .padding(.horizontal, 18)
-                        .padding(.vertical, 9)
-                        if index < items.count - 1 {
-                            Divider().padding(.leading, 46).opacity(0.3)
-                        }
+        case .list(let items, let source):
+            AnswerCard(shareText: state.result.copyText) {
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                        Text(item)
+                            .font(.system(size: 17))
+                            .foregroundStyle(Color.text)
+                            .textSelection(.enabled)
                     }
                 }
-                .padding(.vertical, 6)
+            } footer: {
+                link(String(localized: "powered by \(source)"), to: state.searchURL)
             }
-            .frame(maxHeight: 300)
-            .transition(.opacity.combined(with: .move(edge: .top)))
 
         case .color(let hex):
-            ColorResultView(hex: hex, accent: state.theme.color)
+            ColorResultView(hex: hex)
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
 
         case .convert(let from, let to, let fromUnit, let toUnit):
-            ConvertResultView(from: from, to: to, fromUnit: fromUnit, toUnit: toUnit, accent: state.theme.color)
+            AnswerCard(shareText: state.result.copyText) {
+                ConvertResultView(from: from, to: to, fromUnit: fromUnit, toUnit: toUnit)
+            } footer: {
+                Text("computed offline")
+            }
 
-        case .card(let big, let unit, let sub, _, _):
-            CardResultView(big: big, unit: unit, sub: sub, accent: state.theme.color)
+        case .card(let big, let unit, let sub, let source, let url):
+            AnswerCard(shareText: state.result.copyText) {
+                CardResultView(big: big, unit: unit, sub: sub)
+            } footer: {
+                link(String(localized: "powered by \(source)"), to: url ?? state.searchURL)
+            }
 
         case .graph(let expr, let points):
-            GraphResultView(expr: expr, points: points, accent: state.theme.color)
+            AnswerCard(shareText: state.result.copyText) {
+                GraphResultView(expr: expr, points: points)
+            } footer: {
+                Text("computed offline")
+            }
 
         case .error(let message, let searchURL):
             VStack(spacing: 10) {
                 Text(message)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.dim)
                 if let searchURL, URL(string: searchURL) != nil {
                     Button("Search on DuckDuckGo →") { state.openInDDG() }
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(state.theme.color.opacity(0.85))
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundStyle(Color.bulbDeep)
                         .buttonStyle(.plain)
                 }
             }
@@ -107,6 +104,148 @@ struct ResultView: View {
             .transition(.opacity)
         }
     }
+
+    /// The source line opens its page; without a URL it does nothing.
+    @ViewBuilder
+    private func link(_ label: String, to url: String) -> some View {
+        if let u = URL(string: url) {
+            Button { openURL(u) } label: { Text(label) }.buttonStyle(.plain)
+        } else {
+            Text(label)
+        }
+    }
+}
+
+// MARK: - Shared cards (web app: .card, .field, the eyebrow and the Ask button)
+
+/// The answer card: hairline border, 22pt padding, an eyebrow, the answer, then one row with the source and Share.
+struct AnswerCard<Content: View, Footer: View>: View {
+    let shareText: String?
+    let content: Content
+    let footer: Footer
+
+    init(shareText: String?, @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
+        self.shareText = shareText
+        self.content = content()
+        self.footer = footer()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Eyebrow(text: "Answer")
+            content
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                footer
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.dim)
+                Spacer(minLength: 8)
+                if let shareText, !shareText.isEmpty {
+                    ShareLink(item: shareText) {
+                        Text("Share")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.dim)
+                            .underline()
+                    }
+                }
+            }
+        }
+        .padding(22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.hairline, lineWidth: 1))
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+}
+
+/// Small caps label in the accent: "ANSWER", "BEFORE I ANSWER", "RECENT".
+struct Eyebrow: View {
+    let text: LocalizedStringKey
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 11, weight: .bold))
+            .tracking(1.3)
+            .textCase(.uppercase)
+            .foregroundStyle(Color.bulbDeep)
+    }
+}
+
+/// Asked before the first AI answer. Same card as an answer, with Allow and Don't Allow.
+struct ConsentCard: View {
+    @Environment(AppState.self) private var state
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Eyebrow(text: "Before I answer")
+            Text("Send your question to an AI service?")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(Color.soft)
+            Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
+                .font(.system(size: 17))
+                .foregroundStyle(Color.text)
+                .lineSpacing(4)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 10) {
+                Button("Allow") { state.answerAIConsent(true) }
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 10)
+                    .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
+                    .buttonStyle(.plain)
+                Button("Don't Allow") { state.answerAIConsent(false) }
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.text)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 10)
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.hairline, lineWidth: 1))
+                    .buttonStyle(.plain)
+            }
+        }
+        .padding(22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.hairline, lineWidth: 1))
+    }
+}
+
+/// Past questions (or the starter questions when there are none). Hairline between rows.
+struct RecentList: View {
+    @Environment(AppState.self) private var state
+    let title: LocalizedStringKey
+    let items: [String]
+    var size: CGFloat = 16
+    var onClear: (() -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Eyebrow(text: title)
+                Spacer()
+                if let onClear {
+                    Button("Clear", action: onClear)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.dim)
+                        .buttonStyle(.plain)
+                }
+            }
+            .padding(.bottom, 8)
+            ForEach(Array(items.enumerated()), id: \.offset) { index, q in
+                if index > 0 { Rectangle().fill(Color.hairline).frame(height: 1) }
+                Button {
+                    state.queryText = q
+                    state.performQuery()
+                } label: {
+                    Text(q)
+                        .font(.system(size: size))
+                        .foregroundStyle(Color.text)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, size * 0.6)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
 }
 
 // MARK: - Graph
@@ -114,10 +253,9 @@ struct ResultView: View {
 private struct GraphResultView: View {
     let expr: String
     let points: [CGPoint]
-    let accent: Color
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             Canvas { ctx, size in
                 let xs = points.map(\.x), ys = points.map(\.y)
                 guard let x0 = xs.min(), let x1 = xs.max(), let y0 = ys.min(), let y1 = ys.max(), x1 > x0 else { return }
@@ -129,7 +267,7 @@ private struct GraphResultView: View {
                 var axes = Path()
                 if y0 <= 0, y1 >= 0 { let y = pt(CGPoint(x: x0, y: 0)).y; axes.move(to: CGPoint(x: 0, y: y)); axes.addLine(to: CGPoint(x: size.width, y: y)) }
                 if x0 <= 0, x1 >= 0 { let x = pt(CGPoint(x: 0, y: y0)).x; axes.move(to: CGPoint(x: x, y: 0)); axes.addLine(to: CGPoint(x: x, y: size.height)) }
-                ctx.stroke(axes, with: .color(.secondary.opacity(0.4)), lineWidth: 1)
+                ctx.stroke(axes, with: .color(Color.dim), lineWidth: 1)
                 var curve = Path()
                 // Break the line where sampled neighbours are far apart (asymptotes).
                 var pen = false
@@ -137,48 +275,79 @@ private struct GraphResultView: View {
                     let jump = i > 0 && abs(p.x - points[i - 1].x) > (x1 - x0) / 50
                     if !pen || jump { curve.move(to: pt(p)); pen = true } else { curve.addLine(to: pt(p)) }
                 }
-                ctx.stroke(curve, with: .color(accent), style: StrokeStyle(lineWidth: 2, lineJoin: .round))
+                ctx.stroke(curve, with: .color(Color.bulbDeep), style: StrokeStyle(lineWidth: 2, lineJoin: .round))
             }
             .frame(height: 160)
-            .padding(.horizontal, 20)
             .accessibilityHidden(true)
             Text("y = \(expr)")
-                .font(.system(size: 12, weight: .medium))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Color.soft)
                 .textSelection(.enabled)
         }
-        .padding(.vertical, 14)
-        .transition(.opacity)
     }
 }
 
-// MARK: - Math
+// MARK: - Math, convert, card
 
 private struct MathResultView: View {
     let value: String
-    let accent: Color
     @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 4) {
-            Text(value)
-                .font(.system(size: 42, weight: .semibold))
-                .foregroundStyle(.primary)
+        Text(value)
+            .font(.system(size: 34, weight: .bold))
+            .foregroundStyle(Color.text)
+            .textSelection(.enabled)
+            .scaleEffect(appeared ? 1.0 : 0.88)
+            .opacity(appeared ? 1.0 : 0)
+            .onAppear {
+                withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true }
+            }
+    }
+}
+
+private struct ConvertResultView: View {
+    let from: String
+    let to: String
+    let fromUnit: String
+    let toUnit: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("\(to) \(toUnit)")
+                .font(.system(size: 34, weight: .bold))
+                .foregroundStyle(Color.text)
                 .textSelection(.enabled)
-                .letterSpacing(-0.03)
-            Text("RESULT")
-                .font(.system(size: 9, weight: .semibold))
-                .foregroundStyle(accent.opacity(0.7))
-                .tracking(1.2)
+            Text("\(from) \(fromUnit)")
+                .font(.system(size: 18))
+                .foregroundStyle(Color.soft)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 18)
-        .padding(.horizontal, 20)
-        .scaleEffect(appeared ? 1.0 : 0.88)
-        .opacity(appeared ? 1.0 : 0)
-        .onAppear {
-            withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true }
+    }
+}
+
+private struct CardResultView: View {
+    let big: String
+    let unit: String
+    let sub: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(big)
+                .font(.system(size: 34, weight: .bold))
+                .foregroundStyle(Color.text)
+            if !unit.isEmpty {
+                Text(unit)
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.dim)
+                    .textCase(.uppercase)
+                    .tracking(0.5)
+            }
+            Text(sub)
+                .font(.system(size: 18))
+                .foregroundStyle(Color.soft)
         }
+        .textSelection(.enabled)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -186,7 +355,6 @@ private struct MathResultView: View {
 
 private struct ColorResultView: View {
     let hex: String
-    let accent: Color
 
     private var components: (r: Int, g: Int, b: Int) {
         let h = hex.replacingOccurrences(of: "#", with: "")
@@ -200,79 +368,21 @@ private struct ColorResultView: View {
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(hex: hex) ?? .orange)
                 .frame(width: 56, height: 56)
-                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.1), lineWidth: 1))
+                .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.hairline, lineWidth: 1))
             VStack(alignment: .leading, spacing: 5) {
-                colorRow(label: "HEX", value: hex.uppercased(), accent: accent)
-                colorRow(label: "RGB", value: "rgb(\(c.r), \(c.g), \(c.b))", accent: accent)
+                colorRow(label: "HEX", value: hex.uppercased())
+                colorRow(label: "RGB", value: "rgb(\(c.r), \(c.g), \(c.b))")
             }
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 14)
-        .transition(.opacity.combined(with: .scale(scale: 0.9)))
     }
 
-    private func colorRow(label: String, value: String, accent: Color) -> some View {
+    private func colorRow(label: String, value: String) -> some View {
         HStack(spacing: 8) {
-            Text(label).font(.system(size: 9, weight: .semibold)).foregroundStyle(accent.opacity(0.7)).frame(width: 30)
-            Text(value).font(.system(size: 12)).foregroundStyle(.primary)
+            Text(label).font(.system(size: 11, weight: .bold)).foregroundStyle(Color.bulbDeep).frame(width: 30)
+            Text(value).font(.system(size: 14)).foregroundStyle(Color.text)
         }
-    }
-}
-
-// MARK: - Convert (roadmap)
-
-private struct ConvertResultView: View {
-    let from: String
-    let to: String
-    let fromUnit: String
-    let toUnit: String
-    let accent: Color
-    @State private var appeared = false
-
-    var body: some View {
-        HStack(spacing: 20) {
-            VStack(spacing: 2) {
-                Text(from).font(.system(size: 32, weight: .light)).foregroundStyle(.secondary)
-                Text(fromUnit).font(.system(size: 11)).foregroundStyle(.secondary).tracking(0.5)
-            }
-            Text("→").font(.system(size: 18, weight: .light)).foregroundStyle(accent.opacity(0.5))
-            VStack(spacing: 2) {
-                Text(to).font(.system(size: 40, weight: .semibold)).foregroundStyle(.primary)
-                    .scaleEffect(appeared ? 1.0 : 0.88)
-                    .onAppear { withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true } }
-                Text(toUnit).font(.system(size: 11)).foregroundStyle(accent.opacity(0.6)).tracking(0.5)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .padding(.horizontal, 20)
-        .transition(.opacity.combined(with: .move(edge: .top)))
-    }
-}
-
-// MARK: - Card (weather, currency, local time)
-
-private struct CardResultView: View {
-    let big: String
-    let unit: String
-    let sub: String
-    let accent: Color
-    @State private var appeared = false
-
-    var body: some View {
-        VStack(spacing: 2) {
-            Text(big).font(.system(size: 40, weight: .semibold)).foregroundStyle(.primary)
-                .scaleEffect(appeared ? 1.0 : 0.88)
-                .onAppear { withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true } }
-            Text(unit).font(.system(size: 11)).foregroundStyle(accent.opacity(0.6)).tracking(0.5).textCase(.uppercase)
-            Text(sub).font(.system(size: 12)).foregroundStyle(.secondary).multilineTextAlignment(.center).padding(.top, 6)
-        }
-        .textSelection(.enabled)
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .padding(.horizontal, 20)
-        .accessibilityElement(children: .combine)
-        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 }
 
@@ -283,13 +393,5 @@ private extension Color {
         let h = hex.replacingOccurrences(of: "#", with: "")
         guard let v = Int(h, radix: 16) else { return nil }
         self.init(red: Double((v >> 16) & 0xFF) / 255, green: Double((v >> 8) & 0xFF) / 255, blue: Double(v & 0xFF) / 255)
-    }
-}
-
-// MARK: - Tracking modifier helper
-
-private extension View {
-    func letterSpacing(_ value: Double) -> some View {
-        self
     }
 }

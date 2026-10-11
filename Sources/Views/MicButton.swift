@@ -17,7 +17,7 @@ struct MicButton: View {
             Button(action: { voice.toggle() }) {
                 Image(systemName: "mic")
                     .font(.system(size: size, weight: .regular))
-                    .foregroundStyle(voice.listening ? state.theme.color : Color.secondary)
+                    .foregroundStyle(voice.listening ? state.theme.color : Color.dim)
                     .frame(width: 24, height: 24)
                     .contentShape(Rectangle())
             }

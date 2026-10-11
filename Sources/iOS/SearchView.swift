@@ -11,97 +11,41 @@ struct SearchView: View {
 
         NavigationStack {
             VStack(spacing: 0) {
-                HStack(spacing: 12) {
-                    Canvas { ctx, size in
-                        let accent = state.theme.color
-                        let c = Path(ellipseIn: CGRect(x: 2, y: 2, width: 12, height: 12))
-                        ctx.stroke(c, with: .color(accent.opacity(0.9)), lineWidth: 1.5)
-                        var line = Path()
-                        line.move(to: CGPoint(x: 13, y: 13))
-                        line.addLine(to: CGPoint(x: 18, y: 18))
-                        ctx.stroke(line, with: .color(accent.opacity(0.9)), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
-                    }
-                    .frame(width: 20, height: 20)
-                    .accessibilityHidden(true)
+                ScrollView {
+                    VStack(spacing: 0) {
+                        Text("Ask anything.")
+                            .font(.system(size: 28, weight: .bold))
+                            .tracking(-0.56)
+                            .foregroundStyle(Color.text)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 28)
+                            .padding(.bottom, 24)
 
-                    TextField("", text: $state.queryText, prompt: Text(state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder).foregroundStyle(.secondary))
-                        .textFieldStyle(.plain)
-                        .font(.system(size: 22, weight: .light))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                        .focused($isInputFocused)
-                        .onSubmit { state.performQuery() }
-                        .submitLabel(.search)
+                        searchField
 
-                    if state.result == .loading {
-                        Circle()
-                            .trim(from: 0, to: 0.75)
-                            .stroke(state.theme.color, lineWidth: 2)
-                            .frame(width: 18, height: 18)
-                            .rotationEffect(.degrees(-90))
-                            .animation(.linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
-                    }
-
-                    MicButton().environment(state)
-                }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 13)
-
-                if state.result != .none {
-                    Divider().opacity(0.1)
-                    // ponytail: result sits mid-screen instead of hugging the field over a wall of white
-                    Spacer()
-
-                    ResultView()
-                        .environment(state)
+                        Group {
+                            if state.askingAIConsent {
+                                ConsentCard()
+                            } else if state.result != .none {
+                                ResultView()
+                            } else {
+                                recent
+                            }
+                        }
+                        .padding(.top, 24)
                         .animation(.spring(duration: 0.3), value: state.result == .loading)
 
-                    if sourceText != "" {
-                        HStack {
-                            Spacer()
-                            Text(sourceText)
-                                .font(.system(size: 10))
-                                .foregroundStyle(.tertiary)
-                                .onTapGesture { openSource() }
-                        }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 8)
-                        .padding(.top, 2)
+                        Text("Math, units and graphs work offline. Everything else gets one sentence and a source.")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.dim)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 28)
                     }
-                } else {
-                    // Empty state: recent searches once there are any, else a few real questions to tap.
-                    VStack(alignment: .leading, spacing: 10) {
-                        if state.history.entries.isEmpty {
-                            Text("TRY")
-                                .font(.system(size: 11, weight: .bold))
-                                .tracking(1.2)
-                                .foregroundStyle(state.theme.color)
-                            ForEach(tries, id: \.self) { q in tapRow(q) }
-                        } else {
-                            HStack {
-                                Text("RECENT")
-                                    .font(.system(size: 11, weight: .bold))
-                                    .tracking(1.2)
-                                    .foregroundStyle(state.theme.color)
-                                Spacer()
-                                Button("Clear") { state.clearHistory() }
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(.secondary)
-                                    .buttonStyle(.plain)
-                            }
-                            ForEach(state.history.entries.prefix(8), id: \.q) { e in tapRow(e.q) }
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 18)
-                    .padding(.top, 28)
-                    .onAppear {
-                        if tries.isEmpty { tries = Array(Set((0..<12).map { _ in state.randomSuggestion() })).prefix(4).map { $0 } }
-                    }
+                    .padding(.bottom, 24)
                 }
-
-                Spacer()
+                .scrollDismissesKeyboard(.interactively)
 
                 HStack {
                     ThemePickerView()
@@ -113,7 +57,7 @@ struct SearchView: View {
                         Button(action: { state.copyResultText() }) {
                             Image(systemName: "doc.on.doc")
                                 .font(.system(size: 14))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.dim)
                         }
                         .accessibilityLabel("Copy result")
                         NavigationLink {
@@ -121,7 +65,7 @@ struct SearchView: View {
                         } label: {
                             Image(systemName: "gearshape")
                                 .font(.system(size: 14))
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(Color.dim)
                         }
                         .accessibilityLabel("Settings")
                     }
@@ -139,17 +83,11 @@ struct SearchView: View {
             // No title on the root screen, so the empty bar was only ever a black
             // strip above the search field.
             .toolbar(.hidden, for: .navigationBar)
-            .alert("Send your question to an AI service?", isPresented: $state.askingAIConsent) {
-                Button("Allow") { state.answerAIConsent(true) }
-                Button("Don't Allow", role: .cancel) { state.answerAIConsent(false) }
-            } message: {
-                Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
-            }
+            // Light/dark follows the system, like the web app; the theme is only the accent.
+            // Painted here, on the content: the NavigationStack's own system background
+            // sits above a background set on the stack and turned the cream white.
+            .background(Color.bg.ignoresSafeArea())
         }
-        // Light/dark follows the system, like the web app; the theme is only the accent.
-        // On the NavigationStack rather than its content, inside, the status-bar area
-        // stayed unpainted and rendered black.
-        .background(Color(uiColor: .systemBackground).ignoresSafeArea())
         .preferredColorScheme(state.theme.colorScheme)
         // nimble://ask from the widget: land with the caret in the field.
         .onOpenURL { url in
@@ -159,35 +97,65 @@ struct SearchView: View {
         .tint(state.theme.color)  // caret and toolbar in the theme accent, not system blue
     }
 
-    private func tapRow(_ q: String) -> some View {
-        Button {
-            state.queryText = q
-            state.performQuery()
-        } label: {
-            Text(q)
-                .font(.system(size: 17))
-                .foregroundStyle(.secondary)
+    /// The web app's field: rounded, soft fill, hairline that turns into a yellow ring when focused, Ask at the end.
+    private var searchField: some View {
+        @Bindable var state = state
+        let placeholder = state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder
+
+        return HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(Color.bulbDeep)
+                .accessibilityHidden(true)
+
+            TextField("", text: $state.queryText, prompt: Text(placeholder).foregroundStyle(Color.dim))
+                .textFieldStyle(.plain)
+                .font(.system(size: 18))
+                .foregroundStyle(Color.text)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .focused($isInputFocused)
+                .onSubmit { state.performQuery() }
+                .submitLabel(.search)
+
+            if state.result == .loading {
+                Circle()
+                    .trim(from: 0, to: 0.75)
+                    .stroke(state.theme.color, lineWidth: 2)
+                    .frame(width: 18, height: 18)
+                    .rotationEffect(.degrees(-90))
+                    .animation(.linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
+            }
+
+            MicButton().environment(state)
+
+            Button("Ask") { state.performQuery() }
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(.black)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 9)
+                .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
+                .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color.bg2))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isInputFocused ? Color.bulbDeep : Color.hairline, lineWidth: isInputFocused ? 2 : 1)
+        )
     }
 
-    private var sourceText: String {
-        switch state.result {
-        case .math, .convert: return "Computed offline"
-        case .text(_, _, let source, _, _): return source
-        case .list(_, let source): return source
-        case .graph: return "Computed offline"
-        case .card(_, _, _, let source, _): return source
-        default: return ""
-        }
-    }
-
-    private func openSource() {
-        switch state.result {
-        case .text(_, _, _, let url, _), .card(_, _, _, _, let url):
-            if let url, let u = URL(string: url) { UIApplication.shared.open(u) }
-        default:
-            state.openInDDG()
+    /// Starter questions until there is history, then the last eight searches.
+    @ViewBuilder
+    private var recent: some View {
+        if state.history.entries.isEmpty {
+            RecentList(title: "TRY", items: tries)
+                .onAppear {
+                    if tries.isEmpty { tries = Array(Set((0..<12).map { _ in state.randomSuggestion() })).prefix(4).map { $0 } }
+                }
+        } else {
+            RecentList(title: "RECENT", items: state.history.entries.prefix(8).map(\.q), onClear: { state.clearHistory() })
         }
     }
 }

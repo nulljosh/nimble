@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(AppState.self) private var state
-    @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isInputFocused: Bool
 
@@ -10,8 +9,7 @@ struct SearchView: View {
         @Bindable var state = state
 
         VStack(spacing: 0) {
-            // Search bar
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 // Close sits top-left, where every other Mac window puts it, it used
                 // to be the last item in the bottom-right status row.
                 Button(action: { NSApplication.shared.terminate(nil) }) {
@@ -23,129 +21,31 @@ struct SearchView: View {
                 .help("Quit Nimble")
                 .accessibilityLabel("Quit Nimble")
 
-                // Accent-colored search icon
-                Canvas { ctx, size in
-                    let accent = state.theme.color
-                    let c = Path(ellipseIn: CGRect(x: 2, y: 2, width: 12, height: 12))
-                    ctx.stroke(c, with: .color(accent.opacity(0.9)), lineWidth: 1.5)
-                    var line = Path()
-                    line.move(to: CGPoint(x: 13, y: 13))
-                    line.addLine(to: CGPoint(x: 18, y: 18))
-                    ctx.stroke(line, with: .color(accent.opacity(0.9)), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
-                }
-                .frame(width: 20, height: 20)
-                .accessibilityHidden(true)
-
-                TextField(state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder, text: $state.queryText)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 22, weight: .light))
-                    .foregroundStyle(Color.primary.opacity(0.92))
-                    .focused($isInputFocused)
-                    .onSubmit { state.performQuery() }
-                    .onKeyPress(.tab) {
-                        if state.queryText.isEmpty { state.queryText = state.currentPlaceholder }
-                        return .handled
-                    }
-
-                if state.result == .loading {
-                    Circle()
-                        .trim(from: 0, to: 0.75)
-                        .stroke(state.theme.color, lineWidth: 2)
-                        .frame(width: 18, height: 18)
-                        .rotationEffect(.degrees(-90))
-                        .animation(reduceMotion ? nil : .linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
-                } else if !state.queryText.isEmpty {
-                    Text("↩")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundStyle(Color.primary.opacity(0.3))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.primary.opacity(0.07))
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                        .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.primary.opacity(0.1), lineWidth: 1))
-                }
-
-                MicButton().environment(state)
+                searchField
             }
             .padding(.horizontal, 18)
-            .padding(.vertical, 13)
+            .padding(.top, 16)
+            .padding(.bottom, 14)
 
             // Inline rather than an alert: the HUD is a borderless window with nothing to hang a sheet on.
             if state.askingAIConsent {
-                Divider().opacity(0.1)
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Send your question to an AI service?")
-                        .font(.system(size: 13, weight: .semibold))
-                    Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    HStack {
-                        Spacer()
-                        Button("Don't Allow") { state.answerAIConsent(false) }
-                            .keyboardShortcut(.cancelAction)
-                        Button("Allow") { state.answerAIConsent(true) }
-                            .keyboardShortcut(.defaultAction)
-                    }
-                }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 13)
+                ConsentCard()
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 14)
             }
 
-            // Results
             if state.result != .none {
-                Divider().opacity(0.1).padding(.horizontal, 0)
-
                 ResultView()
                     .environment(state)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 14)
                     .animation(.spring(duration: 0.3), value: state.result == .loading)
-
-                if sourceText != "" {
-                    HStack {
-                        Spacer()
-                        Button(action: openSource) {
-                            Text(sourceText)
-                                .font(.system(size: 10))
-                                .foregroundStyle(Color.primary.opacity(0.2))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 8)
-                    .padding(.top, 2)
-                }
-            }
-
-            // Recent searches, only while the HUD has no answer on screen.
-            if state.result == .none, !state.history.entries.isEmpty, !state.askingAIConsent {
-                Divider().opacity(0.1)
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text("RECENT")
-                            .font(.system(size: 10, weight: .bold))
-                            .tracking(1.2)
-                            .foregroundStyle(state.theme.color)
-                        Spacer()
-                        Button("Clear") { state.clearHistory() }
-                            .font(.system(size: 10))
-                            .foregroundStyle(.secondary)
-                            .buttonStyle(.plain)
-                    }
-                    ForEach(state.history.entries.prefix(5), id: \.q) { e in
-                        Button {
-                            state.queryText = e.q
-                            state.performQuery()
-                        } label: {
-                            Text(e.q)
-                                .font(.system(size: 13))
-                                .foregroundStyle(.secondary)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 10)
+            } else if !state.askingAIConsent, !state.history.entries.isEmpty {
+                // Recent searches, only while the HUD has no answer on screen.
+                RecentList(title: "RECENT", items: state.history.entries.prefix(5).map(\.q), size: 14, onClear: { state.clearHistory() })
+                    .environment(state)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 14)
             }
 
             // Bottom bar
@@ -153,17 +53,17 @@ struct SearchView: View {
                 // Theme lives in Settings only, the swatch here duplicated the grid
                 // in SettingsView. (iOS keeps its inline picker: no menu bar there.)
                 Spacer()
-                    Text("Nimble v\(Bundle.main.marketingVersion)")
-                        .font(.system(size: 9, weight: .medium))
-                        .foregroundStyle(Color.primary.opacity(0.2))
-                        .tracking(0.8)
-                        .textCase(.uppercase)
+                Text("Nimble v\(Bundle.main.marketingVersion)")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Color.dim)
+                    .tracking(0.8)
+                    .textCase(.uppercase)
                 Spacer()
                 HStack(spacing: 10) {
                     Button(action: { state.copyResultText() }) {
                         Text("⎘")
                             .font(.system(size: 13))
-                            .foregroundStyle(Color.primary.opacity(0.3))
+                            .foregroundStyle(Color.dim)
                     }
                     .buttonStyle(.plain)
                     .help("Copy Result")
@@ -171,24 +71,18 @@ struct SearchView: View {
                 }
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 8)
+            .padding(.vertical, 9)
             .overlay(alignment: .top) {
-                Divider().opacity(0.07)
+                Rectangle().fill(Color.hairline).frame(height: 1)
             }
         }
         .frame(width: 660)
         .fixedSize(horizontal: false, vertical: true)
-        .background(
-            ZStack {
-                VisualEffectView(material: .popover, blendingMode: .behindWindow)
-                // The adaptive material is a flat grey in dark mode; the old HUD ink brings the depth back.
-                if scheme == .dark { Color(red: 0.07, green: 0.07, blue: 0.118).opacity(0.55) }
-            }
-        )
-        // Follows the system appearance; the .popover material adapts with it.
+        .background(Color.bg)
+        // Follows the system appearance; the cream palette adapts with it.
         .preferredColorScheme(state.theme.colorScheme)
         .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.primary.opacity(0.1), lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.hairline, lineWidth: 1))
         .onAppear {
             // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
             if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery() }
@@ -199,24 +93,55 @@ struct SearchView: View {
         .gesture(WindowDrag())
     }
 
-    private var sourceText: String {
-        switch state.result {
-        case .math, .convert: return "Computed offline"
-        case .text(_, _, let source, _, _): return source
-        case .list(_, let source): return source
-        case .graph: return "Computed offline"
-        case .card(_, _, _, let source, _): return source
-        default: return ""
-        }
-    }
+    /// The web app's field: rounded, soft fill, hairline that turns into a yellow ring when focused.
+    /// Return submits, so the Mac keeps its return-key hint in place of an Ask button.
+    private var searchField: some View {
+        @Bindable var state = state
 
-    private func openSource() {
-        switch state.result {
-        case .text(_, _, _, let url, _), .card(_, _, _, _, let url):
-            if let url, let u = URL(string: url) { NSWorkspace.shared.open(u) }
-        default:
-            state.openInDDG()
+        return HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 18, weight: .medium))
+                .foregroundStyle(Color.bulbDeep)
+                .accessibilityHidden(true)
+
+            TextField(state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder, text: $state.queryText)
+                .textFieldStyle(.plain)
+                .font(.system(size: 18))
+                .foregroundStyle(Color.text)
+                .focused($isInputFocused)
+                .onSubmit { state.performQuery() }
+                .onKeyPress(.tab) {
+                    if state.queryText.isEmpty { state.queryText = state.currentPlaceholder }
+                    return .handled
+                }
+
+            if state.result == .loading {
+                Circle()
+                    .trim(from: 0, to: 0.75)
+                    .stroke(state.theme.color, lineWidth: 2)
+                    .frame(width: 18, height: 18)
+                    .rotationEffect(.degrees(-90))
+                    .animation(reduceMotion ? nil : .linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
+            } else if !state.queryText.isEmpty {
+                Text("↩")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(Color.dim)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.hairline.opacity(0.5))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.hairline, lineWidth: 1))
+            }
+
+            MicButton().environment(state)
         }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color.bg2))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isInputFocused ? Color.bulbDeep : Color.hairline, lineWidth: isInputFocused ? 2 : 1)
+        )
     }
 }
 
