@@ -1,4 +1,5 @@
 import SwiftUI
+import ObjectiveC
 
 @main
 struct NimbleApp: App {
@@ -47,6 +48,25 @@ struct NimbleApp: App {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    /// A borderless window answers `canBecomeKey == false`, so an Opt+Space summon landed
+    /// with no caret and typing went nowhere. Subclass the window's own class at runtime
+    /// (SwiftUI's AppKitWindow, which a plain NSWindow subclass would replace) and say yes.
+    private func makeKeyable(_ window: NSWindow) {
+        let base: AnyClass = type(of: window)
+        guard !NSStringFromClass(base).hasPrefix("NSKVONotifying") else { return }  // KVO already swapped the class
+        let name = "NimbleKey_" + NSStringFromClass(base)
+        let keyable: AnyClass = NSClassFromString(name) ?? {
+            let sub = objc_allocateClassPair(base, name, 0)!
+            let yes: @convention(block) (AnyObject) -> Bool = { _ in true }
+            class_addMethod(sub, #selector(getter: NSWindow.canBecomeKey),
+                            imp_implementationWithBlock(yes), "B@:")
+            objc_registerClassPair(sub)
+            return sub
+        }()
+        if type(of: window) != keyable { object_setClass(window, keyable) }
+        window.makeKeyAndOrderFront(nil)
+    }
+
     private func configureWindow() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             for window in NSApp.windows {
@@ -63,11 +83,10 @@ struct NimbleApp: App {
                 // hiding those views individually all failed — SwiftUI rebuilds them on
                 // layout. Dropping .titled deletes the container outright, and the
                 // window shrinks by exactly the 32pt the strip occupied.
-                // ponytail: this leaves canBecomeKey == false, as it does for any
-                // borderless window. Clicking the window still focuses the field, but
-                // if an Opt+Space summon ever lands without a caret, the fix is an
-                // NSPanel that can override canBecomeKey — see roadmap.md.
+                // ponytail: borderless means canBecomeKey == false; makeKeyable() below overrides that
+                // so a summon lands with a caret. Dragging is the WindowDrag gesture in SearchView.
                 window.styleMask = [.resizable, .fullSizeContentView]
+                if window.title == "Nimble" { makeKeyable(window) }  // not the system remote-view windows in NSApp.windows
                 window.toolbar = nil
                 window.titlebarSeparatorStyle = .none
                 // Borderless means nothing rounds the window any more, so the

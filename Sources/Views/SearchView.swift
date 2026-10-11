@@ -195,6 +195,8 @@ struct SearchView: View {
             isInputFocused = true
         }
         .contextMenu { ContextMenuView().environment(state) }
+        .contentShape(Rectangle())
+        .gesture(WindowDrag())
     }
 
     private var sourceText: String {
@@ -215,5 +217,24 @@ struct SearchView: View {
         default:
             state.openInDDG()
         }
+    }
+}
+
+/// The borderless HUD ignored `isMovableByWindowBackground`: SwiftUI's hosting view eats the
+/// mouse-down before AppKit can start a window drag. Move the window by hand instead.
+private struct WindowDrag: Gesture {
+    @State private var grab: (mouse: NSPoint, origin: NSPoint)?
+
+    var body: some Gesture {
+        DragGesture(minimumDistance: 2, coordinateSpace: .global)
+            .onChanged { _ in
+                guard let window = NSApp.keyWindow else { return }
+                let mouse = NSEvent.mouseLocation
+                let start = grab ?? (mouse, window.frame.origin)
+                grab = start
+                window.setFrameOrigin(NSPoint(x: start.origin.x + mouse.x - start.mouse.x,
+                                              y: start.origin.y + mouse.y - start.mouse.y))
+            }
+            .onEnded { _ in grab = nil }
     }
 }
