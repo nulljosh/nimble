@@ -243,7 +243,7 @@ const ENGINES = {
   ollama:{name:"Ollama (local)", model:"llama3.1:8b", base:"http://localhost:11434"},
   // Samantha is the house local model (oMLX on :8000, OpenAI chat shape). Opt-in until she
   // passes the same QA as the free proxy; then she becomes the default.
-  samantha:{name:"Samantha (local)", model:"samantha", base:"http://localhost:8000"},
+  samantha:{name:"Samantha (local)", model:"Qwen3.5-9B-OptiQ-4bit", base:"http://localhost:8000"},
 };
 function aiConfig(){
   try{ return {engine:"nimble", apiKey:"", model:"", baseURL:"", ...JSON.parse(localStorage.getItem("nimble.ai")||"{}")}; }

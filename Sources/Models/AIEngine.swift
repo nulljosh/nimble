@@ -23,7 +23,7 @@ enum AIEngine: String, Codable, CaseIterable, Sendable {
         case .claude: return "claude-opus-5"
         case .openai: return "gpt-5"
         case .ollama: return "llama3.1:8b"
-        case .samantha: return "samantha"
+        case .samantha: return "Qwen3.5-9B-OptiQ-4bit"
         }
     }
 
