@@ -388,7 +388,9 @@ final class QueryEngine: Sendable {
     // old per-shape Wikidata handlers (which dumped every historical officeholder).
     private func queryLLM(_ input: String, session: URLSession, ai: AIConfig, turns: TurnBuffer) async -> QueryResult? {
         // A misconfigured engine (Claude with no key) falls back to the free proxy.
-        guard let req = ai.request(for: input, turns: turns) ?? AIConfig().request(for: input, turns: turns) else { return nil }
+        let context = (ai.engine == .ollama || ai.engine == .samantha) ? await wikiGrounding(input, session: session) : ""
+        guard var req = ai.request(for: input, turns: turns, context: context) ?? AIConfig().request(for: input, turns: turns) else { return nil }
+        if ai.engine == .ollama || ai.engine == .samantha { req.timeoutInterval = 40 } // a local 9B on a busy Mac is slow
         do {
             let (data, response) = try await session.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200,
@@ -397,6 +399,22 @@ final class QueryEngine: Sendable {
         } catch {
             return nil
         }
+    }
+
+    /// Top-3 Wikipedia search intros for `query`, as one block of text. Empty on any failure.
+    private func wikiGrounding(_ query: String, session: URLSession) async -> String {
+        guard let q = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&format=json&formatversion=2&gsrsearch=\(q)"),
+              let (data, _) = try? await session.data(from: url),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let pages = (json["query"] as? [String: Any])?["pages"] as? [[String: Any]] else { return "" }
+        let blocks = pages.compactMap { p -> String? in
+            guard let title = p["title"] as? String, let extract = p["extract"] as? String else { return nil }
+            let sentences = extract.components(separatedBy: ". ")
+            let kept = sentences.prefix(4) + sentences.dropFirst(4).filter { $0.range(of: "\\b(current|incumbent|since)\\b", options: [.regularExpression, .caseInsensitive]) != nil }
+            return "\(title): " + kept.joined(separator: ". ")
+        }
+        return String(blocks.joined(separator: "\n\n").prefix(6000))
     }
 
     /// "Who made you" is about Nimble, not the Wikipedia article the words happen to match.

@@ -50,9 +50,17 @@ struct AIConfig: Codable, Equatable, Sendable {
 
     static let systemPrompt = "Answer in one short factual sentence. No preamble, no markdown. If you do not know, reply exactly UNKNOWN."
 
+    /// Local engines get live Wikipedia intros plus today's date, like the free proxy, because
+    /// model weights are frozen ("Justin Trudeau" in 2026). Mirrors `grounding()` in docs/engine.js.
+    static func groundingSuffix(_ context: String) -> String {
+        guard !context.isEmpty else { return "" }
+        let today = ISO8601DateFormatter().string(from: Date()).prefix(10)
+        return " Today is \(today). Your training data is out of date; when the reference text below covers the question, trust it over your memory. Never mention the reference text.\n\nReference (live Wikipedia):\n\(context)"
+    }
+
     /// Builds the vendor request for `question`. Nil when the engine has no usable config
     /// (e.g. Claude picked but no key) so the caller can fall back to the free proxy.
-    func request(for question: String, turns: TurnBuffer = TurnBuffer()) -> URLRequest? {
+    func request(for question: String, turns: TurnBuffer = TurnBuffer(), context: String = "") -> URLRequest? {
         if engine.needsKey && apiKey.isEmpty { return nil }
         let base = resolvedBaseURL
         var req: URLRequest
@@ -75,8 +83,10 @@ struct AIConfig: Codable, Equatable, Sendable {
             req = URLRequest(url: url)
             if !apiKey.isEmpty { req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization") }
             body = ["model": resolvedModel, "max_tokens": 256,
-                    "messages": [["role": "system", "content": Self.systemPrompt]] + turns.messages
+                    "messages": [["role": "system", "content": Self.systemPrompt + Self.groundingSuffix(context)]] + turns.messages
                                  + [["role": "user", "content": question]]]
+            // Samantha's Qwen3.5 base reasons at length by default and would eat the token budget.
+            if engine == .samantha { body["chat_template_kwargs"] = ["enable_thinking": false] }
         }
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "content-type")

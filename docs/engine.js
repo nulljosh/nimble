@@ -7,9 +7,11 @@ const TIMEOUT_MS = 6000;
 // The answer proxy runs up to three models (tiebreak) and can take 10s+; 6s cut it off and
 // the web app fell through to a Wikipedia list article. Native uses 15s, so match it.
 const PROXY_TIMEOUT_MS = 15000;
+const LOCAL_TIMEOUT_MS = 40000; // a local 9B model on a busy Mac needs far longer than a hosted API
 async function getJSON(url, opts){
   try{
-    const r = await fetch(url, {...opts, signal: AbortSignal.timeout(url.startsWith(ANSWER_PROXY) && opts?.method==="POST" ? PROXY_TIMEOUT_MS : TIMEOUT_MS)});
+    const {timeout, ...init} = opts || {};
+    const r = await fetch(url, {...init, signal: AbortSignal.timeout(timeout || (url.startsWith(ANSWER_PROXY) && opts?.method==="POST" ? PROXY_TIMEOUT_MS : TIMEOUT_MS))});
     return r.ok ? await r.json() : null;
   }catch{ return null; }
 }
@@ -289,6 +291,14 @@ const turns = {
 };
 // Earlier exchanges as chat messages, oldest first, ahead of the new question.
 const turnMessages = () => turnList.flatMap(t=>[{role:"user", content:t.q}, {role:"assistant", content:t.a}]);
+// The free proxy grounds every question in live Wikipedia intros plus today's date, because model
+// weights are frozen ("Justin Trudeau" in 2026). Local engines get the same grounding here.
+async function grounding(query){
+  const d = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&format=json&formatversion=2&origin=*&gsrsearch=${encodeURIComponent(query)}`);
+  const pages = d?.query?.pages || [];
+  const trim = t => { const ss = (t||"").split(/(?<=[.!?])\s+/); return [...ss.slice(0,4), ...ss.slice(4).filter(x=>/\b(current|incumbent|since)\b/i.test(x))].join(" "); };
+  return pages.map(p=>`${p.title}: ${trim(p.extract)}`).join("\n\n").slice(0,6000);
+}
 async function gemma(query){
   let c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
   if(e.key && !c.apiKey){ c = {engine:"nimble"}; e = ENGINES.nimble; } // no key = free proxy
@@ -299,9 +309,12 @@ async function gemma(query){
       body:JSON.stringify({model, max_tokens:256, system:SYSTEM, messages:[...turnMessages(), {role:"user", content:query}]})});
     text = (d?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(""); src = model;
   }else if(e===ENGINES.openai || e===ENGINES.ollama || e===ENGINES.samantha){
+    const local = e!==ENGINES.openai;
+    const ctx = local ? await grounding(query) : "";
+    const system = SYSTEM + (ctx ? ` Today is ${new Date().toISOString().slice(0,10)}. Your training data is out of date; when the reference text below covers the question, trust it over your memory. Never mention the reference text.\n\nReference (live Wikipedia):\n${ctx}` : "");
     // Ollama speaks the OpenAI chat shape at /v1 (needs OLLAMA_ORIGINS set for the browser).
     d = await getJSON(base+"/v1/chat/completions", {method:"POST", headers:{...H, ...(c.apiKey?{Authorization:"Bearer "+c.apiKey}:{})},
-      body:JSON.stringify({model, max_tokens:256, messages:[{role:"system", content:SYSTEM}, ...turnMessages(), {role:"user", content:query}]})});
+      body:JSON.stringify({model, max_tokens:256, ...(e===ENGINES.samantha ? {chat_template_kwargs:{enable_thinking:false}} : {}), messages:[{role:"system", content:system}, ...turnMessages(), {role:"user", content:query}]}), ...(local ? {timeout:LOCAL_TIMEOUT_MS} : {})});
     text = d?.choices?.[0]?.message?.content; src = model;
   }else{
     d = await getJSON(ANSWER_PROXY, {method:"POST", headers:H, body:JSON.stringify({q:query, turns:turns.list()})});
