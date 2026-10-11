@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [5.4.0] - 2026-10-11
+
+- feat: mascot picker in Settings, Flit the hummingbird or Fen the fennec, on web, iPhone and Mac
+- feat: app icon rebuilt in Icon Composer, a tapered glass bulb with a soft glow
+- feat: 5.4.0 App Store listing text and a simulator screenshot script
+
 ## [5.3.0] - 2026-10-11
 
 - feat: search history syncs between iPhone and Mac through iCloud (question text and time only)
