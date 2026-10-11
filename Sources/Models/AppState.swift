@@ -238,6 +238,7 @@ final class AppState {
         case .claude: return "Anthropic (Claude)"
         case .openai: return "OpenAI"
         case .ollama: return "your own Ollama server"
+        case .samantha: return "Samantha, running on this Mac"
         }
     }
 

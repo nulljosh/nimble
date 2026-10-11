@@ -16,10 +16,14 @@ Keep Nimble moving after 5.0.0 with one small, shippable slice at a time: fix wh
 - Landing page and web app pass axe with zero violations in light and dark. The live version badge reads v5.0.1.
 - All 78 native strings carry en, fr, es, zh and pa.
 - The three stale remote branches are deleted. Zero open issues, zero open PRs.
-- One open roadmap item: query QA and filtering. Joshua's Oct 3 phone screenshots show raw model text for "who is the president", and Wikipedia articles for "who created you" and "nine plus ten".
+- Query QA loop (2026-10-11 afternoon): a 61-question exam (math, units, science, history, politics, definitions, sites, geography, people, live cards) lives in the loop's scratchpad as qa.js and runs against docs/engine.js with consent "yes". Round 1 scored 51/61; the misses were a stale answer key (UK PM is Andy Burnham since 20 July 2026, Nimble was right), the web app's 6s proxy timeout (fixed, 15s like native), Wikipedia list articles leaking as answers (fixed, skipped), and card shapes in the test harness. "define nimble" still picks an obscure Wiktionary sense.
+- Website questions ("what's primitive.dev?") are answered from the site itself: title, meta description, h1, first paragraph, via the worker's `?site=` route on web/API and direct in Swift. Numeric entities decode.
+- Samantha is an engine option on web and native (oMLX on localhost:8000, OpenAI chat shape, source label "Samantha"). She is opt-in until she passes the same 61-question exam at the free engine's score; then she becomes the default.
+- The default Claude model ID is still `claude-opus-5` (stale; current is `claude-opus-5-5`). Not yet changed.
 
 ## Next, in order
 
+0. Query QA loop: rerun qa.js, fix every real miss at the root (engine.js first, mirror in QueryEngine.swift), push, let deploy-site.yml ship docs/, redeploy worker/ with wrangler when it changes. Then start oMLX on :8000, run the same exam against Samantha, grade her, and write the score here.
 1. Wait on App Review for iOS 5.0.1 and Mac 5.0.1. If either is rejected, fix the stated reason and resubmit.
 2. Fix the query failures from the Oct 3 screenshots, one test each, then ship the next patch.
 3. Confirm the iOS search view font and formatting, since the roadmap notes it was not checked on iOS.
@@ -35,4 +39,4 @@ Loop: Nimble. First, the manual release-build check: launch the exported release
 
 ---
 
-Loop status: live. Current state is 5.0.1 in App Review. The next work is the query QA fixes.
+Loop status: live. 5.0.1 in App Review. Query QA loop running; Samantha grading next.

@@ -17,7 +17,7 @@ struct AIEngineSettings: View {
             }
             TextField("Model", text: $state.ai.model, prompt: Text(state.ai.engine.defaultModel))
                 .onSubmit { state.savePreferences() }
-            if state.ai.engine == .ollama {
+            if state.ai.engine == .ollama || state.ai.engine == .samantha {
                 TextField("Server", text: $state.ai.baseURL, prompt: Text(AIEngine.ollama.defaultBaseURL))
                     .onSubmit { state.savePreferences() }
             }

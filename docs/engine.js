@@ -4,9 +4,12 @@ const ANSWER_PROXY = "https://nimble-answers.trommatic.workers.dev";
 // Every network source goes through here: hard timeout, non-2xx = null, bad JSON = null.
 // A dead upstream costs one timeout, never a hung answer. TIMEOUT_MS is the calibration knob.
 const TIMEOUT_MS = 6000;
+// The answer proxy runs up to three models (tiebreak) and can take 10s+; 6s cut it off and
+// the web app fell through to a Wikipedia list article. Native uses 15s, so match it.
+const PROXY_TIMEOUT_MS = 15000;
 async function getJSON(url, opts){
   try{
-    const r = await fetch(url, {...opts, signal: AbortSignal.timeout(TIMEOUT_MS)});
+    const r = await fetch(url, {...opts, signal: AbortSignal.timeout(url.startsWith(ANSWER_PROXY) && opts?.method==="POST" ? PROXY_TIMEOUT_MS : TIMEOUT_MS)});
     return r.ok ? await r.json() : null;
   }catch{ return null; }
 }
@@ -136,7 +139,7 @@ async function wiki(query){
     const o = await getJSON(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&format=json&origin=*`);
     title = o?.[1]?.[0];
   }
-  if(!title) return null;
+  if(!title || /^list of /i.test(title)) return null; // a list article's intro never answers the question
   const sum = await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
   if(!sum?.extract || sum.type==="disambiguation") return null;
   return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null};
@@ -238,6 +241,9 @@ const ENGINES = {
   claude:{name:"Claude", key:true, model:"claude-opus-5", base:"https://api.anthropic.com"},
   openai:{name:"OpenAI", key:true, model:"gpt-5", base:"https://api.openai.com"},
   ollama:{name:"Ollama (local)", model:"llama3.1:8b", base:"http://localhost:11434"},
+  // Samantha is the house local model (oMLX on :8000, OpenAI chat shape). Opt-in until she
+  // passes the same QA as the free proxy; then she becomes the default.
+  samantha:{name:"Samantha (local)", model:"samantha", base:"http://localhost:8000"},
 };
 function aiConfig(){
   try{ return {engine:"nimble", apiKey:"", model:"", baseURL:"", ...JSON.parse(localStorage.getItem("nimble.ai")||"{}")}; }
@@ -266,6 +272,7 @@ function aiRecipient(){
     case "claude": return "Anthropic (Claude)";
     case "openai": return "OpenAI";
     case "ollama": return "your own Ollama server";
+    case "samantha": return "Samantha, running on this Mac";
     default: return "Nimble's answer service, which runs Google Gemma and Alibaba Qwen models on Cloudflare Workers AI";
   }
 }
@@ -291,7 +298,7 @@ async function gemma(query){
     d = await getJSON(base+"/v1/messages", {method:"POST", headers:{...H, "x-api-key":c.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({model, max_tokens:256, system:SYSTEM, messages:[...turnMessages(), {role:"user", content:query}]})});
     text = (d?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(""); src = model;
-  }else if(e===ENGINES.openai || e===ENGINES.ollama){
+  }else if(e===ENGINES.openai || e===ENGINES.ollama || e===ENGINES.samantha){
     // Ollama speaks the OpenAI chat shape at /v1 (needs OLLAMA_ORIGINS set for the browser).
     d = await getJSON(base+"/v1/chat/completions", {method:"POST", headers:{...H, ...(c.apiKey?{Authorization:"Bearer "+c.apiKey}:{})},
       body:JSON.stringify({model, max_tokens:256, messages:[{role:"system", content:SYSTEM}, ...turnMessages(), {role:"user", content:query}]})});

@@ -3,7 +3,7 @@ import Foundation
 /// Which model answers factual questions. `nimble` is the free house proxy (no key);
 /// the rest call the vendor directly with the user's own key, which never leaves the device.
 enum AIEngine: String, Codable, CaseIterable, Sendable {
-    case nimble, claude, openai, ollama
+    case nimble, claude, openai, ollama, samantha
 
     var displayName: String {
         switch self {
@@ -11,6 +11,7 @@ enum AIEngine: String, Codable, CaseIterable, Sendable {
         case .claude: return "Claude"
         case .openai: return "OpenAI"
         case .ollama: return "Ollama (local)"
+        case .samantha: return "Samantha (local)"
         }
     }
 
@@ -22,6 +23,7 @@ enum AIEngine: String, Codable, CaseIterable, Sendable {
         case .claude: return "claude-opus-5"
         case .openai: return "gpt-5"
         case .ollama: return "llama3.1:8b"
+        case .samantha: return "samantha"
         }
     }
 
@@ -32,6 +34,7 @@ enum AIEngine: String, Codable, CaseIterable, Sendable {
         case .claude: return "https://api.anthropic.com"
         case .openai: return "https://api.openai.com"
         case .ollama: return "http://localhost:11434"
+        case .samantha: return "http://localhost:8000"
         }
     }
 }
@@ -66,8 +69,8 @@ struct AIConfig: Codable, Equatable, Sendable {
             req.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
             body = ["model": resolvedModel, "max_tokens": 256, "system": Self.systemPrompt,
                     "messages": turns.messages + [["role": "user", "content": question]]]
-        case .openai, .ollama:
-            // Ollama speaks the OpenAI chat shape at /v1, so one branch covers both.
+        case .openai, .ollama, .samantha:
+            // Ollama and Samantha (oMLX) speak the OpenAI chat shape at /v1, so one branch covers both.
             guard let url = URL(string: base + "/v1/chat/completions") else { return nil }
             req = URLRequest(url: url)
             if !apiKey.isEmpty { req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization") }
@@ -93,13 +96,13 @@ struct AIConfig: Codable, Equatable, Sendable {
         case .claude:
             let blocks = json["content"] as? [[String: Any]] ?? []
             text = blocks.compactMap { $0["type"] as? String == "text" ? $0["text"] as? String : nil }.joined()
-        case .openai, .ollama:
+        case .openai, .ollama, .samantha:
             let choices = json["choices"] as? [[String: Any]] ?? []
             text = (choices.first?["message"] as? [String: Any])?["content"] as? String
         }
         guard let t = text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !t.isEmpty, t.uppercased() != "UNKNOWN" else { return nil }
-        if engine != .nimble { source = resolvedModel }
+        if engine == .samantha { source = "Samantha" } else if engine != .nimble { source = resolvedModel }
         return (t, source)
     }
 }
