@@ -79,5 +79,7 @@
   "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.": "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.",
   "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.": "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.",
   "Your key stays on this device and is sent only to {s}.": "Your key stays on this device and is sent only to {s}.",
-  "Asks this again": "Asks this again"
+  "Asks this again": "Asks this again",
+  "Mascot": "Mascot",
+  "Mascot: {s}": "Mascot: {s}"
 }

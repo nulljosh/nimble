@@ -46,8 +46,8 @@ struct SearchView: View {
                     .padding(.horizontal, 18)
                     .padding(.bottom, 14)
             } else if !state.askingAIConsent {
-                // Empty HUD: Flit sits where the recent searches would go. Decorative, so VoiceOver skips him.
-                Image("Flit")
+                // Empty HUD: the chosen mascot sits where the recent searches would go. Decorative, so VoiceOver skips him.
+                Image(state.mascotAsset)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)

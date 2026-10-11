@@ -159,8 +159,8 @@ struct SearchView: View {
     private var recent: some View {
         if state.history.entries.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                // Flit is decorative here, so VoiceOver skips him.
-                Image("Flit")
+                // The chosen mascot is decorative here, so VoiceOver skips him.
+                Image(state.mascotAsset)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 96, height: 96)

@@ -79,5 +79,7 @@
   "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.": "ਚਾਲੂ ਹੋਣ 'ਤੇ ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ {s} ਨੂੰ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਹੋਰ ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ। ਬੰਦ ਹੋਣ 'ਤੇ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ।",
   "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, {s} ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ, ਸੰਪਰਕ, ਟਿਕਾਣਾ ਜਾਂ ਪਛਾਣ ਨਹੀਂ ਭੇਜੀ ਜਾਂਦੀ, ਅਤੇ Nimble ਇਸ ਦਾ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਦਾ। ਜੇ ਤੁਸੀਂ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੇ, ਤਾਂ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਤੁਸੀਂ ਇਹ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
   "Your key stays on this device and is sent only to {s}.": "ਤੁਹਾਡੀ ਕੁੰਜੀ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਹੀ ਰਹਿੰਦੀ ਹੈ ਅਤੇ ਸਿਰਫ਼ {s} ਨੂੰ ਭੇਜੀ ਜਾਂਦੀ ਹੈ।",
-  "Asks this again": "ਇਹ ਦੁਬਾਰਾ ਪੁੱਛਦਾ ਹੈ"
+  "Asks this again": "ਇਹ ਦੁਬਾਰਾ ਪੁੱਛਦਾ ਹੈ",
+  "Mascot": "ਮਾਸਕੌਟ",
+  "Mascot: {s}": "ਮਾਸਕੌਟ: {s}"
 }

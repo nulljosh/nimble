@@ -51,6 +51,24 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
                     .tracking(1)
 
+                HStack(spacing: 8) {
+                    Text(String(localized: "Mascot"))
+                    Spacer()
+                    Picker(String(localized: "Mascot"), selection: $state.mascot) {
+                        Text(verbatim: "Flit").tag("flit")
+                        Text(verbatim: "Fen").tag("fen")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(width: 120)
+                    .onChange(of: state.mascot) { state.savePreferences() }
+                    Image(state.mascotAsset)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                        .accessibilityHidden(true)
+                }
+
                 Toggle("Offline math", isOn: $state.mathEnabled)
                     .onChange(of: state.mathEnabled) { state.savePreferences() }
 

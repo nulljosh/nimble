@@ -281,6 +281,14 @@ function aiRecipient(){
     default: return "Nimble's answer service, which runs Google Gemma and Alibaba Qwen models on Cloudflare Workers AI";
   }
 }
+// --- Mascot: Flit (default) or Fen, the one in the empty state and the loading card. This device only. ---
+// Storage blocked (private windows, site data cleared) keeps the choice for the page instead.
+let memMascot = "flit";
+function mascot(v){
+  if(v!==undefined){ memMascot = v; try{ localStorage.setItem("nimble.mascot", v); }catch{} return v; }
+  try{ return localStorage.getItem("nimble.mascot")==="fen" ? "fen" : "flit"; }
+  catch{ return memMascot; }
+}
 // --- Follow-ups: the last three AI exchanges, memory only, so "and in celsius?" has context ---
 const TURNS_MAX = 3, turnList = [];
 const turns = {
@@ -513,4 +521,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};

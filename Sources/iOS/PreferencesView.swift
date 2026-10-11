@@ -26,6 +26,24 @@ struct PreferencesView: View {
                 }
             }
 
+            Section(String(localized: "Mascot")) {
+                HStack(spacing: 12) {
+                    Picker(String(localized: "Mascot"), selection: $state.mascot) {
+                        Text(verbatim: "Flit").tag("flit")
+                        Text(verbatim: "Fen").tag("fen")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .onChange(of: state.mascot) { state.savePreferences() }
+
+                    Image(state.mascotAsset)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                        .accessibilityHidden(true)
+                }
+            }
+
             Section("Preferences") {
                 Toggle("Offline Math", isOn: Binding(
                     get: { state.mathEnabled },

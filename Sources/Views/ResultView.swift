@@ -10,7 +10,7 @@ struct ResultView: View {
             EmptyView()
 
         case .loading:
-            // The card appears at once with Flit in it; the answer replaces him in place.
+            // The card appears at once with the chosen mascot in it; the answer replaces him in place.
             AnswerCard(shareText: nil) {
                 FlitThinking()
             } footer: {

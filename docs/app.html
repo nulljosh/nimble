@@ -20,7 +20,7 @@ body {
 }
 a { color: inherit; }
 .top {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; flex-wrap: wrap; row-gap: 8px; align-items: center; justify-content: space-between;
   padding: max(14px, env(safe-area-inset-top)) 20px 14px;
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: var(--tracking-tight); text-decoration: none; }
@@ -28,6 +28,9 @@ a { color: inherit; }
 .top nav a { font-size: 14px; color: var(--text-mid); text-decoration: none; margin-left: 18px; }
 .top nav a:hover, .top nav button:hover { color: var(--text); }
 .top nav button { border: 0; background: none; font: inherit; font-size: 14px; color: var(--text-mid); margin-left: 18px; cursor: pointer; }
+/* Nav items stay on one line; on a narrow phone the nav drops under the brand, right-aligned. */
+.top nav { display: flex; align-items: center; white-space: nowrap; margin-left: auto; }
+@media (max-width: 480px) { .top nav a, .top nav button { margin-left: 12px; font-size: 13px; } }
 
 main { flex: 1; width: 100%; max-width: 640px; margin: 0 auto; padding: 8vh 20px 40px; }
 h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: 1.1; margin-bottom: 24px; text-align: center; }
@@ -120,7 +123,7 @@ form { position: relative; }
 <body>
 <header class="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
-  <nav><button type="button" id="ai" aria-live="polite"></button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
+  <nav><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
 <main>
   <h1 data-i18n="Ask anything.">Ask anything.</h1>
@@ -144,6 +147,17 @@ form { position: relative; }
 <script src="i18n.js"></script>
 <script src="engine.js?v=offline"></script>
 <script>
+// The two mascots. Flit is the default; Fen is the fennec from docs/mascot/fen.svg, inlined so the
+// empty state and the loading card work offline too.
+var FLIT='<svg viewBox="0 0 240 240" aria-hidden="true" focusable="false"><ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" fill="#8a6412"/><ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" fill="#8a6412"/><ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" fill="#8a6412" opacity="0.5"/><ellipse cx="108" cy="154" rx="54" ry="46" fill="#ffca30"/><path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" fill="#ffe27a"/><circle cx="156" cy="104" r="52" fill="#ffca30"/><path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" fill="#8a6412"/><circle cx="180" cy="126" r="9" fill="#e07a3f" opacity="0.35"/><path d="M203 98 L232 108 L203 118 Z" fill="#8a6412" stroke="#8a6412" stroke-width="5" stroke-linejoin="round"/><g class="flit-eye"><circle cx="170" cy="100" r="18" fill="#1f1b16"/><circle cx="176" cy="93" r="6.5" fill="#fff8e1"/><circle cx="164" cy="108" r="3" fill="#fff8e1"/></g><g class="flit-wing"><ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" fill="#8a6412"/><ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" fill="#a67c1e"/></g></svg>';
+var FEN='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" aria-hidden="true" focusable="false"><path d="M60 196 C 30 190, 26 160, 48 152 C 44 172, 60 180, 82 178 Z" fill="#8a6412"/><circle cx="48" cy="156" r="10" fill="#ffe27a"/><ellipse cx="120" cy="178" rx="48" ry="36" fill="#ffca30"/><ellipse cx="120" cy="190" rx="28" ry="18" fill="#ffe27a"/><path d="M74 118 C 50 60, 62 30, 84 36 C 98 44, 104 90, 100 122 Z" fill="#ffca30"/><path d="M80 112 C 66 70, 72 48, 84 48 C 92 56, 96 92, 94 118 Z" fill="#e07a3f" opacity="0.45"/><path d="M166 118 C 190 60, 178 30, 156 36 C 142 44, 136 90, 140 122 Z" fill="#ffca30"/><path d="M160 112 C 174 70, 168 48, 156 48 C 148 56, 144 92, 146 118 Z" fill="#e07a3f" opacity="0.45"/><circle cx="120" cy="120" r="50" fill="#ffca30"/><ellipse cx="120" cy="140" rx="24" ry="16" fill="#ffe27a"/><circle cx="86" cy="134" r="8" fill="#e07a3f" opacity="0.35"/><circle cx="154" cy="134" r="8" fill="#e07a3f" opacity="0.35"/><circle cx="100" cy="112" r="14" fill="#1f1b16"/><circle cx="105" cy="106" r="5" fill="#fff8e1"/><circle cx="140" cy="112" r="14" fill="#1f1b16"/><circle cx="145" cy="106" r="5" fill="#fff8e1"/><path d="M112 136 L128 136 L120 146 Z" fill="#1f1b16" stroke="#1f1b16" stroke-width="3" stroke-linejoin="round"/></svg>';
+// The empty-state image: a data URI for Fen (no network, works offline), the file for Flit.
+function paintMascotImg(){
+  var fen=mascot()==='fen', el=document.getElementById('flit');
+  el.src=fen?'data:image/svg+xml,'+encodeURIComponent(FEN):'mascot/flit.svg';
+  el.alt=fen?"Fen, Nimble's fennec":"Flit, Nimble's hummingbird";
+}
+paintMascotImg();
 // Everything below speaks the visitor's language, so it starts once the locale has loaded.
 I18N.ready.then(function(){
 var T=I18N.t;
@@ -164,11 +178,10 @@ var T=I18N.t;
     });
   }
   document.getElementById('clear').addEventListener('click',function(){ hist.clear(); paintRecent(); });
-  var FLIT='<svg viewBox="0 0 240 240" aria-hidden="true" focusable="false"><ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" fill="#8a6412"/><ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" fill="#8a6412"/><ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" fill="#8a6412" opacity="0.5"/><ellipse cx="108" cy="154" rx="54" ry="46" fill="#ffca30"/><path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" fill="#ffe27a"/><circle cx="156" cy="104" r="52" fill="#ffca30"/><path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" fill="#8a6412"/><circle cx="180" cy="126" r="9" fill="#e07a3f" opacity="0.35"/><path d="M203 98 L232 108 L203 118 Z" fill="#8a6412" stroke="#8a6412" stroke-width="5" stroke-linejoin="round"/><g class="flit-eye"><circle cx="170" cy="100" r="18" fill="#1f1b16"/><circle cx="176" cy="93" r="6.5" fill="#fff8e1"/><circle cx="164" cy="108" r="3" fill="#fff8e1"/></g><g class="flit-wing"><ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" fill="#8a6412"/><ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" fill="#a67c1e"/></g></svg>';
   async function run(query){
     query=(query||q.value||q.placeholder).trim(); if(!query) return;
     q.value=query; r.hidden=false; paintFlit();
-    r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><div class="thinking">'+FLIT+'<p>'+T('Thinking…')+'</p></div>';
+    r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><div class="thinking">'+(mascot()==='fen'?FEN:FLIT)+'<p>'+T('Thinking…')+'</p></div>';
     // Shareable: /app?q=... opens straight onto the answer.
     history.replaceState(null,'','?q='+encodeURIComponent(query));
     var res=await renderAnswer(query,{t:T});
@@ -242,6 +255,14 @@ var T=I18N.t;
     if(c===null){ r.hidden=false; paintFlit(); r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient(),T); return; }
     aiConsent(c==='yes'?'no':'yes'); paintAI();
   });
+  // Mascot switch: Flit or Fen. Repaints the empty state at once; the next loading card picks it up too.
+  var mascotBtn=document.getElementById('mascot');
+  function paintMascot(){
+    mascotBtn.textContent=T('Mascot: {s}',{s:mascot()==='fen'?'Fen':'Flit'});
+    paintMascotImg();
+  }
+  paintMascot();
+  mascotBtn.addEventListener('click',function(){ mascot(mascot()==='fen'?'flit':'fen'); paintMascot(); });
   // The consent card lives inside the result; Allow and Don't allow re-run the same question.
   r.addEventListener('click',function(e){
     if(e.target.closest('[data-share]')){ shareAnswer(); return; }

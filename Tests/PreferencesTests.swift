@@ -40,6 +40,15 @@ final class PreferencesTests: XCTestCase {
         XCTAssertNil(decoded.ai)
     }
 
+    func testOldPrefsFileWithoutMascotKeepsEverythingElse() throws {
+        XCTAssertNil(PreferencesData().mascot)
+        let data = Data(#"{"theme":"blue","mathEnabled":false,"launchOnStartup":false,"centerWindow":false,"defaultSuggestions":true,"automaticUpdates":true,"lastUpdateCheck":0}"#.utf8)
+        let decoded = try JSONDecoder().decode(PreferencesData.self, from: data)
+        XCTAssertEqual(decoded.theme, "blue", "a non-optional mascot would throw here and reset every setting")
+        XCTAssertFalse(decoded.mathEnabled)
+        XCTAssertNil(decoded.mascot)
+    }
+
     func testAIConfigRequests() throws {
         XCTAssertNil(AIConfig(engine: .claude).request(for: "hi"), "no key = no request, caller falls back")
         let claude = try XCTUnwrap(AIConfig(engine: .claude, apiKey: "k").request(for: "hi"))

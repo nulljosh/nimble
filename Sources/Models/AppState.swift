@@ -58,6 +58,8 @@ final class AppState {
     /// nil = not asked yet, false = answers come from DuckDuckGo and Wikipedia only.
     var aiConsent: Bool? = nil
     var askingAIConsent = false
+    /// Which mascot sits in the empty state and the loading card: "flit" (default) or "fen".
+    var mascot: String = "flit"
     #if os(macOS)
     #endif
 
@@ -88,6 +90,9 @@ final class AppState {
         startPlaceholderTimer()
     }
 
+    /// Asset name of the chosen mascot. Flit is the default; anything but "fen" falls back to him.
+    var mascotAsset: String { mascot == "fen" ? "Fen" : "Flit" }
+
     func loadPreferences() {
         let p = prefs.load()
         theme = NimbleTheme(rawValue: p.theme) ?? .yellow
@@ -99,6 +104,7 @@ final class AppState {
         lastUpdateCheck = p.lastUpdateCheck
         ai = p.ai ?? AIConfig()
         aiConsent = p.aiConsent
+        mascot = p.mascot ?? "flit"
     }
 
     func savePreferences() {
@@ -111,7 +117,8 @@ final class AppState {
             automaticUpdates: automaticUpdates,
             lastUpdateCheck: lastUpdateCheck,
             ai: ai,
-            aiConsent: aiConsent
+            aiConsent: aiConsent,
+            mascot: mascot
         )
         prefs.save(p)
         applyLaunchOnStartup()
