@@ -48,12 +48,37 @@ export default {
     // Browsers can't call DuckDuckGo's JSON API directly (no CORS), so the web
     // app fetches it through here. Native apps still hit DDG themselves.
     const isDDG = req.method === "GET" && url.searchParams.has("ddg");
-    if (req.method !== "POST" && !isDDG) return new Response("POST only", { status: 405, headers: CORS });
+    const isSite = req.method === "GET" && url.searchParams.has("site");
+    if (req.method !== "POST" && !isDDG && !isSite) return new Response("POST only", { status: 405, headers: CORS });
 
     if (isDDG) {
       const ddgQ = url.searchParams.get("ddg").slice(0, 500);
       const r = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(ddgQ)}&format=json&no_html=1&skip_disambig=1`);
       return new Response(await r.text(), { status: r.status, headers: { "content-type": "application/json", ...CORS } });
+    }
+
+    // "What's primitive.dev?" is about the site, so read its own title and description.
+    // Browsers can't fetch other origins, hence here. Hostname is validated to a plain public
+    // domain before fetching. Free like DDG, so it stays outside the rate limit.
+    if (isSite) {
+      const host = url.searchParams.get("site").toLowerCase();
+      if (!/^(?:[a-z0-9-]{1,63}\.)+[a-z]{2,24}$/.test(host)) return json({ error: "bad host" }, 400);
+      try {
+        const r = await fetch(`https://${host}/`, { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" }, signal: AbortSignal.timeout(5000) });
+        const html = (await r.text()).slice(0, 200000);
+        const meta = (re) => html.match(re)?.[1]?.replace(/&amp;/g, "&").replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, " ").trim() || "";
+        const description =
+          meta(/<meta[^>]+(?:name|property)=["'](?:og:)?description["'][^>]+content=["']([^"']*)["']/i) ||
+          meta(/<meta[^>]+content=["']([^"']*)["'][^>]+(?:name|property)=["'](?:og:)?description["']/i);
+        // Scrape past the meta tags: many landing pages leave the description empty or generic,
+        // so also return the first headline and the first real paragraph of body text.
+        const strip = (h) => h.replace(/<(script|style|nav|header|footer)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+        const h1 = strip(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").slice(0, 200);
+        const text = [...html.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map((m) => strip(m[1])).find((t) => t.length > 60)?.slice(0, 400) || "";
+        return json({ host, title: meta(/<title[^>]*>([^<]*)<\/title>/i), siteName: meta(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']*)["']/i), description, h1, text });
+      } catch {
+        return json({ host, title: "", description: "" });
+      }
     }
 
     // Public endpoint, and every AI request bills Workers AI. Throttle per client IP.

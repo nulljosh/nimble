@@ -75,3 +75,23 @@ test("graph samples offline", () => {
   assert.equal(pts[0].y, 200);
   assert.ok(Math.abs(E.samplePoints("3sin(x)")[100].y) < 1e-9);
 });
+
+test("a bare domain question reads the site, not Wikipedia", async () => {
+  assert.equal(E.siteHost("What\u2019s primitive.dev?"), "primitive.dev");
+  assert.equal(E.siteHost("what is https://www.Stripe.com/docs"), "stripe.com");
+  assert.equal(E.siteHost("tell me about linear.app"), "linear.app");
+  assert.equal(E.siteHost("vercel.com"), "vercel.com");
+  assert.equal(E.siteHost("what is node.js"), null);
+  assert.equal(E.siteHost("what is e.g. a div"), null);
+  assert.equal(E.siteHost("who is the ceo of apple.com in 2020"), null);
+  const real = global.fetch;
+  global.fetch = async u => new Response(JSON.stringify(/site=primitive\.dev/.test(u) ? {title:"Primitive", description:"Email infrastructure for AI agents."} : {}));
+  try {
+    const r = await E.site("What's primitive.dev?");
+    assert.equal(r.body, "Email infrastructure for AI agents.");
+    assert.equal(r.src, "primitive.dev");
+    assert.equal(await E.site("what is the moon"), null);
+    global.fetch = async () => new Response(JSON.stringify({title:"Acme", h1:"Ship faster", text:"Acme builds tools that help small teams ship software without any ops work at all."}));
+    assert.match((await E.site("acme.dev")).body, /^Ship faster\./);
+  } finally { global.fetch = real; }
+});

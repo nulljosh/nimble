@@ -407,11 +407,45 @@ final class QueryEngine: Sendable {
         return .text(heading: nil, body: "Nimble is an instant-answer app made by Joshua Trommel. More of his work is at heyitsmejosh.com.", source: "Nimble", sourceURL: nil, imageURL: nil)
     }
 
+    /// "What's primitive.dev?" is about a website; Wikipedia matched the nearest word instead.
+    /// Mirrors `siteHost()` in docs/engine.js.
+    func siteHost(_ input: String) -> String? {
+        let tlds = "com|net|org|dev|io|ai|app|co|ca|me|xyz|tv|gg|so|sh|to|fm|cc|us|uk|info|biz|tech|cloud|site|online|page|wiki|design|studio"
+        let pattern = "^(?:(?:what(?:['\u{2019}]s|\\s+is)|whats|who(?:['\u{2019}]s|\\s+is)|tell me about|about)\\s+)?(?:the\\s+)?(?:https?://)?(?:www\\.)?((?:[a-z0-9-]+\\.)+(?:\(tlds)))(?:/\\S*)?(?:\\s+(?:website|site|company|app))?\\s*\\??$"
+        let q = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let re = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+              let m = re.firstMatch(in: q, range: NSRange(q.startIndex..., in: q)),
+              let r = Range(m.range(at: 1), in: q) else { return nil }
+        return q[r].lowercased()
+    }
+
+    /// Scrapes the site itself: meta description, else headline plus first paragraph.
+    private func querySite(_ input: String, session: URLSession) async -> QueryResult? {
+        guard let host = siteHost(input), let url = URL(string: "https://\(host)/"),
+              let (data, _) = try? await session.data(from: url) else { return nil }
+        let html = String(decoding: data.prefix(200_000), as: UTF8.self)
+        func grab(_ pattern: String) -> String {
+            guard let re = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive, .dotMatchesLineSeparators]),
+                  let m = re.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
+                  let r = Range(m.range(at: 1), in: html) else { return "" }
+            return String(html[r]).replacingOccurrences(of: "<[^>]+>", with: " ", options: .regularExpression)
+                .replacingOccurrences(of: "&amp;", with: "&").replacingOccurrences(of: "&#39;", with: "'")
+                .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression).trimmingCharacters(in: .whitespaces)
+        }
+        let title = grab("<title[^>]*>([^<]*)</title>")
+        var body = grab("<meta[^>]+(?:name|property)=[\"'](?:og:)?description[\"'][^>]+content=[\"']([^\"']*)[\"']")
+        if body.isEmpty { body = [grab("<h1[^>]*>(.*?)</h1>"), grab("<p[^>]*>([^<]{60,})</p>")].filter { !$0.isEmpty }.joined(separator: ". ") }
+        if body.isEmpty { body = title }
+        guard !body.isEmpty else { return nil }
+        return .text(heading: title.isEmpty ? host : title, body: firstSentence(body), source: host, sourceURL: url.absoluteString, imageURL: nil)
+    }
+
     func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer()) async -> QueryResult {
         if let me = identityAnswer(input) { return me }
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
         let session = URLSession(configuration: config)
+        if let site = await querySite(input, session: session) { return site }
 
         // Gemma first for a crisp one-line answer; fall back to DDG/Wikipedia when the
         // key is unreachable or Gemma returns UNKNOWN (keeps a no-key offline degrade).

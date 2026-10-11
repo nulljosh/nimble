@@ -142,6 +142,21 @@ async function wiki(query){
   return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null};
 }
 
+// "What's primitive.dev?" is a question about a website, and Wikipedia answered it with the
+// nearest word ("Div (mythology)"). Read the site's own title + description via the proxy.
+const SITE_TLDS = "com|net|org|dev|io|ai|app|co|ca|me|xyz|tv|gg|so|sh|to|fm|cc|us|uk|info|biz|tech|cloud|site|online|page|wiki|design|studio";
+const SITE_RE = new RegExp(`^(?:(?:what(?:['\u2019]s|\\s+is)|whats|who(?:['\u2019]s|\\s+is)|tell me about|about)\\s+)?(?:the\\s+)?(?:https?:\\/\\/)?(?:www\\.)?((?:[a-z0-9-]+\\.)+(?:${SITE_TLDS}))(?:\\/\\S*)?(?:\\s+(?:website|site|company|app))?\\s*\\??$`, "i");
+function siteHost(query){ const m = query.trim().match(SITE_RE); return m ? m[1].toLowerCase() : null; }
+async function site(query){
+  const host = siteHost(query);
+  if(!host) return null;
+  const d = await getJSON(`${ANSWER_PROXY}/?site=${encodeURIComponent(host)}`);
+  // Best sentence the page gives about itself: meta description, else headline + first paragraph.
+  const body = d && (d.description || [d.h1, d.text].filter(Boolean).join(". ") || d.title);
+  if(!body) return null;
+  return {title:d.siteName || d.title || host, body:first(body), src:host, url:`https://${host}`};
+}
+
 // "define X" must never fall through to Wikipedia search: that turns "define nimble"
 // into a game studio. Wiktionary is deterministic, CORS-open, and needs no key.
 async function dictionary(query){
@@ -315,7 +330,7 @@ async function answer(query, opts={}){
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
-  const live = await firstOf(query, [identity, etymology, dictionary, weather, localTime]);
+  const live = await firstOf(query, [identity, site, etymology, dictionary, weather, localTime]);
   if(live) return live.kind==="card" ? live : {kind:"text", ...live};
   const consent = aiConsent() || opts.ifUnset || null;
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};
@@ -475,4 +490,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={identity,shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,appLink,listenLabel,history:searchHistory,turns};

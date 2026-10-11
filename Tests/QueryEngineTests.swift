@@ -10,6 +10,13 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertNil(engine.identityAnswer("who created the telephone"))
     }
 
+    func testSiteHost() {
+        XCTAssertEqual(engine.siteHost("What\u{2019}s primitive.dev?"), "primitive.dev")
+        XCTAssertEqual(engine.siteHost("tell me about linear.app"), "linear.app")
+        XCTAssertNil(engine.siteHost("what is node.js"))
+        XCTAssertNil(engine.siteHost("who is the ceo of apple.com in 2020"))
+    }
+
     // MARK: - Basic arithmetic
 
     func testBasicAddition() {
