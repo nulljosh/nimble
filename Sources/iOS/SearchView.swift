@@ -80,6 +80,8 @@ struct SearchView: View {
                 guard whatsNewSeenVersion == whatsNewVersion else { return }
                 isInputFocused = true
             }
+            // The consent card's Allow button sat behind the keyboard; drop it while the card shows.
+            .onChange(of: state.askingAIConsent) { _, asking in if asking { isInputFocused = false } }
             // No title on the root screen, so the empty bar was only ever a black
             // strip above the search field.
             .toolbar(.hidden, for: .navigationBar)
