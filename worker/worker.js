@@ -11,14 +11,17 @@ const SYSTEM =
 // came back "Joe Biden". Ground every question in live Wikipedia intros plus today's date
 // and tell the models the context beats their memory.
 // ponytail: top-3 search intros, swap for a real search API if Wikipedia misses too often
-async function freshContext(q) {
+async function freshContext(q, attempt = 0) {
   try {
     const r = await fetch(
       "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&format=json&formatversion=2&gsrsearch=" +
         encodeURIComponent(q),
       { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" } },
     );
-    const pages = (await r.json())?.query?.pages || [];
+    // A throttled or empty Wikipedia reply leaves the models on their stale memory ("Joe Biden"),
+    // so one retry after a beat is worth more than a fast wrong answer.
+    const pages = (r.ok && (await r.json())?.query?.pages) || [];
+    if (!pages.length && attempt === 0) { await new Promise((ok) => setTimeout(ok, 400)); return freshContext(q, 1); }
     // Officeholder intros bury "The current prime minister is X" ten sentences deep, so keep
     // the lead plus any sentence naming who holds something now.
     const trim = (t = "") => {
