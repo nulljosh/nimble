@@ -1,17 +1,68 @@
 # Nimble roadmap
 
-## Loop to v5 (overnight 2026-10-02, one subagent at a time)
+## Loop to v10 (from 5.1.0, 2026-10-11, one subagent at a time)
 
-Each line is one shippable slice: tests green, push, minor bump. A major closes
-when every slice under it is checked: tag, GitHub release (notarized Mac zip,
-msi, apk), landing + README + whitepaper + screenshots synced, What's New, ASC
-submit if a session is live. Model tags route the subagent.
+Each line is one shippable slice: tests green, push, minor or patch bump (SemVer: fixes
+are patches, features are minors, a major closes a theme). A major closes when every slice
+under it is checked: tag, GitHub release (notarized Mac zip, msi, apk), landing + README +
+whitepaper + screenshots synced, What's New, ASC submit if a session is live. The loop's
+yardstick is the question exam (scratchpad qa.js, moved into the repo at 5.2): every round
+must hold 100% on the free engine before a slice counts as shipped. Model tags route the
+subagent: [Haiku] mechanical or UI, [Sonnet] engine work, [Opus] design calls.
 
-### v5.0 Everywhere
+Rules: usage line at or above 88% on any window means /checkpoint and stop. One subagent at a
+time, 10 minute cap. Mac zip is re-notarized only at majors. `native-v*` tags are Joshua's to
+force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purple/teal.
 
-Rules for the loop: usage line at or above 88% on any window means /checkpoint
-and stop. One subagent at a time, 10 minute cap, worktree not needed. Mac zip is
-re-notarized only at majors. `native-v*` tags are Joshua's to force-push.
+### v5.x Finish 5.1 (patches and minors until clean)
+
+- [ ] [Sonnet] 5.2 Move the 95-question exam into `test/exam.js` (LIVE=1 only, paced 3.2s/question), grade by regex, print a scoreboard; CI runs it nightly and opens an issue on any miss.
+- [ ] [Haiku] 5.2 Dark-mode screenshots of iOS and Mac reviewed and fixed; add to `screenshots/`.
+- [ ] [Sonnet] 5.2 Kotlin engine (Android, Windows, Linux) gets the site lookup, the "As of today" cleanup and list-article skipping, so every platform answers alike.
+- [ ] [Haiku] 5.2 iPhone font and keyboard check, Dynamic Type at the largest sizes, VoiceOver pass on the new cards.
+- [ ] [Sonnet] 5.3 Samantha picker: Mac Preferences shows whether she is running, her model and her last latency; one-click start via `omlx start`.
+- [ ] [Sonnet] 5.3 Site answers show a favicon and the page's own name; handle JS-only pages by falling back to the og:description and a one-line "this site loads with JavaScript" note.
+
+### v6 Sources you can trust
+
+- [ ] [Sonnet] "Why this answer": tap the source line to see the exact text the answer came from, with a link. Every text answer carries a sourceURL.
+- [ ] [Sonnet] News card: top three headlines on "news", "what's happening in <place>", from the RSS set already in the stack, one sentence each with the outlet.
+- [ ] [Sonnet] Markets card: stock, crypto and FX quotes ("AAPL", "bitcoin price"), keyless sources first.
+- [ ] [Sonnet] Sports and scores card for "who won the <game>".
+- [ ] [Sonnet] Disagreement honesty: when the models split and no source settles it, say "sources disagree" with both answers instead of picking one.
+- [ ] [Haiku] Freshness label on anything time-sensitive ("as of Oct 11").
+
+### v7 Conversation
+
+- [ ] [Sonnet] Follow-ups on every platform ("and in celsius?", "who was before him?"), a visible thread of the last three turns.
+- [ ] [Sonnet] Tap-to-expand: "tell me more" returns three sentences with sources, still never a wall of text.
+- [ ] [Opus] Voice loop: ask by voice, hear the answer back, hands-free mode on iPhone and Mac.
+- [ ] [Sonnet] App Intents and Shortcuts: "Ask Nimble" in Siri, Spotlight and the Action button; widget answers a question without opening the app.
+- [ ] [Haiku] Share card variants (square, story) with the new look.
+
+### v8 Private and on-device
+
+- [ ] [Opus] Pick the on-device model (Apple Foundation Models where available, otherwise a small MLX/GGUF), grade it on the exam, and ship it only if it clears 90%.
+- [ ] [Sonnet] "Private mode" toggle: answers only from on-device model plus an offline Wikipedia pack, nothing leaves the device; label it honestly with what it cannot answer.
+- [ ] [Sonnet] Offline Wikipedia pack (top-N intros, compressed) downloadable once, refreshed monthly.
+- [ ] [Sonnet] Samantha promoted: if the 9B or a distilled model clears 95% on the exam standalone, she ships as the Mac default without needing oMLX running.
+- [ ] [Haiku] Privacy page and consent copy rewritten for the three modes (free cloud, your key, private).
+
+### v9 Everywhere
+
+- [ ] [Sonnet] Windows, Android and Linux reach exam parity with iOS and Mac (same 95 questions, same pass bar).
+- [ ] [Sonnet] Browser extension (Safari, Chrome, Firefox): select text or hit a hotkey, get the one-sentence answer.
+- [ ] [Sonnet] Public API with a free key tier and clear rate limits; `/api` and `/mcp` documented with examples; keep it read-only.
+- [ ] [Haiku] TUI and CLI (`nimble "question"`) installable by brew, same engine.
+- [ ] [Haiku] Languages: answers and UI in the five shipped languages, then ten more, checked against the exam translated.
+
+### v10 A+
+
+- [ ] [Opus] Publish the benchmark: a 1000-question exam across math, science, history, politics, news, sites, units, definitions, with method and results for Nimble, Samantha and the BYO engines, reproducible from the repo.
+- [ ] [Sonnet] Reliability: answer p50 under 2s and p95 under 6s on the free engine, graceful degradation tested with every upstream (Wikipedia, DDG, Workers AI) down in turn.
+- [ ] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces.
+- [ ] [Haiku] Landing, README, whitepaper and screenshots rebuilt for 10.0 with the new look and the benchmark.
+- [ ] [Opus] 10.0 launch: Product Hunt, HN (when the account allows), release notes, and the What's New that explains what a decade of versions bought you in one screen.
 
 ## Open for contribution
 
