@@ -17,7 +17,7 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 ### v5.x Finish 5.1 (patches and minors until clean)
 
 - [x] [Sonnet] 5.2 Move the 95-question exam into `test/exam.js` (LIVE=1 only, paced 3.2s/question), grade by regex, print a scoreboard; CI runs it nightly and opens an issue on any miss.
-- [ ] [Haiku] 5.2 Dark-mode screenshots of iOS and Mac reviewed and fixed; add to `screenshots/`.
+- [x] [Haiku] 5.2 Dark-mode screenshots of iOS and Mac reviewed and fixed; add to `screenshots/`.
 - [ ] [Sonnet] 5.2 Kotlin engine (Android, Windows, Linux) gets the site lookup, the "As of today" cleanup and list-article skipping, so every platform answers alike.
 - [ ] [Haiku] 5.2 iPhone font and keyboard check, Dynamic Type at the largest sizes, VoiceOver pass on the new cards.
 - [ ] [Sonnet] 5.3 Samantha picker: Mac Preferences shows whether she is running, her model and her last latency; one-click start via `omlx start`.
