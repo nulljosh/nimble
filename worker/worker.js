@@ -66,13 +66,13 @@ export default {
       try {
         const r = await fetch(`https://${host}/`, { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" }, signal: AbortSignal.timeout(5000) });
         const html = (await r.text()).slice(0, 200000);
-        const meta = (re) => html.match(re)?.[1]?.replace(/&amp;/g, "&").replace(/&#0?39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, " ").trim() || "";
+        const meta = (re) => html.match(re)?.[1]?.replace(/\s+/g, " ").trim().replace(/&(#x?[0-9a-f]+|amp|quot|apos|nbsp|lt|gt);/gi, decodeEntity) || "";
         const description =
           meta(/<meta[^>]+(?:name|property)=["'](?:og:)?description["'][^>]+content=["']([^"']*)["']/i) ||
           meta(/<meta[^>]+content=["']([^"']*)["'][^>]+(?:name|property)=["'](?:og:)?description["']/i);
         // Scrape past the meta tags: many landing pages leave the description empty or generic,
         // so also return the first headline and the first real paragraph of body text.
-        const strip = (h) => h.replace(/<(script|style|nav|header|footer)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
+        const strip = (h) => h.replace(/<(script|style|nav|header|footer)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().replace(/&(#x?[0-9a-f]+|amp|quot|apos|nbsp|lt|gt);/gi, decodeEntity);
         const h1 = strip(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").slice(0, 200);
         const text = [...html.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map((m) => strip(m[1])).find((t) => t.length > 60)?.slice(0, 400) || "";
         return json({ host, title: meta(/<title[^>]*>([^<]*)<\/title>/i), siteName: meta(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']*)["']/i), description, h1, text });
@@ -182,6 +182,12 @@ const CORS = {
 // synthesis call on every near-duplicate answer.
 function normalize(s) {
   return s.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim();
+}
+
+function decodeEntity(_, e) {
+  e = e.toLowerCase();
+  if (e[0] === "#") return String.fromCodePoint(e[1] === "x" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10) || 32);
+  return { amp: "&", quot: '"', apos: "'", nbsp: " ", lt: "<", gt: ">" }[e];
 }
 
 function json(obj, status = 200) {
