@@ -916,11 +916,17 @@ footer {
   run();
 })();
 // Point download buttons at the latest release assets.
-fetch('https://api.github.com/repos/nulljosh/nimble/releases/latest').then(function(r){return r.json();}).then(function(rel){
-  if(rel.tag_name) document.getElementById('ver').textContent=rel.tag_name;document.getElementById('footver').textContent=rel.tag_name;
+// Badge shows the newest release; each download button takes the newest release that
+// actually carries its file (the Mac zip is only re-notarized at majors).
+fetch('https://api.github.com/repos/nulljosh/nimble/releases?per_page=10').then(function(r){return r.json();}).then(function(rels){
+  rels=(rels||[]).filter(function(r){return !r.draft&&!r.prerelease;});
+  if(!rels.length) return;
+  document.getElementById('ver').textContent=rels[0].tag_name;document.getElementById('footver').textContent=rels[0].tag_name;
   document.querySelectorAll('[data-asset]').forEach(function(a){
-    var hit=(rel.assets||[]).find(function(x){return x.name.endsWith(a.dataset.asset);});
-    if(hit) a.href=hit.browser_download_url;
+    for(var i=0;i<rels.length;i++){
+      var hit=(rels[i].assets||[]).find(function(x){return x.name.endsWith(a.dataset.asset);});
+      if(hit){a.href=hit.browser_download_url;return;}
+    }
   });
 }).catch(function(){});
 </script>
