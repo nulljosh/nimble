@@ -383,7 +383,7 @@ async function renderAnswer(query, opts){
     // Click through to the source; AI answers have none, so fall back to a web search.
     const href=a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query);
     h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
-      +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3>'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
+      +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
     credit=T("powered by {s}",{s:a.src});
   }
   else { h+="<p>"+T('No instant answer. Try a question, a sum, or "5 miles to km".')+"</p>"; }
