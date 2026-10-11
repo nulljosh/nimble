@@ -33,6 +33,8 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 - [ ] [Sonnet] Markets card: stock, crypto and FX quotes ("AAPL", "bitcoin price"), keyless sources first.
 - [ ] [Sonnet] Sports and scores card for "who won the <game>".
 - [ ] [Sonnet] Disagreement honesty: when the models split and no source settles it, say "sources disagree" with both answers instead of picking one.
+- [ ] [Sonnet] Step-by-step math (the Wolfram gap): "show steps" on any math answer expands the evaluation tree the on-device parser already builds, one line per step, offline.
+- [ ] [Sonnet] Multiple sources per answer: when DDG, Wikipedia and the models agree, list up to three sources under the sentence instead of one (the Perplexity gap).
 - [ ] [Haiku] Freshness label on anything time-sensitive ("as of Oct 11").
 
 ### v7 Conversation
@@ -41,6 +43,7 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 - [ ] [Sonnet] Tap-to-expand: "tell me more" returns three sentences with sources, still never a wall of text.
 - [ ] [Opus] Voice loop: ask by voice, hear the answer back, hands-free mode on iPhone and Mac.
 - [ ] [Sonnet] App Intents and Shortcuts: "Ask Nimble" in Siri, Spotlight and the Action button; widget answers a question without opening the app.
+- [ ] [Sonnet] "Ask Nimble about this": an iOS and Mac share extension that takes selected text or a URL from any app and answers it (the Arc Search gap); URLs route through the site lookup.
 - [ ] [Haiku] Share card variants (square, story) with the new look.
 
 ### v8 Private and on-device
