@@ -11,5 +11,5 @@ The whole worker is in the repo (worker/worker.js), capped at 20 requests a minu
 
 Free to use, MIT licensed, would like eyes on the worker code if anyone wants to poke at the fallback logic.
 
-Web: https://nimble.heyitsmejosh.com
+Web: https://nimble.jaybulb.com
 Source: https://github.com/nulljosh/nimble

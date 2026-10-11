@@ -5,7 +5,7 @@ Built a search bar that skips the search results.
 
 Nimble: type a question, get one sentence back. Math runs offline on your device. Facts and definitions come from DuckDuckGo and Wikipedia. Two open models catch the rest.
 
-Free, native, no account. nimble.heyitsmejosh.com
+Free, native, no account. nimble.jaybulb.com
 
 2/
 The trick is classifying the question before it answers. Math (arithmetic, trig, roots, unit conversion) never touches the network, it's evaluated right on device. Ask "y = x^2" and it draws the curve instead.

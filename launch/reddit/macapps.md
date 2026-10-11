@@ -9,6 +9,6 @@ Nimble lives in the menu bar and pops up with ⌥Space. Type a question and it a
 
 Native SwiftUI, 8 color themes, no API keys anywhere in the app, no accounts, no telemetry. Free, MIT licensed, source on GitHub.
 
-Web: https://nimble.heyitsmejosh.com
+Web: https://nimble.jaybulb.com
 Mac build: https://github.com/nulljosh/nimble/releases/latest
 Source: https://github.com/nulljosh/nimble

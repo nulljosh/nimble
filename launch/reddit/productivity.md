@@ -11,4 +11,4 @@ Math runs offline on the device (arithmetic, trig, roots, unit conversion) so it
 
 Free, no account, no tracking. Curious if others here have a similar "shortcut past the browser" habit and what tool you use for it.
 
-Web: https://nimble.heyitsmejosh.com
+Web: https://nimble.jaybulb.com

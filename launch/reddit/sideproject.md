@@ -13,5 +13,5 @@ It's native SwiftUI on macOS and iOS, plus a web version and a terminal client. 
 
 Would genuinely like feedback on where the classification gets it wrong, i.e. questions it routes to the wrong source.
 
-Web: https://nimble.heyitsmejosh.com
+Web: https://nimble.jaybulb.com
 Source: https://github.com/nulljosh/nimble
