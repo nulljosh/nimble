@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [5.2.0] - 2026-10-11
+
+- feat: the question exam lives in the repo (`npm run exam`, 95 live questions) and runs nightly in CI, opening an issue on any miss
+- feat(kotlin): Android, Windows and Linux get the website lookup and skip Wikipedia list articles, parity with web and Swift
+- feat(ios): Dynamic Type scaling on the new cards and the field; VoiceOver reads each card as one element, Share and source are labelled
+- feat: Flit, Nimble's hummingbird mascot (docs/mascot)
+- fix(ios): the AI consent card drops the keyboard so Allow is reachable; dark mode reviewed on iPhone and Mac
+
 ## [5.1.0] - 2026-10-11
 
 - feat: ask about a website ("what's primitive.dev?") and get its own description, scraped
