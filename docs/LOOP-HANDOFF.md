@@ -15,9 +15,9 @@ Loop complete at 5.0.0 (2026-10-02). iOS 5.0.0 submitted WAITING_FOR_REVIEW. mac
 - 4.0.0: Answer cards (weather, currency, time, word origins), share-as-card, iPhone widget, menu-bar quick-ask
 - 5.0.0: Voice in web/iOS/macOS/Windows/Android, five languages (en, fr, es, zh, pa), landing A grade, docs 100%, TUI fixed
 
-Two known bugs remain in roadmap.md under "Open for contribution":
-- iOS weather card for "weather in Vancouver" renders three dots instead of temperature
-- Widget lags one answer behind async card updates
+Both bugs closed 2026-10-11: Vancouver weather renders fine on iPhone (the dots were the loading spinner on a slow fetch), and the widget write already runs after the card lands.
+
+5.0.1 (2026-10-11): fresh App Store screenshots, and the Mac HUD now takes keyboard focus, drags by its background, and no longer crashes on system windows.
 
 No blocked items.
 
