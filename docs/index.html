@@ -130,7 +130,35 @@ a:hover { text-decoration: underline; }
 .hero-nav nav a:hover { color: #000; text-decoration: none; }
 .hero-nav nav .btn { color: var(--yellow); }
 @media (max-width: 600px) { .hero-nav nav a:not(.btn), .hero-brand span { display: none; } }
-.hero-copy { padding-top: 6rem; max-width: 880px; } /* room for the headline's second line at full size */
+.hero-copy { padding-top: 6rem; max-width: 1080px; } /* the nav's width, so the headline and Flit fit on one row at full size */
+
+/* Desktop: the headline with Flit to its right. Phones: Flit above the headline. */
+.hero-head { display: flex; align-items: center; justify-content: center; gap: 2.5rem; margin-bottom: 1.5rem; }
+.hero-head h1 { margin: 0; }
+/* Flit is an inline SVG so the wing and eye can move. Yellow on the yellow hero,
+   so an ink outline traces his silhouette. The bob moves the whole bird. */
+.hero-flit {
+  flex: none; display: block; width: 160px; height: 160px; overflow: visible;
+  filter: drop-shadow(2.5px 0 0 #1f1b16) drop-shadow(-2.5px 0 0 #1f1b16)
+          drop-shadow(0 2.5px 0 #1f1b16) drop-shadow(0 -2.5px 0 #1f1b16)
+          drop-shadow(1.8px 1.8px 0 #1f1b16) drop-shadow(-1.8px 1.8px 0 #1f1b16)
+          drop-shadow(1.8px -1.8px 0 #1f1b16) drop-shadow(-1.8px -1.8px 0 #1f1b16);
+  animation: flit-bob 2.4s ease-in-out infinite alternate;
+}
+/* The wing beats from the top-right end of the blade, a hum. */
+.flit-wing { transform-box: fill-box; transform-origin: 90% 10%; animation: flit-flap 0.22s ease-in-out infinite alternate; }
+/* Shut at 2% of the 4s cycle (80ms), open again at 4% (160ms), open the rest of the time. */
+.flit-eye { transform-box: fill-box; transform-origin: center; animation: flit-blink 4s ease-in-out infinite; }
+@keyframes flit-bob { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+@keyframes flit-flap { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
+@keyframes flit-blink { 0%, 100% { transform: scaleY(1); } 2% { transform: scaleY(0.1); } 4% { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .hero-flit, .flit-wing, .flit-eye { animation: none; }
+}
+@media (max-width: 600px) {
+  .hero-head { flex-direction: column; gap: 1rem; }
+  .hero-flit { order: -1; }
+}
 
 .hero h1 {
   font-size: clamp(2.5rem, 7vw, 4rem);
@@ -470,7 +498,30 @@ footer {
     <nav><a href="#features" data-i18n="Features">Features</a><a href="#install" data-i18n="Download">Download</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a><a class="btn btn-dark" href="/app" data-i18n="Open app">Open app</a></nav>
   </header>
   <div class="container hero-copy">
-    <h1 data-i18n="Ask a question. Get one sentence back.">Ask a question.<br>Get one sentence back.</h1>
+    <div class="hero-head">
+      <h1 data-i18n="Ask a question. Get one sentence back.">Ask a question.<br>Get one sentence back.</h1>
+      <!-- Mirrors docs/mascot/flit.svg. Keep the two in step. -->
+      <svg class="hero-flit" viewBox="0 0 240 240" role="img" aria-label="Flit, Nimble's hummingbird" focusable="false">
+        <ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" fill="#8a6412"/>
+        <ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" fill="#8a6412"/>
+        <ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" fill="#8a6412" opacity="0.5"/>
+        <ellipse cx="108" cy="154" rx="54" ry="46" fill="#ffca30"/>
+        <path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" fill="#ffe27a"/>
+        <circle cx="156" cy="104" r="52" fill="#ffca30"/>
+        <path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" fill="#8a6412"/>
+        <circle cx="180" cy="126" r="9" fill="#e07a3f" opacity="0.35"/>
+        <path d="M203 98 L232 108 L203 118 Z" fill="#8a6412" stroke="#8a6412" stroke-width="5" stroke-linejoin="round"/>
+        <g id="flit-eye" class="flit-eye">
+          <circle cx="170" cy="100" r="18" fill="#1f1b16"/>
+          <circle cx="176" cy="93" r="6.5" fill="#fff8e1"/>
+          <circle cx="164" cy="108" r="3" fill="#fff8e1"/>
+        </g>
+        <g id="flit-wing" class="flit-wing">
+          <ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" fill="#8a6412"/>
+          <ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" fill="#a67c1e"/>
+        </g>
+      </svg>
+    </div>
     <p class="hero-version" id="ver" aria-live="polite"></p>
     <p data-i18n="Math and units answer on your device. Everything else, one sentence with a source.">Math and units answer on your device. Everything else, one sentence with a source.</p>
     <div class="hero-buttons">
@@ -744,7 +795,7 @@ footer {
   // percentages per breakpoint, place each pair against the real measured
   // boxes and keep the ones that land clear. Self-tuning at any width.
   var blockers = [];
-  ['.hero-nav', '.hero h1', '.hero-copy > p', '.hero-version', '.hero-buttons', '.hero .device'].forEach(function (sel) {
+  ['.hero-nav', '.hero h1', '.hero-flit', '.hero-copy > p', '.hero-version', '.hero-buttons', '.hero .device'].forEach(function (sel) {
     var n = hero.querySelector(sel);
     if (n) blockers.push(n.getBoundingClientRect());
   });

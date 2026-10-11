@@ -52,6 +52,8 @@ targets:
           - "ContextMenuView.swift"
           - "SettingsView.swift"
       - path: Sources/iOS
+      # Flit for the empty state. The same catalog the Mac target compiles through Resources.
+      - path: Resources/Assets.xcassets
       # The same String Catalog the Mac target picks up through Resources, generated from i18n/strings.json
       - path: Resources/Localizable.xcstrings
         buildPhase: resources

@@ -103,6 +103,8 @@ form { position: relative; }
 }
 .recent-list button:hover { color: var(--text); }
 .hint { text-align: center; font-size: 13px; color: var(--text-mid); margin-top: 28px; }
+.flit { display: block; width: 96px; height: 96px; margin: 24px auto 0; opacity: 0.9; }
+.flit[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -120,6 +122,7 @@ form { position: relative; }
     </label>
   </form>
   <section class="card" id="r" aria-live="polite" hidden></section>
+  <img class="flit" id="flit" src="mascot/flit.svg" width="96" height="96" alt="Flit, Nimble's hummingbird">
   <div class="chips" id="chips"></div>
   <section class="recent" id="recent" aria-label="Recent searches" data-i18n-aria-label="Recent searches" hidden>
     <div class="recent-head"><div class="mockup-label" data-i18n="Recent">Recent</div><button type="button" id="clear" data-i18n="Clear">Clear</button></div>
@@ -136,11 +139,13 @@ I18N.ready.then(function(){
 var T=I18N.t;
   var f=document.getElementById('f'), q=document.getElementById('q'), r=document.getElementById('r'), chips=document.getElementById('chips');
   var last=null, shot=location.search.indexOf('share=1')>-1; // last: the answer on screen, for Share. shot: screenshots only
-  var hist=searchHistory, recent=document.getElementById('recent'), recentList=document.getElementById('recent-list');
+  var hist=searchHistory, recent=document.getElementById('recent'), recentList=document.getElementById('recent-list'), flit=document.getElementById('flit');
+  // Flit is part of the empty state only: no answer on screen and no recent searches, so the TRY chips are up.
+  function paintFlit(){ flit.hidden=!r.hidden||!recent.hidden; }
   // Recent searches replace the suggestion chips once there is any history. textContent only, never HTML.
   function paintRecent(){
     var items=hist.list().slice(0,8);
-    recent.hidden=!items.length; chips.hidden=items.length>0;
+    recent.hidden=!items.length; chips.hidden=items.length>0; paintFlit();
     recentList.textContent='';
     items.forEach(function(e){
       var li=document.createElement('li'), b=document.createElement('button');
@@ -151,7 +156,7 @@ var T=I18N.t;
   document.getElementById('clear').addEventListener('click',function(){ hist.clear(); paintRecent(); });
   async function run(query){
     query=(query||q.value||q.placeholder).trim(); if(!query) return;
-    q.value=query; r.hidden=false;
+    q.value=query; r.hidden=false; paintFlit();
     r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><p>'+T('Thinking…')+'</p>';
     // Shareable: /app?q=... opens straight onto the answer.
     history.replaceState(null,'','?q='+encodeURIComponent(query));
@@ -223,7 +228,7 @@ var T=I18N.t;
   paintAI();
   ai.addEventListener('click',function(){
     var c=aiConsent();
-    if(c===null){ r.hidden=false; r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient(),T); return; }
+    if(c===null){ r.hidden=false; paintFlit(); r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient(),T); return; }
     aiConsent(c==='yes'?'no':'yes'); paintAI();
   });
   // The consent card lives inside the result; Allow and Don't allow re-run the same question.
@@ -231,7 +236,7 @@ var T=I18N.t;
     if(e.target.closest('[data-share]')){ shareAnswer(); return; }
     var b=e.target.closest('[data-consent]'); if(!b) return;
     aiConsent(b.dataset.consent); paintAI();
-    if(q.value.trim()) run(q.value); else r.hidden=true;
+    if(q.value.trim()) run(q.value); else { r.hidden=true; paintFlit(); }
   });
   fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
     list.sort(function(){return Math.random()-0.5;}).slice(0,6).forEach(function(s){

@@ -168,10 +168,20 @@ struct SearchView: View {
     @ViewBuilder
     private var recent: some View {
         if state.history.entries.isEmpty {
-            RecentList(title: "TRY", items: tries)
-                .onAppear {
-                    if tries.isEmpty { tries = Array(Set((0..<12).map { _ in state.randomSuggestion() })).prefix(4).map { $0 } }
-                }
+            VStack(alignment: .leading, spacing: 0) {
+                // Flit is decorative here, so VoiceOver skips him.
+                Image("Flit")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 96, height: 96)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 16)
+                    .accessibilityHidden(true)
+                RecentList(title: "TRY", items: tries)
+            }
+            .onAppear {
+                if tries.isEmpty { tries = Array(Set((0..<12).map { _ in state.randomSuggestion() })).prefix(4).map { $0 } }
+            }
         } else {
             RecentList(title: "RECENT", items: state.history.entries.prefix(8).map(\.q), onClear: { state.clearHistory() }, isHistory: true)
         }

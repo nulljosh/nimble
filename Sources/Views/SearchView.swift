@@ -46,6 +46,15 @@ struct SearchView: View {
                     .environment(state)
                     .padding(.horizontal, 18)
                     .padding(.bottom, 14)
+            } else if !state.askingAIConsent {
+                // Empty HUD: Flit sits where the recent searches would go. Decorative, so VoiceOver skips him.
+                Image("Flit")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 64, height: 64)
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 14)
+                    .accessibilityHidden(true)
             }
 
             // Bottom bar
