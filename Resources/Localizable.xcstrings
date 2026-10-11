@@ -2730,6 +2730,41 @@
           }
         }
       }
+    },
+    "Asks this again": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Asks this again"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pose à nouveau cette question"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vuelve a preguntar esto"
+          }
+        },
+        "zh": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再问一次"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਇਹ ਦੁਬਾਰਾ ਪੁੱਛਦਾ ਹੈ"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

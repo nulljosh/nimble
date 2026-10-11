@@ -572,5 +572,12 @@
     "es": "Tu clave se queda en este dispositivo y solo se envía a {s}.",
     "zh": "你的密钥保存在此设备上，只会发送给 {s}。",
     "pa": "ਤੁਹਾਡੀ ਕੁੰਜੀ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਹੀ ਰਹਿੰਦੀ ਹੈ ਅਤੇ ਸਿਰਫ਼ {s} ਨੂੰ ਭੇਜੀ ਜਾਂਦੀ ਹੈ।"
+  },
+  "Asks this again": {
+    "en": "Asks this again",
+    "fr": "Pose à nouveau cette question",
+    "es": "Vuelve a preguntar esto",
+    "zh": "再问一次",
+    "pa": "ਇਹ ਦੁਬਾਰਾ ਪੁੱਛਦਾ ਹੈ"
   }
 }

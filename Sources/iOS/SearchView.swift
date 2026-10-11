@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(AppState.self) private var state
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @FocusState private var isInputFocused: Bool
     @AppStorage("whats_new_seen_version") private var whatsNewSeenVersion = ""
     @State private var tries: [String] = []
@@ -14,10 +15,11 @@ struct SearchView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         Text("Ask anything.")
-                            .font(.system(size: 28, weight: .bold))
+                            .nimbleFont(28, weight: .bold)
                             .tracking(-0.56)
                             .foregroundStyle(Color.text)
                             .frame(maxWidth: .infinity)
+                            .accessibilityAddTraits(.isHeader)
                             .padding(.top, 28)
                             .padding(.bottom, 24)
 
@@ -36,7 +38,7 @@ struct SearchView: View {
                         .animation(.spring(duration: 0.3), value: state.result == .loading)
 
                         Text("Math, units and graphs work offline. Everything else gets one sentence and a source.")
-                            .font(.system(size: 12))
+                            .nimbleFont(12)
                             .foregroundStyle(Color.dim)
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity)
@@ -56,7 +58,7 @@ struct SearchView: View {
                             .environment(state)
                         Button(action: { state.copyResultText() }) {
                             Image(systemName: "doc.on.doc")
-                                .font(.system(size: 14))
+                                .nimbleFont(14)
                                 .foregroundStyle(Color.dim)
                         }
                         .accessibilityLabel("Copy result")
@@ -64,7 +66,7 @@ struct SearchView: View {
                             PreferencesView().environment(state)
                         } label: {
                             Image(systemName: "gearshape")
-                                .font(.system(size: 14))
+                                .nimbleFont(14)
                                 .foregroundStyle(Color.dim)
                         }
                         .accessibilityLabel("Settings")
@@ -104,40 +106,54 @@ struct SearchView: View {
         @Bindable var state = state
         let placeholder = state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder
 
-        return HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 18, weight: .medium))
-                .foregroundStyle(Color.bulbDeep)
-                .accessibilityHidden(true)
+        // At accessibility sizes glyph, field, mic and Ask no longer fit one row: the field takes the top, the buttons sit below it.
+        let stacked = dynamicTypeSize.isAccessibilitySize
+        let layout = stacked ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10)) : AnyLayout(HStackLayout(spacing: 10))
 
-            TextField("", text: $state.queryText, prompt: Text(placeholder).foregroundStyle(Color.dim))
-                .textFieldStyle(.plain)
-                .font(.system(size: 18))
-                .foregroundStyle(Color.text)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
-                .focused($isInputFocused)
-                .onSubmit { state.performQuery() }
-                .submitLabel(.search)
+        return layout {
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .nimbleFont(18, weight: .medium)
+                    .foregroundStyle(Color.bulbDeep)
+                    .accessibilityHidden(true)
 
-            if state.result == .loading {
-                Circle()
-                    .trim(from: 0, to: 0.75)
-                    .stroke(state.theme.color, lineWidth: 2)
-                    .frame(width: 18, height: 18)
-                    .rotationEffect(.degrees(-90))
-                    .animation(.linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
+                TextField("", text: $state.queryText, prompt: Text(placeholder).foregroundStyle(Color.dim))
+                    .textFieldStyle(.plain)
+                    .nimbleFont(18)
+                    .foregroundStyle(Color.text)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                    .focused($isInputFocused)
+                    .onSubmit { state.performQuery() }
+                    .submitLabel(.search)
             }
 
-            MicButton().environment(state)
+            HStack(spacing: 10) {
+                if state.result == .loading {
+                    Circle()
+                        .trim(from: 0, to: 0.75)
+                        .stroke(state.theme.color, lineWidth: 2)
+                        .frame(width: 18, height: 18)
+                        .rotationEffect(.degrees(-90))
+                        .animation(.linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
+                        .accessibilityHidden(true)
+                }
 
-            Button("Ask") { state.performQuery() }
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(.black)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
-                .buttonStyle(.plain)
+                MicButton().environment(state)
+
+                Button("Ask") { state.performQuery() }
+                    .nimbleFont(14, weight: .bold)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 9)
+                    .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
+                    .minimumTapTarget()
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Ask")
+            }
+            .frame(maxWidth: stacked ? .infinity : nil, alignment: .trailing)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
@@ -157,7 +173,7 @@ struct SearchView: View {
                     if tries.isEmpty { tries = Array(Set((0..<12).map { _ in state.randomSuggestion() })).prefix(4).map { $0 } }
                 }
         } else {
-            RecentList(title: "RECENT", items: state.history.entries.prefix(8).map(\.q), onClear: { state.clearHistory() })
+            RecentList(title: "RECENT", items: state.history.entries.prefix(8).map(\.q), onClear: { state.clearHistory() }, isHistory: true)
         }
     }
 }

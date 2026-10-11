@@ -16,13 +16,15 @@ struct MicButton: View {
         if voice.offered {
             Button(action: { voice.toggle() }) {
                 Image(systemName: "mic")
-                    .font(.system(size: size, weight: .regular))
+                    .nimbleFont(size, weight: .regular)
                     .foregroundStyle(voice.listening ? state.theme.color : Color.dim)
-                    .frame(width: 24, height: 24)
-                    .contentShape(Rectangle())
+                    .frame(minWidth: 24, minHeight: 24)
+                    .minimumTapTarget()
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(micLabel(voice.listening))
+            // The label stays fixed and the value carries the state, so VoiceOver reads "Ask by voice, Listening".
+            .accessibilityLabel(String(localized: "Ask by voice"))
+            .accessibilityValue(voice.listening ? String(localized: "Listening") : "")
             .help(micLabel(voice.listening))
             .onDisappear { voice.cancel() }
         }

@@ -78,5 +78,6 @@
   "Share answer as image": "Partager la réponse en image",
   "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.": "Lorsque c'est activé, le texte que vous saisissez est envoyé à {s}. Rien d'autre n'est envoyé. Lorsque c'est désactivé, les réponses viennent uniquement de DuckDuckGo et de Wikipédia.",
   "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.": "Pour répondre, Nimble envoie le texte que vous saisissez, et rien d'autre, à {s}. Aucun compte, contact, position ni identifiant n'est envoyé, et Nimble n'en garde aucune trace. Si vous refusez, les réponses viennent uniquement de DuckDuckGo et de Wikipédia. Vous pouvez changer cela dans Réglages.",
-  "Your key stays on this device and is sent only to {s}.": "Votre clé reste sur cet appareil et n'est envoyée qu'à {s}."
+  "Your key stays on this device and is sent only to {s}.": "Votre clé reste sur cet appareil et n'est envoyée qu'à {s}.",
+  "Asks this again": "Pose à nouveau cette question"
 }

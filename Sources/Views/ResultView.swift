@@ -31,11 +31,11 @@ struct ResultView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         if let heading, !heading.isEmpty {
                             Text(heading)
-                                .font(.system(size: 15, weight: .bold))
+                                .nimbleFont(15, weight: .bold)
                                 .foregroundStyle(Color.soft)
                         }
                         Text(body)
-                            .font(.system(size: 19))
+                            .nimbleFont(19)
                             .foregroundStyle(Color.text)
                             .lineSpacing(7)
                             .textSelection(.enabled)
@@ -52,7 +52,7 @@ struct ResultView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                         Text(item)
-                            .font(.system(size: 17))
+                            .nimbleFont(17)
                             .foregroundStyle(Color.text)
                             .textSelection(.enabled)
                     }
@@ -89,11 +89,11 @@ struct ResultView: View {
         case .error(let message, let searchURL):
             VStack(spacing: 10) {
                 Text(message)
-                    .font(.system(size: 14))
+                    .nimbleFont(14)
                     .foregroundStyle(Color.dim)
                 if let searchURL, URL(string: searchURL) != nil {
                     Button("Search on DuckDuckGo →") { state.openInDDG() }
-                        .font(.system(size: 14, weight: .medium))
+                        .nimbleFont(14, weight: .medium)
                         .foregroundStyle(Color.bulbDeep)
                         .buttonStyle(.plain)
                 }
@@ -109,7 +109,9 @@ struct ResultView: View {
     @ViewBuilder
     private func link(_ label: String, to url: String) -> some View {
         if let u = URL(string: url) {
-            Button { openURL(u) } label: { Text(label) }.buttonStyle(.plain)
+            Button { openURL(u) } label: { Text(label) }
+                .buttonStyle(.plain)
+                .accessibilityLabel(label)
         } else {
             Text(label)
         }
@@ -132,20 +134,25 @@ struct AnswerCard<Content: View, Footer: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Eyebrow(text: "Answer")
-            content
+            // One VoiceOver stop for the eyebrow and the answer. The footer row stays apart so Share and the source link remain buttons.
+            VStack(alignment: .leading, spacing: 16) {
+                Eyebrow(text: "Answer")
+                content
+            }
+            .accessibilityElement(children: .combine)
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 footer
-                    .font(.system(size: 12))
+                    .nimbleFont(12)
                     .foregroundStyle(Color.dim)
                 Spacer(minLength: 8)
                 if let shareText, !shareText.isEmpty {
                     ShareLink(item: shareText) {
                         Text("Share")
-                            .font(.system(size: 12))
+                            .nimbleFont(12)
                             .foregroundStyle(Color.dim)
                             .underline()
                     }
+                    .accessibilityLabel("Share")
                 }
             }
         }
@@ -162,7 +169,7 @@ struct Eyebrow: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: 11, weight: .bold))
+            .nimbleFont(11, weight: .bold)
             .tracking(1.3)
             .textCase(.uppercase)
             .foregroundStyle(Color.bulbDeep)
@@ -172,28 +179,37 @@ struct Eyebrow: View {
 /// Asked before the first AI answer. Same card as an answer, with Allow and Don't Allow.
 struct ConsentCard: View {
     @Environment(AppState.self) private var state
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Eyebrow(text: "Before I answer")
-            Text("Send your question to an AI service?")
-                .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(Color.soft)
-            Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
-                .font(.system(size: 17))
-                .foregroundStyle(Color.text)
-                .lineSpacing(4)
-                .fixedSize(horizontal: false, vertical: true)
-            HStack(spacing: 10) {
+        // Side by side normally; stacked at accessibility sizes so the two buttons never squeeze.
+        let buttons = dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
+            : AnyLayout(HStackLayout(spacing: 10))
+
+        return VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 14) {
+                Eyebrow(text: "Before I answer")
+                Text("Send your question to an AI service?")
+                    .nimbleFont(15, weight: .bold)
+                    .foregroundStyle(Color.soft)
+                Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
+                    .nimbleFont(17)
+                    .foregroundStyle(Color.text)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .accessibilityElement(children: .combine)
+            buttons {
                 Button("Allow") { state.answerAIConsent(true) }
-                    .font(.system(size: 15, weight: .bold))
+                    .nimbleFont(15, weight: .bold)
                     .foregroundStyle(.black)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 10)
                     .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
                     .buttonStyle(.plain)
                 Button("Don't Allow") { state.answerAIConsent(false) }
-                    .font(.system(size: 15, weight: .medium))
+                    .nimbleFont(15, weight: .medium)
                     .foregroundStyle(Color.text)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 10)
@@ -214,6 +230,8 @@ struct RecentList: View {
     let items: [String]
     var size: CGFloat = 16
     var onClear: (() -> Void)?
+    /// Past searches get the "Asks this again" hint. The starter questions do not.
+    var isHistory = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -222,26 +240,29 @@ struct RecentList: View {
                 Spacer()
                 if let onClear {
                     Button("Clear", action: onClear)
-                        .font(.system(size: 12))
+                        .nimbleFont(12)
                         .foregroundStyle(Color.dim)
                         .buttonStyle(.plain)
                 }
             }
             .padding(.bottom, 8)
             ForEach(Array(items.enumerated()), id: \.offset) { index, q in
-                if index > 0 { Rectangle().fill(Color.hairline).frame(height: 1) }
+                if index > 0 {
+                    Rectangle().fill(Color.hairline).frame(height: 1).accessibilityHidden(true)
+                }
                 Button {
                     state.queryText = q
                     state.performQuery()
                 } label: {
                     Text(q)
-                        .font(.system(size: size))
+                        .nimbleFont(size)
                         .foregroundStyle(Color.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, size * 0.6)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityHint(isHistory ? String(localized: "Asks this again") : "")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -280,7 +301,7 @@ private struct GraphResultView: View {
             .frame(height: 160)
             .accessibilityHidden(true)
             Text("y = \(expr)")
-                .font(.system(size: 14, weight: .medium))
+                .nimbleFont(14, weight: .medium)
                 .foregroundStyle(Color.soft)
                 .textSelection(.enabled)
         }
@@ -295,7 +316,7 @@ private struct MathResultView: View {
 
     var body: some View {
         Text(value)
-            .font(.system(size: 34, weight: .bold))
+            .nimbleFont(34, weight: .bold)
             .foregroundStyle(Color.text)
             .textSelection(.enabled)
             .scaleEffect(appeared ? 1.0 : 0.88)
@@ -315,11 +336,11 @@ private struct ConvertResultView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("\(to) \(toUnit)")
-                .font(.system(size: 34, weight: .bold))
+                .nimbleFont(34, weight: .bold)
                 .foregroundStyle(Color.text)
                 .textSelection(.enabled)
             Text("\(from) \(fromUnit)")
-                .font(.system(size: 18))
+                .nimbleFont(18)
                 .foregroundStyle(Color.soft)
         }
     }
@@ -333,17 +354,17 @@ private struct CardResultView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(big)
-                .font(.system(size: 34, weight: .bold))
+                .nimbleFont(34, weight: .bold)
                 .foregroundStyle(Color.text)
             if !unit.isEmpty {
                 Text(unit)
-                    .font(.system(size: 13))
+                    .nimbleFont(13)
                     .foregroundStyle(Color.dim)
                     .textCase(.uppercase)
                     .tracking(0.5)
             }
             Text(sub)
-                .font(.system(size: 18))
+                .nimbleFont(18)
                 .foregroundStyle(Color.soft)
         }
         .textSelection(.enabled)
@@ -369,6 +390,7 @@ private struct ColorResultView: View {
                 .fill(Color(hex: hex) ?? .orange)
                 .frame(width: 56, height: 56)
                 .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.hairline, lineWidth: 1))
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 5) {
                 colorRow(label: "HEX", value: hex.uppercased())
                 colorRow(label: "RGB", value: "rgb(\(c.r), \(c.g), \(c.b))")
@@ -376,12 +398,13 @@ private struct ColorResultView: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 14)
+        .accessibilityElement(children: .combine)
     }
 
     private func colorRow(label: String, value: String) -> some View {
         HStack(spacing: 8) {
-            Text(label).font(.system(size: 11, weight: .bold)).foregroundStyle(Color.bulbDeep).frame(width: 30)
-            Text(value).font(.system(size: 14)).foregroundStyle(Color.text)
+            Text(label).nimbleFont(11, weight: .bold).foregroundStyle(Color.bulbDeep).frame(minWidth: 30)
+            Text(value).nimbleFont(14).foregroundStyle(Color.text)
         }
     }
 }

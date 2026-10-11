@@ -36,3 +36,47 @@ extension Color {
         #endif
     }
 }
+
+/// Design sizes for text and icons. On iOS they scale with Dynamic Type; on Mac they stay fixed.
+extension View {
+    func nimbleFont(_ size: CGFloat, weight: Font.Weight = .regular) -> some View {
+        modifier(NimbleFont(size: size, weight: weight))
+    }
+}
+
+#if canImport(UIKit)
+/// @ScaledMetric uses the same curve as UIFontMetrics and redraws the view when the setting changes mid-session.
+private struct NimbleFont: ViewModifier {
+    @ScaledMetric private var size: CGFloat
+    let weight: Font.Weight
+
+    init(size: CGFloat, weight: Font.Weight) {
+        _size = ScaledMetric(wrappedValue: size, relativeTo: .body)
+        self.weight = weight
+    }
+
+    func body(content: Content) -> some View {
+        content.font(.system(size: size, weight: weight))
+    }
+}
+
+extension View {
+    /// Keeps the drawn size and layout, but makes the touch area at least 44pt. Negative padding cancels the layout.
+    func minimumTapTarget() -> some View {
+        padding(10).contentShape(Rectangle()).padding(-10)
+    }
+}
+#else
+private struct NimbleFont: ViewModifier {
+    let size: CGFloat
+    let weight: Font.Weight
+
+    func body(content: Content) -> some View {
+        content.font(.system(size: size, weight: weight))
+    }
+}
+
+extension View {
+    func minimumTapTarget() -> some View { self }
+}
+#endif

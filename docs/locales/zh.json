@@ -78,5 +78,6 @@
   "Share answer as image": "将答案分享为图片",
   "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.": "开启后，你输入的文字会发送给 {s}，不发送其他任何内容。关闭后，答案只来自 DuckDuckGo 和维基百科。",
   "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.": "为了回答，Nimble 只会把你输入的文字发送给 {s}，不发送其他任何内容。不会发送账号、联系人、位置或标识符，Nimble 也不会保留任何记录。如果你不允许，答案将只来自 DuckDuckGo 和维基百科。你可以随时在“设置”中更改。",
-  "Your key stays on this device and is sent only to {s}.": "你的密钥保存在此设备上，只会发送给 {s}。"
+  "Your key stays on this device and is sent only to {s}.": "你的密钥保存在此设备上，只会发送给 {s}。",
+  "Asks this again": "再问一次"
 }
