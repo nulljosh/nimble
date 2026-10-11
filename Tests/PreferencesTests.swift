@@ -4,7 +4,7 @@ import XCTest
 final class PreferencesTests: XCTestCase {
     func testDefaultPreferences() {
         let defaults = PreferencesData()
-        XCTAssertEqual(defaults.theme, "orange")
+        XCTAssertEqual(defaults.theme, "yellow")
         XCTAssertTrue(defaults.mathEnabled)
         XCTAssertFalse(defaults.launchOnStartup)
         XCTAssertFalse(defaults.centerWindow)
