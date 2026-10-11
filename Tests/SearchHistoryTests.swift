@@ -14,14 +14,14 @@ final class SearchHistoryTests: XCTestCase {
     }
 
     func testAddKeepsNewestFirst() {
-        let h = SearchHistory(directory: dir)
+        let h = SearchHistory(directory: dir, cloud: nil)
         h.add("2+2")
         h.add("5 miles to km")
         XCTAssertEqual(h.entries.map(\.q), ["5 miles to km", "2+2"])
     }
 
     func testDuplicateMovesToTopIgnoringCase() {
-        let h = SearchHistory(directory: dir)
+        let h = SearchHistory(directory: dir, cloud: nil)
         h.add("pi")
         h.add("sqrt 9")
         h.add("PI")
@@ -29,13 +29,13 @@ final class SearchHistoryTests: XCTestCase {
     }
 
     func testBlankIsIgnored() {
-        let h = SearchHistory(directory: dir)
+        let h = SearchHistory(directory: dir, cloud: nil)
         h.add("   ")
         XCTAssertTrue(h.entries.isEmpty)
     }
 
     func testCapsAtFifty() {
-        let h = SearchHistory(directory: dir)
+        let h = SearchHistory(directory: dir, cloud: nil)
         for i in 0..<60 { h.add("q\(i)") }
         XCTAssertEqual(h.entries.count, 50)
         XCTAssertEqual(h.entries.first?.q, "q59")
@@ -43,18 +43,18 @@ final class SearchHistoryTests: XCTestCase {
     }
 
     func testClearEmptiesAndPersists() {
-        let h = SearchHistory(directory: dir)
+        let h = SearchHistory(directory: dir, cloud: nil)
         h.add("a")
         h.clear()
         XCTAssertTrue(h.entries.isEmpty)
-        XCTAssertTrue(SearchHistory(directory: dir).entries.isEmpty)
+        XCTAssertTrue(SearchHistory(directory: dir, cloud: nil).entries.isEmpty)
     }
 
     func testPersistsAcrossInstances() {
-        let first = SearchHistory(directory: dir)
+        let first = SearchHistory(directory: dir, cloud: nil)
         first.add("one")
         first.add("two")
-        let second = SearchHistory(directory: dir)
+        let second = SearchHistory(directory: dir, cloud: nil)
         XCTAssertEqual(second.entries.map(\.q), ["two", "one"])
     }
 }
