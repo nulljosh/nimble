@@ -58,6 +58,9 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
 
+        // A bare domain question ("What's primitive.dev?") is answered by the site itself, before any AI or encyclopedia.
+        site(input)?.let { return it }
+
         // Pattern-gated live cards come before the AI, same order as the web: etymology, weather, time, currency.
         cards.card(input)?.let { return Answer.CardAnswer(it) }
 
@@ -147,13 +150,33 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         summary(input.replace(" ", "_"))?.let { return it }
 
         // No direct page: ask the search API what the article is actually called.
-        val title = runCatchingNull {
+        val title = articleTitle(runCatchingNull {
             val url = "https://en.wikipedia.org/w/api.php?action=query&list=search" +
                 "&srsearch=${input.encodeURLParameter()}&format=json&srlimit=1"
             Regex("\"title\"\\s*:\\s*\"(.*?)\"").find(http.get(url).bodyAsText())?.groupValues?.get(1)
-        } ?: return null
+        }) ?: return null
 
         return summary(title.replace(" ", "_"))
+    }
+
+    @Serializable
+    internal data class SiteResponse(
+        val host: String? = null,
+        val title: String? = null,
+        val siteName: String? = null,
+        val description: String? = null,
+        val h1: String? = null,
+        val text: String? = null,
+    )
+
+    private suspend fun site(input: String): Answer.Text? {
+        val host = siteHost(input) ?: return null
+        return runCatchingNull {
+            val d = lenientJson.decodeFromString<SiteResponse>(
+                http.get("$PROXY/?site=${host.encodeURLParameter()}").bodyAsText()
+            )
+            siteAnswer(host, d)
+        }
     }
 
     private suspend fun summary(titlePath: String): Answer.Text? = runCatchingNull {
@@ -163,6 +186,31 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         Answer.Text(w.title, firstSentence(extract), "Wikipedia", w.contentUrls?.desktop?.page, w.thumbnail?.source)
     }
 }
+
+/**
+ * Same pattern as `SITE_RE` in docs/engine.js and `siteHost()` in Sources/Models/QueryEngine.swift.
+ * Only a bare host (optional question wording, scheme, www, path) matches; "what is node.js" does not.
+ */
+private val siteRe = Regex(
+    """^(?:(?:what(?:['’]s|\s+is)|whats|who(?:['’]s|\s+is)|tell me about|about)\s+)?(?:the\s+)?(?:https?://)?(?:www\.)?((?:[a-z0-9-]+\.)+(?:com|net|org|dev|io|ai|app|co|ca|me|xyz|tv|gg|so|sh|to|fm|cc|us|uk|info|biz|tech|cloud|site|online|page|wiki|design|studio))(?:/\S*)?(?:\s+(?:website|site|company|app))?\s*\??$""",
+    RegexOption.IGNORE_CASE
+)
+
+internal fun siteHost(query: String): String? =
+    siteRe.find(query.trim())?.groupValues?.get(1)?.lowercase()
+
+/** Body: meta description, else "h1. text", else title. Heading: siteName, else title, else host. */
+internal fun siteAnswer(host: String, d: AnswerClient.SiteResponse): Answer.Text? {
+    val body = d.description?.takeIf { it.isNotEmpty() }
+        ?: listOfNotNull(d.h1, d.text).filter { it.isNotEmpty() }.joinToString(". ").takeIf { it.isNotEmpty() }
+        ?: d.title?.takeIf { it.isNotEmpty() }
+        ?: return null
+    val heading = d.siteName?.takeIf { it.isNotEmpty() } ?: d.title?.takeIf { it.isNotEmpty() } ?: host
+    return Answer.Text(heading = heading, body = firstSentence(body), source = host, sourceUrl = "https://$host")
+}
+
+/** Wikipedia list articles ("List of ...") are never answers. */
+internal fun articleTitle(raw: String?): String? = raw?.takeUnless { it.startsWith("List of ", ignoreCase = true) }
 
 /** Network and parse failures are misses, not crashes -- every stage can fall through. */
 private inline fun <T> runCatchingNull(block: () -> T?): T? =

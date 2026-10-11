@@ -1,6 +1,9 @@
 package com.nulljosh.nimble
 
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -24,4 +27,64 @@ class AnswerClientTest {
             "chain must resolve or miss cleanly, got $a"
         )
     }
+
+    @Test
+    fun siteHostMatchesBareDomainQuestions() {
+        assertEquals("primitive.dev", siteHost("What's primitive.dev?"))
+        assertEquals("primitive.dev", siteHost("What’s primitive.dev?"))
+        assertEquals("stripe.com", siteHost("what is stripe.com"))
+        assertEquals("linear.app", siteHost("tell me about linear.app"))
+        assertEquals("vercel.com", siteHost("vercel.com"))
+        assertEquals("vercel.com", siteHost("https://www.Vercel.com/pricing"))
+    }
+
+    @Test
+    fun siteHostIgnoresQuestionsAboutThingsThatAreNotSites() {
+        assertNull(siteHost("what is node.js"))
+        assertNull(siteHost("who is the ceo of apple.com in 2020"))
+    }
+
+    @Test
+    fun siteBodyPrefersMetaDescription() {
+        val d = decodeSite(
+            """{"host":"primitive.dev","title":"Primitive","siteName":"Primitive",
+               "description":"Build tools. Ship fast.","h1":"Hello","text":"Long page text."}"""
+        )
+        val a = siteAnswer("primitive.dev", d) as Answer.Text
+        assertEquals("Build tools.", a.body)
+        assertEquals("Primitive", a.heading)
+        assertEquals("primitive.dev", a.source)
+        assertEquals("https://primitive.dev", a.sourceUrl)
+    }
+
+    @Test
+    fun siteBodyFallsBackToHeadlineAndTextThenTitle() {
+        val withText = decodeSite("""{"title":"Acme Page","h1":"Acme makes rockets","text":"We ship. Often."}""")
+        val a = siteAnswer("acme.io", withText) as Answer.Text
+        assertEquals("Acme makes rockets.", a.body)
+        assertEquals("Acme Page", a.heading)
+
+        val titleOnly = decodeSite("""{"title":"Only A Title"}""")
+        assertEquals("Only A Title", (siteAnswer("acme.io", titleOnly) as Answer.Text).body)
+
+        val nothing = decodeSite("""{"host":"acme.io"}""")
+        assertNull(siteAnswer("acme.io", nothing))
+    }
+
+    @Test
+    fun siteHeadingFallsBackToHost() {
+        val d = decodeSite("""{"description":"A tool."}""")
+        assertEquals("acme.io", (siteAnswer("acme.io", d) as Answer.Text).heading)
+    }
+
+    @Test
+    fun listArticlesAreNeverAnswers() {
+        assertNull(articleTitle("List of Canadian provinces"))
+        assertNull(articleTitle("list of rivers"))
+        assertEquals("Canada", articleTitle("Canada"))
+        assertNull(articleTitle(null))
+    }
+
+    private fun decodeSite(json: String): AnswerClient.SiteResponse =
+        Json { ignoreUnknownKeys = true; isLenient = true }.decodeFromString(json)
 }
