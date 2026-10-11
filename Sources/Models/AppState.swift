@@ -186,7 +186,9 @@ final class AppState {
     }
 
     private func askAnswerEngine(_ text: String) {
-        if aiConsent == nil {
+        // A website question is answered from the site itself, no AI involved, so it never needs
+        // consent (the web app already behaves this way).
+        if aiConsent == nil && queryEngine.siteHost(text) == nil {
             askingAIConsent = true
             return
         }
