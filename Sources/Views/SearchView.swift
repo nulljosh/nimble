@@ -221,20 +221,18 @@ struct SearchView: View {
 }
 
 /// The borderless HUD ignored `isMovableByWindowBackground`: SwiftUI's hosting view eats the
-/// mouse-down before AppKit can start a window drag. Move the window by hand instead.
+/// mouse-down before AppKit can start a window drag. Hand the drag to AppKit's own loop
+/// instead, the same one a titlebar uses, so it tracks the cursor exactly.
 private struct WindowDrag: Gesture {
-    @State private var grab: (mouse: NSPoint, origin: NSPoint)?
+    @State private var dragging = false
 
     var body: some Gesture {
         DragGesture(minimumDistance: 2, coordinateSpace: .global)
             .onChanged { _ in
-                guard let window = NSApp.keyWindow else { return }
-                let mouse = NSEvent.mouseLocation
-                let start = grab ?? (mouse, window.frame.origin)
-                grab = start
-                window.setFrameOrigin(NSPoint(x: start.origin.x + mouse.x - start.mouse.x,
-                                              y: start.origin.y + mouse.y - start.mouse.y))
+                guard !dragging, let window = NSApp.keyWindow, let event = NSApp.currentEvent else { return }
+                dragging = true
+                window.performDrag(with: event)
             }
-            .onEnded { _ in grab = nil }
+            .onEnded { _ in dragging = false }
     }
 }
