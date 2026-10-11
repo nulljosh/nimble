@@ -240,7 +240,7 @@ async function localTime(query){
 const SYSTEM = "Answer in one short factual sentence. No preamble, no markdown. If you do not know, reply exactly UNKNOWN.";
 const ENGINES = {
   nimble:{name:"Nimble (free)", model:"", base:ANSWER_PROXY},
-  claude:{name:"Claude", key:true, model:"claude-opus-5", base:"https://api.anthropic.com"},
+  claude:{name:"Claude", key:true, model:"claude-opus-5-5", base:"https://api.anthropic.com"},
   openai:{name:"OpenAI", key:true, model:"gpt-5", base:"https://api.openai.com"},
   ollama:{name:"Ollama (local)", model:"llama3.1:8b", base:"http://localhost:11434"},
   // Samantha is the house local model (oMLX on :8000, OpenAI chat shape). Opt-in until she

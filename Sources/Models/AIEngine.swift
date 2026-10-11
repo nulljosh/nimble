@@ -20,7 +20,7 @@ enum AIEngine: String, Codable, CaseIterable, Sendable {
     var defaultModel: String {
         switch self {
         case .nimble: return ""
-        case .claude: return "claude-opus-5"
+        case .claude: return "claude-opus-5-5"
         case .openai: return "gpt-5"
         case .ollama: return "llama3.1:8b"
         case .samantha: return "Qwen3.5-9B-OptiQ-4bit"

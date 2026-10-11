@@ -386,11 +386,19 @@ final class QueryEngine: Sendable {
 
     // General answer engine: one Gemma call for any factual question. Replaces the
     // old per-shape Wikidata handlers (which dumped every historical officeholder).
-    private func queryLLM(_ input: String, session: URLSession, ai: AIConfig, turns: TurnBuffer) async -> QueryResult? {
+    private func queryLLM(_ input: String, session: URLSession, ai: AIConfig, turns: TurnBuffer, localTimeout: TimeInterval = 40) async -> QueryResult? {
+        #if os(macOS)
+        // On a Mac running Samantha (oMLX on :8000), she is the default and the free proxy is the
+        // fallback. Nobody else can reach localhost, so iOS and web stay on the proxy. 8s cap: a cold
+        // model took 29s, and an instant-answer app can't wait that long when the proxy is right there.
+        if ai.engine == .nimble, let local = await queryLLM(input, session: session, ai: AIConfig(engine: .samantha), turns: turns, localTimeout: 8) {
+            return local
+        }
+        #endif
         // A misconfigured engine (Claude with no key) falls back to the free proxy.
         let context = (ai.engine == .ollama || ai.engine == .samantha) ? await wikiGrounding(input, session: session) : ""
         guard var req = ai.request(for: input, turns: turns, context: context) ?? AIConfig().request(for: input, turns: turns) else { return nil }
-        if ai.engine == .ollama || ai.engine == .samantha { req.timeoutInterval = 40 } // a local 9B on a busy Mac is slow
+        if ai.engine == .ollama || ai.engine == .samantha { req.timeoutInterval = localTimeout } // a local 9B on a busy Mac is slow
         do {
             let (data, response) = try await session.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200,
