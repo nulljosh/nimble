@@ -6,8 +6,16 @@ struct ResultView: View {
 
     var body: some View {
         switch state.result {
-        case .none, .loading:
+        case .none:
             EmptyView()
+
+        case .loading:
+            // The card appears at once with Flit in it; the answer replaces him in place.
+            AnswerCard(shareText: nil) {
+                FlitThinking()
+            } footer: {
+                EmptyView()
+            }
 
         case .math(let value):
             AnswerCard(shareText: state.result.copyText) {

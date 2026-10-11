@@ -129,16 +129,6 @@ struct SearchView: View {
             }
 
             HStack(spacing: 10) {
-                if state.result == .loading {
-                    Circle()
-                        .trim(from: 0, to: 0.75)
-                        .stroke(state.theme.color, lineWidth: 2)
-                        .frame(width: 18, height: 18)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
-                        .accessibilityHidden(true)
-                }
-
                 MicButton().environment(state)
 
                 Button("Ask") { state.performQuery() }

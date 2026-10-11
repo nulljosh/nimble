@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(AppState.self) private var state
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isInputFocused: Bool
 
     var body: some View {
@@ -124,14 +123,7 @@ struct SearchView: View {
                     return .handled
                 }
 
-            if state.result == .loading {
-                Circle()
-                    .trim(from: 0, to: 0.75)
-                    .stroke(state.theme.color, lineWidth: 2)
-                    .frame(width: 18, height: 18)
-                    .rotationEffect(.degrees(-90))
-                    .animation(reduceMotion ? nil : .linear(duration: 0.7).repeatForever(autoreverses: false), value: state.result == .loading)
-            } else if !state.queryText.isEmpty {
+            if state.result != .loading, !state.queryText.isEmpty {
                 Text("↩")
                     .font(.system(size: 10, weight: .medium))
                     .foregroundStyle(Color.dim)
