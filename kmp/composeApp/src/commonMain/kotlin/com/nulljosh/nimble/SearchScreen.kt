@@ -353,6 +353,8 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
 
             is Answer.Market -> MarketResult(answer, theme)
 
+            is Answer.Sports -> SportsResult(answer, theme)
+
             is Answer.News -> NewsResult(answer, theme, client)
 
             is Answer.Text -> {

@@ -50,6 +50,16 @@ sealed class Answer {
         val url: String,
         val asOf: Freshness? = null,
     ) : Answer()
+    /** Sports scores from ESPN: the title, the games (or none), and the state. [url] opens the scoreboard. */
+    data class Sports(
+        val title: String,
+        val league: String?,
+        val rows: List<SportsGame>,
+        val state: SportsState,
+        val lastNight: Boolean,
+        val url: String,
+        val asOf: Freshness?,
+    ) : Answer()
     data class Miss(val message: String, val searchUrl: String) : Answer()
 }
 
@@ -85,6 +95,9 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
 
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
+
+        // Sports before markets, so a league name in capitals ("NFL") never reads as a ticker. A score is a card or the calm state.
+        Scores.answer(input) { url -> fetchScoreboard(url) }?.let { return it }
 
         // Markets come before the AI: a price question is a card or the calm unavailable state, never a model's guess.
         Markets.ask(input)?.let { return Markets.quote(it) { url -> fetchQuote(url) } }
@@ -185,6 +198,14 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
     /** A quote source's body, or null on any failure or after [Markets.QUOTE_TIMEOUT_MS]: the calm state, not an AI answer. */
     private suspend fun fetchQuote(url: String): String? = runCatchingNull {
         withTimeoutOrNull(Markets.QUOTE_TIMEOUT_MS) {
+            val res = http.get(url)
+            if (res.status == HttpStatusCode.OK) res.bodyAsText() else null
+        }
+    }
+
+    /** An ESPN scoreboard body, or null on any failure or after [Scores.TIMEOUT_MS]: the unavailable state. */
+    private suspend fun fetchScoreboard(url: String): String? = runCatchingNull {
+        withTimeoutOrNull(Scores.TIMEOUT_MS) {
             val res = http.get(url)
             if (res.status == HttpStatusCode.OK) res.bodyAsText() else null
         }

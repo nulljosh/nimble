@@ -38,7 +38,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 37
-        versionName = "5.17.0"
+        versionName = "5.17.1"
     }
 }
 
@@ -52,7 +52,7 @@ compose.desktop {
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
             )
             packageName = "Nimble"
-            packageVersion = "5.17.0"
+            packageVersion = "5.17.1"
             description = "Instant answers -- math, facts, definitions."
         }
     }

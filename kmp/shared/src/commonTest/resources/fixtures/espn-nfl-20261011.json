@@ -1,0 +1,181 @@
+{
+  "leagues": [
+    {
+      "id": "28",
+      "name": "National Football League",
+      "abbreviation": "NFL",
+      "slug": "nfl"
+    }
+  ],
+  "events": [
+    {
+      "id": "401872981",
+      "date": "2026-10-11T13:30Z",
+      "name": "Philadelphia Eagles at Jacksonville Jaguars",
+      "shortName": "PHI VS JAX",
+      "status": {
+        "clock": 0.0,
+        "displayClock": "0:00",
+        "period": 4,
+        "type": {
+          "id": "3",
+          "name": "STATUS_FINAL",
+          "state": "post",
+          "completed": true,
+          "description": "Final",
+          "detail": "Final",
+          "shortDetail": "Final"
+        }
+      },
+      "competitions": [
+        {
+          "id": "401872981",
+          "date": "2026-10-11T13:30Z",
+          "competitors": [
+            {
+              "id": "30",
+              "homeAway": "home",
+              "winner": true,
+              "score": "19",
+              "team": {
+                "id": "30",
+                "location": "Jacksonville",
+                "name": "Jaguars",
+                "abbreviation": "JAX",
+                "displayName": "Jacksonville Jaguars",
+                "shortDisplayName": "Jaguars"
+              }
+            },
+            {
+              "id": "21",
+              "homeAway": "away",
+              "winner": false,
+              "score": "17",
+              "team": {
+                "id": "21",
+                "location": "Philadelphia",
+                "name": "Eagles",
+                "abbreviation": "PHI",
+                "displayName": "Philadelphia Eagles",
+                "shortDisplayName": "Eagles"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "401872990",
+      "date": "2026-10-11T17:00Z",
+      "name": "Chicago Bears at Green Bay Packers",
+      "shortName": "CHI @ GB",
+      "status": {
+        "clock": 0.0,
+        "displayClock": "0:00",
+        "period": 4,
+        "type": {
+          "id": "3",
+          "name": "STATUS_FINAL",
+          "state": "post",
+          "completed": true,
+          "description": "Final",
+          "detail": "Final",
+          "shortDetail": "Final"
+        }
+      },
+      "competitions": [
+        {
+          "id": "401872990",
+          "date": "2026-10-11T17:00Z",
+          "competitors": [
+            {
+              "id": "9",
+              "homeAway": "home",
+              "winner": true,
+              "score": "31",
+              "team": {
+                "id": "9",
+                "location": "Green Bay",
+                "name": "Packers",
+                "abbreviation": "GB",
+                "displayName": "Green Bay Packers",
+                "shortDisplayName": "Packers"
+              }
+            },
+            {
+              "id": "3",
+              "homeAway": "away",
+              "winner": false,
+              "score": "7",
+              "team": {
+                "id": "3",
+                "location": "Chicago",
+                "name": "Bears",
+                "abbreviation": "CHI",
+                "displayName": "Chicago Bears",
+                "shortDisplayName": "Bears"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "401872988",
+      "date": "2026-10-11T17:00Z",
+      "name": "New York Giants at Washington Commanders",
+      "shortName": "NYG @ WSH",
+      "status": {
+        "clock": 0.0,
+        "displayClock": "0:00",
+        "period": 5,
+        "type": {
+          "id": "3",
+          "name": "STATUS_FINAL",
+          "state": "post",
+          "completed": true,
+          "description": "Final",
+          "detail": "Final/OT",
+          "shortDetail": "Final/OT",
+          "altDetail": "OT"
+        }
+      },
+      "competitions": [
+        {
+          "id": "401872988",
+          "date": "2026-10-11T17:00Z",
+          "competitors": [
+            {
+              "id": "28",
+              "homeAway": "home",
+              "winner": false,
+              "score": "27",
+              "team": {
+                "id": "28",
+                "location": "Washington",
+                "name": "Commanders",
+                "abbreviation": "WSH",
+                "displayName": "Washington Commanders",
+                "shortDisplayName": "Commanders"
+              }
+            },
+            {
+              "id": "19",
+              "homeAway": "away",
+              "winner": false,
+              "score": "27",
+              "team": {
+                "id": "19",
+                "location": "New York",
+                "name": "Giants",
+                "abbreviation": "NYG",
+                "displayName": "New York Giants",
+                "shortDisplayName": "Giants"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

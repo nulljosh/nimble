@@ -61,7 +61,7 @@ object Markets {
 
     // Capitals that are words or acronyms: a bare "AI" or "US" is never a stock lookup.
     private val notTicker = setOf(
-        "AI", "US", "UK", "EU", "OK", "TV", "IT", "ID", "PC", "CEO", "CFO", "NASA", "USA", "GDP", "CPU", "GPU", "API", "URL",
+        "NFL", "NBA", "MLB", "NHL", "MLS", "EPL", "AI", "US", "UK", "EU", "OK", "TV", "IT", "ID", "PC", "CEO", "CFO", "NASA", "USA", "GDP", "CPU", "GPU", "API", "URL",
         "DNA", "HTML", "CSS", "JS", "FAQ", "NYC", "UN", "OR", "AND", "THE", "ARE", "NOT", "ALL", "ANY", "NEW", "CAN", "PDF",
         "SMS", "VPN", "RAM", "SSD", "USB", "TBD", "WHO", "HOW", "WHY", "YES", "NO", "DJ", "MP", "PM", "AM", "TO", "OF", "IN",
         "IS", "ON", "AT", "BY", "DO", "GO", "UP",
