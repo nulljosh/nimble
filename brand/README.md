@@ -19,4 +19,8 @@ Nimble is a yellow bulb on black, a hummingbird called Flit, and one plain sente
 
 Source of truth: `docs/tokens.css`. The values above are the ones it resolves to today.
 
-Files: `nimble-icon-1024.png` (app icon), `wordmark.svg` (outlined Nimble Sans), `flit.svg`, `fen.svg`, `github-social-1280x640.png` (repo social preview), `og-1200x630.png` (link preview).
+Files: `nimble-icon-1024.png` (app icon), `wordmark.svg` (outlined Nimble Sans, tracked at -0.02em), `flit.svg`, `fen.svg`, `github-social-1280x640.png` (repo social preview: the app icon beside the wordmark, no mascot), `og-1200x630.png` (link preview, same lockup).
+
+The app icon is Apple-rendered artwork and the only exception to the flat rule. Every other file here is flat.
+
+This folder is the source. The site serves copies at `docs/brand/` (plus `docs/og-1200x630.png`, the og:image), copied by hand in 5.13.1 with no build step. When a file here changes, copy it there too. The README stays here only.
