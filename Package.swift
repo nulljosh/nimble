@@ -33,6 +33,7 @@ let package = Package(
                 "Sources/Models/QueryEngine+Compute.swift",
                 "Sources/Models/QueryResult.swift",
                 "Sources/Models/AIEngine.swift",
+                "Sources/Models/OnDeviceAnswers.swift",
                 "Sources/Models/Turns.swift",
                 "Sources/Models/SearchHistory.swift",
                 "tui/main.swift"
