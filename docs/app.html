@@ -85,6 +85,14 @@ form { position: relative; }
 .credit { margin-top: 16px; font-size: 13px; color: var(--text-light); display: flex; align-items: baseline; gap: 14px; }
 .credit button { border: 0; background: none; padding: 0; font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .credit button:hover { color: var(--text); }
+/* Why this answer: the source line is the toggle; the text it came from opens under it. */
+.why { margin-top: 16px; font-size: 13px; color: var(--text-light); }
+.why summary { display: inline-block; cursor: pointer; color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; list-style: none; }
+.why summary::-webkit-details-marker { display: none; }
+.why summary::after { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 0 3px 8px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); vertical-align: middle; }
+.why[open] summary::after { transform: rotate(-135deg); margin-bottom: 0; }
+.card .why p { font-size: 16px; line-height: 1.5; color: var(--text-mid); margin-top: 10px; }
+.why a { display: inline-block; margin-top: 8px; color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 24px; }
 .chips[hidden] { display: none; }
@@ -190,7 +198,7 @@ var T=I18N.t;
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
     last={q:query, a:res.a};
     var share=shareText(res.a)?'<button type="button" data-share>'+T('Share')+'</button>':'';
-    r.innerHTML=res.h+(res.credit||share?'<div class="credit"><span>'+res.credit+'</span>'+share+'</div>':'');
+    r.innerHTML=res.h+(res.credit||share?'<div class="credit">'+(res.credit?'<span>'+res.credit+'</span>':'')+share+'</div>':'');
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
     if(['consent','none','offline'].indexOf(res.kind)<0){ hist.add(query); paintRecent(); }
   }

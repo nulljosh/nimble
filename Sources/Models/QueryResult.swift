@@ -6,7 +6,8 @@ enum QueryResult: Equatable {
     case none
     case loading
     case math(String)
-    case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?)
+    /// grounding is the text the body sentence was cut from ("Why this answer"); nil when there is none.
+    case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?, grounding: String? = nil)
     case list(items: [String], source: String)
     case error(String, searchURL: String?)
     case color(String)
@@ -32,7 +33,7 @@ enum QueryResult: Equatable {
     var copyText: String? {
         switch self {
         case .math(let s): return s
-        case .text(_, let body, _, _, _): return body
+        case .text(_, let body, _, _, _, _): return body
         case .list(let items, _): return items.joined(separator: "\n")
         case .error(let msg, _): return msg
         case .color(let hex): return hex
@@ -49,7 +50,7 @@ enum QueryResult: Equatable {
         switch self {
         case .none, .loading, .error: return nil
         case .math, .convert, .graph, .color: return (text, "Computed offline")
-        case .text(_, _, let source, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
+        case .text(_, _, let source, _, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
         }
     }
 }

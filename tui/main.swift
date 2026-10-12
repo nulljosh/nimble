@@ -11,7 +11,7 @@ func describe(_ result: QueryResult) -> String {
     case .none: return "No answer."
     case .loading: return "..."
     case .math(let value): return value
-    case .text(let heading, let body, let source, _, _):
+    case .text(let heading, let body, let source, _, _, _):
         return [heading, body, "— \(source)"].compactMap { $0 }.joined(separator: "\n")
     case .list(let items, let source):
         return items.joined(separator: "\n") + "\n— \(source)"

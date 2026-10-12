@@ -24,36 +24,9 @@ struct ResultView: View {
                 Text("computed offline")
             }
 
-        case .text(let heading, let body, let source, let sourceURL, let imageURL):
-            AnswerCard(shareText: state.result.copyText) {
-                HStack(alignment: .top, spacing: 14) {
-                    if let imageURL, let url = URL(string: imageURL) {
-                        AsyncImage(url: url) { phase in
-                            if case .success(let image) = phase {
-                                image.resizable().aspectRatio(contentMode: .fill)
-                                    .frame(width: 56, height: 56)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                            }
-                        }
-                    }
-                    VStack(alignment: .leading, spacing: 8) {
-                        if let heading, !heading.isEmpty {
-                            Text(heading)
-                                .nimbleFont(15, weight: .bold)
-                                .foregroundStyle(Color.soft)
-                        }
-                        Text(body)
-                            .nimbleFont(19)
-                            .foregroundStyle(Color.text)
-                            .lineSpacing(7)
-                            .textSelection(.enabled)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-            } footer: {
-                // AI answers have no source page, so the link falls back to a web search.
-                link(String(localized: "powered by \(source)"), to: sourceURL ?? state.searchURL)
-            }
+        case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding):
+            TextAnswerView(heading: heading, answer: answer, source: source, sourceURL: sourceURL,
+                           imageURL: imageURL, grounding: grounding, shareText: state.result.copyText)
 
         case .list(let items, let source):
             AnswerCard(shareText: state.result.copyText) {
@@ -122,6 +95,101 @@ struct ResultView: View {
                 .accessibilityLabel(label)
         } else {
             Text(label)
+        }
+    }
+}
+
+/// A sourced text answer. The source line is the toggle for "Why this answer": the text the sentence
+/// was cut from, with a link to the page. With nothing more to show, the source line just opens the page.
+struct TextAnswerView: View {
+    @Environment(AppState.self) private var state
+    @Environment(\.openURL) private var openURL
+    let heading: String?
+    let answer: String
+    let source: String
+    let sourceURL: String?
+    let imageURL: String?
+    let grounding: String?
+    let shareText: String?
+    @State private var showWhy = false
+
+    /// The grounding text, only when it says more than the sentence did.
+    private var whyText: String? {
+        guard let g = grounding?.trimmingCharacters(in: .whitespacesAndNewlines), !g.isEmpty,
+              g != answer.trimmingCharacters(in: .whitespacesAndNewlines) else { return nil }
+        return g
+    }
+
+    private var pageURL: String { sourceURL ?? state.searchURL }
+
+    var body: some View {
+        AnswerCard(shareText: shareText) {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
+                    if let imageURL, let url = URL(string: imageURL) {
+                        AsyncImage(url: url) { phase in
+                            if case .success(let image) = phase {
+                                image.resizable().aspectRatio(contentMode: .fill)
+                                    .frame(width: 56, height: 56)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                        }
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        if let heading, !heading.isEmpty {
+                            Text(heading)
+                                .nimbleFont(15, weight: .bold)
+                                .foregroundStyle(Color.soft)
+                        }
+                        Text(answer)
+                            .nimbleFont(19)
+                            .foregroundStyle(Color.text)
+                            .lineSpacing(7)
+                            .textSelection(.enabled)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                if showWhy, let whyText {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(whyText)
+                            .nimbleFont(15)
+                            .foregroundStyle(Color.soft)
+                            .lineSpacing(4)
+                            .textSelection(.enabled)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if let u = URL(string: pageURL) {
+                            Button { openURL(u) } label: {
+                                Text(source)
+                                    .nimbleFont(13, weight: .medium)
+                                    .foregroundStyle(Color.bulbDeep)
+                                    .underline()
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .transition(.opacity)
+                }
+            }
+        } footer: {
+            if whyText != nil {
+                Button {
+                    withAnimation(.easeOut(duration: 0.2)) { showWhy.toggle() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("powered by \(source)")
+                        Image(systemName: showWhy ? "chevron.up" : "chevron.down")
+                            .font(.system(size: 9, weight: .bold))
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "powered by \(source)"))
+            } else if let u = URL(string: pageURL) {
+                Button { openURL(u) } label: { Text("powered by \(source)") }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(String(localized: "powered by \(source)"))
+            } else {
+                Text("powered by \(source)")
+            }
         }
     }
 }

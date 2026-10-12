@@ -128,7 +128,7 @@ async function ddg(query){
   if(d){
     const heading = d.Heading || query;
     if(d.Answer) return {title:heading, body:d.Answer, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
-    if(d.AbstractText) return {title:heading, body:first(d.AbstractText), src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
+    if(d.AbstractText) return {title:heading, body:first(d.AbstractText), src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null, grounding:d.AbstractText};
     if(d.Definition) return {title:heading, body:d.Definition, src:d.DefinitionSource||"DuckDuckGo", url:d.DefinitionURL};
   }
   return null;
@@ -144,7 +144,7 @@ async function wiki(query){
   if(!title || /^list of /i.test(title)) return null; // a list article's intro never answers the question
   const sum = await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
   if(!sum?.extract || sum.type==="disambiguation") return null;
-  return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null};
+  return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null, grounding:sum.extract};
 }
 
 // "What's primitive.dev?" is a question about a website, and Wikipedia answered it with the
@@ -160,7 +160,7 @@ async function site(query){
   // A page that only renders with JavaScript has no text in its HTML; say so rather than echo its <title>.
   const body = d && (d.description || [d.h1, d.text].filter(Boolean).join(". ") || (d.js ? "This site loads with JavaScript." : d.title));
   if(!body) return null;
-  return {title:d.title || d.siteName || host, body:first(body), src:host, url:`https://${host}`, icon:`https://www.google.com/s2/favicons?domain=${host}&sz=64`};
+  return {title:d.title || d.siteName || host, body:first(body), src:host, url:`https://${host}`, icon:`https://www.google.com/s2/favicons?domain=${host}&sz=64`, grounding:body};
 }
 
 // "define X" must never fall through to Wikipedia search: that turns "define nimble"
@@ -432,7 +432,14 @@ async function renderAnswer(query, opts){
     h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
       +(a.icon?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
       +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
-    credit=T("powered by {s}",{s:a.src});
+    // "Why this answer": the source line opens the exact text the sentence was cut from, with a link.
+    // Shown only when that text says more than the sentence did.
+    const why = typeof a.grounding==="string" && a.grounding.trim() && a.grounding.trim()!==a.body.trim();
+    if(why){
+      h+='<details class="why"><summary>'+esc(T("powered by {s}",{s:a.src}))+'</summary><p>'+esc(a.grounding.trim())+'</p>'
+        +'<a href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(a.src)+'</a></details>';
+      credit="";
+    } else credit=T("powered by {s}",{s:a.src});
   }
   else { h+="<p>"+T('No instant answer. Try a question, a sum, or "5 miles to km".')+"</p>"; }
   return {h, credit, kind:a.kind, a};

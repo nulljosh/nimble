@@ -476,7 +476,7 @@ final class QueryEngine: Sendable {
         if body.isEmpty { body = html.range(of: "<script", options: .caseInsensitive) != nil ? "This site loads with JavaScript." : title }
         guard !body.isEmpty else { return nil }
         return .text(heading: title.isEmpty ? host : title, body: firstSentence(body), source: host, sourceURL: pageURL,
-                     imageURL: "https://www.google.com/s2/favicons?domain=\(host)&sz=64")
+                     imageURL: "https://www.google.com/s2/favicons?domain=\(host)&sz=64", grounding: body)
     }
 
     func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer()) async -> QueryResult {
@@ -499,7 +499,7 @@ final class QueryEngine: Sendable {
         if let llmResult = await llm {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.
-            if case .text(_, let body, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
+            if case .text(_, let body, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
                let sourced = await ddg { return sourced }
             return llmResult
         }
@@ -534,7 +534,7 @@ final class QueryEngine: Sendable {
                 let source = ddg.abstractSource ?? "DuckDuckGo"
                 let sourceURL = ddg.abstractURL
                 let imageURL = ddg.image.flatMap { $0.isEmpty ? nil : "https://duckduckgo.com\($0)" }
-                return .text(heading: ddg.heading, body: firstSentence(abstract), source: source, sourceURL: sourceURL, imageURL: imageURL)
+                return .text(heading: ddg.heading, body: firstSentence(abstract), source: source, sourceURL: sourceURL, imageURL: imageURL, grounding: abstract)
             }
 
             if let topics = ddg.relatedTopics, !topics.isEmpty {
@@ -612,7 +612,8 @@ final class QueryEngine: Sendable {
                 body: firstSentence(extract),
                 source: "Wikipedia",
                 sourceURL: wiki.contentUrls?.desktop?.page,
-                imageURL: wiki.thumbnail?.source
+                imageURL: wiki.thumbnail?.source,
+                grounding: extract
             )
         } catch {
             return nil
