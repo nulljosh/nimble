@@ -80,6 +80,8 @@ final class AppState {
 
     var queryText: String = ""
     var result: QueryResult = .none
+    /// When a live text answer to a time-sensitive question was fetched; the card shows it as "as of". Nil otherwise.
+    var textAsOf: Freshness? = nil
     /// Why the free AI gave no answer for the current result, when its call failed. Nil otherwise.
     var aiError: String?
     var currentPlaceholder: String = ""
@@ -196,6 +198,7 @@ final class AppState {
         guard !text.isEmpty else { return }
         queryGeneration += 1
         let generation = queryGeneration
+        textAsOf = nil
 
         let encoded = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? text
         searchURL = "https://duckduckgo.com/?q=\(encoded)"
@@ -247,6 +250,7 @@ final class AppState {
                 guard let self, generation == self.queryGeneration else { return }
                 if let answer {
                     self.result = .text(heading: nil, body: answer, source: "On device", sourceURL: nil, imageURL: nil)
+                    self.textAsOf = QueryEngine.isTimeSensitive(text) ? Freshness(date: Date(), isDay: false) : nil
                     self.turns.add(text, answer)
                     self.remember(text)
                 } else {
@@ -296,6 +300,7 @@ final class AppState {
             let answer = await engine.query(text, ai: ai, useLLM: useLLM, turns: turns, note: note)
             guard let self, generation == self.queryGeneration else { return }
             self.result = answer
+            if case .text = answer, QueryEngine.isTimeSensitive(text) { self.textAsOf = Freshness(date: Date(), isDay: false) }
             self.aiError = note.aiError
             switch answer {
             case .error, .none, .loading: break

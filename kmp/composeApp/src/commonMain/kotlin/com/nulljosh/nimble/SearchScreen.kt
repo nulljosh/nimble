@@ -466,6 +466,10 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                     }
                     Text(answer.body, color = theme.text, fontSize = 16.sp, textDecoration = TextDecoration.Underline)
                     Spacer(Modifier.height(12.dp))
+                    answer.asOf?.let {
+                        AsOfLine(it, theme)
+                        Spacer(Modifier.height(12.dp))
+                    }
                     Text("Source: ${answer.source}", color = theme.muted, fontSize = 12.sp)
                     answer.grounding?.let {
                         Spacer(Modifier.height(8.dp))

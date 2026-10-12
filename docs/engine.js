@@ -461,6 +461,18 @@ function asOfLabel(when, day, tz){
 }
 const asOfNow = o => ({...o, asOf:new Date().toISOString()});
 
+// --- time-sensitive questions: the answer changes over time, so a text answer shows its fetch time. Same rule in Swift and Kotlin. ---
+const TS_PRESENT = /\b(current|currently|latest|now|today|tonight|right now|this year|this week|this month|as of|newest|recent|recently|incumbent|last)\b/;
+const TS_ROLE = /\b(ceo|cfo|chairman|president|prime minister|premier|mayor|governor|leader|champion|record|holds|population|price|cost|worth|winner|won|king|queen|monarch|ruler|chancellor|pope|head of)\b/;
+const TS_PAST = /^(who|when|where) (was|were)\b|\b(first|originally|founded|born|died|invented|discovered|history|historical|ancient|medieval)\b|\b(1[0-9]{3}|20[0-1][0-9]|202[0-4])\b/;
+// True when the answer can change over time. Lowercase, word-list only; history questions are false.
+function isTimeSensitive(query){
+  const s=String(query||"").toLowerCase();
+  if(TS_PRESENT.test(s)) return true;
+  if(TS_ROLE.test(s)) return !TS_PAST.test(s);
+  return false;
+}
+
 // --- markets: crypto (CoinGecko simple/price), stocks (Stooq daily CSV), currency pairs (Frankfurter series). ---
 // All keyless and called from the browser with a short timeout. A failed or unreadable source is
 // {kind:"market", unavailable:true}: the page shows a calm state, never a number we did not get,
@@ -978,7 +990,7 @@ async function answer(query, opts={}){
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};
   if(consent==="no"){
     const hit = labelIfGeneric(await firstOf(query, [ddg, wiki]), query);
-    return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit])} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
+    return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit]), ...(isTimeSensitive(query) ? {asOf:new Date().toISOString()} : {})} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
   }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const aiNote = {};
@@ -1007,7 +1019,7 @@ async function answer(query, opts={}){
   const wikiRefs = (ai?.refs || []).filter(r => !dd || norm(r.url) !== norm(dd.url)).filter(r => onTopic(r.title, query, hit && hit.body)).slice(0,2).map(r => ({src:r.title, url:r.url, grounding:r.grounding}));
   // The worker's aiError rides on the fallback only when the AI call failed and gave no answer.
   // Every online source came up empty: the offline pack, when there is one, answers instead of "none".
-  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2), ...(!ai && aiNote.aiError ? {aiError:aiNote.aiError} : {})} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
+  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2), ...(!ai && aiNote.aiError ? {aiError:aiNote.aiError} : {}), ...(isTimeSensitive(query) ? {asOf:new Date().toISOString()} : {})} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
 }
 
 // The consent card, same words as the native prompt. Pages wire the buttons by data-consent.
@@ -1145,7 +1157,7 @@ async function renderAnswer(query, opts){
     h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
       +photo
       +(a.icon&&!photo?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
-      +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
+      +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>'+fresh(a);
     // "Why this answer": the source line opens the exact text the sentence was cut from, with a link.
     // Shown only when that text says more than the sentence did.
     const why = typeof a.grounding==="string" && a.grounding.trim().length > a.body.trim().length;
@@ -1254,4 +1266,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};

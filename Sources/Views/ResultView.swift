@@ -27,7 +27,7 @@ struct ResultView: View {
         case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding, let sources, let photo, let background):
             TextAnswerView(heading: heading, answer: answer, source: source, sourceURL: sourceURL,
                            imageURL: imageURL, grounding: grounding, sources: sources, photo: photo, shareText: state.result.copyText,
-                           aiError: state.aiError, background: background)
+                           aiError: state.aiError, background: background, asOf: state.textAsOf)
 
         case .list(let items, let source):
             AnswerCard(shareText: state.result.copyText) {
@@ -212,6 +212,8 @@ struct TextAnswerView: View {
     var aiError: String? = nil
     /// The generic topic page for a specific question: the header says BACKGROUND and a caption leads the summary.
     var background: Bool = false
+    /// When a live text answer was fetched, for a time-sensitive question: the quiet "as of" line. Nil for offline pack and timeless answers.
+    var asOf: Freshness? = nil
     // Screenshots: `-shotWhy YES` opens the "Why this answer" block on launch.
     @State private var showWhy = UserDefaults.standard.bool(forKey: "shotWhy")
 
@@ -233,7 +235,7 @@ struct TextAnswerView: View {
     }
 
     var body: some View {
-        AnswerCard(shareText: shareText, eyebrow: QueryResult.eyebrow(background: background),
+        AnswerCard(shareText: shareText, freshness: asOf?.label(), eyebrow: QueryResult.eyebrow(background: background),
                    lead: QueryResult.leadLines(background: background, aiError: aiError, source: source)) {
             VStack(alignment: .leading, spacing: 16) {
                 if let photo, let url = URL(string: photo.url) {

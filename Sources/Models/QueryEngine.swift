@@ -632,6 +632,15 @@ final class QueryEngine: Sendable {
     }
 
     /// Gives a result the photo from another result when it has none of its own.
+    /// True when the answer can change over time, so a text answer shows its fetch time. Same word lists in web, Swift and Kotlin.
+    static func isTimeSensitive(_ query: String) -> Bool {
+        let s = query.lowercased()
+        if s.range(of: #"\b(current|currently|latest|now|today|tonight|right now|this year|this week|this month|as of|newest|recent|recently|incumbent|last)\b"#, options: .regularExpression) != nil { return true }
+        let role = s.range(of: #"\b(ceo|cfo|chairman|president|prime minister|premier|mayor|governor|leader|champion|record|holds|population|price|cost|worth|winner|won|king|queen|monarch|ruler|chancellor|pope|head of)\b"#, options: .regularExpression) != nil
+        let past = s.range(of: #"^(who|when|where) (was|were)\b|\b(first|originally|founded|born|died|invented|discovered|history|historical|ancient|medieval)\b|\b(1[0-9]{3}|20[0-1][0-9]|202[0-4])\b"#, options: .regularExpression) != nil
+        return role && !past
+    }
+
     static func keepingPhoto(_ result: QueryResult, from other: QueryResult) -> QueryResult {
         guard case .text(let h, let b, let s, let su, let iu, let g, let srcs, nil, let bg) = result,
               case .text(_, _, _, _, _, _, _, let photo?, _) = other else { return result }

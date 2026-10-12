@@ -44,6 +44,8 @@ sealed class Answer {
         val aiNote: String? = null,
         /** True when a Wikipedia topic page answers a specific question: it is background, never the answer. */
         val background: Boolean = false,
+        /** When a live text answer was fetched, for a time-sensitive question. Null for timeless answers and the offline pack (its source line has the pack date). */
+        val asOf: Freshness? = null,
     ) : Answer()
     /** "news" or "what's happening in <place>": up to three headlines from the worker's RSS route. */
     data class News(val items: List<NewsItem>, val source: String, val asOf: Freshness? = null) : Answer()
@@ -137,7 +139,7 @@ class AnswerClient(
         val aiFailures = mutableListOf<String>()
         when (val ai = gemma(input, aiFailures)) {
             is Answer.Text -> {
-                val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}")
+                val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}", asOf = asOfForText(input))
                 return TopicPhoto.withTopic(answer, input) { fetchText(it) }
             }
             // The split stands unless DDG's sourced answer backs one of the two; then the normal path below runs (the web's rule).
@@ -149,12 +151,12 @@ class AnswerClient(
         }
 
         val (ddgQuery, wikiQuery) = QueryEngine.preprocess(input)
-        ddg(ddgQuery)?.let { return it }
+        ddg(ddgQuery)?.let { return it.copy(asOf = asOfForText(input)) }
         WikiFallback.answer(wikiQuery) { fetchText(it) }?.let { wiki ->
             // A page's own lead photo stays; otherwise the photo is the one of the entity the sentence names (TopicPhoto).
             val pic = if (wiki.photoUrl != null) wiki else TopicPhoto.lookup(input, wiki.body) { fetchText(it) }
                 ?.let { wiki.copy(photoUrl = it.photoUrl, photoCredit = it.photoCredit) } ?: wiki
-            return QueryEngine.labelIfGeneric(pic.copy(aiNote = aiFailures.lastOrNull()?.let { aiRestingNote(it, wiki.source) }), input)
+            return QueryEngine.labelIfGeneric(pic.copy(aiNote = aiFailures.lastOrNull()?.let { aiRestingNote(it, wiki.source) }, asOf = asOfForText(input)), input)
         }
 
         return Answer.Miss(
