@@ -6,6 +6,7 @@ Keep Nimble moving with one small, shippable slice at a time: fix what App Revie
 
 ## Where things stand
 
+- Version 5.15.0 (was 5.14.5): markets card for crypto (CoinGecko), currency pairs (Frankfurter, the existing FX source) and stocks (Stooq, which now answers scripted clients with a browser challenge, so stock quotes show the calm "Quote unavailable right now" state and no price); time-sensitive answers carry a quiet "as of" line. Web first, zero violations at 390, 768 and 1440 in light and dark. Next slice: Swift and Kotlin parity for the markets card and the as-of line.
 - Version 5.14.1 (was 5.14.0): web surfaces (landing, app, brand kit) pass the UI constraint measure at 390, 768 and 1440 in light and dark, zero violations: spacing, 44px targets, type scale, AA contrast, gutters, 4px line heights.
 - Version 5.14.0 (was 5.13.13): footer Why toggle, source links and resting note now meet 44pt taps and AA contrast on iPhone. Current state, not history: answers carry a photo when the picture belongs to the entity the answer names, credited "<Title> · Wikipedia" on web, Swift, Mac and Kotlin; the Why text opens on the Wikipedia page behind any answer that has none of its own; the proxy returns `topic`, `topicUrl` and `aiError`.
 - When the free AI fails (quota or outage), the Worker says why in `aiError` and the app shows "The free AI is resting, showing Wikipedia." Joshua declined the $5 paid plan: Workers AI stays on the free tier, 10,000 neurons a day.

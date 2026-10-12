@@ -30,7 +30,7 @@ test("units", () => {
 });
 
 test("currency expr", () => {
-  assert.deepEqual(E.currencyExpr("100 usd to eur"), {v:100, from:"USD", to:"EUR"});
+  assert.deepEqual(E.currencyExpr("100 usd to eur"), {v:100, from:"USD", to:"EUR", pair:false});
   assert.equal(E.currencyExpr("100 km to mi"), null);
 });
 

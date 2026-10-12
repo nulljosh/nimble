@@ -25,7 +25,9 @@ test("weather is a card", async () => {
   setup();
   try {
     const a = await E.answer("weather in Vancouver");
-    assert.deepEqual(a, { kind: "card", big: "12", unit: "°C", sub: "Vancouver, Canada, overcast, wind 12 km/h", src: "Open-Meteo", url: "https://open-meteo.com" });
+    const { asOf, ...weatherCard } = a; // the time it was asked is checked on its own: it is the clock
+    assert.ok(!isNaN(Date.parse(asOf)));
+    assert.deepEqual(weatherCard, { kind: "card", big: "12", unit: "°C", sub: "Vancouver, Canada, overcast, wind 12 km/h", src: "Open-Meteo", url: "https://open-meteo.com" });
     const r = await E.renderAnswer("weather in Vancouver");
     assert.match(r.h, /mockup-big num">12 °C</);
     assert.match(r.h, /<p class="num">Vancouver, Canada, overcast, wind 12 km\/h<\/p>/);

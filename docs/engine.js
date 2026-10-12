@@ -405,18 +405,111 @@ async function etymology(query){
 }
 
 // --- currency ("100 usd to eur") via Frankfurter (ECB rates, CORS-open, no key) ---
+// ECB codes only: Frankfurter serves these, so a pair of words like "the to and" never reads as money.
+const CCY = new Set("USD EUR GBP JPY CAD AUD CHF CNY INR MXN BRL KRW SEK NOK DKK NZD SGD HKD ZAR TRY PLN CZK HUF ILS THB PHP IDR MYR ISK RON BGN".split(" "));
+// "100 usd to eur" is an amount. "eur to usd" and "eur to usd rate" have no amount: those are a pair quote (markets).
 function currencyExpr(s){
-  const m=/^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$/i.exec(s.trim());
-  return m && !U[m[2].toLowerCase()] && !U[m[3].toLowerCase()] ? {v:+m[1],from:m[2].toUpperCase(),to:m[3].toUpperCase()} : null;
+  const m=/^(?:convert\s+)?(?:(-?\d+(?:\.\d+)?)\s*)?([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})(\s+rate)?\??$/i.exec(s.trim());
+  if(!m || U[m[2].toLowerCase()] || U[m[3].toLowerCase()]) return null;
+  const pair = m[1]===undefined;
+  if(pair && !(CCY.has(m[2].toUpperCase()) && CCY.has(m[3].toUpperCase()))) return null;
+  return {v: m[1]===undefined ? 1 : +m[1], from:m[2].toUpperCase(), to:m[3].toUpperCase(), pair};
 }
 async function currency(query){
-  const c=currencyExpr(query); if(!c) return null;
+  const c=currencyExpr(query); if(!c || c.pair) return null;
   const d=await getJSON(`https://api.frankfurter.dev/v1/latest?base=${c.from}&symbols=${c.to}`)
        || await getJSON(`https://open.er-api.com/v6/latest/${c.from}`); // fallback: same rate map shape
   const rate=d?.rates?.[c.to]; if(!rate) return null;
   const fmt=n=>n.toLocaleString("en",{minimumFractionDigits:2,maximumFractionDigits:2});
-  return card(fmt(c.v*rate), c.to, `${c.v.toLocaleString("en")} ${c.from} at today's rate`,
-    d.base?"Frankfurter":"ExchangeRate-API", d.base?"https://frankfurter.dev":"https://www.exchangerate-api.com");
+  return {...card(fmt(c.v*rate), c.to, `${c.v.toLocaleString("en")} ${c.from} at today's rate`,
+    d.base?"Frankfurter":"ExchangeRate-API", d.base?"https://frankfurter.dev":"https://www.exchangerate-api.com"),
+    ...(d.date ? {asOf:d.date, asOfDay:true} : {})};
+}
+
+// --- freshness: "as of Oct 12, 3:41 pm" for anything time-sensitive. asOf is an ISO time, or a date with asOfDay. ---
+// Pure: the day or time is formatted from the value, never from the clock, so tests can pin it with a zone.
+function asOfLabel(when, day, tz){
+  const d=new Date(when); if(isNaN(d)) return "";
+  if(day) return new Intl.DateTimeFormat("en",{month:"short",day:"numeric",timeZone:"UTC"}).format(d);
+  return new Intl.DateTimeFormat("en",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit",...(tz?{timeZone:tz}:{})}).format(d).replace(/\b(AM|PM)\b/,m=>m.toLowerCase());
+}
+const asOfNow = o => ({...o, asOf:new Date().toISOString()});
+
+// --- markets: crypto (CoinGecko simple/price), stocks (Stooq daily CSV), currency pairs (Frankfurter series). ---
+// All keyless and called from the browser with a short timeout. A failed or unreadable source is
+// {kind:"market", unavailable:true}: the page shows a calm state, never a number we did not get,
+// and the AI never runs for a price question.
+const QUOTE_TIMEOUT_MS = 4000;
+const CRYPTO = {bitcoin:["bitcoin","Bitcoin","BTC"], btc:["bitcoin","Bitcoin","BTC"], ethereum:["ethereum","Ethereum","ETH"], eth:["ethereum","Ethereum","ETH"],
+  solana:["solana","Solana","SOL"], sol:["solana","Solana","SOL"], dogecoin:["dogecoin","Dogecoin","DOGE"], doge:["dogecoin","Dogecoin","DOGE"]};
+const CRYPTO_KEYS = Object.keys(CRYPTO).join("|");
+// "bitcoin price", "price of bitcoin", "what's the current price of ethereum", or a bare "btc" (the short names only).
+const CRYPTO_RE = new RegExp(`^(?:(?:what(?:'s| is) the )?(?:current )?price (?:of |for )?(${CRYPTO_KEYS})|(${CRYPTO_KEYS}) price|(btc|eth|sol|doge))\\s*\\??$`, "i");
+// Capitals that are words or acronyms: a bare "AI" or "US" is never a stock lookup.
+const NOT_TICKER = new Set("AI US UK EU OK TV IT ID PC CEO CFO NASA USA GDP CPU GPU API URL DNA HTML CSS JS FAQ NYC UN OR AND THE ARE NOT ALL ANY NEW CAN PDF SMS VPN RAM SSD USB TBD WHO HOW WHY YES NO DJ MP PM AM TO OF IN IS ON AT BY DO GO UP".split(" "));
+// "AAPL", "$AAPL", "AAPL stock", "stock price of AAPL", "aapl price". A bare word needs the capitals (so "who is apple" never matches).
+const STOCK_RE = /^(?:(?:what(?:'s| is) the )?(?:stock )?(?:price|quote) (?:of |for )?)?\$?([A-Za-z]{1,5})(?: (?:stock|stock price|share price|shares?|price|quote))?\s*\??$/i;
+function stockSymbol(q){
+  const s=q.trim(), m=STOCK_RE.exec(s); if(!m) return null;
+  const bare = s === m[1] || s === "$"+m[1];
+  if(bare && !(/^\$?[A-Z]{2,5}$/.test(s) && !NOT_TICKER.has(m[1]))) return null;
+  return m[1].toUpperCase();
+}
+async function quoteText(url){
+  try{ const r=await fetch(url,{signal:AbortSignal.timeout(QUOTE_TIMEOUT_MS)}); return r.ok ? await r.text() : null; }catch{ return null; }
+}
+const usd = n => new Intl.NumberFormat("en",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:n<1?4:2}).format(n);
+// "Up 0.56% in the last 24 hours", "Down 1.20% on Oct 9", "Flat today". Words carry the direction, not colour.
+function changeText(pct, when){
+  if(typeof pct!=="number" || !isFinite(pct)) return "";
+  const a=Math.abs(pct).toFixed(2);
+  return a==="0.00" ? "Flat "+when : (pct>0?"Up ":"Down ")+a+"% "+when;
+}
+const dayLabel = iso => asOfLabel(iso, true);
+// Stooq daily CSV (Date,Open,High,Low,Close,Volume). The last two closes give the change. Anything else is null.
+function parseDaily(csv){
+  const rows=String(csv||"").trim().split(/\r?\n/).map(l=>l.split(","));
+  const head=rows.shift()||[];
+  const iD=head.findIndex(h=>/^date$/i.test(h.trim())), iC=head.findIndex(h=>/^close$/i.test(h.trim()));
+  if(iD<0 || iC<0) return null;
+  const pts=rows.map(r=>({date:(r[iD]||"").trim(), close:+r[iC]}))
+    .filter(p=>/^\d{4}-\d{2}-\d{2}$/.test(p.date) && isFinite(p.close) && p.close>0)
+    .sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  if(pts.length<2) return null;
+  const last=pts[pts.length-1], prev=pts[pts.length-2];
+  return {date:last.date, close:last.close, pct:(last.close-prev.close)/prev.close*100};
+}
+async function cryptoCard(key){
+  const [id,name,sym]=CRYPTO[key];
+  const base={kind:"market", title:`${name} (${sym})`, src:"CoinGecko", url:"https://www.coingecko.com"};
+  const d=await getJSON(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd&include_24hr_change=true&include_last_updated_at=true`,{timeout:QUOTE_TIMEOUT_MS});
+  const q=d?.[id];
+  if(typeof q?.usd!=="number" || !isFinite(q.usd)) return {...base, unavailable:true};
+  return {...base, big:usd(q.usd), change:changeText(q.usd_24h_change, "in the last 24 hours"),
+    asOf:new Date((q.last_updated_at || Date.now()/1000)*1000).toISOString()};
+}
+async function stockCard(sym){
+  const base={kind:"market", title:sym, src:"Stooq", url:`https://stooq.com/q/?s=${sym.toLowerCase()}.us`};
+  const p=parseDaily(await quoteText(`https://stooq.com/q/d/l/?s=${sym.toLowerCase()}.us&i=d`));
+  if(!p) return {...base, unavailable:true};
+  return {...base, big:usd(p.close), change:changeText(p.pct, "on "+dayLabel(p.date)), asOf:p.date, asOfDay:true};
+}
+async function fxCard(from,to){
+  const base={kind:"market", title:`${from} to ${to}`, src:"Frankfurter", url:"https://frankfurter.dev"};
+  const start=new Date(Date.now()-14*864e5).toISOString().slice(0,10);
+  const d=await getJSON(`https://api.frankfurter.dev/v1/${start}..?base=${from}&symbols=${to}`,{timeout:QUOTE_TIMEOUT_MS});
+  const days=Object.keys(d?.rates||{}).filter(k=>typeof d.rates[k]?.[to]==="number").sort();
+  if(days.length<2) return {...base, unavailable:true};
+  const day=days[days.length-1], last=d.rates[day][to], prev=d.rates[days[days.length-2]][to];
+  return {...base, big:last.toFixed(4)+" "+to, change:changeText((last-prev)/prev*100, "on "+dayLabel(day)), asOf:day, asOfDay:true};
+}
+// The market card for a query, or null when the query is not a market question (the chain goes on).
+async function market(query){
+  const q=query.trim();
+  const c=CRYPTO_RE.exec(q); if(c) return cryptoCard((c[1]||c[2]||c[3]).toLowerCase());
+  const fx=currencyExpr(q); if(fx && fx.pair) return fxCard(fx.from, fx.to);
+  const sym=stockSymbol(q); if(sym) return stockCard(sym);
+  return null;
 }
 
 // --- weather / local time via Open-Meteo (geocoding + forecast, no key) ---
@@ -430,7 +523,7 @@ async function weather(query){
   const w=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m`);
   const c=w?.current; if(!c) return null;
   const sky={0:"clear",1:"mostly clear",2:"partly cloudy",3:"overcast",45:"fog",48:"fog",51:"drizzle",53:"drizzle",55:"drizzle",61:"rain",63:"rain",65:"heavy rain",71:"snow",73:"snow",75:"heavy snow",80:"showers",81:"showers",82:"heavy showers",95:"thunderstorm"}[c.weather_code]||"";
-  return card(Math.round(c.temperature_2m), "°C", [loc.name, loc.country, sky, `wind ${Math.round(c.wind_speed_10m)} km/h`].filter(Boolean).join(", "), "Open-Meteo", "https://open-meteo.com");
+  return asOfNow(card(Math.round(c.temperature_2m), "°C", [loc.name, loc.country, sky, `wind ${Math.round(c.wind_speed_10m)} km/h`].filter(Boolean).join(", "), "Open-Meteo", "https://open-meteo.com"));
 }
 async function localTime(query){
   const place=/^(?:what(?:'s| is) the )?(?:current )?time (?:in|at) (.+?)\??$/i.exec(query.trim())?.[1]; if(!place) return null;
@@ -439,7 +532,7 @@ async function localTime(query){
     const now=new Date(), tz=loc.timezone;
     const big=new Intl.DateTimeFormat("en-GB",{timeZone:tz,hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(now);
     const day=new Intl.DateTimeFormat("en",{timeZone:tz,weekday:"long",month:"long",day:"numeric"}).format(now);
-    return card(big, loc.name, `${day}, ${tz}`, "Open-Meteo", "https://open-meteo.com");
+    return asOfNow(card(big, loc.name, `${day}, ${tz}`, "Open-Meteo", "https://open-meteo.com"));
   }catch{ return null; }
 }
 
@@ -571,7 +664,7 @@ async function news(query){
   const d = await getJSON(`${ANSWER_PROXY}/?news=${encodeURIComponent(place)}`);
   const items = (d?.items||[]).filter(i=>i && i.url && i.sentence && i.outlet).slice(0,3)
     .map(i=>({...i, image: i.image && /^https:\/\//.test(i.image.url||"") ? i.image : null}));
-  return items.length ? {kind:"news", items, src:[...new Set(items.map(i=>i.outlet))].join(", ")} : null;
+  return items.length ? {kind:"news", items, src:[...new Set(items.map(i=>i.outlet))].join(", "), asOf:new Date().toISOString()} : null;
 }
 
 // First non-null wins, in order. Sources are functions so a throw in one never kills the chain.
@@ -593,6 +686,8 @@ async function answer(query, opts={}){
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
+  const mk = await market(query).catch(()=>null);
+  if(mk) return mk;
   const live = await firstOf(query, [identity, news, site, etymology, dictionary, weather, localTime]);
   if(live) return live.kind ? live : {kind:"text", ...live, sources:sourcesFor(live.body, [live])};
   const consent = aiConsent() || opts.ifUnset || null;
@@ -668,13 +763,23 @@ const searchHistory = {
 async function renderAnswer(query, opts){
   const esc=t=>String(t).replace(/</g,"&lt;");
   const T=(opts&&opts.t)||plain;
+  // The freshness line: quiet, under the answer, same left edge as the source row.
+  const fresh=x=>x.asOf?'<p class="as-of num">'+esc(T("as of {t}",{t:asOfLabel(x.asOf,x.asOfDay)}))+'</p>':'';
   const a=(opts&&opts.scripted)||await answer(query, opts); let h='<div class="mockup-label">'+T("Answer")+'</div>', credit='';
   if(a.kind==="convert"){ h+='<div class="mockup-big num">'+a.to+' '+esc(a.toUnit)+'</div><p class="num">'+a.from+' '+esc(a.fromUnit)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="card"){
     // Same markup as convert; the whole card opens its source like a text answer does.
     const href=esc(a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query)).replace(/"/g,"&quot;");
-    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big num">'+esc(a.big)+(a.unit?" "+esc(a.unit):"")+'</div><p class="num">'+esc(a.sub)+'</p></a>';
+    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big num">'+esc(a.big)+(a.unit?" "+esc(a.unit):"")+'</div><p class="num">'+esc(a.sub)+'</p></a>'+fresh(a);
     credit=T("powered by {s}",{s:a.src});
+  }
+  else if(a.kind==="market"){
+    // Title, the price, the change in words, then the freshness line and the source. A failed quote shows a calm state, never a number.
+    if(a.unavailable){ h+='<p class="market-title">'+esc(a.title)+'</p><p class="market-state">'+esc(T("Quote unavailable right now"))+'</p>'; }
+    else {
+      h+='<a class="mockup-link mockup-card" href="'+esc(a.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener"><p class="market-title">'+esc(a.title)+'</p><div class="market-price num">'+esc(a.big)+'</div>'+(a.change?'<p class="market-change num">'+esc(a.change)+'</p>':'')+'</a>'+fresh(a);
+      credit=T("powered by {s}",{s:a.src});
+    }
   }
   else if(a.kind==="math"){
     h+='<div class="mockup-big num">'+a.value+'</div>';
@@ -688,7 +793,7 @@ async function renderAnswer(query, opts){
     // picture gets a 56px square beside its sentence; without one the row is the plain layout.
     h+='<ol class="news">'+a.items.map(i=>'<li'+(i.image?' class="has-thumb"':'')+'>'
       +(i.image?thumbHTML(i.image.url, i.title||i.sentence):'')
-      +'<div><a href="'+esc(i.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(i.sentence)+'</a> <span class="news-src">'+esc(i.outlet)+'</span></div></li>').join("")+'</ol>';
+      +'<div><a href="'+esc(i.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(i.sentence)+'</a> <span class="news-src">'+esc(i.outlet)+'</span></div></li>').join("")+'</ol>'+fresh(a);
     credit=T("powered by {s}",{s:a.src});
   }
   else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
@@ -733,6 +838,7 @@ function shareText(a){
     case "convert": return a.to+" "+a.toUnit;
     case "graph": return "y = "+a.expr;
     case "card": return a.big+(a.unit?(a.unit[0]==="\u00B0"?"":" ")+a.unit:"")+(a.sub?", "+a.sub:"");
+    case "market": return a.unavailable ? null : a.title+" "+a.big+(a.change?", "+a.change:"");
     case "text": return a.body ? first(a.body) : null;
     case "news": return a.items[0] ? a.items[0].sentence : null;
     default: return null;
@@ -810,4 +916,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
