@@ -166,12 +166,14 @@ function agrees(body, text){
   const have = new Set(keyWords(text)), nums = body.match(/\d+/g) || [];
   return want.filter(w => have.has(w)).length >= Math.ceil(want.length * 0.6) && nums.every(n => text.includes(n));
 }
+// URLs compare decoded and lowercase, so DDG's and Wikipedia's spellings of one article match.
+const norm = u => { try { return decodeURIComponent(String(u)).toLowerCase(); } catch { return String(u).toLowerCase(); } };
 // Up to three linked sources, first candidate first, deduped by URL. The first candidate is the
 // primary and needs no agreement; every other candidate must back the sentence. Never a new fetch.
 function sourcesFor(body, candidates){
   const out = [];
   candidates.forEach((c, i) => {
-    if(!c || !c.url || out.length >= 3 || out.some(o => o.url === c.url)) return;
+    if(!c || !c.url || out.length >= 3 || out.some(o => norm(o.url) === norm(c.url))) return;
     if(i === 0 || agrees(body, c.grounding || c.body)) out.push({name:c.src, url:c.url});
   });
   return out;
@@ -391,7 +393,7 @@ async function gemma(query){
   let c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
   if(e.key && !c.apiKey){ c = {engine:"nimble"}; e = ENGINES.nimble; } // no key = free proxy
   const base = c.baseURL || e.base, model = c.model || e.model, H = {"Content-Type":"application/json"};
-  let d, text, src, image = null;
+  let d, text, src, image = null, refs = [];
   if(c.engine==="claude" && e===ENGINES.claude){
     d = await getJSON(base+"/v1/messages", {method:"POST", headers:{...H, "x-api-key":c.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({model, max_tokens:256, system:SYSTEM, messages:[...turnMessages(), {role:"user", content:query}]})});
@@ -408,9 +410,11 @@ async function gemma(query){
     d = await getJSON(ANSWER_PROXY, {method:"POST", headers:H, body:JSON.stringify({q:query, turns:turns.list()})});
     text = d?.answer; src = d?.source||"Nimble AI";
     image = d?.image && /^https:\/\//.test(d.image.url||"") ? d.image : null;
+    // Wikipedia pages behind the proxy's answer; the worker has already matched them to the sentence.
+    refs = Array.isArray(d?.refs) ? d.refs.filter(r => r && /^https:\/\//.test(r.url||"") && r.extract).map(r => ({src:"Wikipedia", title:r.title||"Wikipedia", url:r.url, grounding:r.extract})) : [];
   }
   const a = (text||"").trim();
-  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {})} : null;
+  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {}), ...(refs.length ? {refs} : {})} : null;
 }
 
 // "Who made you" is about us, not the Wikipedia article for whatever the words match (it used to
@@ -465,7 +469,9 @@ async function answer(query, opts={}){
   const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await firstOf(query, [wiki]));
   if(hit) turns.add(query, hit.body);
   // The model names no page, so the DDG abstract is the only link here; it must back the sentence.
-  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd])} : {kind:"none"};
+  // The proxy's Wikipedia pages fill the second link (web shows at most two): the first ones that are not DDG's own article.
+  const wikiRefs = (ai?.refs || []).filter(r => !dd || norm(r.url) !== norm(dd.url)).slice(0,2).map(r => ({src:r.title, url:r.url, grounding:r.grounding}));
+  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2)} : {kind:"none"};
 }
 
 // The consent card, same words as the native prompt. Pages wire the buttons by data-consent.

@@ -3,13 +3,13 @@
 const test = require("node:test"), assert = require("node:assert/strict");
 const E = require("../docs/engine.js");
 
-function stubFetch({ answer, ddg, site }) {
+function stubFetch({ answer, ddg, site, refs }) {
   const real = global.fetch, calls = [];
   global.fetch = async (url, init = {}) => {
     calls.push(String(url));
     const body = String(url).includes("?site=") ? (site || null)
       : String(url).includes("?ddg=") ? (ddg || null)
-      : (init.method === "POST" ? (answer ? { answer, source: "Gemma + Qwen" } : null) : null);
+      : (init.method === "POST" ? (answer ? { answer, source: "Gemma + Qwen", ...(refs ? { refs } : {}) } : null) : null);
     return new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
   };
   return { calls, restore: () => { global.fetch = real; } };
@@ -76,4 +76,48 @@ test("sourceRow renders names as links, joined by a middle dot, with no extra wo
     { name: "DuckDuckGo", url: "https://duckduckgo.com/?q=ottawa" },
   ]);
   assert.equal(html, '<a href="https://en.wikipedia.org/wiki/Ottawa" target="_blank" rel="noopener">Wikipedia</a> · <a href="https://duckduckgo.com/?q=ottawa" target="_blank" rel="noopener">DuckDuckGo</a>');
+});
+
+test("a model answer lists the proxy's Wikipedia page as a second source, after DDG's", async () => {
+  const hamlet = { title: "Hamlet", url: "https://en.wikipedia.org/wiki/Hamlet", extract: "Hamlet is a tragedy written by William Shakespeare." };
+  const shakes = { title: "William Shakespeare", url: "https://en.wikipedia.org/wiki/William_Shakespeare", extract: "William Shakespeare was an English playwright. He wrote Hamlet." };
+  const s = stubFetch({
+    answer: "William Shakespeare wrote Hamlet.",
+    refs: [hamlet, shakes],
+    ddg: { AbstractText: "Hamlet is a tragedy written by William Shakespeare.", AbstractURL: "https://en.wikipedia.org/wiki/Hamlet", AbstractSource: "Wikipedia" },
+  });
+  try {
+    const a = await E.answer("who wrote hamlet", { ifUnset: "yes" });
+    assert.equal(a.kind, "text");
+    assert.deepEqual(a.sources, [
+      { name: "Wikipedia", url: "https://en.wikipedia.org/wiki/Hamlet" },
+      { name: "William Shakespeare", url: "https://en.wikipedia.org/wiki/William_Shakespeare" },
+    ]);
+  } finally { s.restore(); }
+});
+
+test("the proxy's Wikipedia page for the same article as DDG's adds nothing, whatever the spelling", async () => {
+  const hamlet = { title: "Hamlet", url: "https://en.wikipedia.org/wiki/Hamlet", extract: "Hamlet is a tragedy written by William Shakespeare." };
+  for (const abstractURL of ["https://en.wikipedia.org/wiki/Hamlet", "https://EN.wikipedia.org/wiki/hamlet"]) {
+    const s = stubFetch({
+      answer: "William Shakespeare wrote Hamlet.",
+      refs: [hamlet],
+      ddg: { AbstractText: "Hamlet is a tragedy written by William Shakespeare.", AbstractURL: abstractURL, AbstractSource: "Other" },
+    });
+    try {
+      const a = await E.answer("who wrote hamlet", { ifUnset: "yes" });
+      assert.equal(a.sources.length, 1, abstractURL);
+    } finally { s.restore(); }
+  }
+});
+
+test("with no DDG abstract, the proxy's first two Wikipedia pages make the two sources, named by article", async () => {
+  const hamlet = { title: "Hamlet", url: "https://en.wikipedia.org/wiki/Hamlet", extract: "Hamlet is a tragedy written by William Shakespeare." };
+  const film = { title: "Hamlet (1996 film)", url: "https://en.wikipedia.org/wiki/Hamlet_(1996_film)", extract: "Hamlet is a film of Shakespeare by William Hamlet wrote." };
+  const third = { title: "Third", url: "https://en.wikipedia.org/wiki/Third", extract: "Unrelated text." };
+  const s = stubFetch({ answer: "William Shakespeare wrote Hamlet.", refs: [hamlet, film, third] });
+  try {
+    const a = await E.answer("who wrote hamlet", { ifUnset: "yes" });
+    assert.deepEqual(a.sources.map(x => x.name), ["Hamlet", "Hamlet (1996 film)"]);
+  } finally { s.restore(); }
 });

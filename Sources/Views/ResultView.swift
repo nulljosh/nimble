@@ -166,17 +166,22 @@ struct TextAnswerView: View {
             VStack(alignment: .leading, spacing: 14) {
                 if let photo, let url = URL(string: photo.url) {
                     // 16:9 box reserved up front, the cream placeholder until the picture loads, so nothing jumps.
+                    // Fill and anchor to the top: the picture covers the box and crops from the bottom, so heads stay in frame.
                     Color.clear
                         .aspectRatio(16.0 / 9.0, contentMode: .fit)
                         .frame(maxWidth: .infinity)
                         .overlay {
-                            AsyncImage(url: url) { phase in
-                                if case .success(let image) = phase {
-                                    image.resizable().aspectRatio(contentMode: .fill)
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                } else {
-                                    Color.bg2
+                            GeometryReader { geo in
+                                AsyncImage(url: url) { phase in
+                                    if case .success(let image) = phase {
+                                        image.resizable().aspectRatio(contentMode: .fill)
+                                            .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
+                                    } else {
+                                        Color.bg2
+                                    }
                                 }
+                                .frame(width: geo.size.width, height: geo.size.height)
+                                .clipped()
                             }
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 12))

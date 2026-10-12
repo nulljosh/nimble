@@ -52,6 +52,22 @@ function photoFor(answer, pages) {
   }
   return null;
 }
+// The Wikipedia pages behind an AI answer, up to three, each with the same word-overlap test as the
+// photo. The client lists one of them as a second source next to DDG. URLs match DDG's format
+// (underscores, the article's own title) so the client can dedupe them.
+function groundingRefs(answer, pages) {
+  const keys = (s) => (s.toLowerCase().match(/[a-z]{4,}/g) || []).filter((w) => !GLUE.has(w));
+  const want = [...new Set(keys(answer))];
+  if (!want.length) return [];
+  return pages
+    .filter((p) => p.title && p.extract && !/^list of /i.test(p.title))
+    .filter((p) => {
+      const have = new Set(keys(p.extract));
+      return want.filter((w) => have.has(w)).length >= Math.ceil(want.length * 0.6);
+    })
+    .slice(0, 3)
+    .map((p) => ({ title: p.title, url: encodeURI(`https://en.wikipedia.org/wiki/${p.title.replace(/ /g, "_")}`), extract: p.extract }));
+}
 const GLUE = new Set("that this with from which were have they their also been into about after there these those when where while would could should will".split(" "));
 
 // Follow-up context from the client: at most 3 {q, a} string pairs, each side cut to 300 chars.
@@ -144,7 +160,8 @@ export default {
     const { text: context, pages } = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
     const reply = (o) => {
       const image = o.answer !== "UNKNOWN" ? photoFor(o.answer, pages) : null;
-      return json(image ? { ...o, image } : o);
+      const refs = o.answer !== "UNKNOWN" ? groundingRefs(o.answer, pages) : [];
+      return json({ ...o, ...(image ? { image } : {}), ...(refs.length ? { refs } : {}) });
     };
     const today = new Date().toISOString().slice(0, 10);
     const system =

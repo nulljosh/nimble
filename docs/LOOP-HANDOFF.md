@@ -6,6 +6,7 @@ Keep Nimble moving after 5.0.0 with one small, shippable slice at a time: fix wh
 
 ## Where things stand
 
+- 5.11.1 (2026-10-11): answer photos are top-anchored (`object-position: center 20%` on web, top-aligned fill in the 16:9 frame on Swift) and capped at 220px on phones. Web answers show a second source: the worker's `refs` (up to three Wikipedia pages that back the AI answer) fill it when DDG has no link of its own. Worker redeployed with wrangler, verified by curl.
 - Current version is 5.0.1 (2026-10-11). 5.0.0 was the last major.
 - iOS 5.0.1 is in App Review, submitted 2026-10-11 with fresh iPhone, iPad and Mac screenshots.
 - Mac 5.0.1 was cancelled and resubmitted with the fixed build (timestamp build number 202610110121). Apple blocks lowering a version, so 5.0.1 is the next number.
