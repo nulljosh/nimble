@@ -488,15 +488,15 @@ async function renderAnswer(query, opts){
   const esc=t=>String(t).replace(/</g,"&lt;");
   const T=(opts&&opts.t)||plain;
   const a=await answer(query, opts); let h='<div class="mockup-label">'+T("Answer")+'</div>', credit='';
-  if(a.kind==="convert"){ h+='<div class="mockup-big">'+a.to+' '+esc(a.toUnit)+'</div><p>'+a.from+' '+esc(a.fromUnit)+'</p>'; credit=T("computed offline"); }
+  if(a.kind==="convert"){ h+='<div class="mockup-big num">'+a.to+' '+esc(a.toUnit)+'</div><p class="num">'+a.from+' '+esc(a.fromUnit)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="card"){
     // Same markup as convert; the whole card opens its source like a text answer does.
     const href=esc(a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query)).replace(/"/g,"&quot;");
-    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big">'+esc(a.big)+(a.unit?" "+esc(a.unit):"")+'</div><p>'+esc(a.sub)+'</p></a>';
+    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big num">'+esc(a.big)+(a.unit?" "+esc(a.unit):"")+'</div><p class="num">'+esc(a.sub)+'</p></a>';
     credit=T("powered by {s}",{s:a.src});
   }
   else if(a.kind==="math"){
-    h+='<div class="mockup-big">'+a.value+'</div>';
+    h+='<div class="mockup-big num">'+a.value+'</div>';
     const steps = mathSteps(query);
     if(steps) h+='<details class="why steps"><summary>'+esc(T("Show steps"))+'</summary><ol>'+steps.map(l=>"<li>"+esc(l)+"</li>").join("")+"</ol></details>";
     credit=T("computed offline");

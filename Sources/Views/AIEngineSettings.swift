@@ -33,7 +33,7 @@ struct AIEngineSettings: View {
             }
             #endif
             Text("Your key stays on this device and is sent only to \(state.ai.engine.displayName).")
-                .font(.caption)
+                .font(.nimbleSmall)
                 .foregroundStyle(.secondary)
         }
     }
@@ -60,7 +60,7 @@ private struct SamanthaStatusRow: View {
                     case .running(let model):
                         Text(String(localized: "Samantha is running"))
                         Text(model)
-                            .font(.caption)
+                            .font(.nimbleSmall)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                             .truncationMode(.middle)

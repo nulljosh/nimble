@@ -27,8 +27,8 @@ test("weather is a card", async () => {
     const a = await E.answer("weather in Vancouver");
     assert.deepEqual(a, { kind: "card", big: "12", unit: "°C", sub: "Vancouver, Canada, overcast, wind 12 km/h", src: "Open-Meteo", url: "https://open-meteo.com" });
     const r = await E.renderAnswer("weather in Vancouver");
-    assert.match(r.h, /mockup-big">12 °C</);
-    assert.match(r.h, /<p>Vancouver, Canada, overcast, wind 12 km\/h<\/p>/);
+    assert.match(r.h, /mockup-big num">12 °C</);
+    assert.match(r.h, /<p class="num">Vancouver, Canada, overcast, wind 12 km\/h<\/p>/);
     assert.equal(r.credit, "powered by Open-Meteo");
     assert.equal(r.kind, "card");
   } finally { teardown(); }
@@ -40,8 +40,8 @@ test("currency is a card", async () => {
     const a = await E.answer("100 usd to cad");
     assert.deepEqual(a, { kind: "card", big: "137.12", unit: "CAD", sub: "100 USD at today's rate", src: "Frankfurter", url: "https://frankfurter.dev" });
     const r = await E.renderAnswer("100 usd to cad");
-    assert.match(r.h, /mockup-big">137\.12 CAD</);
-    assert.match(r.h, /<p>100 USD at today's rate<\/p>/);
+    assert.match(r.h, /mockup-big num">137\.12 CAD</);
+    assert.match(r.h, /<p class="num">100 USD at today's rate<\/p>/);
     assert.equal(r.credit, "powered by Frankfurter");
   } finally { teardown(); }
 });
@@ -56,7 +56,7 @@ test("local time is a card", async () => {
     assert.match(a.sub, /^\w+, \w+ \d+, America\/Vancouver$/);
     assert.equal(a.src, "Open-Meteo");
     const r = await E.renderAnswer("time in Vancouver");
-    assert.match(r.h, /mockup-big">\d\d:\d\d Vancouver</);
+    assert.match(r.h, /mockup-big num">\d\d:\d\d Vancouver</);
     assert.match(r.h, /href="https:\/\/open-meteo\.com"/);
   } finally { teardown(); }
 });
@@ -74,8 +74,8 @@ test("etymology is a card", async () => {
     const a = await E.answer("etymology of nimble");
     assert.deepEqual(a, { kind: "card", big: "nimble", unit: "", sub: "Derived from nymyl, Middle English", src: "Wordroot", url: "https://wordroot.jaybulb.com/#search=nimble" });
     const r = await E.renderAnswer("etymology of nimble");
-    assert.match(r.h, /mockup-big">nimble</);
-    assert.match(r.h, /<p>Derived from nymyl, Middle English<\/p>/);
+    assert.match(r.h, /mockup-big num">nimble</);
+    assert.match(r.h, /<p class="num">Derived from nymyl, Middle English<\/p>/);
     assert.equal(r.credit, "powered by Wordroot");
     assert.equal(r.kind, "card");
   } finally { teardown(); }

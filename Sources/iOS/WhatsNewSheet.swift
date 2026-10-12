@@ -23,7 +23,7 @@ struct WhatsNewSheet: View {
             .sheet(isPresented: $isPresented) {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("What's new in \(whatsNewVersion)")
-                        .font(.title2.bold())
+                        .font(.nimbleHeadline)
 
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(whatsNewBullets, id: \.self) { bullet in
@@ -33,7 +33,7 @@ struct WhatsNewSheet: View {
                             }
                         }
                     }
-                    .font(.body)
+                    .font(.nimbleBody)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 

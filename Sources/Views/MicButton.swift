@@ -16,7 +16,7 @@ struct MicButton: View {
         if voice.offered {
             Button(action: { voice.toggle() }) {
                 Image(systemName: "mic")
-                    .nimbleFont(size, weight: .regular)
+                    .font(.nimble(size, .regular, relativeTo: .body))
                     .foregroundStyle(voice.listening ? state.theme.color : Color.dim)
                     .frame(minWidth: 24, minHeight: 24)
                     .minimumTapTarget()

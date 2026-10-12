@@ -33,7 +33,8 @@ struct ResultView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                         Text(item)
-                            .nimbleFont(17)
+                            .font(.nimbleBody)
+                            .lineSpacing(5.95)
                             .foregroundStyle(Color.text)
                             .textSelection(.enabled)
                     }
@@ -66,11 +67,11 @@ struct ResultView: View {
                     ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                         VStack(alignment: .leading, spacing: 3) {
                             link(item.sentence, to: item.url)
-                                .nimbleFont(17)
+                                .font(.nimbleBody)
                                 .foregroundStyle(Color.text)
                                 .multilineTextAlignment(.leading)
                             Text(item.outlet)
-                                .nimbleFont(13)
+                                .font(.nimbleCaption)
                                 .foregroundStyle(Color.dim)
                         }
                     }
@@ -89,11 +90,11 @@ struct ResultView: View {
         case .error(let message, let searchURL):
             VStack(spacing: 10) {
                 Text(message)
-                    .nimbleFont(14)
+                    .font(.nimbleCallout)
                     .foregroundStyle(Color.dim)
                 if let searchURL, URL(string: searchURL) != nil {
                     Button("Search on DuckDuckGo →") { state.openInDDG() }
-                        .nimbleFont(14, weight: .medium)
+                        .font(.nimbleCalloutMedium)
                         .foregroundStyle(Color.bulbDeep)
                         .buttonStyle(.plain)
                 }
@@ -159,13 +160,14 @@ struct TextAnswerView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         if let heading, !heading.isEmpty {
                             Text(heading)
-                                .nimbleFont(15, weight: .bold)
+                                .font(.nimbleSubheadBold)
+                                .tracking(-0.3)
                                 .foregroundStyle(Color.soft)
                         }
                         Text(answer)
-                            .nimbleFont(19)
+                            .font(.nimbleLead)
                             .foregroundStyle(Color.text)
-                            .lineSpacing(7)
+                            .lineSpacing(6.65)
                             .textSelection(.enabled)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -177,7 +179,7 @@ struct TextAnswerView: View {
                             if let u = URL(string: item.url) {
                                 Button { openURL(u) } label: {
                                     Text(item.name)
-                                        .nimbleFont(13, weight: .medium)
+                                        .font(.nimbleCaptionMedium)
                                         .foregroundStyle(Color.bulbDeep)
                                         .underline()
                                 }
@@ -189,15 +191,15 @@ struct TextAnswerView: View {
                 if showWhy, let whyText {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(whyText)
-                            .nimbleFont(15)
+                            .font(.nimbleSubhead)
                             .foregroundStyle(Color.soft)
-                            .lineSpacing(4)
+                            .lineSpacing(5.25)
                             .textSelection(.enabled)
                             .fixedSize(horizontal: false, vertical: true)
                         if let u = URL(string: pageURL) {
                             Button { openURL(u) } label: {
                                 Text(source)
-                                    .nimbleFont(13, weight: .medium)
+                                    .font(.nimbleCaptionMedium)
                                     .foregroundStyle(Color.bulbDeep)
                                     .underline()
                             }
@@ -215,7 +217,7 @@ struct TextAnswerView: View {
                     HStack(spacing: 6) {
                         Text("powered by \(source)")
                         Image(systemName: showWhy ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 9, weight: .bold))
+                            .font(.nimbleMicro)
                     }
                 }
                 .buttonStyle(.plain)
@@ -255,13 +257,13 @@ struct AnswerCard<Content: View, Footer: View>: View {
             .accessibilityElement(children: .combine)
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 footer
-                    .nimbleFont(12)
+                    .font(.nimbleSmall)
                     .foregroundStyle(Color.dim)
                 Spacer(minLength: 8)
                 if let shareText, !shareText.isEmpty {
                     ShareLink(item: shareText) {
                         Text("Share")
-                            .nimbleFont(12)
+                            .font(.nimbleSmall)
                             .foregroundStyle(Color.dim)
                             .underline()
                     }
@@ -282,7 +284,7 @@ struct Eyebrow: View {
 
     var body: some View {
         Text(text)
-            .nimbleFont(11, weight: .bold)
+            .font(.nimbleEyebrow)
             .tracking(1.3)
             .textCase(.uppercase)
             .foregroundStyle(Color.bulbDeep)
@@ -304,25 +306,25 @@ struct ConsentCard: View {
             VStack(alignment: .leading, spacing: 14) {
                 Eyebrow(text: "Before I answer")
                 Text("Send your question to an AI service?")
-                    .nimbleFont(15, weight: .bold)
+                    .font(.nimbleSubheadBold)
                     .foregroundStyle(Color.soft)
                 Text("Nimble sends your question text, and nothing else, to \(state.aiRecipient). No account or personal data, and no record is kept. Change this any time in settings.")
-                    .nimbleFont(17)
+                    .font(.nimbleBody)
                     .foregroundStyle(Color.text)
-                    .lineSpacing(4)
+                    .lineSpacing(5.95)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .accessibilityElement(children: .combine)
             buttons {
                 Button("Allow") { state.answerAIConsent(true) }
-                    .nimbleFont(15, weight: .bold)
+                    .font(.nimbleSubheadBold)
                     .foregroundStyle(.black)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 10)
                     .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
                     .buttonStyle(.plain)
                 Button("Don't Allow") { state.answerAIConsent(false) }
-                    .nimbleFont(15, weight: .medium)
+                    .font(.nimbleSubheadMedium)
                     .foregroundStyle(Color.text)
                     .padding(.horizontal, 18)
                     .padding(.vertical, 10)
@@ -353,7 +355,7 @@ struct RecentList: View {
                 Spacer()
                 if let onClear {
                     Button("Clear", action: onClear)
-                        .nimbleFont(12)
+                        .font(.nimbleSmall)
                         .foregroundStyle(Color.dim)
                         .buttonStyle(.plain)
                 }
@@ -368,7 +370,7 @@ struct RecentList: View {
                     state.performQuery()
                 } label: {
                     Text(q)
-                        .nimbleFont(size)
+                        .font(.nimble(size, .regular, relativeTo: .body))
                         .foregroundStyle(Color.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.vertical, size * 0.6)
@@ -414,7 +416,7 @@ private struct GraphResultView: View {
             .frame(height: 160)
             .accessibilityHidden(true)
             Text("y = \(expr)")
-                .nimbleFont(14, weight: .medium)
+                .font(.nimbleCalloutMedium)
                 .foregroundStyle(Color.soft)
                 .textSelection(.enabled)
         }
@@ -432,7 +434,9 @@ private struct MathResultView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(value)
-                .nimbleFont(34, weight: .bold)
+                .font(.nimbleDisplay)
+                .monospacedDigit()
+                .tracking(-0.68)
                 .foregroundStyle(Color.text)
                 .textSelection(.enabled)
                 .scaleEffect(appeared ? 1.0 : 0.88)
@@ -445,14 +449,15 @@ private struct MathResultView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
                             Text(step)
-                                .nimbleFont(15)
+                                .font(.nimbleSubhead)
+                                .monospacedDigit()
                                 .foregroundStyle(Color.dim)
                                 .textSelection(.enabled)
                         }
                     }
                     .padding(.top, 4)
                 }
-                .nimbleFont(14, weight: .medium)
+                .font(.nimbleCalloutMedium)
                 .foregroundStyle(Color.bulbDeep)
             }
         }
@@ -468,11 +473,14 @@ private struct ConvertResultView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("\(to) \(toUnit)")
-                .nimbleFont(34, weight: .bold)
+                .font(.nimbleDisplay)
+                .monospacedDigit()
+                .tracking(-0.68)
                 .foregroundStyle(Color.text)
                 .textSelection(.enabled)
             Text("\(from) \(fromUnit)")
-                .nimbleFont(18)
+                .font(.nimbleLead)
+                .monospacedDigit()
                 .foregroundStyle(Color.soft)
         }
     }
@@ -487,17 +495,20 @@ private struct CardResultView: View {
         VStack(alignment: .leading, spacing: 6) {
             // A temperature reads as one headline, "11 °C"; other units stay a small caption.
             Text(unit.hasPrefix("°") ? "\(big) \(unit)" : big)
-                .nimbleFont(34, weight: .bold)
+                .font(.nimbleDisplay)
+                .monospacedDigit()
+                .tracking(-0.68)
                 .foregroundStyle(Color.text)
             if !unit.isEmpty && !unit.hasPrefix("°") {
                 Text(unit)
-                    .nimbleFont(13)
+                    .font(.nimbleCaption)
                     .foregroundStyle(Color.dim)
                     .textCase(.uppercase)
                     .tracking(0.5)
             }
             Text(sub)
-                .nimbleFont(18)
+                .font(.nimbleLead)
+                .monospacedDigit()
                 .foregroundStyle(Color.soft)
         }
         .textSelection(.enabled)
@@ -536,8 +547,8 @@ private struct ColorResultView: View {
 
     private func colorRow(label: String, value: String) -> some View {
         HStack(spacing: 8) {
-            Text(label).nimbleFont(11, weight: .bold).foregroundStyle(Color.bulbDeep).frame(minWidth: 30)
-            Text(value).nimbleFont(14).foregroundStyle(Color.text)
+            Text(label).font(.nimbleEyebrow).foregroundStyle(Color.bulbDeep).frame(minWidth: 30)
+            Text(value).font(.nimbleCallout).monospacedDigit().foregroundStyle(Color.text)
         }
     }
 }

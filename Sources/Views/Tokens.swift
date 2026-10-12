@@ -38,7 +38,8 @@ extension Color {
 }
 
 /// Nimble Sans, the app's own face (fonts/README.md). The scale matches docs/tokens.css.
-/// Each step is tied to a text style, so Dynamic Type still scales it on iOS.
+/// Each named step is tied to a text style, so Dynamic Type scales it on iOS. Headings take -0.02em tracking,
+/// body copy a 1.35 line height (`lineSpacing(0.35 * size)`).
 extension Font {
     enum NimbleWeight: String {
         case regular = "Regular", medium = "Medium", semibold = "SemiBold", bold = "Bold"
@@ -48,49 +49,28 @@ extension Font {
         .custom("NimbleSans-\(weight.rawValue)", size: size, relativeTo: style)
     }
 
-    /// Maps SwiftUI weights onto the four bundled faces. Anything else falls back to Regular.
-    static func nimbleFace(_ size: CGFloat, weight: Font.Weight) -> Font {
-        let face: NimbleWeight = switch weight {
-        case .medium: .medium
-        case .semibold: .semibold
-        case .bold, .heavy, .black: .bold
-        default: .regular
-        }
-        return .custom("NimbleSans-\(face.rawValue)", size: size)
-    }
-
-    // Web scale: 34 / 28 / 22 / 17 / 15 / 13 px.
-    static let nimbleDisplay = nimble(34, .semibold, relativeTo: .largeTitle)
-    static let nimbleTitle = nimble(28, .semibold, relativeTo: .title)
+    // Web scale: 34 / 28 / 22 / 17 / 15 / 13 px, with the steps between them named for their use.
+    static let nimbleDisplay = nimble(34, .bold, relativeTo: .largeTitle)
+    static let nimbleTitle = nimble(28, .bold, relativeTo: .title)
     static let nimbleHeadline = nimble(22, .semibold, relativeTo: .title2)
+    static let nimbleLead = nimble(19, .regular, relativeTo: .title3)
+    static let nimbleLeadMedium = nimble(19, .medium, relativeTo: .title3)
     static let nimbleBody = nimble(17, .regular, relativeTo: .body)
     static let nimbleSubhead = nimble(15, .regular, relativeTo: .subheadline)
+    static let nimbleSubheadMedium = nimble(15, .medium, relativeTo: .subheadline)
+    static let nimbleSubheadBold = nimble(15, .bold, relativeTo: .subheadline)
+    static let nimbleCallout = nimble(14, .regular, relativeTo: .callout)
+    static let nimbleCalloutMedium = nimble(14, .medium, relativeTo: .callout)
+    static let nimbleCalloutBold = nimble(14, .bold, relativeTo: .callout)
     static let nimbleCaption = nimble(13, .regular, relativeTo: .footnote)
-}
-
-/// Design sizes for text and icons. On iOS they scale with Dynamic Type; on Mac they stay fixed.
-extension View {
-    func nimbleFont(_ size: CGFloat, weight: Font.Weight = .regular) -> some View {
-        modifier(NimbleFont(size: size, weight: weight))
-    }
+    static let nimbleCaptionMedium = nimble(13, .medium, relativeTo: .footnote)
+    static let nimbleSmall = nimble(12, .regular, relativeTo: .caption)
+    static let nimbleFine = nimble(11, .regular, relativeTo: .caption2)
+    static let nimbleEyebrow = nimble(11, .bold, relativeTo: .caption2)
+    static let nimbleMicro = nimble(10, .semibold, relativeTo: .caption2)
 }
 
 #if canImport(UIKit)
-/// @ScaledMetric uses the same curve as UIFontMetrics and redraws the view when the setting changes mid-session.
-private struct NimbleFont: ViewModifier {
-    @ScaledMetric private var size: CGFloat
-    let weight: Font.Weight
-
-    init(size: CGFloat, weight: Font.Weight) {
-        _size = ScaledMetric(wrappedValue: size, relativeTo: .body)
-        self.weight = weight
-    }
-
-    func body(content: Content) -> some View {
-        content.font(.nimbleFace(size, weight: weight))
-    }
-}
-
 extension View {
     /// Keeps the drawn size and layout, but makes the touch area at least 44pt. Negative padding cancels the layout.
     func minimumTapTarget() -> some View {
@@ -98,15 +78,6 @@ extension View {
     }
 }
 #else
-private struct NimbleFont: ViewModifier {
-    let size: CGFloat
-    let weight: Font.Weight
-
-    func body(content: Content) -> some View {
-        content.font(.nimbleFace(size, weight: weight))
-    }
-}
-
 extension View {
     func minimumTapTarget() -> some View { self }
 }

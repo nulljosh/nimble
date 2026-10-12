@@ -15,16 +15,16 @@ struct QuickAskView: View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 Image(systemName: "magnifyingglass")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.nimbleCaptionMedium)
                     .foregroundStyle(.secondary)
                     .accessibilityHidden(true)
                 if fieldStandIn {
-                    Text(state.queryText).font(.system(size: 15))
+                    Text(state.queryText).font(.nimbleSubhead)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
                     TextField(state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder, text: $state.queryText)
                         .textFieldStyle(.plain)
-                        .font(.system(size: 15))
+                        .font(.nimbleSubhead)
                         .focused($focused)
                         .onSubmit { state.performQuery() }
                 }
@@ -48,7 +48,7 @@ struct QuickAskView: View {
                     .keyboardShortcut("q")
             }
             .buttonStyle(.plain)
-            .font(.system(size: 12))
+            .font(.nimbleSmall)
             .foregroundStyle(.secondary)
             .padding(.horizontal, 14)
             .padding(.vertical, 9)

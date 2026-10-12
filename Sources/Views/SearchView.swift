@@ -13,7 +13,7 @@ struct SearchView: View {
                 // to be the last item in the bottom-right status row.
                 Button(action: { NSApplication.shared.terminate(nil) }) {
                     Text("✕")
-                        .font(.system(size: 11))
+                        .font(.nimbleFine)
                         .foregroundStyle(Color.red.opacity(0.7))
                 }
                 .buttonStyle(.plain)
@@ -62,7 +62,7 @@ struct SearchView: View {
                 // in SettingsView. (iOS keeps its inline picker: no menu bar there.)
                 Spacer()
                 Text("Nimble v\(Bundle.main.marketingVersion)")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.nimbleMicro)
                     .foregroundStyle(Color.dim)
                     .tracking(0.8)
                     .textCase(.uppercase)
@@ -70,7 +70,7 @@ struct SearchView: View {
                 HStack(spacing: 10) {
                     Button(action: { state.copyResultText() }) {
                         Text("⎘")
-                            .font(.system(size: 13))
+                            .font(.nimbleCaption)
                             .foregroundStyle(Color.dim)
                     }
                     .buttonStyle(.plain)
@@ -108,13 +108,13 @@ struct SearchView: View {
 
         return HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 18, weight: .medium))
+                .font(.nimbleLeadMedium)
                 .foregroundStyle(Color.bulbDeep)
                 .accessibilityHidden(true)
 
             TextField(state.voice.listening ? String(localized: "Listening") : state.currentPlaceholder, text: $state.queryText)
                 .textFieldStyle(.plain)
-                .font(.system(size: 18))
+                .font(.nimbleLead)
                 .foregroundStyle(Color.text)
                 .focused($isInputFocused)
                 .onSubmit { state.performQuery() }
@@ -125,7 +125,7 @@ struct SearchView: View {
 
             if state.result != .loading, !state.queryText.isEmpty {
                 Text("↩")
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.nimbleMicro)
                     .foregroundStyle(Color.dim)
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)

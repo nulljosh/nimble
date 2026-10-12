@@ -21,3 +21,13 @@ The OFL requires that the font itself stays under the OFL, and that derivative f
 - `NimbleSans-*.ttf`: installable and bundled into the iOS and macOS apps.
 - `../docs/fonts/NimbleSans-*.woff2`: web, loaded by `docs/app.html` and `docs/index.html`.
 - Type scale: 34 / 28 / 22 / 17 / 15 / 13 px, defined in `docs/tokens.css` and mirrored in `Sources/Views/Tokens.swift`.
+
+## Font QA (fontbakery 1.1.0, check-universal, 5.10.1)
+
+Run: `fontbakery check-universal fonts/NimbleSans-*.ttf`. Zero FAILs. Fixed in 5.10.1: integer-PPEM flag on hinted fonts, usWinAscent/usWinDescent at the 2042/556 floor, one underline thickness across the family, a drawn `.notdef`, typographic family name (ID 16/17) shared, name ID 5 and `head` revision both 5.100, xAvgCharWidth recalculated per weight.
+
+Left as WARNs, on purpose:
+- Glyph contour counts: four glyphs differ from the reference-family norm. These are the Inter shapes, unchanged.
+- `post` table format 3: no glyph names. Keeps the file small; nothing in the apps reads glyph names.
+
+Kerning survived the subset: GPOS `kern` is present in all four weights. Measured with canvas `fontKerning`: AV, To, We and Yo tighten by 2 to 4 px at 34px. "11" tightens slightly. The degree sign and C are unkerned, as designed.

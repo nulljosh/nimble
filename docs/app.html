@@ -19,7 +19,7 @@
 html, body { min-height: 100%; }
 body {
   background: var(--bg); color: var(--text); font-family: var(--font);
-  -webkit-font-smoothing: antialiased; line-height: 1.5;
+  -webkit-font-smoothing: antialiased; line-height: 1.35;
   display: flex; flex-direction: column; min-height: 100svh;
 }
 a { color: inherit; }
@@ -73,8 +73,8 @@ form { position: relative; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 .mockup-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow-deep); margin-bottom: 10px; }
 .mockup-big { font-size: clamp(2rem, 8vw, 3rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 6px; overflow-wrap: anywhere; }
-.card p { font-size: clamp(19px, 5vw, 24px); line-height: 1.4; color: var(--text); }
-.card h3 { font-size: 15px; font-weight: 700; color: var(--text-mid); margin-bottom: 6px; }
+.card p { font-size: clamp(19px, 5vw, 24px); line-height: 1.35; color: var(--text); }
+.card h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--text-mid); margin-bottom: 6px; }
 .card svg { width: 100%; height: auto; color: var(--yellow-deep); }
 .mockup-link { display: block; text-decoration: none; }
 .mockup-icon { display: block; width: 24px; height: 24px; border-radius: 5px; margin-bottom: 8px; }
@@ -93,7 +93,8 @@ form { position: relative; }
 .credit button:hover { color: var(--text); }
 /* Why this answer: the source line is the toggle; the text it came from opens under it. */
 .news { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 14px; }
-.news li { line-height: 1.5; }
+.news li { line-height: 1.35; }
+.num { font-variant-numeric: tabular-nums; }
 .news a { color: var(--text); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .news-src { display: block; font-size: 13px; color: var(--text-light); margin-top: 2px; }
 .why { margin-top: 16px; font-size: 13px; color: var(--text-light); }
@@ -104,7 +105,7 @@ form { position: relative; }
 .why.steps ol { margin: 8px 0 0; padding: 0; list-style: none; counter-reset: step; }
 .why.steps li { counter-increment: step; margin: 0 0 4px; }
 .why.steps li::before { content: counter(step) "."; display: inline-block; width: 22px; color: var(--text-light); font-variant-numeric: tabular-nums; }
-.card .why p { font-size: 16px; line-height: 1.5; color: var(--text-mid); margin-top: 10px; }
+.card .why p { font-size: 16px; line-height: 1.35; color: var(--text-mid); margin-top: 10px; }
 .why a { display: inline-block; margin-top: 8px; color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 24px; }

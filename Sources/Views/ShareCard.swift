@@ -28,7 +28,7 @@ struct ShareCard: View {
             Color(red: 1, green: 202.0 / 255, blue: 48.0 / 255)
 
             Text(answer)
-                .font(.system(size: answerSize, weight: .bold))
+                .font(.nimble(answerSize, .bold, relativeTo: .body))
                 .tracking(-answerSize * 0.02)
                 .lineSpacing(0)
                 .minimumScaleFactor(0.5)
@@ -37,14 +37,14 @@ struct ShareCard: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 Text(question)
-                    .font(.system(size: 36, weight: .regular))
+                    .font(.nimbleDisplay)
                     .foregroundStyle(.black)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Spacer(minLength: 0)
                 HStack(alignment: .center) {
                     Text(source.uppercased())
-                        .font(.system(size: 20, weight: .medium))
+                        .font(.nimbleLeadMedium)
                         .tracking(1.6)
                         .foregroundStyle(.black.opacity(0.6))
                     Spacer(minLength: 0)
@@ -120,7 +120,7 @@ struct ShareAnswerButton: View {
             if let file {
                 ShareLink(item: file) {
                     Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 14))
+                        .font(.nimbleCallout)
                         .foregroundStyle(.secondary)
                 }
                 .accessibilityLabel("Share answer as image")

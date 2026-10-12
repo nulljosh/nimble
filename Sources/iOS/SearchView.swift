@@ -15,7 +15,7 @@ struct SearchView: View {
                 ScrollView {
                     VStack(spacing: 0) {
                         Text("Ask anything.")
-                            .nimbleFont(28, weight: .bold)
+                            .font(.nimbleTitle)
                             .tracking(-0.56)
                             .foregroundStyle(Color.text)
                             .frame(maxWidth: .infinity)
@@ -38,7 +38,7 @@ struct SearchView: View {
                         .animation(.spring(duration: 0.3), value: state.result == .loading)
 
                         Text("Math, units and graphs work offline. Everything else gets one sentence and a source.")
-                            .nimbleFont(12)
+                            .font(.nimbleSmall)
                             .foregroundStyle(Color.dim)
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity)
@@ -58,7 +58,7 @@ struct SearchView: View {
                             .environment(state)
                         Button(action: { state.copyResultText() }) {
                             Image(systemName: "doc.on.doc")
-                                .nimbleFont(14)
+                                .font(.nimbleCallout)
                                 .foregroundStyle(Color.dim)
                         }
                         .accessibilityLabel("Copy result")
@@ -66,7 +66,7 @@ struct SearchView: View {
                             PreferencesView().environment(state)
                         } label: {
                             Image(systemName: "gearshape")
-                                .nimbleFont(14)
+                                .font(.nimbleCallout)
                                 .foregroundStyle(Color.dim)
                         }
                         .accessibilityLabel("Settings")
@@ -114,13 +114,13 @@ struct SearchView: View {
         return layout {
             HStack(spacing: 10) {
                 Image(systemName: "magnifyingglass")
-                    .nimbleFont(18, weight: .medium)
+                    .font(.nimbleLeadMedium)
                     .foregroundStyle(Color.bulbDeep)
                     .accessibilityHidden(true)
 
                 TextField("", text: $state.queryText, prompt: Text(placeholder).foregroundStyle(Color.dim))
                     .textFieldStyle(.plain)
-                    .nimbleFont(18)
+                    .font(.nimbleLead)
                     .foregroundStyle(Color.text)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
@@ -133,7 +133,7 @@ struct SearchView: View {
                 MicButton().environment(state)
 
                 Button("Ask") { state.performQuery() }
-                    .nimbleFont(14, weight: .bold)
+                    .font(.nimbleCalloutBold)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                     .foregroundStyle(.black)

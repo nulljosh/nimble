@@ -10,7 +10,7 @@ struct SettingsView: View {
             // Theme picker
             VStack(alignment: .leading, spacing: 8) {
                 Text("THEME")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.nimbleMicro)
                     .foregroundStyle(.secondary)
                     .tracking(1)
 
@@ -27,13 +27,13 @@ struct SettingsView: View {
                                     .overlay {
                                         if state.theme == theme {
                                             Image(systemName: "checkmark")
-                                                .font(.system(size: 10, weight: .bold))
+                                                .font(.nimbleMicro)
                                                 .foregroundStyle(theme == .yellow ? .black : .white)
                                                 .accessibilityHidden(true)
                                         }
                                     }
                                 Text(theme.displayName)
-                                    .font(.system(size: 9))
+                                    .font(.nimbleMicro)
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -47,7 +47,7 @@ struct SettingsView: View {
             // Preferences
             VStack(alignment: .leading, spacing: 6) {
                 Text("PREFERENCES")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.nimbleMicro)
                     .foregroundStyle(.secondary)
                     .tracking(1)
 
@@ -83,11 +83,11 @@ struct SettingsView: View {
                     set: { state.aiConsent = $0; state.savePreferences() }
                 ))
                 Text("When on, the text you type is sent to \(state.aiRecipient). Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.")
-                    .font(.system(size: 10))
+                    .font(.nimbleMicro)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .font(.system(size: 12))
+            .font(.nimbleSmall)
             .toggleStyle(.switch)
             .controlSize(.small)
 
@@ -95,14 +95,14 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 Text("AI ENGINE")
-                    .font(.system(size: 10, weight: .semibold))
+                    .font(.nimbleMicro)
                     .foregroundStyle(.secondary)
                     .tracking(1)
                 AIEngineSettings(state: state)
                     .textFieldStyle(.roundedBorder)
                     .labelsHidden()
             }
-            .font(.system(size: 12))
+            .font(.nimbleSmall)
             .controlSize(.small)
             .onDisappear { state.savePreferences() }
 
@@ -111,11 +111,11 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text("Version")
-                        .font(.system(size: 12))
+                        .font(.nimbleSmall)
                         .foregroundStyle(.secondary)
                     Spacer()
                     Text(Bundle.main.marketingVersion)
-                        .font(.system(size: 12))
+                        .font(.nimbleSmall)
                         .foregroundStyle(.secondary)
                 }            }
 
@@ -124,7 +124,7 @@ struct SettingsView: View {
             Button("Quit Nimble") {
                 NSApplication.shared.terminate(nil)
             }
-            .font(.system(size: 12))
+            .font(.nimbleSmall)
             .foregroundStyle(.red)
             .buttonStyle(.plain)
         }

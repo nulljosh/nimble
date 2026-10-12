@@ -52,6 +52,6 @@ test("the answer page shows the steps behind a collapsed Show steps line", async
 
 test("a plain sum renders the answer with no Show steps line", async () => {
   const r = await E.renderAnswer("2+2");
-  assert.match(r.h, /mockup-big">4</);
+  assert.match(r.h, /mockup-big num">4</);
   assert.doesNotMatch(r.h, /Show steps/);
 });

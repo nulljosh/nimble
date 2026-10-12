@@ -29,7 +29,7 @@ struct FlitThinking: View {
                 .accessibilityHidden(true)
 
             Text("Thinking…")
-                .nimbleFont(19)
+                .font(.nimbleLead)
                 .foregroundStyle(Color.text)
         }
         .accessibilityElement(children: .ignore)
