@@ -446,7 +446,7 @@ const CRYPTO_KEYS = Object.keys(CRYPTO).join("|");
 // "bitcoin price", "price of bitcoin", "what's the current price of ethereum", or a bare "btc" (the short names only).
 const CRYPTO_RE = new RegExp(`^(?:(?:what(?:'s| is) the )?(?:current )?price (?:of |for )?(${CRYPTO_KEYS})|(${CRYPTO_KEYS}) price|(btc|eth|sol|doge))\\s*\\??$`, "i");
 // Capitals that are words or acronyms: a bare "AI" or "US" is never a stock lookup.
-const NOT_TICKER = new Set("AI US UK EU OK TV IT ID PC CEO CFO NASA USA GDP CPU GPU API URL DNA HTML CSS JS FAQ NYC UN OR AND THE ARE NOT ALL ANY NEW CAN PDF SMS VPN RAM SSD USB TBD WHO HOW WHY YES NO DJ MP PM AM TO OF IN IS ON AT BY DO GO UP".split(" "));
+const NOT_TICKER = new Set("NFL NBA MLB NHL MLS EPL AI US UK EU OK TV IT ID PC CEO CFO NASA USA GDP CPU GPU API URL DNA HTML CSS JS FAQ NYC UN OR AND THE ARE NOT ALL ANY NEW CAN PDF SMS VPN RAM SSD USB TBD WHO HOW WHY YES NO DJ MP PM AM TO OF IN IS ON AT BY DO GO UP".split(" "));
 // "AAPL", "$AAPL", "AAPL stock", "stock price of AAPL", "aapl price". A bare word needs the capitals (so "who is apple" never matches).
 const STOCK_RE = /^(?:(?:what(?:'s| is) the )?(?:stock )?(?:price|quote) (?:of |for )?)?\$?([A-Za-z]{1,5})(?: (?:stock|stock price|share price|shares?|price|quote))?\s*\??$/i;
 function stockSymbol(q){
@@ -510,6 +510,141 @@ async function market(query){
   const fx=currencyExpr(q); if(fx && fx.pair) return fxCard(fx.from, fx.to);
   const sym=stockSymbol(q); if(sym) return stockCard(sym);
   return null;
+}
+
+// --- sports: ESPN's public scoreboard (keyless, CORS-open). Web first; Swift and Kotlin follow. ---
+// A sports question names a team we know (or a league, for "nfl scores") and has a score word.
+// A bare team name ("lakers") is enough. A common word ("heat", "jazz") needs the score word too, so a
+// definition never reaches ESPN. A game we did not find says so; a failed request is the calm
+// "Scores unavailable right now". A score is never guessed, and the AI never runs for one.
+const SPORTS_TIMEOUT_MS = 4000;
+const SPORTS_LEAGUES = {
+  nba:{path:"basketball/nba", name:"NBA", url:"https://www.espn.com/nba/scoreboard", unit:"quarter", periods:4},
+  nfl:{path:"football/nfl", name:"NFL", url:"https://www.espn.com/nfl/scoreboard", unit:"quarter", periods:4},
+  mlb:{path:"baseball/mlb", name:"MLB", url:"https://www.espn.com/mlb/scoreboard"},
+  nhl:{path:"hockey/nhl", name:"NHL", url:"https://www.espn.com/nhl/scoreboard", unit:"period", periods:3},
+  epl:{path:"soccer/eng.1", name:"Premier League", url:"https://www.espn.com/soccer/league/_/name/eng.1"},
+  mls:{path:"soccer/usa.1", name:"MLS", url:"https://www.espn.com/soccer/league/_/name/usa.1"},
+};
+// Teams split by ";". A "|" lists the names a fan types (the first is the ESPN display name). Without one,
+// the big four also answer to the last word ("Lakers"); soccer names are listed in full.
+const SPORTS_TEAMS = {
+  nba:"Atlanta Hawks;Boston Celtics;Brooklyn Nets;Charlotte Hornets;Chicago Bulls;Cleveland Cavaliers;Dallas Mavericks;Denver Nuggets;Detroit Pistons;Golden State Warriors;Houston Rockets;Indiana Pacers;LA Clippers|Clippers;Los Angeles Lakers;Memphis Grizzlies;Miami Heat;Milwaukee Bucks;Minnesota Timberwolves;New Orleans Pelicans;New York Knicks;Oklahoma City Thunder;Orlando Magic;Philadelphia 76ers|76ers|Sixers;Phoenix Suns;Portland Trail Blazers|Trail Blazers;Sacramento Kings;San Antonio Spurs;Toronto Raptors;Utah Jazz;Washington Wizards",
+  nfl:"Arizona Cardinals;Atlanta Falcons;Baltimore Ravens;Buffalo Bills;Carolina Panthers;Chicago Bears;Cincinnati Bengals;Cleveland Browns;Dallas Cowboys;Denver Broncos;Detroit Lions;Green Bay Packers;Houston Texans;Indianapolis Colts;Jacksonville Jaguars;Kansas City Chiefs;Las Vegas Raiders;Los Angeles Chargers;Los Angeles Rams;Miami Dolphins;Minnesota Vikings;New England Patriots;New Orleans Saints;New York Giants;New York Jets;Philadelphia Eagles;Pittsburgh Steelers;San Francisco 49ers;Seattle Seahawks;Tampa Bay Buccaneers;Tennessee Titans;Washington Commanders",
+  mlb:"Arizona Diamondbacks;Atlanta Braves;Baltimore Orioles;Boston Red Sox|Red Sox;Chicago Cubs;Chicago White Sox|White Sox;Cincinnati Reds;Cleveland Guardians;Colorado Rockies;Detroit Tigers;Houston Astros;Kansas City Royals;Los Angeles Angels;Los Angeles Dodgers;Miami Marlins;Milwaukee Brewers;Minnesota Twins;New York Mets;New York Yankees;Athletics;Philadelphia Phillies;Pittsburgh Pirates;San Diego Padres;San Francisco Giants;Seattle Mariners;St. Louis Cardinals;Tampa Bay Rays;Texas Rangers;Toronto Blue Jays|Blue Jays;Washington Nationals",
+  nhl:"Anaheim Ducks;Boston Bruins;Buffalo Sabres;Calgary Flames;Carolina Hurricanes;Chicago Blackhawks;Colorado Avalanche;Columbus Blue Jackets|Blue Jackets;Dallas Stars;Detroit Red Wings|Red Wings;Edmonton Oilers;Florida Panthers;Los Angeles Kings;Minnesota Wild;Montreal Canadiens;Nashville Predators;New Jersey Devils;New York Islanders;New York Rangers;Ottawa Senators;Philadelphia Flyers;Pittsburgh Penguins;San Jose Sharks;Seattle Kraken;St. Louis Blues;Tampa Bay Lightning;Toronto Maple Leafs|Maple Leafs;Utah Mammoth|Utah Hockey Club|Mammoth;Vancouver Canucks;Vegas Golden Knights|Golden Knights;Washington Capitals;Winnipeg Jets",
+  epl:"Arsenal;Aston Villa|Villa;AFC Bournemouth|Bournemouth;Brentford;Brighton & Hove Albion|Brighton;Burnley;Chelsea;Crystal Palace|Palace;Everton;Fulham;Leeds United|Leeds;Liverpool;Manchester City|Man City;Manchester United|Man United|Man Utd;Newcastle United|Newcastle;Nottingham Forest|Nottingham;Sunderland;Tottenham Hotspur|Tottenham|Spurs;West Ham United|West Ham;Wolverhampton Wanderers|Wolves",
+  mls:"Atlanta United FC|Atlanta United;Austin FC;CF Montréal|CF Montreal|Montreal;Charlotte FC;Chicago Fire FC|Chicago Fire;FC Cincinnati|Cincinnati;Colorado Rapids|Rapids;Columbus Crew|Columbus Crew SC;D.C. United|DC United;FC Dallas|Dallas FC;Houston Dynamo FC|Houston Dynamo;Inter Miami CF|Inter Miami;LA Galaxy|Galaxy;Los Angeles FC|LAFC;Minnesota United FC|Minnesota United;Nashville SC|Nashville;New England Revolution|Revolution;New York City FC|NYCFC;New York Red Bulls|Red Bulls;Orlando City SC|Orlando City;Philadelphia Union;Portland Timbers|Timbers;Real Salt Lake|Salt Lake;San Diego FC;San Jose Earthquakes|Earthquakes;Seattle Sounders FC|Sounders|Seattle Sounders;Sporting Kansas City|Sporting KC;St. Louis City SC|St. Louis City;Toronto FC;Vancouver Whitecaps FC|Whitecaps|Vancouver Whitecaps",
+};
+// Nicknames that are also everyday words: these match only with a score word, never alone.
+const SPORTS_COMMON = new Set("heat magic jazz thunder wild kings nets suns spurs warriors hawks bulls bears giants cardinals panthers rangers jets stars rockets nuggets pelicans clippers wizards hornets pistons titans chiefs chargers raiders packers vikings lions cowboys eagles falcons saints rams dolphins patriots colts broncos bills ravens steelers texans jaguars browns bengals seahawks commanders buccaneers lightning flames senators bruins blues ducks sharks devils hurricanes capitals islanders flyers avalanche predators kraken coyotes canadiens sabres athletics guardians orioles royals rays tigers twins angels reds cubs mets braves astros padres nationals mariners pirates phillies yankees brewers rockies marlins diamondbacks dodgers wolves villa palace crew union revolution timbers galaxy rapids dynamo sounders whitecaps earthquakes mammoth blazers sixers raptors cavaliers bucks grizzlies pacers".split(" "));
+const sportsFold = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[‘’]/g,"'").replace(/\s+/g," ").trim();
+// alias -> [{lg, keys}], and one regex over every alias (longest first) to find the team in a query.
+const SPORTS_INDEX = new Map();
+for(const lg of Object.keys(SPORTS_TEAMS)){
+  for(const raw of SPORTS_TEAMS[lg].split(";")){
+    const parts = raw.split("|").map(s=>s.trim());
+    const names = parts.length>1 || !["nba","nfl","mlb","nhl"].includes(lg) ? parts : [parts[0], parts[0].split(" ").pop()];
+    const keys = [...new Set(names.map(sportsFold))];
+    for(const k of keys){ if(!SPORTS_INDEX.has(k)) SPORTS_INDEX.set(k, []); SPORTS_INDEX.get(k).push({lg, keys}); }
+  }
+}
+const SPORTS_ALIAS_RE = new RegExp("(?:^|[^a-z0-9])(" + [...SPORTS_INDEX.keys()].sort((a,b)=>b.length-a.length)
+  .map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|") + ")(?![a-z0-9])");
+const SPORTS_LEAGUE_RE = /^(?:(?:today's|todays|latest|recent|last night's)\s+)?(nba|nfl|mlb|nhl|mls|epl|premier league)\s+(?:scores?|results?|games?)$/;
+// A score word. "win" and "game" count; "history" and "coach" do not, so they never reach a scoreboard.
+const SPORTS_INTENT_RE = /\b(scores?|scored|won|wins?|winner|lose|loses|lost|loss|beat|beats|beaten|games?|results?|final|finals|playing|match|tonight|last night)\b/;
+// Questions about the future, opinions, rosters and news are never a score lookup.
+const SPORTS_NEG_RE = /\b(will|would|should|could|might|why|how many|how much|how to|how do|odds|predict\w*|bet|best|worst|trade|traded|draft|drafted|sign|signed|coach|roster|news|history|rumou?rs?)\b/;
+
+// The sports question in a query: {league} for "nfl scores", or {team, teams, lastNight} for a team. Else null.
+function sportsQuery(query){
+  const q = sportsFold(query).replace(/[?!.]+$/,"").trim();
+  const lm = SPORTS_LEAGUE_RE.exec(q);
+  if(lm) return {league: lm[1]==="premier league" ? "epl" : lm[1], lastNight: /last night/.test(q)};
+  if(SPORTS_NEG_RE.test(q)) return null;
+  const m = SPORTS_ALIAS_RE.exec(q); if(!m) return null;
+  const team = m[1], intent = SPORTS_INTENT_RE.test(q);
+  if(!intent && q !== team && q !== "the "+team) return null;   // a bare name, or "the" and the name, and nothing else
+  if(!intent && SPORTS_COMMON.has(team)) return null;
+  const teams = {};
+  for(const {lg, keys} of SPORTS_INDEX.get(team)){ teams[lg] = teams[lg] || new Set(); keys.forEach(k=>teams[lg].add(k)); }
+  return {team, teams, lastNight: /last night/.test(q)};
+}
+
+// The day as YYYYMMDD in the zone asked for, `back` days ago (ESPN's ?dates= wants this shape).
+const sportsDay = (now, back, tz) => new Intl.DateTimeFormat("en-CA",{year:"numeric", month:"2-digit", day:"2-digit", ...(tz?{timeZone:tz}:{})})
+  .format(new Date(now.getTime() - back*864e5)).replace(/-/g,"");
+// One league's events for one day: an array (possibly empty), or null when the request failed.
+async function sportsBoard(lg, ymd){
+  const d = await getJSON(`https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[lg].path}/scoreboard?dates=${ymd}`, {timeout:SPORTS_TIMEOUT_MS});
+  return d && Array.isArray(d.events) ? d.events : null;
+}
+const ordinal = n => n + (n%10===1 && n%100!==11 ? "st" : n%10===2 && n%100!==12 ? "nd" : n%10===3 && n%100!==13 ? "rd" : "th");
+// "Final", "Final/OT", "3rd quarter 4:12", "Scheduled for 7:30 pm". Soccer and baseball use ESPN's own short text.
+function sportsStatus(ev, lg, now, tz){
+  const t = ev.status?.type || {}, st = ev.status || {}, L = SPORTS_LEAGUES[lg] || {};
+  if(t.state==="post") return t.detail || t.shortDetail || "Final";
+  if(t.state==="pre") return "Scheduled for " + kickoffLabel(ev.date, now, tz);
+  if(t.name==="STATUS_HALFTIME") return "Halftime";
+  if(t.state==="in" && L.unit && st.period>=1 && st.period<=L.periods && st.displayClock) return `${ordinal(st.period)} ${L.unit} ${st.displayClock}`;
+  return t.shortDetail || t.detail || "In progress";
+}
+// "7:30 pm" today, "Oct 13, 7:30 pm" on another day. The clock reads in the zone asked for.
+function kickoffLabel(iso, now, tz){
+  const d = new Date(iso); if(isNaN(d)) return "";
+  const zone = tz ? {timeZone:tz} : {};
+  const time = new Intl.DateTimeFormat("en",{hour:"numeric", minute:"2-digit", ...zone}).format(d).replace(/\s+/g," ").replace(/\b(AM|PM)\b/, m=>m.toLowerCase());
+  const dayOf = x => new Intl.DateTimeFormat("en-CA",{year:"numeric", month:"2-digit", day:"2-digit", ...zone}).format(x);
+  if(dayOf(d)===dayOf(now)) return time;
+  return new Intl.DateTimeFormat("en",{month:"short", day:"numeric", ...zone}).format(d) + ", " + time;
+}
+// One game as a row: our team first, the winner marked, a tie said in words. ESPN gives no score before kickoff.
+function gameRow(ev, ours, lg, now, tz){
+  const comps = ev.competitions?.[0]?.competitors || [];
+  const order = ours ? [ours, ...comps.filter(c=>c!==ours)] : [...comps].sort((a,b)=>(a.homeAway==="away"?0:1)-(b.homeAway==="away"?0:1));
+  const state = ev.status?.type?.state;
+  const teams = order.map(c=>({name: c.team?.shortDisplayName || c.team?.name || "", score: state==="pre" ? "" : String(c.score ?? ""), winner: c.winner===true}));
+  const tied = state==="post" && !teams.some(t=>t.winner);
+  return {teams, state, status: sportsStatus(ev, lg, now, tz) + (tied ? ", tied" : "")};
+}
+// The event where the team plays, found by any of its names.
+function sportsFind(events, keys){
+  for(const ev of events){
+    const comps = ev.competitions?.[0]?.competitors || [];
+    const ours = comps.find(c=>[c.team?.displayName, c.team?.shortDisplayName, c.team?.name].some(n=>keys.has(sportsFold(n))));
+    if(ours) return {ev, ours};
+  }
+  return null;
+}
+// The sports card for a query, or null when the query is not about sports. Today first, then yesterday;
+// "last night" means yesterday only. A failed request on any day, with no game found, is "unavailable",
+// never "no game". opts.now and opts.tz are for tests.
+async function sports(query, opts={}){
+  const p = sportsQuery(query); if(!p) return null;
+  const now = opts.now || new Date(), tz = opts.tz, src = "ESPN";
+  const days = p.lastNight ? [1] : [0, 1];
+  if(p.league){
+    const L = SPORTS_LEAGUES[p.league], base = {kind:"sports", src, title:`${L.name} scores`, league:L.name, url:L.url};
+    let failed = false;
+    for(const back of days){
+      const ev = await sportsBoard(p.league, sportsDay(now, back, tz));
+      if(!ev){ failed = true; continue; }
+      if(ev.length) return {...base, rows: ev.slice(0,8).map(e=>gameRow(e, null, p.league, now, tz)), asOf: now.toISOString()};
+    }
+    return failed ? {...base, unavailable:true} : {...base, none:true, lastNight:p.lastNight, asOf: now.toISOString()};
+  }
+  const title = p.team.replace(/\b\w/g, c=>c.toUpperCase()), base = {kind:"sports", src, title};
+  let failed = false;
+  for(const back of days){
+    for(const lg of Object.keys(p.teams)){
+      const ev = await sportsBoard(lg, sportsDay(now, back, tz));
+      if(!ev){ failed = true; continue; }
+      const hit = sportsFind(ev, p.teams[lg]);
+      if(hit) return {...base, url: SPORTS_LEAGUES[lg].url, rows:[gameRow(hit.ev, hit.ours, lg, now, tz)], asOf: now.toISOString()};
+    }
+  }
+  return failed ? {...base, url:"https://www.espn.com", unavailable:true} : {...base, url:"https://www.espn.com", none:true, lastNight:p.lastNight, asOf: now.toISOString()};
 }
 
 // --- weather / local time via Open-Meteo (geocoding + forecast, no key) ---
@@ -686,6 +821,9 @@ async function answer(query, opts={}){
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
+  // Sports before market, so a league name in capitals ("NFL") never reads as a ticker.
+  const sp = await sports(query).catch(()=>null);
+  if(sp) return sp;
   const mk = await market(query).catch(()=>null);
   if(mk) return mk;
   const live = await firstOf(query, [identity, news, site, etymology, dictionary, weather, localTime]);
@@ -778,6 +916,23 @@ async function renderAnswer(query, opts){
     if(a.unavailable){ h+='<p class="market-title">'+esc(a.title)+'</p><p class="market-state">'+esc(T("Quote unavailable right now"))+'</p>'; }
     else {
       h+='<a class="mockup-link mockup-card" href="'+esc(a.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener"><p class="market-title">'+esc(a.title)+'</p><div class="market-price num">'+esc(a.big)+'</div>'+(a.change?'<p class="market-change num">'+esc(a.change)+'</p>':'')+'</a>'+fresh(a);
+      credit=T("powered by {s}",{s:a.src});
+    }
+  }
+  else if(a.kind==="sports"){
+    // The score in words with the winner in bold, the status under it, and the as-of line. A failed request is the calm state; a game not found names the days checked. Never a guessed score.
+    const head='<p class="sports-title">'+esc(a.title)+'</p>';
+    if(a.unavailable) h+=head+'<p class="sports-state">'+esc(T("Scores unavailable right now"))+'</p>';
+    else if(a.none){
+      const msg = a.league ? T("No {league} games {when}",{league:a.league, when:a.lastNight ? "yesterday" : "today or yesterday"})
+        : T(a.lastNight ? "No game found for the {team} yesterday" : "No game found for the {team} today or yesterday",{team:a.title});
+      h+=head+'<p class="sports-state">'+esc(msg)+'</p>'+fresh(a);
+    }
+    else {
+      const href=esc(a.url).replace(/"/g,"&quot;");
+      const line = r => r.state==="pre" && r.teams.length===2 ? esc(r.teams[0].name)+" vs "+esc(r.teams[1].name)
+        : r.teams.map(t=>{ const sc=t.score!==""?" "+esc(t.score):""; return t.winner ? "<strong>"+esc(t.name)+sc+"</strong>" : esc(t.name)+sc; }).join(", ");
+      h+=head+'<div class="sports-rows">'+a.rows.map(r=>'<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><p class="sports-score num">'+line(r)+'</p><p class="sports-status num">'+esc(r.status)+'</p></a>').join("")+'</div>'+fresh(a);
       credit=T("powered by {s}",{s:a.src});
     }
   }
@@ -916,4 +1071,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
