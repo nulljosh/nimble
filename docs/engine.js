@@ -572,12 +572,13 @@ function sportsQuery(query){
   return {team, teams, lastNight: /last night/.test(q)};
 }
 
-// The day as YYYYMMDD in the zone asked for, `back` days ago (ESPN's ?dates= wants this shape).
-const sportsDay = (now, back, tz) => new Intl.DateTimeFormat("en-CA",{year:"numeric", month:"2-digit", day:"2-digit", ...(tz?{timeZone:tz}:{})})
-  .format(new Date(now.getTime() - back*864e5)).replace(/-/g,"");
-// One league's events for one day: an array (possibly empty), or null when the request failed.
+// The day as YYYYMMDD in the zone asked for (ESPN's ?dates= wants this shape). A bad date is "".
+const ymdOf = (date, tz) => isNaN(date) ? "" : new Intl.DateTimeFormat("en-CA",{year:"numeric", month:"2-digit", day:"2-digit", ...(tz?{timeZone:tz}:{})})
+  .format(date).replace(/-/g,"");
+const sportsDay = (now, back, tz) => ymdOf(new Date(now.getTime() - back*864e5), tz);
+// One league's events for one day (ymd), or the current scoreboard when ymd is null: an array (possibly empty), or null when the request failed.
 async function sportsBoard(lg, ymd){
-  const d = await getJSON(`https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[lg].path}/scoreboard?dates=${ymd}`, {timeout:SPORTS_TIMEOUT_MS});
+  const d = await getJSON(`https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[lg].path}/scoreboard${ymd ? "?dates="+ymd : ""}`, {timeout:SPORTS_TIMEOUT_MS});
   return d && Array.isArray(d.events) ? d.events : null;
 }
 const ordinal = n => n + (n%10===1 && n%100!==11 ? "st" : n%10===2 && n%100!==12 ? "nd" : n%10===3 && n%100!==13 ? "rd" : "th");
@@ -599,52 +600,98 @@ function kickoffLabel(iso, now, tz){
   if(dayOf(d)===dayOf(now)) return time;
   return new Intl.DateTimeFormat("en",{month:"short", day:"numeric", ...zone}).format(d) + ", " + time;
 }
+// The game's own date in words, "Thursday, Oct 8", in the zone asked for.
+const sportsDayWords = (iso, tz) => { const d = new Date(iso); return isNaN(d) ? "" : new Intl.DateTimeFormat("en",{weekday:"long", month:"short", day:"numeric", ...(tz?{timeZone:tz}:{})}).format(d); };
 // One game as a row: our team first, the winner marked, a tie said in words. ESPN gives no score before kickoff.
-function gameRow(ev, ours, lg, now, tz){
+// dated: a finished game found by the look-back says its day ("Final, Thursday, Oct 8").
+function gameRow(ev, ours, lg, now, tz, dated){
   const comps = ev.competitions?.[0]?.competitors || [];
   const order = ours ? [ours, ...comps.filter(c=>c!==ours)] : [...comps].sort((a,b)=>(a.homeAway==="away"?0:1)-(b.homeAway==="away"?0:1));
   const state = ev.status?.type?.state;
   const teams = order.map(c=>({name: c.team?.shortDisplayName || c.team?.name || "", score: state==="pre" ? "" : String(c.score ?? ""), winner: c.winner===true}));
   const tied = state==="post" && !teams.some(t=>t.winner);
-  return {teams, state, status: sportsStatus(ev, lg, now, tz) + (tied ? ", tied" : "")};
+  const day = dated && state==="post" ? ", " + sportsDayWords(ev.date, tz) : "";
+  return {teams, state, status: sportsStatus(ev, lg, now, tz) + day + (tied ? ", tied" : "")};
 }
-// The event where the team plays, found by any of its names.
-function sportsFind(events, keys){
+// Every event where the team plays, with the team's own side, found by any of its names.
+function sportsHits(events, keys){
+  const out = [];
   for(const ev of events){
     const comps = ev.competitions?.[0]?.competitors || [];
     const ours = comps.find(c=>[c.team?.displayName, c.team?.shortDisplayName, c.team?.name].some(n=>keys.has(sportsFold(n))));
-    if(ours) return {ev, ours};
+    if(ours) out.push({ev, ours});
   }
-  return null;
+  return out;
 }
-// The sports card for a query, or null when the query is not about sports. Today first, then yesterday;
-// "last night" means yesterday only. A failed request on any day, with no game found, is "unavailable",
-// never "no game". opts.now and opts.tz are for tests.
+// The event where the team plays, found by any of its names.
+function sportsFind(events, keys){ return sportsHits(events, keys)[0] || null; }
+const sportsTime = ev => Date.parse(ev.date) || 0;
+const sportsState = ev => ev.status?.type?.state;
+// The team's most recent game on one board: the latest Final, else one in progress, else the next scheduled.
+function sportsRecent(events, keys){
+  const hits = sportsHits(events, keys);
+  const finals = hits.filter(h=>sportsState(h.ev)==="post").sort((a,b)=>sportsTime(b.ev)-sportsTime(a.ev));
+  if(finals.length) return finals[0];
+  const live = hits.find(h=>sportsState(h.ev)==="in"); if(live) return live;
+  return hits.filter(h=>sportsState(h.ev)==="pre").sort((a,b)=>sportsTime(a.ev)-sportsTime(b.ev))[0] || null;
+}
+// A league's most recent day on its current scoreboard: the latest Final's day, else a game in progress, else the next
+// scheduled day. Returns that day's games (possibly none).
+function sportsRecentDay(events, tz){
+  const finals = events.filter(e=>sportsState(e)==="post").sort((a,b)=>sportsTime(b)-sportsTime(a));
+  const live = events.filter(e=>sportsState(e)==="in");
+  const next = events.filter(e=>sportsState(e)==="pre").sort((a,b)=>sportsTime(a)-sportsTime(b));
+  const pick = finals[0] || live[0] || next[0];
+  if(!pick) return [];
+  const day = ymdOf(new Date(pick.date), tz);
+  return events.filter(e=>ymdOf(new Date(e.date), tz)===day);
+}
+// The sports card for a query, or null when the query is not about sports. The order is fixed:
+// 1. today, then yesterday ("last night" is yesterday only), by the day's board;
+// 2. the team's or league's current scoreboard (no date): the most recent game, Final, else in progress, else next;
+// 3. each day back to seven days ago, most recent first.
+// A failed request with no game found is "unavailable", never "no game". opts.now and opts.tz are for tests.
 async function sports(query, opts={}){
   const p = sportsQuery(query); if(!p) return null;
-  const now = opts.now || new Date(), tz = opts.tz, src = "ESPN";
+  const now = opts.now || new Date(), tz = opts.tz, src = "ESPN", asOf = now.toISOString();
   const days = p.lastNight ? [1] : [0, 1];
-  if(p.league){
-    const L = SPORTS_LEAGUES[p.league], base = {kind:"sports", src, title:`${L.name} scores`, league:L.name, url:L.url};
-    let failed = false;
-    for(const back of days){
-      const ev = await sportsBoard(p.league, sportsDay(now, back, tz));
-      if(!ev){ failed = true; continue; }
-      if(ev.length) return {...base, rows: ev.slice(0,8).map(e=>gameRow(e, null, p.league, now, tz)), asOf: now.toISOString()};
-    }
-    return failed ? {...base, unavailable:true} : {...base, none:true, lastNight:p.lastNight, asOf: now.toISOString()};
-  }
-  const title = p.team.replace(/\b\w/g, c=>c.toUpperCase()), base = {kind:"sports", src, title};
   let failed = false;
-  for(const back of days){
-    for(const lg of Object.keys(p.teams)){
+  if(p.league){
+    const lg = p.league, L = SPORTS_LEAGUES[lg], base = {kind:"sports", src, title:`${L.name} scores`, league:L.name, url:L.url};
+    const show = (evs, dated) => ({...base, rows: evs.slice(0,8).map(e=>gameRow(e, null, lg, now, tz, dated)), asOf});
+    for(const back of days){
       const ev = await sportsBoard(lg, sportsDay(now, back, tz));
       if(!ev){ failed = true; continue; }
-      const hit = sportsFind(ev, p.teams[lg]);
-      if(hit) return {...base, url: SPORTS_LEAGUES[lg].url, rows:[gameRow(hit.ev, hit.ours, lg, now, tz)], asOf: now.toISOString()};
+      if(ev.length) return show(ev, false);
     }
+    const board = await sportsBoard(lg, null);
+    if(!board) failed = true;
+    else { const evs = sportsRecentDay(board, tz); if(evs.length) return show(evs, true); }
+    for(let back=2; back<=7; back++){
+      const ev = await sportsBoard(lg, sportsDay(now, back, tz));
+      if(!ev){ failed = true; continue; }
+      if(ev.length) return show(ev, true);
+    }
+    return failed ? {...base, unavailable:true} : {...base, none:true, lastNight:p.lastNight, asOf};
   }
-  return failed ? {...base, url:"https://www.espn.com", unavailable:true} : {...base, url:"https://www.espn.com", none:true, lastNight:p.lastNight, asOf: now.toISOString()};
+  const title = p.team.replace(/\b\w/g, c=>c.toUpperCase()), base = {kind:"sports", src, title};
+  const found = (lg, hit, dated) => ({...base, url: SPORTS_LEAGUES[lg].url, rows:[gameRow(hit.ev, hit.ours, lg, now, tz, dated)], asOf});
+  for(const back of days) for(const lg of Object.keys(p.teams)){
+    const ev = await sportsBoard(lg, sportsDay(now, back, tz));
+    if(!ev){ failed = true; continue; }
+    const hit = sportsFind(ev, p.teams[lg]); if(hit) return found(lg, hit, false);
+  }
+  for(const lg of Object.keys(p.teams)){
+    const ev = await sportsBoard(lg, null);
+    if(!ev){ failed = true; continue; }
+    const hit = sportsRecent(ev, p.teams[lg]); if(hit) return found(lg, hit, true);
+  }
+  for(let back=2; back<=7; back++) for(const lg of Object.keys(p.teams)){
+    const ev = await sportsBoard(lg, sportsDay(now, back, tz));
+    if(!ev){ failed = true; continue; }
+    const hit = sportsFind(ev, p.teams[lg]); if(hit) return found(lg, hit, true);
+  }
+  return failed ? {...base, url:"https://www.espn.com", unavailable:true} : {...base, url:"https://www.espn.com", none:true, lastNight:p.lastNight, asOf};
 }
 
 // --- weather / local time via Open-Meteo (geocoding + forecast, no key) ---
@@ -936,8 +983,8 @@ async function renderAnswer(query, opts){
     const head='<p class="sports-title">'+esc(a.title)+'</p>';
     if(a.unavailable) h+=head+'<p class="sports-state">'+esc(T("Scores unavailable right now"))+'</p>';
     else if(a.none){
-      const msg = a.league ? T("No {league} games {when}",{league:a.league, when:a.lastNight ? "yesterday" : "today or yesterday"})
-        : T(a.lastNight ? "No game found for the {team} yesterday" : "No game found for the {team} today or yesterday",{team:a.title});
+      const msg = a.league ? T("No {league} games in the last week",{league:a.league})
+        : T("No game found for the {team} in the last week",{team:a.title});
       h+=head+'<p class="sports-state">'+esc(msg)+'</p>'+fresh(a);
     }
     else {
@@ -1090,4 +1137,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};

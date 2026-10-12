@@ -19,6 +19,11 @@ class SportsTest {
 
     private val nfl0811 = readFixture("espn-nfl-20261011.json")   // Final, Final, Final/OT (Commanders and Giants tied)
     private val nfl0812 = readFixture("espn-nfl-20261012.json")   // Rams and Bills, not yet played
+    // ESPN's default scoreboard (no dates), saved live on Oct 12: Bucs 24 at Cowboys 16 (Final, Thu Oct 8 ET),
+    // Bears 7 at Packers 31 (Final, Sun Oct 11), Bills at Rams (not yet played). Trimmed to these three games.
+    private val nflDefault = readFixture("espn-nfl-default.json")
+    // ESPN's default NBA scoreboard, saved live on Oct 12: two preseason games, no Lakers.
+    private val nbaDefault = readFixture("espn-nba-default.json")
     private val now = 1791835200_000L                             // 2026-10-12 20:00 UTC, 1:00 pm in Vancouver
     private val tz = "America/Vancouver"
     private val failure = SPORTS_FAILURE                          // route marker: a failed request
@@ -28,7 +33,8 @@ class SportsTest {
         val calls = mutableListOf<String>()
         val fetch: suspend (String) -> String? = { url ->
             assertTrue(url.startsWith("https://site.api.espn.com/"), "unexpected host: $url")
-            val key = url.substringAfter("/sports/").substringBefore("/scoreboard") + "|" + url.substringAfter("dates=")
+            val dates = if ("dates=" in url) url.substringAfter("dates=") else ""
+            val key = url.substringAfter("/sports/").substringBefore("/scoreboard") + "|" + dates
             calls.add(key)
             when (val hit = routes[key]) {
                 null -> "{\"events\":[]}"
@@ -162,7 +168,8 @@ class SportsTest {
         val espn = Espn(mapOf("hockey/nhl|20261011" to "{\"events\":[]}"))
         val card = Scores.answer("canucks game last night", now, tz, espn.fetch)
         assertNotNull(card)
-        assertEquals(listOf("hockey/nhl|20261011"), espn.calls)
+        assertEquals(listOf("hockey/nhl|20261011", "hockey/nhl|"), espn.calls.take(2))
+        assertFalse(espn.calls.contains("hockey/nhl|20261012"))
         assertEquals(SportsState.NoGame, card.state)
         assertTrue(card.lastNight)
     }
@@ -174,20 +181,67 @@ class SportsTest {
         assertNotNull(card)
         assertEquals(
             listOf("basketball/nba|20261012", "hockey/nhl|20261012", "basketball/nba|20261011", "hockey/nhl|20261011"),
-            espn.calls,
+            espn.calls.take(4),
         )
         assertEquals(SportsState.NoGame, card.state)
     }
 
     @Test
-    fun noGameSaysWhichDaysWereChecked() = runBlockingTest {
-        val espn = Espn(emptyMap())
+    fun noGameInTheLastWeekChecksEverySevenDaysBack() = runBlockingTest {
+        val espn = Espn(mapOf("basketball/nba|" to nbaDefault))
         val card = Scores.answer("lakers score", now, tz, espn.fetch)
         assertNotNull(card)
         assertEquals(SportsState.NoGame, card.state)
         assertEquals("Lakers", card.title)
-        assertEquals("No game found for the Lakers today or yesterday", card.noGameLine())
-        assertEquals(listOf("basketball/nba|20261012", "basketball/nba|20261011"), espn.calls)
+        assertEquals("No game found for the Lakers in the last week", card.noGameLine())
+        assertEquals(listOf("basketball/nba|20261012", "basketball/nba|20261011", "basketball/nba|",
+            "basketball/nba|20261010", "basketball/nba|20261009", "basketball/nba|20261008",
+            "basketball/nba|20261007", "basketball/nba|20261006", "basketball/nba|20261005"), espn.calls)
+    }
+
+    @Test
+    fun cowboysOnTheCurrentBoardIsFinalAndDatedInWords() = runBlockingTest {
+        val espn = Espn(mapOf("football/nfl|" to nflDefault))
+        val card = Scores.answer("cowboys score", now, tz, espn.fetch)
+        assertNotNull(card)
+        assertEquals(SportsState.Scores, card.state)
+        assertEquals(listOf("football/nfl|20261012", "football/nfl|20261011", "football/nfl|"), espn.calls)
+        assertEquals(listOf(SportsTeam("Cowboys", "16", false), SportsTeam("Buccaneers", "24", true)), card.rows[0].teams)
+        assertEquals("Final, Thursday, Oct 8", card.rows[0].status)
+    }
+
+    @Test
+    fun lookBackFindsTheGameOnTheFourthDayBackAndStopsThere() = runBlockingTest {
+        val espn = Espn(mapOf("football/nfl|20261008" to nflDefault))
+        val card = Scores.answer("cowboys score", now, tz, espn.fetch)
+        assertEquals(SportsState.Scores, card?.state)
+        assertEquals(listOf("football/nfl|20261012", "football/nfl|20261011", "football/nfl|",
+            "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008"), espn.calls)
+        assertEquals("Final, Thursday, Oct 8", card?.rows?.first()?.status)
+    }
+
+    @Test
+    fun leagueWithNoGameTodayOrYesterdayShowsTheLatestDayOnTheCurrentBoard() = runBlockingTest {
+        val espn = Espn(mapOf("football/nfl|" to nflDefault))
+        val card = Scores.answer("nfl scores", now, tz, espn.fetch)
+        assertEquals(1, card?.rows?.size)
+        assertEquals("Final, Sunday, Oct 11", card?.rows?.first()?.status)
+    }
+
+    @Test
+    fun mostRecentGameIsTheLatestFinalThenInProgressThenNextScheduled() {
+        fun ev(state: String, date: String, name: String) = event("""{"date":"$date","status":{"type":{"state":"$state"}},
+            "competitions":[{"competitors":[{"homeAway":"home","team":{"displayName":"Dallas Cowboys","shortDisplayName":"Cowboys","name":"Cowboys"}},
+            {"homeAway":"away","team":{"displayName":"$name","shortDisplayName":"$name","name":"$name"}}]}]}""")
+        fun dateOf(hit: Pair<JsonObject, JsonObject>?) = hit?.first?.get("date")?.toString()
+        val keys = setOf("cowboys", "dallas cowboys")
+        val finals = listOf(ev("post", "2026-09-27T17:00Z", "Eagles"), ev("post", "2026-10-09T00:15Z", "Bucs"), ev("pre", "2026-10-20T17:00Z", "Giants"))
+        assertEquals("\"2026-10-09T00:15Z\"", dateOf(sportsRecent(finals, keys)))
+        val live = listOf(ev("in", "2026-10-12T17:00Z", "Giants"), ev("pre", "2026-10-20T17:00Z", "Bears"))
+        assertEquals("\"2026-10-12T17:00Z\"", dateOf(sportsRecent(live, keys)))
+        val next = listOf(ev("pre", "2026-10-20T17:00Z", "Bears"), ev("pre", "2026-10-15T17:00Z", "Giants"))
+        assertEquals("\"2026-10-15T17:00Z\"", dateOf(sportsRecent(next, keys)))
+        assertNull(sportsRecent(listOf(ev("pre", "2026-10-20T17:00Z", "Bears")), setOf("jets")))
     }
 
     @Test
@@ -222,7 +276,7 @@ class SportsTest {
         val card = Scores.answer("nba scores", now, tz, espn.fetch)
         assertNotNull(card)
         assertEquals(SportsState.NoGame, card.state)
-        assertEquals("No NBA games today or yesterday", card.noGameLine())
+        assertEquals("No NBA games in the last week", card.noGameLine())
     }
 
     @Test

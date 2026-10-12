@@ -6,6 +6,7 @@ Keep Nimble moving with one small, shippable slice at a time: fix what App Revie
 
 ## Where things stand
 
+- Version 5.17.4 (was 5.17.3): sports never says a game is missing when one happened in the last week. After today and yesterday, the team's or league's current ESPN scoreboard is checked (most recent Final, else in progress, else next), then each day back to seven days; the card dates a found final in words ("Final, Thursday, Oct 8"). Web, Swift and Kotlin match; the "No game found" line now says "in the last week". Tested offline on all three.
 - Version 5.17.3 (was 5.17.2): QA launches are sandboxed. Any `-shot*` or `-qaSandbox` launch arg moves history, prefs, the shared answer suite and iCloud sync to a fresh temp root, so screenshot runs stop writing to the real history.json. Unit tests in QASandboxTests.
 - Version 5.17.2 (was 5.17.1): the Swift sports card is verified, not assumed. Full macOS XCTest run (164 tests, sports suite included) and the iOS build are green; the score is now the hero at 28pt with the winner semibold against regular, so it reads without color. Screenshots of the sports and bitcoin cards in light and dark are in the QA folder; npm test green.
 - Version 5.17.1 (was 5.17.0): Kotlin (Android, Windows, desktop) has the sports and scores card in the shared engine and Compose UI, the same detection, ESPN day order and states as the web and Swift. Tested offline (jvmTest SportsTest, 19 tests; npm test green). Next: Android compile is checked by CI only.

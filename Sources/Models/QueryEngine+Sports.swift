@@ -127,13 +127,28 @@ extension QueryEngine {
         return out
     }
 
-    /// The day as YYYYMMDD, `back` days before now, in the zone asked for (ESPN's ?dates= wants this shape).
-    static func sportsDay(_ now: Date, back: Int, tz: TimeZone?) -> String {
+    /// The day as YYYYMMDD in the zone asked for (ESPN's ?dates= wants this shape).
+    static func sportsYMD(_ date: Date, tz: TimeZone?) -> String {
         let f = DateFormatter()
         f.locale = Locale(identifier: "en_US_POSIX")
         f.timeZone = tz ?? .current
         f.dateFormat = "yyyyMMdd"
-        return f.string(from: now.addingTimeInterval(-Double(back) * 86_400))
+        return f.string(from: date)
+    }
+
+    /// The day `back` days before now, as YYYYMMDD.
+    static func sportsDay(_ now: Date, back: Int, tz: TimeZone?) -> String {
+        sportsYMD(now.addingTimeInterval(-Double(back) * 86_400), tz: tz)
+    }
+
+    /// The game's own day in words, "Thursday, Oct 8", in the zone asked for.
+    static func sportsDayWords(_ iso: String?, tz: TimeZone?) -> String {
+        guard let iso, let d = espnDate(iso) else { return "" }
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = tz ?? .current
+        f.dateFormat = "EEEE, MMM d"
+        return f.string(from: d)
     }
 
     /// ESPN's dates: "2026-10-13T00:15Z" (no seconds) or with them, or with fractions.
@@ -190,7 +205,8 @@ extension QueryEngine {
     }
 
     /// One game as a row: our team first, the winner marked, a tie said in words. ESPN gives no score before kickoff.
-    static func gameRow(_ ev: SportsEvent, ours: Int?, league: String, now: Date, tz: TimeZone?) -> SportsGame {
+    /// dated: a final found by the look-back says its day ("Final, Thursday, Oct 8").
+    static func gameRow(_ ev: SportsEvent, ours: Int?, league: String, now: Date, tz: TimeZone?, dated: Bool = false) -> SportsGame {
         let comps = ev.competitions?.first?.competitors ?? []
         let order: [SportsEvent.Competitor]
         if let ours, comps.indices.contains(ours) {
@@ -206,50 +222,103 @@ extension QueryEngine {
                        winner: c.winner == true)
         }
         let tied = state == "post" && !teams.contains { $0.winner }
+        let day = dated && state == "post" ? ", " + sportsDayWords(ev.date, tz: tz) : ""
         return SportsGame(teams: teams, isPre: state == "pre",
-                          status: sportsStatus(ev, league: league, now: now, tz: tz) + (tied ? ", tied" : ""))
+                          status: sportsStatus(ev, league: league, now: now, tz: tz) + day + (tied ? ", tied" : ""))
     }
 
-    /// The event where the team plays, and that team's index in the event, found by any of its names.
-    static func sportsFind(_ events: [SportsEvent], keys: Set<String>) -> (event: SportsEvent, index: Int)? {
-        for ev in events {
+    /// Every event where the team plays, with the team's side, found by any of its names.
+    static func sportsHits(_ events: [SportsEvent], keys: Set<String>) -> [(event: SportsEvent, index: Int)] {
+        events.compactMap { ev in
             let comps = ev.competitions?.first?.competitors ?? []
             let index = comps.firstIndex { c in
                 [c.team?.displayName, c.team?.shortDisplayName, c.team?.name].contains { name in
                     name.map { keys.contains(sportsFold($0)) } ?? false
                 }
             }
-            if let index { return (ev, index) }
+            return index.map { (ev, $0) }
         }
-        return nil
     }
 
-    /// The sports card for a question. Today first, then yesterday; "last night" is yesterday only.
-    /// A failed request on any day, with no game found, is unavailable, never "no game". now and tz are for tests.
+    /// The event where the team plays, and that team's index in the event, found by any of its names.
+    static func sportsFind(_ events: [SportsEvent], keys: Set<String>) -> (event: SportsEvent, index: Int)? {
+        sportsHits(events, keys: keys).first
+    }
+
+    static func sportsState(_ ev: SportsEvent) -> String? { ev.status?.type?.state }
+    static func sportsTime(_ ev: SportsEvent) -> Date { espnDate(ev.date ?? "") ?? .distantPast }
+
+    /// The team's most recent game on one board: the latest Final, else one in progress, else the next scheduled.
+    static func sportsRecent(_ events: [SportsEvent], keys: Set<String>) -> (event: SportsEvent, index: Int)? {
+        let hits = sportsHits(events, keys: keys)
+        if let final = hits.filter({ sportsState($0.event) == "post" }).max(by: { sportsTime($0.event) < sportsTime($1.event) }) {
+            return final
+        }
+        if let live = hits.first(where: { sportsState($0.event) == "in" }) { return live }
+        return hits.filter { sportsState($0.event) == "pre" }.min { sportsTime($0.event) < sportsTime($1.event) }
+    }
+
+    /// A league's most recent day on its current scoreboard: the latest Final's day, else a game in progress, else the
+    /// next scheduled day. Returns that day's games (possibly none).
+    static func sportsRecentDay(_ events: [SportsEvent], tz: TimeZone?) -> [SportsEvent] {
+        let pick = events.filter { sportsState($0) == "post" }.max { sportsTime($0) < sportsTime($1) }
+            ?? events.first { sportsState($0) == "in" }
+            ?? events.filter { sportsState($0) == "pre" }.min { sportsTime($0) < sportsTime($1) }
+        guard let pick else { return [] }
+        let day = sportsYMD(sportsTime(pick), tz: tz)
+        return events.filter { sportsYMD(sportsTime($0), tz: tz) == day }
+    }
+
+    /// The sports card for a question. The order is fixed: today, then yesterday ("last night" is yesterday only), by the
+    /// day's board; then the current scoreboard with no date (the most recent game, Final, else in progress, else next);
+    /// then each day back to seven days ago. A failed request with no game found is unavailable, never no game.
+    /// now and tz are for tests.
     func sportsCard(_ ask: SportsAsk, now: Date = Date(), tz: TimeZone? = nil, session: URLSession = .shared) async -> SportsCard {
         let days = ask.lastNight ? [1] : [0, 1]
         let fresh = Freshness(date: now, isDay: false)
         var failed = false
         if let league = ask.league, let l = Self.sportsLeagues[league] {
+            let title = "\(l.name) scores"
+            func card(_ events: [SportsEvent], dated: Bool) -> SportsCard {
+                let games = events.prefix(8).map { Self.gameRow($0, ours: nil, league: league, now: now, tz: tz, dated: dated) }
+                return SportsCard(title: title, league: l.name, games: games, outcome: .found, url: l.url, asOf: fresh)
+            }
             for back in days {
                 guard let events = await sportsBoard(league, Self.sportsDay(now, back: back, tz: tz), session) else { failed = true; continue }
-                if !events.isEmpty {
-                    let games = events.prefix(8).map { Self.gameRow($0, ours: nil, league: league, now: now, tz: tz) }
-                    return SportsCard(title: "\(l.name) scores", league: l.name, games: games, outcome: .found, url: l.url, asOf: fresh)
-                }
+                if !events.isEmpty { return card(events, dated: false) }
             }
-            return SportsCard(title: "\(l.name) scores", league: l.name, games: [],
+            if let board = await sportsBoard(league, nil, session) {
+                let events = Self.sportsRecentDay(board, tz: tz)
+                if !events.isEmpty { return card(events, dated: true) }
+            } else { failed = true }
+            for back in 2...7 {
+                guard let events = await sportsBoard(league, Self.sportsDay(now, back: back, tz: tz), session) else { failed = true; continue }
+                if !events.isEmpty { return card(events, dated: true) }
+            }
+            return SportsCard(title: title, league: l.name, games: [],
                               outcome: failed ? .unavailable : .noGame(lastNight: ask.lastNight), url: l.url,
                               asOf: failed ? nil : fresh)
         }
         let title = Self.titleCase(ask.team ?? "")
+        func card(_ league: String, _ hit: (event: SportsEvent, index: Int), dated: Bool) -> SportsCard {
+            let game = Self.gameRow(hit.event, ours: hit.index, league: league, now: now, tz: tz, dated: dated)
+            return SportsCard(title: title, league: nil, games: [game], outcome: .found,
+                              url: Self.sportsLeagues[league]?.url ?? "https://www.espn.com", asOf: fresh)
+        }
         for back in days {
             for entry in ask.teams {
                 guard let events = await sportsBoard(entry.league, Self.sportsDay(now, back: back, tz: tz), session) else { failed = true; continue }
-                if let hit = Self.sportsFind(events, keys: entry.keys), let url = Self.sportsLeagues[entry.league]?.url {
-                    let game = Self.gameRow(hit.event, ours: hit.index, league: entry.league, now: now, tz: tz)
-                    return SportsCard(title: title, league: nil, games: [game], outcome: .found, url: url, asOf: fresh)
-                }
+                if let hit = Self.sportsFind(events, keys: entry.keys) { return card(entry.league, hit, dated: false) }
+            }
+        }
+        for entry in ask.teams {
+            guard let events = await sportsBoard(entry.league, nil, session) else { failed = true; continue }
+            if let hit = Self.sportsRecent(events, keys: entry.keys) { return card(entry.league, hit, dated: true) }
+        }
+        for back in 2...7 {
+            for entry in ask.teams {
+                guard let events = await sportsBoard(entry.league, Self.sportsDay(now, back: back, tz: tz), session) else { failed = true; continue }
+                if let hit = Self.sportsFind(events, keys: entry.keys) { return card(entry.league, hit, dated: true) }
             }
         }
         return SportsCard(title: title, league: nil, games: [],
@@ -263,10 +332,11 @@ extension QueryEngine {
         return await sportsCard(ask, now: now, tz: tz, session: session)
     }
 
-    /// One league's events for one day: an array (possibly empty), or nil when the request failed.
-    private func sportsBoard(_ league: String, _ ymd: String, _ session: URLSession) async -> [SportsEvent]? {
+    /// One league's events for one day (ymd), or the current scoreboard when ymd is nil: an array (possibly empty),
+    /// or nil when the request failed.
+    private func sportsBoard(_ league: String, _ ymd: String?, _ session: URLSession) async -> [SportsEvent]? {
         guard let l = Self.sportsLeagues[league],
-              let url = URL(string: "https://site.api.espn.com/apis/site/v2/sports/\(l.path)/scoreboard?dates=\(ymd)") else { return nil }
+              let url = URL(string: "https://site.api.espn.com/apis/site/v2/sports/\(l.path)/scoreboard" + (ymd.map { "?dates=\($0)" } ?? "")) else { return nil }
         var request = URLRequest(url: url)
         request.timeoutInterval = Self.sportsTimeout
         guard let (data, response) = try? await session.data(for: request),

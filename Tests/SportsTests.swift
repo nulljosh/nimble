@@ -64,6 +64,10 @@ final class SportsTests: XCTestCase {
 
     private var nfl1011: Data { fixture("espn-nfl-20261011") }   // Final, Final, Final/OT (Commanders and Giants tied)
     private var nfl1012: Data { fixture("espn-nfl-20261012") }   // Rams and Bills, not yet played
+    /// ESPN's default scoreboard (no dates), saved live on Oct 12: Bucs 24 at Cowboys 16 (Final, Thu Oct 8 ET), Bears 7 at Packers 31, Bills at Rams.
+    private var nflDefault: Data { fixture("espn-nfl-default") }
+    /// ESPN's default NBA scoreboard, saved live on Oct 12: two preseason games, no Lakers.
+    private var nbaDefault: Data { fixture("espn-nba-default") }
 
     private func session() -> URLSession {
         let config = URLSessionConfiguration.ephemeral
@@ -192,26 +196,59 @@ final class SportsTests: XCTestCase {
         XCTAssertEqual(card?.outcome, .found)
     }
 
-    func testLastNightIsYesterdayOnly() async {
+    func testLastNightIsYesterdayOnlyThenTheLookBack() async {
         let card = await lookup("canucks game last night", ["hockey/nhl|20261011": .success(Data(#"{"events":[]}"#.utf8))])
-        XCTAssertEqual(SportsStub.requested(), ["hockey/nhl|20261011"])
+        XCTAssertEqual(Array(SportsStub.requested().prefix(2)), ["hockey/nhl|20261011", "hockey/nhl|"])
+        XCTAssertFalse(SportsStub.requested().contains("hockey/nhl|20261012"))
         XCTAssertEqual(card?.outcome, .noGame(lastNight: true))
     }
 
     func testTeamInTwoLeaguesIsCheckedInEachBeforeCalledMissing() async {
         let card = await lookup("kings score", [:])
-        XCTAssertEqual(SportsStub.requested(), ["basketball/nba|20261012", "hockey/nhl|20261012",
-                                                "basketball/nba|20261011", "hockey/nhl|20261011"])
+        XCTAssertEqual(Array(SportsStub.requested().prefix(4)), ["basketball/nba|20261012", "hockey/nhl|20261012",
+                                                                 "basketball/nba|20261011", "hockey/nhl|20261011"])
         XCTAssertEqual(card?.outcome, .noGame(lastNight: false))
     }
 
-    func testNoGameSaysWhichDaysWereChecked() async {
-        let card = await lookup("lakers score", [:])
+    func testNoGameInTheLastWeekChecksEverySevenDaysBack() async {
+        let card = await lookup("lakers score", ["basketball/nba|": .success(nbaDefault)])
         XCTAssertEqual(card?.outcome, .noGame(lastNight: false))
         XCTAssertEqual(card?.title, "Lakers")
         XCTAssertNil(card?.league)
-        XCTAssertEqual(SportsStub.requested(), ["basketball/nba|20261012", "basketball/nba|20261011"])
+        let days = (5...10).map { "basketball/nba|202610\(String(format: "%02d", $0))" }
+        XCTAssertEqual(SportsStub.requested(), ["basketball/nba|20261012", "basketball/nba|20261011", "basketball/nba|"] + days.reversed())
         XCTAssertEqual(card?.asOf?.date, now)
+    }
+
+    func testCowboysOnTheCurrentBoardIsFinalAndDatedInWords() async {
+        let card = await lookup("cowboys score", ["football/nfl|": .success(nflDefault)])
+        XCTAssertEqual(SportsStub.requested(), ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|"])
+        XCTAssertEqual(card?.outcome, .found)
+        XCTAssertEqual(card?.games.first?.line, "Cowboys 16, Buccaneers 24")
+        XCTAssertEqual(card?.games.first?.status, "Final, Thursday, Oct 8")
+        XCTAssertEqual(card?.asOf?.label(in: tz), "Oct 12, 1:00 pm")
+    }
+
+    func testLookBackFindsTheGameOnTheFourthDayBackAndStopsThere() async {
+        let card = await lookup("cowboys score", ["football/nfl|20261008": .success(nflDefault)])
+        XCTAssertEqual(SportsStub.requested(), ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|",
+                                                "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008"])
+        XCTAssertEqual(card?.games.first?.status, "Final, Thursday, Oct 8")
+    }
+
+    func testGameStillToComeOnTheCurrentBoardShowsItsKickoff() async {
+        let root = try! JSONSerialization.jsonObject(with: nflDefault) as! [String: Any]
+        let events = root["events"] as! [Any]
+        let data = try! JSONSerialization.data(withJSONObject: ["events": [events[2]]])
+        let card = await lookup("bills score", ["football/nfl|": .success(data)])
+        XCTAssertEqual(card?.games.first?.isPre, true)
+        XCTAssertEqual(card?.games.first?.status, "Scheduled for 5:15 pm")
+    }
+
+    func testLeagueWithNoGameTodayOrYesterdayShowsTheLatestDayOnTheCurrentBoard() async {
+        let card = await lookup("nfl scores", ["football/nfl|": .success(nflDefault)])
+        XCTAssertEqual(card?.games.count, 1)
+        XCTAssertEqual(card?.games.first?.status, "Final, Sunday, Oct 11")
     }
 
     func testFailedRequestIsUnavailableNeverNoGame() async {

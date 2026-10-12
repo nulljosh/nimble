@@ -702,8 +702,8 @@ private struct SportsResultView: View {
                 Text(String(localized: "Scores unavailable right now"))
                     .font(.nimbleLead)
                     .foregroundStyle(Color.soft)
-            case .noGame(let lastNight):
-                Text(Self.noGameLine(card, lastNight: lastNight))
+            case .noGame:
+                Text(Self.noGameLine(card))
                     .font(.nimbleLead)
                     .foregroundStyle(Color.soft)
             case .found:
@@ -737,12 +737,11 @@ private struct SportsResultView: View {
         }
     }
 
-    private static func noGameLine(_ card: SportsCard, lastNight: Bool) -> String {
+    /// The calm line when no game was found in the last seven days. Unavailable is a separate line.
+    private static func noGameLine(_ card: SportsCard) -> String {
         if let league = card.league {
-            return String(localized: "No \(league) games \(lastNight ? "yesterday" : "today or yesterday")")
+            return String(localized: "No \(league) games in the last week")
         }
-        return lastNight
-            ? String(localized: "No game found for the \(card.title) yesterday")
-            : String(localized: "No game found for the \(card.title) today or yesterday")
+        return String(localized: "No game found for the \(card.title) in the last week")
     }
 }

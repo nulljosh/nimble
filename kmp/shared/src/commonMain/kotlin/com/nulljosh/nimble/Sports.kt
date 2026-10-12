@@ -178,8 +178,9 @@ internal fun sportsStatus(ev: JsonObject, lg: String, now: Long, zoneId: String?
     return t.str("shortDetail") ?: t.str("detail") ?: "In progress"
 }
 
-/** One game as a row: our team first, the winner marked, a tie said in words. ESPN gives no score before kickoff. */
-fun gameRow(ev: JsonObject, ours: JsonObject?, lg: String, now: Long, zoneId: String?): SportsGame {
+/** One game as a row: our team first, the winner marked, a tie said in words. ESPN gives no score before kickoff.
+ *  dated: a final found by the look-back says its day ("Final, Thursday, Oct 8"). */
+fun gameRow(ev: JsonObject, ours: JsonObject?, lg: String, now: Long, zoneId: String?, dated: Boolean = false): SportsGame {
     val comps = ev.competitors()
     val order = if (ours != null) listOf(ours) + comps.filter { it !== ours }
         else comps.sortedBy { if (it.str("homeAway") == "away") 0 else 1 }
@@ -193,19 +194,42 @@ fun gameRow(ev: JsonObject, ours: JsonObject?, lg: String, now: Long, zoneId: St
         )
     }
     val tied = state == "post" && teams.none { it.winner }
-    return SportsGame(teams, state, sportsStatus(ev, lg, now, zoneId) + if (tied) ", tied" else "")
+    val day = if (dated && state == "post") ", " + (isoMillis(ev.str("date") ?: "")?.let { zoneClock(it, zoneId, "EEEE, MMM d") } ?: "") else ""
+    return SportsGame(teams, state, sportsStatus(ev, lg, now, zoneId) + day + if (tied) ", tied" else "")
+}
+
+// Every event where the team plays, with the team's own side, found by any of its names.
+private fun sportsHits(events: List<JsonObject>, keys: Set<String>): List<Pair<JsonObject, JsonObject>> = events.mapNotNull { ev ->
+    val ours = ev.competitors().firstOrNull { c ->
+        val t = c.obj("team")
+        listOf(t?.str("displayName"), t?.str("shortDisplayName"), t?.str("name")).any { n -> n != null && sportsFold(n) in keys }
+    }
+    ours?.let { ev to it }
 }
 
 // The event where the team plays, found by any of its names.
-private fun sportsFind(events: List<JsonObject>, keys: Set<String>): Pair<JsonObject, JsonObject>? {
-    for (ev in events) {
-        val ours = ev.competitors().firstOrNull { c ->
-            val t = c.obj("team")
-            listOf(t?.str("displayName"), t?.str("shortDisplayName"), t?.str("name")).any { n -> n != null && sportsFold(n) in keys }
-        }
-        if (ours != null) return ev to ours
-    }
-    return null
+private fun sportsFind(events: List<JsonObject>, keys: Set<String>): Pair<JsonObject, JsonObject>? = sportsHits(events, keys).firstOrNull()
+
+private fun sportsState(ev: JsonObject): String? = ev.obj("status")?.obj("type")?.str("state")
+private fun sportsTime(ev: JsonObject): Long = isoMillis(ev.str("date") ?: "") ?: 0L
+
+// The team's most recent game on one board: the latest Final, else one in progress, else the next scheduled.
+internal fun sportsRecent(events: List<JsonObject>, keys: Set<String>): Pair<JsonObject, JsonObject>? {
+    val hits = sportsHits(events, keys)
+    hits.filter { sportsState(it.first) == "post" }.maxByOrNull { sportsTime(it.first) }?.let { return it }
+    hits.firstOrNull { sportsState(it.first) == "in" }?.let { return it }
+    return hits.filter { sportsState(it.first) == "pre" }.minByOrNull { sportsTime(it.first) }
+}
+
+// A league's most recent day on its current scoreboard: the latest Final's day, else a game in progress, else the next
+// scheduled day. Returns that day's games (possibly none).
+private fun recentDay(events: List<JsonObject>, zoneId: String?): List<JsonObject> {
+    val pick = events.filter { sportsState(it) == "post" }.maxByOrNull { sportsTime(it) }
+        ?: events.firstOrNull { sportsState(it) == "in" }
+        ?: events.filter { sportsState(it) == "pre" }.minByOrNull { sportsTime(it) }
+        ?: return emptyList()
+    val day = zoneClock(sportsTime(pick), zoneId, "yyyyMMdd")
+    return events.filter { zoneClock(sportsTime(it), zoneId, "yyyyMMdd") == day }
 }
 
 /** "lakers" -> "Lakers", "man city" -> "Man City": capitalise each word, the way the web title does. */
@@ -220,16 +244,16 @@ internal fun titleCase(s: String): String {
     return out.toString()
 }
 
-/** The line under a card that found no game, in words. Used by the Compose card and the tests. */
+/** The calm line when no game was found in the last seven days. Used by the Compose card and the tests. */
 fun Answer.Sports.noGameLine(): String = when {
-    league != null -> "No $league games ${if (lastNight) "yesterday" else "today or yesterday"}"
-    lastNight -> "No game found for the $title yesterday"
-    else -> "No game found for the $title today or yesterday"
+    league != null -> "No $league games in the last week"
+    else -> "No game found for the $title in the last week"
 }
 
-/** The sports card for a query, or null when the query is not about sports. Today first, then yesterday;
- *  "last night" means yesterday only. A failed request on any day, with no game found, is Unavailable, never NoGame.
- *  [fetch] returns a 200 body or null (a failure). No other host is ever asked. */
+/** The sports card for a query, or null when the query is not about sports. The order is fixed: today, then yesterday
+ *  ("last night" is yesterday only), by the day's board; then the current scoreboard with no date (the most recent game:
+ *  Final, else in progress, else next); then each day back to seven days ago. A failed request with no game found is
+ *  Unavailable, never NoGame. [fetch] returns a 200 body or null (a failure). No other host is ever asked. */
 object Scores {
 
     const val TIMEOUT_MS = 4_000L
@@ -249,31 +273,46 @@ object Scores {
         return when (ask) {
             is SportsAsk.ByLeague -> {
                 val L = LEAGUES.getValue(ask.key)
+                fun show(evs: List<JsonObject>, dated: Boolean) = Answer.Sports(
+                    "${L.name} scores", L.name, evs.take(8).map { gameRow(it, null, ask.key, now, zoneId, dated) },
+                    SportsState.Scores, lastNight, L.url, asOf,
+                )
                 for (b in back) {
                     val ev = board(ask.key, day(now, b, zoneId), fetch)
                     if (ev == null) { failed = true; continue }
-                    if (ev.isNotEmpty()) {
-                        return Answer.Sports(
-                            "${L.name} scores", L.name, ev.take(8).map { gameRow(it, null, ask.key, now, zoneId) },
-                            SportsState.Scores, lastNight, L.url, asOf,
-                        )
-                    }
+                    if (ev.isNotEmpty()) return show(ev, false)
+                }
+                val current = board(ask.key, null, fetch)
+                if (current == null) failed = true
+                else recentDay(current, zoneId).takeIf { it.isNotEmpty() }?.let { return show(it, true) }
+                for (b in 2..7) {
+                    val ev = board(ask.key, day(now, b, zoneId), fetch)
+                    if (ev == null) { failed = true; continue }
+                    if (ev.isNotEmpty()) return show(ev, true)
                 }
                 if (failed) Answer.Sports("${L.name} scores", L.name, emptyList(), SportsState.Unavailable, lastNight, L.url, null)
                 else Answer.Sports("${L.name} scores", L.name, emptyList(), SportsState.NoGame, lastNight, L.url, asOf)
             }
             is SportsAsk.ByTeam -> {
                 val title = titleCase(ask.team)
+                fun found(lg: String, hit: Pair<JsonObject, JsonObject>, dated: Boolean) = Answer.Sports(
+                    title, null, listOf(gameRow(hit.first, hit.second, lg, now, zoneId, dated)),
+                    SportsState.Scores, lastNight, LEAGUES.getValue(lg).url, asOf,
+                )
                 for (b in back) for (lg in ask.teams.keys) {
                     val ev = board(lg, day(now, b, zoneId), fetch)
                     if (ev == null) { failed = true; continue }
-                    val hit = sportsFind(ev, ask.teams.getValue(lg))
-                    if (hit != null) {
-                        return Answer.Sports(
-                            title, null, listOf(gameRow(hit.first, hit.second, lg, now, zoneId)),
-                            SportsState.Scores, lastNight, LEAGUES.getValue(lg).url, asOf,
-                        )
-                    }
+                    sportsFind(ev, ask.teams.getValue(lg))?.let { return found(lg, it, false) }
+                }
+                for (lg in ask.teams.keys) {
+                    val ev = board(lg, null, fetch)
+                    if (ev == null) { failed = true; continue }
+                    sportsRecent(ev, ask.teams.getValue(lg))?.let { return found(lg, it, true) }
+                }
+                for (b in 2..7) for (lg in ask.teams.keys) {
+                    val ev = board(lg, day(now, b, zoneId), fetch)
+                    if (ev == null) { failed = true; continue }
+                    sportsFind(ev, ask.teams.getValue(lg))?.let { return found(lg, it, true) }
                 }
                 if (failed) Answer.Sports(title, null, emptyList(), SportsState.Unavailable, lastNight, "https://www.espn.com", null)
                 else Answer.Sports(title, null, emptyList(), SportsState.NoGame, lastNight, "https://www.espn.com", asOf)
@@ -283,9 +322,11 @@ object Scores {
 
     private fun day(now: Long, back: Int, zoneId: String?): String = zoneClock(now - back * DAY_MS, zoneId, "yyyyMMdd")
 
-    // One league's events for one day: a list (possibly empty), or null when the request failed.
-    private suspend fun board(lg: String, ymd: String, fetch: suspend (String) -> String?): List<JsonObject>? {
-        val body = fetch("https://site.api.espn.com/apis/site/v2/sports/${LEAGUES.getValue(lg).path}/scoreboard?dates=$ymd") ?: return null
+    // One league's events for one day (ymd), or the current scoreboard when ymd is null: a list (possibly empty),
+    // or null when the request failed.
+    private suspend fun board(lg: String, ymd: String?, fetch: suspend (String) -> String?): List<JsonObject>? {
+        val query = if (ymd == null) "" else "?dates=$ymd"
+        val body = fetch("https://site.api.espn.com/apis/site/v2/sports/${LEAGUES.getValue(lg).path}/scoreboard$query") ?: return null
         val root = runCatching { json.parseToJsonElement(body) as? JsonObject }.getOrNull() ?: return null
         val events = root["events"] as? JsonArray ?: return null
         return events.mapNotNull { it as? JsonObject }

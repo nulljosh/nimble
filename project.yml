@@ -7,7 +7,7 @@ settings:
     # and signing fails with "requires a development team".
     DEVELOPMENT_TEAM: QMM486NPYC
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "5.17.3"
+    MARKETING_VERSION: "5.17.4"
     CURRENT_PROJECT_VERSION: "39"
 targets:
   Nimble:
@@ -112,6 +112,8 @@ targets:
           - "*.plist"
           - "*.entitlements"
       - path: Sources/Models/SharedAnswer.swift
+      # SharedAnswer reads NimbleStorage, which lives here (5.17.3 added it; the widget needs it too).
+      - path: Sources/Models/QASandbox.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios.widget

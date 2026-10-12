@@ -8,6 +8,11 @@ const E = require("../docs/engine.js");
 const fixture = name => JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", name), "utf8"));
 const nfl0811 = fixture("espn-nfl-20261011.json");   // Final, Final, Final/OT (Commanders and Giants tied)
 const nfl0812 = fixture("espn-nfl-20261012.json");   // Rams and Bills, not yet played
+// ESPN's default scoreboard (no dates), saved live on Oct 12: Bucs 24 at Cowboys 16 (Final, Thu Oct 8 ET),
+// Bears 7 at Packers 31 (Final, Sun Oct 11), Bills at Rams (not yet played). Trimmed to these three games.
+const nflDefault = fixture("espn-nfl-default.json");
+// ESPN's default NBA scoreboard, saved live on Oct 12: two preseason games, no Lakers.
+const nbaDefault = fixture("espn-nba-default.json");
 const NOW = new Date("2026-10-12T20:00:00Z");        // 1:00 pm in Vancouver on Oct 12
 const TZ = "America/Vancouver";
 
@@ -128,11 +133,12 @@ test("date fallback: no game today, the game is found yesterday, in that order",
   } finally { restore(); }
 });
 
-test("last night is yesterday only", async () => {
+test("last night is yesterday only, then the look-back: never a fallback to today", async () => {
   espn({ "hockey/nhl|20261011": { events: [] } });
   try {
     const card = await E.sports("canucks game last night", { now: NOW, tz: TZ });
-    assert.deepEqual(calls, ["hockey/nhl|20261011"]);
+    assert.deepEqual(calls.slice(0, 2), ["hockey/nhl|20261011", "hockey/nhl|null"]);
+    assert.ok(!calls.includes("hockey/nhl|20261012"));
     assert.equal(card.none, true);
     assert.equal(card.lastNight, true);
   } finally { restore(); }
@@ -142,8 +148,94 @@ test("a team in two leagues is checked in each before a game is called missing",
   espn({});
   try {
     const card = await E.sports("kings score", { now: NOW, tz: TZ });
-    assert.deepEqual(calls, ["basketball/nba|20261012", "hockey/nhl|20261012", "basketball/nba|20261011", "hockey/nhl|20261011"]);
+    assert.deepEqual(calls.slice(0, 4), ["basketball/nba|20261012", "hockey/nhl|20261012", "basketball/nba|20261011", "hockey/nhl|20261011"]);
     assert.equal(card.none, true);
+  } finally { restore(); }
+});
+
+test("no game in the last week: today, yesterday, the current board, then each of the seven days back", async () => {
+  espn({ "basketball/nba|null": nbaDefault });
+  try {
+    const card = await E.sports("lakers score", { now: NOW, tz: TZ });
+    assert.equal(card.none, true);
+    assert.equal(card.unavailable, undefined);
+    assert.equal(card.title, "Lakers");
+    assert.deepEqual(calls, ["basketball/nba|20261012", "basketball/nba|20261011", "basketball/nba|null",
+      "basketball/nba|20261010", "basketball/nba|20261009", "basketball/nba|20261008",
+      "basketball/nba|20261007", "basketball/nba|20261006", "basketball/nba|20261005"]);
+    const r = await E.renderAnswer("lakers score", { scripted: card });
+    assert.match(r.h, /No game found for the Lakers in the last week/);
+    assert.doesNotMatch(r.h, /today or yesterday/);
+  } finally { restore(); }
+});
+
+test("no game for a league: the calm line says the week", async () => {
+  espn({});
+  try {
+    const card = await E.sports("nba scores", { now: NOW, tz: TZ });
+    assert.equal(card.none, true);
+    const r = await E.renderAnswer("nba scores", { scripted: card });
+    assert.match(r.h, /No NBA games in the last week/);
+  } finally { restore(); }
+});
+
+test("Cowboys: not on today or yesterday, but on ESPN's current scoreboard, Final, dated in words", async () => {
+  espn({ "football/nfl|null": nflDefault });
+  try {
+    const card = await E.sports("cowboys score", { now: NOW, tz: TZ });
+    assert.deepEqual(calls, ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|null"]);
+    assert.equal(card.none, undefined);
+    assert.equal(card.unavailable, undefined);
+    assert.equal(card.rows.length, 1);
+    assert.deepEqual(card.rows[0].teams.map(t => [t.name, t.score, t.winner]), [["Cowboys", "16", false], ["Buccaneers", "24", true]]);
+    assert.equal(card.rows[0].status, "Final, Thursday, Oct 8");
+    const r = await E.renderAnswer("cowboys score", { scripted: card });
+    assert.match(r.h, /Final, Thursday, Oct 8/);
+    assert.match(r.h, /class="as-of num">as of Oct 12, 1:00 pm</);
+    assert.doesNotMatch(r.h, /No game found/);
+  } finally { restore(); }
+});
+
+test("look-back: a game on the fourth day back is found and dated, and nothing after it is asked", async () => {
+  espn({ "football/nfl|20261008": nflDefault });
+  try {
+    const card = await E.sports("cowboys score", { now: NOW, tz: TZ });
+    assert.deepEqual(calls, ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|null",
+      "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008"]);
+    assert.equal(card.rows[0].status, "Final, Thursday, Oct 8");
+  } finally { restore(); }
+});
+
+test("a game still to come on the current board is shown with its kickoff, and no day is faked", async () => {
+  espn({ "football/nfl|null": { events: [nflDefault.events[2]] } });
+  try {
+    const card = await E.sports("bills score", { now: NOW, tz: TZ });
+    assert.equal(card.rows[0].state, "pre");
+    assert.equal(card.rows[0].status, "Scheduled for 5:15 pm");
+  } finally { restore(); }
+});
+
+test("most recent game: the latest Final, else one in progress, else the next scheduled", () => {
+  const ev = (state, date, name) => ({ date, name, status: { type: { state } }, competitions: [{ competitors: [
+    { homeAway: "home", team: { displayName: "Dallas Cowboys", shortDisplayName: "Cowboys", name: "Cowboys" } },
+    { homeAway: "away", team: { displayName: name, shortDisplayName: name, name } }] }] });
+  const keys = new Set(["cowboys", "dallas cowboys"]);
+  const finals = [ev("post", "2026-09-27T17:00Z", "Eagles"), ev("post", "2026-10-09T00:15Z", "Bucs"), ev("pre", "2026-10-20T17:00Z", "Giants")];
+  assert.equal(E.sportsRecent(finals, keys).ev.name, "Bucs");
+  const live = [ev("in", "2026-10-12T17:00Z", "Giants"), ev("pre", "2026-10-20T17:00Z", "Bears")];
+  assert.equal(E.sportsRecent(live, keys).ev.name, "Giants");
+  const next = [ev("pre", "2026-10-20T17:00Z", "Bears"), ev("pre", "2026-10-15T17:00Z", "Giants")];
+  assert.equal(E.sportsRecent(next, keys).ev.name, "Giants");
+  assert.equal(E.sportsRecent([ev("pre", "2026-10-20T17:00Z", "Bears")], new Set(["jets"])), null);
+});
+
+test("league scores with no game today or yesterday: the most recent day on the current board, dated", async () => {
+  espn({ "football/nfl|null": nflDefault });
+  try {
+    const card = await E.sports("nfl scores", { now: NOW, tz: TZ });
+    assert.deepEqual(calls, ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|null"]);
+    assert.equal(card.rows.length, 1);
+    assert.equal(card.rows[0].status, "Final, Sunday, Oct 11");
   } finally { restore(); }
 });
 
@@ -154,9 +246,8 @@ test("no game: both days answered, neither had the team, so it says which days",
     assert.equal(card.none, true);
     assert.equal(card.unavailable, undefined);
     assert.equal(card.title, "Lakers");
-    assert.deepEqual(calls, ["basketball/nba|20261012", "basketball/nba|20261011"]);
     const r = await E.renderAnswer("lakers score", { scripted: card });
-    assert.match(r.h, /No game found for the Lakers today or yesterday/);
+    assert.match(r.h, /No game found for the Lakers in the last week/);
   } finally { restore(); }
 });
 
@@ -199,7 +290,7 @@ test("league scores with nothing on either day says so", async () => {
     const card = await E.sports("nba scores", { now: NOW, tz: TZ });
     assert.equal(card.none, true);
     const r = await E.renderAnswer("nba scores", { scripted: card });
-    assert.match(r.h, /No NBA games today or yesterday/);
+    assert.match(r.h, /No NBA games in the last week/);
   } finally { restore(); }
 });
 
