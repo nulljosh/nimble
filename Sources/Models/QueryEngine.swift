@@ -82,6 +82,11 @@ struct TopicSummary: Decodable {
     }
 }
 
+/// Why the proxy's AI gave no answer. queryLLM fills it on a failed AI call; the caller reads it once after the query.
+final class AIFailureNote: @unchecked Sendable {
+    var aiError: String?
+}
+
 /// The answer proxy's extras: the photo it adds when its page backs the sentence, and the Wikipedia pages
 /// behind the answer (`refs`, each with the intro that backed it). Same fields docs/engine.js reads.
 struct ProxyReply: Decodable {
@@ -90,6 +95,8 @@ struct ProxyReply: Decodable {
     /// The Wikipedia page the proxy names for its answer and photo. Optional: older proxies never send it.
     let topic: String?
     let topicUrl: String?
+    /// Why the AI gave no answer, when an AI call failed (quota, capacity, outage). Set only on UNKNOWN from a failure.
+    let aiError: String?
 
     /// The named page, when the proxy sent a Wikipedia link for it, with its intro from `refs` when there is one.
     var namedTopic: (title: String, url: String, grounding: String?)? {
@@ -482,7 +489,7 @@ final class QueryEngine: Sendable {
 
     // General answer engine: one Gemma call for any factual question. Replaces the
     // old per-shape Wikidata handlers (which dumped every historical officeholder).
-    private func queryLLM(_ input: String, session: URLSession, ai: AIConfig, turns: TurnBuffer, localTimeout: TimeInterval = 40) async -> QueryResult? {
+    private func queryLLM(_ input: String, session: URLSession, ai: AIConfig, turns: TurnBuffer, localTimeout: TimeInterval = 40, note: AIFailureNote? = nil) async -> QueryResult? {
         // On device never reaches the proxy below: a nil answer means no answer, and the question stays here.
         if ai.engine == .onDevice {
             guard let answer = await OnDeviceAnswers.answer(input, turns: turns) else { return nil }
@@ -503,8 +510,12 @@ final class QueryEngine: Sendable {
         if local { req.timeoutInterval = localTimeout } // a local 9B on a busy Mac is slow
         do {
             let (data, response) = try await session.data(for: req)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200,
-                  let (answer, source) = ai.parse(data) else { return nil }
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
+            guard let (answer, source) = ai.parse(data) else {
+                // UNKNOWN from the proxy: keep the reason only when the worker says an AI call failed.
+                note?.aiError = (try? JSONDecoder().decode(ProxyReply.self, from: data))?.aiError
+                return nil
+            }
             // The proxy sends a photo only when the page behind its answer backs the sentence. A local
             // model gets the same rule against the Wikipedia pages it was grounded on.
             // Same rules as docs/engine.js gemma(): the photo's credit is the first on-topic Wikipedia page, and
@@ -756,7 +767,7 @@ final class QueryEngine: Sendable {
                      imageURL: photo == nil ? "https://www.google.com/s2/favicons?domain=\(host)&sz=64" : nil, grounding: body, photo: photo)
     }
 
-    func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer()) async -> QueryResult {
+    func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer(), note: AIFailureNote? = nil) async -> QueryResult {
         if let me = identityAnswer(input) { return me }
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 15
@@ -770,7 +781,7 @@ final class QueryEngine: Sendable {
         let (ddgInput, wikiInput) = preprocessQuery(input)
         // With the on-device model answering, the question sends nothing to DuckDuckGo or Wikipedia.
         let localOnly = useLLM && ai.engine == .onDevice && OnDeviceAnswers.isAvailable
-        async let llm: QueryResult? = useLLM ? await queryLLM(input, session: session, ai: ai, turns: turns) : nil
+        async let llm: QueryResult? = useLLM ? await queryLLM(input, session: session, ai: ai, turns: turns, note: note) : nil
         async let ddg: QueryResult? = localOnly ? nil : queryDDG(ddgInput, session: session)
         async let wiki: QueryResult? = localOnly ? nil : queryWikipedia(wikiInput, session: session)
         // The answer's Wikipedia topic fills a missing picture and the "Why this answer" text. Only when the
@@ -791,6 +802,12 @@ final class QueryEngine: Sendable {
 
         let encoded = input.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? input
         return .error("No instant answer found.", searchURL: "https://duckduckgo.com/?q=\(encoded)")
+    }
+
+    /// The quiet line under a Wikipedia fallback when the AI's call failed. Nil when there is nothing to say.
+    static func aiRestingNote(aiError: String?, source: String) -> String? {
+        guard aiError != nil, source == "Wikipedia" else { return nil }
+        return "The free AI is resting, showing Wikipedia."
     }
 
     /// Attaches the linked sources to a text answer. `others` are results already fetched for the same question.

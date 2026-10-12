@@ -32,6 +32,21 @@ class RichResultsTest {
     }
 
     @Test
+    fun proxyAiErrorIsReadOnlyWhenPresent() {
+        assertEquals("AiError: quota", proxyAiError("""{"answer":"UNKNOWN","aiError":"AiError: quota"}"""))
+        assertNull(proxyAiError("""{"answer":"UNKNOWN"}"""))
+        assertNull(proxyAiError("""{"answer":"UNKNOWN","aiError":""}"""))
+        assertNull(proxyAiError("not json"))
+    }
+
+    @Test
+    fun aiRestingNoteOnlyUnderAWikipediaFallbackWithAnError() {
+        assertEquals("The free AI is resting, showing Wikipedia.", aiRestingNote("capacity", "Wikipedia"))
+        assertNull(aiRestingNote(null, "Wikipedia"))
+        assertNull(aiRestingNote("capacity", "DuckDuckGo"))
+    }
+
+    @Test
     fun proxyUnknownIsNotAnAnswer() {
         assertNull(proxyAnswer("""{"answer":"UNKNOWN"}"""))
         assertNull(proxyAnswer("""{"answer":"  "}"""))

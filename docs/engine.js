@@ -472,7 +472,8 @@ async function grounding(query){
   const trim = t => { const ss = (t||"").split(/(?<=[.!?])\s+/); return [...ss.slice(0,4), ...ss.slice(4).filter(x=>/\b(current|incumbent|since)\b/i.test(x))].join(" "); };
   return pages.map(p=>`${p.title}: ${trim(p.extract)}`).join("\n\n").slice(0,6000);
 }
-async function gemma(query){
+// out.aiError: the worker's reason when its AI call failed (quota, capacity); empty for a plain UNKNOWN.
+async function gemma(query, out={}){
   let c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
   if(e.key && !c.apiKey){ c = {engine:"nimble"}; e = ENGINES.nimble; } // no key = free proxy
   const base = c.baseURL || e.base, model = c.model || e.model, H = {"Content-Type":"application/json"};
@@ -492,6 +493,7 @@ async function gemma(query){
   }else{
     d = await getJSON(ANSWER_PROXY, {method:"POST", headers:H, body:JSON.stringify({q:query, turns:turns.list()})});
     text = d?.answer; src = d?.source||"Nimble AI";
+    if(typeof d?.aiError==="string" && d.aiError) out.aiError = d.aiError;
     image = d?.image && /^https:\/\//.test(d.image.url||"") ? d.image : null;
     // Wikipedia pages behind the proxy's answer; the worker has already matched them to the sentence.
     refs = Array.isArray(d?.refs) ? d.refs.filter(r => r && /^https:\/\//.test(r.url||"") && r.extract).map(r => ({src:"Wikipedia", title:r.title||"Wikipedia", url:r.url, grounding:r.extract})) : [];
@@ -556,7 +558,8 @@ async function answer(query, opts={}){
     return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit])} : {kind:"none"};
   }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
-  const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
+  const aiNote = {};
+  const [ai, dd] = await Promise.all([gemma(query, aiNote).catch(()=>null), ddg(query).catch(()=>null)]);
   // The model's photo, when its page backs the sentence, stays with the number it was shown with.
   let hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : (ai || dd || await firstOf(query, [wiki]));
   // The answer's Wikipedia topic can supply a picture (when the proxy sent none) and the text behind the sentence (when nothing else did).
@@ -571,7 +574,8 @@ async function answer(query, opts={}){
   // The model names no page, so the DDG abstract is the only link here; it must back the sentence.
   // The proxy's Wikipedia pages fill the second link (web shows at most two): the first ones that are not DDG's own article.
   const wikiRefs = (ai?.refs || []).filter(r => !dd || norm(r.url) !== norm(dd.url)).filter(r => onTopic(r.title, query, hit && hit.body)).slice(0,2).map(r => ({src:r.title, url:r.url, grounding:r.grounding}));
-  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2)} : {kind:"none"};
+  // The worker's aiError rides on the fallback only when the AI call failed and gave no answer.
+  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2), ...(!ai && aiNote.aiError ? {aiError:aiNote.aiError} : {})} : {kind:"none"};
 }
 
 // The consent card, same words as the native prompt. Pages wire the buttons by data-consent.
@@ -669,6 +673,8 @@ async function renderAnswer(query, opts){
       h+='<p class="sources">'+sourceRow(a.sources)+'</p>';
       credit="";
     }
+    // A quiet note under a Wikipedia fallback when the free AI's call failed. Design tokens only.
+    if(a.aiError && a.src==="Wikipedia") h+='<p class="ai-note">'+esc(T("The free AI is resting, showing Wikipedia."))+'</p>';
   }
   else { h+="<p>"+T('No instant answer. Try a question, a sum, or "5 miles to km".')+"</p>"; }
   return {h, credit, kind:a.kind, a};

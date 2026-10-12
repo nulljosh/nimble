@@ -26,7 +26,8 @@ struct ResultView: View {
 
         case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding, let sources, let photo):
             TextAnswerView(heading: heading, answer: answer, source: source, sourceURL: sourceURL,
-                           imageURL: imageURL, grounding: grounding, sources: sources, photo: photo, shareText: state.result.copyText)
+                           imageURL: imageURL, grounding: grounding, sources: sources, photo: photo, shareText: state.result.copyText,
+                           aiError: state.aiError)
 
         case .list(let items, let source):
             AnswerCard(shareText: state.result.copyText) {
@@ -150,6 +151,8 @@ struct TextAnswerView: View {
     /// The picture above the card; nil keeps the plain layout.
     let photo: AnswerPhoto?
     let shareText: String?
+    /// The worker's reason the free AI gave no answer; shows the resting note under a Wikipedia fallback.
+    var aiError: String? = nil
     // Screenshots: `-shotWhy YES` opens the "Why this answer" block on launch.
     @State private var showWhy = UserDefaults.standard.bool(forKey: "shotWhy")
 
@@ -241,6 +244,11 @@ struct TextAnswerView: View {
                             }
                         }
                     }
+                }
+                if let note = QueryEngine.aiRestingNote(aiError: aiError, source: source) {
+                    Text(note)
+                        .font(.nimbleCaption)
+                        .foregroundStyle(Color.dim)
                 }
                 if showWhy, let whyText {
                     VStack(alignment: .leading, spacing: 8) {

@@ -372,6 +372,10 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                     Text(answer.body, color = theme.text, fontSize = 16.sp, textDecoration = TextDecoration.Underline)
                     Spacer(Modifier.height(12.dp))
                     Text("Source: ${answer.source}", color = theme.muted, fontSize = 12.sp)
+                    answer.aiNote?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, color = theme.muted, fontSize = 13.sp)
+                    }
                     answer.grounding?.let {
                         Spacer(Modifier.height(8.dp))
                         WhyThisAnswer(it, answer.sourceUrl, theme)

@@ -36,6 +36,8 @@ sealed class Answer {
         val photoCredit: String? = null,
         /** The Wikipedia intro behind the answer, shown under "Why this answer". Null when nothing backs it. */
         val grounding: String? = null,
+        /** The quiet line under a Wikipedia fallback when the free AI's call failed. Null otherwise. */
+        val aiNote: String? = null,
     ) : Answer()
     /** "news" or "what's happening in <place>": up to three headlines from the worker's RSS route. */
     data class News(val items: List<NewsItem>, val source: String) : Answer()
@@ -86,14 +88,17 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
 
         // AI answers have no source page; give them a web search so every answer opens somewhere.
         // An AI answer with no proxy photo takes the picture and intro of the Wikipedia topic it names (TopicPhoto).
-        gemma(input)?.let { ai ->
+        val aiFailures = mutableListOf<String>()
+        gemma(input, aiFailures)?.let { ai ->
             val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}")
             return TopicPhoto.withTopic(answer, input) { fetchText(it) }
         }
 
         val (ddgQuery, wikiQuery) = QueryEngine.preprocess(input)
         ddg(ddgQuery)?.let { return it }
-        wikipedia(wikiQuery)?.let { return it }
+        wikipedia(wikiQuery)?.let { wiki ->
+            return wiki.copy(aiNote = aiFailures.lastOrNull()?.let { aiRestingNote(it, wiki.source) })
+        }
 
         return Answer.Miss(
             "No instant answer found.",
@@ -104,12 +109,17 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
     @Serializable
     private data class ProxyBody(val q: String)
 
-    private suspend fun gemma(input: String): Answer.Text? = runCatchingNull {
+    private suspend fun gemma(input: String, aiFailures: MutableList<String>): Answer.Text? = runCatchingNull {
         val res = http.post(PROXY) {
             contentType(ContentType.Application.Json)
             setBody(ProxyBody(input))
         }
-        proxyAnswer(res.bodyAsText())
+        val body = res.bodyAsText()
+        proxyAnswer(body) ?: run {
+            // UNKNOWN: keep the worker's reason only when its AI call failed.
+            proxyAiError(body)?.let { aiFailures.add(it) }
+            null
+        }
     }
 
     private suspend fun news(place: String): Answer.News? = runCatchingNull {
@@ -252,6 +262,14 @@ internal fun siteAnswer(host: String, d: AnswerClient.SiteResponse): Answer.Text
     )
 }
 
+/** The quiet note under a Wikipedia fallback when the AI's call failed (quota or outage). Null for any other source. */
+internal fun aiRestingNote(aiError: String?, source: String): String? =
+    if (aiError != null && source == "Wikipedia") "The free AI is resting, showing Wikipedia." else null
+
+/** The worker's `aiError`, present only when its AI call failed and the answer is UNKNOWN. */
+internal fun proxyAiError(body: String): String? =
+    runCatching { rich.decodeFromString<ProxyReply>(body).aiError }.getOrNull()?.takeIf { it.isNotEmpty() }
+
 /** The worker's `/?q=` reply. `image` is an object `{url, width, height}`; a string here would drop the whole answer. */
 internal fun proxyAnswer(body: String): Answer.Text? {
     val d = rich.decodeFromString<ProxyReply>(body)
@@ -280,6 +298,7 @@ private data class ProxyReply(
     val topic: String? = null,
     val topicUrl: String? = null,
     val refs: List<ProxyRef>? = null,
+    val aiError: String? = null,
 )
 
 @Serializable

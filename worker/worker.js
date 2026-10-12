@@ -137,6 +137,13 @@ const GLUE = new Set("that this with from which were have they their also been i
 
 // Follow-up context from the client: at most 3 {q, a} string pairs, each side cut to 300 chars.
 // Anything else is dropped. Never logged.
+// The last AI call failure (a thrown error, not a model's UNKNOWN), kept in module memory for debugging.
+// A request reports its own failure as aiError, so concurrent requests never share one.
+let lastAiError = "";
+function aiErrorText(e) {
+  return String(e?.message ?? e ?? "unknown error").replace(/\s+/g, " ").slice(0, 200);
+}
+
 function cleanTurns(raw) {
   if (!Array.isArray(raw)) return [];
   return raw
@@ -223,6 +230,8 @@ export default {
 
     // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
     const { text: context, pages } = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
+    // Set only when an AI call threw and the answer is UNKNOWN because of it (see reply below).
+    const aiFailures = [];
     const reply = async (o) => {
       const known = o.answer !== "UNKNOWN";
       const photo = known ? await photoFor(q, o.answer) : null;
@@ -262,13 +271,18 @@ export default {
           // A reply with no letter or digit (a stray "*" from a reasoning trace) is no answer.
           return /[a-z0-9]/i.test(clean) ? clean[0].toUpperCase() + clean.slice(1) : "UNKNOWN";
         })
-        .catch(() => "UNKNOWN");
+        .catch((e) => {
+          lastAiError = aiErrorText(e);
+          aiFailures.push(lastAiError);
+          return "UNKNOWN";
+        });
 
     const [qwenAnswer, gemmaAnswer] = await Promise.all([ask(QWEN), ask(GEMMA)]);
 
     // The client shows `source` under the answer, so it has to name the models that
     // actually produced it — it used to hardcode "Gemma" for all four branches.
-    if (qwenAnswer === "UNKNOWN" && gemmaAnswer === "UNKNOWN") return reply({ answer: "UNKNOWN" });
+    if (qwenAnswer === "UNKNOWN" && gemmaAnswer === "UNKNOWN")
+      return reply({ answer: "UNKNOWN", ...(aiFailures.length ? { aiError: aiFailures[aiFailures.length - 1] } : {}) });
     if (qwenAnswer === "UNKNOWN") return reply({ answer: gemmaAnswer, source: "Gemma" });
     if (gemmaAnswer === "UNKNOWN") return reply({ answer: qwenAnswer, source: "Qwen" });
     if (normalize(qwenAnswer) === normalize(gemmaAnswer)) return reply({ answer: qwenAnswer, source: "Gemma + Qwen" });

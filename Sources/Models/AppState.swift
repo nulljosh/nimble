@@ -65,6 +65,8 @@ final class AppState {
 
     var queryText: String = ""
     var result: QueryResult = .none
+    /// Why the free AI gave no answer for the current result, when its call failed. Nil otherwise.
+    var aiError: String?
     var currentPlaceholder: String = ""
     var searchURL: String = ""
 
@@ -220,12 +222,15 @@ final class AppState {
         let useLLM = aiConsent == true
 
         result = .loading
+        aiError = nil
         let engine = queryEngine
         let ai = self.ai
         let turns = self.turns
         Task { @MainActor [weak self] in
-            let answer = await engine.query(text, ai: ai, useLLM: useLLM, turns: turns)
+            let note = AIFailureNote()
+            let answer = await engine.query(text, ai: ai, useLLM: useLLM, turns: turns, note: note)
             self?.result = answer
+            self?.aiError = note.aiError
             switch answer {
             case .error, .none, .loading: break
             default: self?.remember(text)
