@@ -89,7 +89,7 @@ struct SearchView: View {
             guard url.scheme == "nimble" else { return }
             Task { try? await Task.sleep(for: .milliseconds(300)); isInputFocused = true }
         }
-        .tint(state.theme.color)  // caret and toolbar in the theme accent, not system blue
+        .tint(state.theme.ink)  // caret and toolbar in the theme accent, not system blue
     }
 
     /// The web app's field: rounded, soft fill, hairline that turns into a yellow ring when focused, Ask at the end.

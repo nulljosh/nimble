@@ -767,11 +767,16 @@ final class QueryEngine: Sendable {
                      imageURL: photo == nil ? "https://www.google.com/s2/favicons?domain=\(host)&sz=64" : nil, grounding: body, photo: photo)
     }
 
-    func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer(), note: AIFailureNote? = nil) async -> QueryResult {
+    func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer(), note: AIFailureNote? = nil, session injected: URLSession? = nil) async -> QueryResult {
         if let me = identityAnswer(input) { return me }
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 15
-        let session = URLSession(configuration: config)
+        let session: URLSession
+        if let injected {
+            session = injected
+        } else {
+            let config = URLSessionConfiguration.default
+            config.timeoutIntervalForRequest = 15
+            session = URLSession(configuration: config)
+        }
         if let site = await querySite(input, session: session) { return site }
 
         // Gemma first for a crisp one-line answer; fall back to DDG/Wikipedia when the
@@ -783,7 +788,7 @@ final class QueryEngine: Sendable {
         let localOnly = useLLM && ai.engine == .onDevice && OnDeviceAnswers.isAvailable
         async let llm: QueryResult? = useLLM ? await queryLLM(input, session: session, ai: ai, turns: turns, note: note) : nil
         async let ddg: QueryResult? = localOnly ? nil : queryDDG(ddgInput, session: session)
-        async let wiki: QueryResult? = localOnly ? nil : queryWikipedia(wikiInput, session: session)
+        async let wiki: QueryResult? = localOnly ? nil : queryWikipedia(wikiInput, session: session, question: input)
         // The answer's Wikipedia topic fills a missing picture and the "Why this answer" text. Only when the
         // user allowed an AI (useLLM) and nothing stayed on device; a "no" answer is DDG and Wikipedia only.
         let topicOK = useLLM && !localOnly
@@ -797,7 +802,7 @@ final class QueryEngine: Sendable {
             return await Self.withTopic(withSources(llmResult, others: [await ddg, await wiki]), query: input, session: session, enabled: topicOK)
         }
 
-        if let ddgResult = await ddg { return await Self.withTopic(withSources(ddgResult, others: [await wiki]), query: input, session: session, enabled: topicOK) }
+        if let ddgResult = await ddg { return await Self.withTopic(withSources(Self.labeledIfGeneric(ddgResult, question: input), others: [await wiki]), query: input, session: session, enabled: topicOK) }
         if let wikiResult = await wiki { return await Self.withTopic(withSources(wikiResult, others: []), query: input, session: session, enabled: topicOK) }
 
         let encoded = input.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? input
@@ -807,7 +812,7 @@ final class QueryEngine: Sendable {
     /// The quiet line under a Wikipedia fallback when the AI's call failed. Nil when there is nothing to say.
     static func aiRestingNote(aiError: String?, source: String) -> String? {
         guard aiError != nil, source == "Wikipedia" else { return nil }
-        return "The free AI is resting, showing Wikipedia."
+        return "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening."
     }
 
     /// Attaches the linked sources to a text answer. `others` are results already fetched for the same question.
@@ -986,7 +991,9 @@ final class QueryEngine: Sendable {
         return titles.filter { !$0.lowercased().hasPrefix("list of") }.prefix(5).map { $0 }
     }
 
-    func queryWikipedia(_ input: String, session: URLSession = .shared) async -> QueryResult? {
+    /// `question` is the user's own words when `input` is a preprocessed search ("what was the" stripped), so the
+    /// generic-topic label checks what was actually asked.
+    func queryWikipedia(_ input: String, session: URLSession = .shared, question: String? = nil) async -> QueryResult? {
         if let rel = WikiRelation.of(input) {
             // A relation question never falls back to a loose search hit: the subject's own page first, then the top hits.
             let hits = await Self.searchHits(input, session: session)
@@ -1014,9 +1021,34 @@ final class QueryEngine: Sendable {
             guard let encoded = title.replacingOccurrences(of: " ", with: "_").addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
                   let url = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(encoded)"),
                   let result = await fetchWikiSummary(url: url, session: session) else { continue }
-            if case .text(let heading, _, _, _, _, _, _, _) = result, !(heading ?? "").lowercased().hasPrefix("list of") { return result }
+            if case .text(let heading, _, _, _, _, _, _, _) = result, !(heading ?? "").lowercased().hasPrefix("list of") {
+                return Self.labeledIfGeneric(result, question: question ?? input)
+            }
         }
         return nil
+    }
+
+    /// A specific question ("what was the first color photograph of a rainbow") that only a generic topic page
+    /// comes back for. The topic page is background, labeled as such, never presented as the answer.
+    static func labeledIfGeneric(_ result: QueryResult, question: String) -> QueryResult {
+        guard case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, let sources, let photo) = result,
+              source == "Wikipedia", let topic = heading, isSpecificQuestion(question, topic: topic) else { return result }
+        return .text(heading: heading, body: "Not a direct answer. Here is what Wikipedia says about \(topic). \(body)", source: source,
+                     sourceURL: sourceURL, imageURL: imageURL, grounding: grounding, sources: sources, photo: photo)
+    }
+
+    /// True when a question word opens the question and it names something beyond the topic's title.
+    /// "what is the speed of light" against "Speed of light" has nothing extra, so it stays a direct answer.
+    static func isSpecificQuestion(_ question: String, topic: String) -> Bool {
+        func tokens(_ s: String) -> [String] {
+            s.lowercased().components(separatedBy: CharacterSet.letters.inverted).filter { !$0.isEmpty }
+        }
+        let words = tokens(question)
+        let questionWords: Set<String> = ["what", "who", "when", "where", "which", "how"]
+        let filler: Set<String> = questionWords.union(["was", "is", "are", "were", "the", "a", "an", "of", "in", "on", "to", "did", "does", "do", "it", "its", "that"])
+        guard let first = words.first, questionWords.contains(first) else { return false }
+        let topicWords = Set(tokens(topic))
+        return words.contains { !filler.contains($0) && !topicWords.contains($0) }
     }
 
     private func fetchWikiSummary(url: URL, session: URLSession = .shared) async -> QueryResult? {

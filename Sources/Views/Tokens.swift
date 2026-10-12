@@ -19,7 +19,7 @@ extension Color {
     static let bulb = adaptive(light: 0xffca30, dark: 0xffca30)
     static let bulbDeep = adaptive(light: 0x8a6412, dark: 0xffca30)
 
-    private static func adaptive(light: UInt32, dark: UInt32, alpha: CGFloat = 1) -> Color {
+    static func adaptive(light: UInt32, dark: UInt32, alpha: CGFloat = 1) -> Color {
         func rgb(_ hex: UInt32) -> (CGFloat, CGFloat, CGFloat) {
             (CGFloat((hex >> 16) & 0xFF) / 255, CGFloat((hex >> 8) & 0xFF) / 255, CGFloat(hex & 0xFF) / 255)
         }

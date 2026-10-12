@@ -90,4 +90,31 @@ final class PreferencesTests: XCTestCase {
         XCTAssertNotEqual(QueryResult.math("42"), QueryResult.math("43"))
         XCTAssertNotEqual(QueryResult.none, QueryResult.loading)
     }
+
+    /// The accent lost on iPhone: a fresh install has no folder for the prefs file yet, and the save wrote nothing.
+    /// The save must create the folder, and a new Preferences over the same file must read the theme back.
+    func testThemeSurvivesARelaunchWhenTheFolderDoesNotExistYet() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("prefs-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let path = root.appendingPathComponent("Nimble/nimble-options.json").path
+        var prefs = PreferencesData()
+        prefs.theme = "pink"
+        prefs.mascot = "fen"
+        XCTAssertTrue(Preferences(path: path).save(prefs), "save must create the folder and report success")
+        let relaunched = Preferences(path: path).load()
+        XCTAssertEqual(relaunched.theme, "pink")
+        XCTAssertEqual(relaunched.mascot, "fen")
+    }
+
+    /// Every setter route goes through savePreferences, so a theme chosen in any picker is back after a relaunch.
+    @MainActor
+    func testAccentChosenInTheAppIsBackOnTheNextLaunch() {
+        let first = AppState()
+        first.theme = .blue
+        first.savePreferences()
+        XCTAssertEqual(AppState().theme, .blue)
+        first.theme = .yellow
+        first.savePreferences()
+        XCTAssertEqual(AppState().theme, .yellow)
+    }
 }

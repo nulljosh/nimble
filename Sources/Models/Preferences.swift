@@ -37,14 +37,19 @@ final class Preferences {
         }
     }
 
-    func save(_ prefs: PreferencesData) {
+    @discardableResult
+    func save(_ prefs: PreferencesData) -> Bool {
         do {
             let data = try JSONEncoder().encode(prefs)
             let json = try JSONSerialization.jsonObject(with: data)
             let pretty = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
-            try pretty.write(to: URL(fileURLWithPath: path))
+            // A fresh install has no folder yet; without this the first save fails and nothing persists.
+            let file = URL(fileURLWithPath: path)
+            try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try pretty.write(to: file, options: .atomic)
+            return true
         } catch {
-            // Silent fail
+            return false
         }
     }
 }

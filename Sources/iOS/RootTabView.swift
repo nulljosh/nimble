@@ -35,7 +35,7 @@ struct RootTabView: View {
             .tabItem { Label("Settings", systemImage: "gearshape") }
         }
         .environment(state)
-        .tint(state.theme.color)
+        .tint(state.theme.ink)
         .preferredColorScheme(state.theme.colorScheme)
     }
 }

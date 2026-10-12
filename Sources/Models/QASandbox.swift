@@ -62,9 +62,14 @@ enum NimbleStorage {
         qa ? nil : .default
     }
 
-    /// Preferences file: ~/.nimble-options.json normally, a file in the QA root in QA mode.
+    /// Preferences file: ~/.nimble-options.json on the Mac, a file in Application Support on iPhone (the
+    /// container root is not a place an iOS app can write, so the accent was never saved there), the QA root in QA mode.
     static func preferencesPath(qa: Bool = QASandbox.launch) -> String {
-        qa ? QASandbox.root.appendingPathComponent("nimble-options.json").path
-           : NSHomeDirectory() + "/.nimble-options.json"
+        if qa { return QASandbox.root.appendingPathComponent("nimble-options.json").path }
+        #if os(iOS)
+        return supportDirectory(qa: false).appendingPathComponent("nimble-options.json").path
+        #else
+        return NSHomeDirectory() + "/.nimble-options.json"
+        #endif
     }
 }

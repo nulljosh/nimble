@@ -23,6 +23,8 @@ struct HistoryView: View {
                     ForEach(entries, id: \.q) { entry in
                         row(entry)
                             .listRowBackground(Color.bg)
+                            // Edit mode shows selection circles only; swipe-to-delete stays outside edit mode.
+                            .deleteDisabled(editing)
                     }
                     .onDelete { offsets in
                         state.history.remove(Set(offsets.map { entries[$0].q }))

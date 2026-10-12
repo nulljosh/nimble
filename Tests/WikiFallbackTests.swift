@@ -113,4 +113,34 @@ final class WikiFallbackTests: XCTestCase {
         XCTAssertEqual(heading, "Fraser River")
         XCTAssertEqual(body, "The Fraser River is the longest river in British Columbia.")
     }
+
+    /// The wrong-topic case: a specific question that only the generic topic page answers is labeled, not answered.
+    func testSpecificQuestionOnlyAGenericTopicPageIsLabeledAsBackground() async {
+        StubProtocol.searchTitles = ["Rainbow"]
+        StubProtocol.summaries = ["Rainbow": ["title": "Rainbow", "extract": "A rainbow is an optical phenomenon caused by refraction, internal reflection and dispersion of light in water droplets.", "content_urls": ["desktop": ["page": "https://en.wikipedia.org/wiki/Rainbow"]]]]
+        let result = await QueryEngine().queryWikipedia("What was the first color photograph of a rainbow?", session: session)
+        guard case .text(let heading, let body, let source, let url, _, _, _, _)? = result else { return XCTFail("expected text, got \(String(describing: result))") }
+        XCTAssertEqual(heading, "Rainbow")
+        XCTAssertEqual(source, "Wikipedia")
+        XCTAssertEqual(url, "https://en.wikipedia.org/wiki/Rainbow")
+        XCTAssertEqual(body, "Not a direct answer. Here is what Wikipedia says about Rainbow. A rainbow is an optical phenomenon caused by refraction, internal reflection and dispersion of light in water droplets.")
+    }
+
+    /// The app searches with the preprocessed words ("first color photograph of a rainbow"); the label must still see the question.
+    func testLabelUsesTheOriginalQuestionWhenTheSearchTextIsPreprocessed() async {
+        StubProtocol.searchTitles = ["Rainbow"]
+        StubProtocol.summaries = ["Rainbow": ["title": "Rainbow", "extract": "A rainbow is an optical phenomenon.", "content_urls": ["desktop": ["page": "https://en.wikipedia.org/wiki/Rainbow"]]]]
+        let result = await QueryEngine().queryWikipedia("first color photograph of a rainbow", session: session, question: "What was the first color photograph of a rainbow?")
+        guard case .text(_, let body, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
+        XCTAssertTrue(body.hasPrefix("Not a direct answer. Here is what Wikipedia says about Rainbow."), body)
+    }
+
+    /// A question whose words are all in the topic title is still answered directly.
+    func testQuestionWithNoWordsBeyondTheTopicStaysADirectAnswer() async {
+        StubProtocol.searchTitles = ["Speed of light"]
+        StubProtocol.summaries = ["Speed of light": ["title": "Speed of light", "extract": "The speed of light in vacuum is 299792458 metres per second."]]
+        let result = await QueryEngine().queryWikipedia("what is the speed of light", session: session)
+        guard case .text(_, let body, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
+        XCTAssertEqual(body, "The speed of light in vacuum is 299792458 metres per second.")
+    }
 }

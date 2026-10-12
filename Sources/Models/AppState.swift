@@ -30,6 +30,21 @@ enum NimbleTheme: String, CaseIterable, Codable {
         }
     }
 
+    /// The accent as text, links and the selected tab. Light mode gets a deep shade that reads on the cream
+    /// (at least 4.5:1); dark mode keeps the bright color. Fills keep `color`.
+    var ink: Color {
+        switch self {
+        case .orange: Color.adaptive(light: 0x9a4a00, dark: 0xff8c12)
+        case .red: Color.adaptive(light: 0xb00000, dark: 0xdb0000)
+        case .yellow: Color.adaptive(light: 0x8a6412, dark: 0xffca30)  // the same as Color.bulbDeep
+        case .green: Color.adaptive(light: 0x3f6e0a, dark: 0x75bf21)
+        case .blue: Color.adaptive(light: 0x1d5bb8, dark: 0x297de8)
+        case .purple: Color.adaptive(light: 0x6105b0, dark: 0x6105b0)
+        case .pink: Color.adaptive(light: 0xa3085f, dark: 0xd105a1)
+        case .contrast: color
+        }
+    }
+
     /// nil follows the system light/dark setting; only Contrast pins dark.
     var colorScheme: ColorScheme? {
         self == .contrast ? .dark : nil
