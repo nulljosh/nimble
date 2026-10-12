@@ -27,7 +27,7 @@ test("weather is a card", async () => {
     const a = await E.answer("weather in Vancouver");
     assert.deepEqual(a, { kind: "card", big: "12", unit: "°C", sub: "Vancouver, Canada, overcast, wind 12 km/h", src: "Open-Meteo", url: "https://open-meteo.com" });
     const r = await E.renderAnswer("weather in Vancouver");
-    assert.match(r.h, /mockup-big">12°C</);
+    assert.match(r.h, /mockup-big">12 °C</);
     assert.match(r.h, /<p>Vancouver, Canada, overcast, wind 12 km\/h<\/p>/);
     assert.equal(r.credit, "powered by Open-Meteo");
     assert.equal(r.kind, "card");

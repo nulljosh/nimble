@@ -339,7 +339,7 @@ function aiRecipient(){
     case "openai": return "OpenAI";
     case "ollama": return "your own Ollama server";
     case "samantha": return "Samantha, running on this Mac";
-    default: return "Nimble's answer service, which runs Google Gemma and Alibaba Qwen models on Cloudflare Workers AI";
+    default: return "Nimble's answer service (Google Gemma and Alibaba Qwen on Cloudflare)";
   }
 }
 // --- Mascot: Flit (default) or Fen, the one in the empty state and the loading card. This device only. ---
@@ -456,7 +456,7 @@ function consentHTML(recipient, t){
   const esc=t=>String(t).replace(/</g,"&lt;");
   const T=t||plain;
   return '<div class="mockup-label">'+T("Before I answer")+'</div><h3>'+T("Send your question to an AI service?")+'</h3><p>'
-    +T("To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.",{s:esc(recipient)})+'</p>'
+    +T("Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.",{s:esc(recipient)})+'</p>'
     +'<div class="consent-actions"><button type="button" class="consent-yes" data-consent="yes">'+T("Allow")+'</button><button type="button" class="consent-no" data-consent="no">'+T("Don't allow")+'</button></div>';
 }
 // English fallback for the translator hook: fills {name} slots and nothing else.
@@ -492,7 +492,7 @@ async function renderAnswer(query, opts){
   else if(a.kind==="card"){
     // Same markup as convert; the whole card opens its source like a text answer does.
     const href=esc(a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query)).replace(/"/g,"&quot;");
-    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big">'+esc(a.big)+(a.unit?(a.unit[0]==="°"?"":" ")+esc(a.unit):"")+'</div><p>'+esc(a.sub)+'</p></a>';
+    h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big">'+esc(a.big)+(a.unit?" "+esc(a.unit):"")+'</div><p>'+esc(a.sub)+'</p></a>';
     credit=T("powered by {s}",{s:a.src});
   }
   else if(a.kind==="math"){

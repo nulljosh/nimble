@@ -306,7 +306,7 @@ struct ConsentCard: View {
                 Text("Send your question to an AI service?")
                     .nimbleFont(15, weight: .bold)
                     .foregroundStyle(Color.soft)
-                Text("To answer, Nimble sends the text you type, and nothing else, to \(state.aiRecipient). No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.")
+                Text("Nimble sends your question text, and nothing else, to \(state.aiRecipient). No account or personal data, and no record is kept. Change this any time in settings.")
                     .nimbleFont(17)
                     .foregroundStyle(Color.text)
                     .lineSpacing(4)
@@ -485,10 +485,11 @@ private struct CardResultView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(big)
+            // A temperature reads as one headline, "11 °C"; other units stay a small caption.
+            Text(unit.hasPrefix("°") ? "\(big) \(unit)" : big)
                 .nimbleFont(34, weight: .bold)
                 .foregroundStyle(Color.text)
-            if !unit.isEmpty {
+            if !unit.isEmpty && !unit.hasPrefix("°") {
                 Text(unit)
                     .nimbleFont(13)
                     .foregroundStyle(Color.dim)

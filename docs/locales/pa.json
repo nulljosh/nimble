@@ -22,7 +22,7 @@
   "Click to turn AI answers on": "AI ਜਵਾਬ ਚਾਲੂ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ",
   "Before I answer": "ਜਵਾਬ ਦੇਣ ਤੋਂ ਪਹਿਲਾਂ",
   "Send your question to an AI service?": "ਕੀ ਤੁਹਾਡਾ ਸਵਾਲ ਕਿਸੇ AI ਸੇਵਾ ਨੂੰ ਭੇਜਣਾ ਹੈ?",
-  "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, {s} ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ, ਸੰਪਰਕ, ਟਿਕਾਣਾ ਜਾਂ ਪਛਾਣ ਨਹੀਂ ਭੇਜੀ ਜਾਂਦੀ, ਅਤੇ Nimble ਇਸ ਦਾ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਦਾ। ਜੇ ਤੁਸੀਂ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੇ, ਤਾਂ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਤੁਸੀਂ ਇਹ ਕਦੇ ਵੀ ਵੈੱਬ ਐਪ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
+  "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, {s} ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ ਜਾਂ ਨਿੱਜੀ ਡੇਟਾ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ, ਅਤੇ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਿਆ ਜਾਂਦਾ। ਤੁਸੀਂ ਇਹ ਕਦੇ ਵੀ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
   "powered by {s}": "{s} ਦੁਆਰਾ",
   "Allow": "ਇਜਾਜ਼ਤ ਦਿਓ",
   "Don't allow": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ",

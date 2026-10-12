@@ -22,7 +22,7 @@
   "Click to turn AI answers on": "Cliquez pour activer les réponses de l'IA",
   "Before I answer": "Avant de répondre",
   "Send your question to an AI service?": "Envoyer votre question à un service d'IA ?",
-  "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.": "Pour répondre, Nimble envoie le texte que vous saisissez, et rien d'autre, à {s}. Aucun compte, contact, position ni identifiant n'est envoyé, et Nimble n'en garde aucune trace. Si vous refusez, les réponses viennent uniquement de DuckDuckGo et de Wikipédia. Vous pouvez changer cela à tout moment dans l'app web.",
+  "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.": "Nimble envoie le texte de votre question, et rien d'autre, à {s}. Aucun compte ni donnée personnelle, et aucun historique n'est conservé. Vous pouvez changer cela à tout moment dans les réglages.",
   "powered by {s}": "propulsé par {s}",
   "Allow": "Autoriser",
   "Don't allow": "Ne pas autoriser",

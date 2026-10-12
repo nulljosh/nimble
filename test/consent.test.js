@@ -88,7 +88,7 @@ test("getter and setter round trip", () => {
 test("recipient names the engine, same text as the native app", () => {
   setup(null);
   try {
-    assert.equal(E.aiRecipient(), "Nimble's answer service, which runs Google Gemma and Alibaba Qwen models on Cloudflare Workers AI");
+    assert.equal(E.aiRecipient(), "Nimble's answer service (Google Gemma and Alibaba Qwen on Cloudflare)");
     localStorage.setItem("nimble.ai", JSON.stringify({ engine: "claude", apiKey: "k" }));
     assert.equal(E.aiRecipient(), "Anthropic (Claude)");
     localStorage.setItem("nimble.ai", JSON.stringify({ engine: "ollama" }));

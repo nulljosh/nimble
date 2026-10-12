@@ -78,7 +78,8 @@ struct SearchView: View {
             }
             .onAppear {
                 // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
-                if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery() }
+                // A shot launch leaves the field unfocused, so no keyboard or "slide to type" overlay lands in the frame.
+                if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery(); return }
                 guard whatsNewSeenVersion == whatsNewVersion else { return }
                 isInputFocused = true
             }

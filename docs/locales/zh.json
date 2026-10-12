@@ -22,7 +22,7 @@
   "Click to turn AI answers on": "点击开启 AI 回答",
   "Before I answer": "回答之前",
   "Send your question to an AI service?": "把你的问题发送给 AI 服务？",
-  "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.": "为了回答，Nimble 只会把你输入的文字发送给 {s}，不发送其他任何内容。不会发送账号、联系人、位置或标识符，Nimble 也不会保留任何记录。如果你不允许，答案将只来自 DuckDuckGo 和维基百科。你可以随时在网页版中更改。",
+  "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.": "Nimble 只会把你的问题文字发送给 {s}，不发送其他任何内容。不发送账号或个人数据，也不保留任何记录。你可以随时在设置中更改。",
   "powered by {s}": "由 {s} 提供",
   "Allow": "允许",
   "Don't allow": "不允许",

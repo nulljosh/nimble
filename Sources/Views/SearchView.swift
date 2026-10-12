@@ -93,7 +93,7 @@ struct SearchView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.hairline, lineWidth: 1))
         .onAppear {
             // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
-            if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery() }
+            if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery(); return }
             isInputFocused = true
         }
         .contextMenu { ContextMenuView().environment(state) }

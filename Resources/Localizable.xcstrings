@@ -806,37 +806,37 @@
         }
       }
     },
-    "To answer, Nimble sends the text you type, and nothing else, to %@. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app.": {
+    "Nimble sends your question text, and nothing else, to %@. No account or personal data, and no record is kept. Change this any time in settings.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "To answer, Nimble sends the text you type, and nothing else, to %@. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this any time in the web app."
+            "value": "Nimble sends your question text, and nothing else, to %@. No account or personal data, and no record is kept. Change this any time in settings."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pour répondre, Nimble envoie le texte que vous saisissez, et rien d'autre, à %@. Aucun compte, contact, position ni identifiant n'est envoyé, et Nimble n'en garde aucune trace. Si vous refusez, les réponses viennent uniquement de DuckDuckGo et de Wikipédia. Vous pouvez changer cela à tout moment dans l'app web."
+            "value": "Nimble envoie le texte de votre question, et rien d'autre, à %@. Aucun compte ni donnée personnelle, et aucun historique n'est conservé. Vous pouvez changer cela à tout moment dans les réglages."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Para responder, Nimble envía el texto que escribes, y nada más, a %@. No se envía ninguna cuenta, contacto, ubicación ni identificador, y Nimble no guarda ningún registro. Si no lo permites, las respuestas vienen solo de DuckDuckGo y Wikipedia. Puedes cambiarlo cuando quieras en la app web."
+            "value": "Nimble envía el texto de tu pregunta, y nada más, a %@. No se envía ninguna cuenta ni dato personal, y no se guarda ningún registro. Puedes cambiarlo en cualquier momento en los ajustes."
           }
         },
         "zh": {
           "stringUnit": {
             "state": "translated",
-            "value": "为了回答，Nimble 只会把你输入的文字发送给 %@，不发送其他任何内容。不会发送账号、联系人、位置或标识符，Nimble 也不会保留任何记录。如果你不允许，答案将只来自 DuckDuckGo 和维基百科。你可以随时在网页版中更改。"
+            "value": "Nimble 只会把你的问题文字发送给 %@，不发送其他任何内容。不发送账号或个人数据，也不保留任何记录。你可以随时在设置中更改。"
           }
         },
         "pa": {
           "stringUnit": {
             "state": "translated",
-            "value": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, %@ ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ, ਸੰਪਰਕ, ਟਿਕਾਣਾ ਜਾਂ ਪਛਾਣ ਨਹੀਂ ਭੇਜੀ ਜਾਂਦੀ, ਅਤੇ Nimble ਇਸ ਦਾ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਦਾ। ਜੇ ਤੁਸੀਂ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੇ, ਤਾਂ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਤੁਸੀਂ ਇਹ ਕਦੇ ਵੀ ਵੈੱਬ ਐਪ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"
+            "value": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, %@ ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ ਜਾਂ ਨਿੱਜੀ ਡੇਟਾ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ, ਅਤੇ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਿਆ ਜਾਂਦਾ। ਤੁਸੀਂ ਇਹ ਕਦੇ ਵੀ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"
           }
         }
       }
