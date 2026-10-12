@@ -1,6 +1,6 @@
 # Nimble Technical Whitepaper
 
-**v5.16.1** | October 2026
+**v5.17.0** | October 2026
 
 Ask a question. Get one sentence back.
 
@@ -22,7 +22,9 @@ query into one of three types before deciding where the answer comes from:
 3. **Factual**: routed to the DuckDuckGo Instant Answer API, with a Gemma
    model on Cloudflare Workers AI behind it for queries the instant-answer
    endpoint has nothing for, since a fixed API only covers a fixed set of
-   question shapes.
+   question shapes. When Qwen and Gemma clash on a number, a year or a name and
+   the reference text does not settle it, the answer is shown as "Sources
+   disagree" with both answers and their model names, and no photo.
 
 Classification happens before any network request fires, so math queries
 resolve instantly with zero latency and no external dependency, and the

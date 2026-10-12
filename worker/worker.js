@@ -234,7 +234,8 @@ export default {
     const aiFailures = [];
     const reply = async (o) => {
       const known = o.answer !== "UNKNOWN";
-      const photo = known ? await photoFor(q, o.answer) : null;
+      // A disagreement has no photo: the sources do not say which answer is right, so no picture leans either way.
+      const photo = known && !o.disagree ? await photoFor(q, o.answer) : null;
       const refs = known ? groundingRefs(o.answer, pages) : [];
       const topic = known ? topicOf(photo?.page, refs) : null;
       return json({ ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) });
@@ -278,6 +279,8 @@ export default {
         });
 
     const [qwenAnswer, gemmaAnswer] = await Promise.all([ask(QWEN), ask(GEMMA)]);
+    // Only adds fields (disagree, alts) when the two house models clash and the reference does not settle it.
+    const dis = disagreement(qwenAnswer, gemmaAnswer, pages.map((p) => p.extract || "").join(" "), q);
 
     // The client shows `source` under the answer, so it has to name the models that
     // actually produced it — it used to hardcode "Gemma" for all four branches.
@@ -291,8 +294,8 @@ export default {
     // independent model and take the majority — neutral, same call count either way.
     const llamaAnswer = await ask(LLAMA);
     if (llamaAnswer !== "UNKNOWN") {
-      if (normalize(llamaAnswer) === normalize(qwenAnswer)) return reply({ answer: qwenAnswer, source: "Qwen + Llama" });
-      if (normalize(llamaAnswer) === normalize(gemmaAnswer)) return reply({ answer: gemmaAnswer, source: "Gemma + Llama" });
+      if (normalize(llamaAnswer) === normalize(qwenAnswer)) return reply({ answer: qwenAnswer, source: "Qwen + Llama", ...dis });
+      if (normalize(llamaAnswer) === normalize(gemmaAnswer)) return reply({ answer: gemmaAnswer, source: "Gemma + Llama", ...dis });
     }
 
     // All three differ (or Llama came back UNKNOWN) — fall back to synthesizing one sentence.
@@ -314,7 +317,7 @@ export default {
 
     const answer =
       (synthesis?.response || synthesis?.choices?.[0]?.message?.content || "").trim() || qwenAnswer;
-    return reply({ answer, source: "Gemma + Qwen" });
+    return reply({ answer, source: "Gemma + Qwen", ...dis });
   },
 };
 
@@ -329,6 +332,54 @@ const CORS = {
 // synthesis call on every near-duplicate answer.
 function normalize(s) {
   return s.toLowerCase().replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim();
+}
+
+// Disagreement. Two answers agree unless they clash on a key token: a number or year that only one of
+// them carries and the other does not, or a proper noun the question does not already name. Words both
+// answers share never count, so "Apple's CEO is Tim Cook" and "Apple's CEO is Satya Nadella" clash on the names.
+const PLAIN = new Set(("the a an it its he she they them this that these those in on at of as is was are were be been and or but " +
+  "for from with by to after before during since until today yes no not also one most many several some there both each every all any").split(" "));
+const isUnknown = (s) => !s || /^\s*UNKNOWN\s*$/i.test(s);
+// Numbers ("1,200" reads as 1200) and capitalised words, lowercased. Question words and question numbers are not the answer's, so they are dropped.
+function keyTokens(s, q = "") {
+  const text = String(s).replace(/(\d),(?=\d{3}\b)/g, "$1");
+  const asked = new Set(String(q).toLowerCase().match(/[a-z]+|\d+(?:\.\d+)?/g) || []);
+  const nums = new Set((text.match(/\d+(?:\.\d+)?/g) || []).filter((n) => !asked.has(n)));
+  const names = new Set();
+  for (const m of text.matchAll(/\b[A-Z][\w'’-]*/g)) {
+    const w = m[0].replace(/['’]s$/, "").toLowerCase();
+    if (w.length > 1 && !PLAIN.has(w) && !asked.has(w)) names.add(w);
+  }
+  return { nums, names };
+}
+// Names match when one is a prefix of the other ("tim" and "timothy"); numbers match exactly.
+const sameName = (a, b) => a === b || (a.length >= 3 && b.length >= 3 && (a.startsWith(b) || b.startsWith(a)));
+// The key tokens that clash: a number or name one answer has and the other lacks, but only when both
+// answers each have such a token. One-sided extras ("... and Jeff Williams") are not a clash.
+function clashTokens(ka, kb) {
+  const only = (x, y) => ({
+    nums: [...x.nums].filter((t) => !y.nums.has(t)),
+    names: [...x.names].filter((t) => ![...y.names].some((u) => sameName(t, u))),
+  });
+  const a = only(ka, kb), b = only(kb, ka), out = [];
+  if (a.nums.length && b.nums.length) out.push(...a.nums, ...b.nums);
+  if (a.names.length && b.names.length) out.push(...a.names, ...b.names);
+  return out;
+}
+export function agree(a, b, q = "") {
+  if (isUnknown(a) || isUnknown(b)) return true;
+  if (normalize(a) === normalize(b)) return true;
+  return clashTokens(keyTokens(a, q), keyTokens(b, q)).length === 0;
+}
+// The fields to add to a reply: {} when the answers agree, or when a reference names one of the tokens
+// they clash on (the reference settles it). Otherwise both answers with their model names, and no pick.
+export function disagreement(qwen, gemma, grounding, q = "") {
+  if (isUnknown(qwen) || isUnknown(gemma)) return {};
+  const clash = clashTokens(keyTokens(qwen, q), keyTokens(gemma, q));
+  if (!clash.length) return {};
+  const words = new Set(String(grounding).replace(/(\d),(?=\d{3}\b)/g, "$1").toLowerCase().match(/[a-z0-9]+(?:\.\d+)?/g) || []);
+  if (clash.some((t) => words.has(t))) return {};
+  return { disagree: true, alts: [{ model: "Qwen3 30B", answer: qwen }, { model: "Gemma 4 26B", answer: gemma }] };
 }
 
 function decodeEntity(_, e) {

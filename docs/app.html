@@ -134,6 +134,11 @@ form { position: relative; }
 /* The card sets every paragraph to the 22px answer size. These lines sit under the answer, so they set their own. */
 .card .sources { font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); }
 .card .ai-note { font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-light); }
+/* Sources disagree: both answers, each with its model name quiet under it. The card sets its own sizes, so it reads the same inside .card and on the landing demo. */
+.card .disagree-title, .disagree-title { font-size: var(--fs-17); line-height: var(--lh-md); color: var(--text-mid); margin: 0; }
+.card .disagree-alt, .disagree-alt { margin-top: var(--space-4); }
+.card .disagree-answer, .disagree-answer { font-size: var(--fs-22); line-height: var(--lh-lg); color: var(--text); margin: 0; }
+.card .disagree-model, .disagree-model { font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); margin: var(--space-1) 0 0; }
 .card .thinking p { font-size: var(--fs-17); color: var(--text-mid); }
 /* Consent: the question is the headline, the explanation reads as body copy. */
 .card .consent-q { font-size: var(--fs-22); line-height: var(--lh-lg); letter-spacing: -0.01em; font-weight: var(--fw-semibold); color: var(--text); margin-bottom: var(--space-2); }
@@ -150,7 +155,7 @@ form { position: relative; }
 .recent[hidden] { display: none; }
 .recent-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: var(--space-2); }
 .recent-head .mockup-label { margin-bottom: 0; }
-.recent-head button { border: 0; background: none; font: inherit; font-size: var(--fs-13); color: var(--text-light); cursor: pointer; padding: var(--tap-pad) 0; margin-block: calc(var(--tap-pad) * -1); }
+.recent-head button { border: 0; background: none; font: inherit; font-size: var(--fs-13); color: var(--text-mid); cursor: pointer; min-width: 44px; padding: var(--tap-pad) 0; margin-block: calc(var(--tap-pad) * -1); }
 .recent-head button:hover { color: var(--text); }
 .recent-list { list-style: none; }
 .recent-list button {

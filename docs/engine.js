@@ -778,6 +778,10 @@ async function gemma(query, out={}){
     // The Why link opens the named page's intro, only when the proxy named one that came with its text.
     if(named && named.grounding) why = {grounding:named.grounding, groundingTitle:named.title, groundingUrl:named.url};
   }
+  // The proxy's two models clash and no source settles it: both answers come back, and answer() shows them side by side.
+  const alts = d && d.disagree === true && Array.isArray(d.alts)
+    ? d.alts.filter(x => x && typeof x.model==="string" && typeof x.answer==="string" && x.answer.trim()).map(x => ({model:x.model, answer:x.answer.trim()})) : [];
+  if(alts.length >= 2) return {title:query, body:"", src, disagree:alts, ...(refs.length ? {refs} : {})};
   const a = (text||"").trim();
   return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {}), ...(refs.length ? {refs} : {}), ...why} : null;
 }
@@ -836,7 +840,15 @@ async function answer(query, opts={}){
   }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const aiNote = {};
-  const [ai, dd] = await Promise.all([gemma(query, aiNote).catch(()=>null), ddg(query).catch(()=>null)]);
+  let [ai, dd] = await Promise.all([gemma(query, aiNote).catch(()=>null), ddg(query).catch(()=>null)]);
+  // The models clash. DDG's abstract that backs one of the two settles it (the normal path below); otherwise both answers show, with no pick and no photo.
+  if(ai && ai.disagree){
+    if(!(dd && ai.disagree.some(x => agrees(x.answer, dd.grounding || dd.body)))){
+      return {kind:"disagree", title:query, alts:ai.disagree, asOf:new Date().toISOString(),
+        sources:(ai.refs||[]).slice(0,2).map(r => ({name:r.title, url:r.url}))};
+    }
+    ai = null;
+  }
   // The model's photo, when its page backs the sentence, stays with the number it was shown with.
   let hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : (ai || dd || await firstOf(query, [wiki]));
   // The answer's Wikipedia topic can supply a picture (when the proxy sent none) and the text behind the sentence (when nothing else did).
@@ -950,6 +962,13 @@ async function renderAnswer(query, opts){
       +(i.image?thumbHTML(i.image.url, i.title||i.sentence):'')
       +'<div><a href="'+esc(i.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(i.sentence)+'</a> <span class="news-src">'+esc(i.outlet)+'</span></div></li>').join("")+'</ol>'+fresh(a);
     credit=T("powered by {s}",{s:a.src});
+  }
+  else if(a.kind==="disagree"){
+    // Both answers, each with its model name quiet under it, and no photo: the sources do not say which is right, so the card picks neither.
+    h+='<p class="disagree-title">'+esc(T("Sources disagree"))+'</p>'
+      +a.alts.map(x=>'<div class="disagree-alt"><p class="disagree-answer">'+esc(x.answer)+'</p><p class="disagree-model">'+esc(x.model)+'</p></div>').join("")
+      +fresh(a)+((a.sources||[]).length ? '<p class="sources">'+sourceRow(a.sources)+'</p>' : "");
+    credit="";
   }
   else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
   else if(a.kind==="offline"){ h+="<p>"+T("You're offline. Math, units and graphs still work.")+"</p>"; }

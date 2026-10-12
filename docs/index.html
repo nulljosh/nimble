@@ -295,6 +295,14 @@ a:hover { text-decoration: underline; }
 .sports-state { font-size: var(--fs-15); line-height: var(--lh-md); color: var(--text-mid); margin: 0; }
 .sports-rows { display: grid; gap: var(--space-3); }
 .as-of { margin: var(--space-3) 0 0; font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-light); }
+/* Sources disagree: both answers, each with its model name quiet under it. The demo result sets its own sizes (.mockup-result p is 13px), so these lines are scoped under it. */
+.mockup-result .disagree-title { font-size: var(--fs-17); line-height: var(--lh-md); color: var(--panel-mid); margin: 0; }
+.mockup-result .disagree-alt { margin-top: var(--space-4); }
+.mockup-result .disagree-answer { font-size: var(--fs-17); line-height: var(--lh-md); color: var(--panel-text); margin: 0; }
+.mockup-result .disagree-model { font-size: var(--fs-13); line-height: var(--lh-sm); color: var(--panel-mid); }
+/* The hero's own reset zeroes every p margin, so the spacing under the answer is set with the hero's specificity. */
+.hero .mockup .mockup-result .disagree-model { margin-top: var(--space-1); }
+.hero .mockup .mockup-result .as-of { margin-top: var(--space-3); }
 /* Rich results: a photo tops a card (16:9, 12px radius); a news story can carry a 56px square. */
 .mockup-photo { display: block; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: var(--bg2); margin: 0 0 var(--space-4); }
 .mockup-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; opacity: 0; transition: opacity .25s ease; }
