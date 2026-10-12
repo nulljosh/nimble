@@ -724,15 +724,15 @@ private struct SportsResultView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// "Lakers 112, Warriors 104", the winner heavier; "Bills vs Rams" before kickoff.
+    /// "Lakers 112, Warriors 104", the winner heavier (semibold against regular, so it reads without color); "Bills vs Rams" before kickoff.
     private static func scoreText(_ game: SportsGame) -> Text {
         if game.isPre && game.teams.count == 2 {
-            return Text("\(game.teams[0].name) vs \(game.teams[1].name)").font(.nimbleLead)
+            return Text("\(game.teams[0].name) vs \(game.teams[1].name)").font(.nimbleHeadline)
         }
         return game.teams.enumerated().reduce(Text("")) { line, pair in
             let team = pair.element
             let label = (pair.offset > 0 ? ", " : "") + (team.score.isEmpty ? team.name : "\(team.name) \(team.score)")
-            let piece = Text(label).font(team.winner ? .nimbleLeadMedium : .nimbleLead)
+            let piece = Text(label).font(team.winner ? .nimbleScore : .nimbleScoreRegular)
             return line + piece
         }
     }

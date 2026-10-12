@@ -54,6 +54,9 @@ extension Font {
     static let nimbleTitle = nimble(28, .bold, relativeTo: .title)
     static let nimbleHeadline = nimble(22, .semibold, relativeTo: .title2)
     static let nimbleLead = nimble(19, .regular, relativeTo: .title3)
+    // A game score is the answer, so it takes the 28 step: the winner semibold, the other side regular.
+    static let nimbleScore = nimble(28, .semibold, relativeTo: .title)
+    static let nimbleScoreRegular = nimble(28, .regular, relativeTo: .title)
     static let nimbleLeadMedium = nimble(19, .medium, relativeTo: .title3)
     static let nimbleBody = nimble(17, .regular, relativeTo: .body)
     static let nimbleSubhead = nimble(15, .regular, relativeTo: .subheadline)

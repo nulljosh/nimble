@@ -93,7 +93,13 @@ struct SearchView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.hairline, lineWidth: 1))
         .onAppear {
             // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
-            if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery(); return }
+            if let q = UserDefaults.standard.string(forKey: "shot") {
+                // QA only: `-shotStub YES` answers ESPN and CoinGecko with fixed JSON (Sources/macOS/QAStubProtocol.swift).
+                #if os(macOS)
+                if UserDefaults.standard.bool(forKey: "shotStub") { QAStubProtocol.install() }
+                #endif
+                state.queryText = q; state.performQuery(); return
+            }
             isInputFocused = true
         }
         .contextMenu { ContextMenuView().environment(state) }
