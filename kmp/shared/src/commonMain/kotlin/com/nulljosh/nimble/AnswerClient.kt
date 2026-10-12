@@ -85,7 +85,11 @@ data class NewsItem(val sentence: String, val outlet: String, val url: String, v
  * web implementations. Every stage returns null on failure so the next one gets a turn;
  * a dead network degrades to Miss rather than throwing.
  */
-class AnswerClient(private val http: HttpClient = defaultClient()) {
+class AnswerClient(
+    private val http: HttpClient = defaultClient(),
+    /** The downloaded offline pack, or null when none is installed. Read only on the offline path. */
+    private val offlinePack: suspend () -> OfflinePack? = { null },
+) {
 
     private val cards = CardClient(http)
 
@@ -109,6 +113,9 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
 
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
+
+        // Offline: the pack answers first, else an honest miss. Math above already worked with no network.
+        if (!networkAvailable()) return offlineAnswer(input)
 
         // Sports before markets, so a league name in capitals ("NFL") never reads as a ticker. A score is a card or the calm state.
         Scores.answer(input) { url -> fetchScoreboard(url) }?.let { return it }
@@ -154,6 +161,26 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
             "No instant answer found.",
             "https://duckduckgo.com/?q=${input.encodeURLParameter()}"
         )
+    }
+
+    /** Same labels as the Swift and web apps. The pack's source line carries its build date. */
+    private suspend fun offlineAnswer(input: String): Answer {
+        val pack = offlinePack()
+        pack?.answer(input)?.let { hit ->
+            val asOf = packAsOfLabel(hit.builtAt)?.let { " · as of $it" }.orEmpty()
+            return Answer.Text(
+                heading = hit.title,
+                body = hit.text,
+                source = "Offline pack · Wikipedia (CC BY-SA)$asOf",
+                sourceUrl = hit.url,
+            )
+        }
+        val message = if (pack != null) {
+            "Not in the offline pack. Math, units and graphs still work offline."
+        } else {
+            "You're offline. Math, units and graphs still work."
+        }
+        return Answer.Miss(message, "")
     }
 
     @Serializable

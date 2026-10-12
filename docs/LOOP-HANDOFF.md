@@ -6,6 +6,7 @@ Keep Nimble moving with one small, shippable slice at a time: fix what App Revie
 
 ## Where things stand
 
+- Version 5.22.0 (was 5.21.0): the offline Wikipedia pack on Android. Settings has an Offline answers section: download on a tap (size, progress, Remove). Offline, a question answers from the pack with the article link and an as-of date, or says it is not in the pack. Port of the web's packAnswer; tests in kmp/shared/src/commonTest/.../OfflinePackTest.kt.
 - Version 5.21.0 (was 5.20.1): the offline Wikipedia pack on iPhone and Mac. Settings has an Offline answers row: download on a tap (size shown, progress, Remove). Offline, a question answers from the pack with the article link and "as of" date, or says it is not in the pack. Port of the web's packAnswer; tests in Tests/OfflinePackTests.swift.
 - Version 5.20.1 (was 5.20.0): offline pack grows to 9,000 entries (1.9 MB, 120 days of pageviews, title filter). Answers take the sentence that answers the question, with relation questions (capital, population, who wrote or founded, when) as the online fallback does. Freshness reads "as of Oct 12".
 - Version 5.20.0 (was 5.19.0): offline Wikipedia pack on the web. One tap downloads the top 4,000 article intros (about 0.6 MB, IndexedDB); offline or when online sources are empty, questions answer from it with the article link and the build date. Builder in scripts/build-offline-pack.mjs. Swift and Kotlin read the same JSON in later slices.

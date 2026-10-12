@@ -56,8 +56,14 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.decodeToImageBitmap
 
 @Composable
-fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: Voice? = null) {
-    val client = remember { AnswerClient() }
+fun SearchScreen(
+    history: SearchHistory,
+    modifier: Modifier = Modifier,
+    voice: Voice? = null,
+    /** The offline pack's store on this platform, or null: no Settings button when null. */
+    packStore: OfflinePackStore? = null,
+) {
+    val client = remember { AnswerClient(offlinePack = { packStore?.load() }) }
     val scope = rememberCoroutineScope()
 
     var theme by remember { mutableStateOf(NimbleTheme.Yellow) }
@@ -66,6 +72,7 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
     var loading by remember { mutableStateOf(false) }
     var recent by remember { mutableStateOf(history.list()) }
     var showHistory by remember { mutableStateOf(false) }
+    var showSettings by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
     val placeholder = remember { QueryEngine.randomSuggestion() }
 
@@ -99,6 +106,16 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
             loading = false
             record(q, a)
         }
+    }
+
+    if (showSettings && packStore != null) {
+        SettingsScreen(
+            store = packStore,
+            theme = theme,
+            onBack = { showSettings = false },
+            modifier = modifier,
+        )
+        return
     }
 
     if (showHistory) {
@@ -170,6 +187,7 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
         // The tools row: History always; New question once an answer is on screen.
         Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             ToolButton("History", theme) { showHistory = true }
+            if (packStore != null) ToolButton("Settings", theme) { showSettings = true }
             Spacer(Modifier.weight(1f))
             if (answer != null) ToolButton("New question", theme) { newQuestion() }
         }
@@ -203,7 +221,7 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
 
 /** A labeled 48dp pill button: outlined in the theme's muted colour, text in the theme's text colour. */
 @Composable
-private fun ToolButton(label: String, theme: NimbleTheme, onClick: () -> Unit) {
+internal fun ToolButton(label: String, theme: NimbleTheme, onClick: () -> Unit) {
     Box(
         Modifier
             .defaultMinSize(minHeight = 48.dp)
