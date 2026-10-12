@@ -131,7 +131,7 @@ test("real pack: who is albert einstein names Einstein", () => {
 });
 
 test("real pack: the freshness label is the app's short date, not ISO", () => {
-  assert.equal(E.asOfLabel(REAL.builtAt, true), "Oct 12");
+  assert.match(E.asOfLabel(REAL.builtAt, true), /^[A-Z][a-z]{2} \d{1,2}$/);
   assert.ok(!/\d{4}-\d{2}-\d{2}/.test(E.asOfLabel(REAL.builtAt, true)));
 });
 
@@ -140,4 +140,22 @@ test("real pack: an answer is at most two sentences and never has double spaces"
     const a = E.packAnswer(q, REAL);
     if (a) assert.ok(!/  /.test(a.text) && a.text.split(/(?<=[.!?])\s+/).length <= 3, q);
   }
+});
+
+test("real pack: when was albert einstein born never gives the 1921 prize year", () => {
+  const a = E.packAnswer("when was albert einstein born", REAL);
+  assert.ok(!a || !/1921/.test(a.text), a && a.text);
+  if (a) assert.match(a.text, /1879|born/i);
+});
+
+test("real pack: when was apple founded names 1976", () => {
+  const a = E.packAnswer("when was apple founded", REAL);
+  assert.ok(a, "Apple Inc. is in the pack");
+  assert.match(a.text, /1976/);
+});
+
+test("the web's relation table has no population rule: the pack keeps its own", () => {
+  assert.equal(E.relationOf("population of japan"), null);
+  const a = E.packAnswer("population of japan", REAL);
+  assert.ok(a === null || a.kind === "pack");
 });

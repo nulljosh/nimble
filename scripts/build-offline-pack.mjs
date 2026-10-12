@@ -89,11 +89,13 @@ const NON_ARTICLE = /^(Main_Page|Special:|Wikipedia:|WP:|Portal:|File:|Help:|Tem
 const isArticleTitle = (t) => t && !NON_ARTICLE.test(t) && t !== "-";
 const MONTHS = "January|February|March|April|May|June|July|August|September|October|November|December";
 // Lists, year pages, decade pages and day or month pages never answer a question: dropped before any summary is fetched.
-const isSkippedTitle = (t) =>
-  /^List of /i.test(t) ||
+const isSkippedTitle = (raw) => {
+  const t = String(raw).replace(/_/g, " "); // pageview titles use underscores
+  return /^List of /i.test(t) ||
   /\(disambiguation\)$/i.test(t) ||
   /^\d{1,4}s?( BC| AD)?$/.test(t) ||
   new RegExp(`^(${MONTHS})( \\d{1,2})?(,? \\d{1,4})?$`).test(t);
+};
 const pad = (n) => String(n).padStart(2, "0");
 const dayPath = (d) => `${d.getUTCFullYear()}/${pad(d.getUTCMonth() + 1)}/${pad(d.getUTCDate())}`;
 

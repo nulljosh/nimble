@@ -153,7 +153,8 @@ function graph(expr){
 
 // ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
 // Don't split after a short capitalized abbreviation (Mr., Dr., St., Ver.).
-const first = (t) => t.trim().split(/(?<!\b[A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/)[0];
+const SENTENCE_BREAK = /(?<!\b[A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/;
+const first = (t) => t.trim().split(SENTENCE_BREAK)[0];
 
 // Multiple sources: a second source is listed only when its text backs the sentence. Same rule as
 // AnswerSources in Sources/Models/QueryResult.swift; keep the two in step.
@@ -300,12 +301,21 @@ async function ddg(query){
 const RELATIONS = [
   {re:/^(?:what(?:'s| is)(?: the)?\s+|the\s+)?capital(?:\s+city)?\s+of\s+(.+?)\s*\??$/i, word:/\bcapital\b/i, not:/capital punishment/i},
   {re:/^who\s+(?:wrote|written|authored|painted|composed|directed|invented|discovered|founded|created)\s+(.+?)\s*\??$/i, word:/\b(?:written|wrote|author|authored|composed|painted|directed|invented|discovered|founded|created)\b/i},
-  {re:/^when\s+(?:was|did|were|is)\s+(.+?)(?:\s+(?:born|founded|built|invented|released|published|created|written|made|died|die))?\s*\??$/i, word:/\b(?:1[0-9]{3}|20[0-9]{2})\b/},
+  {re:/^when\s+(?:was|did|were|is)\s+(.+?)(?:\s+(born|founded|built|invented|released|published|created|written|made|died|die))?\s*\??$/i, word:/\b(?:1[0-9]{3}|20[0-9]{2})\b/},
+];
+// Pack-only relations: the online fallback and the Mac and iOS apps do not have these, so the web keeps its own list.
+const PACK_ONLY_RELATIONS = [
   {re:/^population\s+of\s+(.+?)\s*\??$/i, word:/\bpopulation (?:of|is|was|at|about|around|over|estimated)\b[^.]*\d/i},
 ];
-function relationOf(query){
+function relationOf(query, list = RELATIONS){
   const q = String(query||"").trim();
-  for(const r of RELATIONS){ const m = r.re.exec(q); if(m) return {subject:m[1].replace(/^the\s+/i,""), word:r.word, not:r.not}; }
+  for(const r of list){
+    const m = r.re.exec(q); if(!m) continue;
+    // "when was X born": the year sentence must also carry the verb ("a German-born physicist" has no birth year).
+    const verb = m[2];
+    const word = verb ? new RegExp(`^(?=[\\s\\S]*\\b${verb}\\b)[\\s\\S]*?(?:${r.word.source})`, "i") : r.word;
+    return {subject:m[1].replace(/^the\s+/i,""), word, not:r.not};
+  }
   return null;
 }
 const wikiURL = title => "https://en.wikipedia.org/wiki/" + encodeURIComponent(String(title).replace(/ /g,"_"));
@@ -319,7 +329,7 @@ async function introOf(title){
 // The first sentence with the relation word. A search hit must also name the subject, so the sentence is about it.
 function relationSentence(extract, rel, subject, ownPage){
   const ws = keyWords(subject), have = s => new Set(keyWords(s));
-  return extract.split(/(?<=[.!?])\s+/).map(s => s.replace(/\s*\(\s*\)/g,"").replace(/\s+,/g,",").trim())
+  return extract.split(SENTENCE_BREAK).map(s => s.replace(/\s*\(\s*\)/g,"").replace(/\s+,/g,",").trim())
     .find(s => rel.word.test(s) && !(rel.not && rel.not.test(s)) && (ownPage || (ws.length ? ws.every(w => have(s).has(w)) : s.toLowerCase().includes(subject.toLowerCase())))) || null;
 }
 async function relationWiki(query, rel){
@@ -910,13 +920,12 @@ function packSearch(query, pack){
 // that carries the relation word (the same rule as the online fallback), after the lead sentence; no such sentence means no answer, never a guess.
 // Any other question takes the one or two sentences sharing the most content words with it (the title's own words
 // are in every sentence, so they do not count). No overlap: the first sentence.
-const SENTENCE_BREAK = /(?<!\b[A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/;
 function packText(entry, query, rel){
   const sents = String(entry.e||"").split(SENTENCE_BREAK).filter(Boolean); // same breaks as first(): "Apple Inc. Founded" stays whole
   if(!sents.length) return "";
   if(rel){
     // The relation sentence often starts with "Its" or "He": the lead sentence before it names the subject.
-    const main = relationSentence(entry.e, rel, rel.subject, true);
+    const main = sents.find(x => rel.word.test(x) && !(rel.not && rel.not.test(x)));
     if(!main) return "";
     return sents[0] === main ? main : sents[0] + " " + main;
   }
@@ -930,7 +939,7 @@ function packText(entry, query, rel){
 // A relation question tries each matching entry until one carries the relation sentence ("Apple" the fruit has no founder,
 // "Apple Inc." does). No entry does: null, and the caller says it is not in the pack.
 function packAnswer(query, pack){
-  const rel = relationOf(query);
+  const rel = relationOf(query, [...RELATIONS, ...PACK_ONLY_RELATIONS]);
   for(const hit of packHits(rel ? rel.subject : query, pack)){
     const e = hit.entry, text = packText(e, query, rel);
     if(text) return {kind:"pack", title:e.t, text, url:e.u, asOf:pack.builtAt||"", src:"Offline pack · Wikipedia (CC BY-SA)"};
