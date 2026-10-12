@@ -1,0 +1,53 @@
+{
+ "version": 1,
+ "builtAt": "2026-09-30",
+ "source": "Wikipedia, CC BY-SA 4.0",
+ "pageviews": "2026-09",
+ "count": 5,
+ "entries": [
+  {
+   "t": "France",
+   "d": "Country in Western Europe",
+   "e": "France, officially the French Republic, is a country primarily located in Western Europe. Its capital, largest city and main cultural and economic centre is Paris.",
+   "u": "https://en.wikipedia.org/wiki/France",
+   "a": [
+    "the france",
+    "france (country)"
+   ]
+  },
+  {
+   "t": "Paris",
+   "d": "Capital and largest city of France",
+   "e": "Paris is the capital and most populous city of France.",
+   "u": "https://en.wikipedia.org/wiki/Paris",
+   "a": [
+    "the paris"
+   ]
+  },
+  {
+   "t": "Hamlet",
+   "d": "Tragedy by William Shakespeare",
+   "e": "The Tragedy of Hamlet, Prince of Denmark, often shortened to Hamlet, is a tragedy written by William Shakespeare sometime between 1599 and 1601.",
+   "u": "https://en.wikipedia.org/wiki/Hamlet",
+   "a": [
+    "the hamlet"
+   ]
+  },
+  {
+   "t": "William Shakespeare",
+   "d": "English playwright and poet",
+   "e": "William Shakespeare was an English playwright, poet and actor. He wrote plays, sonnets and narrative poems.",
+   "u": "https://en.wikipedia.org/wiki/William_Shakespeare",
+   "a": []
+  },
+  {
+   "t": "Water",
+   "d": "Chemical compound",
+   "e": "Water is an inorganic compound with the chemical formula H2O.",
+   "u": "https://en.wikipedia.org/wiki/Water",
+   "a": [
+    "the water"
+   ]
+  }
+ ]
+}

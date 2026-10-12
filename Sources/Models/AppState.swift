@@ -92,6 +92,8 @@ final class AppState {
     private let queryEngine = QueryEngine()
     private let prefs = Preferences()
     let history = SearchHistory()
+    /// The offline Wikipedia pack. Downloaded only on a tap in Settings; answers offline when it is there.
+    let offlinePack = OfflinePackStore()
     /// Last three AI exchanges for follow-ups. Memory only, never saved.
     private(set) var turns = TurnBuffer()
     private var placeholderTimer: Timer?
@@ -109,6 +111,14 @@ final class AppState {
         loadPreferences()
         rotatePlaceholder()
         startPlaceholderTimer()
+        offlinePack.load()
+        #if DEBUG
+        // QA only: `-shotOfflinePack <path to the .gz>` installs a pack into the sandbox, so the offline shots can run.
+        if QASandbox.launch, let path = UserDefaults.standard.string(forKey: "shotOfflinePack"),
+           let gz = try? Data(contentsOf: URL(fileURLWithPath: path)) {
+            offlinePack.installForQA(gz: gz)
+        }
+        #endif
     }
 
     /// Asset name of the chosen mascot. Flit is the default; anything but "fen" falls back to him.
@@ -173,6 +183,14 @@ final class AppState {
         focusRequest += 1
     }
 
+    /// The network is up. A DEBUG QA launch can force offline with `-shotOffline YES`, for the offline screenshots.
+    private var isOnline: Bool {
+        #if DEBUG
+        if QASandbox.launch, UserDefaults.standard.bool(forKey: "shotOffline") { return false }
+        #endif
+        return pathMonitor.currentPath.status == .satisfied
+    }
+
     func performQuery() {
         let text = queryText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
@@ -204,10 +222,22 @@ final class AppState {
 
         // Fail fast offline instead of spinning through three request timeouts. With Apple's on-device
         // model ready, a question still gets an answer, and nothing leaves the device to get it.
-        guard pathMonitor.currentPath.status == .satisfied else {
+        if !isOnline {
             let offline = "You're offline. Math, units and graphs still work."
+            // The offline pack answers first, when it is on this device. A miss says so, in the pack's own words.
+            var packMiss = offline
+            if offlinePack.pack != nil {
+                packMiss = "Not in the offline pack. Math, units and graphs still work offline."
+                if let hit = offlinePack.answer(text) {
+                    let asOf = OfflinePack.asOfLabel(hit.builtAt).map { " · as of \($0)" } ?? ""
+                    result = .text(heading: hit.title, body: hit.text, source: "Offline pack · Wikipedia (CC BY-SA)" + asOf,
+                                   sourceURL: hit.url, imageURL: nil)
+                    remember(text)
+                    return
+                }
+            }
             guard OnDeviceAnswers.isAvailable, !queryEngine.isCardQuery(text) else {
-                result = .error(offline, searchURL: nil)
+                result = .error(packMiss, searchURL: nil)
                 return
             }
             result = .loading
@@ -220,7 +250,7 @@ final class AppState {
                     self.turns.add(text, answer)
                     self.remember(text)
                 } else {
-                    self.result = .error(offline, searchURL: nil)
+                    self.result = .error(packMiss, searchURL: nil)
                 }
             }
             return

@@ -63,6 +63,10 @@ struct PreferencesView: View {
                 ))
             }
 
+            Section("Offline answers") {
+                OfflineAnswersRow(store: state.offlinePack)
+            }
+
             Section {
                 Toggle("AI Answers", isOn: Binding(
                     get: { state.aiConsent == true },

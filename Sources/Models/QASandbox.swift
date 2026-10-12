@@ -5,7 +5,8 @@ import Foundation
 /// and the UserDefaults suite all move to a fresh temp root, and iCloud sync stays off.
 enum QASandbox {
     /// Launch flags that mark a QA run. `-qaSandbox YES` is the explicit switch; the hooks imply it.
-    static let flags = ["shot", "shotAppearance", "shotWhy", "shotStub", "shotDisagree", "shotHistory", "qaSandbox"]
+    static let flags = ["shot", "shotAppearance", "shotWhy", "shotStub", "shotDisagree", "shotHistory", "shotSettings",
+                        "shotOffline", "shotOfflinePack", "qaSandbox"]
     /// Stubbed history rows for `-shotHistory YES`. Every answer says it is stubbed, so no screenshot passes them off as real.
     static let historyStubs: [(q: String, a: String)] = [
         ("what was the first color photograph of a rainbow", "A rainbow is an optical phenomenon caused by refraction, internal reflection and dispersion of light in water droplets. (stubbed)"),

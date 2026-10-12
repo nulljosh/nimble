@@ -19,20 +19,26 @@ struct RootTabView: View {
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 
+    /// QA only: `-shotSettings YES` opens straight on Settings, for the offline row shot.
+    @State private var tab = QASandbox.launch && UserDefaults.standard.bool(forKey: "shotSettings") ? 2 : 0
+
     var body: some View {
-        TabView {
+        TabView(selection: $tab) {
             SearchView()
                 .tabItem { Label("Ask", systemImage: "magnifyingglass") }
+                .tag(0)
 
             NavigationStack {
                 HistoryView()
             }
             .tabItem { Label("History", systemImage: "clock.arrow.circlepath") }
+            .tag(1)
 
             NavigationStack {
                 PreferencesView()
             }
             .tabItem { Label("Settings", systemImage: "gearshape") }
+            .tag(2)
         }
         .environment(state)
         .tint(state.theme.ink)

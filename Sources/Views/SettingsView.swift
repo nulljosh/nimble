@@ -109,6 +109,16 @@ struct SettingsView: View {
             Divider()
 
             VStack(alignment: .leading, spacing: 6) {
+                Text("OFFLINE ANSWERS")
+                    .font(.nimbleMicro)
+                    .foregroundStyle(.secondary)
+                    .tracking(1)
+                OfflineAnswersRow(store: state.offlinePack, compact: true)
+            }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text("Version")
                         .font(.nimbleSmall)
