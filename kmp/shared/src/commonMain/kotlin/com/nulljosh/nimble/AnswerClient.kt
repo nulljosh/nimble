@@ -167,6 +167,7 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         val description: String? = null,
         val h1: String? = null,
         val text: String? = null,
+        val js: Boolean? = null,
     )
 
     private suspend fun site(input: String): Answer.Text? {
@@ -199,14 +200,23 @@ private val siteRe = Regex(
 internal fun siteHost(query: String): String? =
     siteRe.find(query.trim())?.groupValues?.get(1)?.lowercase()
 
-/** Body: meta description, else "h1. text", else title. Heading: siteName, else title, else host. */
+/**
+ * Body: meta description, else "h1. text", else a JavaScript note when the page ships scripts, else title.
+ * Heading: page title, else siteName, else host. Icon: Google's favicon service for the host.
+ */
 internal fun siteAnswer(host: String, d: AnswerClient.SiteResponse): Answer.Text? {
     val body = d.description?.takeIf { it.isNotEmpty() }
         ?: listOfNotNull(d.h1, d.text).filter { it.isNotEmpty() }.joinToString(". ").takeIf { it.isNotEmpty() }
-        ?: d.title?.takeIf { it.isNotEmpty() }
+        ?: (if (d.js == true) "This site loads with JavaScript." else d.title?.takeIf { it.isNotEmpty() })
         ?: return null
-    val heading = d.siteName?.takeIf { it.isNotEmpty() } ?: d.title?.takeIf { it.isNotEmpty() } ?: host
-    return Answer.Text(heading = heading, body = firstSentence(body), source = host, sourceUrl = "https://$host")
+    val heading = d.title?.takeIf { it.isNotEmpty() } ?: d.siteName?.takeIf { it.isNotEmpty() } ?: host
+    return Answer.Text(
+        heading = heading,
+        body = firstSentence(body),
+        source = host,
+        sourceUrl = "https://$host",
+        imageUrl = "https://www.google.com/s2/favicons?domain=$host&sz=64",
+    )
 }
 
 /** Wikipedia list articles ("List of ...") are never answers. */

@@ -71,14 +71,19 @@ export default {
         const html = (await r.text()).slice(0, 200000);
         const meta = (re) => html.match(re)?.[1]?.replace(/\s+/g, " ").trim().replace(/&(#x?[0-9a-f]+|amp|quot|apos|nbsp|lt|gt);/gi, decodeEntity) || "";
         const description =
-          meta(/<meta[^>]+(?:name|property)=["'](?:og:)?description["'][^>]+content=["']([^"']*)["']/i) ||
-          meta(/<meta[^>]+content=["']([^"']*)["'][^>]+(?:name|property)=["'](?:og:)?description["']/i);
+          meta(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i) ||
+          meta(/<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i) ||
+          meta(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']*)["']/i) ||
+          meta(/<meta[^>]+content=["']([^"']*)["'][^>]+property=["']og:description["']/i);
         // Scrape past the meta tags: many landing pages leave the description empty or generic,
         // so also return the first headline and the first real paragraph of body text.
         const strip = (h) => h.replace(/<(script|style|nav|header|footer)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().replace(/&(#x?[0-9a-f]+|amp|quot|apos|nbsp|lt|gt);/gi, decodeEntity);
         const h1 = strip(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "").slice(0, 200);
         const text = [...html.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map((m) => strip(m[1])).find((t) => t.length > 60)?.slice(0, 400) || "";
-        return json({ host, title: meta(/<title[^>]*>([^<]*)<\/title>/i), siteName: meta(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']*)["']/i), description, h1, text });
+        // js: the page ships scripts, so an empty body means it renders client-side.
+        const js = /<script[\s>]/i.test(html);
+        const favicon = `https://www.google.com/s2/favicons?domain=${host}&sz=64`;
+        return json({ host, title: meta(/<title[^>]*>([^<]*)<\/title>/i), siteName: meta(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']*)["']/i), description, h1, text, js, favicon });
       } catch {
         return json({ host, title: "", description: "" });
       }

@@ -17,6 +17,28 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertNil(engine.siteHost("who is the ceo of apple.com in 2020"))
     }
 
+    func testSiteAnswerUsesPageTitleAndFavicon() {
+        let html = "<title>Stripe | Payments</title><meta name=\"description\" content=\"Payments for the internet.\">"
+        guard case .text(let heading, let body, let source, _, let icon)? = engine.parseSite(html: html, host: "stripe.com", pageURL: "https://stripe.com/") else { return XCTFail("no answer") }
+        XCTAssertEqual(heading, "Stripe | Payments")
+        XCTAssertEqual(body, "Payments for the internet.")
+        XCTAssertEqual(source, "stripe.com")
+        XCTAssertEqual(icon, "https://www.google.com/s2/favicons?domain=stripe.com&sz=64")
+    }
+
+    func testSiteAnswerFallsBackToOpenGraphThenJavaScriptNote() {
+        let og = "<meta property=\"og:description\" content=\"Ship faster.\">"
+        guard case .text(_, let ogBody, _, _, _)? = engine.parseSite(html: og, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no og answer") }
+        XCTAssertEqual(ogBody, "Ship faster.")
+
+        let spa = "<title>Acme App</title><div id=\"root\"></div><script src=\"/app.js\"></script>"
+        guard case .text(let heading, let spaBody, _, _, _)? = engine.parseSite(html: spa, host: "acme.app", pageURL: "https://acme.app/") else { return XCTFail("no spa answer") }
+        XCTAssertEqual(spaBody, "This site loads with JavaScript.")
+        XCTAssertEqual(heading, "Acme App")
+
+        XCTAssertNil(engine.parseSite(html: "", host: "acme.io", pageURL: "https://acme.io/"))
+    }
+
     // MARK: - Basic arithmetic
 
     func testBasicAddition() {

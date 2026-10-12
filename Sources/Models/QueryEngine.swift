@@ -450,11 +450,16 @@ final class QueryEngine: Sendable {
         return q[r].lowercased()
     }
 
-    /// Scrapes the site itself: meta description, else headline plus first paragraph.
+    /// Scrapes the site itself: meta description (or og:description), else headline plus first
+    /// paragraph, else a note for pages that only render with JavaScript.
     private func querySite(_ input: String, session: URLSession) async -> QueryResult? {
         guard let host = siteHost(input), let url = URL(string: "https://\(host)/"),
               let (data, _) = try? await session.data(from: url) else { return nil }
-        let html = String(decoding: data.prefix(200_000), as: UTF8.self)
+        return parseSite(html: String(decoding: data.prefix(200_000), as: UTF8.self), host: host, pageURL: url.absoluteString)
+    }
+
+    /// Pure HTML-to-answer step, split out of `querySite` so it can be tested without a network.
+    func parseSite(html: String, host: String, pageURL: String) -> QueryResult? {
         func grab(_ pattern: String) -> String {
             guard let re = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive, .dotMatchesLineSeparators]),
                   let m = re.firstMatch(in: html, range: NSRange(html.startIndex..., in: html)),
@@ -464,11 +469,14 @@ final class QueryEngine: Sendable {
                 .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression).trimmingCharacters(in: .whitespaces)
         }
         let title = grab("<title[^>]*>([^<]*)</title>")
-        var body = grab("<meta[^>]+(?:name|property)=[\"'](?:og:)?description[\"'][^>]+content=[\"']([^\"']*)[\"']")
+        var body = grab("<meta[^>]+name=[\"']description[\"'][^>]+content=[\"']([^\"']*)[\"']")
+        if body.isEmpty { body = grab("<meta[^>]+property=[\"']og:description[\"'][^>]+content=[\"']([^\"']*)[\"']") }
         if body.isEmpty { body = [grab("<h1[^>]*>(.*?)</h1>"), grab("<p[^>]*>([^<]{60,})</p>")].filter { !$0.isEmpty }.joined(separator: ". ") }
-        if body.isEmpty { body = title }
+        // Scripts but no words in the HTML: the page draws itself in JavaScript, so its <title> says nothing.
+        if body.isEmpty { body = html.range(of: "<script", options: .caseInsensitive) != nil ? "This site loads with JavaScript." : title }
         guard !body.isEmpty else { return nil }
-        return .text(heading: title.isEmpty ? host : title, body: firstSentence(body), source: host, sourceURL: url.absoluteString, imageURL: nil)
+        return .text(heading: title.isEmpty ? host : title, body: firstSentence(body), source: host, sourceURL: pageURL,
+                     imageURL: "https://www.google.com/s2/favicons?domain=\(host)&sz=64")
     }
 
     func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer()) async -> QueryResult {

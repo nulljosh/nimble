@@ -78,6 +78,20 @@ class AnswerClientTest {
     }
 
     @Test
+    fun jsOnlyPageSaysSoInsteadOfEchoingTitle() {
+        val d = decodeSite("""{"title":"App","js":true}""")
+        val a = siteAnswer("app.io", d) as Answer.Text
+        assertEquals("This site loads with JavaScript.", a.body)
+        assertEquals("App", a.heading)
+    }
+
+    @Test
+    fun siteAnswerCarriesFavicon() {
+        val a = siteAnswer("stripe.com", decodeSite("""{"description":"Payments."}""")) as Answer.Text
+        assertEquals("https://www.google.com/s2/favicons?domain=stripe.com&sz=64", a.imageUrl)
+    }
+
+    @Test
     fun listArticlesAreNeverAnswers() {
         assertNull(articleTitle("List of Canadian provinces"))
         assertNull(articleTitle("list of rivers"))

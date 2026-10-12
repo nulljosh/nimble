@@ -93,5 +93,12 @@ test("a bare domain question reads the site, not Wikipedia", async () => {
     assert.equal(await E.site("what is the moon"), null);
     global.fetch = async () => new Response(JSON.stringify({title:"Acme", h1:"Ship faster", text:"Acme builds tools that help small teams ship software without any ops work at all."}));
     assert.match((await E.site("acme.dev")).body, /^Ship faster\./);
+    global.fetch = async () => new Response(JSON.stringify({title:"Acme App", js:true}));
+    const spa = await E.site("acme.app");
+    assert.equal(spa.body, "This site loads with JavaScript.");
+    assert.equal(spa.title, "Acme App");
+    assert.equal(spa.icon, "https://www.google.com/s2/favicons?domain=acme.app&sz=64");
+    global.fetch = async () => new Response(JSON.stringify({}));
+    assert.equal(await E.site("acme.dev"), null);
   } finally { global.fetch = real; }
 });

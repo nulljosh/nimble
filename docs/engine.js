@@ -157,9 +157,10 @@ async function site(query){
   if(!host) return null;
   const d = await getJSON(`${ANSWER_PROXY}/?site=${encodeURIComponent(host)}`);
   // Best sentence the page gives about itself: meta description, else headline + first paragraph.
-  const body = d && (d.description || [d.h1, d.text].filter(Boolean).join(". ") || d.title);
+  // A page that only renders with JavaScript has no text in its HTML; say so rather than echo its <title>.
+  const body = d && (d.description || [d.h1, d.text].filter(Boolean).join(". ") || (d.js ? "This site loads with JavaScript." : d.title));
   if(!body) return null;
-  return {title:d.siteName || d.title || host, body:first(body), src:host, url:`https://${host}`};
+  return {title:d.title || d.siteName || host, body:first(body), src:host, url:`https://${host}`, icon:`https://www.google.com/s2/favicons?domain=${host}&sz=64`};
 }
 
 // "define X" must never fall through to Wikipedia search: that turns "define nimble"
@@ -429,6 +430,7 @@ async function renderAnswer(query, opts){
     // Click through to the source; AI answers have none, so fall back to a web search.
     const href=a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query);
     h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
+      +(a.icon?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
       +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
     credit=T("powered by {s}",{s:a.src});
   }
