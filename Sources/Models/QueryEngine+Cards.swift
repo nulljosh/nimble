@@ -9,6 +9,7 @@ extension QueryEngine {
 
     private enum Ask {
         case weather(String), time(String), currency(amount: Double, from: String, to: String), etymology(String)
+        case news(place: String)
     }
 
     private static func ask(_ input: String) -> Ask? {
@@ -19,6 +20,10 @@ extension QueryEngine {
             return (1..<m.numberOfRanges).map { (q as NSString).substring(with: m.range(at: $0)) }
         }
         if let g = groups(#"^(?:origin|etymology|root|where\s+does\s+the\s+word)\s+(?:of\s+)?(?:the\s+word\s+)?(.+?)(?:\s+come\s+from)?\s*\??$"#) { return .etymology(g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
+        // "news" and "what's happening" with no place are the world feed; a place is the search.
+        if groups(#"^(?:(?:latest|top|breaking)\s+)?news\s*\??$|^what(?:'s|\u2019s| is) happening\s*\??$"#) != nil { return .news(place: "") }
+        if let g = groups(#"^(?:(?:latest|top|breaking)\s+)?news\s+(?:in|from|for|around)\s+(.+?)\s*\??$"#) { return .news(place: g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
+        if let g = groups(#"^what(?:'s|\u2019s| is) happening\s+(?:in|at|around)\s+(.+?)\s*\??$"#) { return .news(place: g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
         if let g = groups(#"^(?:what(?:'s| is) the )?weather (?:in|for|at) (.+?)\??$"#) { return .weather(g[0]) }
         if let g = groups(#"^(?:what(?:'s| is) the )?(?:current )?time (?:in|at) (.+?)\??$"#) { return .time(g[0]) }
         if let g = groups(#"^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$"#),
@@ -33,6 +38,7 @@ extension QueryEngine {
     func card(_ input: String, session: URLSession = .shared) async -> QueryResult? {
         switch Self.ask(input) {
         case .etymology(let word): return await etymologyCard(word, session)
+        case .news(let place): return await newsCard(place, session)
         case .weather(let place): return await weatherCard(place, session)
         case .time(let place): return await timeCard(place, session)
         case .currency(let amount, let from, let to): return await currencyCard(amount, from, to, session)
@@ -137,6 +143,26 @@ extension QueryEngine {
             return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: "ExchangeRate-API", url: "https://www.exchangerate-api.com")
         }
         return nil
+    }
+
+    /// The worker's keyless RSS route: it already cleans the text and filters by place.
+    private func newsCard(_ place: String, _ session: URLSession) async -> QueryResult? {
+        let encoded = place.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? place
+        guard let u = URL(string: "https://nimble-answers.trommatic.workers.dev/?news=\(encoded)"),
+              let (data, response) = try? await session.data(from: u),
+              (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+        return Self.newsResult(json: data)
+    }
+
+    /// Pure, so the tests need no network. Nil when the feed had no usable story.
+    static func newsResult(json data: Data) -> QueryResult? {
+        struct Payload: Decodable { let items: [NewsItem] }
+        guard let payload = try? JSONDecoder().decode(Payload.self, from: data) else { return nil }
+        let top = Array(payload.items.filter { !$0.sentence.isEmpty && ($0.url.hasPrefix("https://") || $0.url.hasPrefix("http://")) }.prefix(3))
+        guard !top.isEmpty else { return nil }
+        var outlets: [String] = []
+        for item in top where !outlets.contains(item.outlet) { outlets.append(item.outlet) }
+        return .news(items: top, source: outlets.joined(separator: ", "))
     }
 
     private func etymologyCard(_ word: String, _ session: URLSession) async -> QueryResult? {

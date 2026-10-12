@@ -375,6 +375,18 @@ async function identity(query){
   return {title:query, body:"Nimble is an instant-answer app made by Joshua Trommel. More of his work is at jaybulb.com.", src:"Nimble"};
 }
 
+// "news" and "what's happening in <place>": the top three headlines from keyless RSS, served by the
+// proxy's ?news route (BBC, CBC, NPR, Guardian, Global; a place keeps only matching stories).
+const NEWS_RE = /^(?:(?:latest|top|today['\u2019]?s|breaking)\s+)?news(?:\s+(?:in|from|for|around)\s+(.+?))?\s*\??$|^what(?:['\u2019]s| is) happening(?:\s+(?:in|at|around)\s+(.+?))?\s*\??$/i;
+async function news(query){
+  const m = query.trim().match(NEWS_RE);
+  if(!m) return null;
+  const place = (m[1]||m[2]||"").trim();
+  const d = await getJSON(`${ANSWER_PROXY}/?news=${encodeURIComponent(place)}`);
+  const items = (d?.items||[]).filter(i=>i && i.url && i.sentence && i.outlet).slice(0,3);
+  return items.length ? {kind:"news", items, src:[...new Set(items.map(i=>i.outlet))].join(", ")} : null;
+}
+
 // First non-null wins, in order. Sources are functions so a throw in one never kills the chain.
 async function firstOf(query, fns){
   for(const fn of fns){ const r = await fn(query).catch(()=>null); if(r) return r; }
@@ -394,8 +406,8 @@ async function answer(query, opts={}){
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
-  const live = await firstOf(query, [identity, site, etymology, dictionary, weather, localTime]);
-  if(live) return live.kind==="card" ? live : {kind:"text", ...live};
+  const live = await firstOf(query, [identity, news, site, etymology, dictionary, weather, localTime]);
+  if(live) return live.kind ? live : {kind:"text", ...live};
   const consent = aiConsent() || opts.ifUnset || null;
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};
   if(consent==="no"){
@@ -461,6 +473,11 @@ async function renderAnswer(query, opts){
     credit=T("computed offline");
   }
   else if(a.kind==="graph"){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit=T("computed offline"); }
+  else if(a.kind==="news"){
+    // One sentence per story, the outlet beside it, and the link on the sentence.
+    h+='<ol class="news">'+a.items.map(i=>'<li><a href="'+esc(i.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(i.sentence)+'</a> <span class="news-src">'+esc(i.outlet)+'</span></li>').join("")+'</ol>';
+    credit=T("powered by {s}",{s:a.src});
+  }
   else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
   else if(a.kind==="offline"){ h+="<p>"+T("You're offline. Math, units and graphs still work.")+"</p>"; }
   else if(a.kind==="text"){
@@ -492,6 +509,7 @@ function shareText(a){
     case "graph": return "y = "+a.expr;
     case "card": return a.big+(a.unit?(a.unit[0]==="\u00B0"?"":" ")+a.unit:"")+(a.sub?", "+a.sub:"");
     case "text": return a.body ? first(a.body) : null;
+    case "news": return a.items[0] ? a.items[0].sentence : null;
     default: return null;
   }
 }

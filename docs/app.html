@@ -86,6 +86,10 @@ form { position: relative; }
 .credit button { border: 0; background: none; padding: 0; font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .credit button:hover { color: var(--text); }
 /* Why this answer: the source line is the toggle; the text it came from opens under it. */
+.news { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 14px; }
+.news li { line-height: 1.5; }
+.news a { color: var(--text); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.news-src { display: block; font-size: 13px; color: var(--text-light); margin-top: 2px; }
 .why { margin-top: 16px; font-size: 13px; color: var(--text-light); }
 .why summary { display: inline-block; cursor: pointer; color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; list-style: none; }
 .why summary::-webkit-details-marker { display: none; }

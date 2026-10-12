@@ -45,4 +45,47 @@ final class CardTests: XCTestCase {
         XCTAssertTrue(engine.isCardQuery("where does the word nimble come from"))
         XCTAssertFalse(engine.isCardQuery("who wrote Dune"))
     }
+
+    // MARK: - News
+
+    func testNewsRouting() {
+        let engine = QueryEngine()
+        XCTAssertTrue(engine.isCardQuery("news"))
+        XCTAssertTrue(engine.isCardQuery("Latest news"))
+        XCTAssertTrue(engine.isCardQuery("what's happening in Vancouver?"))
+        XCTAssertTrue(engine.isCardQuery("what is happening in Ottawa"))
+        XCTAssertFalse(engine.isCardQuery("newsroom"))
+        XCTAssertFalse(engine.isCardQuery("what is the capital of france"))
+    }
+
+    func testNewsDecodesTopThreeWithOutlets() {
+        let json = """
+        {"items":[
+          {"title":"A","sentence":"First story happened today.","outlet":"BBC","url":"https://www.bbc.com/news/1"},
+          {"title":"B","sentence":"Second story happened.","outlet":"CBC","url":"https://www.cbc.ca/news/2"},
+          {"title":"C","sentence":"Bad link.","outlet":"Nope","url":"javascript:alert(1)"},
+          {"title":"D","sentence":"Third story.","outlet":"NPR","url":"http://www.npr.org/3"},
+          {"title":"E","sentence":"Fourth story is cut.","outlet":"Guardian","url":"https://www.theguardian.com/4"}
+        ]}
+        """
+        let result = QueryEngine.newsResult(json: Data(json.utf8))
+        guard case let .news(items, source)? = result else { return XCTFail("expected a news card") }
+        XCTAssertEqual(items.map(\.outlet), ["BBC", "CBC", "NPR"])
+        XCTAssertEqual(source, "BBC, CBC, NPR")
+        XCTAssertEqual(items[0].url, "https://www.bbc.com/news/1")
+    }
+
+    func testNewsEmptyFeedIsNil() {
+        XCTAssertNil(QueryEngine.newsResult(json: Data("{\"items\":[]}".utf8)))
+        XCTAssertNil(QueryEngine.newsResult(json: Data("not json".utf8)))
+    }
+
+    func testNewsCopyAndShare() {
+        let items = [NewsItem(sentence: "First story.", outlet: "BBC", url: "https://www.bbc.com/news/1"),
+                     NewsItem(sentence: "Second story.", outlet: "CBC", url: "https://www.cbc.ca/news/2")]
+        let news = QueryResult.news(items: items, source: "BBC, CBC")
+        XCTAssertEqual(news.copyText, "First story. (BBC)\nSecond story. (CBC)")
+        XCTAssertEqual(news.shareContent?.text, "First story.")
+        XCTAssertEqual(news.shareContent?.source, "BBC, CBC")
+    }
 }

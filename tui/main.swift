@@ -15,6 +15,8 @@ func describe(_ result: QueryResult) -> String {
         return [heading, body, "— \(source)"].compactMap { $0 }.joined(separator: "\n")
     case .list(let items, let source):
         return items.joined(separator: "\n") + "\n— \(source)"
+    case .news(let items, let source):
+        return items.map { "\($0.sentence) (\($0.outlet))" }.joined(separator: "\n") + "\n\(source)"
     case .error(let message, _): return message
     case .color(let value): return value
     case .convert(let from, let to, let fromUnit, let toUnit):

@@ -52,7 +52,8 @@ export default {
     // app fetches it through here. Native apps still hit DDG themselves.
     const isDDG = req.method === "GET" && url.searchParams.has("ddg");
     const isSite = req.method === "GET" && url.searchParams.has("site");
-    if (req.method !== "POST" && !isDDG && !isSite) return new Response("POST only", { status: 405, headers: CORS });
+    const isNews = req.method === "GET" && url.searchParams.has("news");
+    if (req.method !== "POST" && !isDDG && !isSite && !isNews) return new Response("POST only", { status: 405, headers: CORS });
 
     if (isDDG) {
       const ddgQ = url.searchParams.get("ddg").slice(0, 500);
@@ -87,6 +88,14 @@ export default {
       } catch {
         return json({ host, title: "", description: "" });
       }
+    }
+
+    // "news" and "what's happening in <place>": the top three headlines from keyless RSS.
+    // Free like DDG and site, so it sits outside the rate limit. Feed text is untrusted, so only
+    // http(s) links survive and every string is stripped of tags and entities.
+    if (isNews) {
+      const place = url.searchParams.get("news").trim().slice(0, 80);
+      return json({ items: await news(place) }, 200);
     }
 
     // Public endpoint, and every AI request bills Workers AI. Throttle per client IP.
@@ -199,6 +208,85 @@ function decodeEntity(_, e) {
   e = e.toLowerCase();
   if (e[0] === "#") return String.fromCodePoint(e[1] === "x" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10) || 32);
   return { amp: "&", quot: '"', apos: "'", nbsp: " ", lt: "<", gt: ">" }[e];
+}
+
+// Keyless news. Outlets come in FEEDS order and are interleaved, so the top three span outlets.
+// A place keeps only items that name it; when fewer than three do, Google News search for the
+// place tops up (its <source> tag names the outlet). Never unrelated headlines under a place.
+const NEWS_FEEDS = [
+  ["BBC", "https://feeds.bbci.co.uk/news/world/rss.xml"],
+  ["CBC", "https://www.cbc.ca/webfeed/rss/rss-topstories"],
+  ["NPR", "https://feeds.npr.org/1001/rss.xml"],
+  ["The Guardian", "https://www.theguardian.com/world/rss"],
+  ["Global News", "https://globalnews.ca/feed/"],
+];
+async function news(place) {
+  const lists = await Promise.all(
+    NEWS_FEEDS.map(([outlet, feed]) => feedItems(feed, outlet, place)),
+  );
+  let items = interleave(lists).slice(0, 3);
+  if (place && items.length < 3) {
+    const search = await feedItems(
+      `https://news.google.com/rss/search?q=${encodeURIComponent(place)}&hl=en-CA&gl=CA&ceid=CA:en`,
+      "",
+      "",
+    );
+    const seen = new Set(items.map((i) => i.url));
+    items = [...items, ...search.filter((i) => i.outlet && !seen.has(i.url))].slice(0, 3);
+  }
+  return items;
+}
+
+async function feedItems(feed, outlet, place) {
+  try {
+    const r = await fetch(feed, {
+      headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" },
+      signal: AbortSignal.timeout(5000),
+      cf: { cacheTtl: 300, cacheEverything: true },
+    });
+    if (!r.ok) return [];
+    const xml = await r.text();
+    const items = [...xml.matchAll(/<item\b[^>]*>([\s\S]*?)<\/item>/gi)]
+      .map((m) => newsItem(m[1], outlet))
+      .filter(Boolean);
+    const keep = place ? items.filter((i) => `${i.title} ${i.sentence}`.toLowerCase().includes(place.toLowerCase())) : items;
+    return keep.slice(0, 5);
+  } catch {
+    return [];
+  }
+}
+
+function newsItem(block, fallbackOutlet) {
+  const tag = (name) => {
+    const m = block.match(new RegExp(`<${name}\\b[^>]*>([\\s\\S]*?)<\\/${name}>`, "i"));
+    return m ? m[1] : "";
+  };
+  // Strip tags, decode entities, then once more for double-encoded feeds ("&amp;lt;img&amp;gt;").
+  const plain = (raw) => {
+    let t = raw.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1");
+    for (let i = 0; i < 2; i++) t = t.replace(/<[^>]+>/g, " ").replace(/&(#x?[0-9a-f]+|amp|quot|apos|nbsp|lt|gt);/gi, decodeEntity);
+    return t.replace(/\s*[\u2013\u2014]\s*/g, ", ").replace(/\s+/g, " ").trim();
+  };
+  const url = plain(tag("link"));
+  if (!/^https?:\/\//i.test(url)) return null;
+  const sourceTag = block.match(/<source\b[^>]*>([\s\S]*?)<\/source>/i);
+  const outlet = sourceTag ? plain(sourceTag[1]) : fallbackOutlet;
+  let title = plain(tag("title")).replace(/\s-\s[^-]+$/, (m) => (sourceTag ? "" : m));
+  if (!title) return null;
+  // The first sentence of the description is the body; the headline stands in when it is empty.
+  const desc = plain(tag("description")).replace(/\s*\.\.\.$/, "");
+  const sentences = desc.split(/(?<=[.!?])\s+(?=[A-Z0-9"(])/);
+  // Google News descriptions repeat the headline and the outlet, so their headline is the sentence.
+  let sentence = !sourceTag && sentences[0] && sentences[0].length >= 40 ? sentences[0] : title;
+  if (sentence.length > 220) sentence = sentence.slice(0, 217).replace(/\s+\S*$/, "") + "...";
+  if (!/[.!?]$/.test(sentence)) sentence += ".";
+  return { title, sentence, outlet, url };
+}
+
+function interleave(lists) {
+  const out = [];
+  for (let i = 0; i < Math.max(0, ...lists.map((l) => l.length)); i++) for (const l of lists) if (l[i]) out.push(l[i]);
+  return out;
 }
 
 function json(obj, status = 200) {

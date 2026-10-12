@@ -60,6 +60,25 @@ struct ResultView: View {
                 link(String(localized: "powered by \(source)"), to: url ?? state.searchURL)
             }
 
+        case .news(let items, let source):
+            AnswerCard(shareText: state.result.copyText) {
+                VStack(alignment: .leading, spacing: 14) {
+                    ForEach(Array(items.enumerated()), id: \.offset) { _, item in
+                        VStack(alignment: .leading, spacing: 3) {
+                            link(item.sentence, to: item.url)
+                                .nimbleFont(17)
+                                .foregroundStyle(Color.text)
+                                .multilineTextAlignment(.leading)
+                            Text(item.outlet)
+                                .nimbleFont(13)
+                                .foregroundStyle(Color.dim)
+                        }
+                    }
+                }
+            } footer: {
+                link(String(localized: "powered by \(source)"), to: state.searchURL)
+            }
+
         case .graph(let expr, let points):
             AnswerCard(shareText: state.result.copyText) {
                 GraphResultView(expr: expr, points: points)

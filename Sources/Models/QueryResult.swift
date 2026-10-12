@@ -1,5 +1,12 @@
 import CoreGraphics
 
+/// One story on the news card: one sentence, the outlet that ran it, and the link.
+struct NewsItem: Equatable, Decodable {
+    let sentence: String
+    let outlet: String
+    let url: String
+}
+
 // Foundation/CoreGraphics only, no SwiftUI — shared with the terminal frontend (tui/),
 // which imports SwiftTUI and can't also import SwiftUI in the same module.
 enum QueryResult: Equatable {
@@ -16,6 +23,8 @@ enum QueryResult: Equatable {
     case graph(expr: String, points: [CGPoint])
     /// One big number, a small label under it, one quiet line: weather, currency, local time.
     case card(big: String, unit: String, sub: String, source: String, url: String?)
+    /// The top three headlines for "news" or "what's happening in <place>"; source lists the outlets.
+    case news(items: [NewsItem], source: String)
 
     static func == (lhs: QueryResult, rhs: QueryResult) -> Bool {
         switch (lhs, rhs) {
@@ -26,6 +35,7 @@ enum QueryResult: Equatable {
         case let (.convert(a, b, c, d), .convert(e, f, g, h)): return (a, b, c, d) == (e, f, g, h)
         case let (.graph(a, _), .graph(b, _)): return a == b
         case let (.card(a, b, c, d, e), .card(f, g, h, i, j)): return (a, b, c, d, e) == (f, g, h, i, j)
+        case let (.news(a, _), .news(b, _)): return a == b
         default: return false
         }
     }
@@ -41,6 +51,7 @@ enum QueryResult: Equatable {
         case .convert(let from, let to, let fromUnit, let toUnit): return "\(from) \(fromUnit) = \(to) \(toUnit)"
         case .graph(let expr, _): return "y = \(expr)"
         case .card(let big, let unit, let sub, _, _): return "\(big) \(unit), \(sub)"
+        case .news(let items, _): return items.map { "\($0.sentence) (\($0.outlet))" }.joined(separator: "\n")
         case .none, .loading: return nil
         }
     }
@@ -51,6 +62,8 @@ enum QueryResult: Equatable {
         switch self {
         case .none, .loading, .error: return nil
         case .math, .convert, .graph, .color: return (text, "Computed offline")
+        // The share image carries one sentence, not the whole list.
+        case .news(let items, let source): return items.first.map { ($0.sentence, source) }
         case .text(_, _, let source, _, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
         }
     }
