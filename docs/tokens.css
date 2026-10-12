@@ -27,3 +27,5 @@
 :root{--device-frame:#c9c7c3;--device-body:#1c1c1e;--device-punch:#2a2a2a;--device-button:#8a8885;--device-bar:#ececec;--device-bar-text:#3c3c43;--device-bar-dark:#3a3a3c;--device-bar-text-dark:#e5e5ea;--device-win-bar:#f3f3f3;--device-close:#ff5f57;--device-minimise:#febc2e;--device-zoom:#28c840;}
 /* Flit, the hummingbird: accent fills that only the mascot uses (bulb and bulb-deep come from the shared tokens). */
 :root{--flit-belly:#ffe27a;--flit-cheek:#e07a3f;--flit-wing:#a67c1e;--flit-glint:#fff8e1;}
+
+:root{--radius-photo:12px;--ratio-photo:16 / 9;}

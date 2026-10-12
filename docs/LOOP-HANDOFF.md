@@ -8,6 +8,7 @@ Keep Nimble moving with one small, shippable slice at a time: fix what App Revie
 
 - Version 5.13.2 is on main and pushed. Spacing runs on one 4px scale in tokens.css with a gutter token; links, buttons and fields reach 44px tall.
 - Version 5.13.3: dark and light QA on all three pages at 390 and 1440, zero text under 4.5:1 in either scheme; brand captions moved to --text-mid and the brand cards got a hairline. Photo card and source row checked on live queries; Why this answer only shows when the source text says more than the sentence, so it did not fire on the four queries tried.
+- Version 5.13.4: an AI answer with no proxy photo now takes the picture of the Wikipedia topic its sentence names ("Paris" for capital of France), with the page title as credit and that page's text under the source line. Math, units, weather and time never look. Photosynthesis has no photo on purpose: its lead image is an SVG diagram, and SVGs are skipped. Swift and Kotlin parity not done.
 - Brand kit lives at nimble.jaybulb.com/brand (logo, icon, Flit and Fen, live tokens, type, voice, downloads). The brand/ folder at the repo root holds the icon, wordmark, mascots and the GitHub social image; the social image and link preview show the real app icon.
 - Nimble Sans is the app's own typeface, derived from Inter 4.1 under OFL 1.1. Type is swept across web, iOS and Mac.
 - Rich results on every surface: answer photos (16:9, top-cropped) on web, Swift, Mac and Kotlin; a news card with thumbnails; up to three source links under an answer.

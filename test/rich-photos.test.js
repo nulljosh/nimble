@@ -148,3 +148,62 @@ test("a numeric AI answer keeps its photo when DDG supplies the sourced number",
   assert.equal(a.src, "Britannica");
   assert.equal(a.image.url, PHOTO.source);
 });
+
+// AI answers (the proxy's sentence, consent given). The proxy sends no photo, so the engine looks for the
+// Wikipedia topic the sentence names. Every fetch is routed; anything unlisted is a miss.
+function aiStub({ answer, proxyImage = null, search = [], pages = {} }) {
+  const calls = [];
+  globalThis.fetch = async (url, opts) => {
+    url = String(url); calls.push(url);
+    if (url.startsWith("https://nimble-answers") && opts?.method === "POST") return json({ answer, source: "Qwen", ...(proxyImage ? { image: proxyImage } : {}) });
+    if (url.includes("list=search")) return json({ query: { search: search.map((title) => ({ title })) } });
+    const m = /\/page\/summary\/(.+)$/.exec(url);
+    if (m && pages[decodeURIComponent(m[1])]) {
+      const title = decodeURIComponent(m[1]);
+      return json({ title, ...pages[title], content_urls: { desktop: { page: "https://en.wikipedia.org/wiki/" + title } } });
+    }
+    return { ok: false };
+  };
+  return calls;
+}
+const PARIS = { thumbnail: PHOTO, extract: "Paris is the capital and most populous city of France. It has a population of over two million people." };
+
+test("an AI answer with no proxy photo takes the Wikipedia topic its sentence names", async () => {
+  consent = "yes";
+  aiStub({ answer: "The capital of France is Paris.", search: ["List of capitals of France"], pages: { Paris: PARIS } });
+  const a = await E.answer("capital of france");
+  assert.equal(a.kind, "text");
+  assert.deepEqual(a.image, { url: PHOTO.source, width: 800, height: 533, title: "Paris" });
+});
+
+test("the photo credit names the page and the Why expander opens the page's text", async () => {
+  consent = "yes";
+  aiStub({ answer: "The capital of France is Paris.", search: [], pages: { Paris: PARIS } });
+  const r = await E.renderAnswer("capital of france");
+  assert.match(r.h, /<span class="photo-credit">Paris · Wikipedia<\/span>/);
+  assert.match(r.h, /<details class="why">/);
+  assert.match(r.h, /<p>Paris is the capital and most populous city of France\./);
+});
+
+test("the proxy's own photo wins, and no topic lookup runs", async () => {
+  consent = "yes";
+  const calls = aiStub({ answer: "The capital of France is Paris.", proxyImage: { url: "https://example.org/p.jpg" }, pages: { Paris: PARIS } });
+  const a = await E.answer("capital of france");
+  assert.equal(a.image.url, "https://example.org/p.jpg");
+  assert.equal(calls.filter((u) => u.includes("/page/summary/")).length, 0);
+});
+
+test("a topic whose only picture is a logo gives the answer no photo", async () => {
+  consent = "yes";
+  aiStub({ answer: "The capital of France is Paris.", search: [], pages: { Paris: { thumbnail: LOGO, extract: "Paris." } } });
+  const a = await E.answer("capital of france");
+  assert.equal(a.image, undefined);
+});
+
+test("weather, time and math never look for a photo", async () => {
+  consent = "yes";
+  const calls = aiStub({ answer: "It is 5 degrees in Vancouver.", search: ["Vancouver"], pages: { Vancouver: PARIS } });
+  const a = await E.answer("weather in vancouver");
+  assert.equal(a.image, undefined);
+  assert.equal(calls.filter((u) => u.includes("/page/summary/")).length, 0);
+});

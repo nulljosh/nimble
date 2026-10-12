@@ -193,6 +193,33 @@ function wikiPhoto(sum){
   if(!u || !/^https:\/\//.test(u) || NOT_PHOTO.test(u)) return null;
   return {url:u, width:t.width||null, height:t.height||null};
 }
+// Topic photo for an AI answer the proxy sent without one. Candidates, in order: the proper nouns the
+// answer names ("Paris" in "The capital of France is Paris."), then the top Wikipedia search hits for the
+// question. The first page with a real lead photo wins, and its title is the credit. Never a guess:
+// a page with no picture gives nothing. Math, units, weather and time never get one.
+const NO_PHOTO_Q = /\b(weather|forecast|temperature|time|clock|convert|math|sum|plus|minus|times|divided|percent)\b|\d/i;
+const ENTITY_RE = /\b\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+){0,3}/gu;
+const NOT_ENTITY = new Set(["The","A","An","It","This","That","In","On","At","As","Its","He","She","They","There","Yes","No","I","Of","For","And","But","If","When","Where","Who","What","From","With","By","To","Is","Was","These","Those","We","You"]);
+async function summaryPhoto(title){
+  const sum = await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+  if(!sum || sum.type==="disambiguation") return null;
+  const img = wikiPhoto(sum);
+  return img ? {...img, title: sum.title || title, extract: sum.extract || null} : null;
+}
+async function topicPhoto(query, body){
+  if(NO_PHOTO_Q.test(query)) return null;
+  const q = query.toLowerCase();
+  const ents = [...new Set((body||"").match(ENTITY_RE)||[])].filter(e=>!NOT_ENTITY.has(e) && !q.includes(e.toLowerCase()));
+  const [search, ...first] = await Promise.all([
+    getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=3&origin=*`),
+    ...ents.slice(0,2).map(summaryPhoto),
+  ]);
+  for(const p of first) if(p) return p;
+  const hits = (search?.query?.search||[]).map(x=>x.title).filter(t=>t && !/^list of /i.test(t) && !ents.includes(t)).slice(0,2);
+  for(const t of hits){ const p = await summaryPhoto(t); if(p) return p; }
+  return null;
+}
+
 // A DuckDuckGo abstract from Wikipedia names its article; that article's lead photo goes with it.
 async function abstractPhoto(url){
   const m = /^https:\/\/en\.wikipedia\.org\/wiki\/([^?#]+)/.exec(url||"");
@@ -467,7 +494,12 @@ async function answer(query, opts={}){
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
   // The model's photo, when its page backs the sentence, stays with the number it was shown with.
-  const hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : (ai || dd || await firstOf(query, [wiki]));
+  let hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : (ai || dd || await firstOf(query, [wiki]));
+  // No picture from the proxy: the answer's Wikipedia topic may still have one. Its extract backs the answer too.
+  if(hit && !hit.image){
+    const p = await topicPhoto(query, hit.body).catch(()=>null);
+    if(p) hit = {...hit, image:{url:p.url, width:p.width, height:p.height, title:p.title}, ...(!hit.grounding && p.extract ? {grounding:p.extract} : {})};
+  }
   if(hit) turns.add(query, hit.body);
   // The model names no page, so the DDG abstract is the only link here; it must back the sentence.
   // The proxy's Wikipedia pages fill the second link (web shows at most two): the first ones that are not DDG's own article.
@@ -550,14 +582,14 @@ async function renderAnswer(query, opts){
     // Click through to the source; AI answers have none, so fall back to a web search.
     const href=a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query);
     // A photo (Wikipedia lead image, a site's share image) tops the card; the favicon only stands in when there is none.
-    const photo = a.image && a.image.url ? photoHTML(a.image.url, a.title) : "";
+    const photo = a.image && a.image.url ? photoHTML(a.image.url, a.title) + (a.image.title ? '<span class="photo-credit">'+esc(a.image.title)+' \u00B7 Wikipedia</span>' : "") : "";
     h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
       +photo
       +(a.icon&&!photo?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
       +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
     // "Why this answer": the source line opens the exact text the sentence was cut from, with a link.
     // Shown only when that text says more than the sentence did.
-    const why = typeof a.grounding==="string" && a.grounding.trim() && a.grounding.trim()!==a.body.trim();
+    const why = typeof a.grounding==="string" && a.grounding.trim().length > a.body.trim().length;
     if(why){
       h+='<details class="why"><summary>'+esc(T("powered by {s}",{s:a.src}))+'</summary><p>'+esc(a.grounding.trim())+'</p>'
         +'<a href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(a.src)+'</a></details>';
