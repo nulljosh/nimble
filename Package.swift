@@ -31,6 +31,7 @@ let package = Package(
                 "Sources/Models/QueryEngine.swift",
                 "Sources/Models/QueryEngine+Cards.swift",
                 "Sources/Models/QueryEngine+Compute.swift",
+                "Sources/Models/QueryEngine+Markets.swift",
                 "Sources/Models/QueryResult.swift",
                 "Sources/Models/AIEngine.swift",
                 "Sources/Models/OnDeviceAnswers.swift",
