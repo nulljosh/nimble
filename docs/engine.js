@@ -179,6 +179,17 @@ function sourcesFor(body, candidates){
   return out;
 }
 
+// A Wikipedia page is listed as a source only when its article is the topic the question names or an
+// entity the answer names. "Hamlet (1996 film)" is the article Hamlet; "Capital punishment in France"
+// is not "capital of France". Every word of the article's name (a parenthesized qualifier dropped) must
+// be a word of the question or of the answer's entities.
+function onTopic(title, query, body){
+  const ents = (body && body.match(ENTITY_RE)) || [];
+  const allowed = new Set([...keyWords(query), ...keyWords(ents.filter(e=>!NOT_ENTITY.has(e)).join(" "))]);
+  const words = keyWords(String(title||"").replace(/\s*\(.*?\)/g, ""));
+  return words.length > 0 && words.every(w => allowed.has(w));
+}
+
 // The linked sources as "Name · Name", each one a link. Names only: no new words in the UI.
 function sourceRow(list){
   const esc=t=>String(t).replace(/</g,"&lt;");
@@ -187,10 +198,13 @@ function sourceRow(list){
 
 // Photos: only real pictures from Wikipedia's lead image. Logos, flags, icons and SVG drawings are
 // skipped, so a topic with only a logo shows its text and no photo. https only.
-const NOT_PHOTO = /\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-/i;
+// A raw .svg is never a photo. An SVG diagram's REST thumbnail is a PNG render (".svg.png"): a picture
+// like any other, so the lead image falls back to it. Only png, jpg, jpeg and webp count.
+const NOT_PHOTO = /\.svg(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-/i;
+const PHOTO_EXT = /\.(png|jpe?g|webp)(\?|$)/i;
 function wikiPhoto(sum){
   const t = sum && sum.thumbnail, u = t && t.source;
-  if(!u || !/^https:\/\//.test(u) || NOT_PHOTO.test(u)) return null;
+  if(!u || !/^https:\/\//.test(u) || NOT_PHOTO.test(u) || !PHOTO_EXT.test(u)) return null;
   return {url:u, width:t.width||null, height:t.height||null};
 }
 // Topic photo for an AI answer the proxy sent without one. Candidates, in order: the proper nouns the
@@ -447,6 +461,9 @@ async function gemma(query){
     image = d?.image && /^https:\/\//.test(d.image.url||"") ? d.image : null;
     // Wikipedia pages behind the proxy's answer; the worker has already matched them to the sentence.
     refs = Array.isArray(d?.refs) ? d.refs.filter(r => r && /^https:\/\//.test(r.url||"") && r.extract).map(r => ({src:"Wikipedia", title:r.title||"Wikipedia", url:r.url, grounding:r.extract})) : [];
+    // The proxy's photo names no page: its credit is the on-topic Wikipedia page, as an AI photo's is. No match, no credit.
+    const topic = image && (refs.find(r => onTopic(r.title, query, "")) || refs.find(r => onTopic(r.title, query, text)));
+    if(topic) image = {...image, title:topic.title};
   }
   const a = (text||"").trim();
   return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {}), ...(refs.length ? {refs} : {})} : null;
@@ -514,7 +531,7 @@ async function answer(query, opts={}){
   if(hit) turns.add(query, hit.body);
   // The model names no page, so the DDG abstract is the only link here; it must back the sentence.
   // The proxy's Wikipedia pages fill the second link (web shows at most two): the first ones that are not DDG's own article.
-  const wikiRefs = (ai?.refs || []).filter(r => !dd || norm(r.url) !== norm(dd.url)).slice(0,2).map(r => ({src:r.title, url:r.url, grounding:r.grounding}));
+  const wikiRefs = (ai?.refs || []).filter(r => !dd || norm(r.url) !== norm(dd.url)).filter(r => onTopic(r.title, query, hit && hit.body)).slice(0,2).map(r => ({src:r.title, url:r.url, grounding:r.grounding}));
   return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2)} : {kind:"none"};
 }
 
@@ -704,4 +721,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};

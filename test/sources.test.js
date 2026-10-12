@@ -121,3 +121,22 @@ test("with no DDG abstract, the proxy's first two Wikipedia pages make the two s
     assert.deepEqual(a.sources.map(x => x.name), ["Hamlet", "Hamlet (1996 film)"]);
   } finally { s.restore(); }
 });
+
+test("a proxy ref on another subject is not listed: 'Capital punishment in France' drops off 'capital of france'", async () => {
+  const paris = { title: "Paris", url: "https://en.wikipedia.org/wiki/Paris", extract: "Paris is the capital and most populous city of France." };
+  const punish = { title: "Capital punishment in France", url: "https://en.wikipedia.org/wiki/Capital_punishment_in_France", extract: "Capital punishment in France was abolished in 1981. The capital of France was ..." };
+  const s = stubFetch({ answer: "The capital of France is Paris.", refs: [punish, paris] });
+  try {
+    const a = await E.answer("capital of france", { ifUnset: "yes" });
+    assert.deepEqual(a.sources.map(x => x.name), ["Paris"]);
+  } finally { s.restore(); }
+});
+
+test("onTopic: the question's topic, the answer's entity, or a qualifier-stripped article name; never a stray subject", () => {
+  assert.equal(E.onTopic("Capital punishment in France", "capital of france", "The capital of France is Paris."), false);
+  assert.equal(E.onTopic("Paris", "capital of france", "The capital of France is Paris."), true);
+  assert.equal(E.onTopic("France", "capital of france", "The capital of France is Paris."), true);
+  assert.equal(E.onTopic("Hamlet (1996 film)", "who wrote hamlet", "William Shakespeare wrote Hamlet."), true);
+  assert.equal(E.onTopic("Third", "who wrote hamlet", "William Shakespeare wrote Hamlet."), false);
+  assert.equal(E.onTopic("", "who wrote hamlet", "William Shakespeare wrote Hamlet."), false);
+});

@@ -209,14 +209,52 @@ test("a topic with text but no picture gives grounding and no image", async () =
   assert.equal(a.groundingTitle, "Paris");
 });
 
-test("photosynthesis: the search hit's text grounds the answer, and its SVG diagram is not a photo", async () => {
+const DIAGRAM = { source: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Photosynthesis_en.svg/330px-Photosynthesis_en.svg.png", width: 330, height: 330 };
+const PHOTOSYNTHESIS = "Photosynthesis is a system of biological processes by which organisms convert light energy into chemical energy.";
+
+test("photosynthesis: the lead image is an SVG diagram, so its PNG render is the photo, credited to the page", async () => {
   consent = "yes";
-  const DIAGRAM = { source: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Photosynthesis_en.svg/330px-Photosynthesis_en.svg.png", width: 330, height: 330 };
-  aiStub({ answer: "Photosynthesis turns light into chemical energy.", search: ["Photosynthesis"], pages: { Photosynthesis: { thumbnail: DIAGRAM, extract: "Photosynthesis is a system of biological processes by which organisms convert light energy into chemical energy." } } });
+  aiStub({ answer: "Photosynthesis turns light into chemical energy.", search: ["Photosynthesis"], pages: { Photosynthesis: { thumbnail: DIAGRAM, extract: PHOTOSYNTHESIS } } });
   const a = await E.answer("what is photosynthesis");
-  assert.equal(a.image, undefined);
+  assert.deepEqual(a.image, { url: DIAGRAM.source, width: 330, height: 330, title: "Photosynthesis" });
   assert.match(a.grounding, /^Photosynthesis is a system/);
   assert.equal(a.groundingTitle, "Photosynthesis");
+  const r = await E.renderAnswer("what is photosynthesis");
+  assert.match(r.h, /<span class="photo-credit">Photosynthesis · Wikipedia<\/span>/);
+});
+
+test("the SVG fallback takes only a rendered raster: a raw .svg is never a photo", async () => {
+  consent = "yes";
+  const RAW = { source: "https://upload.wikimedia.org/wikipedia/commons/5/55/Photosynthesis_en.svg", width: 330, height: 330 };
+  aiStub({ answer: "Photosynthesis turns light into chemical energy.", search: ["Photosynthesis"], pages: { Photosynthesis: { thumbnail: RAW, extract: PHOTOSYNTHESIS } } });
+  const a = await E.answer("what is photosynthesis");
+  assert.equal(a.image, undefined);
+  assert.match(a.grounding, /^Photosynthesis is a system/, "the text still grounds the answer");
+});
+
+test("the Hamlet proxy photo is credited to its on-topic Wikipedia page", async () => {
+  consent = "yes";
+  const HAMLET_PIC = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Hamlet_skull.jpg/800px-Hamlet_skull.jpg";
+  const refs = [
+    { title: "William Shakespeare", url: "https://en.wikipedia.org/wiki/William_Shakespeare", extract: "William Shakespeare was an English playwright. He wrote Hamlet." },
+    { title: "Hamlet", url: "https://en.wikipedia.org/wiki/Hamlet", extract: "Hamlet is a tragedy written by William Shakespeare." },
+  ];
+  globalThis.fetch = async (url, opts) => (String(url).startsWith("https://nimble-answers") && opts?.method === "POST")
+    ? json({ answer: "William Shakespeare wrote Hamlet.", source: "Qwen", image: { url: HAMLET_PIC, width: 800, height: 600 }, refs })
+    : { ok: false };
+  const a = await E.answer("who wrote hamlet");
+  assert.equal(a.image.url, HAMLET_PIC);
+  assert.equal(a.image.title, "Hamlet");
+  const r = await E.renderAnswer("who wrote hamlet");
+  assert.match(r.h, /<span class="photo-credit">Hamlet · Wikipedia<\/span>/);
+});
+
+test("the proxy photo gets no credit when no Wikipedia page on the answer's topic names it", async () => {
+  consent = "yes";
+  aiStub({ answer: "The capital of France is Paris.", proxyImage: { url: "https://example.org/p.jpg" }, pages: {} });
+  const a = await E.answer("capital of france");
+  assert.equal(a.image.url, "https://example.org/p.jpg");
+  assert.equal(a.image.title, undefined);
 });
 
 test("a topic whose only picture is a logo gives the answer no photo", async () => {
