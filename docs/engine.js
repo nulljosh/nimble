@@ -155,6 +155,34 @@ function graph(expr){
 // Don't split after a short capitalized abbreviation (Mr., Dr., St., Ver.).
 const first = (t) => t.trim().split(/(?<!\b[A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/)[0];
 
+// Multiple sources: a second source is listed only when its text backs the sentence. Same rule as
+// AnswerSources in Sources/Models/QueryResult.swift; keep the two in step.
+const GLUE = new Set("that this with from which were have they their also been into about after there these those when where while would could should will".split(" "));
+const keyWords = (s) => (s.toLowerCase().match(/[a-z]{4,}/g) || []).filter(w => !GLUE.has(w));
+// Most content words of the sentence must appear in the text, and every number in the sentence too.
+function agrees(body, text){
+  const want = [...new Set(keyWords(body))];
+  if(!want.length || !text) return false;
+  const have = new Set(keyWords(text)), nums = body.match(/\d+/g) || [];
+  return want.filter(w => have.has(w)).length >= Math.ceil(want.length * 0.6) && nums.every(n => text.includes(n));
+}
+// Up to three linked sources, first candidate first, deduped by URL. The first candidate is the
+// primary and needs no agreement; every other candidate must back the sentence. Never a new fetch.
+function sourcesFor(body, candidates){
+  const out = [];
+  candidates.forEach((c, i) => {
+    if(!c || !c.url || out.length >= 3 || out.some(o => o.url === c.url)) return;
+    if(i === 0 || agrees(body, c.grounding || c.body)) out.push({name:c.src, url:c.url});
+  });
+  return out;
+}
+
+// The linked sources as "Name · Name", each one a link. Names only: no new words in the UI.
+function sourceRow(list){
+  const esc=t=>String(t).replace(/</g,"&lt;");
+  return list.map(s=>'<a href="'+esc(s.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>').join(" \u00B7 ");
+}
+
 async function ddg(query){
   const d = await getJSON(`${ANSWER_PROXY}/?ddg=${encodeURIComponent(query)}`);
   if(d){
@@ -407,18 +435,19 @@ async function answer(query, opts={}){
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
   const live = await firstOf(query, [identity, news, site, etymology, dictionary, weather, localTime]);
-  if(live) return live.kind ? live : {kind:"text", ...live};
+  if(live) return live.kind ? live : {kind:"text", ...live, sources:sourcesFor(live.body, [live])};
   const consent = aiConsent() || opts.ifUnset || null;
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};
   if(consent==="no"){
     const hit = await firstOf(query, [ddg, wiki]);
-    return hit ? {kind:"text", ...hit} : {kind:"none"};
+    return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit])} : {kind:"none"};
   }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
   const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await firstOf(query, [wiki]));
   if(hit) turns.add(query, hit.body);
-  return hit ? {kind:"text", ...hit} : {kind:"none"};
+  // The model names no page, so the DDG abstract is the only link here; it must back the sentence.
+  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd])} : {kind:"none"};
 }
 
 // The consent card, same words as the native prompt. Pages wire the buttons by data-consent.
@@ -494,6 +523,11 @@ async function renderAnswer(query, opts){
         +'<a href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(a.src)+'</a></details>';
       credit="";
     } else credit=T("powered by {s}",{s:a.src});
+    // Two or more linked sources sit under the sentence, names only; the row replaces the credit line.
+    if((a.sources||[]).length>1){
+      h+='<p class="sources">'+sourceRow(a.sources)+'</p>';
+      credit="";
+    }
   }
   else { h+="<p>"+T('No instant answer. Try a question, a sum, or "5 miles to km".')+"</p>"; }
   return {h, credit, kind:a.kind, a};
@@ -585,4 +619,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};

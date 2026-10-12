@@ -24,9 +24,9 @@ struct ResultView: View {
                 Text("computed offline")
             }
 
-        case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding):
+        case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding, let sources):
             TextAnswerView(heading: heading, answer: answer, source: source, sourceURL: sourceURL,
-                           imageURL: imageURL, grounding: grounding, shareText: state.result.copyText)
+                           imageURL: imageURL, grounding: grounding, sources: sources, shareText: state.result.copyText)
 
         case .list(let items, let source):
             AnswerCard(shareText: state.result.copyText) {
@@ -129,6 +129,8 @@ struct TextAnswerView: View {
     let sourceURL: String?
     let imageURL: String?
     let grounding: String?
+    /// Up to three linked sources; shown as a row under the sentence when there are two or more.
+    let sources: [AnswerSource]
     let shareText: String?
     @State private var showWhy = false
 
@@ -166,6 +168,22 @@ struct TextAnswerView: View {
                             .lineSpacing(7)
                             .textSelection(.enabled)
                             .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                if sources.count > 1 {
+                    HStack(spacing: 6) {
+                        ForEach(Array(sources.enumerated()), id: \.offset) { index, item in
+                            if index > 0 { Text("\u{00B7}").foregroundStyle(Color.soft) }
+                            if let u = URL(string: item.url) {
+                                Button { openURL(u) } label: {
+                                    Text(item.name)
+                                        .nimbleFont(13, weight: .medium)
+                                        .foregroundStyle(Color.bulbDeep)
+                                        .underline()
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
                     }
                 }
                 if showWhy, let whyText {

@@ -1,4 +1,48 @@
+import Foundation
 import CoreGraphics
+
+/// One linked source behind a text answer: the name shown and the page it opens.
+struct AnswerSource: Equatable, Hashable {
+    let name: String
+    let url: String
+}
+
+/// Multiple sources: a second source is listed only when its text backs the sentence. Same rule as
+/// `agrees` in docs/engine.js; keep the two in step.
+enum AnswerSources {
+    static let glue: Set<String> = ["that", "this", "with", "from", "which", "were", "have", "they", "their", "also",
+                                    "been", "into", "about", "after", "there", "these", "those", "when", "where",
+                                    "while", "would", "could", "should", "will"]
+
+    /// Words of four letters or more, lowercased, glue words dropped.
+    static func keyWords(_ s: String) -> Set<String> {
+        Set(s.lowercased().split(whereSeparator: { !($0.isASCII && $0.isLetter) }).map(String.init)
+            .filter { $0.count >= 4 && !glue.contains($0) })
+    }
+
+    /// Most content words of the sentence must appear in the text, and every number in the sentence too.
+    static func agrees(_ body: String, _ text: String) -> Bool {
+        let want = keyWords(body)
+        guard !want.isEmpty, !text.isEmpty else { return false }
+        let have = keyWords(text)
+        let hits = want.filter { have.contains($0) }.count
+        let nums = body.split(whereSeparator: { !($0.isASCII && $0.isNumber) }).map(String.init)
+        return hits >= Int((Double(want.count) * 0.6).rounded(.up)) && nums.allSatisfy { text.contains($0) }
+    }
+
+    /// Up to three linked sources, deduped by URL. `candidates` runs primary first: the first one needs
+    /// no agreement, every other must back the sentence. Non-text results and unlinked ones are skipped.
+    static func linked(body: String, candidates: [QueryResult]) -> [AnswerSource] {
+        var out: [AnswerSource] = []
+        for (index, candidate) in candidates.enumerated() {
+            guard case .text(_, let cBody, let name, let url?, _, let grounding, _) = candidate,
+                  out.count < 3, !out.contains(where: { $0.url == url }) else { continue }
+            let text = grounding.flatMap { $0.isEmpty ? nil : $0 } ?? cBody
+            if index == 0 || agrees(body, text) { out.append(AnswerSource(name: name, url: url)) }
+        }
+        return out
+    }
+}
 
 /// One story on the news card: one sentence, the outlet that ran it, and the link.
 struct NewsItem: Equatable, Decodable {
@@ -15,7 +59,8 @@ enum QueryResult: Equatable {
     /// steps is the "Show steps" list (one line per operation); empty when there is nothing to expand.
     case math(String, steps: [String] = [])
     /// grounding is the text the body sentence was cut from ("Why this answer"); nil when there is none.
-    case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?, grounding: String? = nil)
+    /// sources is the linked list under the sentence (up to three); sourceURL and source stay the primary.
+    case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?, grounding: String? = nil, sources: [AnswerSource] = [])
     case list(items: [String], source: String)
     case error(String, searchURL: String?)
     case color(String)
@@ -44,7 +89,7 @@ enum QueryResult: Equatable {
     var copyText: String? {
         switch self {
         case .math(let s, _): return s
-        case .text(_, let body, _, _, _, _): return body
+        case .text(_, let body, _, _, _, _, _): return body
         case .list(let items, _): return items.joined(separator: "\n")
         case .error(let msg, _): return msg
         case .color(let hex): return hex
@@ -64,7 +109,7 @@ enum QueryResult: Equatable {
         case .math, .convert, .graph, .color: return (text, "Computed offline")
         // The share image carries one sentence, not the whole list.
         case .news(let items, let source): return items.first.map { ($0.sentence, source) }
-        case .text(_, _, let source, _, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
+        case .text(_, _, let source, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
         }
     }
 }

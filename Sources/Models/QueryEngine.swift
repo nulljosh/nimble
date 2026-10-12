@@ -543,16 +543,24 @@ final class QueryEngine: Sendable {
         if let llmResult = await llm {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.
-            if case .text(_, let body, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
-               let sourced = await ddg { return sourced }
-            return llmResult
+            if case .text(_, let body, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
+               let sourced = await ddg { return withSources(sourced, others: [await wiki]) }
+            return withSources(llmResult, others: [await ddg, await wiki])
         }
 
-        if let ddgResult = await ddg { return ddgResult }
-        if let wikiResult = await wiki { return wikiResult }
+        if let ddgResult = await ddg { return withSources(ddgResult, others: [await wiki]) }
+        if let wikiResult = await wiki { return withSources(wikiResult, others: []) }
 
         let encoded = input.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? input
         return .error("No instant answer found.", searchURL: "https://duckduckgo.com/?q=\(encoded)")
+    }
+
+    /// Attaches the linked sources to a text answer. `others` are results already fetched for the same question.
+    private func withSources(_ result: QueryResult, others: [QueryResult?]) -> QueryResult {
+        guard case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, _) = result else { return result }
+        let sources = AnswerSources.linked(body: body, candidates: [result] + others.compactMap { $0 })
+        return .text(heading: heading, body: body, source: source, sourceURL: sourceURL, imageURL: imageURL,
+                     grounding: grounding, sources: sources)
     }
 
     private func queryDDG(_ input: String, session: URLSession = .shared) async -> QueryResult? {

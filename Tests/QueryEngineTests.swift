@@ -5,7 +5,7 @@ final class QueryEngineTests: XCTestCase {
     let engine = QueryEngine()
 
     func testIdentityAnswer() {
-        guard case .text(_, let body, _, _, _, _)? = engine.identityAnswer("Who created you") else { return XCTFail("no answer") }
+        guard case .text(_, let body, _, _, _, _, _)? = engine.identityAnswer("Who created you") else { return XCTFail("no answer") }
         XCTAssertTrue(body.contains("Joshua Trommel"))
         XCTAssertNil(engine.identityAnswer("who created the telephone"))
     }
@@ -19,7 +19,7 @@ final class QueryEngineTests: XCTestCase {
 
     func testSiteAnswerUsesPageTitleAndFavicon() {
         let html = "<title>Stripe | Payments</title><meta name=\"description\" content=\"Payments for the internet.\">"
-        guard case .text(let heading, let body, let source, _, let icon, _)? = engine.parseSite(html: html, host: "stripe.com", pageURL: "https://stripe.com/") else { return XCTFail("no answer") }
+        guard case .text(let heading, let body, let source, _, let icon, _, _)? = engine.parseSite(html: html, host: "stripe.com", pageURL: "https://stripe.com/") else { return XCTFail("no answer") }
         XCTAssertEqual(heading, "Stripe | Payments")
         XCTAssertEqual(body, "Payments for the internet.")
         XCTAssertEqual(source, "stripe.com")
@@ -28,18 +28,18 @@ final class QueryEngineTests: XCTestCase {
 
     func testSiteAnswerKeepsGroundingForWhyThisAnswer() {
         let html = "<title>Acme</title><meta name=\"description\" content=\"Ship faster. Then ship again.\">"
-        guard case .text(_, let body, _, _, _, let grounding)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
+        guard case .text(_, let body, _, _, _, let grounding, _)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
         XCTAssertEqual(body, "Ship faster.")
         XCTAssertEqual(grounding, "Ship faster. Then ship again.")
     }
 
     func testSiteAnswerFallsBackToOpenGraphThenJavaScriptNote() {
         let og = "<meta property=\"og:description\" content=\"Ship faster.\">"
-        guard case .text(_, let ogBody, _, _, _, _)? = engine.parseSite(html: og, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no og answer") }
+        guard case .text(_, let ogBody, _, _, _, _, _)? = engine.parseSite(html: og, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no og answer") }
         XCTAssertEqual(ogBody, "Ship faster.")
 
         let spa = "<title>Acme App</title><div id=\"root\"></div><script src=\"/app.js\"></script>"
-        guard case .text(let heading, let spaBody, _, _, _, _)? = engine.parseSite(html: spa, host: "acme.app", pageURL: "https://acme.app/") else { return XCTFail("no spa answer") }
+        guard case .text(let heading, let spaBody, _, _, _, _, _)? = engine.parseSite(html: spa, host: "acme.app", pageURL: "https://acme.app/") else { return XCTFail("no spa answer") }
         XCTAssertEqual(spaBody, "This site loads with JavaScript.")
         XCTAssertEqual(heading, "Acme App")
 
