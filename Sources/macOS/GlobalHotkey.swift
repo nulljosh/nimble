@@ -9,7 +9,7 @@ import Carbon.HIToolbox
 /// frontmost, which is useless for summoning it.
 ///
 /// ponytail: the chord is hardcoded to ⌥Space. Make it configurable in Preferences only
-/// if it needs to be — every other Nimble setting predates a reason to.
+/// if it needs to be, every other Nimble setting predates a reason to.
 @MainActor
 enum GlobalHotkey {
     private static var ref: EventHotKeyRef?

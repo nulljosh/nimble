@@ -114,12 +114,10 @@ a:hover { text-decoration: underline; }
 
 @media (prefers-reduced-motion: reduce) { .float, .float svg { animation: none; } }
 
-/* Semi-transparent yellow over the icons: solid under the copy, clear at the edges. */
+/* Flat yellow wash over the icon band, no gradient by house rule. */
 .hero::after {
   content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background:
-    radial-gradient(ellipse 56% 50% at 50% 46%, var(--yellow) 20%, transparent 76%),
-    linear-gradient(var(--yellow), transparent 14%, transparent 86%, var(--yellow));
+  background: var(--yellow); opacity: .82;
 }
 
 .hero-nav {

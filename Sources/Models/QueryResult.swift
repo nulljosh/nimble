@@ -51,7 +51,7 @@ struct NewsItem: Equatable, Decodable {
     let url: String
 }
 
-// Foundation/CoreGraphics only, no SwiftUI — shared with the terminal frontend (tui/),
+// Foundation/CoreGraphics only, no SwiftUI, shared with the terminal frontend (tui/),
 // which imports SwiftTUI and can't also import SwiftUI in the same module.
 enum QueryResult: Equatable {
     case none

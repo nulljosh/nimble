@@ -533,7 +533,7 @@ final class QueryEngine: Sendable {
         // Gemma first for a crisp one-line answer; fall back to DDG/Wikipedia when the
         // key is unreachable or Gemma returns UNKNOWN (keeps a no-key offline degrade).
         // All three start together so a cold LLM call doesn't add a sequential hop in
-        // front of Wikipedia — only the preference order (llm > ddg > wiki) is sequential.
+        // front of Wikipedia, only the preference order (llm > ddg > wiki) is sequential.
         let (ddgInput, wikiInput) = preprocessQuery(input)
         // With the on-device model answering, the question sends nothing to DuckDuckGo or Wikipedia.
         let localOnly = useLLM && ai.engine == .onDevice && OnDeviceAnswers.isAvailable

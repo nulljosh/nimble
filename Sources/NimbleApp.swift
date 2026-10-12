@@ -17,14 +17,14 @@ struct NimbleApp: App {
                 }
         }
         .windowStyle(.hiddenTitleBar)
-        // Without this the window keeps a titlebar-sized strip above the search bar —
+        // Without this the window keeps a titlebar-sized strip above the search bar ,
         // the empty bar at the top of the HUD. `.contentSize` makes the frame hug the
         // view, which is also what lets it grow when a result appears.
         .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Nimble") { NSApp.orderFrontStandardAboutPanel(nil) }            }
-            // Nothing to create, and no help book to open — both menus were empty.
+            // Nothing to create, and no help book to open, both menus were empty.
             CommandGroup(replacing: .newItem) {}
             CommandGroup(replacing: .help) {}
         }
@@ -70,7 +70,7 @@ struct NimbleApp: App {
     private func configureWindow() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             for window in NSApp.windows {
-                // No buttons to hide any more — dropping .titled below takes the whole
+                // No buttons to hide any more, dropping .titled below takes the whole
                 // titlebar with them. Dragging survives on the window background.
                 window.isMovableByWindowBackground = true
                 window.titlebarAppearsTransparent = true
@@ -80,7 +80,7 @@ struct NimbleApp: App {
                 window.hasShadow = true
                 // The pale strip above the search field was _NSTitlebarDecorationView
                 // inside NSTitlebarContainerView. Transparency, hidden buttons and
-                // hiding those views individually all failed — SwiftUI rebuilds them on
+                // hiding those views individually all failed, SwiftUI rebuilds them on
                 // layout. Dropping .titled deletes the container outright, and the
                 // window shrinks by exactly the 32pt the strip occupied.
                 // ponytail: borderless means canBecomeKey == false; makeKeyable() below overrides that
