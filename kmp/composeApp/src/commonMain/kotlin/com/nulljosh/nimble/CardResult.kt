@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,13 +29,13 @@ fun CardResult(card: Card, theme: NimbleTheme, modifier: Modifier = Modifier) {
             .widthIn(max = 640.dp)
             .clickable(onClickLabel = "Open ${card.source}") { uriHandler.openUri(card.url) }
     ) {
+        // One headline line, "11 °C": the unit sits after a space and never wraps onto its own line.
         Text(
             buildAnnotatedString {
                 append(card.big)
                 if (card.unit.isNotEmpty()) {
                     withStyle(SpanStyle(fontSize = 13.sp, color = theme.accent)) {
-                        // The degree sign hugs the number; every other unit gets a space.
-                        if (!card.unit.startsWith("°")) append(" ")
+                        append(" ")
                         append(card.unit)
                     }
                 }
@@ -42,6 +43,9 @@ fun CardResult(card: Card, theme: NimbleTheme, modifier: Modifier = Modifier) {
             color = theme.text,
             fontSize = 34.sp,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(4.dp))
         Text(card.sub, color = theme.muted, fontSize = 15.sp)

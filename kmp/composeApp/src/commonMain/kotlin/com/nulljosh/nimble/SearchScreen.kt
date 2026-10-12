@@ -5,6 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -211,6 +216,83 @@ private fun ThemeSwatches(selected: NimbleTheme, onSelect: (NimbleTheme) -> Unit
     }
 }
 
+/**
+ * Lead photo above a text answer: a 16:9 frame, 12dp corners, cropped from the top. The frame is
+ * reserved while the bytes load so the answer does not jump; it hides itself only when the load fails.
+ */
+@Composable
+private fun AnswerPhoto(url: String, theme: NimbleTheme, client: AnswerClient) {
+    // Null while loading; Photo(null) once the load has failed.
+    val photo by produceState<Photo?>(null, url) {
+        value = Photo(client.imageBytes(url)?.let { runCatching { it.decodeToImageBitmap() }.getOrNull() })
+    }
+    val loaded = photo
+    if (loaded?.bitmap == null && loaded != null) return
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .aspectRatio(16f / 9f)
+            .clip(RoundedCornerShape(12.dp))
+            .background(theme.muted.copy(alpha = 0.12f))
+    ) {
+        loaded?.bitmap?.let {
+            Image(
+                bitmap = it,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopCenter,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+}
+
+private class Photo(val bitmap: ImageBitmap?)
+
+/** A news story: sentence and outlet, a 56dp thumbnail only when the feed has one, and the row opens the link. */
+@Composable
+private fun NewsResult(news: Answer.News, theme: NimbleTheme, client: AnswerClient) {
+    val uriHandler = LocalUriHandler.current
+    Column {
+        news.items.forEachIndexed { index, item ->
+            if (index > 0) Spacer(Modifier.height(16.dp))
+            Row(
+                Modifier.fillMaxWidth().clickable(onClickLabel = "Open ${item.outlet}") { uriHandler.openUri(item.url) },
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(item.sentence, color = theme.text, fontSize = 16.sp)
+                    if (item.outlet.isNotEmpty()) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(item.outlet, color = theme.muted, fontSize = 12.sp)
+                    }
+                }
+                item.imageUrl?.let {
+                    Spacer(Modifier.width(12.dp))
+                    NewsThumb(it, theme, client)
+                }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        Text("Source: ${news.source}", color = theme.muted, fontSize = 12.sp)
+    }
+}
+
+@Composable
+private fun NewsThumb(url: String, theme: NimbleTheme, client: AnswerClient) {
+    val bitmap by produceState<ImageBitmap?>(null, url) {
+        value = client.imageBytes(url)?.let { runCatching { it.decodeToImageBitmap() }.getOrNull() }
+    }
+    Box(
+        Modifier
+            .size(56.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(theme.muted.copy(alpha = 0.12f))
+    ) {
+        bitmap?.let { Image(bitmap = it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+    }
+}
+
 /** Small site favicon above a web answer. Draws nothing until it loads, and nothing if it fails. */
 @Composable
 private fun SiteIcon(url: String, client: AnswerClient) {
@@ -233,10 +315,16 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
 
             is Answer.CardAnswer -> CardResult(answer.card, theme)
 
+            is Answer.News -> NewsResult(answer, theme, client)
+
             is Answer.Text -> {
                 // Whole answer opens its source; AI answers have none, so fall back to a web search.
                 val uriHandler = LocalUriHandler.current
                 Column(Modifier.clickable { answer.sourceUrl?.let(uriHandler::openUri) }) {
+                    answer.photoUrl?.let {
+                        AnswerPhoto(it, theme, client)
+                        Spacer(Modifier.height(12.dp))
+                    }
                     answer.imageUrl?.let {
                         SiteIcon(it, client)
                         Spacer(Modifier.height(8.dp))

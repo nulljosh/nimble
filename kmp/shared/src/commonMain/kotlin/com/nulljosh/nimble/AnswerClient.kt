@@ -27,10 +27,18 @@ sealed class Answer {
         val body: String,
         val source: String,
         val sourceUrl: String? = null,
+        /** Small icon beside a site answer (favicon). */
         val imageUrl: String? = null,
+        /** Lead photo above the answer, cropped to 16:9 from the top. https only. */
+        val photoUrl: String? = null,
     ) : Answer()
+    /** "news" or "what's happening in <place>": up to three headlines from the worker's RSS route. */
+    data class News(val items: List<NewsItem>, val source: String) : Answer()
     data class Miss(val message: String, val searchUrl: String) : Answer()
 }
+
+/** One story: the sentence, the outlet, the link, and a thumbnail when the feed has one (https only). */
+data class NewsItem(val sentence: String, val outlet: String, val url: String, val imageUrl: String? = null)
 
 /**
  * Math -> cards (etymology, weather, time, currency) -> Gemma proxy -> DuckDuckGo -> Wikipedia, same chain and same endpoints as the Swift and
@@ -68,6 +76,9 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         // Pattern-gated live cards come before the AI, same order as the web: etymology, weather, time, currency.
         cards.card(input)?.let { return Answer.CardAnswer(it) }
 
+        // News is gated before the AI so "news" never gets an invented answer. A failed feed falls through.
+        newsPlace(input)?.let { place -> news(place)?.let { return it } }
+
         // AI answers have no source page; give them a web search so every answer opens somewhere.
         gemma(input)?.let { return it.copy(sourceUrl = "https://duckduckgo.com/?q=${input.encodeURLParameter()}") }
 
@@ -84,18 +95,16 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
     @Serializable
     private data class ProxyBody(val q: String)
 
-    @Serializable
-    private data class ProxyResponse(val answer: String? = null, val source: String? = null)
-
     private suspend fun gemma(input: String): Answer.Text? = runCatchingNull {
         val res = http.post(PROXY) {
             contentType(ContentType.Application.Json)
             setBody(ProxyBody(input))
         }
-        val decoded = lenientJson.decodeFromString<ProxyResponse>(res.bodyAsText())
-        val answer = decoded.answer?.trim().orEmpty()
-        if (answer.isEmpty() || answer.uppercase() == "UNKNOWN") return@runCatchingNull null
-        Answer.Text(heading = null, body = answer, source = decoded.source ?: "Nimble")
+        proxyAnswer(res.bodyAsText())
+    }
+
+    private suspend fun news(place: String): Answer.News? = runCatchingNull {
+        newsFromJson(http.get("$PROXY/?news=${place.encodeURLParameter()}").bodyAsText())
     }
 
     @Serializable
@@ -132,7 +141,7 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
                 firstSentence(it),
                 d.abstractSource ?: "DuckDuckGo",
                 d.abstractUrl,
-                d.image?.takeIf { img -> img.isNotEmpty() }?.let { img -> "https://duckduckgo.com$img" }
+                photoUrl = d.image?.takeIf { img -> img.isNotEmpty() }?.let { img -> "https://duckduckgo.com$img" },
             )
         }
         null
@@ -188,7 +197,10 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         val url = "https://en.wikipedia.org/api/rest_v1/page/summary/${titlePath.encodeURLPathPart()}"
         val w = lenientJson.decodeFromString<WikiSummary>(http.get(url).bodyAsText())
         val extract = w.extract?.takeIf { it.isNotEmpty() } ?: return@runCatchingNull null
-        Answer.Text(w.title, firstSentence(extract), "Wikipedia", w.contentUrls?.desktop?.page, w.thumbnail?.source)
+        Answer.Text(
+            w.title, firstSentence(extract), "Wikipedia", w.contentUrls?.desktop?.page,
+            photoUrl = leadPhoto(w.thumbnail?.source),
+        )
     }
 }
 
@@ -221,6 +233,61 @@ internal fun siteAnswer(host: String, d: AnswerClient.SiteResponse): Answer.Text
         sourceUrl = "https://$host",
         imageUrl = "https://www.google.com/s2/favicons?domain=$host&sz=64",
     )
+}
+
+/** The worker's `/?q=` reply. `image` is an object `{url, width, height}`; a string here would drop the whole answer. */
+internal fun proxyAnswer(body: String): Answer.Text? {
+    val d = rich.decodeFromString<ProxyReply>(body)
+    val answer = d.answer?.trim().orEmpty()
+    if (answer.isEmpty() || answer.uppercase() == "UNKNOWN") return null
+    return Answer.Text(heading = null, body = answer, source = d.source ?: "Nimble", photoUrl = httpsOnly(d.image?.url))
+}
+
+@Serializable
+private data class ProxyReply(val answer: String? = null, val source: String? = null, val image: RichImage? = null)
+
+@Serializable
+private data class RichImage(val url: String? = null)
+
+/** The worker's `/?news=` reply: items with sentence, outlet, url and an optional image object. */
+internal fun newsFromJson(body: String): Answer.News? {
+    val items = try { rich.decodeFromString<NewsReply>(body).items } catch (_: Exception) { return null }
+    val top = items.asSequence().mapNotNull { row ->
+        val sentence = row.sentence.orEmpty()
+        val url = row.url.orEmpty()
+        if (sentence.isEmpty() || !(url.startsWith("https://") || url.startsWith("http://"))) return@mapNotNull null
+        NewsItem(sentence, row.outlet.orEmpty(), url, httpsOnly(row.image?.url))
+    }.take(3).toList()
+    if (top.isEmpty()) return null
+    return Answer.News(top, top.map { it.outlet }.filter { it.isNotEmpty() }.distinct().joinToString(", "))
+}
+
+@Serializable
+private data class NewsReply(val items: List<NewsRow> = emptyList())
+
+@Serializable
+private data class NewsRow(val sentence: String? = null, val outlet: String? = null, val url: String? = null, val image: RichImage? = null)
+
+private val rich = Json { ignoreUnknownKeys = true; isLenient = true }
+
+/** Same as Swift's AnswerPhoto.https: only https photos are shown. */
+internal fun httpsOnly(url: String?): String? = url?.takeIf { it.lowercase().startsWith("https://") }
+
+/** Wikipedia's lead image, unless it is a logo, flag, icon or drawing (same rule as Swift's wikipediaLead). */
+internal fun leadPhoto(url: String?): String? =
+    httpsOnly(url)?.takeUnless { leadSkip.containsMatchIn(it) }
+
+private val leadSkip = Regex("""\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-""", RegexOption.IGNORE_CASE)
+
+private val newsWorld = Regex("""^(?:(?:latest|top|breaking)\s+)?news\s*\??$|^what(?:'s|\u2019s| is) happening\s*\??$""", RegexOption.IGNORE_CASE)
+private val newsIn = Regex("""^(?:(?:latest|top|breaking)\s+)?news\s+(?:in|from|for|around)\s+(.+?)\s*\??$""", RegexOption.IGNORE_CASE)
+private val happeningIn = Regex("""^what(?:'s|\u2019s| is) happening\s+(?:in|at|around)\s+(.+?)\s*\??$""", RegexOption.IGNORE_CASE)
+
+/** The place for a news question: "" for the world feed, the place name, or null when the input is not news. */
+internal fun newsPlace(input: String): String? {
+    val q = input.trim()
+    if (newsWorld.containsMatchIn(q)) return ""
+    return (newsIn.find(q) ?: happeningIn.find(q))?.groupValues?.get(1)?.trim()
 }
 
 /** Wikipedia list articles ("List of ...") are never answers. */
