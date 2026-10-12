@@ -14,7 +14,7 @@ final class QuickAskTests: XCTestCase {
             else { defaults.removeObject(forKey: SharedAnswer.questionKey); defaults.removeObject(forKey: SharedAnswer.answerKey) }
         }
         SharedAnswer.save(question: "15% of 240", answer: "36", to: defaults)
-        let back = try XCTUnwrap(SharedAnswer.load(from: UserDefaults(suiteName: SharedAnswer.suiteName)))
+        let back = try XCTUnwrap(SharedAnswer.load(from: defaults))
         XCTAssertEqual(back.question, "15% of 240")
         XCTAssertEqual(back.answer, "36")
     }

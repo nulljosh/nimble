@@ -22,8 +22,8 @@ struct PreferencesData: Codable {
 final class Preferences {
     private let path: String
 
-    init() {
-        path = NSHomeDirectory() + "/.nimble-options.json"
+    init(path: String = NimbleStorage.preferencesPath()) {
+        self.path = path
     }
 
     func load() -> PreferencesData {

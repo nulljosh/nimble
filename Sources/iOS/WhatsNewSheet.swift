@@ -10,7 +10,7 @@ private let whatsNewBullets = [
 ]
 
 struct WhatsNewSheet: View {
-    @AppStorage("whats_new_seen_version") private var seenVersion = ""
+    @AppStorage("whats_new_seen_version", store: NimbleStorage.defaults()) private var seenVersion = ""
     @State private var isPresented = false
     @State private var contentHeight: CGFloat = 220
 

@@ -4,7 +4,7 @@ struct SearchView: View {
     @Environment(AppState.self) private var state
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @FocusState private var isInputFocused: Bool
-    @AppStorage("whats_new_seen_version") private var whatsNewSeenVersion = ""
+    @AppStorage("whats_new_seen_version", store: NimbleStorage.defaults()) private var whatsNewSeenVersion = ""
     @State private var tries: [String] = []
 
     var body: some View {

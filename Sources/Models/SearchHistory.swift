@@ -14,12 +14,9 @@ final class SearchHistory {
     private let file: URL
     private let cloud: NSUbiquitousKeyValueStore?
 
-    init(directory: URL? = nil, cloud: NSUbiquitousKeyValueStore? = .default) {
+    init(directory: URL? = nil, cloud: NSUbiquitousKeyValueStore? = NimbleStorage.cloudStore()) {
         self.cloud = cloud
-        let base = directory
-            ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-                .appendingPathComponent("Nimble", isDirectory: true)
-            ?? FileManager.default.temporaryDirectory.appendingPathComponent("Nimble", isDirectory: true)
+        let base = directory ?? NimbleStorage.supportDirectory()
         file = base.appendingPathComponent("history.json")
         guard let data = try? Data(contentsOf: file), let rows = try? JSONDecoder().decode([Row].self, from: data) else { return }
         entries = rows.filter { !$0.q.isEmpty }.prefix(Self.maxEntries).map { ($0.q, Date(timeIntervalSince1970: $0.t / 1000)) }

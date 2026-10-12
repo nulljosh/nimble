@@ -7,7 +7,7 @@ enum SharedAnswer {
     static let questionKey = "lastQuestion"
     static let answerKey = "lastAnswer"
 
-    static var defaults: UserDefaults? { UserDefaults(suiteName: suiteName) }
+    static var defaults: UserDefaults? { NimbleStorage.sharedDefaults() }
 
     static func save(question: String, answer: String, to defaults: UserDefaults? = SharedAnswer.defaults) {
         guard let defaults else { return }

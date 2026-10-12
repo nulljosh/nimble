@@ -1,5 +1,5 @@
 # Nimble
-v5.17.2
+v5.17.3
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Gemma + Qwen3 on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 
@@ -26,6 +26,9 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 ## The loop
 
 See `docs/LOOP-HANDOFF.md` (current state at 5.0.1, 2026-10-11). The loop shipped five majors 1.0 to 5.0 in one session, then 5.0.1. Open: query QA in roadmap.md, three merged remote branches Joshua has to delete, and the zero-issue goal; no blockers.
+
+## QA
+QA hooks always sandbox storage: any `-shot*` or `-qaSandbox` launch arg moves history, prefs, the shared answer suite and iCloud sync to a fresh temp root (`Sources/Models/QASandbox.swift`). Never launch the real app bundle for QA against real data.
 
 ## Build
 ```bash

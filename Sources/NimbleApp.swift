@@ -6,6 +6,11 @@ struct NimbleApp: App {
     @State private var appState = AppState()
     @Environment(\.openWindow) private var openWindow
 
+    init() {
+        // QA launches start from an empty suite (QASandbox.defaults wipes it on first use).
+        if QASandbox.launch { _ = QASandbox.defaults }
+    }
+
     var body: some Scene {
         Window("Nimble", id: "main") {
             SearchView()
