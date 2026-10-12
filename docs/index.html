@@ -209,7 +209,7 @@ a:hover { text-decoration: underline; }
 .mockup-status span:last-child { font-size: 6px; color: var(--panel-mid); letter-spacing: 2px; }
 .mockup-result { flex: 1; }
 .device-mac .mockup-status, .device-windows .mockup-status { display: none; }
-.hero .demo-caption { font-variant: var(--caption); letter-spacing: 0.06em; font-size: 0.9rem; color: var(--on-yellow-mid); max-width: none; margin: var(--s2) auto 0; }
+.hero .demo-caption { font-family: var(--font); font-variant: normal; text-transform: none; letter-spacing: normal; font-size: var(--fs-13); color: var(--on-yellow-mid); max-width: none; margin: var(--s2) auto 0; }
 .demo-caption a { color: inherit; text-decoration: underline; }
 
 /* The query row, laid out like the app: accent glass, then what you typed. */
@@ -660,7 +660,7 @@ footer {
 // Live demo: the same engine the app ships. The showcase runs first: a photo answer, math with steps, news, weather.
 var SHOWCASE=['who wrote hamlet','(3+4)*2','news','weather in Vancouver'];
 // Scripted showcase answers: the Wikipedia lines are written out, so the demo never waits on a lookup or asks for AI consent.
-var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy of Hamlet, Prince of Denmark, often shortened to Hamlet, is a tragedy written by William Shakespeare sometime between 1599 and 1601.',src:'Wikipedia',url:'https://en.wikipedia.org/wiki/Hamlet',sources:[{name:'Hamlet',url:'https://en.wikipedia.org/wiki/Hamlet'},{name:'Prince Hamlet',url:'https://en.wikipedia.org/wiki/Prince_Hamlet'}]}};
+var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy of Hamlet, Prince of Denmark, often shortened to Hamlet, is a tragedy written by William Shakespeare sometime between 1599 and 1601.',src:'Wikipedia',url:'https://en.wikipedia.org/wiki/Hamlet',image:{url:'hamlet-16x9.jpg',width:361,height:203},sources:[{name:'Hamlet',url:'https://en.wikipedia.org/wiki/Hamlet'},{name:'Prince Hamlet',url:'https://en.wikipedia.org/wiki/Prince_Hamlet'}]}};
 (function(){
   var tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
   var names={iphone:'iPhone',android:'Android',mac:'Mac',windows:'Windows'}, dev=document.documentElement.dataset.device;

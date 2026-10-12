@@ -6,6 +6,7 @@ Keep Nimble moving after 5.0.0 with one small, shippable slice at a time: fix wh
 
 ## Where things stand
 
+- 5.12.6 (2026-10-11): Landing demo shows a local Hamlet photo (docs/hamlet-16x9.jpg, 16:9 top-cropped, precached), the caption is plain Nimble Sans at the 13px token in sentence case, and the Deploy site check is confirmed.
 - 5.12.5 (2026-10-11): Landing A+ pass. Device greys, Flit fills and the theme colour moved onto tokens (zero hex outside tokens.css); the "who wrote hamlet" demo step shows its Hamlet and Prince Hamlet source line from scripted data, Show steps unfold on their own; CLAUDE.md and README version lines fixed.
 - 5.12.4 (2026-10-11): Landing audit. Float icon field and text ghosts removed; Flit sits above the headline so the h1 is centred; devices flattened (soft shadows gone, 1px ring, Nimble Sans); hero, mockup and demo colours, sizes, radii and spacing moved onto tokens; demo opens on "who wrote hamlet" then steps, news and weather. Checked at 390 and 1440, npm test green.
 - 5.12.3 (2026-10-11): Landing polish. Hero version label follows the newest release as a bare number (5.12.3, no lowercase v) at body size with tabular figures; h1 to label gap tightened; heading tracking set to -0.02em and line-height 1.1 across the landing h2/h3s. Checked at 390 and 1440.
