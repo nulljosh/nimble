@@ -48,33 +48,6 @@ struct SearchView: View {
                     .padding(.bottom, 24)
                 }
                 .scrollDismissesKeyboard(.interactively)
-
-                HStack {
-                    ThemePickerView()
-                        .environment(state)
-                    Spacer()
-                    HStack(spacing: 14) {
-                        ShareAnswerButton()
-                            .environment(state)
-                        Button(action: { state.copyResultText() }) {
-                            Image(systemName: "doc.on.doc")
-                                .font(.nimbleCallout)
-                                .foregroundStyle(Color.dim)
-                        }
-                        .accessibilityLabel("Copy result")
-                        NavigationLink {
-                            PreferencesView().environment(state)
-                        } label: {
-                            Image(systemName: "gearshape")
-                                .font(.nimbleCallout)
-                                .foregroundStyle(Color.dim)
-                        }
-                        .accessibilityLabel("Settings")
-                    }
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 12)
-                .overlay(alignment: .top) { Divider().opacity(0.07) }
             }
             .onAppear {
                 // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
@@ -85,9 +58,26 @@ struct SearchView: View {
             }
             // The consent card's Allow button sat behind the keyboard; drop it while the card shows.
             .onChange(of: state.askingAIConsent) { _, asking in if asking { isInputFocused = false } }
-            // No title on the root screen, so the empty bar was only ever a black
-            // strip above the search field.
-            .toolbar(.hidden, for: .navigationBar)
+            // New question puts the caret back in the field.
+            .onChange(of: state.focusRequest) { _, _ in isInputFocused = true }
+            // Untitled bar, painted cream: it carries only the New question pencil, top right, once there is an answer.
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.bg, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                if state.result != .none {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(action: { state.newQuestion() }) {
+                            Image(systemName: "square.and.pencil")
+                                .font(.nimbleCallout)
+                                .foregroundStyle(Color.dim)
+                        }
+                        .minimumTapTarget()
+                        .accessibilityLabel("New question")
+                    }
+                }
+            }
             // Light/dark follows the system, like the web app; the theme is only the accent.
             // Painted here, on the content: the NavigationStack's own system background
             // sits above a background set on the stack and turned the cream white.
@@ -127,6 +117,17 @@ struct SearchView: View {
                     .focused($isInputFocused)
                     .onSubmit { state.performQuery() }
                     .submitLabel(.search)
+
+                if !state.queryText.isEmpty {
+                    Button(action: { state.newQuestion() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.nimbleLeadMedium)
+                            .foregroundStyle(Color.dim)
+                    }
+                    .buttonStyle(.plain)
+                    .minimumTapTarget()
+                    .accessibilityLabel("Clear question")
+                }
             }
 
             HStack(spacing: 10) {

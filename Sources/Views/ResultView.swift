@@ -321,6 +321,9 @@ struct TextAnswerView: View {
 /// The answer card: hairline border, 24pt padding, an eyebrow, the answer, then one row with the source and Share.
 struct AnswerCard<Content: View, Footer: View>: View {
     let shareText: String?
+#if os(iOS)
+    @State private var copied = false
+#endif
     /// The quiet "as of" line under the answer, at the same left edge as the source row. Nil when there is none.
     let freshness: String?
     let content: Content
@@ -352,12 +355,28 @@ struct AnswerCard<Content: View, Footer: View>: View {
                     .foregroundStyle(Color.dim)
                 Spacer(minLength: 8)
                 if let shareText, !shareText.isEmpty {
+#if os(iOS)
+                    Button {
+                        UIPasteboard.general.string = shareText
+                        copied = true
+                        Task { try? await Task.sleep(for: .seconds(1)); copied = false }
+                    } label: {
+                        Text(copied ? String(localized: "Copied") : String(localized: "Copy"))
+                            .font(.nimbleSmall)
+                            .foregroundStyle(Color.dim)
+                            .underline()
+                    }
+                    .buttonStyle(.plain)
+                    .minimumTapTarget()
+                    .accessibilityLabel("Copy")
+#endif
                     ShareLink(item: shareText) {
                         Text("Share")
                             .font(.nimbleSmall)
                             .foregroundStyle(Color.dim)
                             .underline()
                     }
+                    .minimumTapTarget()
                     .accessibilityLabel("Share")
                 }
             }

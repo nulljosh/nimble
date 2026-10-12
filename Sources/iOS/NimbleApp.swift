@@ -6,7 +6,7 @@ struct NimbleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            SearchView()
+            RootTabView()
                 .environment(appState)
                 .overlay { WhatsNewSheet() }
         }

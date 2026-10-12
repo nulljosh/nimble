@@ -33,8 +33,12 @@ struct NimbleApp: App {
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Nimble") { NSApp.orderFrontStandardAboutPanel(nil) }            }
-            // Nothing to create, and no help book to open, both menus were empty.
-            CommandGroup(replacing: .newItem) {}
+            // The one thing to create is a new question: Cmd-N clears the answer and puts the caret back.
+            CommandGroup(replacing: .newItem) {
+                Button("New Question") { appState.newQuestion() }
+                    .keyboardShortcut("n")
+            }
+            // No help book to open, so the Help menu stays empty.
             CommandGroup(replacing: .help) {}
         }
 

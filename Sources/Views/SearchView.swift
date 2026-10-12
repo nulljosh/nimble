@@ -105,6 +105,8 @@ struct SearchView: View {
         .contextMenu { ContextMenuView().environment(state) }
         .contentShape(Rectangle())
         .gesture(WindowDrag())
+        // Cmd-N (New Question) puts the caret back in the field.
+        .onChange(of: state.focusRequest) { _, _ in isInputFocused = true }
     }
 
     /// The web app's field: rounded, soft fill, hairline that turns into a yellow ring when focused.

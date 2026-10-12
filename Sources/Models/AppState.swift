@@ -69,6 +69,10 @@ final class AppState {
     var aiError: String?
     var currentPlaceholder: String = ""
     var searchURL: String = ""
+    /// Bumped by newQuestion(), so the field can take focus from SwiftUI (iOS and Mac).
+    private(set) var focusRequest = 0
+    /// Bumped by every query and by newQuestion(). A slow answer that arrives after either is dropped.
+    private var queryGeneration = 0
 
     private let queryEngine = QueryEngine()
     private let prefs = Preferences()
@@ -142,9 +146,23 @@ final class AppState {
         #endif
     }
 
+    /// Starts over: the field empties, the answer goes, the field takes focus. Follow-up context is
+    /// dropped too, so the next question is not read as a follow-up to the last one.
+    func newQuestion() {
+        queryGeneration += 1
+        queryText = ""
+        result = .none
+        aiError = nil
+        askingAIConsent = false
+        turns.clear()
+        focusRequest += 1
+    }
+
     func performQuery() {
         let text = queryText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
+        queryGeneration += 1
+        let generation = queryGeneration
 
         let encoded = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? text
         searchURL = "https://duckduckgo.com/?q=\(encoded)"
@@ -181,7 +199,7 @@ final class AppState {
             let turns = self.turns
             Task { @MainActor [weak self] in
                 let answer = await OnDeviceAnswers.answer(text, turns: turns)
-                guard let self else { return }
+                guard let self, generation == self.queryGeneration else { return }
                 if let answer {
                     self.result = .text(heading: nil, body: answer, source: "On device", sourceURL: nil, imageURL: nil)
                     self.turns.add(text, answer)
@@ -199,20 +217,22 @@ final class AppState {
             result = .loading
             let engine = queryEngine
             Task { @MainActor [weak self] in
-                if let card = await engine.card(text) {
-                    self?.result = card
-                    self?.remember(text)
+                let card = await engine.card(text)
+                guard let self, generation == self.queryGeneration else { return }
+                if let card {
+                    self.result = card
+                    self.remember(text)
                 } else {
-                    self?.result = .none
-                    self?.askAnswerEngine(text)
+                    self.result = .none
+                    self.askAnswerEngine(text, generation: generation)
                 }
             }
             return
         }
-        askAnswerEngine(text)
+        askAnswerEngine(text, generation: generation)
     }
 
-    private func askAnswerEngine(_ text: String) {
+    private func askAnswerEngine(_ text: String, generation: Int) {
         // A website question is answered from the site itself, no AI involved, so it never needs
         // consent (the web app already behaves this way).
         if aiConsent == nil && queryEngine.siteHost(text) == nil {
@@ -229,19 +249,21 @@ final class AppState {
         Task { @MainActor [weak self] in
             let note = AIFailureNote()
             let answer = await engine.query(text, ai: ai, useLLM: useLLM, turns: turns, note: note)
-            self?.result = answer
-            self?.aiError = note.aiError
+            guard let self, generation == self.queryGeneration else { return }
+            self.result = answer
+            self.aiError = note.aiError
             switch answer {
             case .error, .none, .loading: break
-            default: self?.remember(text)
+            default: self.remember(text)
             }
-            if useLLM, case .text(_, let body, _, _, _, _, _, _) = answer { self?.turns.add(text, body) }
+            if useLLM, case .text(_, let body, _, _, _, _, _, _) = answer { self.turns.add(text, body) }
         }
     }
 
-    /// Every answered question goes to history, and on iOS to the widget too.
+    /// Every answered question goes to history with its answer text, and on iOS to the widget too.
+    /// Called only after `result` is set, so the answer is the current result's copy text.
     private func remember(_ text: String) {
-        history.add(text)
+        history.add(text, answer: result.copyText)
         #if os(iOS)
         if let answer = result.copyText {
             SharedAnswer.save(question: text, answer: answer)

@@ -7,23 +7,31 @@ struct PreferencesView: View {
         @Bindable var state = state
 
         List {
-            Section("Theme") {
-                ForEach(NimbleTheme.allCases, id: \.self) { theme in
-                    Button {
-                        state.theme = theme
-                        state.savePreferences()
-                    } label: {
-                        HStack {
-                            Text(theme.displayName)
-                            Spacer()
-                            if state.theme == theme {
-                                Image(systemName: "checkmark")
-                                    .accessibilityHidden(true)
-                            }
+            Section("Accent") {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 4) {
+                    ForEach(NimbleTheme.allCases, id: \.self) { theme in
+                        Button {
+                            state.theme = theme
+                            state.savePreferences()
+                        } label: {
+                            Circle()
+                                .fill(theme.color)
+                                .frame(width: 30, height: 30)
+                                .overlay(Circle().stroke(Color.hairline, lineWidth: 1))
+                                .overlay {
+                                    if state.theme == theme {
+                                        Circle().stroke(Color.text, lineWidth: 2).frame(width: 38, height: 38)
+                                    }
+                                }
+                                .frame(width: 44, height: 44)
+                                .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(theme.displayName)
+                        .accessibilityAddTraits(state.theme == theme ? .isSelected : [])
                     }
-                    .foregroundStyle(.primary)
                 }
+                .padding(.vertical, 4)
             }
 
             Section(String(localized: "Mascot")) {
@@ -75,6 +83,6 @@ struct PreferencesView: View {
                 Button("Open in DuckDuckGo") { state.openInDDG() }
             }
         }
-        .navigationTitle("Preferences")
+        .navigationTitle("Settings")
     }
 }

@@ -105,33 +105,3 @@ extension AppState {
     }
 }
 #endif
-
-#if os(iOS)
-/// Sits next to Copy in the bottom bar and opens the share sheet with the card as a PNG.
-struct ShareAnswerButton: View {
-    @Environment(AppState.self) private var state
-    @State private var file: URL?
-
-    // One render per answer, not per redraw: the key only moves when the answer does.
-    private var key: String { state.searchURL + "\n" + (state.result.shareContent?.text ?? "") }
-
-    var body: some View {
-        Group {
-            if let file {
-                ShareLink(item: file) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.nimbleCallout)
-                        .foregroundStyle(.secondary)
-                }
-                .accessibilityLabel("Share answer as image")
-            }
-        }
-        .task(id: key) {
-            guard let content = state.result.shareContent,
-                  let data = ShareCardRenderer.png(question: state.queryText, answer: content.text, source: content.source) else { file = nil; return }
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("nimble-answer.png")
-            file = (try? data.write(to: url, options: .atomic)) == nil ? nil : url
-        }
-    }
-}
-#endif
