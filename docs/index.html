@@ -165,16 +165,16 @@ a:hover { text-decoration: underline; }
 .hero h1 {
   font-size: clamp(2.5rem, 7vw, 4rem);
   font-weight: 700;
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: -0.02em;
   line-height: 1.1;
   text-wrap: balance;
   color: var(--dark);
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .hero-version {
-  font-variant: var(--caption); letter-spacing: 0.08em;
-  font-size: 0.85rem !important; color: rgba(0,0,0,0.5) !important;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(1rem, 2.5vw, 1.2rem) !important; color: rgba(0,0,0,0.6) !important;
   margin: 0 auto 1.5rem !important; min-height: 1.2em;
 }
 .hero p {
@@ -223,7 +223,7 @@ a:hover { text-decoration: underline; }
 }
 /* Equal heights: the copy grows, so every card's links sit on one line. */
 .install-card { display: flex; flex-direction: column; }
-.install-card h3 { font-size: 1.1rem; letter-spacing: var(--tracking-tight); margin-bottom: 0.4rem; }
+.install-card h3 { font-size: 1.1rem; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.4rem; }
 .install-card p { flex: 1; color: var(--mid); margin-bottom: 1.5rem; }
 .install-links { display: flex; align-items: baseline; gap: 1.5rem; }
 .install-links .btn:not(.btn-dark) { padding-left: 0; padding-right: 0; }
@@ -386,8 +386,8 @@ main > section:not(.hero) { padding: 6rem 0; border-top: var(--rule); }
 main > section:not(.hero) h2 {
   font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 700;
-  letter-spacing: var(--tracking-tight);
-  line-height: 1.15;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   text-align: center;
   margin-bottom: 3rem;
 }
@@ -402,7 +402,8 @@ main > section:not(.hero) h2 {
 .feature h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   margin-bottom: 0.4rem;
 }
 
@@ -945,7 +946,7 @@ footer {
 fetch('https://api.github.com/repos/nulljosh/nimble/releases?per_page=10').then(function(r){return r.json();}).then(function(rels){
   rels=(rels||[]).filter(function(r){return !r.draft&&!r.prerelease;});
   if(!rels.length) return;
-  document.getElementById('ver').textContent=rels[0].tag_name;document.getElementById('footver').textContent=rels[0].tag_name;
+  var num=String(rels[0].tag_name).replace(/^v/i,'');document.getElementById('ver').textContent=num;document.getElementById('footver').textContent=num;
   document.querySelectorAll('[data-asset]').forEach(function(a){
     for(var i=0;i<rels.length;i++){
       var hit=(rels[i].assets||[]).find(function(x){return x.name.endsWith(a.dataset.asset);});
