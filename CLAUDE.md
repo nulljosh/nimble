@@ -1,5 +1,5 @@
 # Nimble
-v5.23.1
+v6.0.0
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Gemma + Qwen3 on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 
@@ -10,7 +10,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - AI engine is user-selectable in Settings (`Sources/Models/AIEngine.swift`, `ENGINES` in `engine.js`): Nimble proxy (default, free), Claude, OpenAI, Ollama. Keys stay on device (prefs file / localStorage), calls go straight to the vendor; no key = silent fallback to the proxy
 - DuckDuckGo Instant Answer API + Wikipedia REST API as fallback
 - macOS window is borderless (`styleMask = [.resizable, .fullSizeContentView]`), dropping `.titled` is what removes the titlebar strip; do not restore it
-- 48 tests (QueryEngine + Preferences + UpdateChecker + AIConfig + SearchHistory)
+- Tests at 6.0.0: 295 web (`npm test`: 294 pass, 1 skipped, 0 fail); 218 Swift test functions in `Tests/` (static count; the last full XCTest run on record is 164, from 5.17.2, so run `xcodebuild test` before the next release); 167 `@Test` in `kmp/` (static count, not run in 6.0.0)
 
 ## Structure
 - `Sources/Models/QueryEngine.swift`: classification, math eval, API queries
@@ -21,11 +21,11 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - `worker/worker.js`: answer proxy, `npx wrangler deploy` from `worker/`
 - `docs/`: landing page with the live engine (`engine.js`), deployed via Cloudflare Pages to `nimble.jaybulb.com`; the full web app is `docs/app.html`, served at `/app`
 - `docs/index.html`: marketing/landing page, deployed via GitHub Pages (default `nulljosh.github.io/nimble` URL, the custom domain is taken by the web app)
-- `Tests/`: 48 tests
+- `Tests/`: 218 Swift test functions (see the count under Stack); `test/`: 295 web tests
 
 ## The loop
 
-See `docs/LOOP-HANDOFF.md` (current state at 5.0.1, 2026-10-11). The loop shipped five majors 1.0 to 5.0 in one session, then 5.0.1. Open: query QA in roadmap.md, three merged remote branches Joshua has to delete, and the zero-issue goal; no blockers.
+See `docs/LOOP-HANDOFF.md` (current state at 6.0.0, 2026-10-12). The loop shipped five majors 1.0 to 5.0 in one session, then 6.0.0 on top of 5.23.1: the three-tab iPhone, History, sources disagree, sports and markets cards, freshness lines, the offline Wikipedia pack on four platforms, and a quota-aware Worker. Open: query QA in roadmap.md, three merged remote branches Joshua has to delete, and the zero-issue goal; no blockers.
 
 ## QA
 QA hooks always sandbox storage: any `-shot*` or `-qaSandbox` launch arg moves history, prefs, the shared answer suite and iCloud sync to a fresh temp root (`Sources/Models/QASandbox.swift`). Never launch the real app bundle for QA against real data.

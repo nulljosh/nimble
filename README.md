@@ -2,11 +2,11 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v5.23.1-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v6.0.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
-Math, units and graphs answer on the device. Everything else goes to two open models at once, and DuckDuckGo and Wikipedia catch what they miss. No API keys, no accounts, no telemetry.
+Math, units and graphs answer on the device. Everything else goes to an open model, with a second one when a date, a number or a fresh fact needs checking. DuckDuckGo and Wikipedia catch what the models miss. No API keys, no accounts, no telemetry.
 
 **[nimble.jaybulb.com →](https://nimble.jaybulb.com)** · **[Open the web app →](https://nimble.jaybulb.com/app)**
 
@@ -32,19 +32,19 @@ Math, units and graphs answer on the device. Everything else goes to two open mo
 
 1. Units, math and graphs: evaluated on the device. `5 miles to km`, `15% of 240`, `plot sin(x)`.
 2. Dictionary, weather, local time and currency: pattern-gated live sources.
-3. Everything else: Gemma and Qwen3 run side by side on Cloudflare Workers AI through `worker/worker.js`. Agree and you get it; disagree and the two are folded into one sentence. Numbers are cross-checked against DuckDuckGo. Both give up and Wikipedia answers.
+3. Everything else: Qwen3 answers first on Cloudflare Workers AI through `worker/worker.js`. Gemma joins for time-sensitive, date and number questions, and when Qwen says UNKNOWN. When the two split, a third model breaks the tie. If nothing agrees, the app shows "Sources disagree" with both answers and their model names. Known answers are cached for six hours, and a daily neuron guard keeps the free tier from running out. Both models give up and Wikipedia answers.
 
 Agents get the same engine at `https://nimble.jaybulb.com/api/answer?q=5+miles+to+km` and over MCP at `https://nimble.jaybulb.com/mcp`. Tools: answer, convert, math, graph.
 
-Every answer names its source. Light and dark follow the system. 8 accent themes.
+Every answer names its source, and time-sensitive answers carry an "as of" line. Light and dark follow the system. 8 accent themes, picked in Settings.
 
 ## What else it does
 
-Weather, currency, local time and word origins come back as cards. Recent questions sit under the field on every surface and never leave the device. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. A home screen widget keeps your last answer on iPhone; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Five languages: English, French, Spanish, Chinese, Punjabi.
+Weather, currency, local time, word origins, markets and the latest game score come back as cards. Recent questions sit under the field on every surface and never leave the device. On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer, and you can select several to share or delete. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. A home screen widget keeps your last answer on iPhone; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Five languages: English, French, Spanish, Chinese, Punjabi.
 
 ## Offline pack
 
-On the web, you can download a small pack of Wikipedia article intros once: the top 9,000 English articles, about 1.9 MB. Tap "Download offline answers" in the menu. After that, when the network is gone, questions about those articles still get an answer, with the article link and the date the pack was built. Nothing downloads on its own. Math, units and graphs never needed the network. See `docs/pack/README.md` for the format and the license.
+You can download a small pack of Wikipedia article intros once: the top 9,000 English articles, about 1.9 MB. It works on the web, iPhone, Mac and Android. On the web, tap "Download offline answers" in the menu; on the apps, use the Offline answers row in Settings. After that, when the network is gone, questions about those articles still get an answer, with the article link and the date the pack was built. Nothing downloads on its own. Math is offline everywhere; units and graphs are offline on the web, iPhone and Mac. See `docs/pack/README.md` for the format and the license.
 
 ## Development
 

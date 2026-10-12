@@ -6,6 +6,8 @@ Keep Nimble moving with one small, shippable slice at a time: fix what App Revie
 
 ## Where things stand
 
+- Version 6.0.0 (was 5.23.1): a summary release, docs and version only, no feature code. Since 5.0: the three-tab iPhone (Ask, History, Settings) with saved answers and multi-select share and delete; New question; accent picker in Settings; the "Sources disagree" card on every client; sports latest-game and markets cards; "as of" lines on time-sensitive answers; the offline Wikipedia pack (9,000 articles, about 1.9 MB, explicit download) on web, iPhone, Mac and Android; and a quota-friendly Worker: Qwen first, Gemma and Llama only when needed, a 6h answer cache, a daily neuron guard at 8,500, and `GET /stats`. Kotlin has math but no units or graphs. Tests at 6.0.0: `npm test` 295 (294 pass, 1 skipped). Not tagged or released yet.
+- The apps are free. The web stays free with the $1 unlock, as documented in the whitepaper and landing.
 - Version 5.22.0 (was 5.21.0): the offline Wikipedia pack on Android. Settings has an Offline answers section: download on a tap (size, progress, Remove). Offline, a question answers from the pack with the article link and an as-of date, or says it is not in the pack. Port of the web's packAnswer; tests in kmp/shared/src/commonTest/.../OfflinePackTest.kt.
 - Version 5.21.0 (was 5.20.1): the offline Wikipedia pack on iPhone and Mac. Settings has an Offline answers row: download on a tap (size shown, progress, Remove). Offline, a question answers from the pack with the article link and "as of" date, or says it is not in the pack. Port of the web's packAnswer; tests in Tests/OfflinePackTests.swift.
 - Version 5.20.1 (was 5.20.0): offline pack grows to 9,000 entries (1.9 MB, 120 days of pageviews, title filter). Answers take the sentence that answers the question, with relation questions (capital, population, who wrote or founded, when) as the online fallback does. Freshness reads "as of Oct 12".
@@ -28,17 +30,14 @@ Keep Nimble moving with one small, shippable slice at a time: fix what App Revie
 - Nimble Sans is the app's own typeface, derived from Inter 4.1 under OFL 1.1. Spacing runs on one 4px scale in tokens.css; text pairs meet 4.5:1 in light and dark.
 - The landing page is built only from tokens. Its demo is scripted and opens on "who wrote Hamlet".
 - Apple: iPhone 5.4.0 is IN_REVIEW (build 202610111645). Mac 5.0.1 is IN_REVIEW. Mac 5.4.0 and 5.5+ submissions wait for these to clear.
-- The $0.99 price flip rides the next store release (asc pricing, apple-pricing skill). Web stays free with the $1 unlock.
 - Samantha (local Qwen on oMLX) is opt-in, not the public default. She scored 89/95 under load; the free engine scores 95/95.
 - roadmap.md has another session's unstaged edit. Check-offs and prune wait until that lands; do not stage it from the loop.
 
 ## Next, in order
 
 1. Watch the App Review pair: iPhone 5.4.0 and Mac 5.0.1 are both IN_REVIEW. If either is rejected, fix the stated reason and resubmit. When they clear, submit 5.5 and up with the store text and screenshots.
-2. Flip the price to $0.99 with the next store release, and update MONEY.md and the landing the same day.
-3. Check off the shipped items in roadmap.md once its unstaged edit is committed: Samantha picker, favicon and page title, Why this answer, Show steps, news card, multiple sources.
-4. Grade the rich results and brand kit at A+ on a phone and a Mac: photo crops, thumbnails, tap targets, dark mode. Rasterise the deployed landing and brand page before calling them done.
-5. Next features from the v10 list: markets card, sports card, freshness label, follow-ups, tap-to-expand, then the offline Wikipedia pack.
+2. Check off the shipped items in roadmap.md once its unstaged edit is committed: Samantha picker, favicon and page title, Why this answer, Show steps, news card, multiple sources.
+3. Grade the rich results and brand kit at A+ on a phone and a Mac: photo crops, thumbnails, tap targets, dark mode. Rasterise the deployed landing and brand page before calling them done.
 
 ## Restart prompt
 
