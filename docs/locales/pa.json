@@ -89,5 +89,19 @@
   "Start": "ਸ਼ੁਰੂ ਕਰੋ",
   "Test": "ਜਾਂਚ",
   "Last answer: {s}": "ਆਖਰੀ ਜਵਾਬ: {s}",
-  "Show steps": "ਕਦਮ ਵੇਖੋ"
+  "Show steps": "ਕਦਮ ਵੇਖੋ",
+  "Background": "ਪਿਛੋਕੜ",
+  "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.": "ਮੁਫ਼ਤ AI ਅੱਜ ਲਈ ਜਵਾਬ ਖ਼ਤਮ ਕਰ ਚੁੱਕਾ ਹੈ, ਇਸ ਲਈ ਇਹ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਹੈ। ਸ਼ਾਮ ਨੂੰ ਇਹ ਮੁੜ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ।",
+  "Not a direct answer to your question. Background from Wikipedia:": "ਇਹ ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਸਿੱਧਾ ਜਵਾਬ ਨਹੀਂ ਹੈ। ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਪਿਛੋਕੜ:",
+  "New question": "ਨਵਾਂ ਸਵਾਲ",
+  "History": "ਇਤਿਹਾਸ",
+  "Back": "ਪਿੱਛੇ",
+  "Edit": "ਸੋਧੋ",
+  "Done": "ਹੋਇਆ",
+  "Delete": "ਮਿਟਾਓ",
+  "Delete selected": "ਚੁਣੇ ਮਿਟਾਓ",
+  "Copy selected": "ਚੁਣੇ ਕਾਪੀ ਕਰੋ",
+  "Copied": "ਕਾਪੀ ਹੋਇਆ",
+  "Ask again": "ਦੁਬਾਰਾ ਪੁੱਛੋ",
+  "No questions yet.": "ਅਜੇ ਕੋਈ ਸਵਾਲ ਨਹੀਂ।"
 }

@@ -582,9 +582,9 @@ final class QueryEngine: Sendable {
 
     /// Gives a result the photo from another result when it has none of its own.
     static func keepingPhoto(_ result: QueryResult, from other: QueryResult) -> QueryResult {
-        guard case .text(let h, let b, let s, let su, let iu, let g, let srcs, nil) = result,
-              case .text(_, _, _, _, _, _, _, let photo?) = other else { return result }
-        return .text(heading: h, body: b, source: s, sourceURL: su, imageURL: iu, grounding: g, sources: srcs, photo: photo)
+        guard case .text(let h, let b, let s, let su, let iu, let g, let srcs, nil, let bg) = result,
+              case .text(_, _, _, _, _, _, _, let photo?, _) = other else { return result }
+        return .text(heading: h, body: b, source: s, sourceURL: su, imageURL: iu, grounding: g, sources: srcs, photo: photo, background: bg)
     }
 
     /// Math, units, weather and time never look for a photo (same as `NO_PHOTO_Q` in docs/engine.js).
@@ -614,13 +614,13 @@ final class QueryEngine: Sendable {
     /// Wikipedia fallback: `enabled` is false when nothing may leave the device or the user said no.
     static func withTopic(_ result: QueryResult, query: String, session: URLSession, enabled: Bool) async -> QueryResult {
         guard enabled,
-              case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, let sources, let photo) = result,
+              case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, let sources, let photo, let bg) = result,
               photo == nil || grounding == nil,
               let topic = await topicLookup(query: query, body: body, session: session) else { return result }
         let fromTopic = grounding == nil && topic.extract != nil
         return .text(heading: heading, body: body, source: source,
                      sourceURL: fromTopic ? (topic.page ?? sourceURL) : sourceURL, imageURL: imageURL,
-                     grounding: grounding ?? topic.extract, sources: sources, photo: photo ?? topic.photo)
+                     grounding: grounding ?? topic.extract, sources: sources, photo: photo ?? topic.photo, background: bg)
     }
 
     /// The photo comes only from the entities the answer names (see `photoFromEntity`). The intro ("Why this answer")
@@ -795,7 +795,7 @@ final class QueryEngine: Sendable {
         if let llmResult = await llm {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.
-            if case .text(_, let body, _, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
+            if case .text(_, let body, _, _, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
                let sourced = await ddg {
                 return await Self.withTopic(withSources(Self.keepingPhoto(sourced, from: llmResult), others: [await wiki]), query: input, session: session, enabled: topicOK)
             }
@@ -817,10 +817,10 @@ final class QueryEngine: Sendable {
 
     /// Attaches the linked sources to a text answer. `others` are results already fetched for the same question.
     private func withSources(_ result: QueryResult, others: [QueryResult?]) -> QueryResult {
-        guard case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, _, let photo) = result else { return result }
+        guard case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, _, let photo, let bg) = result else { return result }
         let sources = AnswerSources.linked(body: body, candidates: [result] + others.compactMap { $0 })
         return .text(heading: heading, body: body, source: source, sourceURL: sourceURL, imageURL: imageURL,
-                     grounding: grounding, sources: sources, photo: photo)
+                     grounding: grounding, sources: sources, photo: photo, background: bg)
     }
 
     /// The lead photo of a Wikipedia article named by a DuckDuckGo abstract. Nil for any other link.
@@ -1015,13 +1015,13 @@ final class QueryEngine: Sendable {
         if let encoded = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
            let url = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(encoded)"),
            let result = await fetchWikiSummary(url: url, session: session) {
-            if case .text(let heading, _, _, _, _, _, _, _) = result, !(heading ?? "").lowercased().hasPrefix("list of") { return result }
+            if case .text(let heading, _, _, _, _, _, _, _, _) = result, !(heading ?? "").lowercased().hasPrefix("list of") { return result }
         }
         for title in await Self.searchHits(input, session: session) {
             guard let encoded = title.replacingOccurrences(of: " ", with: "_").addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
                   let url = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(encoded)"),
                   let result = await fetchWikiSummary(url: url, session: session) else { continue }
-            if case .text(let heading, _, _, _, _, _, _, _) = result, !(heading ?? "").lowercased().hasPrefix("list of") {
+            if case .text(let heading, _, _, _, _, _, _, _, _) = result, !(heading ?? "").lowercased().hasPrefix("list of") {
                 return Self.labeledIfGeneric(result, question: question ?? input)
             }
         }
@@ -1029,12 +1029,13 @@ final class QueryEngine: Sendable {
     }
 
     /// A specific question ("what was the first color photograph of a rainbow") that only a generic topic page
-    /// comes back for. The topic page is background, labeled as such, never presented as the answer.
+    /// comes back for. The topic page is background: the body stays the page's own sentence, and the flag tells the
+    /// card to say BACKGROUND and show the "Not a direct answer" caption instead of ANSWER.
     static func labeledIfGeneric(_ result: QueryResult, question: String) -> QueryResult {
-        guard case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, let sources, let photo) = result,
+        guard case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, let sources, let photo, _) = result,
               source == "Wikipedia", let topic = heading, isSpecificQuestion(question, topic: topic) else { return result }
-        return .text(heading: heading, body: "Not a direct answer. Here is what Wikipedia says about \(topic). \(body)", source: source,
-                     sourceURL: sourceURL, imageURL: imageURL, grounding: grounding, sources: sources, photo: photo)
+        return .text(heading: heading, body: body, source: source,
+                     sourceURL: sourceURL, imageURL: imageURL, grounding: grounding, sources: sources, photo: photo, background: true)
     }
 
     /// True when a question word opens the question and it names something beyond the topic's title.

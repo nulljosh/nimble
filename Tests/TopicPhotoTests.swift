@@ -128,7 +128,7 @@ final class TopicPhotoTests: XCTestCase {
         let answer = QueryResult.text(heading: nil, body: "The capital of France is Paris.", source: "Gemma + Qwen",
                                       sourceURL: nil, imageURL: nil)
         let result = await QueryEngine.withTopic(answer, query: "What is the capital of France?", session: session, enabled: true)
-        guard case .text(_, _, _, let sourceURL, _, let grounding, _, let photo) = result else { return XCTFail("no text answer") }
+        guard case .text(_, _, _, let sourceURL, _, let grounding, _, let photo, _) = result else { return XCTFail("no text answer") }
         XCTAssertEqual(grounding, "Paris is the capital and most populous city of France.")
         XCTAssertEqual(sourceURL, "https://en.wikipedia.org/wiki/Paris")
         XCTAssertEqual(photo?.title, "Paris")
@@ -140,7 +140,7 @@ final class TopicPhotoTests: XCTestCase {
         let answer = QueryResult.text(heading: nil, body: "The capital of France is Paris.", source: "Gemma + Qwen", sourceURL: nil,
                                       imageURL: nil, grounding: "Its own text.", photo: own)
         let result = await QueryEngine.withTopic(answer, query: "What is the capital of France?", session: session, enabled: true)
-        guard case .text(_, _, _, _, _, let grounding, _, let kept) = result else { return XCTFail("no text answer") }
+        guard case .text(_, _, _, _, _, let grounding, _, let kept, _) = result else { return XCTFail("no text answer") }
         XCTAssertEqual(grounding, "Its own text.")
         XCTAssertEqual(kept, own)
         XCTAssertTrue(StubProtocol.requested.isEmpty)
@@ -150,7 +150,7 @@ final class TopicPhotoTests: XCTestCase {
         StubProtocol.summaries["Paris"] = paris
         let answer = QueryResult.text(heading: nil, body: "The capital of France is Paris.", source: "Wikipedia", sourceURL: nil, imageURL: nil)
         let result = await QueryEngine.withTopic(answer, query: "What is the capital of France?", session: session, enabled: false)
-        guard case .text(_, _, _, let sourceURL, _, let grounding, _, let photo) = result else { return XCTFail("no text answer") }
+        guard case .text(_, _, _, let sourceURL, _, let grounding, _, let photo, _) = result else { return XCTFail("no text answer") }
         XCTAssertNil(sourceURL)
         XCTAssertNil(grounding)
         XCTAssertNil(photo)

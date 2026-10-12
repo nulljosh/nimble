@@ -35,7 +35,7 @@ enum AnswerSources {
     static func linked(body: String, candidates: [QueryResult]) -> [AnswerSource] {
         var out: [AnswerSource] = []
         for (index, candidate) in candidates.enumerated() {
-            guard case .text(_, let cBody, let name, let url?, _, let grounding, _, _) = candidate,
+            guard case .text(_, let cBody, let name, let url?, _, let grounding, _, _, _) = candidate,
                   out.count < 3, !out.contains(where: { $0.url == url }) else { continue }
             let text = grounding.flatMap { $0.isEmpty ? nil : $0 } ?? cBody
             if index == 0 || agrees(body, text) { out.append(AnswerSource(name: name, url: url)) }
@@ -155,7 +155,8 @@ enum QueryResult: Equatable {
     /// grounding is the text the body sentence was cut from ("Why this answer"); nil when there is none.
     /// sources is the linked list under the sentence (up to three); sourceURL and source stay the primary.
     /// photo is the picture above the card (Wikipedia, a site's share image); imageURL stays the small icon.
-    case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?, grounding: String? = nil, sources: [AnswerSource] = [], photo: AnswerPhoto? = nil)
+    /// background is true when the text is the generic topic page for a specific question: the card says BACKGROUND, not ANSWER.
+    case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?, grounding: String? = nil, sources: [AnswerSource] = [], photo: AnswerPhoto? = nil, background: Bool = false)
     case list(items: [String], source: String)
     case error(String, searchURL: String?)
     case color(String)
@@ -192,7 +193,7 @@ enum QueryResult: Equatable {
     var copyText: String? {
         switch self {
         case .math(let s, _): return s
-        case .text(_, let body, _, _, _, _, _, _): return body
+        case .text(_, let body, _, _, _, _, _, _, _): return body
         case .list(let items, _): return items.joined(separator: "\n")
         case .error(let msg, _): return msg
         case .color(let hex): return hex
@@ -217,8 +218,25 @@ enum QueryResult: Equatable {
         case .math, .convert, .graph, .color: return (text, "Computed offline")
         // The share image carries one sentence, not the whole list.
         case .news(let items, let source, _): return items.first.map { ($0.sentence, source) }
-        case .text(_, _, let source, _, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _, _), .market(_, _, _, let source, _, _): return (text, source)
+        case .text(_, _, let source, _, _, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _, _), .market(_, _, _, let source, _, _): return (text, source)
         case .sports: return (text, SportsCard.source)
         }
+    }
+}
+
+extension QueryResult {
+    /// The caption above a background answer: the generic topic page, not an answer to the question.
+    static let backgroundCaption = "Not a direct answer to your question. Background from Wikipedia:"
+
+    /// The header word over a text answer: BACKGROUND for the generic topic page, else ANSWER.
+    static func eyebrow(background: Bool) -> String { background ? "Background" : "Answer" }
+
+    /// The quiet lines under the header, in reading order: the resting note first (the free AI is out for today),
+    /// then the background caption. Empty when neither applies.
+    static func leadLines(background: Bool, aiError: String?, source: String) -> [String] {
+        var lines: [String] = []
+        if let note = QueryEngine.aiRestingNote(aiError: aiError, source: source) { lines.append(note) }
+        if background { lines.append(backgroundCaption) }
+        return lines
     }
 }

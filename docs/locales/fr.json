@@ -89,5 +89,19 @@
   "Start": "Démarrer",
   "Test": "Tester",
   "Last answer: {s}": "Dernière réponse : {s}",
-  "Show steps": "Voir les étapes"
+  "Show steps": "Voir les étapes",
+  "Background": "Contexte",
+  "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.": "L'IA gratuite n'a plus de réponses pour aujourd'hui, donc ceci vient de Wikipédia. Elle se remet à zéro le soir.",
+  "Not a direct answer to your question. Background from Wikipedia:": "Ce n'est pas une réponse directe à votre question. Contexte de Wikipédia :",
+  "New question": "Nouvelle question",
+  "History": "Historique",
+  "Back": "Retour",
+  "Edit": "Modifier",
+  "Done": "Terminé",
+  "Delete": "Supprimer",
+  "Delete selected": "Supprimer la sélection",
+  "Copy selected": "Copier la sélection",
+  "Copied": "Copié",
+  "Ask again": "Reposer la question",
+  "No questions yet.": "Aucune question pour l'instant."
 }

@@ -77,7 +77,7 @@ final class WikiFallbackTests: XCTestCase {
         StubProtocol.searchTitles = ["List of capitals of France", "Capital punishment in France"]
         StubProtocol.intros = ["France": france]
         let result = await QueryEngine().queryWikipedia("capital of france", session: session)
-        guard case .text(let heading, let body, let source, let url, _, _, _, _)? = result else { return XCTFail("expected text, got \(String(describing: result))") }
+        guard case .text(let heading, let body, let source, let url, _, _, _, _, _)? = result else { return XCTFail("expected text, got \(String(describing: result))") }
         XCTAssertEqual(heading, "France")
         XCTAssertEqual(body, "Its capital, largest city and main cultural and economic centre is Paris, with a metropolitan population of over 13 million.")
         XCTAssertEqual(source, "Wikipedia")
@@ -101,7 +101,7 @@ final class WikiFallbackTests: XCTestCase {
         StubProtocol.searchTitles = ["Hamlet (film)"]
         StubProtocol.intros = ["Hamlet": hamlet]
         let result = await QueryEngine().queryWikipedia("who wrote hamlet", session: session)
-        guard case .text(_, let body, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
+        guard case .text(_, let body, _, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
         XCTAssertEqual(body, "The Tragedy of Hamlet, Prince of Denmark, often shortened to Hamlet, is a tragedy written by William Shakespeare sometime between 1599 and 1601.")
     }
 
@@ -109,7 +109,7 @@ final class WikiFallbackTests: XCTestCase {
         StubProtocol.searchTitles = ["List of rivers of Canada", "Fraser River"]
         StubProtocol.summaries = ["Fraser River": ["title": "Fraser River", "extract": "The Fraser River is the longest river in British Columbia."]]
         let result = await QueryEngine().queryWikipedia("fraser river", session: session)
-        guard case .text(let heading, let body, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
+        guard case .text(let heading, let body, _, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
         XCTAssertEqual(heading, "Fraser River")
         XCTAssertEqual(body, "The Fraser River is the longest river in British Columbia.")
     }
@@ -119,11 +119,13 @@ final class WikiFallbackTests: XCTestCase {
         StubProtocol.searchTitles = ["Rainbow"]
         StubProtocol.summaries = ["Rainbow": ["title": "Rainbow", "extract": "A rainbow is an optical phenomenon caused by refraction, internal reflection and dispersion of light in water droplets.", "content_urls": ["desktop": ["page": "https://en.wikipedia.org/wiki/Rainbow"]]]]
         let result = await QueryEngine().queryWikipedia("What was the first color photograph of a rainbow?", session: session)
-        guard case .text(let heading, let body, let source, let url, _, _, _, _)? = result else { return XCTFail("expected text, got \(String(describing: result))") }
+        guard case .text(let heading, let body, let source, let url, _, _, _, _, let background)? = result else { return XCTFail("expected text, got \(String(describing: result))") }
         XCTAssertEqual(heading, "Rainbow")
         XCTAssertEqual(source, "Wikipedia")
         XCTAssertEqual(url, "https://en.wikipedia.org/wiki/Rainbow")
-        XCTAssertEqual(body, "Not a direct answer. Here is what Wikipedia says about Rainbow. A rainbow is an optical phenomenon caused by refraction, internal reflection and dispersion of light in water droplets.")
+        // The body is the page's own sentence; the flag, not a prefix in the text, marks it as background.
+        XCTAssertEqual(body, "A rainbow is an optical phenomenon caused by refraction, internal reflection and dispersion of light in water droplets.")
+        XCTAssertTrue(background)
     }
 
     /// The app searches with the preprocessed words ("first color photograph of a rainbow"); the label must still see the question.
@@ -131,8 +133,9 @@ final class WikiFallbackTests: XCTestCase {
         StubProtocol.searchTitles = ["Rainbow"]
         StubProtocol.summaries = ["Rainbow": ["title": "Rainbow", "extract": "A rainbow is an optical phenomenon.", "content_urls": ["desktop": ["page": "https://en.wikipedia.org/wiki/Rainbow"]]]]
         let result = await QueryEngine().queryWikipedia("first color photograph of a rainbow", session: session, question: "What was the first color photograph of a rainbow?")
-        guard case .text(_, let body, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
-        XCTAssertTrue(body.hasPrefix("Not a direct answer. Here is what Wikipedia says about Rainbow."), body)
+        guard case .text(_, let body, _, _, _, _, _, _, let background)? = result else { return XCTFail("expected text") }
+        XCTAssertEqual(body, "A rainbow is an optical phenomenon.")
+        XCTAssertTrue(background)
     }
 
     /// A question whose words are all in the topic title is still answered directly.
@@ -140,7 +143,7 @@ final class WikiFallbackTests: XCTestCase {
         StubProtocol.searchTitles = ["Speed of light"]
         StubProtocol.summaries = ["Speed of light": ["title": "Speed of light", "extract": "The speed of light in vacuum is 299792458 metres per second."]]
         let result = await QueryEngine().queryWikipedia("what is the speed of light", session: session)
-        guard case .text(_, let body, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
+        guard case .text(_, let body, _, _, _, _, _, _, _)? = result else { return XCTFail("expected text") }
         XCTAssertEqual(body, "The speed of light in vacuum is 299792458 metres per second.")
     }
 }

@@ -89,5 +89,19 @@
   "Start": "Start",
   "Test": "Test",
   "Last answer: {s}": "Last answer: {s}",
-  "Show steps": "Show steps"
+  "Show steps": "Show steps",
+  "Background": "Background",
+  "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.": "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.",
+  "Not a direct answer to your question. Background from Wikipedia:": "Not a direct answer to your question. Background from Wikipedia:",
+  "New question": "New question",
+  "History": "History",
+  "Back": "Back",
+  "Edit": "Edit",
+  "Done": "Done",
+  "Delete": "Delete",
+  "Delete selected": "Delete selected",
+  "Copy selected": "Copy selected",
+  "Copied": "Copied",
+  "Ask again": "Ask again",
+  "No questions yet.": "No questions yet."
 }

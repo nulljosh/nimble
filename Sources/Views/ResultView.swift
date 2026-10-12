@@ -24,10 +24,10 @@ struct ResultView: View {
                 Text("computed offline")
             }
 
-        case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding, let sources, let photo):
+        case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding, let sources, let photo, let background):
             TextAnswerView(heading: heading, answer: answer, source: source, sourceURL: sourceURL,
                            imageURL: imageURL, grounding: grounding, sources: sources, photo: photo, shareText: state.result.copyText,
-                           aiError: state.aiError)
+                           aiError: state.aiError, background: background)
 
         case .list(let items, let source):
             AnswerCard(shareText: state.result.copyText) {
@@ -170,6 +170,8 @@ struct TextAnswerView: View {
     let shareText: String?
     /// The worker's reason the free AI gave no answer; shows the resting note under a Wikipedia fallback.
     var aiError: String? = nil
+    /// The generic topic page for a specific question: the header says BACKGROUND and a caption leads the summary.
+    var background: Bool = false
     // Screenshots: `-shotWhy YES` opens the "Why this answer" block on launch.
     @State private var showWhy = UserDefaults.standard.bool(forKey: "shotWhy")
 
@@ -191,7 +193,8 @@ struct TextAnswerView: View {
     }
 
     var body: some View {
-        AnswerCard(shareText: shareText) {
+        AnswerCard(shareText: shareText, eyebrow: QueryResult.eyebrow(background: background),
+                   lead: QueryResult.leadLines(background: background, aiError: aiError, source: source)) {
             VStack(alignment: .leading, spacing: 16) {
                 if let photo, let url = URL(string: photo.url) {
                     // 16:9 box reserved up front, the cream placeholder until the picture loads, so nothing jumps.
@@ -263,11 +266,6 @@ struct TextAnswerView: View {
                         }
                     }
                 }
-                if let note = QueryEngine.aiRestingNote(aiError: aiError, source: source) {
-                    Text(note)
-                        .font(.nimbleCaption)
-                        .foregroundStyle(Color.soft)
-                }
                 if showWhy, let whyText {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(whyText)
@@ -326,12 +324,19 @@ struct AnswerCard<Content: View, Footer: View>: View {
 #endif
     /// The quiet "as of" line under the answer, at the same left edge as the source row. Nil when there is none.
     let freshness: String?
+    /// The header word: "Answer" by default, "Background" for the generic topic page.
+    var eyebrow: String = "Answer"
+    /// Quiet dim lines directly under the header, before the content (the resting note, the background caption).
+    var lead: [String] = []
     let content: Content
     let footer: Footer
 
-    init(shareText: String?, freshness: String? = nil, @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
+    init(shareText: String?, freshness: String? = nil, eyebrow: String = "Answer", lead: [String] = [],
+         @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
         self.shareText = shareText
         self.freshness = freshness
+        self.eyebrow = eyebrow
+        self.lead = lead
         self.content = content()
         self.footer = footer()
     }
@@ -340,7 +345,18 @@ struct AnswerCard<Content: View, Footer: View>: View {
         VStack(alignment: .leading, spacing: 16) {
             // One VoiceOver stop for the eyebrow and the answer. The footer row stays apart so Share and the source link remain buttons.
             VStack(alignment: .leading, spacing: 16) {
-                Eyebrow(text: "Answer")
+                Eyebrow(text: LocalizedStringKey(eyebrow))
+                if !lead.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(Array(lead.enumerated()), id: \.offset) { _, line in
+                            // Soft, not dim: the 60% ink is 4.3:1 on the light card; soft is 6.3:1 light and 8.2:1 dark.
+                            Text(line)
+                                .font(.nimbleCaption)
+                                .foregroundStyle(Color.soft)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
                 content
                 if let freshness {
                     Text(String(localized: "as of \(freshness)"))
@@ -398,6 +414,7 @@ struct Eyebrow: View {
             .tracking(1.3)
             .textCase(.uppercase)
             .foregroundStyle(Color.bulbDeep)
+            .accessibilityAddTraits(.isHeader)
     }
 }
 

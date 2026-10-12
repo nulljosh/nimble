@@ -35,7 +35,7 @@ a { color: inherit; }
 /* Nav items stay on one line; on a narrow phone the nav drops under the brand, right-aligned. */
 .top nav { display: flex; align-items: center; white-space: nowrap; margin-left: auto; }
 .top nav a, .top nav button { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
-@media (max-width: 480px) { .top nav a, .top nav button { margin-left: var(--space-3); } }
+@media (max-width: 480px) { .top nav a, .top nav button { margin-left: var(--space-2); } }
 
 main { flex: 1; width: 100%; max-width: var(--max-app); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-7); }
 h1 { font-size: var(--fs-28); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: var(--lh-xl); margin-bottom: var(--space-5); text-align: center; }
@@ -121,6 +121,33 @@ form { position: relative; }
 .news-thumb { width: 56px; height: 56px; border-radius: var(--radius-md); object-fit: cover; background: var(--bg2); opacity: 0; transition: opacity .25s ease; }
 .news-thumb.on { opacity: 1; }
 .ai-note { margin: var(--space-3) 0 0; font-size: var(--fs-13); color: var(--text-light); }
+/* Lead lines sit directly under the card header: the resting note, then the background caption. */
+.card .ai-note, .card .bg-caption, .bg-caption { margin: 0 0 var(--space-2); font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); }
+.new-q { display: block; margin: var(--space-4) auto 0; min-height: 44px; padding: var(--space-2) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-15); font-weight: var(--fw-semibold); cursor: pointer; }
+.new-q[hidden] { display: none; }
+.new-q:hover { color: var(--text); border-color: var(--yellow-deep); }
+/* History: a page view in place of the ask. Rows re-ask on tap; Edit adds a checkbox per row. */
+.hist[hidden], .hist-bar[hidden], .hist-empty[hidden] { display: none; }
+.hist-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+.hist-title { font-size: var(--fs-22); line-height: var(--lh-lg); font-weight: var(--fw-semibold); letter-spacing: -0.01em; text-align: center; }
+.hist-head button { min-width: 44px; min-height: 44px; padding: 0 var(--space-2); border: 0; background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-15); cursor: pointer; }
+.hist-head button:hover { color: var(--text); }
+.hist-empty { font-size: var(--fs-17); line-height: var(--lh-md); color: var(--text-mid); margin-top: var(--space-5); text-align: center; }
+.hist-list { list-style: none; border-top: 1px solid var(--line); }
+.hist-row { display: flex; align-items: stretch; gap: var(--space-2); border-bottom: 1px solid var(--line); }
+.hist-ask { flex: 1; min-width: 0; min-height: 44px; padding: var(--space-3) 0; border: 0; background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.hist-ask:hover .hist-q { text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.hist-text { display: block; min-width: 0; }
+.hist-q { display: block; font-size: var(--fs-17); line-height: var(--lh-md); color: var(--text); overflow-wrap: anywhere; }
+.hist-snip { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: var(--space-1); font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); }
+.hist-del { flex: none; align-self: center; min-width: 44px; min-height: 44px; border: 0; background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-13); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.hist-del:hover { color: var(--text); }
+.hist-pick { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); min-height: 44px; padding: var(--space-3) 0; cursor: pointer; }
+.hist-pick input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--yellow-deep); cursor: pointer; }
+.hist-bar { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+.hist-bar button { min-height: 44px; padding: var(--space-2) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: none; color: var(--text); font: inherit; font-size: var(--fs-15); font-weight: var(--fw-semibold); cursor: pointer; }
+.hist-bar button:hover:not(:disabled) { border-color: var(--yellow-deep); }
+.hist-bar button:disabled { color: var(--text-light); cursor: default; }
 .why { margin-top: var(--space-4); font-size: var(--fs-13); color: var(--text-light); }
 .why summary { display: inline-block; cursor: pointer; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; list-style: none; }
 .why summary::-webkit-details-marker { display: none; }
@@ -182,9 +209,10 @@ form { position: relative; }
 <body>
 <header class="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
-  <nav><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
+  <nav><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><button type="button" id="hist-open" data-i18n="History">History</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
 <main>
+<div id="ask">
   <h1 data-i18n="Ask anything.">Ask anything.</h1>
   <form id="f" autocomplete="off">
     <label class="field">
@@ -194,6 +222,7 @@ form { position: relative; }
     </label>
   </form>
   <section class="card" id="r" aria-live="polite" hidden></section>
+  <button type="button" class="new-q" id="new" data-i18n="New question" hidden>New question</button>
   <img class="flit" id="flit" src="mascot/flit.svg" width="96" height="96" alt="Flit, Nimble's hummingbird">
   <div class="chips" id="chips"></div>
   <section class="recent" id="recent" aria-label="Recent searches" data-i18n-aria-label="Recent searches" hidden>
@@ -201,6 +230,20 @@ form { position: relative; }
     <ul class="recent-list" id="recent-list"></ul>
   </section>
   <p class="hint" data-i18n="Math, units and graphs work offline. Everything else gets one sentence and a source.">Math, units and graphs work offline. Everything else gets one sentence and a source.</p>
+</div>
+<section class="hist" id="hist" aria-labelledby="hist-title" hidden>
+  <div class="hist-head">
+    <button type="button" id="hist-back" data-i18n="Back">Back</button>
+    <h2 class="hist-title" id="hist-title" data-i18n="History">History</h2>
+    <button type="button" id="hist-edit" data-i18n="Edit">Edit</button>
+  </div>
+  <p class="hist-empty" id="hist-empty" data-i18n="No questions yet." hidden>No questions yet.</p>
+  <ul class="hist-list" id="hist-list"></ul>
+  <div class="hist-bar" id="hist-bar" hidden>
+    <button type="button" id="hist-copy" data-i18n="Copy selected">Copy selected</button>
+    <button type="button" id="hist-delete" data-i18n="Delete selected">Delete selected</button>
+  </div>
+</section>
   <img id="shareDebug" alt="" style="display:block;width:100%;margin-top:var(--space-5)">
 </main>
 <script src="i18n.js"></script>
@@ -224,6 +267,7 @@ var T=I18N.t;
   var f=document.getElementById('f'), q=document.getElementById('q'), r=document.getElementById('r'), chips=document.getElementById('chips');
   var last=null, shot=location.search.indexOf('share=1')>-1; // last: the answer on screen, for Share. shot: screenshots only
   var hist=searchHistory, recent=document.getElementById('recent'), recentList=document.getElementById('recent-list'), flit=document.getElementById('flit');
+  var newBtn=document.getElementById('new');
   // Flit is part of the empty state only: no answer on screen and no recent searches, so the TRY chips are up.
   function paintFlit(){ flit.hidden=!r.hidden||!recent.hidden; }
   // Recent searches replace the suggestion chips once there is any history. textContent only, never HTML.
@@ -250,8 +294,10 @@ var T=I18N.t;
     last={q:query, a:res.a};
     var share=shareText(res.a)?'<button type="button" data-share>'+T('Share')+'</button>':'';
     r.innerHTML=res.h+(res.credit||share?'<div class="credit">'+(res.credit?'<span>'+res.credit+'</span>':'')+share+'</div>':'');
+    newBtn.hidden=false;
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
-    if(['consent','none','offline'].indexOf(res.kind)<0){ hist.add(query); paintRecent(); }
+    // The saved answer is the first 280 characters of the answer's text, on this device only.
+    if(['consent','none','offline'].indexOf(res.kind)<0){ var snip=shareText(res.a); hist.add(query, typeof snip==='string'?snip:null); paintRecent(); }
   }
   // Share sheet with the PNG where the browser can, a download of nimble-answer.png where it can't.
   async function shareAnswer(){
@@ -312,7 +358,7 @@ var T=I18N.t;
   paintAI();
   ai.addEventListener('click',function(){
     var c=aiConsent();
-    if(c===null){ r.hidden=false; paintFlit(); r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient(),T); return; }
+    if(c===null){ r.hidden=false; newBtn.hidden=true; paintFlit(); r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient(),T); return; }
     aiConsent(c==='yes'?'no':'yes'); paintAI();
   });
   // Mascot switch: Flit or Fen. Repaints the empty state at once; the next loading card picks it up too.
@@ -339,6 +385,67 @@ var T=I18N.t;
   }).catch(function(){});
   if(location.search.indexOf('seed=1')>-1) ['5 miles to km','capital of Canada','sqrt(144)'].forEach(function(s){ hist.add(s); }); // screenshots only
   paintRecent();
+  // New question: clears the field and the answer, and puts the cursor back in the field.
+  newBtn.addEventListener('click',function(){
+    last=null; q.value=''; r.innerHTML=''; r.hidden=true; newBtn.hidden=true; paintFlit();
+    history.replaceState(null,'',location.pathname); q.focus();
+  });
+  // History: every question with its saved answer. A row asks it again; Edit adds checkboxes for Copy selected and Delete selected.
+  var askView=document.getElementById('ask'), histPanel=document.getElementById('hist'), histList=document.getElementById('hist-list'),
+      histEmpty=document.getElementById('hist-empty'), histBar=document.getElementById('hist-bar'), histEdit=document.getElementById('hist-edit'),
+      histCopy=document.getElementById('hist-copy'), histDelete=document.getElementById('hist-delete');
+  var histEditing=false, histPicked=new Set();
+  function showHistory(on){
+    askView.hidden=on; histPanel.hidden=!on;
+    if(on){ histEditing=false; histPicked.clear(); paintHistory(); document.getElementById('hist-open').blur(); }
+    else { paintFlit(); }
+    window.scrollTo(0,0);
+  }
+  // A row's text: the question, then the saved answer snippet when there is one. textContent only.
+  function histRowText(e){
+    var wrap=document.createElement('span'); wrap.className='hist-text';
+    var qq=document.createElement('span'); qq.className='hist-q'; qq.textContent=e.q; wrap.appendChild(qq);
+    if(e.a){ var sn=document.createElement('span'); sn.className='hist-snip'; sn.textContent=e.a; wrap.appendChild(sn); }
+    return wrap;
+  }
+  function paintHistoryBar(){ histCopy.disabled=histDelete.disabled=!histPicked.size; }
+  function paintHistory(){
+    var items=hist.list();
+    histEmpty.hidden=items.length>0; histEdit.hidden=!items.length;
+    histEdit.textContent=T(histEditing?'Done':'Edit');
+    histBar.hidden=!(histEditing && items.length);
+    paintHistoryBar();
+    histList.textContent='';
+    items.forEach(function(e){
+      var li=document.createElement('li'); li.className='hist-row';
+      if(histEditing){
+        var lab=document.createElement('label'); lab.className='hist-pick';
+        var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=histPicked.has(e.q);
+        cb.addEventListener('change',function(){ if(cb.checked) histPicked.add(e.q); else histPicked.delete(e.q); paintHistoryBar(); });
+        lab.appendChild(cb); lab.appendChild(histRowText(e)); li.appendChild(lab);
+      } else {
+        var ask=document.createElement('button'); ask.type='button'; ask.className='hist-ask';
+        ask.appendChild(histRowText(e));
+        ask.setAttribute('aria-label', e.q+'. '+T('Ask again'));
+        ask.onclick=function(){ showHistory(false); run(e.q); };
+        var del=document.createElement('button'); del.type='button'; del.className='hist-del';
+        del.textContent=T('Delete'); del.setAttribute('aria-label', T('Delete')+': '+e.q);
+        del.onclick=function(){ hist.remove(e.q); histPicked.delete(e.q); paintHistory(); paintRecent(); };
+        li.appendChild(ask); li.appendChild(del);
+      }
+      histList.appendChild(li);
+    });
+  }
+  document.getElementById('hist-open').addEventListener('click',function(){ showHistory(true); });
+  document.getElementById('hist-back').addEventListener('click',function(){ showHistory(false); });
+  histEdit.addEventListener('click',function(){ histEditing=!histEditing; histPicked.clear(); paintHistory(); });
+  histDelete.addEventListener('click',function(){ hist.remove(Array.from(histPicked)); histPicked.clear(); paintHistory(); paintRecent(); });
+  histCopy.addEventListener('click',function(){
+    var text=hist.list().filter(function(e){ return histPicked.has(e.q); }).map(function(e){ return e.q+(e.a?'\n'+e.a:''); }).join('\n\n');
+    if(!text) return;
+    var flash=function(){ histCopy.textContent=T('Copied'); setTimeout(function(){ histCopy.textContent=T('Copy selected'); },1500); };
+    try{ navigator.clipboard.writeText(text).then(flash,function(){}); }catch(err){}
+  });
   var start=new URLSearchParams(location.search).get('q'); if(start) run(start);
 });
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});

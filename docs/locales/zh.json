@@ -89,5 +89,19 @@
   "Start": "启动",
   "Test": "测试",
   "Last answer: {s}": "上次回答：{s}",
-  "Show steps": "显示步骤"
+  "Show steps": "显示步骤",
+  "Background": "背景",
+  "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.": "免费 AI 今天的回答次数已用完，所以这条内容来自维基百科。傍晚会重置。",
+  "Not a direct answer to your question. Background from Wikipedia:": "这不是对你问题的直接回答。以下是维基百科的背景资料：",
+  "New question": "新问题",
+  "History": "历史记录",
+  "Back": "返回",
+  "Edit": "编辑",
+  "Done": "完成",
+  "Delete": "删除",
+  "Delete selected": "删除所选",
+  "Copy selected": "复制所选",
+  "Copied": "已复制",
+  "Ask again": "再问一次",
+  "No questions yet.": "还没有问题。"
 }

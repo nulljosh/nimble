@@ -87,7 +87,7 @@ final class AIErrorNoteTests: XCTestCase {
         StubProtocol.summaries = ["Fraser River": ["title": "Fraser River", "extract": "The Fraser River is the longest river in British Columbia."]]
         let note = AIFailureNote()
         let result = await QueryEngine().query("fraser river", ai: AIConfig(), useLLM: true, note: note, session: session)
-        guard case .text(_, _, let source, _, _, _, _, _) = result else { return XCTFail("expected text, got \(result)") }
+        guard case .text(_, _, let source, _, _, _, _, _, _) = result else { return XCTFail("expected text, got \(result)") }
         XCTAssertEqual(source, "Wikipedia")
         XCTAssertEqual(note.aiError, "AiError: daily free allocation exceeded")
         XCTAssertEqual(QueryEngine.aiRestingNote(aiError: note.aiError, source: source), Self.note)
@@ -100,10 +100,12 @@ final class AIErrorNoteTests: XCTestCase {
         StubProtocol.ddgReply = ["Heading": "Rainbow", "AbstractText": "A rainbow is an optical phenomenon caused by refraction, internal reflection and dispersion of light in water droplets.", "AbstractSource": "Wikipedia", "AbstractURL": "https://en.wikipedia.org/wiki/Rainbow"]
         let note = AIFailureNote()
         let result = await QueryEngine().query("What was the first color photograph of a rainbow?", ai: AIConfig(), useLLM: true, note: note, session: session)
-        guard case .text(let heading, let body, let source, _, _, _, _, _) = result else { return XCTFail("expected text, got \(result)") }
+        guard case .text(let heading, let body, let source, _, _, _, _, _, let background) = result else { return XCTFail("expected text, got \(result)") }
         XCTAssertEqual(heading, "Rainbow")
         XCTAssertEqual(source, "Wikipedia")
-        XCTAssertTrue(body.hasPrefix("Not a direct answer. Here is what Wikipedia says about Rainbow. A rainbow is an optical phenomenon"), body)
+        XCTAssertTrue(background, "the generic page for a specific question is background")
+        XCTAssertTrue(body.hasPrefix("A rainbow is an optical phenomenon caused by refraction, internal reflection and dispersion"), body)
+        XCTAssertFalse(body.contains("Not a direct answer"), "the caption is a card line, never body text")
         XCTAssertEqual(QueryEngine.aiRestingNote(aiError: note.aiError, source: source), Self.note)
     }
 

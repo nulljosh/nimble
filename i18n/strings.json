@@ -649,5 +649,103 @@
     "es": "Ver los pasos",
     "zh": "显示步骤",
     "pa": "ਕਦਮ ਵੇਖੋ"
+  },
+  "Background": {
+    "en": "Background",
+    "fr": "Contexte",
+    "es": "Antecedentes",
+    "zh": "背景",
+    "pa": "ਪਿਛੋਕੜ"
+  },
+  "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.": {
+    "en": "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.",
+    "fr": "L'IA gratuite n'a plus de réponses pour aujourd'hui, donc ceci vient de Wikipédia. Elle se remet à zéro le soir.",
+    "es": "La IA gratuita se quedó sin respuestas por hoy, así que esto viene de Wikipedia. Se reinicia por la noche.",
+    "zh": "免费 AI 今天的回答次数已用完，所以这条内容来自维基百科。傍晚会重置。",
+    "pa": "ਮੁਫ਼ਤ AI ਅੱਜ ਲਈ ਜਵਾਬ ਖ਼ਤਮ ਕਰ ਚੁੱਕਾ ਹੈ, ਇਸ ਲਈ ਇਹ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਹੈ। ਸ਼ਾਮ ਨੂੰ ਇਹ ਮੁੜ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ।"
+  },
+  "Not a direct answer to your question. Background from Wikipedia:": {
+    "en": "Not a direct answer to your question. Background from Wikipedia:",
+    "fr": "Ce n'est pas une réponse directe à votre question. Contexte de Wikipédia :",
+    "es": "No es una respuesta directa a tu pregunta. Antecedentes de Wikipedia:",
+    "zh": "这不是对你问题的直接回答。以下是维基百科的背景资料：",
+    "pa": "ਇਹ ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਸਿੱਧਾ ਜਵਾਬ ਨਹੀਂ ਹੈ। ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਪਿਛੋਕੜ:"
+  },
+  "New question": {
+    "en": "New question",
+    "fr": "Nouvelle question",
+    "es": "Nueva pregunta",
+    "zh": "新问题",
+    "pa": "ਨਵਾਂ ਸਵਾਲ"
+  },
+  "History": {
+    "en": "History",
+    "fr": "Historique",
+    "es": "Historial",
+    "zh": "历史记录",
+    "pa": "ਇਤਿਹਾਸ"
+  },
+  "Back": {
+    "en": "Back",
+    "fr": "Retour",
+    "es": "Volver",
+    "zh": "返回",
+    "pa": "ਪਿੱਛੇ"
+  },
+  "Edit": {
+    "en": "Edit",
+    "fr": "Modifier",
+    "es": "Editar",
+    "zh": "编辑",
+    "pa": "ਸੋਧੋ"
+  },
+  "Done": {
+    "en": "Done",
+    "fr": "Terminé",
+    "es": "Listo",
+    "zh": "完成",
+    "pa": "ਹੋਇਆ"
+  },
+  "Delete": {
+    "en": "Delete",
+    "fr": "Supprimer",
+    "es": "Eliminar",
+    "zh": "删除",
+    "pa": "ਮਿਟਾਓ"
+  },
+  "Delete selected": {
+    "en": "Delete selected",
+    "fr": "Supprimer la sélection",
+    "es": "Eliminar lo seleccionado",
+    "zh": "删除所选",
+    "pa": "ਚੁਣੇ ਮਿਟਾਓ"
+  },
+  "Copy selected": {
+    "en": "Copy selected",
+    "fr": "Copier la sélection",
+    "es": "Copiar lo seleccionado",
+    "zh": "复制所选",
+    "pa": "ਚੁਣੇ ਕਾਪੀ ਕਰੋ"
+  },
+  "Copied": {
+    "en": "Copied",
+    "fr": "Copié",
+    "es": "Copiado",
+    "zh": "已复制",
+    "pa": "ਕਾਪੀ ਹੋਇਆ"
+  },
+  "Ask again": {
+    "en": "Ask again",
+    "fr": "Reposer la question",
+    "es": "Preguntar de nuevo",
+    "zh": "再问一次",
+    "pa": "ਦੁਬਾਰਾ ਪੁੱਛੋ"
+  },
+  "No questions yet.": {
+    "en": "No questions yet.",
+    "fr": "Aucune question pour l'instant.",
+    "es": "Aún no hay preguntas.",
+    "zh": "还没有问题。",
+    "pa": "ਅਜੇ ਕੋਈ ਸਵਾਲ ਨਹੀਂ।"
   }
 }

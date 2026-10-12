@@ -36,27 +36,27 @@ final class RichPhotoTests: XCTestCase {
 
     func testSiteOpenGraphImageBecomesThePhotoAndTheFaviconSteps() {
         let html = "<title>Acme</title><meta property=\"og:image\" content=\"https://acme.io/share.png\"><meta name=\"description\" content=\"Ship faster.\">"
-        guard case .text(_, _, _, _, let icon, _, _, let photo)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
+        guard case .text(_, _, _, _, let icon, _, _, let photo, _)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
         XCTAssertEqual(photo?.url, "https://acme.io/share.png")
         XCTAssertNil(icon)
     }
 
     func testRelativeOpenGraphImageResolvesAgainstTheHost() {
         let html = "<title>Acme</title><meta content=\"/share.png\" property=\"og:image\"><meta name=\"description\" content=\"Ship faster.\">"
-        guard case .text(_, _, _, _, _, _, _, let photo)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
+        guard case .text(_, _, _, _, _, _, _, let photo, _)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
         XCTAssertEqual(photo?.url, "https://acme.io/share.png")
     }
 
     func testSiteWithoutImageKeepsTheFavicon() {
         let html = "<title>Acme</title><meta name=\"description\" content=\"Ship faster.\">"
-        guard case .text(_, _, _, _, let icon, _, _, let photo)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
+        guard case .text(_, _, _, _, let icon, _, _, let photo, _)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
         XCTAssertNil(photo)
         XCTAssertEqual(icon, "https://www.google.com/s2/favicons?domain=acme.io&sz=64")
     }
 
     func testHttpOpenGraphImageIsRefused() {
         let html = "<title>Acme</title><meta property=\"og:image\" content=\"http://acme.io/share.png\"><meta name=\"description\" content=\"Ship faster.\">"
-        guard case .text(_, _, _, _, _, _, _, let photo)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
+        guard case .text(_, _, _, _, _, _, _, let photo, _)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
         XCTAssertNil(photo)
     }
 
@@ -88,10 +88,10 @@ final class RichPhotoTests: XCTestCase {
         let llm = QueryResult.text(heading: nil, body: "Mount Everest is 8,848 meters tall.", source: "Qwen", sourceURL: nil, imageURL: nil,
                                    photo: AnswerPhoto(url: "https://upload.wikimedia.org/everest.jpg", width: nil, height: nil))
         let ddg = QueryResult.text(heading: "Everest", body: "8,848 m", source: "Britannica", sourceURL: "https://example.com", imageURL: nil)
-        guard case .text(_, _, _, _, _, _, _, let filled) = QueryEngine.keepingPhoto(ddg, from: llm) else { return XCTFail("no text") }
+        guard case .text(_, _, _, _, _, _, _, let filled, _) = QueryEngine.keepingPhoto(ddg, from: llm) else { return XCTFail("no text") }
         XCTAssertEqual(filled?.url, "https://upload.wikimedia.org/everest.jpg")
         let own = QueryResult.text(heading: nil, body: "8,848 m", source: "DDG", sourceURL: nil, imageURL: nil, photo: AnswerPhoto(url: "https://a.org/own.jpg", width: nil, height: nil))
-        guard case .text(_, _, _, _, _, _, _, let kept) = QueryEngine.keepingPhoto(own, from: llm) else { return XCTFail("no text") }
+        guard case .text(_, _, _, _, _, _, _, let kept, _) = QueryEngine.keepingPhoto(own, from: llm) else { return XCTFail("no text") }
         XCTAssertEqual(kept?.url, "https://a.org/own.jpg")
     }
 

@@ -5,11 +5,11 @@ import SwiftUI
 struct HistoryView: View {
     @Environment(AppState.self) private var state
     @Environment(\.dismiss) private var dismiss
-    @State private var editMode: EditMode = .inactive
+    /// Edit mode is ours, not the List's: the List's own selection circles drew a half-finished tick in screenshots.
+    @State private var editing = false
     @State private var selection = Set<String>()
 
     private var entries: [SearchHistory.Entry] { state.history.entries }
-    private var editing: Bool { editMode.isEditing }
 
     var body: some View {
         Group {
@@ -19,7 +19,7 @@ struct HistoryView: View {
                     .foregroundStyle(Color.dim)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List(selection: $selection) {
+                List {
                     ForEach(entries, id: \.q) { entry in
                         row(entry)
                             .listRowBackground(Color.bg)
@@ -33,7 +33,6 @@ struct HistoryView: View {
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .listRowSeparatorTint(Color.hairline)
-                .environment(\.editMode, $editMode)
             }
         }
         .background(Color.bg.ignoresSafeArea())
@@ -94,17 +93,30 @@ struct HistoryView: View {
         .padding(.vertical, 8)
         .contentShape(Rectangle())
 
-        Group {
-            if editing {
-                // In edit mode the row itself is the selection target, so it is not a button.
-                content
-            } else {
-                Button { ask(entry.q) } label: { content }
-                    .buttonStyle(.plain)
-                    .accessibilityHint(String(localized: "Asks this again"))
+        if editing {
+            // The whole row toggles. The circle is a plain SF Symbol: a full checkmark when selected, an empty ring when not.
+            let picked = selection.contains(entry.q)
+            Button { toggle(entry.q) } label: {
+                HStack(alignment: .center, spacing: 12) {
+                    Image(systemName: picked ? "checkmark.circle.fill" : "circle")
+                        .font(.nimbleHeadline)
+                        .foregroundStyle(picked ? Color.bulbDeep : Color.dim)
+                        .accessibilityHidden(true)
+                    content
+                }
             }
+            .buttonStyle(.plain)
+            .accessibilityAddTraits(picked ? .isSelected : [])
+            .accessibilityLabel(entry.q)
+        } else {
+            Button { ask(entry.q) } label: { content }
+                .buttonStyle(.plain)
+                .accessibilityHint(String(localized: "Asks this again"))
         }
-        .tag(entry.q)
+    }
+
+    private func toggle(_ question: String) {
+        if selection.contains(question) { selection.remove(question) } else { selection.insert(question) }
     }
 
     /// Plain text of the selected rows, newest first: question, then answer, blocks separated by a blank line.
@@ -127,13 +139,7 @@ struct HistoryView: View {
     }
 
     private func toggleEditing() {
-        withAnimation {
-            if editing {
-                editMode = .inactive
-                selection.removeAll()
-            } else {
-                editMode = .active
-            }
-        }
+        editing.toggle()
+        if !editing { selection.removeAll() }
     }
 }

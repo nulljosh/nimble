@@ -6,7 +6,7 @@ const wikiAnswer = (extra) => ({ kind: "text", title: "France", body: "Paris is 
 
 test("a Wikipedia fallback with aiError shows the resting note", async () => {
   const { h } = await E.renderAnswer("capital of france", { scripted: wikiAnswer({ aiError: "AiError: daily free allocation exceeded" }) });
-  assert.match(h, /<p class="ai-note">The free AI is resting, showing Wikipedia\.<\/p>/);
+  assert.match(h, /<p class="ai-note">The free AI is out of answers for today, so this is from Wikipedia\. It resets in the evening\.<\/p>/);
 });
 
 test("no aiError, no note", async () => {

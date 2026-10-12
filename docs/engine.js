@@ -332,6 +332,21 @@ async function relationWiki(query, rel){
   }
   return null;
 }
+// A specific question ("what was the first color photograph of a rainbow") that only a generic topic page answers.
+// That page is background: flagged, never presented as the answer. Same rule as QueryEngine.isSpecificQuestion in Swift.
+const QUESTION_WORDS = ["what","who","when","where","which","how"];
+const QUESTION_FILLER = new Set([...QUESTION_WORDS,"was","is","are","were","the","a","an","of","in","on","to","did","does","do","it","its","that"]);
+const words = s => String(s).toLowerCase().match(/\p{L}+/gu) || [];
+function isSpecificQuestion(question, topic){
+  const w = words(question);
+  if(!w.length || !QUESTION_WORDS.includes(w[0])) return false;
+  const topicWords = new Set(words(topic));
+  return w.some(x => !QUESTION_FILLER.has(x) && !topicWords.has(x));
+}
+function labelIfGeneric(hit, question){
+  if(!hit || hit.src!=="Wikipedia" || !hit.title || !isSpecificQuestion(question, hit.title)) return hit;
+  return {...hit, background:true};
+}
 async function wiki(query){
   const rel = relationOf(query);
   if(rel) return relationWiki(query, rel); // a relation question never falls back to a loose search hit
@@ -882,7 +897,7 @@ async function answer(query, opts={}){
   const consent = aiConsent() || opts.ifUnset || null;
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};
   if(consent==="no"){
-    const hit = await firstOf(query, [ddg, wiki]);
+    const hit = labelIfGeneric(await firstOf(query, [ddg, wiki]), query);
     return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit])} : {kind:"none"};
   }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
@@ -897,7 +912,7 @@ async function answer(query, opts={}){
     ai = null;
   }
   // The model's photo, when its page backs the sentence, stays with the number it was shown with.
-  let hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : (ai || dd || await firstOf(query, [wiki]));
+  let hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : labelIfGeneric(ai || dd || await firstOf(query, [wiki]), query);
   // The answer's Wikipedia topic can supply a picture (when the proxy sent none) and the text behind the sentence (when nothing else did).
   if(hit && (!hit.image || !hit.grounding)){
     const t = await topicFor(query, hit.body).catch(()=>null);
@@ -945,12 +960,19 @@ const searchHistory = {
       return Array.isArray(a) ? a.filter(e=>e && typeof e.q==="string" && e.q).slice(0,HISTORY_MAX) : [];
     }catch{ return []; }
   },
-  add(query){
+  // `a` is the saved answer snippet: the first 280 characters of the answer's text. Stored on this device only.
+  add(query, answer){
     const q = String(query||"").trim(); if(!q) return;
+    const a = typeof answer==="string" && answer.trim() ? answer.trim().slice(0,280) : null;
     try{
       const rest = this.list().filter(e=>e.q.toLowerCase()!==q.toLowerCase());
-      localStorage.setItem(HISTORY_KEY, JSON.stringify([{q, t:Date.now()}, ...rest].slice(0,HISTORY_MAX)));
+      localStorage.setItem(HISTORY_KEY, JSON.stringify([{q, t:Date.now(), ...(a?{a}:{})}, ...rest].slice(0,HISTORY_MAX)));
     }catch{}
+  },
+  // Removes the rows whose question is in `queries` (a string or an array of strings).
+  remove(queries){
+    const drop = new Set([].concat(queries).map(x=>String(x).toLowerCase()));
+    try{ localStorage.setItem(HISTORY_KEY, JSON.stringify(this.list().filter(e=>!drop.has(e.q.toLowerCase())))); }catch{}
   },
   clear(){ turns.clear(); try{ localStorage.removeItem(HISTORY_KEY); }catch{} },
 };
@@ -962,7 +984,14 @@ async function renderAnswer(query, opts){
   const T=(opts&&opts.t)||plain;
   // The freshness line: quiet, under the answer, same left edge as the source row.
   const fresh=x=>x.asOf?'<p class="as-of num">'+esc(T("as of {t}",{t:asOfLabel(x.asOf,x.asOfDay)}))+'</p>':'';
-  const a=(opts&&opts.scripted)||await answer(query, opts); let h='<div class="mockup-label">'+T("Answer")+'</div>', credit='';
+  const a=(opts&&opts.scripted)||await answer(query, opts);
+  // A text answer's header says BACKGROUND for the generic topic page; its lead lines sit right under the header.
+  const isText = a.kind==="text";
+  let h='<div class="mockup-label">'+T(isText&&a.background?"Background":"Answer")+'</div>', credit='';
+  if(isText){
+    if(a.aiError && a.src==="Wikipedia") h+='<p class="ai-note">'+esc(T("The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening."))+'</p>';
+    if(a.background) h+='<p class="bg-caption">'+esc(T("Not a direct answer to your question. Background from Wikipedia:"))+'</p>';
+  }
   if(a.kind==="convert"){ h+='<div class="mockup-big num">'+a.to+' '+esc(a.toUnit)+'</div><p class="num">'+a.from+' '+esc(a.fromUnit)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="card"){
     // Same markup as convert; the whole card opens its source like a text answer does.
@@ -1043,8 +1072,6 @@ async function renderAnswer(query, opts){
       h+='<p class="sources">'+sourceRow(a.sources)+'</p>';
       credit="";
     }
-    // A quiet note under a Wikipedia fallback when the free AI's call failed. Design tokens only.
-    if(a.aiError && a.src==="Wikipedia") h+='<p class="ai-note">'+esc(T("The free AI is resting, showing Wikipedia."))+'</p>';
   }
   else { h+="<p>"+T('No instant answer. Try a question, a sum, or "5 miles to km".')+"</p>"; }
   return {h, credit, kind:a.kind, a};
@@ -1137,4 +1164,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};

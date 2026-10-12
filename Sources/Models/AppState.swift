@@ -271,7 +271,7 @@ final class AppState {
             case .error, .none, .loading: break
             default: self.remember(text)
             }
-            if useLLM, case .text(_, let body, _, _, _, _, _, _) = answer { self.turns.add(text, body) }
+            if useLLM, case .text(_, let body, _, _, _, _, _, _, _) = answer { self.turns.add(text, body) }
         }
     }
 
