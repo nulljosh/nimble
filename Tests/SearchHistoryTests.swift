@@ -20,6 +20,15 @@ final class SearchHistoryTests: XCTestCase {
         XCTAssertEqual(h.entries.map(\.q), ["5 miles to km", "2+2"])
     }
 
+    func testCopyTextKeepsListOrderAndAnswers() {
+        let h = SearchHistory(directory: dir, cloud: nil)
+        h.add("sqrt 9", answer: "3")
+        h.add("pi", answer: "3.14159")
+        h.add("5 miles to km")
+        XCTAssertEqual(h.copyText(for: ["SQRT 9", "pi"]), "pi\n3.14159\n\nsqrt 9\n3")
+        XCTAssertEqual(h.copyText(for: []), "")
+    }
+
     func testDuplicateMovesToTopIgnoringCase() {
         let h = SearchHistory(directory: dir, cloud: nil)
         h.add("pi")

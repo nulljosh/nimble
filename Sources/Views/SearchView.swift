@@ -3,6 +3,8 @@ import SwiftUI
 struct SearchView: View {
     @Environment(AppState.self) private var state
     @FocusState private var isInputFocused: Bool
+    /// The History list takes the place of the answer until Back, Escape or a row is asked again.
+    @State private var showingHistory = false
 
     var body: some View {
         @Bindable var state = state
@@ -33,7 +35,12 @@ struct SearchView: View {
                     .padding(.bottom, 14)
             }
 
-            if state.result != .none {
+            if showingHistory {
+                HistoryPanel(onClose: { showingHistory = false })
+                    .environment(state)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 14)
+            } else if state.result != .none {
                 ResultView()
                     .environment(state)
                     .padding(.horizontal, 18)
@@ -58,6 +65,12 @@ struct SearchView: View {
 
             // Bottom bar
             HStack {
+                // History: the saved questions, with their answers, in place of the answer.
+                Button("History") { isInputFocused = false; showingHistory = true }
+                    .buttonStyle(.plain)
+                    .font(.nimbleSmall)
+                    .foregroundStyle(Color.soft)
+                    .disabled(showingHistory || state.history.entries.isEmpty)
                 // Theme lives in Settings only, the swatch here duplicated the grid
                 // in SettingsView. (iOS keeps its inline picker: no menu bar there.)
                 Spacer()
@@ -92,6 +105,13 @@ struct SearchView: View {
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.hairline, lineWidth: 1))
         .onAppear {
+            // QA only: `-shotHistory YES` fills the sandboxed history with stubbed questions and opens the History list.
+            if QASandbox.launch, UserDefaults.standard.bool(forKey: "shotHistory") {
+                for stub in QASandbox.historyStubs.reversed() { state.history.add(stub.q, answer: stub.a) }
+                showingHistory = true
+                isInputFocused = false
+                return
+            }
             // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
             if let q = UserDefaults.standard.string(forKey: "shot") {
                 // QA only: `-shotStub YES` answers ESPN and CoinGecko with fixed JSON (Sources/macOS/QAStubProtocol.swift).
@@ -125,7 +145,7 @@ struct SearchView: View {
                 .font(.nimbleLead)
                 .foregroundStyle(Color.text)
                 .focused($isInputFocused)
-                .onSubmit { state.performQuery() }
+                .onSubmit { showingHistory = false; state.performQuery() }
                 .onKeyPress(.tab) {
                     if state.queryText.isEmpty { state.queryText = state.currentPlaceholder }
                     return .handled

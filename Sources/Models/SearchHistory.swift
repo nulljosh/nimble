@@ -103,6 +103,16 @@ final class SearchHistory {
         save()
     }
 
+    /// Plain text of the rows for these questions, in list order: each question, then its saved answer,
+    /// blocks separated by a blank line. Matches questions ignoring case, like remove().
+    func copyText(for questions: Set<String>) -> String {
+        let keys = Set(questions.map { $0.lowercased() })
+        return entries
+            .filter { keys.contains($0.q.lowercased()) }
+            .map { [$0.q, $0.a].compactMap { $0 }.joined(separator: "\n") }
+            .joined(separator: "\n\n")
+    }
+
     func clear() {
         entries = []
         cloud?.set(Date().timeIntervalSince1970 * 1000, forKey: Self.cloudKey + ".clearedAt")

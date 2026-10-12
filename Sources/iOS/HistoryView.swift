@@ -119,13 +119,8 @@ struct HistoryView: View {
         if selection.contains(question) { selection.remove(question) } else { selection.insert(question) }
     }
 
-    /// Plain text of the selected rows, newest first: question, then answer, blocks separated by a blank line.
-    private var shareText: String {
-        entries
-            .filter { selection.contains($0.q) }
-            .map { [$0.q, $0.a].compactMap { $0 }.joined(separator: "\n") }
-            .joined(separator: "\n\n")
-    }
+    /// Plain text of the selected rows, newest first (SearchHistory.copyText): question, then answer.
+    private var shareText: String { state.history.copyText(for: selection) }
 
     private func ask(_ question: String) {
         state.queryText = question

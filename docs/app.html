@@ -23,21 +23,31 @@ body {
   display: flex; flex-direction: column; min-height: 100svh;
 }
 a { color: inherit; }
-.top {
-  display: flex; flex-wrap: wrap; row-gap: var(--space-2); align-items: center; justify-content: space-between;
-  padding: max(var(--space-4), env(safe-area-inset-top)) var(--gutter) var(--space-4);
-}
-.brand { min-height: 44px; display: flex; align-items: center; gap: var(--space-3); font-weight: 700; font-size: var(--fs-17); letter-spacing: var(--tracking-tight); text-decoration: none; }
+/* Header: one row, fixed height from the tokens. Phones fold the links into a sheet behind one 44px button. */
+.top { position: relative; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  min-height: var(--header-h); padding: max(var(--space-2), env(safe-area-inset-top)) var(--gutter) var(--space-2); }
+.brand { min-height: var(--tap); display: flex; align-items: center; gap: var(--space-3); font-weight: 700; font-size: var(--fs-17); letter-spacing: var(--tracking-tight); text-decoration: none; }
 .brand img { width: 30px; height: 30px; border-radius: var(--radius-sm); }
-.top nav a { font-size: var(--fs-15); color: var(--text-mid); text-decoration: none; margin-left: var(--space-4); }
+.top nav a, .top nav button { display: flex; align-items: center; min-height: var(--tap); padding: 0; border: 0; background: none; font: inherit; font-size: var(--fs-15); color: var(--text-mid); text-decoration: none; cursor: pointer; }
 .top nav a:hover, .top nav button:hover { color: var(--text); }
-.top nav button { border: 0; background: none; font: inherit; font-size: var(--fs-15); color: var(--text-mid); margin-left: var(--space-4); cursor: pointer; }
-/* Nav items stay on one line; on a narrow phone the nav drops under the brand, right-aligned. */
-.top nav { display: flex; align-items: center; white-space: nowrap; margin-left: auto; }
-.top nav a, .top nav button { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
-@media (max-width: 480px) { .top nav a, .top nav button { margin-left: var(--space-2); } }
+.menu-btn { display: grid; place-items: center; flex: none; width: var(--tap); height: var(--tap); padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--text); cursor: pointer; }
+.menu-btn:hover { color: var(--yellow-deep); }
+.menu-btn svg { width: 20px; height: 20px; }
+.menu-btn[aria-expanded="true"] { color: var(--yellow-deep); }
+/* Phone: the links sit in a full-width sheet under the header. Hidden until the menu button opens it. */
+.top nav { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 5; flex-direction: column; align-items: stretch;
+  padding: 0 var(--gutter) var(--space-2); background: var(--bg); border-bottom: 1px solid var(--line); }
+.top.open nav { display: flex; }
+.top nav > * { width: 100%; justify-content: flex-start; text-align: left; }
+.top nav > * + * { border-top: 1px solid var(--line); }
+@media (min-width: 640px) {
+  .menu-btn { display: none; }
+  .top nav { display: flex; position: static; flex-direction: row; align-items: center; gap: var(--space-4); margin-left: auto; padding: 0; background: none; border: 0; }
+  .top nav > * { width: auto; }
+  .top nav > * + * { border-top: 0; }
+}
 
-main { flex: 1; width: 100%; max-width: var(--max-app); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-7); }
+main { flex: 1; width: 100%; max-width: var(--max-app); margin: 0 auto; padding: var(--space-6) var(--gutter) var(--space-7); }
 h1 { font-size: var(--fs-28); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: var(--lh-xl); margin-bottom: var(--space-5); text-align: center; }
 
 form { position: relative; }
@@ -89,8 +99,8 @@ form { position: relative; }
 .consent-actions button { min-height: 44px; border: 1px solid var(--line); background: none; color: var(--text); border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); font: inherit; font-weight: 700; font-size: var(--fs-15); cursor: pointer; }
 .consent-actions .consent-yes { border-color: transparent; background: var(--yellow); color: var(--black); }
 .consent-actions .consent-no:hover { border-color: var(--yellow-deep); }
-.credit { margin-top: var(--space-4); font-size: var(--fs-13); color: var(--text-light); display: flex; align-items: baseline; gap: var(--space-4); }
-.credit button { border: 0; background: none; padding: var(--tap-pad) 0; margin-block: calc(var(--tap-pad) * -1); font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.credit { margin-top: var(--space-4); font-size: var(--fs-13); color: var(--text-mid); display: flex; align-items: baseline; gap: var(--space-4); }
+.credit button { min-width: var(--tap); border: 0; background: none; padding: var(--tap-pad) var(--space-2); margin-block: calc(var(--tap-pad) * -1); font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .credit button:hover { color: var(--text); }
 /* Why this answer: the source line is the toggle; the text it came from opens under it. */
 .news { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; gap: var(--space-4); }
@@ -123,31 +133,48 @@ form { position: relative; }
 .ai-note { margin: var(--space-3) 0 0; font-size: var(--fs-13); color: var(--text-light); }
 /* Lead lines sit directly under the card header: the resting note, then the background caption. */
 .card .ai-note, .card .bg-caption, .bg-caption { margin: 0 0 var(--space-2); font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); }
-.new-q { display: block; margin: var(--space-4) auto 0; min-height: 44px; padding: var(--space-2) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-15); font-weight: var(--fw-semibold); cursor: pointer; }
-.new-q[hidden] { display: none; }
-.new-q:hover { color: var(--text); border-color: var(--yellow-deep); }
-/* History: a page view in place of the ask. Rows re-ask on tap; Edit adds a checkbox per row. */
-.hist[hidden], .hist-bar[hidden], .hist-empty[hidden] { display: none; }
-.hist-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+/* The tools row under the field: History always, New question once an answer is on screen. */
+.tools { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
+.tools[hidden], .tools button[hidden] { display: none; }
+.tools button { min-height: var(--tap); padding: 0 var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-15); font-weight: var(--fw-semibold); cursor: pointer; }
+.tools button:hover { color: var(--text); border-color: var(--yellow-deep); }
+/* History: a full-screen dialog. Rows re-ask on tap; Edit adds a 24px circle per row and a bottom bar. */
+.hist { inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: var(--bg); color: var(--text); overflow: hidden; }
+.hist[open] { display: flex; flex-direction: column; }
+.hist::backdrop { background: var(--bg); }
+.hist-inner { flex: 1; min-height: 0; width: 100%; max-width: var(--max-app); margin: 0 auto; display: flex; flex-direction: column; padding: max(var(--space-2), env(safe-area-inset-top)) var(--gutter) 0; }
+.hist-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--tap); }
 .hist-title { font-size: var(--fs-22); line-height: var(--lh-lg); font-weight: var(--fw-semibold); letter-spacing: -0.01em; text-align: center; }
-.hist-head button { min-width: 44px; min-height: 44px; padding: 0 var(--space-2); border: 0; background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-15); cursor: pointer; }
+.hist-head button { min-width: var(--tap); min-height: var(--tap); padding: 0 var(--space-2); border: 0; background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-15); cursor: pointer; }
 .hist-head button:hover { color: var(--text); }
+.hist-body { flex: 1; min-height: 0; overflow-y: auto; margin-top: var(--space-4); }
 .hist-empty { font-size: var(--fs-17); line-height: var(--lh-md); color: var(--text-mid); margin-top: var(--space-5); text-align: center; }
 .hist-list { list-style: none; border-top: 1px solid var(--line); }
-.hist-row { display: flex; align-items: stretch; gap: var(--space-2); border-bottom: 1px solid var(--line); }
-.hist-ask { flex: 1; min-width: 0; min-height: 44px; padding: var(--space-3) 0; border: 0; background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.hist-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); }
+.hist-ask { flex: 1; min-width: 0; min-height: var(--tap); padding: var(--space-3) 0; border: 0; background: none; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
 .hist-ask:hover .hist-q { text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
-.hist-text { display: block; min-width: 0; }
-.hist-q { display: block; font-size: var(--fs-17); line-height: var(--lh-md); color: var(--text); overflow-wrap: anywhere; }
+.hist-text { display: block; flex: 1; min-width: 0; }
+.hist-q { display: block; font-size: var(--fs-15); line-height: var(--lh-md); color: var(--text); overflow-wrap: anywhere; }
 .hist-snip { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: var(--space-1); font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); }
-.hist-del { flex: none; align-self: center; min-width: 44px; min-height: 44px; border: 0; background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-13); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.hist-when { display: block; margin-top: var(--space-1); font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); }
+.hist-del { flex: none; align-self: center; min-width: var(--tap); min-height: var(--tap); padding: 0 var(--space-2); border: 0; background: none; color: var(--text-mid); font: inherit; font-size: var(--fs-15); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .hist-del:hover { color: var(--text); }
-.hist-pick { flex: 1; min-width: 0; display: flex; align-items: center; gap: var(--space-3); min-height: 44px; padding: var(--space-3) 0; cursor: pointer; }
-.hist-pick input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--yellow-deep); cursor: pointer; }
-.hist-bar { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }
-.hist-bar button { min-height: 44px; padding: var(--space-2) var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: none; color: var(--text); font: inherit; font-size: var(--fs-15); font-weight: var(--fw-semibold); cursor: pointer; }
-.hist-bar button:hover:not(:disabled) { border-color: var(--yellow-deep); }
-.hist-bar button:disabled { color: var(--text-light); cursor: default; }
+.hist-pick { position: relative; flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: var(--space-2); min-height: var(--tap); padding: var(--space-3) 0; cursor: pointer; }
+/* The selection circle: a 24px ring with a 12px radius (round), filled accent with a check when picked.
+   The 44px box around it is the tap target: the checkbox is laid over the whole box, transparent. */
+.hist-box { position: relative; flex: none; display: grid; place-items: center; width: var(--tap); height: var(--tap); }
+.hist-box input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.hist-dot { position: relative; width: 24px; height: 24px; border: 1.5px solid var(--text-light); border-radius: var(--radius-md); pointer-events: none; }
+.hist-dot::after { content: ""; position: absolute; left: 7px; top: 2px; width: 5px; height: 10px; border: solid var(--black); border-width: 0 2.5px 2.5px 0; transform: rotate(45deg); opacity: 0; }
+.hist-box input:checked + .hist-dot { background: var(--yellow-deep); border-color: var(--yellow-deep); }
+.hist-box input:checked + .hist-dot::after { opacity: 1; }
+.hist-box input:focus-visible + .hist-dot { outline: 2px solid var(--yellow-deep); outline-offset: 2px; }
+/* Edit mode's bottom bar: Select all, Copy selected, Delete selected, each a 44px button. */
+.hist-foot { flex: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); padding: var(--space-3) 0 max(var(--space-3), env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: var(--bg); }
+.hist-foot[hidden] { display: none; }
+.hist-foot button { min-width: 0; min-height: var(--tap); padding: 0 var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-md); background: none; color: var(--text); font: inherit; font-size: var(--fs-15); font-weight: var(--fw-semibold); line-height: var(--lh-sm); cursor: pointer; }
+.hist-foot button:hover:not(:disabled) { border-color: var(--yellow-deep); }
+.hist-foot button:disabled { color: var(--text-light); cursor: default; }
 .why { margin-top: var(--space-4); font-size: var(--fs-13); color: var(--text-light); }
 .why summary { display: inline-block; cursor: pointer; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; list-style: none; }
 .why summary::-webkit-details-marker { display: none; }
@@ -207,9 +234,10 @@ form { position: relative; }
 </style>
 </head>
 <body>
-<header class="top">
+<header class="top" id="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
-  <nav><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><button type="button" id="hist-open" data-i18n="History">History</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
+  <button type="button" class="menu-btn" id="menu-btn" aria-controls="nav" aria-expanded="false" aria-label="Menu" data-i18n-aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
+  <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
 <main>
 <div id="ask">
@@ -221,8 +249,11 @@ form { position: relative; }
       <button class="go" type="submit" data-i18n="Ask">Ask</button>
     </label>
   </form>
+  <div class="tools">
+    <button type="button" id="hist-open" aria-haspopup="dialog" data-i18n="History">History</button>
+    <button type="button" id="new" data-i18n="New question" hidden>New question</button>
+  </div>
   <section class="card" id="r" aria-live="polite" hidden></section>
-  <button type="button" class="new-q" id="new" data-i18n="New question" hidden>New question</button>
   <img class="flit" id="flit" src="mascot/flit.svg" width="96" height="96" alt="Flit, Nimble's hummingbird">
   <div class="chips" id="chips"></div>
   <section class="recent" id="recent" aria-label="Recent searches" data-i18n-aria-label="Recent searches" hidden>
@@ -231,21 +262,26 @@ form { position: relative; }
   </section>
   <p class="hint" data-i18n="Math, units and graphs work offline. Everything else gets one sentence and a source.">Math, units and graphs work offline. Everything else gets one sentence and a source.</p>
 </div>
-<section class="hist" id="hist" aria-labelledby="hist-title" hidden>
-  <div class="hist-head">
-    <button type="button" id="hist-back" data-i18n="Back">Back</button>
-    <h2 class="hist-title" id="hist-title" data-i18n="History">History</h2>
-    <button type="button" id="hist-edit" data-i18n="Edit">Edit</button>
-  </div>
-  <p class="hist-empty" id="hist-empty" data-i18n="No questions yet." hidden>No questions yet.</p>
-  <ul class="hist-list" id="hist-list"></ul>
-  <div class="hist-bar" id="hist-bar" hidden>
-    <button type="button" id="hist-copy" data-i18n="Copy selected">Copy selected</button>
-    <button type="button" id="hist-delete" data-i18n="Delete selected">Delete selected</button>
-  </div>
-</section>
   <img id="shareDebug" alt="" style="display:block;width:100%;margin-top:var(--space-5)">
 </main>
+<dialog class="hist" id="hist" aria-labelledby="hist-title">
+  <div class="hist-inner">
+    <div class="hist-head">
+      <button type="button" id="hist-back" data-i18n="Back">Back</button>
+      <h2 class="hist-title" id="hist-title" data-i18n="History">History</h2>
+      <button type="button" id="hist-edit" data-i18n="Edit">Edit</button>
+    </div>
+    <div class="hist-body">
+      <p class="hist-empty" id="hist-empty" data-i18n="No questions yet." hidden>No questions yet.</p>
+      <ul class="hist-list" id="hist-list"></ul>
+    </div>
+    <div class="hist-foot" id="hist-bar" hidden>
+      <button type="button" id="hist-all" data-i18n="Select all">Select all</button>
+      <button type="button" id="hist-copy" data-i18n="Copy selected">Copy selected</button>
+      <button type="button" id="hist-delete" data-i18n="Delete selected">Delete selected</button>
+    </div>
+  </div>
+</dialog>
 <script src="i18n.js"></script>
 <script src="engine.js?v=offline"></script>
 <script>
@@ -285,6 +321,7 @@ var T=I18N.t;
   async function run(query){
     query=(query||q.value||q.placeholder).trim(); if(!query) return;
     q.value=query; r.hidden=false; paintFlit();
+    newBtn.hidden=true;
     r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><div class="thinking">'+(mascot()==='fen'?FEN:FLIT)+'<p>'+T('Thinking…')+'</p></div>';
     // Shareable: /app?q=... opens straight onto the answer.
     history.replaceState(null,'','?q='+encodeURIComponent(query));
@@ -390,22 +427,44 @@ var T=I18N.t;
     last=null; q.value=''; r.innerHTML=''; r.hidden=true; newBtn.hidden=true; paintFlit();
     history.replaceState(null,'',location.pathname); q.focus();
   });
-  // History: every question with its saved answer. A row asks it again; Edit adds checkboxes for Copy selected and Delete selected.
-  var askView=document.getElementById('ask'), histPanel=document.getElementById('hist'), histList=document.getElementById('hist-list'),
+  // Phone menu: the links sit in a sheet behind one 44px button. Esc or a tap outside closes it and returns focus to the button.
+  var top=document.getElementById('top'), menuBtn=document.getElementById('menu-btn');
+  function setMenu(on){ top.classList.toggle('open',on); menuBtn.setAttribute('aria-expanded',on?'true':'false'); }
+  menuBtn.addEventListener('click',function(){ setMenu(!top.classList.contains('open')); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && top.classList.contains('open')){ setMenu(false); menuBtn.focus(); } });
+  document.addEventListener('click',function(e){ if(top.classList.contains('open') && !top.contains(e.target)) setMenu(false); });
+  // History: every question with its saved answer, in a modal dialog (the browser traps focus and Esc closes it).
+  // A row asks it again; Edit adds a circle per row and the bottom bar: Select all, Copy selected, Delete selected.
+  var histDlg=document.getElementById('hist'), histOpen=document.getElementById('hist-open'), histList=document.getElementById('hist-list'),
       histEmpty=document.getElementById('hist-empty'), histBar=document.getElementById('hist-bar'), histEdit=document.getElementById('hist-edit'),
-      histCopy=document.getElementById('hist-copy'), histDelete=document.getElementById('hist-delete');
-  var histEditing=false, histPicked=new Set();
-  function showHistory(on){
-    askView.hidden=on; histPanel.hidden=!on;
-    if(on){ histEditing=false; histPicked.clear(); paintHistory(); document.getElementById('hist-open').blur(); }
-    else { paintFlit(); }
-    window.scrollTo(0,0);
+      histAll=document.getElementById('hist-all'), histCopy=document.getElementById('hist-copy'), histDelete=document.getElementById('hist-delete');
+  var histEditing=false, histPicked=new Set(), histRestore=true;
+  var locale=document.documentElement.lang||'en';
+  var rtf=null; try{ rtf=new Intl.RelativeTimeFormat(locale,{numeric:'auto'}); }catch(err){}
+  // Relative time for a saved row: "2 minutes ago", "yesterday", else a short date.
+  function whenText(t){
+    if(!t) return '';
+    var s=Math.round((t-Date.now())/1000), a=Math.abs(s);
+    try{
+      if(a<60) return rtf.format(0,'second');
+      if(a<3600) return rtf.format(Math.round(s/60),'minute');
+      if(a<86400) return rtf.format(Math.round(s/3600),'hour');
+      if(a<604800) return rtf.format(Math.round(s/86400),'day');
+      return new Date(t).toLocaleDateString(locale,{month:'short',day:'numeric'});
+    }catch(err){ return ''; }
   }
-  // A row's text: the question, then the saved answer snippet when there is one. textContent only.
+  function showHistory(on){
+    if(on){ histEditing=false; histPicked.clear(); paintHistory(); histDlg.showModal(); histDlg.scrollTop=0; document.getElementById('hist-back').focus(); }
+    else if(histDlg.open) histDlg.close();
+  }
+  // Closing hands focus back to the History button; a row that asks again sends it to the field's answer instead.
+  histDlg.addEventListener('close',function(){ if(histRestore) histOpen.focus(); histRestore=true; });
+  // A row's text: the question, the saved answer snippet, then the time. textContent only.
   function histRowText(e){
     var wrap=document.createElement('span'); wrap.className='hist-text';
     var qq=document.createElement('span'); qq.className='hist-q'; qq.textContent=e.q; wrap.appendChild(qq);
     if(e.a){ var sn=document.createElement('span'); sn.className='hist-snip'; sn.textContent=e.a; wrap.appendChild(sn); }
+    var w=whenText(e.t); if(w){ var wh=document.createElement('span'); wh.className='hist-when'; wh.textContent=w; wrap.appendChild(wh); }
     return wrap;
   }
   function paintHistoryBar(){ histCopy.disabled=histDelete.disabled=!histPicked.size; }
@@ -414,20 +473,23 @@ var T=I18N.t;
     histEmpty.hidden=items.length>0; histEdit.hidden=!items.length;
     histEdit.textContent=T(histEditing?'Done':'Edit');
     histBar.hidden=!(histEditing && items.length);
+    histAll.disabled=!items.length;
     paintHistoryBar();
     histList.textContent='';
     items.forEach(function(e){
       var li=document.createElement('li'); li.className='hist-row';
       if(histEditing){
         var lab=document.createElement('label'); lab.className='hist-pick';
+        var box=document.createElement('span'); box.className='hist-box';
         var cb=document.createElement('input'); cb.type='checkbox'; cb.checked=histPicked.has(e.q);
+        var dot=document.createElement('span'); dot.className='hist-dot'; dot.setAttribute('aria-hidden','true');
         cb.addEventListener('change',function(){ if(cb.checked) histPicked.add(e.q); else histPicked.delete(e.q); paintHistoryBar(); });
-        lab.appendChild(cb); lab.appendChild(histRowText(e)); li.appendChild(lab);
+        box.appendChild(cb); box.appendChild(dot); lab.appendChild(box); lab.appendChild(histRowText(e)); li.appendChild(lab);
       } else {
         var ask=document.createElement('button'); ask.type='button'; ask.className='hist-ask';
         ask.appendChild(histRowText(e));
         ask.setAttribute('aria-label', e.q+'. '+T('Ask again'));
-        ask.onclick=function(){ showHistory(false); run(e.q); };
+        ask.onclick=function(){ histRestore=false; showHistory(false); run(e.q); };
         var del=document.createElement('button'); del.type='button'; del.className='hist-del';
         del.textContent=T('Delete'); del.setAttribute('aria-label', T('Delete')+': '+e.q);
         del.onclick=function(){ hist.remove(e.q); histPicked.delete(e.q); paintHistory(); paintRecent(); };
@@ -436,9 +498,10 @@ var T=I18N.t;
       histList.appendChild(li);
     });
   }
-  document.getElementById('hist-open').addEventListener('click',function(){ showHistory(true); });
+  histOpen.addEventListener('click',function(){ showHistory(true); });
   document.getElementById('hist-back').addEventListener('click',function(){ showHistory(false); });
   histEdit.addEventListener('click',function(){ histEditing=!histEditing; histPicked.clear(); paintHistory(); });
+  histAll.addEventListener('click',function(){ hist.list().forEach(function(e){ histPicked.add(e.q); }); paintHistory(); });
   histDelete.addEventListener('click',function(){ hist.remove(Array.from(histPicked)); histPicked.clear(); paintHistory(); paintRecent(); });
   histCopy.addEventListener('click',function(){
     var text=hist.list().filter(function(e){ return histPicked.has(e.q); }).map(function(e){ return e.q+(e.a?'\n'+e.a:''); }).join('\n\n');

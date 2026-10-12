@@ -231,12 +231,11 @@ extension QueryResult {
     /// The header word over a text answer: BACKGROUND for the generic topic page, else ANSWER.
     static func eyebrow(background: Bool) -> String { background ? "Background" : "Answer" }
 
-    /// The quiet lines under the header, in reading order: the resting note first (the free AI is out for today),
-    /// then the background caption. Empty when neither applies.
+    /// The quiet line under the header. One line, never two stacked: the resting note first when the free AI
+    /// is out for today, then the background caption on the generic topic page. Empty when neither applies.
     static func leadLines(background: Bool, aiError: String?, source: String) -> [String] {
-        var lines: [String] = []
-        if let note = QueryEngine.aiRestingNote(aiError: aiError, source: source) { lines.append(note) }
-        if background { lines.append(backgroundCaption) }
-        return lines
+        let note = QueryEngine.aiRestingNote(aiError: aiError, source: source)
+        if background { return [[note, backgroundCaption].compactMap { $0 }.joined(separator: " ")] }
+        return note.map { [$0] } ?? []
     }
 }

@@ -50,9 +50,9 @@ final class BackgroundAnswerTests: XCTestCase {
         XCTAssertEqual(QueryResult.eyebrow(background: false), "Answer")
     }
 
-    func testLeadLinesPutTheRestingNoteFirstThenTheCaption() {
+    func testLeadLinesMergeTheRestingNoteAndTheCaptionIntoOneLine() {
         let both = QueryResult.leadLines(background: true, aiError: "capacity", source: "Wikipedia")
-        XCTAssertEqual(both, [Self.note, QueryResult.backgroundCaption])
+        XCTAssertEqual(both, [Self.note + " " + QueryResult.backgroundCaption])
         XCTAssertEqual(QueryResult.backgroundCaption, "Not a direct answer to your question. Background from Wikipedia:")
     }
 

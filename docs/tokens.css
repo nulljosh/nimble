@@ -8,6 +8,8 @@
 --max-app:640px;--max-text:720px;--max-wide:960px;
 /* Tap targets: a 44px hit area around text that is shorter than 44px. */
 --tap-pad:var(--space-4);
+/* Tap size and header height: the 44px target, and a header of two 8px rows around it. */
+--tap:44px;--header-h:calc(var(--space-2) * 2 + var(--tap));
 /* Line heights on the 4px grid, one per type size: 13 to 20, 15 and 17 to 24, 22 and 28 to 28 and 32, 34 to 40, 48 to 56. */
 --lh-sm:20px;--lh-md:24px;--lh-lg:28px;--lh-xl:32px;--lh-2xl:40px;--lh-3xl:56px;}
 @media (min-width:600px){:root{--gutter:var(--space-5);}}

@@ -747,5 +747,19 @@
     "es": "Aún no hay preguntas.",
     "zh": "还没有问题。",
     "pa": "ਅਜੇ ਕੋਈ ਸਵਾਲ ਨਹੀਂ।"
+  },
+  "Select all": {
+    "en": "Select all",
+    "fr": "Tout sélectionner",
+    "es": "Seleccionar todo",
+    "zh": "全选",
+    "pa": "ਸਭ ਚੁਣੋ"
+  },
+  "Menu": {
+    "en": "Menu",
+    "fr": "Menu",
+    "es": "Menú",
+    "zh": "菜单",
+    "pa": "ਮੀਨੂ"
   }
 }
