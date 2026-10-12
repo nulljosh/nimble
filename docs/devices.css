@@ -91,7 +91,7 @@
 /* Mac: a macOS window. Titlebar with traffic lights and a centred title. */
 .device-mac, .device-windows {
   --device-w: 560px;
-  --bar: var(--device-bar); --bar-text: var(--device-bar-text); --ring: rgba(0,0,0,.16);
+  --bar: var(--device-bar); --bar-text: var(--device-bar-text); --ring: color-mix(in srgb, var(--black) 16%, transparent);
   width: var(--device-w);
   padding-top: var(--space-6);
   border-radius: 11px;
@@ -124,11 +124,11 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .device-mac, .device-windows { --bar: var(--device-bar-dark); --bar-text: var(--device-bar-text-dark); --ring: rgba(255,255,255,.14); }
+  .device-mac, .device-windows { --bar: var(--device-bar-dark); --bar-text: var(--device-bar-text-dark); --ring: color-mix(in srgb, var(--white) 14%, transparent); }
   .device-mac .device-screen, .device-windows .device-screen { background: var(--device-body); }
 }
-[data-theme="dark"] .device-mac, [data-theme="dark"] .device-windows { --bar: var(--device-bar-dark); --bar-text: var(--device-bar-text-dark); --ring: rgba(255,255,255,.14); }
-[data-theme="light"] .device-mac, [data-theme="light"] .device-windows { --bar: var(--device-bar); --bar-text: var(--device-bar-text); --ring: rgba(0,0,0,.16); }
+[data-theme="dark"] .device-mac, [data-theme="dark"] .device-windows { --bar: var(--device-bar-dark); --bar-text: var(--device-bar-text-dark); --ring: color-mix(in srgb, var(--white) 14%, transparent); }
+[data-theme="light"] .device-mac, [data-theme="light"] .device-windows { --bar: var(--device-bar); --bar-text: var(--device-bar-text); --ring: color-mix(in srgb, var(--black) 16%, transparent); }
 
 @media (max-width: 640px) {
   .device-mac, .device-windows, .device-ipad { --device-w: 100%; }

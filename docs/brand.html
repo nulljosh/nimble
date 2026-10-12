@@ -26,7 +26,7 @@ body {
   color: var(--text);
   font-family: var(--font);
   font-size: var(--fs-17);
-  line-height: 1.5;
+  line-height: var(--lh-md);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -52,7 +52,7 @@ img, svg { display: block; max-width: 100%; }
 
 section { padding: var(--space-7) 0 var(--space-2); border-top: 1px solid var(--line); margin-top: var(--space-7); }
 section:first-of-type { border-top: 0; margin-top: 0; }
-h2 { font-size: var(--fs-28); line-height: var(--lh-display); letter-spacing: var(--track-display); font-weight: 600; }
+h2 { font-size: var(--fs-28); line-height: var(--lh-xl); letter-spacing: var(--track-display); font-weight: 600; }
 .lede { color: var(--text-mid); margin-top: var(--space-2); max-width: 46ch; }
 h3 { font-size: var(--fs-17); font-weight: 600; margin-bottom: var(--space-1); }
 .note { color: var(--text-mid); font-size: var(--fs-13); margin-top: var(--space-2); }
@@ -60,7 +60,7 @@ h3 { font-size: var(--fs-17); font-weight: 600; margin-bottom: var(--space-1); }
 /* Logo and icon */
 .lockup { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-5) var(--space-4); background: var(--bg2); box-shadow: inset 0 0 0 1px var(--line); }
 .lockup svg { width: 64px; height: 64px; flex: none; }
-.lockup span { font-size: var(--fs-34); font-weight: 600; letter-spacing: var(--track-display); line-height: 1; }
+.lockup span { font-size: var(--fs-34); font-weight: 600; letter-spacing: var(--track-display); line-height: var(--lh-2xl); }
 .pair { display: grid; grid-template-columns: 1fr; gap: var(--space-4); margin-top: var(--space-4); }
 .pair figure { background: var(--bg2); box-shadow: inset 0 0 0 1px var(--line); padding: var(--space-5) var(--space-4); display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-3); }
 .pair img { width: 128px; height: 128px; }
@@ -103,7 +103,7 @@ h3 { font-size: var(--fs-17); font-weight: 600; margin-bottom: var(--space-1); }
 
 /* Voice */
 .voice { list-style: none; margin-top: var(--space-4); display: grid; gap: var(--space-3); }
-.voice li { font-size: var(--fs-22); line-height: var(--lh-body); padding-left: var(--space-4); border-left: 4px solid var(--yellow); }
+.voice li { font-size: var(--fs-22); line-height: var(--lh-lg); padding-left: var(--space-4); border-left: 4px solid var(--yellow); }
 
 /* Do and don't */
 .rules { display: grid; grid-template-columns: 1fr; gap: var(--space-4); margin-top: var(--space-4); }
@@ -231,7 +231,7 @@ footer a { display: inline-flex; align-items: center; min-height: 44px; }
     <p class="lede">Nimble Sans only. Six sizes, and nothing between them.</p>
     <ul class="scale">
       <li><span class="step">34</span><span class="sample" style="font-size:var(--fs-34);font-weight:600;letter-spacing:var(--track-display);line-height:var(--lh-display)">Display</span></li>
-      <li><span class="step">28</span><span class="sample" style="font-size:var(--fs-28);font-weight:600;letter-spacing:var(--track-display);line-height:var(--lh-display)">Title</span></li>
+      <li><span class="step">28</span><span class="sample" style="font-size:var(--fs-28);font-weight:600;letter-spacing:var(--track-display);line-height:var(--lh-xl)">Title</span></li>
       <li><span class="step">22</span><span class="sample" style="font-size:var(--fs-22);font-weight:600">Headline</span></li>
       <li><span class="step">17</span><span class="sample" style="font-size:var(--fs-17)">Body. Ask a question, get one sentence back.</span></li>
       <li><span class="step">15</span><span class="sample" style="font-size:var(--fs-15)">Small body and labels in the app.</span></li>

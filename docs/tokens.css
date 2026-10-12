@@ -7,17 +7,19 @@
 /* Measures: reading column, app column, page frame. */
 --max-app:640px;--max-text:720px;--max-wide:960px;
 /* Tap targets: a 44px hit area around text that is shorter than 44px. */
---tap-pad:calc((44px - 1lh) / 2);}
+--tap-pad:var(--space-4);
+/* Line heights on the 4px grid, one per type size: 13 to 20, 15 and 17 to 24, 22 and 28 to 28 and 32, 34 to 40. */
+--lh-sm:20px;--lh-md:24px;--lh-lg:28px;--lh-xl:32px;--lh-2xl:40px;}
 @media (min-width:600px){:root{--gutter:var(--space-5);}}
 @media (min-width:1024px){:root{--gutter:var(--space-6);}}
 /* Links, toggles and buttons that are not .btn read at least 44px tall. Inline text keeps its line; see each page's .tap rules. */
 :where(button:not(.btn),input:not([type=checkbox]):not([type=radio]),select,textarea){min-height:44px}
-:root{--yellow:var(--bulb);--yellow-deep:var(--bulb-deep);--black:#000;--white:#fff;--text:var(--color-text);--text-mid:var(--color-soft);--text-light:var(--color-secondary);--on-yellow-mid:rgba(0,0,0,0.6);--bg:var(--color-bg);--bg-accent:var(--bulb);--line:var(--color-hairline);--font:"Nimble Sans",system-ui,-apple-system,sans-serif;--fw-medium:500;--fw-semibold:600;--fs-13:13px;--fs-15:15px;--fs-17:17px;--fs-22:22px;--fs-28:28px;--fs-34:34px;--lh-body:1.35;--lh-display:1.1;--track-display:-0.02em;--fw-regular:400;--fw-bold:700;--lh:1.6;--tracking-tight:-0.02em;--s1:var(--space-2);--s2:var(--space-4);--s3:var(--space-5);--s4:var(--space-7);--s5:var(--space-8);--radius:0;--radius-card:0;--divider:var(--rule);}
+:root{--yellow:var(--bulb);--yellow-deep:var(--bulb-deep);--black:#000;--white:#fff;--text:var(--color-text);--text-mid:var(--color-soft);--text-light:var(--color-secondary);--on-yellow-mid:rgba(0,0,0,0.6);--bg:var(--color-bg);--bg-accent:var(--bulb);--line:var(--color-hairline);--font:"Nimble Sans",system-ui,-apple-system,sans-serif;--fw-medium:500;--fw-semibold:600;--fs-13:13px;--fs-15:15px;--fs-17:17px;--fs-22:22px;--fs-28:28px;--fs-34:34px;--lh-body:var(--lh-md);--lh-display:var(--lh-2xl);--track-display:-0.02em;--fw-regular:400;--fw-bold:700;--lh:var(--lh-md);--tracking-tight:-0.02em;--s1:var(--space-2);--s2:var(--space-4);--s3:var(--space-5);--s4:var(--space-7);--s5:var(--space-8);--radius:0;--radius-card:0;--divider:var(--rule);}
 
 /* Type scale: fixed px steps. Display sizes track tighter in CSS, not glyph edits. */
 .display{font-size:var(--fs-34);line-height:var(--lh-display);letter-spacing:var(--track-display);font-weight:var(--fw-semibold)}
-.title{font-size:var(--fs-28);line-height:var(--lh-display);letter-spacing:var(--track-display);font-weight:var(--fw-semibold)}
-.headline{font-size:var(--fs-22);line-height:var(--lh-body);letter-spacing:-0.01em;font-weight:var(--fw-semibold)}
+.title{font-size:var(--fs-28);line-height:var(--lh-xl);letter-spacing:var(--track-display);font-weight:var(--fw-semibold)}
+.headline{font-size:var(--fs-22);line-height:var(--lh-lg);letter-spacing:-0.01em;font-weight:var(--fw-semibold)}
 .body{font-size:var(--fs-17);line-height:var(--lh-body)}
 .caption{font-size:var(--fs-13);line-height:var(--lh-body)}
 /* Math and converter numbers: tabular figures, applied per element */

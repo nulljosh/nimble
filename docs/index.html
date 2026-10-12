@@ -41,7 +41,8 @@ body {
   background: var(--bg);
   color: var(--dark);
   font-family: var(--font);
-  line-height: 1.6;
+  font-size: var(--fs-17);
+  line-height: var(--lh-md);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -74,9 +75,9 @@ a:hover { text-decoration: underline; }
   display: flex; align-items: center; justify-content: space-between;
   max-width: var(--max-wide); margin: 0 auto; padding: 0 var(--gutter);
 }
-.hero-brand { min-height: 44px; display: flex; align-items: center; gap: var(--space-3); color: var(--black); font-weight: 700; font-size: 1.15rem; letter-spacing: var(--tracking-tight); }
+.hero-brand { min-height: 44px; min-width: 44px; display: flex; align-items: center; gap: var(--space-3); color: var(--black); font-weight: 700; font-size: var(--fs-17); letter-spacing: var(--tracking-tight); }
 .hero-brand svg { width: 40px; height: 40px; } /* 40px puts every rect of the 200 grid on a whole pixel */
-.hero-nav nav { display: flex; align-items: center; gap: var(--space-5); font-size: 0.95rem; }
+.hero-nav nav { display: flex; align-items: center; gap: var(--space-5); font-size: var(--fs-15); }
 .hero-nav nav a { display: inline-flex; align-items: center; min-height: 44px; color: color-mix(in srgb, var(--black) 70%, transparent); }
 .hero-nav nav a:hover { color: var(--black); text-decoration: none; }
 .hero-nav nav .btn { color: var(--yellow); }
@@ -109,10 +110,10 @@ a:hover { text-decoration: underline; }
 }
 
 .hero h1 {
-  font-size: clamp(2.5rem, 7vw, 4rem);
+  font-size: var(--fs-34);
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: var(--lh-2xl);
   text-wrap: balance;
   color: var(--dark);
   margin-bottom: var(--s1);
@@ -120,11 +121,11 @@ a:hover { text-decoration: underline; }
 
 .hero-version {
   font-variant-numeric: tabular-nums;
-  font-size: clamp(1rem, 2.5vw, 1.2rem) !important; color: var(--on-yellow-mid) !important;
+  font-size: var(--fs-17) !important; color: var(--on-yellow-mid) !important;
   margin: 0 auto var(--s3) !important; min-height: 1.2em;
 }
 .hero p {
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-size: var(--fs-17);
   color: var(--on-yellow-mid);
   max-width: 440px;
   text-wrap: balance;
@@ -140,10 +141,10 @@ a:hover { text-decoration: underline; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  min-height: 44px;
+  min-height: 44px; min-width: 44px;
   padding: var(--space-2) var(--space-4);
   font-family: var(--font);
-  font-size: 0.95rem;
+  font-size: var(--fs-15);
   font-weight: 700;
   text-decoration: none;
   border: none;
@@ -170,7 +171,7 @@ a:hover { text-decoration: underline; }
 }
 /* Equal heights: the copy grows, so every card's links sit on one line. */
 .install-card { display: flex; flex-direction: column; }
-.install-card h3 { font-size: 1.1rem; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: var(--space-2); }
+.install-card h3 { font-size: var(--fs-17); letter-spacing: -0.02em; line-height: var(--lh-md); margin-bottom: var(--space-2); }
 .install-card p { flex: 1; color: var(--mid); margin-bottom: var(--s3); }
 .install-links { display: flex; align-items: baseline; gap: var(--s3); }
 .install-links .btn:not(.btn-dark) { padding-left: 0; padding-right: 0; }
@@ -206,8 +207,8 @@ a:hover { text-decoration: underline; }
 .hero .mockup, .mockup { flex: 1; border-radius: 0; min-height: 0; margin: 0; }
 .device-mac, .device-windows { --device-w: 480px; }
 .device-mac .mockup, .device-windows .mockup { min-height: 300px; }
-.mockup-status { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-6) var(--space-1); font-size: 12px; font-weight: 600; color: var(--panel-text); }
-.mockup-status span:last-child { font-size: 6px; color: var(--panel-mid); letter-spacing: 2px; }
+.mockup-status { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-6) var(--space-1); font-size: var(--fs-13); font-weight: 600; color: var(--panel-text); }
+.mockup-status span:last-child { font-size: var(--fs-13); color: var(--panel-mid); letter-spacing: 2px; }
 .mockup-result { flex: 1; }
 .device-mac .mockup-status, .device-windows .mockup-status { display: none; }
 .hero .demo-caption { font-family: var(--font); font-variant: normal; text-transform: none; letter-spacing: normal; font-size: var(--fs-13); color: var(--on-yellow-mid); max-width: none; margin: var(--s2) auto 0; }
@@ -262,7 +263,7 @@ a:hover { text-decoration: underline; }
 .mockup-card p { text-decoration: none; }
 .mockup-card:hover p { text-decoration: underline; text-decoration-color: var(--panel-gold); }
 .news { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; gap: var(--space-3); }
-.news li { line-height: 1.35; }
+.news li { line-height: var(--lh-md); }
 .news a { color: inherit; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
 .news-src { display: block; font-size: var(--fs-13); opacity: .75; margin-top: var(--space-1); }
 /* Rich results: a photo tops a card (16:9, 12px radius); a news story can carry a 56px square. */
@@ -280,7 +281,7 @@ a:hover { text-decoration: underline; }
 .why.steps ol { margin: var(--space-2) 0 0; padding: 0; list-style: none; counter-reset: step; }
 .why.steps li { counter-increment: step; margin: 0 0 var(--space-1); }
 .why.steps li::before { content: counter(step) "."; display: inline-block; width: 22px; font-variant-numeric: tabular-nums; }
-.why p { margin-top: var(--space-2); font-size: var(--fs-15); line-height: 1.35; }
+.why p { margin-top: var(--space-2); font-size: var(--fs-15); line-height: var(--lh-md); }
 .why a { display: inline-block; padding-block: var(--tap-pad); margin-top: calc(var(--space-2) - var(--tap-pad)); margin-bottom: calc(var(--tap-pad) * -1); color: inherit; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
 .consent-actions { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
 .consent-actions button { min-height: 44px; border: 1px solid var(--panel-line); background: none; color: var(--panel-text); border-radius: var(--radius); padding: var(--space-2) var(--space-3); font: inherit; font-size: var(--fs-13); font-weight: 700; cursor: pointer; }
@@ -308,12 +309,12 @@ a:hover { text-decoration: underline; }
 .mockup-result p {
   font-size: var(--fs-13);
   color: var(--panel-mid);
-  line-height: 1.55;
+  line-height: var(--lh-sm);
 }
 
 /* Small caps gold label, the same one the app puts under an answer. */
 .mockup-label {
-  font-size: 10px;
+  font-size: var(--fs-13);
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -326,7 +327,7 @@ a:hover { text-decoration: underline; }
   padding: var(--space-3) var(--space-4);
   border-top: 1px solid var(--panel-line);
   text-align: right;
-  font-size: 11px;
+  font-size: var(--fs-13);
   color: var(--panel-mid);
 }
 
@@ -337,10 +338,10 @@ a:hover { text-decoration: underline; }
 /* Every section after the hero: one padding, one hairline, one headline. */
 main > section:not(.hero) { padding: var(--space-8) 0; border-top: var(--rule); }
 main > section:not(.hero) h2 {
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  font-size: var(--fs-28);
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: var(--lh-xl);
   text-align: center;
   margin-bottom: var(--space-7);
 }
@@ -353,23 +354,23 @@ main > section:not(.hero) h2 {
 }
 
 .feature h3 {
-  font-size: 1.1rem;
+  font-size: var(--fs-17);
   font-weight: 700;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: var(--lh-md);
   margin-bottom: var(--space-2);
 }
 
 .feature p {
   color: var(--mid);
-  line-height: 1.55;
+  line-height: var(--lh-md);
 }
 
 /* Quotes */
 .quote { text-align: center; max-width: 34rem; margin: 0 auto var(--space-7); }
 .quote:last-child { margin-bottom: 0; }
-.quote p { font-size: 1.1rem; line-height: 1.5; margin-bottom: var(--s1); }
-.quote cite { font-style: normal; font-variant: var(--caption); letter-spacing: 0.06em; font-size: 0.9rem; }
+.quote p { font-size: var(--fs-17); line-height: var(--lh-md); margin-bottom: var(--s1); }
+.quote cite { font-style: normal; font-variant: var(--caption); letter-spacing: 0.06em; font-size: var(--fs-15); }
 
 /* Open source and agents */
 .oss, .agents { text-align: center; }
@@ -388,7 +389,7 @@ main > section:not(.hero) h2 {
   background: var(--color-bg2);
   border-radius: var(--radius);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--fs-15);
   overflow-wrap: anywhere;
 }
 .agents p:last-child { margin: var(--s3) auto 0; }
@@ -398,7 +399,7 @@ footer {
   padding: var(--s5) 0;
   text-align: center;
   border-top: 1px solid var(--line);
-  font-size: 0.85rem;
+  font-size: var(--fs-13);
   color: var(--mid);
 }
 
@@ -409,12 +410,12 @@ footer {
   footer .foot-rule > :last-child { order: 2; }
   @media (max-width: 520px) { footer .foot-rule { flex-wrap: wrap; justify-content: center; gap: var(--space-3) var(--space-4); } footer .foot-rule::before { order: -1; flex-basis: 100%; } }
   .foot-dir { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-6) var(--space-5); max-width: var(--max-wide); margin: 0 auto; padding: 0 var(--gutter) var(--space-6); text-align: left; }
-  .foot-col h3 { margin: 0 0 var(--space-2); font-size: 12px; font-weight: 600; color: var(--dark); letter-spacing: 0.02em; }
+  .foot-col h3 { margin: 0 0 var(--space-2); font-size: var(--fs-13); font-weight: 600; color: var(--dark); letter-spacing: 0.02em; }
   .foot-col ul { list-style: none; margin: 0; padding: 0; }
-  .foot-col a { position: relative; display: inline-block; padding: var(--tap-pad) 0; margin: calc(var(--tap-pad) * -1 + var(--space-1)) 0; color: var(--mid); text-decoration: none; font-size: var(--fs-13); line-height: 1.35; }
+  .foot-col a { position: relative; display: inline-block; min-width: 44px; padding: var(--tap-pad) 0; margin: calc(var(--tap-pad) * -1 + var(--space-1)) 0; color: var(--mid); text-decoration: none; font-size: var(--fs-13); line-height: var(--lh-sm); }
   .foot-col a:hover { color: var(--dark); text-decoration: underline; }
   .foot-bar { max-width: var(--max-wide); margin: 0 auto; padding: var(--space-4) var(--gutter) 0; border-top: 1px solid var(--line); }
-  .foot-bar .foot-meta { margin: 0; text-align: left; color: var(--mid); font-size: 12.5px; line-height: 1.9; }
+  .foot-bar .foot-meta { margin: 0; text-align: left; color: var(--mid); font-size: var(--fs-13); line-height: var(--lh-md); }
   .foot-bar .foot-meta a { color: var(--mid); }
   @media (max-width: 700px) { .foot-dir { grid-template-columns: repeat(2, 1fr); } }
 
@@ -438,7 +439,7 @@ footer {
 
 .credit {
   margin-top: var(--s1);
-  font-size: 0.8rem;
+  font-size: var(--fs-13);
 }
 </style>
 </head>
