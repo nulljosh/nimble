@@ -6,7 +6,7 @@ Keep Nimble moving with one small, shippable slice at a time: fix what App Revie
 
 ## Where things stand
 
-- Version 5.13.13 is on main and pushed. Current state, not history: answers carry a photo when the picture belongs to the entity the answer names, credited "<Title> · Wikipedia" on web, Swift, Mac and Kotlin; the Why text opens on the Wikipedia page behind any answer that has none of its own; the proxy returns `topic`, `topicUrl` and `aiError`.
+- Version 5.14.0 (was 5.13.13): footer Why toggle, source links and resting note now meet 44pt taps and AA contrast on iPhone. Current state, not history: answers carry a photo when the picture belongs to the entity the answer names, credited "<Title> · Wikipedia" on web, Swift, Mac and Kotlin; the Why text opens on the Wikipedia page behind any answer that has none of its own; the proxy returns `topic`, `topicUrl` and `aiError`.
 - When the free AI fails (quota or outage), the Worker says why in `aiError` and the app shows "The free AI is resting, showing Wikipedia." Joshua declined the $5 paid plan: Workers AI stays on the free tier, 10,000 neurons a day.
 - Do not run the 95-question exam in a loop. Repeated exam runs used up the day's free quota on 2026-10-12. The quota note lives in memory (feedback_nimble_worker_neuron_quota.md).
 - Brand kit at nimble.jaybulb.com/brand. The brand/ folder at the repo root holds the icon, wordmark, mascots and social image. Domain stays nimble.jaybulb.com.

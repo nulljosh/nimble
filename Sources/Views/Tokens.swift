@@ -72,9 +72,9 @@ extension Font {
 
 #if canImport(UIKit)
 extension View {
-    /// Keeps the drawn size and layout, but makes the touch area at least 44pt. Negative padding cancels the layout.
+    /// Keeps the drawn size and layout, but makes the touch area about 44pt for 14pt text (14 + 2 x 15). Negative padding cancels the layout.
     func minimumTapTarget() -> some View {
-        padding(10).contentShape(Rectangle()).padding(-10)
+        padding(15).contentShape(Rectangle()).padding(-15)
     }
 }
 #else

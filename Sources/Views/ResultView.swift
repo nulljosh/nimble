@@ -241,6 +241,7 @@ struct TextAnswerView: View {
                                         .underline()
                                 }
                                 .buttonStyle(.plain)
+                                .minimumTapTarget()
                             }
                         }
                     }
@@ -248,7 +249,7 @@ struct TextAnswerView: View {
                 if let note = QueryEngine.aiRestingNote(aiError: aiError, source: source) {
                     Text(note)
                         .font(.nimbleCaption)
-                        .foregroundStyle(Color.dim)
+                        .foregroundStyle(Color.soft)
                 }
                 if showWhy, let whyText {
                     VStack(alignment: .leading, spacing: 8) {
@@ -266,6 +267,7 @@ struct TextAnswerView: View {
                                     .underline()
                             }
                             .buttonStyle(.plain)
+                            .minimumTapTarget()
                         }
                     }
                     .transition(.opacity)
@@ -283,10 +285,12 @@ struct TextAnswerView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .minimumTapTarget()
                 .accessibilityLabel(String(localized: "powered by \(source)"))
             } else if let u = URL(string: pageURL) {
                 Button { openURL(u) } label: { Text("powered by \(source)") }
                     .buttonStyle(.plain)
+                    .minimumTapTarget()
                     .accessibilityLabel(String(localized: "powered by \(source)"))
             } else {
                 Text("powered by \(source)")
@@ -297,7 +301,7 @@ struct TextAnswerView: View {
 
 // MARK: - Shared cards (web app: .card, .field, the eyebrow and the Ask button)
 
-/// The answer card: hairline border, 22pt padding, an eyebrow, the answer, then one row with the source and Share.
+/// The answer card: hairline border, 24pt padding, an eyebrow, the answer, then one row with the source and Share.
 struct AnswerCard<Content: View, Footer: View>: View {
     let shareText: String?
     let content: Content
