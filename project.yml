@@ -7,8 +7,8 @@ settings:
     # and signing fails with "requires a development team".
     DEVELOPMENT_TEAM: QMM486NPYC
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "5.9.1"
-    CURRENT_PROJECT_VERSION: "30"
+    MARKETING_VERSION: "5.10.0"
+    CURRENT_PROJECT_VERSION: "31"
 targets:
   Nimble:
     type: application
@@ -22,6 +22,11 @@ targets:
         buildPhase: resources
       # Icon Composer bundle; Xcode builds the legacy sizes from it
       - path: Nimble.icon
+      # Nimble Sans, the app's own typeface (fonts/README.md)
+      - path: fonts
+        includes:
+          - "*.ttf"
+        buildPhase: resources
       # The bulb on the share card, read from the web's own copy so there is one file
       - path: docs/icon-512.png
         buildPhase: resources
@@ -33,6 +38,7 @@ targets:
         # "unidentified developer" jail. scripts/release-macos.sh does the rest.
         ENABLE_HARDENED_RUNTIME: YES
         CODE_SIGN_ENTITLEMENTS: Nimble-macOS.entitlements
+        INFOPLIST_FILE: Nimble-macOS-Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: Nimble
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
@@ -59,6 +65,11 @@ targets:
         buildPhase: resources
       - path: Nimble.icon
       - path: docs/icon-512.png
+        buildPhase: resources
+      # Nimble Sans, the app's own typeface (fonts/README.md). UIAppFonts lists them in the plist.
+      - path: fonts
+        includes:
+          - "*.ttf"
         buildPhase: resources
     settings:
       base:

@@ -1,3 +1,12 @@
 /* Nimble design system — thin aliases onto the shared Jaybulb tokens. */
 @import url("https://jaybulb.com/tokens.css");
-:root{--yellow:var(--bulb);--yellow-deep:var(--bulb-deep);--black:#000;--white:#fff;--text:var(--color-text);--text-mid:var(--color-soft);--text-light:var(--color-secondary);--on-yellow-mid:rgba(0,0,0,0.6);--bg:var(--color-bg);--bg-accent:var(--bulb);--line:var(--color-hairline);--font:var(--font-body);--fw-regular:400;--fw-bold:700;--lh:1.6;--tracking-tight:-0.02em;--s1:0.5rem;--s2:1rem;--s3:1.5rem;--s4:2.5rem;--s5:4rem;--radius:0;--radius-card:0;--divider:var(--rule);}
+:root{--yellow:var(--bulb);--yellow-deep:var(--bulb-deep);--black:#000;--white:#fff;--text:var(--color-text);--text-mid:var(--color-soft);--text-light:var(--color-secondary);--on-yellow-mid:rgba(0,0,0,0.6);--bg:var(--color-bg);--bg-accent:var(--bulb);--line:var(--color-hairline);--font:"Nimble Sans",system-ui,-apple-system,sans-serif;--fw-medium:500;--fw-semibold:600;--fs-13:13px;--fs-15:15px;--fs-17:17px;--fs-22:22px;--fs-28:28px;--fs-34:34px;--lh-body:1.35;--lh-display:1.1;--track-display:-0.02em;--fw-regular:400;--fw-bold:700;--lh:1.6;--tracking-tight:-0.02em;--s1:0.5rem;--s2:1rem;--s3:1.5rem;--s4:2.5rem;--s5:4rem;--radius:0;--radius-card:0;--divider:var(--rule);}
+
+/* Type scale: fixed px steps. Display sizes track tighter in CSS, not glyph edits. */
+.display{font-size:var(--fs-34);line-height:var(--lh-display);letter-spacing:var(--track-display);font-weight:var(--fw-semibold)}
+.title{font-size:var(--fs-28);line-height:var(--lh-display);letter-spacing:var(--track-display);font-weight:var(--fw-semibold)}
+.headline{font-size:var(--fs-22);line-height:var(--lh-body);letter-spacing:-0.01em;font-weight:var(--fw-semibold)}
+.body{font-size:var(--fs-17);line-height:var(--lh-body)}
+.caption{font-size:var(--fs-13);line-height:var(--lh-body)}
+/* Math and converter numbers: tabular figures, applied per element */
+.num,.math{font-variant-numeric:tabular-nums}

@@ -37,6 +37,37 @@ extension Color {
     }
 }
 
+/// Nimble Sans, the app's own face (fonts/README.md). The scale matches docs/tokens.css.
+/// Each step is tied to a text style, so Dynamic Type still scales it on iOS.
+extension Font {
+    enum NimbleWeight: String {
+        case regular = "Regular", medium = "Medium", semibold = "SemiBold", bold = "Bold"
+    }
+
+    static func nimble(_ size: CGFloat, _ weight: NimbleWeight = .regular, relativeTo style: Font.TextStyle) -> Font {
+        .custom("NimbleSans-\(weight.rawValue)", size: size, relativeTo: style)
+    }
+
+    /// Maps SwiftUI weights onto the four bundled faces. Anything else falls back to Regular.
+    static func nimbleFace(_ size: CGFloat, weight: Font.Weight) -> Font {
+        let face: NimbleWeight = switch weight {
+        case .medium: .medium
+        case .semibold: .semibold
+        case .bold, .heavy, .black: .bold
+        default: .regular
+        }
+        return .custom("NimbleSans-\(face.rawValue)", size: size)
+    }
+
+    // Web scale: 34 / 28 / 22 / 17 / 15 / 13 px.
+    static let nimbleDisplay = nimble(34, .semibold, relativeTo: .largeTitle)
+    static let nimbleTitle = nimble(28, .semibold, relativeTo: .title)
+    static let nimbleHeadline = nimble(22, .semibold, relativeTo: .title2)
+    static let nimbleBody = nimble(17, .regular, relativeTo: .body)
+    static let nimbleSubhead = nimble(15, .regular, relativeTo: .subheadline)
+    static let nimbleCaption = nimble(13, .regular, relativeTo: .footnote)
+}
+
 /// Design sizes for text and icons. On iOS they scale with Dynamic Type; on Mac they stay fixed.
 extension View {
     func nimbleFont(_ size: CGFloat, weight: Font.Weight = .regular) -> some View {
@@ -56,7 +87,7 @@ private struct NimbleFont: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        content.font(.system(size: size, weight: weight))
+        content.font(.nimbleFace(size, weight: weight))
     }
 }
 
@@ -72,7 +103,7 @@ private struct NimbleFont: ViewModifier {
     let weight: Font.Weight
 
     func body(content: Content) -> some View {
-        content.font(.system(size: size, weight: weight))
+        content.font(.nimbleFace(size, weight: weight))
     }
 }
 

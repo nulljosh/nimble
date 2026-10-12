@@ -23,6 +23,14 @@
 		<key>UIImageName</key>
 		<string>LaunchIcon</string>
 	</dict>
+	<!-- Nimble Sans, bundled from fonts/ (see fonts/README.md). -->
+	<key>UIAppFonts</key>
+	<array>
+		<string>NimbleSans-Regular.ttf</string>
+		<string>NimbleSans-Medium.ttf</string>
+		<string>NimbleSans-SemiBold.ttf</string>
+		<string>NimbleSans-Bold.ttf</string>
+	</array>
 	<!-- nimble://ask opens the app with the field focused; the widget links here. -->
 	<key>CFBundleURLTypes</key>
 	<array>
