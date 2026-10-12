@@ -87,7 +87,7 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         // AI answers have no source page; give them a web search so every answer opens somewhere.
         // An AI answer with no proxy photo takes the picture and intro of the Wikipedia topic it names (TopicPhoto).
         gemma(input)?.let { ai ->
-            val answer = ai.copy(sourceUrl = "https://duckduckgo.com/?q=${input.encodeURLParameter()}")
+            val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}")
             return TopicPhoto.withTopic(answer, input) { fetchText(it) }
         }
 
@@ -257,11 +257,33 @@ internal fun proxyAnswer(body: String): Answer.Text? {
     val d = rich.decodeFromString<ProxyReply>(body)
     val answer = d.answer?.trim().orEmpty()
     if (answer.isEmpty() || answer.uppercase() == "UNKNOWN") return null
-    return Answer.Text(heading = null, body = answer, source = d.source ?: "Nimble", photoUrl = httpsOnly(d.image?.url))
+    // The proxy's named Wikipedia page (topic, topicUrl) credits the photo and links the Why text. Older proxies send neither.
+    val url = d.topicUrl?.takeIf { it.startsWith("https://en.wikipedia.org/wiki/") }
+    val title = d.topic?.trim()?.takeIf { it.isNotEmpty() && url != null }
+    val photo = httpsOnly(d.image?.url)
+    return Answer.Text(
+        heading = null,
+        body = answer,
+        source = d.source ?: "Nimble",
+        sourceUrl = url.takeIf { title != null },
+        photoUrl = photo,
+        photoCredit = title?.takeIf { photo != null }?.let { "$it \u00B7 Wikipedia" },
+        grounding = title?.let { t -> d.refs.orEmpty().firstOrNull { it.url == url }?.extract?.takeIf { it.isNotBlank() } },
+    )
 }
 
 @Serializable
-private data class ProxyReply(val answer: String? = null, val source: String? = null, val image: RichImage? = null)
+private data class ProxyReply(
+    val answer: String? = null,
+    val source: String? = null,
+    val image: RichImage? = null,
+    val topic: String? = null,
+    val topicUrl: String? = null,
+    val refs: List<ProxyRef>? = null,
+)
+
+@Serializable
+private data class ProxyRef(val title: String? = null, val url: String? = null, val extract: String? = null)
 
 @Serializable
 private data class RichImage(val url: String? = null)

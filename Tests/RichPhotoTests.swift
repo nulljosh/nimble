@@ -87,4 +87,32 @@ final class RichPhotoTests: XCTestCase {
         guard case .text(_, _, _, _, _, _, _, let kept) = QueryEngine.keepingPhoto(own, from: llm) else { return XCTFail("no text") }
         XCTAssertEqual(kept?.url, "https://a.org/own.jpg")
     }
+
+    /// The proxy names its Wikipedia page; older proxies send no topic, and a non-Wikipedia link is refused.
+    func testProxyTopicDecodesAndNamesItsPage() throws {
+        let json = """
+        {"answer":"Hamlet was written by William Shakespeare.","source":"Gemma + Qwen",
+         "image":{"url":"https://upload.wikimedia.org/h.jpg","width":800,"height":600},
+         "refs":[{"title":"Hamlet","url":"https://en.wikipedia.org/wiki/Hamlet","extract":"Hamlet is a tragedy by William Shakespeare."}],
+         "topic":"Hamlet","topicUrl":"https://en.wikipedia.org/wiki/Hamlet"}
+        """
+        let reply = try JSONDecoder().decode(ProxyReply.self, from: Data(json.utf8))
+        let named = try XCTUnwrap(reply.namedTopic)
+        XCTAssertEqual(named.title, "Hamlet")
+        XCTAssertEqual(named.url, "https://en.wikipedia.org/wiki/Hamlet")
+        XCTAssertEqual(named.grounding, "Hamlet is a tragedy by William Shakespeare.")
+    }
+
+    func testOldProxyReplyWithoutTopicStillDecodes() throws {
+        let json = #"{"answer":"Paris.","source":"Qwen","refs":[{"title":"Paris","url":"https://en.wikipedia.org/wiki/Paris","extract":"Paris is a city."}]}"#
+        let reply = try JSONDecoder().decode(ProxyReply.self, from: Data(json.utf8))
+        XCTAssertNil(reply.namedTopic)
+        XCTAssertEqual(reply.refs?.first?.title, "Paris")
+    }
+
+    func testProxyTopicRefusesNonWikipediaLinks() throws {
+        let json = #"{"answer":"Paris.","topic":"Paris","topicUrl":"https://evil.example/Paris"}"#
+        let reply = try JSONDecoder().decode(ProxyReply.self, from: Data(json.utf8))
+        XCTAssertNil(reply.namedTopic)
+    }
 }

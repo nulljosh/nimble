@@ -87,6 +87,16 @@ struct TopicSummary: Decodable {
 struct ProxyReply: Decodable {
     let image: AnswerPhoto?
     let refs: [ProxyRef]?
+    /// The Wikipedia page the proxy names for its answer and photo. Optional: older proxies never send it.
+    let topic: String?
+    let topicUrl: String?
+
+    /// The named page, when the proxy sent a Wikipedia link for it, with its intro from `refs` when there is one.
+    var namedTopic: (title: String, url: String, grounding: String?)? {
+        guard let title = topic?.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty,
+              let url = topicUrl, url.lowercased().hasPrefix("https://en.wikipedia.org/wiki/") else { return nil }
+        return (title, url, refs?.first { $0.url == url }?.extract?.nonEmpty)
+    }
 }
 
 struct ProxyRef: Decodable {
@@ -504,11 +514,14 @@ final class QueryEngine: Sendable {
                 guard let url = r.url, url.lowercased().hasPrefix("https://"), let title = r.title?.nonEmpty, r.extract?.nonEmpty != nil else { return nil }
                 return (title, url)
             }
-            let topic = refs.first { Self.onTopic($0.title, query: input, body: "") } ?? refs.first { Self.onTopic($0.title, query: input, body: answer) }
+            // The named topic (the proxy's own page) credits the photo and links the Why text; otherwise the first on-topic ref does.
+            let named = reply?.namedTopic
+            let topic = named.map { (title: $0.title, url: $0.url) }
+                ?? refs.first { Self.onTopic($0.title, query: input, body: "") } ?? refs.first { Self.onTopic($0.title, query: input, body: answer) }
             let proxyPhoto = reply?.image.flatMap { AnswerPhoto.https($0.url, width: $0.width, height: $0.height, title: topic?.title) }
             let photo = proxyPhoto ?? Self.answerPhoto(answer, pages: pages)
             let sources = refs.filter { Self.onTopic($0.title, query: input, body: answer) }.prefix(2).map { AnswerSource(name: $0.title, url: $0.url) }
-            return .text(heading: nil, body: answer, source: source, sourceURL: nil, imageURL: nil, sources: Array(sources), photo: photo)
+            return .text(heading: nil, body: answer, source: source, sourceURL: named?.url, imageURL: nil, grounding: named?.grounding, sources: Array(sources), photo: photo)
         } catch {
             return nil
         }

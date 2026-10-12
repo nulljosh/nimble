@@ -442,7 +442,7 @@ async function gemma(query){
   let c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
   if(e.key && !c.apiKey){ c = {engine:"nimble"}; e = ENGINES.nimble; } // no key = free proxy
   const base = c.baseURL || e.base, model = c.model || e.model, H = {"Content-Type":"application/json"};
-  let d, text, src, image = null, refs = [];
+  let d, text, src, image = null, refs = [], why = {};
   if(c.engine==="claude" && e===ENGINES.claude){
     d = await getJSON(base+"/v1/messages", {method:"POST", headers:{...H, "x-api-key":c.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({model, max_tokens:256, system:SYSTEM, messages:[...turnMessages(), {role:"user", content:query}]})});
@@ -461,12 +461,17 @@ async function gemma(query){
     image = d?.image && /^https:\/\//.test(d.image.url||"") ? d.image : null;
     // Wikipedia pages behind the proxy's answer; the worker has already matched them to the sentence.
     refs = Array.isArray(d?.refs) ? d.refs.filter(r => r && /^https:\/\//.test(r.url||"") && r.extract).map(r => ({src:"Wikipedia", title:r.title||"Wikipedia", url:r.url, grounding:r.extract})) : [];
-    // The proxy's photo names no page: its credit is the on-topic Wikipedia page, as an AI photo's is. No match, no credit.
-    const topic = image && (refs.find(r => onTopic(r.title, query, "")) || refs.find(r => onTopic(r.title, query, text)));
-    if(topic) image = {...image, title:topic.title};
+    // The proxy names its page in topic/topicUrl (the page its photo or sentence came from). When it does, that page
+    // gives the photo credit and the Why text. Older proxies send neither: the photo's page is the first on-topic ref.
+    const named = typeof d?.topic==="string" && d.topic.trim() && /^https:\/\/en\.wikipedia\.org\/wiki\//.test(d?.topicUrl||"")
+      ? {title:d.topic.trim(), url:d.topicUrl, grounding:(refs.find(r => r.url===d.topicUrl)||{}).grounding} : null;
+    const topic = named || (image && (refs.find(r => onTopic(r.title, query, "")) || refs.find(r => onTopic(r.title, query, text))));
+    if(image && topic) image = {...image, title:topic.title};
+    // The Why link opens the named page's intro, only when the proxy named one that came with its text.
+    if(named && named.grounding) why = {grounding:named.grounding, groundingTitle:named.title, groundingUrl:named.url};
   }
   const a = (text||"").trim();
-  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {}), ...(refs.length ? {refs} : {})} : null;
+  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {}), ...(refs.length ? {refs} : {}), ...why} : null;
 }
 
 // "Who made you" is about us, not the Wikipedia article for whatever the words match (it used to

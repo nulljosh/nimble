@@ -96,4 +96,28 @@ class RichResultsTest {
         assertNull(leadPhoto("https://upload.wikimedia.org/x/Flag_of_Canada.jpg"))
         assertNull(leadPhoto("http://upload.wikimedia.org/x/Ottawa.jpg"))
     }
+
+    @Test
+    fun proxyTopicCreditsItsPhotoAndLinksTheWhyText() {
+        val a = proxyAnswer(
+            """{"answer":"Hamlet was written by William Shakespeare.","source":"Gemma + Qwen",""" +
+                """"image":{"url":"https://upload.wikimedia.org/h.jpg"},""" +
+                """"refs":[{"title":"Hamlet","url":"https://en.wikipedia.org/wiki/Hamlet","extract":"Hamlet is a tragedy."}],""" +
+                """"topic":"Hamlet","topicUrl":"https://en.wikipedia.org/wiki/Hamlet"}"""
+        )!!
+        assertEquals("Hamlet \u00B7 Wikipedia", a.photoCredit)
+        assertEquals("https://en.wikipedia.org/wiki/Hamlet", a.sourceUrl)
+        assertEquals("Hamlet is a tragedy.", a.grounding)
+    }
+
+    @Test
+    fun proxyTopicWithoutPhotoOrWithAForeignLinkIsIgnored() {
+        val noPhoto = proxyAnswer("""{"answer":"Paris.","topic":"Paris","topicUrl":"https://en.wikipedia.org/wiki/Paris"}""")!!
+        assertNull(noPhoto.photoCredit)
+        val foreign = proxyAnswer(
+            """{"answer":"Paris.","image":{"url":"https://example.com/p.jpg"},"topic":"Paris","topicUrl":"https://evil.example/Paris"}"""
+        )!!
+        assertNull(foreign.sourceUrl)
+        assertNull(foreign.photoCredit)
+    }
 }

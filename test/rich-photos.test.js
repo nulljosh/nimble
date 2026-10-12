@@ -151,11 +151,11 @@ test("a numeric AI answer keeps its photo when DDG supplies the sourced number",
 
 // AI answers (the proxy's sentence, consent given). The proxy sends no photo, so the engine looks for the
 // Wikipedia topic the sentence names. Every fetch is routed; anything unlisted is a miss.
-function aiStub({ answer, proxyImage = null, search = [], pages = {} }) {
+function aiStub({ answer, proxyImage = null, proxyExtra = {}, search = [], pages = {} }) {
   const calls = [];
   globalThis.fetch = async (url, opts) => {
     url = String(url); calls.push(url);
-    if (url.startsWith("https://nimble-answers") && opts?.method === "POST") return json({ answer, source: "Qwen", ...(proxyImage ? { image: proxyImage } : {}) });
+    if (url.startsWith("https://nimble-answers") && opts?.method === "POST") return json({ answer, source: "Qwen", ...(proxyImage ? { image: proxyImage } : {}), ...proxyExtra });
     if (url.includes("list=search")) return json({ query: { search: search.map((title) => ({ title })) } });
     const m = /\/page\/summary\/(.+)$/.exec(url);
     if (m && pages[decodeURIComponent(m[1])]) {
@@ -270,4 +270,49 @@ test("weather, time and math never look for a photo", async () => {
   const a = await E.answer("weather in vancouver");
   assert.equal(a.image, undefined);
   assert.equal(calls.filter((u) => u.includes("/page/summary/")).length, 0);
+});
+
+// The proxy names its Wikipedia page in topic and topicUrl. That page credits the photo and gives the Why text.
+test("the proxy topic credits its photo, and its refs extract gives the Why text", async () => {
+  consent = "yes";
+  const refs = [{ title: "Hamlet", url: "https://en.wikipedia.org/wiki/Hamlet", extract: "Hamlet is a tragedy written by William Shakespeare around 1600. It follows a prince of Denmark." }];
+  aiStub({ answer: "Hamlet was written by William Shakespeare.", proxyImage: { url: "https://upload.wikimedia.org/h.jpg", width: 800, height: 600 },
+    proxyExtra: { topic: "Hamlet", topicUrl: "https://en.wikipedia.org/wiki/Hamlet", refs } });
+  const a = await E.answer("who wrote hamlet");
+  assert.equal(a.image.title, "Hamlet");
+  assert.equal(a.grounding, refs[0].extract);
+  assert.equal(a.groundingTitle, "Hamlet");
+  assert.equal(a.groundingUrl, "https://en.wikipedia.org/wiki/Hamlet");
+  const r = await E.renderAnswer("who wrote hamlet");
+  assert.match(r.h, /<span class="photo-credit">Hamlet · Wikipedia<\/span>/);
+  assert.match(r.h, /<a href="https:\/\/en\.wikipedia\.org\/wiki\/Hamlet" target="_blank" rel="noopener">Hamlet · Wikipedia<\/a>/);
+});
+
+test("a proxy topic beats the on-topic guess for the credit", async () => {
+  consent = "yes";
+  const refs = [{ title: "Hamlet (1948 film)", url: "https://en.wikipedia.org/wiki/Hamlet_(1948_film)", extract: "Hamlet is a 1948 film directed by Laurence Olivier." },
+    { title: "Hamlet", url: "https://en.wikipedia.org/wiki/Hamlet", extract: "Hamlet is a tragedy by William Shakespeare." }];
+  aiStub({ answer: "Hamlet was written by William Shakespeare.", proxyImage: { url: "https://upload.wikimedia.org/h.jpg" },
+    proxyExtra: { topic: "Hamlet", topicUrl: "https://en.wikipedia.org/wiki/Hamlet", refs } });
+  const a = await E.answer("who wrote hamlet");
+  assert.equal(a.image.title, "Hamlet");
+  assert.equal(a.groundingUrl, "https://en.wikipedia.org/wiki/Hamlet");
+});
+
+test("a proxy topic with a non-Wikipedia link is ignored and the on-topic fallback still credits", async () => {
+  consent = "yes";
+  const refs = [{ title: "Hamlet", url: "https://en.wikipedia.org/wiki/Hamlet", extract: "Hamlet is a tragedy by William Shakespeare." }];
+  aiStub({ answer: "Hamlet was written by William Shakespeare.", proxyImage: { url: "https://upload.wikimedia.org/h.jpg" },
+    proxyExtra: { topic: "Hamlet", topicUrl: "https://evil.example/Hamlet", refs } });
+  const a = await E.answer("who wrote hamlet");
+  assert.equal(a.image.title, "Hamlet");
+  assert.notEqual(a.groundingUrl, "https://evil.example/Hamlet");
+});
+
+test("an old proxy with no topic fields keeps the on-topic credit", async () => {
+  consent = "yes";
+  const refs = [{ title: "Hamlet", url: "https://en.wikipedia.org/wiki/Hamlet", extract: "Hamlet is a tragedy by William Shakespeare." }];
+  aiStub({ answer: "Hamlet was written by William Shakespeare.", proxyImage: { url: "https://upload.wikimedia.org/h.jpg" }, proxyExtra: { refs } });
+  const a = await E.answer("who wrote hamlet");
+  assert.equal(a.image.title, "Hamlet");
 });

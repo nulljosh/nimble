@@ -27,7 +27,7 @@ async function freshContext(q, attempt = 0) {
     // the lead plus any sentence naming who holds something now.
     const trim = (t = "") => {
       const sents = t.split(/(?<=[.!?])\s+/);
-      return [...sents.slice(0, 4), ...sents.slice(4).filter((x) => /\b(current|incumbent|since)\b/i.test(x))].join(" ");
+      return [...sents.slice(0, 4), ...sents.slice(4).filter((x) => /\b(current|incumbent)\b|\bsince\b[\s\S]*\b(president|minister|premier|ceo|governor|mayor|secretary|chancellor|king|queen|head)\b/i.test(x))].join(" ");
     };
     return { text: pages.map((p) => `${p.title}: ${trim(p.extract)}`).join("\n\n").slice(0, 6000), pages: sorted };
   } catch {
@@ -39,6 +39,12 @@ async function freshContext(q, attempt = 0) {
 // agreement test the web engine uses. Wikipedia's lead image is sometimes a logo or flag: skipped.
 const NOT_A_PHOTO = /\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-/i;
 function photoFor(answer, pages) {
+  const hit = photoPage(answer, pages);
+  if (!hit) return null;
+  const { thumbnail: t } = hit.page;
+  return { image: { url: t.source, width: t.width ?? null, height: t.height ?? null }, page: hit.page };
+}
+function photoPage(answer, pages) {
   const keys = (s) => (s.toLowerCase().match(/[a-z]{4,}/g) || []).filter((w) => !GLUE.has(w));
   const want = [...new Set(keys(answer))];
   if (!want.length) return null;
@@ -46,11 +52,16 @@ function photoFor(answer, pages) {
     const src = p.thumbnail?.source;
     if (!src || NOT_A_PHOTO.test(src) || !p.extract) continue;
     const have = new Set(keys(p.extract));
-    if (want.filter((w) => have.has(w)).length >= Math.ceil(want.length * 0.6)) {
-      return { url: src, width: p.thumbnail.width ?? null, height: p.thumbnail.height ?? null };
-    }
+    if (want.filter((w) => have.has(w)).length >= Math.ceil(want.length * 0.6)) return { page: p };
   }
   return null;
+}
+// The Wikipedia page a sentence is credited to: the page its photo came from, else the first grounding page.
+// Title and URL use the same format as the refs, so clients can match them.
+function topicOf(answer, pages, refs) {
+  const page = photoPage(answer, pages)?.page || (refs[0] && pages.find((p) => p.title === refs[0].title));
+  if (!page) return null;
+  return { topic: page.title, topicUrl: encodeURI(`https://en.wikipedia.org/wiki/${page.title.replace(/ /g, "_")}`) };
 }
 // The Wikipedia pages behind an AI answer, up to three, each with the same word-overlap test as the
 // photo. The client lists one of them as a second source next to DDG. URLs match DDG's format
@@ -68,6 +79,8 @@ function groundingRefs(answer, pages) {
     .slice(0, 3)
     .map((p) => ({ title: p.title, url: encodeURI(`https://en.wikipedia.org/wiki/${p.title.replace(/ /g, "_")}`), extract: p.extract }));
 }
+// A date or figure comes only from the reference: "since 1944" from an unrelated page is how the France answer went wrong.
+const GROUNDED = "Do not add a date or figure the reference lacks.";
 const GLUE = new Set("that this with from which were have they their also been into about after there these those when where while would could should will".split(" "));
 
 // Follow-up context from the client: at most 3 {q, a} string pairs, each side cut to 300 chars.
@@ -159,14 +172,16 @@ export default {
     // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
     const { text: context, pages } = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
     const reply = (o) => {
-      const image = o.answer !== "UNKNOWN" ? photoFor(o.answer, pages) : null;
-      const refs = o.answer !== "UNKNOWN" ? groundingRefs(o.answer, pages) : [];
-      return json({ ...o, ...(image ? { image } : {}), ...(refs.length ? { refs } : {}) });
+      const known = o.answer !== "UNKNOWN";
+      const photo = known ? photoFor(o.answer, pages) : null;
+      const refs = known ? groundingRefs(o.answer, pages) : [];
+      const topic = known ? topicOf(o.answer, pages, refs) : null;
+      return json({ ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) });
     };
     const today = new Date().toISOString().slice(0, 10);
     const system =
       `${SYSTEM} Today is ${today}. Your training data is out of date; when the reference text below ` +
-      `covers the question, trust it over your memory. Never mention the reference text.` + (context ? `\n\nReference (live Wikipedia):\n${context}` : "");
+      `covers the question, trust it over your memory. Never mention the reference text.` + (context ? ` ${GROUNDED}` : "") + (context ? `\n\nReference (live Wikipedia):\n${context}` : "");
     const ask = (model) =>
       env.AI.run(model, {
         messages: [
@@ -188,11 +203,12 @@ export default {
           // Models narrate the grounding ("not mentioned in the provided reference") instead of
           // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
           // The same goes for the model quoting its own rules back ("The instructions say: ... reply exactly UNKNOWN").
-          if (/\b(reference|provided (text|context))\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b/i.test(text)) return "UNKNOWN";
+          if (/\b(reference|provided (text|context))\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) return "UNKNOWN";
           // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
           // The date is ours, not the answer's; drop the preamble and recapitalize.
           const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "");
-          return clean ? clean[0].toUpperCase() + clean.slice(1) : "UNKNOWN";
+          // A reply with no letter or digit (a stray "*" from a reasoning trace) is no answer.
+          return /[a-z0-9]/i.test(clean) ? clean[0].toUpperCase() + clean.slice(1) : "UNKNOWN";
         })
         .catch(() => "UNKNOWN");
 
@@ -219,7 +235,7 @@ export default {
         {
           role: "system",
           content:
-            "Two AI models answered the same question. Merge them into one short, accurate factual sentence. No preamble, no markdown.",
+            "Two AI models answered the same question. Merge them into one short, accurate factual sentence. No preamble, no markdown. Use only facts both answers state; never add a date or number that neither gives.",
         },
         {
           role: "user",
