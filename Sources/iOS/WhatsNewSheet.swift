@@ -4,9 +4,9 @@ import SwiftUI
 // it was pinned at "1.2.0" while the project shipped 1.0.0, a version that never existed.
 let whatsNewVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 private let whatsNewBullets = [
-    "Ask about any website and get what it does, read from the site itself",
-    "A fresh look: the same warm design as the web app",
-    "Sharper answers on current events, checked against live sources",
+    "Three tabs: Ask, History and Settings",
+    "Works offline: the opening lines of 9,000 Wikipedia articles, downloaded once",
+    "When sources disagree, you see both answers, and live answers say how fresh they are",
 ]
 
 struct WhatsNewSheet: View {
@@ -22,6 +22,8 @@ struct WhatsNewSheet: View {
                 isPresented = seenVersion != whatsNewVersion && !UserDefaults.standard.bool(forKey: "shotDisagree")
             }
             .sheet(isPresented: $isPresented) {
+                // Scrolls and can grow to full height, so accessibility text sizes never clip the last line or the button.
+                ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     Text("What's new in \(whatsNewVersion)")
                         .font(.nimbleHeadline)
@@ -54,8 +56,9 @@ struct WhatsNewSheet: View {
                 .background(GeometryReader { geo in
                     Color.clear.preference(key: SheetHeightKey.self, value: geo.size.height)
                 })
+                }
                 .onPreferenceChange(SheetHeightKey.self) { contentHeight = $0 }
-                .presentationDetents([.height(contentHeight + 34)]) // ponytail: +34 covers home-indicator safe area GeometryReader doesn't include
+                .presentationDetents([.height(contentHeight + 34), .large]) // ponytail: +34 covers home-indicator safe area GeometryReader doesn't include
             }
     }
 }
