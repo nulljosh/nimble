@@ -176,9 +176,9 @@ class AnswerClient(
             )
         }
         val message = if (pack != null) {
-            "Not in the offline pack. Math, units and graphs still work offline."
+            "Not in the offline pack. Math still works offline."
         } else {
-            "You're offline. Math, units and graphs still work."
+            "You're offline. Math still works."
         }
         return Answer.Miss(message, "")
     }
