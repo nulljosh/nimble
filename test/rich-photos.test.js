@@ -185,12 +185,38 @@ test("the photo credit names the page and the Why expander opens the page's text
   assert.match(r.h, /<p>Paris is the capital and most populous city of France\./);
 });
 
-test("the proxy's own photo wins, and no topic lookup runs", async () => {
+test("the proxy's photo wins, and the topic still supplies the grounding and its link", async () => {
   consent = "yes";
   const calls = aiStub({ answer: "The capital of France is Paris.", proxyImage: { url: "https://example.org/p.jpg" }, pages: { Paris: PARIS } });
   const a = await E.answer("capital of france");
   assert.equal(a.image.url, "https://example.org/p.jpg");
-  assert.equal(calls.filter((u) => u.includes("/page/summary/")).length, 0);
+  assert.equal(a.image.title, undefined);
+  assert.equal(a.grounding, PARIS.extract);
+  assert.equal(a.groundingUrl, "https://en.wikipedia.org/wiki/Paris");
+  assert.ok(calls.some((u) => u.includes("/page/summary/Paris")));
+  const r = await E.renderAnswer("capital of france");
+  assert.match(r.h, /<details class="why">/);
+  assert.match(r.h, /<a href="https:\/\/en\.wikipedia\.org\/wiki\/Paris" target="_blank" rel="noopener">Paris \u00B7 Wikipedia<\/a>/);
+  assert.doesNotMatch(r.h.slice(r.h.indexOf("<details")), /duckduckgo/, "the Why link goes to the Wikipedia page, not a search");
+});
+
+test("a topic with text but no picture gives grounding and no image", async () => {
+  consent = "yes";
+  aiStub({ answer: "The capital of France is Paris.", search: [], pages: { Paris: { extract: PARIS.extract } } });
+  const a = await E.answer("capital of france");
+  assert.equal(a.image, undefined);
+  assert.equal(a.grounding, PARIS.extract);
+  assert.equal(a.groundingTitle, "Paris");
+});
+
+test("photosynthesis: the search hit's text grounds the answer, and its SVG diagram is not a photo", async () => {
+  consent = "yes";
+  const DIAGRAM = { source: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Photosynthesis_en.svg/330px-Photosynthesis_en.svg.png", width: 330, height: 330 };
+  aiStub({ answer: "Photosynthesis turns light into chemical energy.", search: ["Photosynthesis"], pages: { Photosynthesis: { thumbnail: DIAGRAM, extract: "Photosynthesis is a system of biological processes by which organisms convert light energy into chemical energy." } } });
+  const a = await E.answer("what is photosynthesis");
+  assert.equal(a.image, undefined);
+  assert.match(a.grounding, /^Photosynthesis is a system/);
+  assert.equal(a.groundingTitle, "Photosynthesis");
 });
 
 test("a topic whose only picture is a logo gives the answer no photo", async () => {

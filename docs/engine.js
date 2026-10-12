@@ -200,24 +200,32 @@ function wikiPhoto(sum){
 const NO_PHOTO_Q = /\b(weather|forecast|temperature|time|clock|convert|math|sum|plus|minus|times|divided|percent)\b|\d/i;
 const ENTITY_RE = /\b\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+){0,3}/gu;
 const NOT_ENTITY = new Set(["The","A","An","It","This","That","In","On","At","As","Its","He","She","They","There","Yes","No","I","Of","For","And","But","If","When","Where","Who","What","From","With","By","To","Is","Was","These","Those","We","You"]);
-async function summaryPhoto(title){
+// One Wikipedia page for the topic: its title, link, lead extract, and lead photo when it is a real picture.
+async function summaryTopic(title){
   const sum = await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-  if(!sum || sum.type==="disambiguation") return null;
-  const img = wikiPhoto(sum);
-  return img ? {...img, title: sum.title || title, extract: sum.extract || null} : null;
+  if(!sum || sum.type==="disambiguation" || !sum.title) return null;
+  const page = sum.content_urls?.desktop?.page;
+  return {title: sum.title, page: /^https:\/\//.test(page||"") ? page : null, extract: sum.extract || null, image: wikiPhoto(sum)};
 }
-async function topicPhoto(query, body){
+// The photo and the grounding come from the same lookup but are picked separately: the first candidate
+// with a real picture gives the photo, the first with text gives the grounding. Candidates: the proper
+// nouns the answer names, then the top Wikipedia search hits for the question.
+async function topicFor(query, body){
   if(NO_PHOTO_Q.test(query)) return null;
   const q = query.toLowerCase();
   const ents = [...new Set((body||"").match(ENTITY_RE)||[])].filter(e=>!NOT_ENTITY.has(e) && !q.includes(e.toLowerCase()));
   const [search, ...first] = await Promise.all([
     getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=3&origin=*`),
-    ...ents.slice(0,2).map(summaryPhoto),
+    ...ents.slice(0,2).map(summaryTopic),
   ]);
-  for(const p of first) if(p) return p;
-  const hits = (search?.query?.search||[]).map(x=>x.title).filter(t=>t && !/^list of /i.test(t) && !ents.includes(t)).slice(0,2);
-  for(const t of hits){ const p = await summaryPhoto(t); if(p) return p; }
-  return null;
+  const titles = (search?.query?.search||[]).map(x=>x.title).filter(t=>t && !/^list of /i.test(t) && !ents.includes(t)).slice(0,2);
+  const all = [...first, ...(await Promise.all(titles.map(summaryTopic)))].filter(Boolean);
+  const pic = all.find(t=>t.image), text = all.find(t=>t.extract && t.page);
+  if(!pic && !text) return null;
+  return {
+    photo: pic ? {url:pic.image.url, width:pic.image.width, height:pic.image.height, title:pic.title} : null,
+    grounding: text ? {title:text.title, url:text.page, extract:text.extract} : null,
+  };
 }
 
 // A DuckDuckGo abstract from Wikipedia names its article; that article's lead photo goes with it.
@@ -495,10 +503,13 @@ async function answer(query, opts={}){
   const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
   // The model's photo, when its page backs the sentence, stays with the number it was shown with.
   let hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : (ai || dd || await firstOf(query, [wiki]));
-  // No picture from the proxy: the answer's Wikipedia topic may still have one. Its extract backs the answer too.
-  if(hit && !hit.image){
-    const p = await topicPhoto(query, hit.body).catch(()=>null);
-    if(p) hit = {...hit, image:{url:p.url, width:p.width, height:p.height, title:p.title}, ...(!hit.grounding && p.extract ? {grounding:p.extract} : {})};
+  // The answer's Wikipedia topic can supply a picture (when the proxy sent none) and the text behind the sentence (when nothing else did).
+  if(hit && (!hit.image || !hit.grounding)){
+    const t = await topicFor(query, hit.body).catch(()=>null);
+    if(t){
+      if(!hit.image && t.photo) hit = {...hit, image:t.photo};
+      if(!hit.grounding && t.grounding) hit = {...hit, grounding:t.grounding.extract, groundingTitle:t.grounding.title, groundingUrl:t.grounding.url};
+    }
   }
   if(hit) turns.add(query, hit.body);
   // The model names no page, so the DDG abstract is the only link here; it must back the sentence.
@@ -591,8 +602,10 @@ async function renderAnswer(query, opts){
     // Shown only when that text says more than the sentence did.
     const why = typeof a.grounding==="string" && a.grounding.trim().length > a.body.trim().length;
     if(why){
+      // The link names the page the text came from: the Wikipedia topic when there is one, else the source.
+      const gHref = a.groundingUrl || href, gName = a.groundingTitle ? a.groundingTitle+" \u00B7 Wikipedia" : a.src;
       h+='<details class="why"><summary>'+esc(T("powered by {s}",{s:a.src}))+'</summary><p>'+esc(a.grounding.trim())+'</p>'
-        +'<a href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(a.src)+'</a></details>';
+        +'<a href="'+esc(gHref).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(gName)+'</a></details>';
       credit="";
     } else credit=T("powered by {s}",{s:a.src});
     // Two or more linked sources sit under the sentence, names only; the row replaces the credit line.
