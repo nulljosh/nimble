@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
@@ -302,6 +303,37 @@ private fun SiteIcon(url: String, client: AnswerClient) {
     bitmap?.let { Image(bitmap = it, contentDescription = null, modifier = Modifier.size(24.dp)) }
 }
 
+/**
+ * "Why this answer": a 48dp toggle under the source line. Open, it shows the Wikipedia intro behind the answer and a
+ * 48dp link to the page. Taps here stop at the toggle, so they do not also open the whole answer.
+ */
+@Composable
+private fun WhyThisAnswer(text: String, pageUrl: String?, theme: NimbleTheme) {
+    val uriHandler = LocalUriHandler.current
+    var open by remember { mutableStateOf(false) }
+    Box(
+        Modifier
+            .defaultMinSize(minHeight = 48.dp)
+            .clickable(onClickLabel = if (open) "Hide why this answer" else "Why this answer") { open = !open },
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Text(if (open) "Hide why this answer" else "Why this answer", color = theme.accent, fontSize = 14.sp)
+    }
+    if (open) {
+        Text(text, color = theme.text, fontSize = 14.sp)
+        pageUrl?.let {
+            Box(
+                Modifier
+                    .defaultMinSize(minHeight = 48.dp)
+                    .clickable(onClickLabel = "Read on Wikipedia") { uriHandler.openUri(it) },
+                contentAlignment = Alignment.CenterStart,
+            ) {
+                Text("Read on Wikipedia", color = theme.accent, fontSize = 14.sp)
+            }
+        }
+    }
+}
+
 @Composable
 private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient) {
     Column(Modifier.widthIn(max = 640.dp)) {
@@ -323,6 +355,10 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                 Column(Modifier.clickable { answer.sourceUrl?.let(uriHandler::openUri) }) {
                     answer.photoUrl?.let {
                         AnswerPhoto(it, theme, client)
+                        answer.photoCredit?.let { credit ->
+                            Spacer(Modifier.height(4.dp))
+                            Text(credit, color = theme.muted, fontSize = 12.sp)
+                        }
                         Spacer(Modifier.height(12.dp))
                     }
                     answer.imageUrl?.let {
@@ -336,6 +372,10 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                     Text(answer.body, color = theme.text, fontSize = 16.sp, textDecoration = TextDecoration.Underline)
                     Spacer(Modifier.height(12.dp))
                     Text("Source: ${answer.source}", color = theme.muted, fontSize = 12.sp)
+                    answer.grounding?.let {
+                        Spacer(Modifier.height(8.dp))
+                        WhyThisAnswer(it, answer.sourceUrl, theme)
+                    }
                 }
             }
 

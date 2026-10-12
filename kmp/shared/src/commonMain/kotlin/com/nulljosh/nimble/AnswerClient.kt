@@ -10,6 +10,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.readRawBytes
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
 import io.ktor.http.encodeURLPathPart
@@ -31,6 +32,10 @@ sealed class Answer {
         val imageUrl: String? = null,
         /** Lead photo above the answer, cropped to 16:9 from the top. https only. */
         val photoUrl: String? = null,
+        /** The photo's credit line, "<Title> · Wikipedia", when the photo came from a Wikipedia topic. */
+        val photoCredit: String? = null,
+        /** The Wikipedia intro behind the answer, shown under "Why this answer". Null when nothing backs it. */
+        val grounding: String? = null,
     ) : Answer()
     /** "news" or "what's happening in <place>": up to three headlines from the worker's RSS route. */
     data class News(val items: List<NewsItem>, val source: String) : Answer()
@@ -80,7 +85,11 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         newsPlace(input)?.let { place -> news(place)?.let { return it } }
 
         // AI answers have no source page; give them a web search so every answer opens somewhere.
-        gemma(input)?.let { return it.copy(sourceUrl = "https://duckduckgo.com/?q=${input.encodeURLParameter()}") }
+        // An AI answer with no proxy photo takes the picture and intro of the Wikipedia topic it names (TopicPhoto).
+        gemma(input)?.let { ai ->
+            val answer = ai.copy(sourceUrl = "https://duckduckgo.com/?q=${input.encodeURLParameter()}")
+            return TopicPhoto.withTopic(answer, input) { fetchText(it) }
+        }
 
         val (ddgQuery, wikiQuery) = QueryEngine.preprocess(input)
         ddg(ddgQuery)?.let { return it }
@@ -147,17 +156,11 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         null
     }
 
-    @Serializable
-    private data class WikiSummary(
-        val title: String? = null,
-        val extract: String? = null,
-        val thumbnail: WikiThumb? = null,
-        @SerialName("content_urls") val contentUrls: WikiUrls? = null,
-    )
-
-    @Serializable private data class WikiThumb(val source: String? = null)
-    @Serializable private data class WikiUrls(val desktop: WikiDesktop? = null)
-    @Serializable private data class WikiDesktop(val page: String? = null)
+    /** Body text of a URL, or null on a network failure or any non-200 reply. */
+    private suspend fun fetchText(url: String): String? = runCatchingNull {
+        val res = http.get(url)
+        if (res.status == HttpStatusCode.OK) res.bodyAsText() else null
+    }
 
     private suspend fun wikipedia(input: String): Answer.Text? {
         summary(input.replace(" ", "_"))?.let { return it }
@@ -203,6 +206,20 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         )
     }
 }
+
+/** A Wikipedia REST summary: the title, intro, lead image, page link and type ("disambiguation" pages are skipped). */
+@Serializable
+internal data class WikiSummary(
+    val title: String? = null,
+    val type: String? = null,
+    val extract: String? = null,
+    val thumbnail: WikiThumb? = null,
+    @SerialName("content_urls") val contentUrls: WikiUrls? = null,
+)
+
+@Serializable internal data class WikiThumb(val source: String? = null)
+@Serializable internal data class WikiUrls(val desktop: WikiDesktop? = null)
+@Serializable internal data class WikiDesktop(val page: String? = null)
 
 /**
  * Same pattern as `SITE_RE` in docs/engine.js and `siteHost()` in Sources/Models/QueryEngine.swift.
@@ -273,11 +290,15 @@ private val rich = Json { ignoreUnknownKeys = true; isLenient = true }
 /** Same as Swift's AnswerPhoto.https: only https photos are shown. */
 internal fun httpsOnly(url: String?): String? = url?.takeIf { it.lowercase().startsWith("https://") }
 
-/** Wikipedia's lead image, unless it is a logo, flag, icon or drawing (same rule as Swift's wikipediaLead). */
+/**
+ * Wikipedia's lead image, unless it is a logo, flag, icon or map, or not a png, jpg, jpeg or webp. A raw .svg is never a
+ * photo; an SVG diagram's rendered ".svg.png" is. Same rule as Swift's `AnswerPhoto.wikipediaLead`.
+ */
 internal fun leadPhoto(url: String?): String? =
-    httpsOnly(url)?.takeUnless { leadSkip.containsMatchIn(it) }
+    httpsOnly(url)?.takeIf { !leadSkip.containsMatchIn(it) && leadRaster.containsMatchIn(it) }
 
-private val leadSkip = Regex("""\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-""", RegexOption.IGNORE_CASE)
+private val leadSkip = Regex("""\.svg(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-""", RegexOption.IGNORE_CASE)
+private val leadRaster = Regex("""\.(png|jpe?g|webp)(\?|$)""", RegexOption.IGNORE_CASE)
 
 private val newsWorld = Regex("""^(?:(?:latest|top|breaking)\s+)?news\s*\??$|^what(?:'s|\u2019s| is) happening\s*\??$""", RegexOption.IGNORE_CASE)
 private val newsIn = Regex("""^(?:(?:latest|top|breaking)\s+)?news\s+(?:in|from|for|around)\s+(.+?)\s*\??$""", RegexOption.IGNORE_CASE)
