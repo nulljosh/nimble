@@ -1,8 +1,8 @@
 {
   "version": 1,
   "file": "wikipedia-top-v1.json.gz",
-  "bytes": 586030,
-  "count": 4000,
+  "bytes": 1949124,
+  "count": 9000,
   "builtAt": "2026-10-12",
-  "pageviews": "2026-09"
+  "pageviews": "2026-09 plus 120 daily lists"
 }

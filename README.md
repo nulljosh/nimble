@@ -2,7 +2,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v5.20.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v5.20.1-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -44,7 +44,7 @@ Weather, currency, local time and word origins come back as cards. Recent questi
 
 ## Offline pack
 
-On the web, you can download a small pack of Wikipedia article intros once: the top 4,000 English articles, about 0.6 MB. Tap "Download offline answers" in the menu. After that, when the network is gone, questions about those articles still get an answer, with the article link and the date the pack was built. Nothing downloads on its own. Math, units and graphs never needed the network. See `docs/pack/README.md` for the format and the license.
+On the web, you can download a small pack of Wikipedia article intros once: the top 9,000 English articles, about 1.9 MB. Tap "Download offline answers" in the menu. After that, when the network is gone, questions about those articles still get an answer, with the article link and the date the pack was built. Nothing downloads on its own. Math, units and graphs never needed the network. See `docs/pack/README.md` for the format and the license.
 
 ## Development
 

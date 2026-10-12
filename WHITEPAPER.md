@@ -1,6 +1,6 @@
 # Nimble Technical Whitepaper
 
-**v5.20.0** | October 2026
+**v5.20.1** | October 2026
 
 Ask a question. Get one sentence back.
 
@@ -58,7 +58,7 @@ One night of releases, 2.0 to 5.0. 2.0 opened the engine to agents: REST at /api
 
 ## Offline pack
 
-The web app can hold a small copy of Wikipedia. It is the opening two sentences of the 4,000 most-viewed English articles, gzipped plain JSON, about 0.6 MB. The user downloads it with one tap; it sits in IndexedDB, never in localStorage or the service worker cache. When the network is down, or every online source comes back empty, the same lookup runs against the pack: a title or alias match, then a keyword score. A weak score says "Not in the offline pack." It never guesses. The pack is rebuilt monthly by `scripts/build-offline-pack.mjs` from Wikimedia pageviews and Wikipedia summaries, and is credited CC BY-SA 4.0 on every answer.
+The web app can hold a small copy of Wikipedia. It is the opening sentences (up to about 1,000 characters) of the 9,000 most-viewed English articles over the last 120 days, gzipped plain JSON, about 1.9 MB. A question gets the sentence or two that share its words; a "capital of" or "population of" question gets the sentence with that relation word, and nothing when no sentence has it. The user downloads it with one tap; it sits in IndexedDB, never in localStorage or the service worker cache. When the network is down, or every online source comes back empty, the same lookup runs against the pack: a title or alias match, then a keyword score. A weak score says "Not in the offline pack." It never guesses. The pack is rebuilt monthly by `scripts/build-offline-pack.mjs` from Wikimedia pageviews and Wikipedia summaries, and is credited CC BY-SA 4.0 on every answer.
 
 ## License
 

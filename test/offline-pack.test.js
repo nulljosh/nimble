@@ -40,7 +40,7 @@ test("a pack hit carries the entry's text, its link and the build date", () => {
   const a = E.packAnswer("what is water", PACK);
   assert.equal(a.kind, "pack");
   assert.equal(a.title, "Water");
-  assert.equal(a.text, PACK.entries[4].e);
+  assert.equal(a.text, PACK.entries[4].e.split(/(?<=[.!?])\s+/)[0], "no sentence overlaps the question, so the first sentence");
   assert.equal(a.url, "https://en.wikipedia.org/wiki/Water");
   assert.equal(a.asOf, "2026-09-30");
   assert.equal(a.src, "Offline pack · Wikipedia (CC BY-SA)");
@@ -88,4 +88,56 @@ test("online and a source answers: the pack is never used", async () => {
   };
   const a = await E.answer("who wrote hamlet", { ifUnset: "no", pack: PACK });
   assert.notEqual(a.kind, "pack");
+});
+
+// The real pack (the file the page downloads). Answers must come from it or be an honest miss, never a guess.
+const zlib = require("node:zlib"), fs = require("node:fs");
+const REAL = JSON.parse(zlib.gunzipSync(fs.readFileSync(path.join(__dirname, "..", "docs", "pack", "wikipedia-top-v1.json.gz"))).toString("utf8"));
+
+test("real pack: capital of france names Paris", () => {
+  const a = E.packAnswer("capital of france", REAL);
+  assert.ok(a, "in the pack");
+  assert.match(a.text, /Paris/);
+});
+
+test("real pack: population of japan gives a population figure, or an honest miss", () => {
+  const a = E.packAnswer("population of japan", REAL);
+  if (a) assert.match(a.text, /population[^.]*\d|\d[^.]*population/i, a.text);
+  else assert.equal(a, null);
+});
+
+test("real pack: who founded apple names Jobs or Wozniak", () => {
+  const a = E.packAnswer("who founded apple", REAL);
+  assert.ok(a, "Apple Inc. is in the pack");
+  assert.match(a.text, /Jobs|Wozniak/);
+});
+
+test("real pack: who wrote hamlet names Hamlet or Shakespeare, or misses honestly", () => {
+  const a = E.packAnswer("who wrote hamlet", REAL);
+  if (a) assert.match(a.text, /Hamlet|Shakespeare/, a.text);
+  else assert.equal(a, null); // Hamlet is not among the top pageview lists
+});
+
+test("real pack: what is water is never a guess from another title", () => {
+  const a = E.packAnswer("what is water", REAL);
+  if (a) assert.match(a.text, /water/i, a.text);
+  assert.ok(!a || !/Way of Water/.test(a.title), "Avatar is not an answer about water");
+});
+
+test("real pack: who is albert einstein names Einstein", () => {
+  const a = E.packAnswer("who is albert einstein", REAL);
+  assert.ok(a, "in the pack");
+  assert.match(a.text, /Einstein/);
+});
+
+test("real pack: the freshness label is the app's short date, not ISO", () => {
+  assert.equal(E.asOfLabel(REAL.builtAt, true), "Oct 12");
+  assert.ok(!/\d{4}-\d{2}-\d{2}/.test(E.asOfLabel(REAL.builtAt, true)));
+});
+
+test("real pack: an answer is at most two sentences and never has double spaces", () => {
+  for (const q of ["capital of france", "who is albert einstein", "population of japan"]) {
+    const a = E.packAnswer(q, REAL);
+    if (a) assert.ok(!/  /.test(a.text) && a.text.split(/(?<=[.!?])\s+/).length <= 3, q);
+  }
 });

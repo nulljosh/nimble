@@ -301,6 +301,7 @@ const RELATIONS = [
   {re:/^(?:what(?:'s| is)(?: the)?\s+|the\s+)?capital(?:\s+city)?\s+of\s+(.+?)\s*\??$/i, word:/\bcapital\b/i, not:/capital punishment/i},
   {re:/^who\s+(?:wrote|written|authored|painted|composed|directed|invented|discovered|founded|created)\s+(.+?)\s*\??$/i, word:/\b(?:written|wrote|author|authored|composed|painted|directed|invented|discovered|founded|created)\b/i},
   {re:/^when\s+(?:was|did|were|is)\s+(.+?)(?:\s+(?:born|founded|built|invented|released|published|created|written|made|died|die))?\s*\??$/i, word:/\b(?:1[0-9]{3}|20[0-9]{2})\b/},
+  {re:/^population\s+of\s+(.+?)\s*\??$/i, word:/\bpopulation (?:of|is|was|at|about|around|over|estimated)\b[^.]*\d/i},
 ];
 function relationOf(query){
   const q = String(query||"").trim();
@@ -877,32 +878,64 @@ function packTokens(s){
   return String(s||"").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g," ").trim()
     .split(" ").filter(Boolean);  // exact words: stemming turned "Frances" into "france"
 }
-function packSearch(query, pack){
-  if(!pack || !Array.isArray(pack.entries)) return null;
+// Every entry that matches the query, best first. A title match counts only when the title is about the query:
+// "Avatar: The Way of Water" is not an article about water, so the one word in its title is a weak match only.
+function packHits(query, pack){
+  if(!pack || !Array.isArray(pack.entries)) return [];
   const want = new Set(packTokens(query).filter(w => !PACK_STOP.has(w)));
-  if(!want.size) return null;
-  let best = null;
+  if(!want.size) return [];
+  const hits = [];
   pack.entries.forEach((e, i) => {
+    const titleWords = packTokens(e.t).filter(w => !PACK_STOP.has(w));
+    const extra = titleWords.filter(w => !want.has(w)).length; // title words the query does not ask for
     const title = new Set(packTokens(e.t).concat((e.a||[]).flatMap(packTokens)));
     const desc = new Set(packTokens(e.d)), text = new Set(packTokens(e.e));
     let score = 0, named = false;
     for(const w of want){
-      if(title.has(w)){ score += 3; named = true; }
+      if(title.has(w)){
+        if(extra <= 1){ score += 3; named = true; } else score += 1;
+      }
       else if(desc.has(w)) score += 2;
       else if(text.has(w)) score += 1;
     }
-    // Ties go to the shorter title (the plainer article), then to the more-viewed entry (earlier in the pack).
-    const len = packTokens(e.t).length;
-    if(named && score >= PACK_MIN && (!best || score > best.score || (score === best.score && len < best.len))) best = {entry:e, score, index:i, len};
+    if(named && score >= PACK_MIN) hits.push({entry:e, score, index:i, len:titleWords.length});
   });
-  return best;
+  // Ties go to the shorter title (the plainer article), then to the more-viewed entry (earlier in the pack).
+  return hits.sort((a, b) => b.score - a.score || a.len - b.len || a.index - b.index);
 }
-// The answer card for a pack hit: the entry's first sentences, its article link, and the pack's build date.
+function packSearch(query, pack){
+  return packHits(query, pack)[0] || null;
+}
+// The sentences of a pack entry that answer the question. A relation question ("capital of X") takes the first sentence
+// that carries the relation word (the same rule as the online fallback), after the lead sentence; no such sentence means no answer, never a guess.
+// Any other question takes the one or two sentences sharing the most content words with it (the title's own words
+// are in every sentence, so they do not count). No overlap: the first sentence.
+const SENTENCE_BREAK = /(?<!\b[A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/;
+function packText(entry, query, rel){
+  const sents = String(entry.e||"").split(SENTENCE_BREAK).filter(Boolean); // same breaks as first(): "Apple Inc. Founded" stays whole
+  if(!sents.length) return "";
+  if(rel){
+    // The relation sentence often starts with "Its" or "He": the lead sentence before it names the subject.
+    const main = relationSentence(entry.e, rel, rel.subject, true);
+    if(!main) return "";
+    return sents[0] === main ? main : sents[0] + " " + main;
+  }
+  const titleWords = new Set(packTokens(entry.t));
+  const want = new Set(packTokens(query).filter(w => !PACK_STOP.has(w) && !titleWords.has(w)));
+  const best = sents.map((s, i) => { const toks = new Set(packTokens(s)); return {s, i, n:[...want].filter(w => toks.has(w)).length}; })
+    .filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.i - b.i).slice(0, 2).sort((a, b) => a.i - b.i);
+  return best.length ? best.map(x => x.s).join(" ") : sents[0];
+}
+// The answer card for a pack hit: the sentences that answer, its article link, and the pack's build date.
+// A relation question tries each matching entry until one carries the relation sentence ("Apple" the fruit has no founder,
+// "Apple Inc." does). No entry does: null, and the caller says it is not in the pack.
 function packAnswer(query, pack){
-  const hit = packSearch(query, pack);
-  if(!hit) return null;
-  const e = hit.entry;
-  return {kind:"pack", title:e.t, text:e.e, url:e.u, asOf:pack.builtAt||"", src:"Offline pack · Wikipedia (CC BY-SA)"};
+  const rel = relationOf(query);
+  for(const hit of packHits(rel ? rel.subject : query, pack)){
+    const e = hit.entry, text = packText(e, query, rel);
+    if(text) return {kind:"pack", title:e.t, text, url:e.u, asOf:pack.builtAt||"", src:"Offline pack · Wikipedia (CC BY-SA)"};
+  }
+  return null;
 }
 
 // First non-null wins, in order. Sources are functions so a throw in one never kills the chain.
@@ -1092,7 +1125,7 @@ async function renderAnswer(query, opts){
   else if(a.kind==="pack-miss"){ h+="<p>"+T("Not in the offline pack. Math, units and graphs still work offline.")+"</p>"; }
   else if(a.kind==="pack"){
     // Offline pack hit: the entry's first sentences, credited to Wikipedia with its article link and the pack's build date.
-    h+='<p>'+esc(a.text)+'</p>'+(a.asOf?'<p class="as-of num">'+esc(T("as of {t}",{t:a.asOf}))+'</p>':'');
+    h+='<p>'+esc(a.text)+'</p>'+(a.asOf?'<p class="as-of num">'+esc(T("as of {t}",{t:asOfLabel(a.asOf,true)}))+'</p>':'');
     credit='<a href="'+esc(a.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(T("Offline pack \u00B7 Wikipedia (CC BY-SA)"))+'</a>';
   }
   else if(a.kind==="text"){
@@ -1212,4 +1245,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={packSearch,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
