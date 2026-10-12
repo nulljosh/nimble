@@ -28,7 +28,7 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 
 ### v5.5 Premium (Joshua, 2026-10-11: domain now, premium features, then $1 on the App Store)
 
-- [ ] [Joshua] Domain: a .com only (no .app, house rule). nimbleask.com is free at $10.46/yr; buy on the Cloudflare dashboard, then point the landing, app, API and worker at it; keep nimble.jaybulb.com as a redirect.
+- [x] [Joshua] Domain: DECISION 2026-10-11: stay on nimble.jaybulb.com for now (every short nimble .com is taken; nimbleapp.com is parked for sale at $10,795 on HugeDomains, usenimble.com $1,995; .com only, no .app). Revisit with a lowball offer on nimbleapp.com once the $1 app earns.
 - [x] [Opus] Offline mode pulled forward from v8: a small on-device model (Apple Foundation Models where available, else a bundled 0.5B to 1.5B MLX/GGUF) answers facts offline with the exam as the gate (90% or it does not ship); math, units, graphs already offline.
 - [ ] [Sonnet] Offline Wikipedia pack: top intros, compressed, one download, refreshed monthly; the grounding source when there is no network.
 - [x] [Haiku] Premium polish: DECISION 2026-10-11: the AI consent card stays on the paid app (Apple 5.1.2(i) requires consent before sharing data with an AI service); everything is unlocked, so no IAP gating code is needed. The "What you get" list lives in the store text and the landing.
