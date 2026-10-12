@@ -1,5 +1,6 @@
 package com.nulljosh.nimble
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +29,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -35,11 +37,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.decodeToImageBitmap
 
 @Composable
 fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: Voice? = null) {
@@ -130,7 +134,7 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
         Box(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())) {
             when {
                 loading -> CircularProgressIndicator(color = theme.accent, modifier = Modifier.size(28.dp))
-                answer != null -> answer?.let { ResultCard(it, theme) }
+                answer != null -> answer?.let { ResultCard(it, theme, client) }
                 query.isBlank() && recent.isNotEmpty() -> RecentList(
                     entries = recent.take(8),
                     theme = theme,
@@ -207,8 +211,17 @@ private fun ThemeSwatches(selected: NimbleTheme, onSelect: (NimbleTheme) -> Unit
     }
 }
 
+/** Small site favicon above a web answer. Draws nothing until it loads, and nothing if it fails. */
 @Composable
-private fun ResultCard(answer: Answer, theme: NimbleTheme) {
+private fun SiteIcon(url: String, client: AnswerClient) {
+    val bitmap by produceState<ImageBitmap?>(null, url) {
+        value = client.imageBytes(url)?.let { runCatching { it.decodeToImageBitmap() }.getOrNull() }
+    }
+    bitmap?.let { Image(bitmap = it, contentDescription = null, modifier = Modifier.size(24.dp)) }
+}
+
+@Composable
+private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient) {
     Column(Modifier.widthIn(max = 640.dp)) {
         when (answer) {
             is Answer.Math -> Text(
@@ -224,6 +237,10 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme) {
                 // Whole answer opens its source; AI answers have none, so fall back to a web search.
                 val uriHandler = LocalUriHandler.current
                 Column(Modifier.clickable { answer.sourceUrl?.let(uriHandler::openUri) }) {
+                    answer.imageUrl?.let {
+                        SiteIcon(it, client)
+                        Spacer(Modifier.height(8.dp))
+                    }
                     answer.heading?.let {
                         Text(it, color = theme.text, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(8.dp))

@@ -8,6 +8,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.readRawBytes
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
@@ -54,6 +55,9 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
             }
         }
     }
+
+    /** Raw bytes of a small image such as a site favicon; null on any failure. */
+    suspend fun imageBytes(url: String): ByteArray? = runCatchingNull { http.get(url).readRawBytes() }
 
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
