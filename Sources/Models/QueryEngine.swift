@@ -82,9 +82,17 @@ struct TopicSummary: Decodable {
     }
 }
 
-/// The photo the answer proxy adds to an AI answer, when its page backs the sentence.
-struct ProxyPhoto: Decodable {
+/// The answer proxy's extras: the photo it adds when its page backs the sentence, and the Wikipedia pages
+/// behind the answer (`refs`, each with the intro that backed it). Same fields docs/engine.js reads.
+struct ProxyReply: Decodable {
     let image: AnswerPhoto?
+    let refs: [ProxyRef]?
+}
+
+struct ProxyRef: Decodable {
+    let title: String?
+    let url: String?
+    let extract: String?
 }
 
 /// A Wikipedia page from the grounding search: its intro, and its lead photo when the photo passes the rules.
@@ -489,9 +497,18 @@ final class QueryEngine: Sendable {
                   let (answer, source) = ai.parse(data) else { return nil }
             // The proxy sends a photo only when the page behind its answer backs the sentence. A local
             // model gets the same rule against the Wikipedia pages it was grounded on.
-            let proxyPhoto = (try? JSONDecoder().decode(ProxyPhoto.self, from: data))?.image.flatMap { AnswerPhoto.https($0.url, width: $0.width, height: $0.height) }
+            // Same rules as docs/engine.js gemma(): the photo's credit is the first on-topic Wikipedia page, and
+            // the linked row is the first two on-topic pages. No match, no credit and no link.
+            let reply = try? JSONDecoder().decode(ProxyReply.self, from: data)
+            let refs: [(title: String, url: String)] = (reply?.refs ?? []).compactMap { r in
+                guard let url = r.url, url.lowercased().hasPrefix("https://"), let title = r.title?.nonEmpty, r.extract?.nonEmpty != nil else { return nil }
+                return (title, url)
+            }
+            let topic = refs.first { Self.onTopic($0.title, query: input, body: "") } ?? refs.first { Self.onTopic($0.title, query: input, body: answer) }
+            let proxyPhoto = reply?.image.flatMap { AnswerPhoto.https($0.url, width: $0.width, height: $0.height, title: topic?.title) }
             let photo = proxyPhoto ?? Self.answerPhoto(answer, pages: pages)
-            return .text(heading: nil, body: answer, source: source, sourceURL: nil, imageURL: nil, photo: photo)
+            let sources = refs.filter { Self.onTopic($0.title, query: input, body: answer) }.prefix(2).map { AnswerSource(name: $0.title, url: $0.url) }
+            return .text(heading: nil, body: answer, source: source, sourceURL: nil, imageURL: nil, sources: Array(sources), photo: photo)
         } catch {
             return nil
         }
@@ -528,6 +545,25 @@ final class QueryEngine: Sendable {
         return pages.first { page in
             page.photo != nil && want.filter { AnswerSources.keyWords(page.extract).contains($0) }.count >= need
         }?.photo
+    }
+
+    /// A Wikipedia page is on topic for an answer when every word of its title (minus a parenthesis) is a word of
+    /// the question or of the answer's own proper nouns. Same rule as `onTopic` in docs/engine.js.
+    static func onTopic(_ title: String, query: String, body: String) -> Bool {
+        let stripped = title.replacingOccurrences(of: #"\s*\(.*?\)"#, with: "", options: .regularExpression)
+        let words = AnswerSources.keyWords(stripped)
+        guard !words.isEmpty else { return false }
+        var allowed = AnswerSources.keyWords(query)
+        var ents: [String] = []
+        if let re = try? NSRegularExpression(pattern: entityPattern) {
+            for m in re.matches(in: body, range: NSRange(body.startIndex..., in: body)) {
+                guard let r = Range(m.range, in: body) else { continue }
+                let e = String(body[r])
+                if !notEntity.contains(e) { ents.append(e) }
+            }
+        }
+        allowed.formUnion(AnswerSources.keyWords(ents.joined(separator: " ")))
+        return words.allSatisfy { allowed.contains($0) }
     }
 
     /// Gives a result the photo from another result when it has none of its own.

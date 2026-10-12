@@ -58,9 +58,9 @@ struct AnswerPhoto: Equatable, Decodable {
     var title: String? = nil
 
     /// A photo from any source, when the link is https; nil otherwise.
-    static func https(_ url: String?, width: Int? = nil, height: Int? = nil) -> AnswerPhoto? {
+    static func https(_ url: String?, width: Int? = nil, height: Int? = nil, title: String? = nil) -> AnswerPhoto? {
         guard let url, url.lowercased().hasPrefix("https://") else { return nil }
-        return AnswerPhoto(url: url, width: width, height: height)
+        return AnswerPhoto(url: url, width: width, height: height, title: title)
     }
 
     /// Wikipedia's lead image, unless it is a logo, flag, icon or SVG drawing, or not a png, jpg, jpeg or webp.

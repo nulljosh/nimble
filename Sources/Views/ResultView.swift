@@ -63,7 +63,7 @@ struct ResultView: View {
 
         case .news(let items, let source):
             AnswerCard(shareText: state.result.copyText) {
-                VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 16) {
                     ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                         HStack(alignment: .top, spacing: 12) {
                             // A story with a picture gets a 56px square beside its sentence; without one the row is plain.
@@ -161,9 +161,17 @@ struct TextAnswerView: View {
 
     private var pageURL: String { sourceURL ?? state.searchURL }
 
+    /// The "Why this answer" link: "<Title> · Wikipedia" when it opens a Wikipedia article, else the source name.
+    private var whyLabel: String {
+        guard let u = URL(string: pageURL), u.host == "en.wikipedia.org", u.path.hasPrefix("/wiki/"),
+              let title = u.lastPathComponent.removingPercentEncoding?.replacingOccurrences(of: "_", with: " "),
+              !title.isEmpty else { return source }
+        return "\(title) \u{00B7} Wikipedia"
+    }
+
     var body: some View {
         AnswerCard(shareText: shareText) {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 16) {
                 if let photo, let url = URL(string: photo.url) {
                     // 16:9 box reserved up front, the cream placeholder until the picture loads, so nothing jumps.
                     // Fill and anchor to the top: the picture covers the box and crops from the bottom, so heads stay in frame.
@@ -192,7 +200,7 @@ struct TextAnswerView: View {
                             .foregroundStyle(Color.soft)
                     }
                 }
-                HStack(alignment: .top, spacing: 14) {
+                HStack(alignment: .top, spacing: 16) {
                     if let imageURL, let url = URL(string: imageURL) {
                         AsyncImage(url: url) { phase in
                             if case .success(let image) = phase {
@@ -218,7 +226,7 @@ struct TextAnswerView: View {
                     }
                 }
                 if sources.count > 1 {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 8) {
                         ForEach(Array(sources.enumerated()), id: \.offset) { index, item in
                             if index > 0 { Text("\u{00B7}").foregroundStyle(Color.soft) }
                             if let u = URL(string: item.url) {
@@ -243,7 +251,7 @@ struct TextAnswerView: View {
                             .fixedSize(horizontal: false, vertical: true)
                         if let u = URL(string: pageURL) {
                             Button { openURL(u) } label: {
-                                Text(source)
+                                Text(whyLabel)
                                     .font(.nimbleCaptionMedium)
                                     .foregroundStyle(Color.bulbDeep)
                                     .underline()
@@ -259,7 +267,7 @@ struct TextAnswerView: View {
                 Button {
                     withAnimation(.easeOut(duration: 0.2)) { showWhy.toggle() }
                 } label: {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 8) {
                         Text("powered by \(source)")
                         Image(systemName: showWhy ? "chevron.up" : "chevron.down")
                             .font(.nimbleMicro)
@@ -316,7 +324,7 @@ struct AnswerCard<Content: View, Footer: View>: View {
                 }
             }
         }
-        .padding(22)
+        .padding(24)
         .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.hairline, lineWidth: 1))
         .transition(.opacity.combined(with: .move(edge: .top)))
@@ -347,8 +355,8 @@ struct ConsentCard: View {
             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 10))
             : AnyLayout(HStackLayout(spacing: 10))
 
-        return VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 14) {
+        return VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 16) {
                 Eyebrow(text: "Before I answer")
                 Text("Send your question to an AI service?")
                     .font(.nimbleSubheadBold)
@@ -377,7 +385,7 @@ struct ConsentCard: View {
                     .buttonStyle(.plain)
             }
         }
-        .padding(22)
+        .padding(24)
         .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.hairline, lineWidth: 1))
     }
@@ -477,7 +485,7 @@ private struct MathResultView: View {
     @State private var showSteps = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             Text(value)
                 .font(.nimbleDisplay)
                 .monospacedDigit()
@@ -491,7 +499,7 @@ private struct MathResultView: View {
                 }
             if !steps.isEmpty {
                 DisclosureGroup("Show steps", isExpanded: $showSteps) {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 8) {
                         ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
                             Text(step.replacingOccurrences(of: "*", with: "×"))
                                 .font(.nimbleSubhead)
@@ -517,7 +525,7 @@ private struct ConvertResultView: View {
     let toUnit: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("\(to) \(toUnit)")
                 .font(.nimbleDisplay)
                 .monospacedDigit()
@@ -538,7 +546,7 @@ private struct CardResultView: View {
     let sub: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             // A temperature reads as one headline, "11 °C"; other units stay a small caption.
             Text(unit.hasPrefix("°") ? "\(big) \(unit)" : big)
                 .font(.nimbleDisplay)
