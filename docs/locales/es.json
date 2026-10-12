@@ -81,5 +81,6 @@
   "Your key stays on this device and is sent only to {s}.": "Tu clave se queda en este dispositivo y solo se envía a {s}.",
   "Asks this again": "Vuelve a preguntar esto",
   "Mascot": "Mascota",
-  "Mascot: {s}": "Mascota: {s}"
+  "Mascot: {s}": "Mascota: {s}",
+  "On device (Apple Intelligence)": "En el dispositivo (Apple Intelligence)"
 }

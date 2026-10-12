@@ -6,11 +6,14 @@ struct AIEngineSettings: View {
 
     var body: some View {
         Picker("Engine", selection: $state.ai.engine) {
-            ForEach(AIEngine.allCases, id: \.self) { Text($0.displayName).tag($0) }
+            // On device only appears where Apple Intelligence is ready to answer.
+            ForEach(AIEngine.allCases.filter { $0 != .onDevice || OnDeviceAnswers.isAvailable }, id: \.self) {
+                Text($0.displayName).tag($0)
+            }
         }
         .onChange(of: state.ai.engine) { state.savePreferences() }
 
-        if state.ai.engine != .nimble {
+        if state.ai.engine != .nimble && state.ai.engine != .onDevice {
             if state.ai.engine.needsKey {
                 SecureField("API key", text: $state.ai.apiKey)
                     .onSubmit { state.savePreferences() }

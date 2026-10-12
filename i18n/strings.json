@@ -593,5 +593,12 @@
     "es": "Mascota: {s}",
     "zh": "吉祥物：{s}",
     "pa": "ਮਾਸਕੌਟ: {s}"
+  },
+  "On device (Apple Intelligence)": {
+    "en": "On device (Apple Intelligence)",
+    "fr": "Sur l’appareil (Apple Intelligence)",
+    "es": "En el dispositivo (Apple Intelligence)",
+    "zh": "设备端（Apple Intelligence）",
+    "pa": "ਡਿਵਾਈਸ ’ਤੇ (Apple Intelligence)"
   }
 }

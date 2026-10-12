@@ -3,11 +3,12 @@ import Foundation
 /// Which model answers factual questions. `nimble` is the free house proxy (no key);
 /// the rest call the vendor directly with the user's own key, which never leaves the device.
 enum AIEngine: String, Codable, CaseIterable, Sendable {
-    case nimble, claude, openai, ollama, samantha
+    case nimble, onDevice, claude, openai, ollama, samantha
 
     var displayName: String {
         switch self {
         case .nimble: return "Nimble (free)"
+        case .onDevice: return String(localized: "On device (Apple Intelligence)")
         case .claude: return "Claude"
         case .openai: return "OpenAI"
         case .ollama: return "Ollama (local)"
@@ -19,7 +20,7 @@ enum AIEngine: String, Codable, CaseIterable, Sendable {
 
     var defaultModel: String {
         switch self {
-        case .nimble: return ""
+        case .nimble, .onDevice: return ""
         case .claude: return "claude-opus-5-5"
         case .openai: return "gpt-5"
         case .ollama: return "llama3.1:8b"
@@ -31,6 +32,7 @@ enum AIEngine: String, Codable, CaseIterable, Sendable {
     var defaultBaseURL: String {
         switch self {
         case .nimble: return "https://nimble-answers.trommatic.workers.dev"
+        case .onDevice: return ""
         case .claude: return "https://api.anthropic.com"
         case .openai: return "https://api.openai.com"
         case .ollama: return "http://localhost:11434"
@@ -70,6 +72,9 @@ struct AIConfig: Codable, Equatable, Sendable {
             guard let url = URL(string: base) else { return nil }
             req = URLRequest(url: url)
             body = ["q": question, "turns": turns.payload]
+        case .onDevice:
+            // Answered in-process by OnDeviceAnswers. There is no request to build.
+            return nil
         case .claude:
             guard let url = URL(string: base + "/v1/messages") else { return nil }
             req = URLRequest(url: url)
@@ -103,6 +108,8 @@ struct AIConfig: Codable, Equatable, Sendable {
         case .nimble:
             text = json["answer"] as? String
             source = json["source"] as? String ?? "Nimble"
+        case .onDevice:
+            text = nil  // never a network reply; see OnDeviceAnswers
         case .claude:
             let blocks = json["content"] as? [[String: Any]] ?? []
             text = blocks.compactMap { $0["type"] as? String == "text" ? $0["text"] as? String : nil }.joined()

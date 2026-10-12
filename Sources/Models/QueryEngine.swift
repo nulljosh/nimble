@@ -387,6 +387,11 @@ final class QueryEngine: Sendable {
     // General answer engine: one Gemma call for any factual question. Replaces the
     // old per-shape Wikidata handlers (which dumped every historical officeholder).
     private func queryLLM(_ input: String, session: URLSession, ai: AIConfig, turns: TurnBuffer, localTimeout: TimeInterval = 40) async -> QueryResult? {
+        // On device never reaches the proxy below: a nil answer means no answer, and the question stays here.
+        if ai.engine == .onDevice {
+            guard let answer = await OnDeviceAnswers.answer(input, turns: turns) else { return nil }
+            return .text(heading: nil, body: answer, source: "On device", sourceURL: nil, imageURL: nil)
+        }
         #if os(macOS)
         // On a Mac running Samantha (oMLX on :8000), she is the default and the free proxy is the
         // fallback. Nobody else can reach localhost, so iOS and web stay on the proxy. 8s cap: a cold
@@ -478,9 +483,11 @@ final class QueryEngine: Sendable {
         // All three start together so a cold LLM call doesn't add a sequential hop in
         // front of Wikipedia — only the preference order (llm > ddg > wiki) is sequential.
         let (ddgInput, wikiInput) = preprocessQuery(input)
+        // With the on-device model answering, the question sends nothing to DuckDuckGo or Wikipedia.
+        let localOnly = useLLM && ai.engine == .onDevice && OnDeviceAnswers.isAvailable
         async let llm: QueryResult? = useLLM ? await queryLLM(input, session: session, ai: ai, turns: turns) : nil
-        async let ddg = queryDDG(ddgInput, session: session)
-        async let wiki = queryWikipedia(wikiInput, session: session)
+        async let ddg: QueryResult? = localOnly ? nil : queryDDG(ddgInput, session: session)
+        async let wiki: QueryResult? = localOnly ? nil : queryWikipedia(wikiInput, session: session)
         if let llmResult = await llm {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.

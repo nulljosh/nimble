@@ -2835,6 +2835,41 @@
           }
         }
       }
+    },
+    "On device (Apple Intelligence)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On device (Apple Intelligence)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sur l’appareil (Apple Intelligence)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En el dispositivo (Apple Intelligence)"
+          }
+        },
+        "zh": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设备端（Apple Intelligence）"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਡਿਵਾਈਸ ’ਤੇ (Apple Intelligence)"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

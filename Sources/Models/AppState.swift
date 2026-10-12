@@ -167,9 +167,27 @@ final class AppState {
             return
         }
 
-        // Fail fast offline instead of spinning through three request timeouts.
+        // Fail fast offline instead of spinning through three request timeouts. With Apple's on-device
+        // model ready, a question still gets an answer, and nothing leaves the device to get it.
         guard pathMonitor.currentPath.status == .satisfied else {
-            result = .error("You're offline. Math, units and graphs still work.", searchURL: nil)
+            let offline = "You're offline. Math, units and graphs still work."
+            guard OnDeviceAnswers.isAvailable, !queryEngine.isCardQuery(text) else {
+                result = .error(offline, searchURL: nil)
+                return
+            }
+            result = .loading
+            let turns = self.turns
+            Task { @MainActor [weak self] in
+                let answer = await OnDeviceAnswers.answer(text, turns: turns)
+                guard let self else { return }
+                if let answer {
+                    self.result = .text(heading: nil, body: answer, source: "On device", sourceURL: nil, imageURL: nil)
+                    self.turns.add(text, answer)
+                    self.remember(text)
+                } else {
+                    self.result = .error(offline, searchURL: nil)
+                }
+            }
             return
         }
 
@@ -244,6 +262,7 @@ final class AppState {
     var aiRecipient: String {
         switch ai.engine {
         case .nimble: return "Nimble's answer service, which runs Google Gemma and Alibaba Qwen models on Cloudflare Workers AI"
+        case .onDevice: return "Apple Intelligence on this device, nothing leaves it"
         case .claude: return "Anthropic (Claude)"
         case .openai: return "OpenAI"
         case .ollama: return "your own Ollama server"
