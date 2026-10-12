@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Nimble</title>
 <meta name="description" content="Ask a question. Get one sentence back.">
-<meta name="theme-color" content="#ffca30">
+<meta name="theme-color" content="">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-512.png">
@@ -24,30 +24,31 @@ body {
 }
 a { color: inherit; }
 .top {
-  display: flex; flex-wrap: wrap; row-gap: 8px; align-items: center; justify-content: space-between;
-  padding: max(14px, env(safe-area-inset-top)) 20px 14px;
+  display: flex; flex-wrap: wrap; row-gap: var(--space-2); align-items: center; justify-content: space-between;
+  padding: max(var(--space-4), env(safe-area-inset-top)) var(--gutter) var(--space-4);
 }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: var(--tracking-tight); text-decoration: none; }
+.brand { min-height: 44px; display: flex; align-items: center; gap: var(--space-3); font-weight: 700; font-size: 17px; letter-spacing: var(--tracking-tight); text-decoration: none; }
 .brand img { width: 30px; height: 30px; border-radius: 8px; }
-.top nav a { font-size: 14px; color: var(--text-mid); text-decoration: none; margin-left: 18px; }
+.top nav a { font-size: 14px; color: var(--text-mid); text-decoration: none; margin-left: var(--space-4); }
 .top nav a:hover, .top nav button:hover { color: var(--text); }
-.top nav button { border: 0; background: none; font: inherit; font-size: 14px; color: var(--text-mid); margin-left: 18px; cursor: pointer; }
+.top nav button { border: 0; background: none; font: inherit; font-size: 14px; color: var(--text-mid); margin-left: var(--space-4); cursor: pointer; }
 /* Nav items stay on one line; on a narrow phone the nav drops under the brand, right-aligned. */
 .top nav { display: flex; align-items: center; white-space: nowrap; margin-left: auto; }
-@media (max-width: 480px) { .top nav a, .top nav button { margin-left: 12px; font-size: 13px; } }
+.top nav a, .top nav button { display: inline-flex; align-items: center; min-height: 44px; }
+@media (max-width: 480px) { .top nav a, .top nav button { margin-left: var(--space-3); font-size: 13px; } }
 
-main { flex: 1; width: 100%; max-width: 640px; margin: 0 auto; padding: 8vh 20px 40px; }
-h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: 1.1; margin-bottom: 24px; text-align: center; }
+main { flex: 1; width: 100%; max-width: var(--max-app); margin: 0 auto; padding: 8vh var(--gutter) var(--space-7); }
+h1 { font-size: clamp(1.8rem, 6vw, 2.6rem); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: 1.1; margin-bottom: var(--space-5); text-align: center; }
 
 form { position: relative; }
 .field {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: var(--space-3);
   background: var(--color-bg2); border: 1px solid var(--line); border-radius: 16px;
-  padding: 16px 18px;
+  padding: var(--space-1) var(--space-4);
 }
 .field svg { flex: none; }
 .field input {
-  flex: 1; min-width: 0; border: 0; background: none;
+  flex: 1; min-width: 0; min-height: 44px; border: 0; background: none;
   font: inherit; font-size: 18px; color: var(--text);
 }
 /* The ring sits on the whole field, not the text inside it. */
@@ -56,92 +57,92 @@ form { position: relative; }
 :focus-visible { outline: 2px solid var(--yellow-deep); outline-offset: 2px; }
 .field input::placeholder { color: var(--text-light); }
 .mic {
-  flex: none; display: grid; place-items: center; width: 28px; height: 28px; margin: -4px 0; padding: 0;
+  flex: none; display: grid; place-items: center; width: 44px; height: 44px; margin: 0 calc(-1 * var(--space-1)); padding: 0;
   border: 0; border-radius: 8px; background: none; color: var(--text-light); cursor: pointer;
 }
 .mic:hover { color: var(--text); }
 .mic.on { color: var(--yellow-deep); }
 .go {
-  flex: none; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer;
-  background: var(--yellow); color: #000; font: inherit; font-weight: 700; font-size: 14px;
+  flex: none; min-height: 44px; border: 0; border-radius: 10px; padding: var(--space-2) var(--space-4); cursor: pointer;
+  background: var(--yellow); color: var(--black); font: inherit; font-weight: 700; font-size: 14px;
 }
 
-.card { margin-top: 20px; padding: 22px; border: 1px solid var(--line); border-radius: 16px; min-height: 120px; }
+.card { margin-top: var(--space-5); padding: var(--space-5); border: 1px solid var(--line); border-radius: 16px; min-height: 120px; }
 .card[hidden] { display: none; }
 .card.swap { animation: in 400ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
-.mockup-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow-deep); margin-bottom: 10px; }
-.mockup-big { font-size: clamp(2rem, 8vw, 3rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 6px; overflow-wrap: anywhere; }
+.mockup-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow-deep); margin-bottom: var(--space-3); }
+.mockup-big { font-size: clamp(2rem, 8vw, 3rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: var(--space-2); overflow-wrap: anywhere; }
 .card p { font-size: clamp(19px, 5vw, 24px); line-height: 1.35; color: var(--text); }
-.card h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--text-mid); margin-bottom: 6px; }
+.card h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--text-mid); margin-bottom: var(--space-2); }
 .card svg { width: 100%; height: auto; color: var(--yellow-deep); }
 .mockup-link { display: block; text-decoration: none; }
-.mockup-icon { display: block; width: 24px; height: 24px; border-radius: 5px; margin-bottom: 8px; }
+.mockup-icon { display: block; width: 24px; height: 24px; border-radius: 5px; margin-bottom: var(--space-2); }
 .mockup-link p { text-decoration: none; color: var(--text); }
 .mockup-link:hover p { text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 4px; }
-.sources { margin: 12px 0 0; font-size: 13px; color: var(--text-mid); }
-.sources a { color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.sources { margin: var(--space-3) 0 0; font-size: 13px; color: var(--text-mid); }
+.sources a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .mockup-card p { text-decoration: none; color: var(--text-mid); }
 .mockup-card:hover p { text-decoration: underline; }
-.consent-actions { display: flex; gap: 10px; margin-top: 16px; }
-.consent-actions button { border: 1px solid var(--line); background: none; color: var(--text); border-radius: 10px; padding: 9px 16px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
-.consent-actions .consent-yes { border-color: transparent; background: var(--yellow); color: #000; }
+.consent-actions { display: flex; gap: var(--space-3); margin-top: var(--space-4); }
+.consent-actions button { min-height: 44px; border: 1px solid var(--line); background: none; color: var(--text); border-radius: 10px; padding: var(--space-2) var(--space-4); font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+.consent-actions .consent-yes { border-color: transparent; background: var(--yellow); color: var(--black); }
 .consent-actions .consent-no:hover { border-color: var(--yellow-deep); }
-.credit { margin-top: 16px; font-size: 13px; color: var(--text-light); display: flex; align-items: baseline; gap: 14px; }
-.credit button { border: 0; background: none; padding: 0; font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.credit { margin-top: var(--space-4); font-size: 13px; color: var(--text-light); display: flex; align-items: baseline; gap: var(--space-4); }
+.credit button { border: 0; background: none; padding: var(--tap-pad) 0; margin-block: calc(var(--tap-pad) * -1); font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .credit button:hover { color: var(--text); }
 /* Why this answer: the source line is the toggle; the text it came from opens under it. */
-.news { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 14px; }
+.news { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; gap: var(--space-4); }
 .news li { line-height: 1.35; }
 .num { font-variant-numeric: tabular-nums; }
-.news a { color: var(--text); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
-.news-src { display: block; font-size: 13px; color: var(--text-light); margin-top: 2px; }
+.news a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.news-src { display: block; font-size: 13px; color: var(--text-light); margin-top: var(--space-1); }
 /* Rich results: a photo tops a card (16:9, 12px radius); a news story can carry a 56px square. */
-.mockup-photo { display: block; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background: var(--bg2); margin: 0 0 16px; }
+.mockup-photo { display: block; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background: var(--bg2); margin: 0 0 var(--space-4); }
 .mockup-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; opacity: 0; transition: opacity .25s ease; }
 @media (max-width: 600px) { .mockup-photo { max-height: 220px; } }
 .mockup-photo img.on { opacity: 1; }
-.news li.has-thumb { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: start; }
+.news li.has-thumb { display: grid; grid-template-columns: 56px 1fr; gap: var(--space-3); align-items: start; }
 .news-thumb { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--bg2); opacity: 0; transition: opacity .25s ease; }
 .news-thumb.on { opacity: 1; }
-.why { margin-top: 16px; font-size: 13px; color: var(--text-light); }
-.why summary { display: inline-block; cursor: pointer; color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; list-style: none; }
+.why { margin-top: var(--space-4); font-size: 13px; color: var(--text-light); }
+.why summary { display: inline-block; cursor: pointer; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; list-style: none; }
 .why summary::-webkit-details-marker { display: none; }
-.why summary::after { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 0 3px 8px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); vertical-align: middle; }
+.why summary::after { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 0 var(--space-1) var(--space-2); border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); vertical-align: middle; }
 .why[open] summary::after { transform: rotate(-135deg); margin-bottom: 0; }
-.why.steps ol { margin: 8px 0 0; padding: 0; list-style: none; counter-reset: step; }
-.why.steps li { counter-increment: step; margin: 0 0 4px; }
+.why.steps ol { margin: var(--space-2) 0 0; padding: 0; list-style: none; counter-reset: step; }
+.why.steps li { counter-increment: step; margin: 0 0 var(--space-1); }
 .why.steps li::before { content: counter(step) "."; display: inline-block; width: 22px; color: var(--text-light); font-variant-numeric: tabular-nums; }
-.card .why p { font-size: 16px; line-height: 1.35; color: var(--text-mid); margin-top: 10px; }
-.why a { display: inline-block; margin-top: 8px; color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+.card .why p { font-size: 16px; line-height: 1.35; color: var(--text-mid); margin-top: var(--space-3); }
+.why a { display: inline-block; padding-block: var(--tap-pad); margin-top: calc(var(--space-2) - var(--tap-pad)); margin-bottom: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 
-.chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 24px; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; margin-top: var(--space-5); }
 .chips[hidden] { display: none; }
 .chips button {
-  border: 1px solid var(--line); background: none; color: var(--text-mid); border-radius: 999px;
-  padding: 7px 13px; font: inherit; font-size: 14px; cursor: pointer;
+  min-height: 44px; border: 1px solid var(--line); background: none; color: var(--text-mid); border-radius: 999px;
+  padding: var(--space-2) var(--space-3); font: inherit; font-size: 14px; cursor: pointer;
 }
 .chips button:hover { color: var(--text); border-color: var(--yellow-deep); }
-.recent { margin-top: 24px; }
+.recent { margin-top: var(--space-5); }
 .recent[hidden] { display: none; }
-.recent-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.recent-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: var(--space-2); }
 .recent-head .mockup-label { margin-bottom: 0; }
-.recent-head button { border: 0; background: none; font: inherit; font-size: 13px; color: var(--text-light); cursor: pointer; padding: 0; }
+.recent-head button { border: 0; background: none; font: inherit; font-size: 13px; color: var(--text-light); cursor: pointer; padding: var(--tap-pad) 0; margin-block: calc(var(--tap-pad) * -1); }
 .recent-head button:hover { color: var(--text); }
 .recent-list { list-style: none; }
 .recent-list button {
-  display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none;
-  font: inherit; font-size: 16px; color: var(--text-mid); padding: 11px 0; cursor: pointer;
+  display: block; width: 100%; min-height: 44px; text-align: left; border: 0; border-bottom: 1px solid var(--line); background: none;
+  font: inherit; font-size: 16px; color: var(--text-mid); padding: var(--space-3) 0; cursor: pointer;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .recent-list button:hover { color: var(--text); }
-.hint { text-align: center; font-size: 13px; color: var(--text-mid); margin-top: 28px; }
-.flit { display: block; width: 96px; height: 96px; margin: 24px auto 0; opacity: 0.9; }
+.hint { text-align: center; font-size: 13px; color: var(--text-mid); margin-top: var(--space-6); }
+.flit { display: block; width: 96px; height: 96px; margin: var(--space-5) auto 0; opacity: 0.9; }
 .flit[hidden] { display: none; }
 /* While an answer is on its way, Flit hums in the card: wing beat plus a bob. Stops the moment
    the answer replaces her. Off under reduced motion. */
-.thinking { display: flex; align-items: center; gap: 16px; }
+.thinking { display: flex; align-items: center; gap: var(--space-4); }
 .thinking svg { flex: none; width: 72px; height: 72px; overflow: visible; animation: flit-bob 1.2s ease-in-out infinite alternate; }
 .thinking .flit-wing { transform-box: fill-box; transform-origin: 90% 10%; animation: flit-flap 0.22s ease-in-out infinite alternate; }
 .thinking .flit-eye { transform-box: fill-box; transform-origin: center; animation: flit-blink 4s ease-in-out infinite; }
@@ -173,14 +174,15 @@ form { position: relative; }
     <ul class="recent-list" id="recent-list"></ul>
   </section>
   <p class="hint" data-i18n="Math, units and graphs work offline. Everything else gets one sentence and a source.">Math, units and graphs work offline. Everything else gets one sentence and a source.</p>
-  <img id="shareDebug" alt="" style="display:block;width:100%;margin-top:20px">
+  <img id="shareDebug" alt="" style="display:block;width:100%;margin-top:var(--space-5)">
 </main>
 <script src="i18n.js"></script>
 <script src="engine.js?v=offline"></script>
 <script>
+document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
 // The two mascots. Flit is the default; Fen is the fennec from docs/mascot/fen.svg, inlined so the
 // empty state and the loading card work offline too.
-var FLIT='<svg viewBox="0 0 240 240" aria-hidden="true" focusable="false"><ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" fill="#8a6412"/><ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" fill="#8a6412"/><ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" fill="#8a6412" opacity="0.5"/><ellipse cx="108" cy="154" rx="54" ry="46" fill="#ffca30"/><path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" fill="#ffe27a"/><circle cx="156" cy="104" r="52" fill="#ffca30"/><path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" fill="#8a6412"/><circle cx="180" cy="126" r="9" fill="#e07a3f" opacity="0.35"/><path d="M203 98 L232 108 L203 118 Z" fill="#8a6412" stroke="#8a6412" stroke-width="5" stroke-linejoin="round"/><g class="flit-eye"><circle cx="170" cy="100" r="18" fill="#1f1b16"/><circle cx="176" cy="93" r="6.5" fill="#fff8e1"/><circle cx="164" cy="108" r="3" fill="#fff8e1"/></g><g class="flit-wing"><ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" fill="#8a6412"/><ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" fill="#a67c1e"/></g></svg>';
+var FLIT='<svg viewBox="0 0 240 240" aria-hidden="true" focusable="false"><ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" style="fill:var(--bulb-deep)"/><ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" style="fill:var(--bulb-deep)"/><ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" opacity="0.5" style="fill:var(--bulb-deep)"/><ellipse cx="108" cy="154" rx="54" ry="46" style="fill:var(--bulb)"/><path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" style="fill:var(--flit-belly)"/><circle cx="156" cy="104" r="52" style="fill:var(--bulb)"/><path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" style="fill:var(--bulb-deep)"/><circle cx="180" cy="126" r="9" opacity="0.35" style="fill:var(--flit-cheek)"/><path d="M203 98 L232 108 L203 118 Z" stroke-width="5" stroke-linejoin="round" style="fill:var(--bulb-deep);stroke:var(--bulb-deep)"/><g class="flit-eye"><circle cx="170" cy="100" r="18" style="fill:var(--black)"/><circle cx="176" cy="93" r="6.5" style="fill:var(--flit-glint)"/><circle cx="164" cy="108" r="3" style="fill:var(--flit-glint)"/></g><g class="flit-wing"><ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" style="fill:var(--bulb-deep)"/><ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" style="fill:var(--flit-wing)"/></g></svg>';
 var FEN='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" aria-hidden="true" focusable="false"><path d="M60 196 C 30 190, 26 160, 48 152 C 44 172, 60 180, 82 178 Z" fill="#8a6412"/><circle cx="48" cy="156" r="10" fill="#ffe27a"/><ellipse cx="120" cy="178" rx="48" ry="36" fill="#ffca30"/><ellipse cx="120" cy="190" rx="28" ry="18" fill="#ffe27a"/><path d="M74 118 C 50 60, 62 30, 84 36 C 98 44, 104 90, 100 122 Z" fill="#ffca30"/><path d="M80 112 C 66 70, 72 48, 84 48 C 92 56, 96 92, 94 118 Z" fill="#e07a3f" opacity="0.45"/><path d="M166 118 C 190 60, 178 30, 156 36 C 142 44, 136 90, 140 122 Z" fill="#ffca30"/><path d="M160 112 C 174 70, 168 48, 156 48 C 148 56, 144 92, 146 118 Z" fill="#e07a3f" opacity="0.45"/><circle cx="120" cy="120" r="50" fill="#ffca30"/><ellipse cx="120" cy="140" rx="24" ry="16" fill="#ffe27a"/><circle cx="86" cy="134" r="8" fill="#e07a3f" opacity="0.35"/><circle cx="154" cy="134" r="8" fill="#e07a3f" opacity="0.35"/><circle cx="100" cy="112" r="14" fill="#1f1b16"/><circle cx="105" cy="106" r="5" fill="#fff8e1"/><circle cx="140" cy="112" r="14" fill="#1f1b16"/><circle cx="145" cy="106" r="5" fill="#fff8e1"/><path d="M112 136 L128 136 L120 146 Z" fill="#1f1b16" stroke="#1f1b16" stroke-width="3" stroke-linejoin="round"/></svg>';
 // The empty-state image: a data URI for Fen (no network, works offline), the file for Flit.
 function paintMascotImg(){

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nimble Answers Privacy Policy</title>
 <meta name="description" content="Privacy policy for Nimble Answers. No accounts, no tracking, no data retention.">
-<meta name="theme-color" content="#ffca30">
+<meta name="theme-color" content="">
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="tokens.css">
 <style>
@@ -21,14 +21,16 @@ body {
 }
 ::selection { background: var(--yellow); color: var(--black); }
 a { color: var(--orange); }
-.container { max-width: 720px; margin: 0 auto; padding: 4rem 1.5rem 6rem; }
-h1 { font-size: 2rem; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
-h2 { font-size: 1.15rem; margin: 2.5rem 0 0.75rem; letter-spacing: -0.01em; }
-p { margin-bottom: 1rem; color: var(--mid); }
-ul { margin: 0 0 1rem 1.25rem; color: var(--mid); }
-li { margin-bottom: 0.5rem; }
-.updated { color: var(--mid); font-size: 0.9rem; margin-bottom: 3rem; }
-.back { display: inline-block; margin-top: 3rem; }
+.container { max-width: var(--max-text); margin: 0 auto; padding: var(--space-8) var(--gutter); }
+.container a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); }
+.back { min-height: 44px; display: inline-flex; align-items: center; }
+h1 { font-size: 2rem; letter-spacing: -0.02em; margin-bottom: var(--space-2); }
+h2 { font-size: 1.15rem; margin: var(--space-7) 0 var(--space-3); letter-spacing: -0.01em; }
+p { margin-bottom: var(--space-4); color: var(--mid); }
+ul { margin: 0 0 var(--space-4) var(--space-5); color: var(--mid); }
+li { margin-bottom: var(--space-2); }
+.updated { color: var(--mid); font-size: 0.9rem; margin-bottom: var(--space-7); }
+.back { display: inline-block; margin-top: var(--space-7); }
 strong { color: var(--dark); }
 </style>
 </head>

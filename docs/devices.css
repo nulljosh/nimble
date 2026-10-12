@@ -24,7 +24,7 @@
   /* round() keeps every derived length on a whole pixel, so edges stay crisp at 2x */
   --r: round(calc(var(--device-w) * 0.185), 1px);
   width: var(--device-w);
-  padding: 3px;
+  padding: var(--space-1);
   border-radius: var(--r);
   background: var(--device-frame);
   box-shadow: 0 0 0 1px var(--line);
@@ -77,7 +77,7 @@
 .device-ipad {
   --device-w: 420px;
   width: var(--device-w);
-  padding: 3px;
+  padding: var(--space-1);
   border-radius: calc(var(--device-w) * 0.055);
   background: var(--device-frame);
   box-shadow: 0 0 0 1px var(--line);
@@ -93,7 +93,7 @@
   --device-w: 560px;
   --bar: var(--device-bar); --bar-text: var(--device-bar-text); --ring: rgba(0,0,0,.16);
   width: var(--device-w);
-  padding-top: 38px;
+  padding-top: var(--space-6);
   border-radius: 11px;
   background: var(--bar);
   color: var(--bar-text);
@@ -117,7 +117,7 @@
 /* Windows: controls on the right, square corners */
 .device-windows { border-radius: 8px; --bar: var(--device-win-bar); }
 .device-windows .device-screen { border-radius: 0 0 7px 7px; }
-.device-windows::after { justify-content: flex-start; padding-left: 14px; }
+.device-windows::after { justify-content: flex-start; padding-left: var(--space-4); }
 .device-windows::before {
   content: '\2212\2003\25A1\2003\2715'; position: absolute; top: 0; right: 14px; height: 38px;
   display: flex; align-items: center; font-size: 11px; letter-spacing: 2px; color: var(--bar-text); opacity: .7;

@@ -6,6 +6,7 @@ Keep Nimble moving after 5.0.0 with one small, shippable slice at a time: fix wh
 
 ## Where things stand
 
+- 5.13.2 (2026-10-11): Spacing and constraints audit. Every margin, padding and gap in docs/ reads one 4px spacing scale in tokens.css, with a --gutter (16, 24, 32px) and max-width tokens; links, buttons and fields reach 44px tall, inline links without moving a line.
 - 5.13.1 (2026-10-11): Brand kit consistency. GitHub social and link preview (og:image) now show the real app icon beside the wordmark, Flit dropped; brand page downloads point at nimble.jaybulb.com/brand (copies in docs/brand/); the icon is named as the one Apple-rendered exception to flat; wordmark already at -0.02em, verified against the font.
 - 5.13.0 (2026-10-11): Brand kit at nimble.jaybulb.com/brand (logo, icon, Flit and Fen, tokens read live, type, voice, do and don't, downloads), brand/ folder at the repo root with the icon, wordmark, mascots, GitHub social image and link preview; README banner and og:image point at them.
 - 5.12.7 (2026-10-11): Landing phone frame filled: the Hamlet answer opens onto its Wikipedia sentence and the empty credit strip is gone, so no dead band under the sources line; buttons and inline controls at 44px tap targets, tighter hero-to-frame rhythm on phones, checked at 390 (iPhone UA) and 1440, no horizontal scroll.

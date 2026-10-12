@@ -1,6 +1,18 @@
-/* Nimble design system — thin aliases onto the shared Jaybulb tokens. */
+/* Nimble design system: thin aliases onto the shared Jaybulb tokens. */
 @import url("https://jaybulb.com/tokens.css");
-:root{--yellow:var(--bulb);--yellow-deep:var(--bulb-deep);--black:#000;--white:#fff;--text:var(--color-text);--text-mid:var(--color-soft);--text-light:var(--color-secondary);--on-yellow-mid:rgba(0,0,0,0.6);--bg:var(--color-bg);--bg-accent:var(--bulb);--line:var(--color-hairline);--font:"Nimble Sans",system-ui,-apple-system,sans-serif;--fw-medium:500;--fw-semibold:600;--fs-13:13px;--fs-15:15px;--fs-17:17px;--fs-22:22px;--fs-28:28px;--fs-34:34px;--lh-body:1.35;--lh-display:1.1;--track-display:-0.02em;--fw-regular:400;--fw-bold:700;--lh:1.6;--tracking-tight:-0.02em;--s1:0.5rem;--s2:1rem;--s3:1.5rem;--s4:2.5rem;--s5:4rem;--radius:0;--radius-card:0;--divider:var(--rule);}
+/* Spacing: one scale on a 4px base. Every margin, padding and gap in docs/ reads from here. */
+:root{--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:48px;--space-8:64px;
+/* Gutter: the side space on every page container. Widens with the screen. */
+--gutter:var(--space-4);
+/* Measures: reading column, app column, page frame. */
+--max-app:640px;--max-text:720px;--max-wide:960px;
+/* Tap targets: a 44px hit area around text that is shorter than 44px. */
+--tap-pad:calc((44px - 1lh) / 2);}
+@media (min-width:600px){:root{--gutter:var(--space-5);}}
+@media (min-width:1024px){:root{--gutter:var(--space-6);}}
+/* Links, toggles and buttons that are not .btn read at least 44px tall. Inline text keeps its line; see each page's .tap rules. */
+:where(button:not(.btn),input:not([type=checkbox]):not([type=radio]),select,textarea){min-height:44px}
+:root{--yellow:var(--bulb);--yellow-deep:var(--bulb-deep);--black:#000;--white:#fff;--text:var(--color-text);--text-mid:var(--color-soft);--text-light:var(--color-secondary);--on-yellow-mid:rgba(0,0,0,0.6);--bg:var(--color-bg);--bg-accent:var(--bulb);--line:var(--color-hairline);--font:"Nimble Sans",system-ui,-apple-system,sans-serif;--fw-medium:500;--fw-semibold:600;--fs-13:13px;--fs-15:15px;--fs-17:17px;--fs-22:22px;--fs-28:28px;--fs-34:34px;--lh-body:1.35;--lh-display:1.1;--track-display:-0.02em;--fw-regular:400;--fw-bold:700;--lh:1.6;--tracking-tight:-0.02em;--s1:var(--space-2);--s2:var(--space-4);--s3:var(--space-5);--s4:var(--space-7);--s5:var(--space-8);--radius:0;--radius-card:0;--divider:var(--rule);}
 
 /* Type scale: fixed px steps. Display sizes track tighter in CSS, not glyph edits. */
 .display{font-size:var(--fs-34);line-height:var(--lh-display);letter-spacing:var(--track-display);font-weight:var(--fw-semibold)}
