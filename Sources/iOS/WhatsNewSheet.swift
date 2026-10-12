@@ -18,8 +18,8 @@ struct WhatsNewSheet: View {
         Color.clear
             .onAppear {
                 guard !CommandLine.arguments.contains(where: { $0.hasPrefix("UITEST_") }) else { return }
-                // QA: `-shotDisagree YES` skips the overlay so the shot shows the answer.
-                isPresented = seenVersion != whatsNewVersion && !UserDefaults.standard.bool(forKey: "shotDisagree")
+                // QA: any shot launch skips the overlay so the screen under it is what the shot shows.
+                isPresented = seenVersion != whatsNewVersion && !QASandbox.launch
             }
             .sheet(isPresented: $isPresented) {
                 // Scrolls and can grow to full height, so accessibility text sizes never clip the last line or the button.

@@ -19,8 +19,8 @@ struct RootTabView: View {
         UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 
-    /// QA only: `-shotSettings YES` opens straight on Settings, for the offline row shot.
-    @State private var tab = QASandbox.launch && UserDefaults.standard.bool(forKey: "shotSettings") ? 2 : 0
+    /// QA only: `-shotSettings YES` opens straight on Settings, `-shotHistory YES` on History (stubbed rows).
+    @State private var tab = QASandbox.launch ? (UserDefaults.standard.bool(forKey: "shotSettings") ? 2 : UserDefaults.standard.bool(forKey: "shotHistory") ? 1 : 0) : 0
 
     var body: some View {
         TabView(selection: $tab) {
@@ -43,5 +43,9 @@ struct RootTabView: View {
         .environment(state)
         .tint(state.theme.ink)
         .preferredColorScheme(state.theme.colorScheme)
+        .onAppear {
+            guard QASandbox.launch, UserDefaults.standard.bool(forKey: "shotHistory") else { return }
+            for stub in QASandbox.historyStubs.reversed() { state.history.add(stub.q, answer: stub.a) }
+        }
     }
 }
