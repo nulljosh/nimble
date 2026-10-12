@@ -82,5 +82,11 @@
   "Asks this again": "Asks this again",
   "Mascot": "Mascot",
   "Mascot: {s}": "Mascot: {s}",
-  "On device (Apple Intelligence)": "On device (Apple Intelligence)"
+  "On device (Apple Intelligence)": "On device (Apple Intelligence)",
+  "Samantha is running": "Samantha is running",
+  "Samantha is not running": "Samantha is not running",
+  "Checking Samantha": "Checking Samantha",
+  "Start": "Start",
+  "Test": "Test",
+  "Last answer: {s}": "Last answer: {s}"
 }

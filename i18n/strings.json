@@ -600,5 +600,47 @@
     "es": "En el dispositivo (Apple Intelligence)",
     "zh": "设备端（Apple Intelligence）",
     "pa": "ਡਿਵਾਈਸ ’ਤੇ (Apple Intelligence)"
+  },
+  "Samantha is running": {
+    "en": "Samantha is running",
+    "fr": "Samantha tourne",
+    "es": "Samantha está en marcha",
+    "zh": "Samantha 正在运行",
+    "pa": "ਸਮੰਥਾ ਚੱਲ ਰਹੀ ਹੈ"
+  },
+  "Samantha is not running": {
+    "en": "Samantha is not running",
+    "fr": "Samantha ne tourne pas",
+    "es": "Samantha no está en marcha",
+    "zh": "Samantha 未在运行",
+    "pa": "ਸਮੰਥਾ ਨਹੀਂ ਚੱਲ ਰਹੀ"
+  },
+  "Checking Samantha": {
+    "en": "Checking Samantha",
+    "fr": "Vérification de Samantha",
+    "es": "Comprobando a Samantha",
+    "zh": "正在检查 Samantha",
+    "pa": "ਸਮੰਥਾ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ"
+  },
+  "Start": {
+    "en": "Start",
+    "fr": "Démarrer",
+    "es": "Iniciar",
+    "zh": "启动",
+    "pa": "ਸ਼ੁਰੂ ਕਰੋ"
+  },
+  "Test": {
+    "en": "Test",
+    "fr": "Tester",
+    "es": "Probar",
+    "zh": "测试",
+    "pa": "ਜਾਂਚ"
+  },
+  "Last answer: {s}": {
+    "en": "Last answer: {s}",
+    "fr": "Dernière réponse : {s}",
+    "es": "Última respuesta: {s}",
+    "zh": "上次回答：{s}",
+    "pa": "ਆਖਰੀ ਜਵਾਬ: {s}"
   }
 }

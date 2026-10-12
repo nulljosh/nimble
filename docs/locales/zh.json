@@ -82,5 +82,11 @@
   "Asks this again": "再问一次",
   "Mascot": "吉祥物",
   "Mascot: {s}": "吉祥物：{s}",
-  "On device (Apple Intelligence)": "设备端（Apple Intelligence）"
+  "On device (Apple Intelligence)": "设备端（Apple Intelligence）",
+  "Samantha is running": "Samantha 正在运行",
+  "Samantha is not running": "Samantha 未在运行",
+  "Checking Samantha": "正在检查 Samantha",
+  "Start": "启动",
+  "Test": "测试",
+  "Last answer: {s}": "上次回答：{s}"
 }

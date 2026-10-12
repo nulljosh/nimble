@@ -82,5 +82,11 @@
   "Asks this again": "ਇਹ ਦੁਬਾਰਾ ਪੁੱਛਦਾ ਹੈ",
   "Mascot": "ਮਾਸਕੌਟ",
   "Mascot: {s}": "ਮਾਸਕੌਟ: {s}",
-  "On device (Apple Intelligence)": "ਡਿਵਾਈਸ ’ਤੇ (Apple Intelligence)"
+  "On device (Apple Intelligence)": "ਡਿਵਾਈਸ ’ਤੇ (Apple Intelligence)",
+  "Samantha is running": "ਸਮੰਥਾ ਚੱਲ ਰਹੀ ਹੈ",
+  "Samantha is not running": "ਸਮੰਥਾ ਨਹੀਂ ਚੱਲ ਰਹੀ",
+  "Checking Samantha": "ਸਮੰਥਾ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ",
+  "Start": "ਸ਼ੁਰੂ ਕਰੋ",
+  "Test": "ਜਾਂਚ",
+  "Last answer: {s}": "ਆਖਰੀ ਜਵਾਬ: {s}"
 }

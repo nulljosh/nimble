@@ -82,5 +82,11 @@
   "Asks this again": "Pose à nouveau cette question",
   "Mascot": "Mascotte",
   "Mascot: {s}": "Mascotte : {s}",
-  "On device (Apple Intelligence)": "Sur l’appareil (Apple Intelligence)"
+  "On device (Apple Intelligence)": "Sur l’appareil (Apple Intelligence)",
+  "Samantha is running": "Samantha tourne",
+  "Samantha is not running": "Samantha ne tourne pas",
+  "Checking Samantha": "Vérification de Samantha",
+  "Start": "Démarrer",
+  "Test": "Tester",
+  "Last answer: {s}": "Dernière réponse : {s}"
 }
