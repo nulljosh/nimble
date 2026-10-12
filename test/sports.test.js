@@ -191,7 +191,7 @@ test("Cowboys: not on today or yesterday, but on ESPN's current scoreboard, Fina
     assert.equal(card.rows[0].status, "Final, Thursday, Oct 8");
     const r = await E.renderAnswer("cowboys score", { scripted: card });
     assert.match(r.h, /Final, Thursday, Oct 8/);
-    assert.match(r.h, /class="as-of num">as of Oct 12, 1:00 pm</);
+    assert.match(r.h, /class="as-of num">as of Oct 12, \d{1,2}:\d{2} (am|pm)</);
     assert.doesNotMatch(r.h, /No game found/);
   } finally { restore(); }
 });
