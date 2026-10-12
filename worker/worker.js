@@ -14,7 +14,7 @@ const SYSTEM =
 async function freshContext(q, attempt = 0) {
   try {
     const r = await fetch(
-      "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&format=json&formatversion=2&gsrsearch=" +
+      "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=thumbnail&pithumbsize=800&format=json&formatversion=2&gsrsearch=" +
         encodeURIComponent(q),
       { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" } },
     );
@@ -22,17 +22,37 @@ async function freshContext(q, attempt = 0) {
     // so one retry after a beat is worth more than a fast wrong answer.
     const pages = (r.ok && (await r.json())?.query?.pages) || [];
     if (!pages.length && attempt === 0) { await new Promise((ok) => setTimeout(ok, 400)); return freshContext(q, 1); }
+    const sorted = [...pages].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
     // Officeholder intros bury "The current prime minister is X" ten sentences deep, so keep
     // the lead plus any sentence naming who holds something now.
     const trim = (t = "") => {
       const sents = t.split(/(?<=[.!?])\s+/);
       return [...sents.slice(0, 4), ...sents.slice(4).filter((x) => /\b(current|incumbent|since)\b/i.test(x))].join(" ");
     };
-    return pages.map((p) => `${p.title}: ${trim(p.extract)}`).join("\n\n").slice(0, 6000);
+    return { text: pages.map((p) => `${p.title}: ${trim(p.extract)}`).join("\n\n").slice(0, 6000), pages: sorted };
   } catch {
-    return "";
+    return { text: "", pages: [] };
   }
 }
+
+// A photo rides on an AI answer only when the page it came from backs the sentence, the same
+// agreement test the web engine uses. Wikipedia's lead image is sometimes a logo or flag: skipped.
+const NOT_A_PHOTO = /\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-/i;
+function photoFor(answer, pages) {
+  const keys = (s) => (s.toLowerCase().match(/[a-z]{4,}/g) || []).filter((w) => !GLUE.has(w));
+  const want = [...new Set(keys(answer))];
+  if (!want.length) return null;
+  for (const p of pages) {
+    const src = p.thumbnail?.source;
+    if (!src || NOT_A_PHOTO.test(src) || !p.extract) continue;
+    const have = new Set(keys(p.extract));
+    if (want.filter((w) => have.has(w)).length >= Math.ceil(want.length * 0.6)) {
+      return { url: src, width: p.thumbnail.width ?? null, height: p.thumbnail.height ?? null };
+    }
+  }
+  return null;
+}
+const GLUE = new Set("that this with from which were have they their also been into about after there these those when where while would could should will".split(" "));
 
 // Follow-up context from the client: at most 3 {q, a} string pairs, each side cut to 300 chars.
 // Anything else is dropped. Never logged.
@@ -84,7 +104,11 @@ export default {
         // js: the page ships scripts, so an empty body means it renders client-side.
         const js = /<script[\s>]/i.test(html);
         const favicon = `https://www.google.com/s2/favicons?domain=${host}&sz=64`;
-        return json({ host, title: meta(/<title[^>]*>([^<]*)<\/title>/i), siteName: meta(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']*)["']/i), description, h1, text, js, favicon });
+        // The page's own share image, when it names one. Https only, resolved against the host.
+        const ogImage = meta(/<meta[^>]+property=["']og:image(?::secure_url)?["'][^>]+content=["']([^"']*)["']/i) ||
+          meta(/<meta[^>]+content=["']([^"']*)["'][^>]+property=["']og:image(?::secure_url)?["']/i);
+        const image = safeImage(ogImage, `https://${host}/`);
+        return json({ host, title: meta(/<title[^>]*>([^<]*)<\/title>/i), siteName: meta(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']*)["']/i), description, h1, text, js, favicon, image });
       } catch {
         return json({ host, title: "", description: "" });
       }
@@ -117,7 +141,11 @@ export default {
     if (q.length > 500) return json({ error: "too long" }, 400);
 
     // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
-    const context = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
+    const { text: context, pages } = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
+    const reply = (o) => {
+      const image = o.answer !== "UNKNOWN" ? photoFor(o.answer, pages) : null;
+      return json(image ? { ...o, image } : o);
+    };
     const today = new Date().toISOString().slice(0, 10);
     const system =
       `${SYSTEM} Today is ${today}. Your training data is out of date; when the reference text below ` +
@@ -155,17 +183,17 @@ export default {
 
     // The client shows `source` under the answer, so it has to name the models that
     // actually produced it — it used to hardcode "Gemma" for all four branches.
-    if (qwenAnswer === "UNKNOWN" && gemmaAnswer === "UNKNOWN") return json({ answer: "UNKNOWN" });
-    if (qwenAnswer === "UNKNOWN") return json({ answer: gemmaAnswer, source: "Gemma" });
-    if (gemmaAnswer === "UNKNOWN") return json({ answer: qwenAnswer, source: "Qwen" });
-    if (normalize(qwenAnswer) === normalize(gemmaAnswer)) return json({ answer: qwenAnswer, source: "Gemma + Qwen" });
+    if (qwenAnswer === "UNKNOWN" && gemmaAnswer === "UNKNOWN") return reply({ answer: "UNKNOWN" });
+    if (qwenAnswer === "UNKNOWN") return reply({ answer: gemmaAnswer, source: "Gemma" });
+    if (gemmaAnswer === "UNKNOWN") return reply({ answer: qwenAnswer, source: "Qwen" });
+    if (normalize(qwenAnswer) === normalize(gemmaAnswer)) return reply({ answer: qwenAnswer, source: "Gemma + Qwen" });
 
     // Qwen and Gemma disagree. Rather than let Qwen arbitrate its own dispute, ask a third,
     // independent model and take the majority — neutral, same call count either way.
     const llamaAnswer = await ask(LLAMA);
     if (llamaAnswer !== "UNKNOWN") {
-      if (normalize(llamaAnswer) === normalize(qwenAnswer)) return json({ answer: qwenAnswer, source: "Qwen + Llama" });
-      if (normalize(llamaAnswer) === normalize(gemmaAnswer)) return json({ answer: gemmaAnswer, source: "Gemma + Llama" });
+      if (normalize(llamaAnswer) === normalize(qwenAnswer)) return reply({ answer: qwenAnswer, source: "Qwen + Llama" });
+      if (normalize(llamaAnswer) === normalize(gemmaAnswer)) return reply({ answer: gemmaAnswer, source: "Gemma + Llama" });
     }
 
     // All three differ (or Llama came back UNKNOWN) — fall back to synthesizing one sentence.
@@ -187,7 +215,7 @@ export default {
 
     const answer =
       (synthesis?.response || synthesis?.choices?.[0]?.message?.content || "").trim() || qwenAnswer;
-    return json({ answer, source: "Gemma + Qwen" });
+    return reply({ answer, source: "Gemma + Qwen" });
   },
 };
 
@@ -256,6 +284,24 @@ async function feedItems(feed, outlet, place) {
   }
 }
 
+// A picture URL from a page or feed: https only, relative links resolved against base, and the
+// width and height kept when the source states them. Anything else is no picture.
+function safeImage(raw, base, width, height) {
+  if (!raw) return null;
+  try {
+    const u = new URL(decodeAttr(raw), base);
+    if (u.protocol !== "https:") return null;
+    const n = (v) => (/^\d{1,5}$/.test(v || "") ? Number(v) : null);
+    return { url: u.href, width: n(width), height: n(height) };
+  } catch {
+    return null;
+  }
+}
+// Attribute values come with &amp; and friends. Only the entities we decode elsewhere.
+function decodeAttr(s) {
+  return s.replace(/&(#x?[0-9a-f]+|amp|quot|apos|nbsp|lt|gt);/gi, decodeEntity);
+}
+
 function newsItem(block, fallbackOutlet) {
   const tag = (name) => {
     const m = block.match(new RegExp(`<${name}\\b[^>]*>([\\s\\S]*?)<\\/${name}>`, "i"));
@@ -273,6 +319,12 @@ function newsItem(block, fallbackOutlet) {
   const outlet = sourceTag ? plain(sourceTag[1]) : fallbackOutlet;
   let title = plain(tag("title")).replace(/\s-\s[^-]+$/, (m) => (sourceTag ? "" : m));
   if (!title) return null;
+  // A story photo: media:thumbnail first, then an image enclosure. Attribute order varies, so match each attribute alone.
+  const attr = (el, name) => el.match(new RegExp(`\\b${name}=["']([^"']*)["']`, "i"))?.[1];
+  const media = block.match(/<media:thumbnail\b[^>]*>/i)?.[0];
+  const enclosure = [...block.matchAll(/<enclosure\b[^>]*>/gi)].map((m) => m[0]).find((e) => /type=["']image\//i.test(e));
+  const pic = media ? { el: media, url: attr(media, "url") } : enclosure ? { el: enclosure, url: attr(enclosure, "url") } : null;
+  const image = pic ? safeImage(pic.url, url, attr(pic.el, "width"), attr(pic.el, "height")) : null;
   // The first sentence of the description is the body; the headline stands in when it is empty.
   const desc = plain(tag("description")).replace(/\s*\.\.\.$/, "");
   const sentences = desc.split(/(?<=[.!?])\s+(?=[A-Z0-9"(])/);
@@ -280,7 +332,7 @@ function newsItem(block, fallbackOutlet) {
   let sentence = !sourceTag && sentences[0] && sentences[0].length >= 40 ? sentences[0] : title;
   if (sentence.length > 220) sentence = sentence.slice(0, 217).replace(/\s+\S*$/, "") + "...";
   if (!/[.!?]$/.test(sentence)) sentence += ".";
-  return { title, sentence, outlet, url };
+  return { title, sentence, outlet, url, image };
 }
 
 function interleave(lists) {

@@ -62,8 +62,15 @@ struct WikiResponse: Codable {
     }
 }
 
+/// The photo the answer proxy adds to an AI answer, when its page backs the sentence.
+struct ProxyPhoto: Decodable {
+    let image: AnswerPhoto?
+}
+
 struct WikiThumbnail: Codable {
     let source: String?
+    let width: Int?
+    let height: Int?
 }
 
 struct WikiContentURLs: Codable {
@@ -452,7 +459,9 @@ final class QueryEngine: Sendable {
             let (data, response) = try await session.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200,
                   let (answer, source) = ai.parse(data) else { return nil }
-            return .text(heading: nil, body: answer, source: source, sourceURL: nil, imageURL: nil)
+            // The proxy sends a photo only when the page behind its answer backs the sentence.
+            let photo = (try? JSONDecoder().decode(ProxyPhoto.self, from: data))?.image.flatMap { AnswerPhoto.https($0.url, width: $0.width, height: $0.height) }
+            return .text(heading: nil, body: answer, source: source, sourceURL: nil, imageURL: nil, photo: photo)
         } catch {
             return nil
         }
@@ -519,8 +528,13 @@ final class QueryEngine: Sendable {
         // Scripts but no words in the HTML: the page draws itself in JavaScript, so its <title> says nothing.
         if body.isEmpty { body = html.range(of: "<script", options: .caseInsensitive) != nil ? "This site loads with JavaScript." : title }
         guard !body.isEmpty else { return nil }
+        // The page's own share image is the card photo; the favicon only stands in when there is none.
+        let ogImage = grab("<meta[^>]+property=[\"']og:image(?::secure_url)?[\"'][^>]+content=[\"']([^\"']*)[\"']")
+            .nonEmpty ?? grab("<meta[^>]+content=[\"']([^\"']*)[\"'][^>]+property=[\"']og:image(?::secure_url)?[\"']")
+        let photo = ogImage.isEmpty ? nil : URL(string: ogImage, relativeTo: URL(string: "https://\(host)/"))
+            .flatMap { AnswerPhoto.https($0.absoluteString) }
         return .text(heading: title.isEmpty ? host : title, body: firstSentence(body), source: host, sourceURL: pageURL,
-                     imageURL: "https://www.google.com/s2/favicons?domain=\(host)&sz=64", grounding: body)
+                     imageURL: photo == nil ? "https://www.google.com/s2/favicons?domain=\(host)&sz=64" : nil, grounding: body, photo: photo)
     }
 
     func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer()) async -> QueryResult {
@@ -543,7 +557,7 @@ final class QueryEngine: Sendable {
         if let llmResult = await llm {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.
-            if case .text(_, let body, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
+            if case .text(_, let body, _, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
                let sourced = await ddg { return withSources(sourced, others: [await wiki]) }
             return withSources(llmResult, others: [await ddg, await wiki])
         }
@@ -557,10 +571,22 @@ final class QueryEngine: Sendable {
 
     /// Attaches the linked sources to a text answer. `others` are results already fetched for the same question.
     private func withSources(_ result: QueryResult, others: [QueryResult?]) -> QueryResult {
-        guard case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, _) = result else { return result }
+        guard case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, _, let photo) = result else { return result }
         let sources = AnswerSources.linked(body: body, candidates: [result] + others.compactMap { $0 })
         return .text(heading: heading, body: body, source: source, sourceURL: sourceURL, imageURL: imageURL,
-                     grounding: grounding, sources: sources)
+                     grounding: grounding, sources: sources, photo: photo)
+    }
+
+    /// The lead photo of a Wikipedia article named by a DuckDuckGo abstract. Nil for any other link.
+    private func wikipediaArticlePhoto(_ url: String?, session: URLSession) async -> AnswerPhoto? {
+        let prefix = "https://en.wikipedia.org/wiki/"
+        guard let url, url.hasPrefix(prefix) else { return nil }
+        let title = String(url.dropFirst(prefix.count)).components(separatedBy: CharacterSet(charactersIn: "?#")).first ?? ""
+        guard !title.isEmpty, let summary = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(title)"),
+              let (data, response) = try? await session.data(from: summary),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let wiki = try? JSONDecoder().decode(WikiResponse.self, from: data) else { return nil }
+        return AnswerPhoto.wikipediaLead(wiki.thumbnail?.source, width: wiki.thumbnail?.width, height: wiki.thumbnail?.height)
     }
 
     private func queryDDG(_ input: String, session: URLSession = .shared) async -> QueryResult? {
@@ -586,7 +612,10 @@ final class QueryEngine: Sendable {
                 let source = ddg.abstractSource ?? "DuckDuckGo"
                 let sourceURL = ddg.abstractURL
                 let imageURL = ddg.image.flatMap { $0.isEmpty ? nil : "https://duckduckgo.com\($0)" }
-                return .text(heading: ddg.heading, body: firstSentence(abstract), source: source, sourceURL: sourceURL, imageURL: imageURL, grounding: abstract)
+                // An abstract from Wikipedia brings that article's lead photo; the small DuckDuckGo icon steps aside.
+                let photo = await wikipediaArticlePhoto(sourceURL, session: session)
+                return .text(heading: ddg.heading, body: firstSentence(abstract), source: source, sourceURL: sourceURL,
+                             imageURL: photo == nil ? imageURL : nil, grounding: abstract, photo: photo)
             }
 
             if let topics = ddg.relatedTopics, !topics.isEmpty {
@@ -664,8 +693,9 @@ final class QueryEngine: Sendable {
                 body: firstSentence(extract),
                 source: "Wikipedia",
                 sourceURL: wiki.contentUrls?.desktop?.page,
-                imageURL: wiki.thumbnail?.source,
-                grounding: extract
+                imageURL: nil,
+                grounding: extract,
+                photo: AnswerPhoto.wikipediaLead(wiki.thumbnail?.source, width: wiki.thumbnail?.width, height: wiki.thumbnail?.height)
             )
         } catch {
             return nil

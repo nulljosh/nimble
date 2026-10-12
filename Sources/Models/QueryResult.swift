@@ -35,7 +35,7 @@ enum AnswerSources {
     static func linked(body: String, candidates: [QueryResult]) -> [AnswerSource] {
         var out: [AnswerSource] = []
         for (index, candidate) in candidates.enumerated() {
-            guard case .text(_, let cBody, let name, let url?, _, let grounding, _) = candidate,
+            guard case .text(_, let cBody, let name, let url?, _, let grounding, _, _) = candidate,
                   out.count < 3, !out.contains(where: { $0.url == url }) else { continue }
             let text = grounding.flatMap { $0.isEmpty ? nil : $0 } ?? cBody
             if index == 0 || agrees(body, text) { out.append(AnswerSource(name: name, url: url)) }
@@ -44,11 +44,40 @@ enum AnswerSources {
     }
 }
 
-/// One story on the news card: one sentence, the outlet that ran it, and the link.
+extension String {
+    /// The string, or nil when it is empty.
+    var nonEmpty: String? { isEmpty ? nil : self }
+}
+
+/// A picture for a card, from Wikipedia, a site's share image or a news feed. https only.
+struct AnswerPhoto: Equatable, Decodable {
+    let url: String
+    let width: Int?
+    let height: Int?
+
+    /// A photo from any source, when the link is https; nil otherwise.
+    static func https(_ url: String?, width: Int? = nil, height: Int? = nil) -> AnswerPhoto? {
+        guard let url, url.lowercased().hasPrefix("https://") else { return nil }
+        return AnswerPhoto(url: url, width: width, height: height)
+    }
+
+    /// Wikipedia's lead image, unless it is a logo, flag, icon or SVG drawing (the same rule as the web engine and the worker).
+    static func wikipediaLead(_ url: String?, width: Int? = nil, height: Int? = nil) -> AnswerPhoto? {
+        guard let photo = https(url, width: width, height: height),
+              photo.url.range(of: #"\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-"#,
+                              options: [.regularExpression, .caseInsensitive]) == nil else { return nil }
+        return photo
+    }
+}
+
+/// One story on the news card: one sentence, the outlet that ran it, the link, and a picture when the feed has one.
 struct NewsItem: Equatable, Decodable {
     let sentence: String
     let outlet: String
     let url: String
+    /// The headline; the picture's alt text.
+    var title: String = ""
+    var image: AnswerPhoto? = nil
 }
 
 // Foundation/CoreGraphics only, no SwiftUI, shared with the terminal frontend (tui/),
@@ -60,7 +89,8 @@ enum QueryResult: Equatable {
     case math(String, steps: [String] = [])
     /// grounding is the text the body sentence was cut from ("Why this answer"); nil when there is none.
     /// sources is the linked list under the sentence (up to three); sourceURL and source stay the primary.
-    case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?, grounding: String? = nil, sources: [AnswerSource] = [])
+    /// photo is the picture above the card (Wikipedia, a site's share image); imageURL stays the small icon.
+    case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?, grounding: String? = nil, sources: [AnswerSource] = [], photo: AnswerPhoto? = nil)
     case list(items: [String], source: String)
     case error(String, searchURL: String?)
     case color(String)
@@ -89,7 +119,7 @@ enum QueryResult: Equatable {
     var copyText: String? {
         switch self {
         case .math(let s, _): return s
-        case .text(_, let body, _, _, _, _, _): return body
+        case .text(_, let body, _, _, _, _, _, _): return body
         case .list(let items, _): return items.joined(separator: "\n")
         case .error(let msg, _): return msg
         case .color(let hex): return hex
@@ -109,7 +139,7 @@ enum QueryResult: Equatable {
         case .math, .convert, .graph, .color: return (text, "Computed offline")
         // The share image carries one sentence, not the whole list.
         case .news(let items, let source): return items.first.map { ($0.sentence, source) }
-        case .text(_, _, let source, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
+        case .text(_, _, let source, _, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
         }
     }
 }

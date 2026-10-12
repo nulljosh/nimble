@@ -24,9 +24,9 @@ struct ResultView: View {
                 Text("computed offline")
             }
 
-        case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding, let sources):
+        case .text(let heading, let answer, let source, let sourceURL, let imageURL, let grounding, let sources, let photo):
             TextAnswerView(heading: heading, answer: answer, source: source, sourceURL: sourceURL,
-                           imageURL: imageURL, grounding: grounding, sources: sources, shareText: state.result.copyText)
+                           imageURL: imageURL, grounding: grounding, sources: sources, photo: photo, shareText: state.result.copyText)
 
         case .list(let items, let source):
             AnswerCard(shareText: state.result.copyText) {
@@ -65,14 +65,29 @@ struct ResultView: View {
             AnswerCard(shareText: state.result.copyText) {
                 VStack(alignment: .leading, spacing: 14) {
                     ForEach(Array(items.enumerated()), id: \.offset) { _, item in
-                        VStack(alignment: .leading, spacing: 3) {
-                            link(item.sentence, to: item.url)
-                                .font(.nimbleBody)
-                                .foregroundStyle(Color.text)
-                                .multilineTextAlignment(.leading)
-                            Text(item.outlet)
-                                .font(.nimbleCaption)
-                                .foregroundStyle(Color.dim)
+                        HStack(alignment: .top, spacing: 12) {
+                            // A story with a picture gets a 56px square beside its sentence; without one the row is plain.
+                            if let image = item.image, let url = URL(string: image.url) {
+                                AsyncImage(url: url) { phase in
+                                    if case .success(let picture) = phase {
+                                        picture.resizable().aspectRatio(contentMode: .fill)
+                                            .frame(width: 56, height: 56)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    } else {
+                                        RoundedRectangle(cornerRadius: 12).fill(Color.bg2).frame(width: 56, height: 56)
+                                    }
+                                }
+                                .accessibilityLabel(item.title)
+                            }
+                            VStack(alignment: .leading, spacing: 3) {
+                                link(item.sentence, to: item.url)
+                                    .font(.nimbleBody)
+                                    .foregroundStyle(Color.text)
+                                    .multilineTextAlignment(.leading)
+                                Text(item.outlet)
+                                    .font(.nimbleCaption)
+                                    .foregroundStyle(Color.dim)
+                            }
                         }
                     }
                 }
@@ -132,6 +147,8 @@ struct TextAnswerView: View {
     let grounding: String?
     /// Up to three linked sources; shown as a row under the sentence when there are two or more.
     let sources: [AnswerSource]
+    /// The picture above the card; nil keeps the plain layout.
+    let photo: AnswerPhoto?
     let shareText: String?
     @State private var showWhy = false
 
@@ -147,6 +164,24 @@ struct TextAnswerView: View {
     var body: some View {
         AnswerCard(shareText: shareText) {
             VStack(alignment: .leading, spacing: 14) {
+                if let photo, let url = URL(string: photo.url) {
+                    // 16:9 box reserved up front, the cream placeholder until the picture loads, so nothing jumps.
+                    Color.clear
+                        .aspectRatio(16.0 / 9.0, contentMode: .fit)
+                        .frame(maxWidth: .infinity)
+                        .overlay {
+                            AsyncImage(url: url) { phase in
+                                if case .success(let image) = phase {
+                                    image.resizable().aspectRatio(contentMode: .fill)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                } else {
+                                    Color.bg2
+                                }
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .accessibilityLabel(heading ?? source)
+                }
                 HStack(alignment: .top, spacing: 14) {
                     if let imageURL, let url = URL(string: imageURL) {
                         AsyncImage(url: url) { phase in

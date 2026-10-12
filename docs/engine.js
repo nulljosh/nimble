@@ -183,12 +183,27 @@ function sourceRow(list){
   return list.map(s=>'<a href="'+esc(s.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>').join(" \u00B7 ");
 }
 
+// Photos: only real pictures from Wikipedia's lead image. Logos, flags, icons and SVG drawings are
+// skipped, so a topic with only a logo shows its text and no photo. https only.
+const NOT_PHOTO = /\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-/i;
+function wikiPhoto(sum){
+  const t = sum && sum.thumbnail, u = t && t.source;
+  if(!u || !/^https:\/\//.test(u) || NOT_PHOTO.test(u)) return null;
+  return {url:u, width:t.width||null, height:t.height||null};
+}
+// A DuckDuckGo abstract from Wikipedia names its article; that article's lead photo goes with it.
+async function abstractPhoto(url){
+  const m = /^https:\/\/en\.wikipedia\.org\/wiki\/([^?#]+)/.exec(url||"");
+  if(!m) return null;
+  return wikiPhoto(await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${m[1]}`));
+}
+
 async function ddg(query){
   const d = await getJSON(`${ANSWER_PROXY}/?ddg=${encodeURIComponent(query)}`);
   if(d){
     const heading = d.Heading || query;
     if(d.Answer) return {title:heading, body:d.Answer, src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null};
-    if(d.AbstractText) return {title:heading, body:first(d.AbstractText), src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null, grounding:d.AbstractText};
+    if(d.AbstractText) return {title:heading, body:first(d.AbstractText), src:d.AbstractSource||"DuckDuckGo", url:d.AbstractURL, img:d.Image?`https://duckduckgo.com${d.Image}`:null, grounding:d.AbstractText, image:await abstractPhoto(d.AbstractURL)};
     if(d.Definition) return {title:heading, body:d.Definition, src:d.DefinitionSource||"DuckDuckGo", url:d.DefinitionURL};
   }
   return null;
@@ -204,7 +219,7 @@ async function wiki(query){
   if(!title || /^list of /i.test(title)) return null; // a list article's intro never answers the question
   const sum = await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
   if(!sum?.extract || sum.type==="disambiguation") return null;
-  return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, img:sum.thumbnail?.source||null, grounding:sum.extract};
+  return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, image:wikiPhoto(sum), grounding:sum.extract};
 }
 
 // "What's primitive.dev?" is a question about a website, and Wikipedia answered it with the
@@ -220,7 +235,8 @@ async function site(query){
   // A page that only renders with JavaScript has no text in its HTML; say so rather than echo its <title>.
   const body = d && (d.description || [d.h1, d.text].filter(Boolean).join(". ") || (d.js ? "This site loads with JavaScript." : d.title));
   if(!body) return null;
-  return {title:d.title || d.siteName || host, body:first(body), src:host, url:`https://${host}`, icon:`https://www.google.com/s2/favicons?domain=${host}&sz=64`, grounding:body};
+  const image = d.image && /^https:\/\//.test(d.image.url||"") ? {url:d.image.url, width:d.image.width||null, height:d.image.height||null} : null;
+  return {title:d.title || d.siteName || host, body:first(body), src:host, url:`https://${host}`, image, icon: image ? null : `https://www.google.com/s2/favicons?domain=${host}&sz=64`, grounding:body};
 }
 
 // "define X" must never fall through to Wikipedia search: that turns "define nimble"
@@ -375,7 +391,7 @@ async function gemma(query){
   let c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
   if(e.key && !c.apiKey){ c = {engine:"nimble"}; e = ENGINES.nimble; } // no key = free proxy
   const base = c.baseURL || e.base, model = c.model || e.model, H = {"Content-Type":"application/json"};
-  let d, text, src;
+  let d, text, src, image = null;
   if(c.engine==="claude" && e===ENGINES.claude){
     d = await getJSON(base+"/v1/messages", {method:"POST", headers:{...H, "x-api-key":c.apiKey, "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({model, max_tokens:256, system:SYSTEM, messages:[...turnMessages(), {role:"user", content:query}]})});
@@ -391,9 +407,10 @@ async function gemma(query){
   }else{
     d = await getJSON(ANSWER_PROXY, {method:"POST", headers:H, body:JSON.stringify({q:query, turns:turns.list()})});
     text = d?.answer; src = d?.source||"Nimble AI";
+    image = d?.image && /^https:\/\//.test(d.image.url||"") ? d.image : null;
   }
   const a = (text||"").trim();
-  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src} : null;
+  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {})} : null;
 }
 
 // "Who made you" is about us, not the Wikipedia article for whatever the words match (it used to
@@ -411,7 +428,8 @@ async function news(query){
   if(!m) return null;
   const place = (m[1]||m[2]||"").trim();
   const d = await getJSON(`${ANSWER_PROXY}/?news=${encodeURIComponent(place)}`);
-  const items = (d?.items||[]).filter(i=>i && i.url && i.sentence && i.outlet).slice(0,3);
+  const items = (d?.items||[]).filter(i=>i && i.url && i.sentence && i.outlet).slice(0,3)
+    .map(i=>({...i, image: i.image && /^https:\/\//.test(i.image.url||"") ? i.image : null}));
   return items.length ? {kind:"news", items, src:[...new Set(items.map(i=>i.outlet))].join(", ")} : null;
 }
 
@@ -459,6 +477,15 @@ function consentHTML(recipient, t){
     +T("Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.",{s:esc(recipient)})+'</p>'
     +'<div class="consent-actions"><button type="button" class="consent-yes" data-consent="yes">'+T("Allow")+'</button><button type="button" class="consent-no" data-consent="no">'+T("Don't allow")+'</button></div>';
 }
+// Photo markup. The frame reserves its 16:9 box before the picture arrives (no layout jump), the cream
+// fills it until load, and a picture that fails to load is removed rather than shown broken.
+function photoHTML(url, alt){
+  return '<span class="mockup-photo"><img src="'+attrEsc(url)+'" alt="'+attrEsc(alt||"")+'" loading="lazy" decoding="async" onload="this.classList.add(\'on\')" onerror="this.parentNode.remove()"></span>';
+}
+function thumbHTML(url, alt){
+  return '<img class="news-thumb" src="'+attrEsc(url)+'" alt="'+attrEsc(alt||"")+'" width="56" height="56" loading="lazy" decoding="async" onload="this.classList.add(\'on\')" onerror="this.remove()">';
+}
+function attrEsc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
 // English fallback for the translator hook: fills {name} slots and nothing else.
 function plain(key, vars){ let s=key; if(vars) for(const k in vars) s=s.split("{"+k+"}").join(vars[k]); return s; }
 
@@ -503,8 +530,11 @@ async function renderAnswer(query, opts){
   }
   else if(a.kind==="graph"){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="news"){
-    // One sentence per story, the outlet beside it, and the link on the sentence.
-    h+='<ol class="news">'+a.items.map(i=>'<li><a href="'+esc(i.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(i.sentence)+'</a> <span class="news-src">'+esc(i.outlet)+'</span></li>').join("")+'</ol>';
+    // One sentence per story, the outlet beside it, and the link on the sentence. A story with a
+    // picture gets a 56px square beside its sentence; without one the row is the plain layout.
+    h+='<ol class="news">'+a.items.map(i=>'<li'+(i.image?' class="has-thumb"':'')+'>'
+      +(i.image?thumbHTML(i.image.url, i.title||i.sentence):'')
+      +'<div><a href="'+esc(i.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(i.sentence)+'</a> <span class="news-src">'+esc(i.outlet)+'</span></div></li>').join("")+'</ol>';
     credit=T("powered by {s}",{s:a.src});
   }
   else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
@@ -512,8 +542,11 @@ async function renderAnswer(query, opts){
   else if(a.kind==="text"){
     // Click through to the source; AI answers have none, so fall back to a web search.
     const href=a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query);
+    // A photo (Wikipedia lead image, a site's share image) tops the card; the favicon only stands in when there is none.
+    const photo = a.image && a.image.url ? photoHTML(a.image.url, a.title) : "";
     h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
-      +(a.icon?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
+      +photo
+      +(a.icon&&!photo?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
       +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>';
     // "Why this answer": the source line opens the exact text the sentence was cut from, with a link.
     // Shown only when that text says more than the sentence did.
