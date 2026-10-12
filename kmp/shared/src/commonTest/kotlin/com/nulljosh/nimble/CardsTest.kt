@@ -139,7 +139,7 @@ class CardsTest {
     fun currencyCardFromFrankfurter() {
         val body = """{"amount":1.0,"base":"USD","date":"2026-10-01","rates":{"EUR":0.92}}"""
         assertEquals(
-            Card("92.00", "EUR", "100 USD at today's rate", "Frankfurter", "https://frankfurter.dev"),
+            Card("92.00", "EUR", "100 USD at today's rate", "Frankfurter", "https://frankfurter.dev", Freshness(utcDayMillis("2026-10-01")!!, true)),
             Cards.currencyFromJson(100.0, "USD", "EUR", body, "Frankfurter", "https://frankfurter.dev"),
         )
     }

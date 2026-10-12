@@ -16,6 +16,7 @@ import io.ktor.http.encodeURLParameter
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 
 sealed class Answer {
@@ -39,7 +40,16 @@ sealed class Answer {
         val aiNote: String? = null,
     ) : Answer()
     /** "news" or "what's happening in <place>": up to three headlines from the worker's RSS route. */
-    data class News(val items: List<NewsItem>, val source: String) : Answer()
+    data class News(val items: List<NewsItem>, val source: String, val asOf: Freshness? = null) : Answer()
+    /** A price or rate: the title, the big number, the change in words. [big] is null when the quote failed, and the card then says "Quote unavailable right now". */
+    data class Market(
+        val title: String,
+        val big: String?,
+        val change: String?,
+        val source: String,
+        val url: String,
+        val asOf: Freshness? = null,
+    ) : Answer()
     data class Miss(val message: String, val searchUrl: String) : Answer()
 }
 
@@ -75,6 +85,9 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
 
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
+
+        // Markets come before the AI: a price question is a card or the calm unavailable state, never a model's guess.
+        Markets.ask(input)?.let { return Markets.quote(it) { url -> fetchQuote(url) } }
 
         // A bare domain question ("What's primitive.dev?") is answered by the site itself, before any AI or encyclopedia.
         site(input)?.let { return it }
@@ -125,7 +138,7 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
     }
 
     private suspend fun news(place: String): Answer.News? = runCatchingNull {
-        newsFromJson(http.get("$PROXY/?news=${place.encodeURLParameter()}").bodyAsText())
+        newsFromJson(http.get("$PROXY/?news=${place.encodeURLParameter()}").bodyAsText())?.copy(asOf = Freshness.now())
     }
 
     @Serializable
@@ -169,6 +182,14 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
     }
 
     /** Body text of a URL, or null on a network failure or any non-200 reply. */
+    /** A quote source's body, or null on any failure or after [Markets.QUOTE_TIMEOUT_MS]: the calm state, not an AI answer. */
+    private suspend fun fetchQuote(url: String): String? = runCatchingNull {
+        withTimeoutOrNull(Markets.QUOTE_TIMEOUT_MS) {
+            val res = http.get(url)
+            if (res.status == HttpStatusCode.OK) res.bodyAsText() else null
+        }
+    }
+
     private suspend fun fetchText(url: String): String? = runCatchingNull {
         val res = http.get(url)
         if (res.status == HttpStatusCode.OK) res.bodyAsText() else null

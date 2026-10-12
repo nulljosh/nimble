@@ -49,7 +49,17 @@ fun CardResult(card: Card, theme: NimbleTheme, modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.height(4.dp))
         Text(card.sub, color = theme.muted, fontSize = 15.sp)
+        card.asOf?.let {
+            Spacer(Modifier.height(12.dp))
+            AsOfLine(it, theme)
+        }
         Spacer(Modifier.height(12.dp))
         Text("Source: ${card.source}", color = theme.muted, fontSize = 11.sp)
     }
+}
+
+/** The quiet freshness line: "as of Oct 12, 3:41 pm", or "as of Oct 9" for a daily value. Same left edge as the source row. */
+@Composable
+fun AsOfLine(asOf: Freshness, theme: NimbleTheme, modifier: Modifier = Modifier) {
+    Text("as of ${asOf.label()}", color = theme.muted, fontSize = 13.sp, modifier = modifier)
 }

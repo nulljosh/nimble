@@ -17,7 +17,8 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 /** One big number, a small label under it, one quiet line, and where it came from. */
-data class Card(val big: String, val unit: String, val sub: String, val source: String, val url: String)
+/** [asOf] is the freshness line ("as of ..."): set for live values (weather, time, FX), null for etymology. */
+data class Card(val big: String, val unit: String, val sub: String, val source: String, val url: String, val asOf: Freshness? = null)
 
 /** Which card a question is asking for. A null from [Cards.ask] means "not this kind of question". */
 sealed class Ask {
@@ -148,8 +149,11 @@ object Cards {
 
     /** Frankfurter and open.er-api share the shape {"rates": {"EUR": 0.92}}. */
     fun currencyFromJson(amount: Double, from: String, to: String, body: String, source: String, url: String): Card? {
-        val rate = (parse(body)?.get("rates") as? JsonObject)?.get(to).num()?.takeIf { it != 0.0 } ?: return null
-        return currencyCard(amount, from, to, rate, source, url)
+        val json = parse(body) ?: return null
+        val rate = (json["rates"] as? JsonObject)?.get(to).num()?.takeIf { it != 0.0 } ?: return null
+        // Frankfurter dates its rate; open.er-api does not, so that card has no freshness line.
+        val day = json["date"].str()?.let(::utcDayMillis)?.let { Freshness(it, true) }
+        return currencyCard(amount, from, to, rate, source, url).copy(asOf = day)
     }
 
     // MARK: Number formatting (no String.format in common code)
@@ -204,12 +208,12 @@ class CardClient(private val http: HttpClient) {
             "https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}" +
                 "&current=temperature_2m,weather_code,wind_speed_10m"
         ) ?: return null
-        return Cards.weatherFromJson(loc, body)
+        return Cards.weatherFromJson(loc, body)?.copy(asOf = Freshness.now())
     }
 
     private suspend fun time(place: String): Card? {
         val loc = geocode(place) ?: return null
-        return Cards.timeCard(loc.name, loc.timezone ?: return null)
+        return Cards.timeCard(loc.name, loc.timezone ?: return null)?.copy(asOf = Freshness.now())
     }
 
     private suspend fun currency(amount: Double, from: String, to: String): Card? {

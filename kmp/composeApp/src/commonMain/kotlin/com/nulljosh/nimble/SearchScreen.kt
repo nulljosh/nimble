@@ -274,6 +274,10 @@ private fun NewsResult(news: Answer.News, theme: NimbleTheme, client: AnswerClie
                 }
             }
         }
+        news.asOf?.let {
+            Spacer(Modifier.height(12.dp))
+            AsOfLine(it, theme)
+        }
         Spacer(Modifier.height(12.dp))
         Text("Source: ${news.source}", color = theme.muted, fontSize = 12.sp)
     }
@@ -346,6 +350,8 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
             )
 
             is Answer.CardAnswer -> CardResult(answer.card, theme)
+
+            is Answer.Market -> MarketResult(answer, theme)
 
             is Answer.News -> NewsResult(answer, theme, client)
 
