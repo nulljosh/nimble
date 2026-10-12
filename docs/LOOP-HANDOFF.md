@@ -33,3 +33,4 @@ Keep Nimble moving with one small, shippable slice at a time: fix what App Revie
 
 Loop: Nimble, until A+. Read docs/LOOP-HANDOFF.md and roadmap.md first. Check App Review for iPhone 5.4.0 and Mac 5.0.1 with asc; resubmit with the fix if either was rejected. Then take the next single slice from "Next, in order": one patch, tests green, tag, GitHub release, landing and docs synced, screenshots retaken and reviewed. Do not touch roadmap.md unless its unstaged edit has been committed. Stage explicit paths only. Ping after each round. Stop only at zero open issues, zero stale branches, all PRs merged, and A+ on UI, UX, accessibility and language.
 ```
+- Version 5.14.2 (was 5.14.1): landing hierarchy pass. Hero headline steps to a 48px display size from tablet up, feature grid is one row of three at 1024 and up, install actions share one solid button style on equal columns, footer heart removed. Zero violations at 390, 768 and 1440 in light and dark.

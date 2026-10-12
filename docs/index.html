@@ -118,6 +118,8 @@ a:hover { text-decoration: underline; }
   color: var(--dark);
   margin-bottom: var(--s1);
 }
+/* From tablet up the headline steps to the display size. Phones keep 34px. */
+@media (min-width: 768px) { .hero h1 { font-size: var(--fs-48); line-height: var(--lh-3xl); } }
 
 .hero-version {
   font-variant-numeric: tabular-nums;
@@ -166,15 +168,17 @@ a:hover { text-decoration: underline; }
 .install .container { max-width: var(--max-wide); }
 .install-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-7);
 }
-/* Equal heights: the copy grows, so every card's links sit on one line. */
+@media (min-width: 1024px) { .install-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Equal heights: the copy grows, so every card's actions sit on the same bottom line. */
 .install-card { display: flex; flex-direction: column; }
 .install-card h3 { font-size: var(--fs-17); letter-spacing: -0.02em; line-height: var(--lh-md); margin-bottom: var(--space-2); }
 .install-card p { flex: 1; color: var(--mid); margin-bottom: var(--s3); }
-.install-links { display: flex; align-items: baseline; gap: var(--s3); }
-.install-links .btn:not(.btn-dark) { padding-left: 0; padding-right: 0; }
+/* One action style for every install path: full-width solid button, 44px tall. */
+.install-links { display: flex; flex-direction: column; gap: var(--space-3); }
+.install-links .btn { width: 100%; }
 
 /* Mockup, the Mac app. Colours are taken off the real iOS screenshot below
    so the two read as one product; the old light-gold panel looked like a
@@ -347,11 +351,13 @@ main > section:not(.hero) h2 {
 }
 @media (max-width: 600px) { main > section:not(.hero) { padding: var(--s5) 0; } .hero-copy { padding-top: var(--s5); } .hero { padding-bottom: var(--s4); } .hero .device { margin-top: var(--s3); } }
 
+.features .container { max-width: var(--max-wide); }
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-7);
 }
+@media (min-width: 1024px) { .features-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
 .feature h3 {
   font-size: var(--fs-17);
@@ -418,24 +424,6 @@ footer {
   .foot-bar .foot-meta { margin: 0; text-align: left; color: var(--mid); font-size: var(--fs-13); line-height: var(--lh-md); }
   .foot-bar .foot-meta a { color: var(--mid); }
   @media (max-width: 700px) { .foot-dir { grid-template-columns: repeat(2, 1fr); } }
-
-/* Footer heart */
-.heart {
-  display: inline-block;
-  vertical-align: -4px;
-  transform-origin: center;
-  animation: thump 1.2s ease-in-out infinite;
-}
-
-@keyframes thump {
-  0%, 28%, 70%, 100% { transform: scale(1); }
-  14% { transform: scale(1.35); }
-  42% { transform: scale(1.2); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .heart { animation: none; }
-}
 
 .credit {
   margin-top: var(--s1);
@@ -543,18 +531,18 @@ footer {
         <p>Native SwiftUI, on the App Store. On the Mac it lives in the menu bar, one keystroke from anywhere.</p>
         <div class="install-links">
           <a href="https://apps.apple.com/app/nimble-answers/id6807858746" class="btn btn-dark">App Store</a>
-          <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn" data-asset="macOS.zip">Direct download</a>
+          <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset="macOS.zip">Direct download</a>
         </div>
       </div>
       <div class="install-card">
         <h3>Windows</h3>
         <p>A native installer. Lands in the Start Menu like any other app.</p>
-        <div class="install-links"><a href="https://github.com/nulljosh/nimble/releases/latest" class="btn" data-asset=".msi" data-i18n="Download for Windows">Download for Windows</a></div>
+        <div class="install-links"><a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".msi" data-i18n="Download for Windows">Download for Windows</a></div>
       </div>
       <div class="install-card">
         <h3>Android</h3>
         <p>A native APK. Full screen, works offline.</p>
-        <div class="install-links"><a href="https://github.com/nulljosh/nimble/releases/latest" class="btn" data-asset=".apk" data-i18n="Download for Android">Download for Android</a></div>
+        <div class="install-links"><a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset=".apk" data-i18n="Download for Android">Download for Android</a></div>
       </div>
     </div>
   </div>
@@ -656,7 +644,7 @@ footer {
     </div>
   </nav>
   <div class="foot-bar">
-    <p class="foot-meta">Nimble <span id="footver"></span> &middot; MIT License &middot; &copy; 2026 Joshua Trommel &middot; Originally created by <a href="https://maybulb.com">Maybulb</a> &middot; Made with <span aria-hidden="true">&hearts;</span> in Vancouver, BC</p>
+    <p class="foot-meta">Nimble <span id="footver"></span> &middot; MIT License &middot; &copy; 2026 Joshua Trommel &middot; Originally created by <a href="https://maybulb.com">Maybulb</a> &middot; Made in Vancouver, BC</p>
   </div>
 </footer>
 
