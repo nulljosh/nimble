@@ -15,14 +15,14 @@ func describe(_ result: QueryResult) -> String {
         return [heading, body, "— \(source)"].compactMap { $0 }.joined(separator: "\n")
     case .list(let items, let source):
         return items.joined(separator: "\n") + "\n— \(source)"
-    case .news(let items, let source):
+    case .news(let items, let source, _):
         return items.map { "\($0.sentence) (\($0.outlet))" }.joined(separator: "\n") + "\n\(source)"
     case .error(let message, _): return message
     case .color(let value): return value
     case .convert(let from, let to, let fromUnit, let toUnit):
         return "\(from) \(fromUnit) = \(to) \(toUnit)"
     case .graph(let expr, _): return "graph: \(expr)"
-    case .card: return result.copyText ?? ""
+    case .card, .market: return result.copyText ?? ""
     }
 }
 

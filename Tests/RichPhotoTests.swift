@@ -27,7 +27,7 @@ final class RichPhotoTests: XCTestCase {
           {"title":"Story three","sentence":"Third story happened.","outlet":"NPR","url":"https://www.npr.org/3"}
         ]}
         """
-        guard case let .news(items, _)? = QueryEngine.newsResult(json: Data(json.utf8)) else { return XCTFail("expected a news card") }
+        guard case let .news(items, _, _)? = QueryEngine.newsResult(json: Data(json.utf8)) else { return XCTFail("expected a news card") }
         XCTAssertEqual(items[0].image, AnswerPhoto(url: "https://ichef.bbci.co.uk/a.jpg", width: 240, height: 135))
         XCTAssertEqual(items[0].title, "Story one")
         XCTAssertNil(items[1].image)

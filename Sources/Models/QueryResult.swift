@@ -85,6 +85,28 @@ struct NewsItem: Equatable, Decodable {
     var image: AnswerPhoto? = nil
 }
 
+/// When a live answer was true: "as of Oct 12, 3:41 pm" for a moment, "as of Oct 9" for a daily value.
+/// Pure: the label comes from the value and the zone it is given, never from the clock.
+struct Freshness: Equatable {
+    let date: Date
+    /// A daily value (an exchange rate, a close): the label is the day only.
+    let isDay: Bool
+
+    func label(in zone: TimeZone = .current) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        if isDay {
+            f.timeZone = TimeZone(identifier: "UTC")
+            f.dateFormat = "MMM d"
+            return f.string(from: date)
+        }
+        f.timeZone = zone
+        f.dateFormat = "MMM d, h:mm a"
+        // "3:41 PM" reads as "3:41 pm" in the freshness line, same as the web.
+        return f.string(from: date).replacingOccurrences(of: " AM", with: " am").replacingOccurrences(of: " PM", with: " pm")
+    }
+}
+
 // Foundation/CoreGraphics only, no SwiftUI, shared with the terminal frontend (tui/),
 // which imports SwiftTUI and can't also import SwiftUI in the same module.
 enum QueryResult: Equatable {
@@ -102,9 +124,13 @@ enum QueryResult: Equatable {
     case convert(from: String, to: String, fromUnit: String, toUnit: String)
     case graph(expr: String, points: [CGPoint])
     /// One big number, a small label under it, one quiet line: weather, currency, local time.
-    case card(big: String, unit: String, sub: String, source: String, url: String?)
+    /// asOf is the freshness line; it is not part of equality.
+    case card(big: String, unit: String, sub: String, source: String, url: String?, asOf: Freshness? = nil)
     /// The top three headlines for "news" or "what's happening in <place>"; source lists the outlets.
-    case news(items: [NewsItem], source: String)
+    case news(items: [NewsItem], source: String, asOf: Freshness? = nil)
+    /// A price or rate: the title, the big number, the change in words. big is nil when the quote failed,
+    /// and the card then says "Quote unavailable right now". Never a number we did not get.
+    case market(title: String, big: String?, change: String?, source: String, url: String, asOf: Freshness? = nil)
 
     static func == (lhs: QueryResult, rhs: QueryResult) -> Bool {
         switch (lhs, rhs) {
@@ -114,8 +140,9 @@ enum QueryResult: Equatable {
         case let (.color(a), .color(b)): return a == b
         case let (.convert(a, b, c, d), .convert(e, f, g, h)): return (a, b, c, d) == (e, f, g, h)
         case let (.graph(a, _), .graph(b, _)): return a == b
-        case let (.card(a, b, c, d, e), .card(f, g, h, i, j)): return (a, b, c, d, e) == (f, g, h, i, j)
-        case let (.news(a, _), .news(b, _)): return a == b
+        case let (.card(a, b, c, d, e, _), .card(f, g, h, i, j, _)): return (a, b, c, d, e) == (f, g, h, i, j)
+        case let (.news(a, _, _), .news(b, _, _)): return a == b
+        case let (.market(a, b, c, d, e, _), .market(f, g, h, i, j, _)): return (a, b, c, d, e) == (f, g, h, i, j)
         default: return false
         }
     }
@@ -130,8 +157,11 @@ enum QueryResult: Equatable {
         case .color(let hex): return hex
         case .convert(let from, let to, let fromUnit, let toUnit): return "\(from) \(fromUnit) = \(to) \(toUnit)"
         case .graph(let expr, _): return "y = \(expr)"
-        case .card(let big, let unit, let sub, _, _): return "\(big) \(unit), \(sub)"
-        case .news(let items, _): return items.map { "\($0.sentence) (\($0.outlet))" }.joined(separator: "\n")
+        case .card(let big, let unit, let sub, _, _, _): return "\(big) \(unit), \(sub)"
+        // An unavailable quote has nothing to copy or share.
+        case .market(_, nil, _, _, _, _): return nil
+        case .market(let title, let big?, let change, _, _, _): return [title + " " + big, change].compactMap { $0 }.joined(separator: ", ")
+        case .news(let items, _, _): return items.map { "\($0.sentence) (\($0.outlet))" }.joined(separator: "\n")
         case .none, .loading: return nil
         }
     }
@@ -143,8 +173,8 @@ enum QueryResult: Equatable {
         case .none, .loading, .error: return nil
         case .math, .convert, .graph, .color: return (text, "Computed offline")
         // The share image carries one sentence, not the whole list.
-        case .news(let items, let source): return items.first.map { ($0.sentence, source) }
-        case .text(_, _, let source, _, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _): return (text, source)
+        case .news(let items, let source, _): return items.first.map { ($0.sentence, source) }
+        case .text(_, _, let source, _, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _, _), .market(_, _, _, let source, _, _): return (text, source)
         }
     }
 }

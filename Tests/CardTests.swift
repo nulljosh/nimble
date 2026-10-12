@@ -69,7 +69,7 @@ final class CardTests: XCTestCase {
         ]}
         """
         let result = QueryEngine.newsResult(json: Data(json.utf8))
-        guard case let .news(items, source)? = result else { return XCTFail("expected a news card") }
+        guard case let .news(items, source, _)? = result else { return XCTFail("expected a news card") }
         XCTAssertEqual(items.map(\.outlet), ["BBC", "CBC", "NPR"])
         XCTAssertEqual(source, "BBC, CBC, NPR")
         XCTAssertEqual(items[0].url, "https://www.bbc.com/news/1")

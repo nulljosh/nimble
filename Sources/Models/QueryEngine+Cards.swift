@@ -33,9 +33,11 @@ extension QueryEngine {
         return nil
     }
 
-    func isCardQuery(_ input: String) -> Bool { Self.ask(input) != nil }
+    func isCardQuery(_ input: String) -> Bool { Self.ask(input) != nil || Self.marketAsk(input) != nil }
 
     func card(_ input: String, session: URLSession = .shared) async -> QueryResult? {
+        // A market question always gets a card, even a failed one, so it never falls through to the AI.
+        if let market = Self.marketAsk(input) { return await marketCard(market, session) }
         switch Self.ask(input) {
         case .etymology(let word): return await etymologyCard(word, session)
         case .news(let place): return await newsCard(place, session)
@@ -58,24 +60,24 @@ extension QueryEngine {
         return .card(big: word, unit: "", sub: sub, source: "Wordroot", url: "https://wordroot.jaybulb.com/#search=\(word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word)")
     }
 
-    static func weatherCard(place: String, country: String?, temp: Double, code: Int, wind: Double) -> QueryResult {
+    static func weatherCard(place: String, country: String?, temp: Double, code: Int, wind: Double, asOf: Freshness? = nil) -> QueryResult {
         let sky = [0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "fog", 48: "fog",
                    51: "drizzle", 53: "drizzle", 55: "drizzle", 61: "rain", 63: "rain", 65: "heavy rain",
                    71: "snow", 73: "snow", 75: "heavy snow", 80: "showers", 81: "showers", 82: "heavy showers",
                    95: "thunderstorm"][code]
         let parts = [place, country, sky, "wind \(Int(wind.rounded())) km/h"].compactMap { $0 }.filter { !$0.isEmpty }
         return .card(big: String(Int(temp.rounded())), unit: "°C", sub: parts.joined(separator: ", "),
-                     source: "Open-Meteo", url: "https://open-meteo.com")
+                     source: "Open-Meteo", url: "https://open-meteo.com", asOf: asOf)
     }
 
-    static func currencyCard(amount: Double, from: String, to: String, rate: Double, source: String, url: String) -> QueryResult {
+    static func currencyCard(amount: Double, from: String, to: String, rate: Double, source: String, url: String, asOf: Freshness? = nil) -> QueryResult {
         let money = NumberFormatter()
         money.locale = Locale(identifier: "en_US")
         money.numberStyle = .decimal
         money.minimumFractionDigits = 2
         money.maximumFractionDigits = 2
         let big = money.string(from: NSNumber(value: amount * rate)) ?? String(amount * rate)
-        return .card(big: big, unit: to, sub: "\(trim(amount)) \(from) at today's rate", source: source, url: url)
+        return .card(big: big, unit: to, sub: "\(trim(amount)) \(from) at today's rate", source: source, url: url, asOf: asOf)
     }
 
     static func timeCard(place: String, zone: TimeZone, now: Date) -> QueryResult {
@@ -87,7 +89,7 @@ extension QueryEngine {
             return f.string(from: now)
         }
         return .card(big: fmt("HH:mm"), unit: place, sub: "\(fmt("EEEE, MMMM d")), \(zone.identifier)",
-                     source: "Open-Meteo", url: "https://open-meteo.com")
+                     source: "Open-Meteo", url: "https://open-meteo.com", asOf: Freshness(date: now, isDay: false))
     }
 
     // MARK: - Fetchers
@@ -109,7 +111,7 @@ extension QueryEngine {
         }
         let current: Now
     }
-    private struct Rates: Decodable { let base: String?; let rates: [String: Double]? }
+    private struct Rates: Decodable { let base: String?; let date: String?; let rates: [String: Double]? }
 
     private func fetch<T: Decodable>(_ type: T.Type, _ url: String, _ session: URLSession) async -> T? {
         guard let u = URL(string: url), let (data, response) = try? await session.data(from: u),
@@ -127,7 +129,7 @@ extension QueryEngine {
               let w = await fetch(Forecast.self, "https://api.open-meteo.com/v1/forecast?latitude=\(loc.latitude)&longitude=\(loc.longitude)&current=temperature_2m,weather_code,wind_speed_10m", session)
         else { return nil }
         return Self.weatherCard(place: loc.name, country: loc.country, temp: w.current.temperature2m,
-                                code: w.current.weatherCode, wind: w.current.windSpeed10m)
+                                code: w.current.weatherCode, wind: w.current.windSpeed10m, asOf: Freshness(date: Date(), isDay: false))
     }
 
     private func timeCard(_ place: String, _ session: URLSession) async -> QueryResult? {
@@ -137,7 +139,9 @@ extension QueryEngine {
 
     private func currencyCard(_ amount: Double, _ from: String, _ to: String, _ session: URLSession) async -> QueryResult? {
         if let d = await fetch(Rates.self, "https://api.frankfurter.dev/v1/latest?base=\(from)&symbols=\(to)", session), let rate = d.rates?[to] {
-            return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: "Frankfurter", url: "https://frankfurter.dev")
+            // Frankfurter's rate is a daily value, so its freshness is the day it is for.
+            let day = d.date.flatMap { Self.utcDay($0) }.map { Freshness(date: $0, isDay: true) }
+            return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: "Frankfurter", url: "https://frankfurter.dev", asOf: day)
         }
         if let d = await fetch(Rates.self, "https://open.er-api.com/v6/latest/\(from)", session), let rate = d.rates?[to] {
             return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: "ExchangeRate-API", url: "https://www.exchangerate-api.com")
@@ -151,18 +155,18 @@ extension QueryEngine {
         guard let u = URL(string: "https://nimble-answers.trommatic.workers.dev/?news=\(encoded)"),
               let (data, response) = try? await session.data(from: u),
               (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
-        return Self.newsResult(json: data)
+        return Self.newsResult(json: data, asOf: Freshness(date: Date(), isDay: false))
     }
 
     /// Pure, so the tests need no network. Nil when the feed had no usable story.
-    static func newsResult(json data: Data) -> QueryResult? {
+    static func newsResult(json data: Data, asOf: Freshness? = nil) -> QueryResult? {
         struct Payload: Decodable { let items: [NewsItem] }
         guard let payload = try? JSONDecoder().decode(Payload.self, from: data) else { return nil }
         let top = Array(payload.items.filter { !$0.sentence.isEmpty && ($0.url.hasPrefix("https://") || $0.url.hasPrefix("http://")) }.prefix(3))
         guard !top.isEmpty else { return nil }
         var outlets: [String] = []
         for item in top where !outlets.contains(item.outlet) { outlets.append(item.outlet) }
-        return .news(items: top, source: outlets.joined(separator: ", "))
+        return .news(items: top, source: outlets.joined(separator: ", "), asOf: asOf)
     }
 
     private func etymologyCard(_ word: String, _ session: URLSession) async -> QueryResult? {

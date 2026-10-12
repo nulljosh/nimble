@@ -8,7 +8,7 @@ extension QueryEngine {
     // MARK: - Units
 
     /// ponytail: flat table in base units (m, kg, L, m/s, B, s); add rows, not code.
-    private static let units: [String: (factor: Double, dim: String)] = [
+    static let units: [String: (factor: Double, dim: String)] = [
         "mm": (0.001, "len"), "millimeter": (0.001, "len"), "millimeters": (0.001, "len"),
         "cm": (0.01, "len"), "centimeter": (0.01, "len"), "centimeters": (0.01, "len"),
         "m": (1, "len"), "meter": (1, "len"), "meters": (1, "len"), "metre": (1, "len"), "metres": (1, "len"),

@@ -55,15 +55,22 @@ struct ResultView: View {
                 Text("computed offline")
             }
 
-        case .card(let big, let unit, let sub, let source, let url):
-            AnswerCard(shareText: state.result.copyText) {
+        case .card(let big, let unit, let sub, let source, let url, let asOf):
+            AnswerCard(shareText: state.result.copyText, freshness: asOf?.label()) {
                 CardResultView(big: big, unit: unit, sub: sub)
             } footer: {
                 link(String(localized: "powered by \(source)"), to: url ?? state.searchURL)
             }
 
-        case .news(let items, let source):
-            AnswerCard(shareText: state.result.copyText) {
+        case .market(let title, let big, let change, let source, let url, let asOf):
+            AnswerCard(shareText: state.result.copyText, freshness: big == nil ? nil : asOf?.label()) {
+                MarketResultView(title: title, big: big, change: change)
+            } footer: {
+                link(String(localized: "powered by \(source)"), to: url)
+            }
+
+        case .news(let items, let source, let asOf):
+            AnswerCard(shareText: state.result.copyText, freshness: asOf?.label()) {
                 VStack(alignment: .leading, spacing: 16) {
                     ForEach(Array(items.enumerated()), id: \.offset) { _, item in
                         HStack(alignment: .top, spacing: 12) {
@@ -128,6 +135,7 @@ struct ResultView: View {
         if let u = URL(string: url) {
             Button { openURL(u) } label: { Text(label) }
                 .buttonStyle(.plain)
+                .minimumTapTarget()
                 .accessibilityLabel(label)
         } else {
             Text(label)
@@ -304,11 +312,14 @@ struct TextAnswerView: View {
 /// The answer card: hairline border, 24pt padding, an eyebrow, the answer, then one row with the source and Share.
 struct AnswerCard<Content: View, Footer: View>: View {
     let shareText: String?
+    /// The quiet "as of" line under the answer, at the same left edge as the source row. Nil when there is none.
+    let freshness: String?
     let content: Content
     let footer: Footer
 
-    init(shareText: String?, @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
+    init(shareText: String?, freshness: String? = nil, @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
         self.shareText = shareText
+        self.freshness = freshness
         self.content = content()
         self.footer = footer()
     }
@@ -319,6 +330,11 @@ struct AnswerCard<Content: View, Footer: View>: View {
             VStack(alignment: .leading, spacing: 16) {
                 Eyebrow(text: "Answer")
                 content
+                if let freshness {
+                    Text(String(localized: "as of \(freshness)"))
+                        .font(.nimbleCaption)
+                        .foregroundStyle(Color.dim)
+                }
             }
             .accessibilityElement(children: .combine)
             HStack(alignment: .firstTextBaseline, spacing: 12) {
@@ -550,6 +566,38 @@ private struct ConvertResultView: View {
                 .monospacedDigit()
                 .foregroundStyle(Color.soft)
         }
+    }
+}
+
+/// A price or rate: the title, the big number, the change in words. A failed quote is the calm state, no number.
+private struct MarketResultView: View {
+    let title: String
+    let big: String?
+    let change: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.nimbleSubheadMedium)
+                .foregroundStyle(Color.dim)
+            if let big {
+                Text(big)
+                    .font(.nimbleDisplay)
+                    .tracking(-0.68)
+                    .foregroundStyle(Color.text)
+                if let change {
+                    Text(change)
+                        .font(.nimbleLead)
+                        .foregroundStyle(Color.soft)
+                }
+            } else {
+                Text(String(localized: "Quote unavailable right now"))
+                    .font(.nimbleLead)
+                    .foregroundStyle(Color.soft)
+            }
+        }
+        .textSelection(.enabled)
+        .accessibilityElement(children: .combine)
     }
 }
 
