@@ -884,37 +884,138 @@ final class QueryEngine: Sendable {
         }
     }
 
-    private func queryWikipedia(_ input: String, session: URLSession = .shared) async -> QueryResult? {
-        // First try direct page summary
+    /// "capital of X", "who wrote X", "when was X": a relation word and a subject. Only an intro sentence that carries
+    /// the relation word answers it, so a list or a loose search hit never does. Same rule as `wiki()` in docs/engine.js.
+    struct WikiRelation: Equatable {
+        let subject: String
+        let word: String
+        let excluded: String?
+
+        private static let shapes: [(pattern: String, word: String, excluded: String?)] = [
+            (#"(?i)^(?:what(?:'s|\s+is)(?:\s+the)?\s+|the\s+)?capital(?:\s+city)?\s+of\s+(.+?)\s*\??$"#, #"(?i)\bcapital\b"#, #"(?i)capital punishment"#),
+            (#"(?i)^who\s+(?:wrote|written|authored|painted|composed|directed|invented|discovered|founded|created)\s+(.+?)\s*\??$"#,
+             #"(?i)\b(?:written|wrote|author|authored|composed|painted|directed|invented|discovered|founded|created)\b"#, nil),
+            (#"(?i)^when\s+(?:was|did|were|is)\s+(.+?)(?:\s+(?:born|founded|built|invented|released|published|created|written|made|died|die))?\s*\??$"#,
+             #"\b(?:1[0-9]{3}|20[0-9]{2})\b"#, nil),
+        ]
+
+        static func of(_ query: String) -> WikiRelation? {
+            let q = query.trimmingCharacters(in: .whitespaces)
+            for shape in shapes {
+                guard let re = try? NSRegularExpression(pattern: shape.pattern),
+                      let m = re.firstMatch(in: q, range: NSRange(q.startIndex..., in: q)),
+                      let r = Range(m.range(at: 1), in: q) else { continue }
+                var subject = String(q[r])
+                if subject.lowercased().hasPrefix("the ") { subject = String(subject.dropFirst(4)) }
+                return WikiRelation(subject: subject, word: shape.word, excluded: shape.excluded)
+            }
+            return nil
+        }
+
+        /// The first sentence of an intro that carries the relation word. A search hit (not ownPage) must also name the subject.
+        func sentence(in extract: String, ownPage: Bool) -> String? {
+            let subjectWords = Set(WikiRelation.words(subject))
+            for raw in WikiRelation.sentences(extract) {
+                var s = raw.replacingOccurrences(of: #"\s*\(\s*\)"#, with: "", options: .regularExpression)
+                s = s.replacingOccurrences(of: #"\s+,"#, with: ",", options: .regularExpression).trimmingCharacters(in: .whitespaces)
+                guard s.range(of: word, options: .regularExpression) != nil else { continue }
+                if let excluded, s.range(of: excluded, options: .regularExpression) != nil { continue }
+                if ownPage { return s }
+                let named = subjectWords.isEmpty
+                    ? s.lowercased().contains(subject.lowercased())
+                    : subjectWords.isSubset(of: Set(WikiRelation.words(s)))
+                if named { return s }
+            }
+            return nil
+        }
+
+        /// Sentences split after . ! or ? and whitespace, the same break as the web's `first()`.
+        static func sentences(_ text: String) -> [String] {
+            guard let re = try? NSRegularExpression(pattern: #"(?<=[.!?])\s+"#) else { return [text] }
+            var out: [String] = [], last = text.startIndex
+            for m in re.matches(in: text, range: NSRange(text.startIndex..., in: text)) {
+                guard let r = Range(m.range, in: text) else { continue }
+                out.append(String(text[last..<r.lowerBound]))
+                last = r.upperBound
+            }
+            out.append(String(text[last...]))
+            return out
+        }
+
+        /// Content words of four letters or more, lower case (the web's keyWords).
+        static func words(_ s: String) -> [String] {
+            s.lowercased().components(separatedBy: CharacterSet.letters.inverted).filter { $0.count >= 4 }
+        }
+    }
+
+    private struct IntroResponse: Decodable {
+        struct Query: Decodable {
+            struct Page: Decodable { let title: String?; let extract: String?; let missing: Bool? }
+            let pages: [Page]?
+        }
+        let query: Query?
+    }
+
+    private struct SearchTitlesResponse: Decodable {
+        struct Query: Decodable {
+            struct Hit: Decodable { let title: String }
+            let search: [Hit]?
+        }
+        let query: Query?
+    }
+
+    /// A relation question's intro: the page's lead text, its title and link. Nil for a missing page, a list or a disambiguation page.
+    private static func introOf(_ title: String, session: URLSession) async -> (title: String, extract: String)? {
+        guard let enc = title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&format=json&formatversion=2&origin=*&titles=\(enc)"),
+              let (data, response) = try? await session.data(from: url),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let page = try? JSONDecoder().decode(IntroResponse.self, from: data).query?.pages?.first,
+              page.missing != true, let t = page.title, let extract = page.extract, !extract.isEmpty,
+              !t.lowercased().hasPrefix("list of"),
+              !extract.prefix(300).lowercased().contains("may refer to") else { return nil }
+        return (t, extract)
+    }
+
+    /// The top search titles for a question, list articles removed. Empty on any failure.
+    private static func searchHits(_ query: String, session: URLSession) async -> [String] {
+        guard let enc = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=\(enc)&format=json&srlimit=5&origin=*"),
+              let (data, _) = try? await session.data(from: url),
+              let titles = try? JSONDecoder().decode(SearchTitlesResponse.self, from: data).query?.search?.map(\.title) else { return [] }
+        return titles.filter { !$0.lowercased().hasPrefix("list of") }.prefix(5).map { $0 }
+    }
+
+    func queryWikipedia(_ input: String, session: URLSession = .shared) async -> QueryResult? {
+        if let rel = WikiRelation.of(input) {
+            // A relation question never falls back to a loose search hit: the subject's own page first, then the top hits.
+            let hits = await Self.searchHits(input, session: session)
+            let own = await Self.introOf(rel.subject, session: session)
+            var pages: [(title: String, extract: String)?] = [own]
+            for t in hits { pages.append(await Self.introOf(t, session: session)) }
+            for (i, page) in pages.enumerated() {
+                guard let page, let body = rel.sentence(in: page.extract, ownPage: i == 0) else { continue }
+                let slug = page.title.replacingOccurrences(of: " ", with: "_")
+                return .text(heading: page.title, body: body, source: "Wikipedia",
+                             sourceURL: "https://en.wikipedia.org/wiki/" + (slug.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? slug),
+                             imageURL: nil, grounding: page.extract, sources: [], photo: nil)
+            }
+            return nil
+        }
+
+        // Any other question: the exact article first, then the top search hits; the first usable one answers.
         let searchTerm = input.replacingOccurrences(of: " ", with: "_")
         if let encoded = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
            let url = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(encoded)"),
            let result = await fetchWikiSummary(url: url, session: session) {
-            return result
+            if case .text(let heading, _, _, _, _, _, _, _) = result, !(heading ?? "").lowercased().hasPrefix("list of") { return result }
         }
-
-        // Fall back to Wikipedia search API to find the right article
-        guard let searchEncoded = input.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let searchURL = URL(string: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=\(searchEncoded)&format=json&srlimit=1") else {
-            return nil
+        for title in await Self.searchHits(input, session: session) {
+            guard let encoded = title.replacingOccurrences(of: " ", with: "_").addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+                  let url = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(encoded)"),
+                  let result = await fetchWikiSummary(url: url, session: session) else { continue }
+            if case .text(let heading, _, _, _, _, _, _, _) = result, !(heading ?? "").lowercased().hasPrefix("list of") { return result }
         }
-
-        do {
-            let (data, _) = try await session.data(from: searchURL)
-            if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let query = json["query"] as? [String: Any],
-               let search = query["search"] as? [[String: Any]],
-               let first = search.first,
-               let title = first["title"] as? String {
-                let articleTitle = title.replacingOccurrences(of: " ", with: "_")
-                guard let titleEncoded = articleTitle.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
-                      let summaryURL = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(titleEncoded)") else {
-                    return nil
-                }
-                return await fetchWikiSummary(url: summaryURL, session: session)
-            }
-        } catch {}
-
         return nil
     }
 

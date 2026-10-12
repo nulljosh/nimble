@@ -13,7 +13,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
-import io.ktor.http.encodeURLPathPart
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -96,8 +95,11 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
 
         val (ddgQuery, wikiQuery) = QueryEngine.preprocess(input)
         ddg(ddgQuery)?.let { return it }
-        wikipedia(wikiQuery)?.let { wiki ->
-            return wiki.copy(aiNote = aiFailures.lastOrNull()?.let { aiRestingNote(it, wiki.source) })
+        WikiFallback.answer(wikiQuery) { fetchText(it) }?.let { wiki ->
+            // A page's own lead photo stays; otherwise the photo is the one of the entity the sentence names (TopicPhoto).
+            val pic = if (wiki.photoUrl != null) wiki else TopicPhoto.lookup(input, wiki.body) { fetchText(it) }
+                ?.let { wiki.copy(photoUrl = it.photoUrl, photoCredit = it.photoCredit) } ?: wiki
+            return pic.copy(aiNote = aiFailures.lastOrNull()?.let { aiRestingNote(it, wiki.source) })
         }
 
         return Answer.Miss(
@@ -172,19 +174,6 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         if (res.status == HttpStatusCode.OK) res.bodyAsText() else null
     }
 
-    private suspend fun wikipedia(input: String): Answer.Text? {
-        summary(input.replace(" ", "_"))?.let { return it }
-
-        // No direct page: ask the search API what the article is actually called.
-        val title = articleTitle(runCatchingNull {
-            val url = "https://en.wikipedia.org/w/api.php?action=query&list=search" +
-                "&srsearch=${input.encodeURLParameter()}&format=json&srlimit=1"
-            Regex("\"title\"\\s*:\\s*\"(.*?)\"").find(http.get(url).bodyAsText())?.groupValues?.get(1)
-        }) ?: return null
-
-        return summary(title.replace(" ", "_"))
-    }
-
     @Serializable
     internal data class SiteResponse(
         val host: String? = null,
@@ -204,16 +193,6 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
             )
             siteAnswer(host, d)
         }
-    }
-
-    private suspend fun summary(titlePath: String): Answer.Text? = runCatchingNull {
-        val url = "https://en.wikipedia.org/api/rest_v1/page/summary/${titlePath.encodeURLPathPart()}"
-        val w = lenientJson.decodeFromString<WikiSummary>(http.get(url).bodyAsText())
-        val extract = w.extract?.takeIf { it.isNotEmpty() } ?: return@runCatchingNull null
-        Answer.Text(
-            w.title, firstSentence(extract), "Wikipedia", w.contentUrls?.desktop?.page,
-            photoUrl = leadPhoto(w.thumbnail?.source),
-        )
     }
 }
 

@@ -35,7 +35,7 @@ a { color: inherit; }
 /* Nav items stay on one line; on a narrow phone the nav drops under the brand, right-aligned. */
 .top nav { display: flex; align-items: center; white-space: nowrap; margin-left: auto; }
 .top nav a, .top nav button { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
-@media (max-width: 480px) { .top nav a, .top nav button { margin-left: var(--space-3); font-size: var(--fs-13); } }
+@media (max-width: 480px) { .top nav a, .top nav button { margin-left: var(--space-3); } }
 
 main { flex: 1; width: 100%; max-width: var(--max-app); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-7); }
 h1 { font-size: var(--fs-28); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: var(--lh-xl); margin-bottom: var(--space-5); text-align: center; }
@@ -145,7 +145,7 @@ form { position: relative; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .recent-list button:hover { color: var(--text); }
-.hint { text-align: center; font-size: var(--fs-13); color: var(--text-mid); margin-top: var(--space-6); }
+.hint { text-align: left; font-size: var(--fs-13); color: var(--text-mid); margin-top: var(--space-6); }
 .flit { display: block; width: 96px; height: 96px; margin: var(--space-5) auto 0; opacity: 0.9; }
 .flit[hidden] { display: none; }
 /* While an answer is on its way, Flit hums in the card: wing beat plus a bob. Stops the moment

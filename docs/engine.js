@@ -294,17 +294,61 @@ async function ddg(query){
   return null;
 }
 
-async function wiki(query){
-  const s = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=1&origin=*`);
-  let title = s?.query?.search?.[0]?.title;
-  if(!title){ // fulltext search down or empty: prefix search is a separate endpoint
-    const o = await getJSON(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&format=json&origin=*`);
-    title = o?.[1]?.[0];
+// A question that names a relation and a subject: "capital of X", "who wrote X", "when was X". Only an intro
+// sentence that carries the relation word answers it, so a page without one gives no answer, never a guess.
+// "Capital punishment in France" is excluded: it has the word "capital" but is not the capital city.
+const RELATIONS = [
+  {re:/^(?:what(?:'s| is)(?: the)?\s+|the\s+)?capital(?:\s+city)?\s+of\s+(.+?)\s*\??$/i, word:/\bcapital\b/i, not:/capital punishment/i},
+  {re:/^who\s+(?:wrote|written|authored|painted|composed|directed|invented|discovered|founded|created)\s+(.+?)\s*\??$/i, word:/\b(?:written|wrote|author|authored|composed|painted|directed|invented|discovered|founded|created)\b/i},
+  {re:/^when\s+(?:was|did|were|is)\s+(.+?)(?:\s+(?:born|founded|built|invented|released|published|created|written|made|died|die))?\s*\??$/i, word:/\b(?:1[0-9]{3}|20[0-9]{2})\b/},
+];
+function relationOf(query){
+  const q = String(query||"").trim();
+  for(const r of RELATIONS){ const m = r.re.exec(q); if(m) return {subject:m[1].replace(/^the\s+/i,""), word:r.word, not:r.not}; }
+  return null;
+}
+const wikiURL = title => "https://en.wikipedia.org/wiki/" + encodeURIComponent(String(title).replace(/ /g,"_"));
+// The lead section's text (not the summary's first paragraph), so the sentence with the answer is there.
+async function introOf(title){
+  const d = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&redirects=1&format=json&formatversion=2&origin=*&titles=${encodeURIComponent(title)}`);
+  const p = d?.query?.pages?.[0];
+  if(!p || p.missing || !p.extract || !p.title || /^list of /i.test(p.title) || /may refer to/i.test(p.extract.slice(0,300))) return null;
+  return {title:p.title, extract:p.extract};
+}
+// The first sentence with the relation word. A search hit must also name the subject, so the sentence is about it.
+function relationSentence(extract, rel, subject, ownPage){
+  const ws = keyWords(subject), have = s => new Set(keyWords(s));
+  return extract.split(/(?<=[.!?])\s+/).map(s => s.replace(/\s*\(\s*\)/g,"").replace(/\s+,/g,",").trim())
+    .find(s => rel.word.test(s) && !(rel.not && rel.not.test(s)) && (ownPage || (ws.length ? ws.every(w => have(s).has(w)) : s.toLowerCase().includes(subject.toLowerCase())))) || null;
+}
+async function relationWiki(query, rel){
+  const s = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=5&origin=*`);
+  const hits = (s?.query?.search||[]).map(x=>x.title).filter(t => t && !/^list of /i.test(t)).slice(0,5);
+  const intros = await Promise.all([introOf(rel.subject), ...hits.map(introOf)]);
+  for(let i = 0; i < intros.length; i++){
+    const it = intros[i]; if(!it) continue;
+    const body = relationSentence(it.extract, rel, rel.subject, i === 0);
+    if(body) return {title:it.title, body, src:"Wikipedia", url:wikiURL(it.title), grounding:it.extract};
   }
-  if(!title || /^list of /i.test(title)) return null; // a list article's intro never answers the question
-  const sum = await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-  if(!sum?.extract || sum.type==="disambiguation") return null;
-  return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, image:wikiPhoto(sum), grounding:sum.extract};
+  return null;
+}
+async function wiki(query){
+  const rel = relationOf(query);
+  if(rel) return relationWiki(query, rel); // a relation question never falls back to a loose search hit
+  const s = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=5&origin=*`);
+  let titles = (s?.query?.search||[]).map(x=>x.title);
+  if(!titles.length){ // fulltext search down or empty: prefix search is a separate endpoint
+    const o = await getJSON(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=5&format=json&origin=*`);
+    titles = o?.[1] || [];
+  }
+  // List articles and disambiguation pages never answer; the next hit gets its turn.
+  titles = titles.filter(t => t && !/^list of /i.test(t)).slice(0,5);
+  const sums = await Promise.all(titles.map(t => getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t)}`)));
+  for(const sum of sums){
+    if(!sum?.extract || sum.type==="disambiguation" || /^list of /i.test(sum.title||"")) continue;
+    return {title:sum.title, body:first(sum.extract), src:"Wikipedia", url:sum.content_urls?.desktop?.page, image:wikiPhoto(sum), grounding:sum.extract};
+  }
+  return null;
 }
 
 // "What's primitive.dev?" is a question about a website, and Wikipedia answered it with the
@@ -766,4 +810,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
