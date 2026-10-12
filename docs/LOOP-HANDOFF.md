@@ -6,6 +6,7 @@ Keep Nimble moving after 5.0.0 with one small, shippable slice at a time: fix wh
 
 ## Where things stand
 
+- 5.12.1 (2026-10-11): Mac QA pass. Show steps lists sit flush left under the answer (they centred before) and render "×" for "*"; captures of home, photo answer, news, weather, math and Settings checked, 119 node tests and 95 macOS tests green.
 - 5.12.0 (2026-10-11): Kotlin parity for rich results. Answer photos on text answers (16:9, top-cropped, reserved frame), a news card via `?news=` with 56dp thumbnails, and the weather headline on one line ("11 °C"); 9 new offline jvm tests, 73 green.
 - 5.11.1 (2026-10-11): answer photos are top-anchored (`object-position: center 20%` on web, top-aligned fill in the 16:9 frame on Swift) and capped at 220px on phones. Web answers show a second source: the worker's `refs` (up to three Wikipedia pages that back the AI answer) fill it when DDG has no link of its own. Worker redeployed with wrangler, verified by curl.
 - Current version is 5.0.1 (2026-10-11). 5.0.0 was the last major.

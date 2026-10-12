@@ -488,13 +488,14 @@ private struct MathResultView: View {
                 DisclosureGroup("Show steps", isExpanded: $showSteps) {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
-                            Text(step)
+                            Text(step.replacingOccurrences(of: "*", with: "×"))
                                 .font(.nimbleSubhead)
                                 .monospacedDigit()
                                 .foregroundStyle(Color.dim)
                                 .textSelection(.enabled)
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 4)
                 }
                 .font(.nimbleCalloutMedium)
