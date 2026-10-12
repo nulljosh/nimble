@@ -583,7 +583,7 @@ async function answer(query, opts={}){
 function consentHTML(recipient, t){
   const esc=t=>String(t).replace(/</g,"&lt;");
   const T=t||plain;
-  return '<div class="mockup-label">'+T("Before I answer")+'</div><h3>'+T("Send your question to an AI service?")+'</h3><p>'
+  return '<div class="mockup-label">'+T("Before I answer")+'</div><h3 class="consent-q">'+T("Send your question to an AI service?")+'</h3><p class="consent-copy">'
     +T("Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.",{s:esc(recipient)})+'</p>'
     +'<div class="consent-actions"><button type="button" class="consent-yes" data-consent="yes">'+T("Allow")+'</button><button type="button" class="consent-no" data-consent="no">'+T("Don't allow")+'</button></div>';
 }

@@ -27,15 +27,15 @@ a { color: inherit; }
   display: flex; flex-wrap: wrap; row-gap: var(--space-2); align-items: center; justify-content: space-between;
   padding: max(var(--space-4), env(safe-area-inset-top)) var(--gutter) var(--space-4);
 }
-.brand { min-height: 44px; display: flex; align-items: center; gap: var(--space-3); font-weight: 700; font-size: 17px; letter-spacing: var(--tracking-tight); text-decoration: none; }
-.brand img { width: 30px; height: 30px; border-radius: 8px; }
+.brand { min-height: 44px; display: flex; align-items: center; gap: var(--space-3); font-weight: 700; font-size: var(--fs-17); letter-spacing: var(--tracking-tight); text-decoration: none; }
+.brand img { width: 30px; height: 30px; border-radius: var(--radius-sm); }
 .top nav a { font-size: var(--fs-15); color: var(--text-mid); text-decoration: none; margin-left: var(--space-4); }
 .top nav a:hover, .top nav button:hover { color: var(--text); }
 .top nav button { border: 0; background: none; font: inherit; font-size: var(--fs-15); color: var(--text-mid); margin-left: var(--space-4); cursor: pointer; }
 /* Nav items stay on one line; on a narrow phone the nav drops under the brand, right-aligned. */
 .top nav { display: flex; align-items: center; white-space: nowrap; margin-left: auto; }
 .top nav a, .top nav button { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
-@media (max-width: 480px) { .top nav a, .top nav button { margin-left: var(--space-3); font-size: 13px; } }
+@media (max-width: 480px) { .top nav a, .top nav button { margin-left: var(--space-3); font-size: var(--fs-13); } }
 
 main { flex: 1; width: 100%; max-width: var(--max-app); margin: 0 auto; padding: var(--space-8) var(--gutter) var(--space-7); }
 h1 { font-size: var(--fs-28); font-weight: 700; letter-spacing: var(--tracking-tight); line-height: var(--lh-xl); margin-bottom: var(--space-5); text-align: center; }
@@ -43,7 +43,7 @@ h1 { font-size: var(--fs-28); font-weight: 700; letter-spacing: var(--tracking-t
 form { position: relative; }
 .field {
   display: flex; align-items: center; gap: var(--space-3);
-  background: var(--color-bg2); border: 1px solid var(--line); border-radius: 16px;
+  background: var(--color-bg2); border: 1px solid var(--line); border-radius: var(--radius-lg);
   padding: var(--space-1) var(--space-4);
 }
 .field svg { flex: none; }
@@ -58,16 +58,16 @@ form { position: relative; }
 .field input::placeholder { color: var(--text-light); }
 .mic {
   flex: none; display: grid; place-items: center; width: 44px; height: 44px; margin: 0 calc(-1 * var(--space-1)); padding: 0;
-  border: 0; border-radius: 8px; background: none; color: var(--text-light); cursor: pointer;
+  border: 0; border-radius: var(--radius-sm); background: none; color: var(--text-light); cursor: pointer;
 }
 .mic:hover { color: var(--text); }
 .mic.on { color: var(--yellow-deep); }
 .go {
-  flex: none; min-height: 44px; border: 0; border-radius: 10px; padding: var(--space-2) var(--space-4); cursor: pointer;
+  flex: none; min-height: 44px; border: 0; border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); cursor: pointer;
   background: var(--yellow); color: var(--black); font: inherit; font-weight: 700; font-size: var(--fs-15);
 }
 
-.card { margin-top: var(--space-5); padding: var(--space-5); border: 1px solid var(--line); border-radius: 16px; min-height: 120px; }
+.card { margin-top: var(--space-5); padding: var(--space-5); border: 1px solid var(--line); border-radius: var(--radius-lg); min-height: 120px; }
 .card[hidden] { display: none; }
 .card.swap { animation: in 400ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -75,21 +75,21 @@ form { position: relative; }
 .mockup-label { font-size: var(--fs-13); font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--yellow-deep); margin-bottom: var(--space-3); }
 .mockup-big { font-size: var(--fs-34); font-weight: 600; letter-spacing: -0.02em; line-height: var(--lh-2xl); margin-bottom: var(--space-2); overflow-wrap: anywhere; }
 .card p { font-size: var(--fs-22); line-height: var(--lh-lg); color: var(--text); }
-.card h3 { font-size: 15px; font-weight: 700; letter-spacing: -0.02em; color: var(--text-mid); margin-bottom: var(--space-2); }
+.card h3 { font-size: var(--fs-15); font-weight: 700; letter-spacing: -0.02em; color: var(--text-mid); margin-bottom: var(--space-2); }
 .card svg { width: 100%; height: auto; color: var(--yellow-deep); }
 .mockup-link { display: block; text-decoration: none; }
-.mockup-icon { display: block; width: 24px; height: 24px; border-radius: 5px; margin-bottom: var(--space-2); }
+.mockup-icon { display: block; width: 24px; height: 24px; border-radius: var(--radius-sm); margin-bottom: var(--space-2); }
 .mockup-link p { text-decoration: none; color: var(--text); }
 .mockup-link:hover p { text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 4px; }
-.sources { margin: var(--space-3) 0 0; font-size: 13px; color: var(--text-mid); }
+.sources { margin: var(--space-3) 0 0; font-size: var(--fs-13); color: var(--text-mid); }
 .sources a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .mockup-card p { text-decoration: none; color: var(--text-mid); }
 .mockup-card:hover p { text-decoration: underline; }
 .consent-actions { display: flex; gap: var(--space-3); margin-top: var(--space-4); }
-.consent-actions button { min-height: 44px; border: 1px solid var(--line); background: none; color: var(--text); border-radius: 10px; padding: var(--space-2) var(--space-4); font: inherit; font-weight: 700; font-size: var(--fs-15); cursor: pointer; }
+.consent-actions button { min-height: 44px; border: 1px solid var(--line); background: none; color: var(--text); border-radius: var(--radius-md); padding: var(--space-2) var(--space-4); font: inherit; font-weight: 700; font-size: var(--fs-15); cursor: pointer; }
 .consent-actions .consent-yes { border-color: transparent; background: var(--yellow); color: var(--black); }
 .consent-actions .consent-no:hover { border-color: var(--yellow-deep); }
-.credit { margin-top: var(--space-4); font-size: 13px; color: var(--text-light); display: flex; align-items: baseline; gap: var(--space-4); }
+.credit { margin-top: var(--space-4); font-size: var(--fs-13); color: var(--text-light); display: flex; align-items: baseline; gap: var(--space-4); }
 .credit button { border: 0; background: none; padding: var(--tap-pad) 0; margin-block: calc(var(--tap-pad) * -1); font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .credit button:hover { color: var(--text); }
 /* Why this answer: the source line is the toggle; the text it came from opens under it. */
@@ -97,18 +97,17 @@ form { position: relative; }
 .news li { line-height: var(--lh-md); }
 .num { font-variant-numeric: tabular-nums; }
 .news a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
-.news-src { display: block; font-size: 13px; color: var(--text-light); margin-top: var(--space-1); }
+.news-src { display: block; font-size: var(--fs-13); color: var(--text-light); margin-top: var(--space-1); }
 /* Rich results: a photo tops a card (16:9, 12px radius); a news story can carry a 56px square. */
 .mockup-photo { display: block; aspect-ratio: var(--ratio-photo); border-radius: var(--radius-photo); overflow: hidden; background: var(--bg2); margin: 0 0 var(--space-4); }
 .mockup-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; opacity: 0; transition: opacity .25s ease; }
-@media (max-width: 600px) { .mockup-photo { max-height: 220px; } }
 .mockup-photo img.on { opacity: 1; }
-.photo-credit { display: block; margin: calc(var(--space-4) * -1) 0 var(--space-4); font-size: 13px; color: var(--text-light); }
+.photo-credit { display: block; margin: calc(var(--space-4) * -1) 0 var(--space-4); font-size: var(--fs-13); color: var(--text-light); }
 .news li.has-thumb { display: grid; grid-template-columns: 56px 1fr; gap: var(--space-3); align-items: start; }
-.news-thumb { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--bg2); opacity: 0; transition: opacity .25s ease; }
+.news-thumb { width: 56px; height: 56px; border-radius: var(--radius-md); object-fit: cover; background: var(--bg2); opacity: 0; transition: opacity .25s ease; }
 .news-thumb.on { opacity: 1; }
-.ai-note { margin: var(--space-3) 0 0; font-size: 13px; color: var(--text-light); }
-.why { margin-top: var(--space-4); font-size: 13px; color: var(--text-light); }
+.ai-note { margin: var(--space-3) 0 0; font-size: var(--fs-13); color: var(--text-light); }
+.why { margin-top: var(--space-4); font-size: var(--fs-13); color: var(--text-light); }
 .why summary { display: inline-block; cursor: pointer; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; list-style: none; }
 .why summary::-webkit-details-marker { display: none; }
 .why summary::after { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 0 var(--space-1) var(--space-2); border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); vertical-align: middle; }
@@ -118,6 +117,13 @@ form { position: relative; }
 .why.steps li::before { content: counter(step) "."; display: inline-block; width: 22px; color: var(--text-light); font-variant-numeric: tabular-nums; }
 .card .why p { font-size: var(--fs-17); line-height: var(--lh-md); color: var(--text-mid); margin-top: var(--space-3); }
 .why a { display: inline-block; padding-block: var(--tap-pad); margin-top: calc(var(--space-2) - var(--tap-pad)); margin-bottom: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
+/* The card sets every paragraph to the 22px answer size. These lines sit under the answer, so they set their own. */
+.card .sources { font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); }
+.card .ai-note { font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-light); }
+.card .thinking p { font-size: var(--fs-17); color: var(--text-mid); }
+/* Consent: the question is the headline, the explanation reads as body copy. */
+.card .consent-q { font-size: var(--fs-22); line-height: var(--lh-lg); letter-spacing: -0.01em; font-weight: var(--fw-semibold); color: var(--text); margin-bottom: var(--space-2); }
+.card .consent-copy { font-size: var(--fs-17); line-height: var(--lh-md); color: var(--text-mid); }
 
 .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; margin-top: var(--space-5); }
 .chips[hidden] { display: none; }
@@ -130,7 +136,7 @@ form { position: relative; }
 .recent[hidden] { display: none; }
 .recent-head { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--line); padding-bottom: var(--space-2); }
 .recent-head .mockup-label { margin-bottom: 0; }
-.recent-head button { border: 0; background: none; font: inherit; font-size: 13px; color: var(--text-light); cursor: pointer; padding: var(--tap-pad) 0; margin-block: calc(var(--tap-pad) * -1); }
+.recent-head button { border: 0; background: none; font: inherit; font-size: var(--fs-13); color: var(--text-light); cursor: pointer; padding: var(--tap-pad) 0; margin-block: calc(var(--tap-pad) * -1); }
 .recent-head button:hover { color: var(--text); }
 .recent-list { list-style: none; }
 .recent-list button {
@@ -139,7 +145,7 @@ form { position: relative; }
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .recent-list button:hover { color: var(--text); }
-.hint { text-align: center; font-size: 13px; color: var(--text-mid); margin-top: var(--space-6); }
+.hint { text-align: center; font-size: var(--fs-13); color: var(--text-mid); margin-top: var(--space-6); }
 .flit { display: block; width: 96px; height: 96px; margin: var(--space-5) auto 0; opacity: 0.9; }
 .flit[hidden] { display: none; }
 /* While an answer is on its way, Flit hums in the card: wing beat plus a bob. Stops the moment

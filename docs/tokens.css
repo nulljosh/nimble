@@ -30,4 +30,5 @@
 /* Flit, the hummingbird: accent fills that only the mascot uses (bulb and bulb-deep come from the shared tokens). */
 :root{--flit-belly:#ffe27a;--flit-cheek:#e07a3f;--flit-wing:#a67c1e;--flit-glint:#fff8e1;}
 
-:root{--radius-photo:12px;--ratio-photo:16 / 9;}
+/* Radius: three steps. Icons and small marks 8, buttons and photos 12, the field and cards 16. */
+:root{--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-photo:var(--radius-md);--ratio-photo:16 / 9;}
