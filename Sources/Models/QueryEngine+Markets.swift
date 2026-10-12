@@ -34,7 +34,7 @@ extension QueryEngine {
     // "AAPL", "$AAPL", "AAPL stock", "stock price of MSFT", "aapl price". A bare word needs the capitals (so "who is apple" never matches).
     private static let stockPattern = #"^(?:(?:what(?:'s|’s| is) the )?(?:stock )?(?:price|quote) (?:of |for )?)?\$?([A-Za-z]{1,5})(?: (?:stock|stock price|share price|shares?|price|quote))?\s*\??$"#
     // Capitals that are words or acronyms: a bare "AI" or "US" is never a stock lookup.
-    private static let notTicker: Set<String> = Set("AI US UK EU OK TV IT ID PC CEO CFO NASA USA GDP CPU GPU API URL DNA HTML CSS JS FAQ NYC UN OR AND THE ARE NOT ALL ANY NEW CAN PDF SMS VPN RAM SSD USB TBD WHO HOW WHY YES NO DJ MP PM AM TO OF IN IS ON AT BY DO GO UP".split(separator: " ").map(String.init))
+    private static let notTicker: Set<String> = Set("NFL NBA MLB NHL MLS EPL AI US UK EU OK TV IT ID PC CEO CFO NASA USA GDP CPU GPU API URL DNA HTML CSS JS FAQ NYC UN OR AND THE ARE NOT ALL ANY NEW CAN PDF SMS VPN RAM SSD USB TBD WHO HOW WHY YES NO DJ MP PM AM TO OF IN IS ON AT BY DO GO UP".split(separator: " ").map(String.init))
 
     /// The market question a query asks, or nil when it is not one (math, normal questions, plain words).
     static func marketAsk(_ input: String) -> MarketAsk? {
@@ -165,7 +165,7 @@ extension QueryEngine {
     }
 
     /// Capture groups of the first match (nil for a group that did not take part), or nil when there is no match.
-    private static func captures(_ pattern: String, _ s: String, ignoreCase: Bool) -> [String?]? {
+    static func captures(_ pattern: String, _ s: String, ignoreCase: Bool) -> [String?]? {
         guard let re = try? NSRegularExpression(pattern: pattern, options: ignoreCase ? .caseInsensitive : []),
               let m = re.firstMatch(in: s, range: NSRange(s.startIndex..., in: s)) else { return nil }
         return (1..<m.numberOfRanges).map { i in

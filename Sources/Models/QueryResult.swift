@@ -44,6 +44,44 @@ enum AnswerSources {
     }
 }
 
+/// One team in a game on the sports card. score is "" before kickoff; winner is ESPN's own flag.
+struct SportsTeam: Equatable {
+    let name: String
+    let score: String
+    let winner: Bool
+}
+
+/// One game: the teams (our team first, else away first), the status in words, and whether it has not kicked off.
+struct SportsGame: Equatable {
+    let teams: [SportsTeam]
+    let isPre: Bool
+    let status: String
+
+    /// "Lakers 112, Warriors 104", or "Bills vs Rams" before kickoff. No bold, no markup.
+    var line: String {
+        if isPre && teams.count == 2 { return "\(teams[0].name) vs \(teams[1].name)" }
+        return teams.map { $0.score.isEmpty ? $0.name : "\($0.name) \($0.score)" }.joined(separator: ", ")
+    }
+}
+
+/// What the sports lookup found: games, no game on the days checked, or the request failed.
+enum SportsOutcome: Equatable {
+    case found
+    case noGame(lastNight: Bool)
+    case unavailable
+}
+
+/// The sports card. league is set for league scores ("NBA scores"); url is the page the card links to.
+struct SportsCard: Equatable {
+    static let source = "ESPN"
+    let title: String
+    let league: String?
+    let games: [SportsGame]
+    let outcome: SportsOutcome
+    let url: String
+    let asOf: Freshness?
+}
+
 extension String {
     /// The string, or nil when it is empty.
     var nonEmpty: String? { isEmpty ? nil : self }
@@ -131,6 +169,8 @@ enum QueryResult: Equatable {
     /// A price or rate: the title, the big number, the change in words. big is nil when the quote failed,
     /// and the card then says "Quote unavailable right now". Never a number we did not get.
     case market(title: String, big: String?, change: String?, source: String, url: String, asOf: Freshness? = nil)
+    /// Scores from ESPN's scoreboard. Words carry the winner and the status; a missing game or a failed request is said in words.
+    case sports(SportsCard)
 
     static func == (lhs: QueryResult, rhs: QueryResult) -> Bool {
         switch (lhs, rhs) {
@@ -143,6 +183,7 @@ enum QueryResult: Equatable {
         case let (.card(a, b, c, d, e, _), .card(f, g, h, i, j, _)): return (a, b, c, d, e) == (f, g, h, i, j)
         case let (.news(a, _, _), .news(b, _, _)): return a == b
         case let (.market(a, b, c, d, e, _), .market(f, g, h, i, j, _)): return (a, b, c, d, e) == (f, g, h, i, j)
+        case let (.sports(a), .sports(b)): return (a.title, a.league, a.games, a.outcome, a.url) == (b.title, b.league, b.games, b.outcome, b.url)
         default: return false
         }
     }
@@ -162,6 +203,8 @@ enum QueryResult: Equatable {
         case .market(_, nil, _, _, _, _): return nil
         case .market(let title, let big?, let change, _, _, _): return [title + " " + big, change].compactMap { $0 }.joined(separator: ", ")
         case .news(let items, _, _): return items.map { "\($0.sentence) (\($0.outlet))" }.joined(separator: "\n")
+        // A score is copied line by line; a missing game or a failed request has nothing to copy.
+        case .sports(let card): return card.games.isEmpty ? nil : card.games.map { "\($0.line), \($0.status)" }.joined(separator: "\n")
         case .none, .loading: return nil
         }
     }
@@ -175,6 +218,7 @@ enum QueryResult: Equatable {
         // The share image carries one sentence, not the whole list.
         case .news(let items, let source, _): return items.first.map { ($0.sentence, source) }
         case .text(_, _, let source, _, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _, _), .market(_, _, _, let source, _, _): return (text, source)
+        case .sports: return (text, SportsCard.source)
         }
     }
 }

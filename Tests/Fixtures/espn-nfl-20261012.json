@@ -1,0 +1,68 @@
+{
+  "leagues": [
+    {
+      "id": "28",
+      "name": "National Football League",
+      "abbreviation": "NFL",
+      "slug": "nfl"
+    }
+  ],
+  "events": [
+    {
+      "id": "401872994",
+      "date": "2026-10-13T00:15Z",
+      "name": "Buffalo Bills at Los Angeles Rams",
+      "shortName": "BUF @ LAR",
+      "status": {
+        "clock": 0.0,
+        "displayClock": "0:00",
+        "period": 0,
+        "type": {
+          "id": "1",
+          "name": "STATUS_SCHEDULED",
+          "state": "pre",
+          "completed": false,
+          "description": "Scheduled",
+          "detail": "Mon, October 12th at 8:15 PM EDT",
+          "shortDetail": "10/12 - 8:15 PM EDT"
+        }
+      },
+      "competitions": [
+        {
+          "id": "401872994",
+          "date": "2026-10-13T00:15Z",
+          "competitors": [
+            {
+              "id": "14",
+              "homeAway": "home",
+              "winner": null,
+              "score": "0",
+              "team": {
+                "id": "14",
+                "location": "Los Angeles",
+                "name": "Rams",
+                "abbreviation": "LAR",
+                "displayName": "Los Angeles Rams",
+                "shortDisplayName": "Rams"
+              }
+            },
+            {
+              "id": "2",
+              "homeAway": "away",
+              "winner": null,
+              "score": "0",
+              "team": {
+                "id": "2",
+                "location": "Buffalo",
+                "name": "Bills",
+                "abbreviation": "BUF",
+                "displayName": "Buffalo Bills",
+                "shortDisplayName": "Bills"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -69,6 +69,15 @@ struct ResultView: View {
                 link(String(localized: "powered by \(source)"), to: url)
             }
 
+        case .sports(let card):
+            AnswerCard(shareText: state.result.copyText, freshness: card.asOf?.label()) {
+                SportsResultView(card: card)
+            } footer: {
+                if card.outcome == .found {
+                    link(String(localized: "powered by \(SportsCard.source)"), to: card.url)
+                }
+            }
+
         case .news(let items, let source, let asOf):
             AnswerCard(shareText: state.result.copyText, freshness: asOf?.label()) {
                 VStack(alignment: .leading, spacing: 16) {
@@ -675,5 +684,65 @@ private extension Color {
         let h = hex.replacingOccurrences(of: "#", with: "")
         guard let v = Int(h, radix: 16) else { return nil }
         self.init(red: Double((v >> 16) & 0xFF) / 255, green: Double((v >> 8) & 0xFF) / 255, blue: Double(v & 0xFF) / 255)
+    }
+}
+
+/// Scores: the score in words with the winner in a heavier weight, the status under it. A missing game or a failed
+/// request is one calm line. Words carry the winner and the status, never colour alone.
+private struct SportsResultView: View {
+    let card: SportsCard
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(card.title)
+                .font(.nimbleSubheadMedium)
+                .foregroundStyle(Color.dim)
+            switch card.outcome {
+            case .unavailable:
+                Text(String(localized: "Scores unavailable right now"))
+                    .font(.nimbleLead)
+                    .foregroundStyle(Color.soft)
+            case .noGame(let lastNight):
+                Text(Self.noGameLine(card, lastNight: lastNight))
+                    .font(.nimbleLead)
+                    .foregroundStyle(Color.soft)
+            case .found:
+                VStack(alignment: .leading, spacing: 16) {
+                    ForEach(Array(card.games.enumerated()), id: \.offset) { _, game in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Self.scoreText(game)
+                                .foregroundStyle(Color.text)
+                            Text(game.status)
+                                .font(.nimbleCaption)
+                                .foregroundStyle(Color.dim)
+                        }
+                    }
+                }
+            }
+        }
+        .textSelection(.enabled)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// "Lakers 112, Warriors 104", the winner heavier; "Bills vs Rams" before kickoff.
+    private static func scoreText(_ game: SportsGame) -> Text {
+        if game.isPre && game.teams.count == 2 {
+            return Text("\(game.teams[0].name) vs \(game.teams[1].name)").font(.nimbleLead)
+        }
+        return game.teams.enumerated().reduce(Text("")) { line, pair in
+            let team = pair.element
+            let label = (pair.offset > 0 ? ", " : "") + (team.score.isEmpty ? team.name : "\(team.name) \(team.score)")
+            let piece = Text(label).font(team.winner ? .nimbleLeadMedium : .nimbleLead)
+            return line + piece
+        }
+    }
+
+    private static func noGameLine(_ card: SportsCard, lastNight: Bool) -> String {
+        if let league = card.league {
+            return String(localized: "No \(league) games \(lastNight ? "yesterday" : "today or yesterday")")
+        }
+        return lastNight
+            ? String(localized: "No game found for the \(card.title) yesterday")
+            : String(localized: "No game found for the \(card.title) today or yesterday")
     }
 }
