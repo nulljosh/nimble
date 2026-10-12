@@ -59,4 +59,32 @@ final class RichPhotoTests: XCTestCase {
         guard case .text(_, _, _, _, _, _, _, let photo)? = engine.parseSite(html: html, host: "acme.io", pageURL: "https://acme.io/") else { return XCTFail("no answer") }
         XCTAssertNil(photo)
     }
+
+    func testAnswerPhotoComesFromThePageThatBacksTheSentence() {
+        let everest = AnswerPhoto(url: "https://upload.wikimedia.org/wikipedia/commons/e/ev/Everest.jpg", width: 800, height: 533)
+        let pages = [
+            GroundingPage(title: "Flag", extract: "The flag of Nepal has a crimson border and a blue frame.", photo: AnswerPhoto(url: "https://upload.wikimedia.org/wikipedia/commons/n/Flag_of_Nepal.svg.png", width: 800, height: 600)),
+            GroundingPage(title: "Mount Everest", extract: "Mount Everest is Earth's highest mountain above sea level, 8,848 meters tall.", photo: everest),
+        ]
+        XCTAssertEqual(QueryEngine.answerPhoto("Mount Everest is 8,848.86 meters tall.", pages: pages), everest)
+    }
+
+    func testAnswerPhotoIsNilWhenNoPageBacksTheSentenceOrHasAPhoto() {
+        let unrelated = GroundingPage(title: "Hamlet", extract: "Hamlet is a tragedy written by William Shakespeare.", photo: AnswerPhoto(url: "https://upload.wikimedia.org/hamlet.jpg", width: nil, height: nil))
+        XCTAssertNil(QueryEngine.answerPhoto("Mount Everest is 8,848.86 meters tall.", pages: [unrelated]))
+        let bare = GroundingPage(title: "Mount Everest", extract: "Mount Everest is 8,848 meters tall.", photo: nil)
+        XCTAssertNil(QueryEngine.answerPhoto("Mount Everest is 8,848.86 meters tall.", pages: [bare]))
+        XCTAssertNil(QueryEngine.answerPhoto("UNKNOWN", pages: [unrelated]))
+    }
+
+    func testKeepingPhotoFillsOnlyAnEmptySlot() {
+        let llm = QueryResult.text(heading: nil, body: "Mount Everest is 8,848 meters tall.", source: "Qwen", sourceURL: nil, imageURL: nil,
+                                   photo: AnswerPhoto(url: "https://upload.wikimedia.org/everest.jpg", width: nil, height: nil))
+        let ddg = QueryResult.text(heading: "Everest", body: "8,848 m", source: "Britannica", sourceURL: "https://example.com", imageURL: nil)
+        guard case .text(_, _, _, _, _, _, _, let filled) = QueryEngine.keepingPhoto(ddg, from: llm) else { return XCTFail("no text") }
+        XCTAssertEqual(filled?.url, "https://upload.wikimedia.org/everest.jpg")
+        let own = QueryResult.text(heading: nil, body: "8,848 m", source: "DDG", sourceURL: nil, imageURL: nil, photo: AnswerPhoto(url: "https://a.org/own.jpg", width: nil, height: nil))
+        guard case .text(_, _, _, _, _, _, _, let kept) = QueryEngine.keepingPhoto(own, from: llm) else { return XCTFail("no text") }
+        XCTAssertEqual(kept?.url, "https://a.org/own.jpg")
+    }
 }

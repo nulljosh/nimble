@@ -466,7 +466,8 @@ async function answer(query, opts={}){
   }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const [ai, dd] = await Promise.all([gemma(query).catch(()=>null), ddg(query).catch(()=>null)]);
-  const hit = (ai && /\d/.test(ai.body) && dd) ? dd : (ai || dd || await firstOf(query, [wiki]));
+  // The model's photo, when its page backs the sentence, stays with the number it was shown with.
+  const hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : (ai || dd || await firstOf(query, [wiki]));
   if(hit) turns.add(query, hit.body);
   // The model names no page, so the DDG abstract is the only link here; it must back the sentence.
   // The proxy's Wikipedia pages fill the second link (web shows at most two): the first ones that are not DDG's own article.

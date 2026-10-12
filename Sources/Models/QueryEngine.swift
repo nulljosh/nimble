@@ -67,6 +67,13 @@ struct ProxyPhoto: Decodable {
     let image: AnswerPhoto?
 }
 
+/// A Wikipedia page from the grounding search: its intro, and its lead photo when the photo passes the rules.
+struct GroundingPage {
+    let title: String
+    let extract: String
+    let photo: AnswerPhoto?
+}
+
 struct WikiThumbnail: Codable {
     let source: String?
     let width: Int?
@@ -452,35 +459,62 @@ final class QueryEngine: Sendable {
         }
         #endif
         // A misconfigured engine (Claude with no key) falls back to the free proxy.
-        let context = (ai.engine == .ollama || ai.engine == .samantha) ? await wikiGrounding(input, session: session) : ""
+        let local = ai.engine == .ollama || ai.engine == .samantha
+        let (context, pages) = local ? await wikiGrounding(input, session: session) : ("", [])
         guard var req = ai.request(for: input, turns: turns, context: context) ?? AIConfig().request(for: input, turns: turns) else { return nil }
-        if ai.engine == .ollama || ai.engine == .samantha { req.timeoutInterval = localTimeout } // a local 9B on a busy Mac is slow
+        if local { req.timeoutInterval = localTimeout } // a local 9B on a busy Mac is slow
         do {
             let (data, response) = try await session.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200,
                   let (answer, source) = ai.parse(data) else { return nil }
-            // The proxy sends a photo only when the page behind its answer backs the sentence.
-            let photo = (try? JSONDecoder().decode(ProxyPhoto.self, from: data))?.image.flatMap { AnswerPhoto.https($0.url, width: $0.width, height: $0.height) }
+            // The proxy sends a photo only when the page behind its answer backs the sentence. A local
+            // model gets the same rule against the Wikipedia pages it was grounded on.
+            let proxyPhoto = (try? JSONDecoder().decode(ProxyPhoto.self, from: data))?.image.flatMap { AnswerPhoto.https($0.url, width: $0.width, height: $0.height) }
+            let photo = proxyPhoto ?? Self.answerPhoto(answer, pages: pages)
             return .text(heading: nil, body: answer, source: source, sourceURL: nil, imageURL: nil, photo: photo)
         } catch {
             return nil
         }
     }
 
-    /// Top-3 Wikipedia search intros for `query`, as one block of text. Empty on any failure.
-    private func wikiGrounding(_ query: String, session: URLSession) async -> String {
+    /// Top-3 Wikipedia search intros for `query`, as one block of text, plus each page's lead photo.
+    /// Empty on any failure.
+    private func wikiGrounding(_ query: String, session: URLSession) async -> (context: String, pages: [GroundingPage]) {
         guard let q = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts&exintro=1&explaintext=1&format=json&formatversion=2&gsrsearch=\(q)"),
+              let url = URL(string: "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts%7Cpageimages&exintro=1&explaintext=1&piprop=thumbnail&pithumbsize=800&format=json&formatversion=2&gsrsearch=\(q)"),
               let (data, _) = try? await session.data(from: url),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let pages = (json["query"] as? [String: Any])?["pages"] as? [[String: Any]] else { return "" }
-        let blocks = pages.compactMap { p -> String? in
+              let raw = (json["query"] as? [String: Any])?["pages"] as? [[String: Any]] else { return ("", []) }
+        let pages = raw.compactMap { p -> GroundingPage? in
             guard let title = p["title"] as? String, let extract = p["extract"] as? String else { return nil }
-            let sentences = extract.components(separatedBy: ". ")
-            let kept = sentences.prefix(4) + sentences.dropFirst(4).filter { $0.range(of: "\\b(current|incumbent|since)\\b", options: [.regularExpression, .caseInsensitive]) != nil }
-            return "\(title): " + kept.joined(separator: ". ")
+            let thumb = p["thumbnail"] as? [String: Any]
+            let photo = AnswerPhoto.wikipediaLead(thumb?["source"] as? String, width: thumb?["width"] as? Int, height: thumb?["height"] as? Int)
+            return GroundingPage(title: title, extract: extract, photo: photo)
         }
-        return String(blocks.joined(separator: "\n\n").prefix(6000))
+        let blocks = pages.map { p -> String in
+            let sentences = p.extract.components(separatedBy: ". ")
+            let kept = sentences.prefix(4) + sentences.dropFirst(4).filter { $0.range(of: "\\b(current|incumbent|since)\\b", options: [.regularExpression, .caseInsensitive]) != nil }
+            return "\(p.title): " + kept.joined(separator: ". ")
+        }
+        return (String(blocks.joined(separator: "\n\n").prefix(6000)), pages)
+    }
+
+    /// The photo for an AI answer: the first page whose intro backs at least 60% of the sentence's words
+    /// and has a usable lead photo. The same rule as `photoFor` in worker/worker.js.
+    static func answerPhoto(_ answer: String, pages: [GroundingPage]) -> AnswerPhoto? {
+        let want = AnswerSources.keyWords(answer)
+        guard !want.isEmpty else { return nil }
+        let need = Int((Double(want.count) * 0.6).rounded(.up))
+        return pages.first { page in
+            page.photo != nil && want.filter { AnswerSources.keyWords(page.extract).contains($0) }.count >= need
+        }?.photo
+    }
+
+    /// Gives a result the photo from another result when it has none of its own.
+    static func keepingPhoto(_ result: QueryResult, from other: QueryResult) -> QueryResult {
+        guard case .text(let h, let b, let s, let su, let iu, let g, let srcs, nil) = result,
+              case .text(_, _, _, _, _, _, _, let photo?) = other else { return result }
+        return .text(heading: h, body: b, source: s, sourceURL: su, imageURL: iu, grounding: g, sources: srcs, photo: photo)
     }
 
     /// "Who made you" is about Nimble, not the Wikipedia article the words happen to match.
@@ -558,7 +592,7 @@ final class QueryEngine: Sendable {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.
             if case .text(_, let body, _, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
-               let sourced = await ddg { return withSources(sourced, others: [await wiki]) }
+               let sourced = await ddg { return withSources(Self.keepingPhoto(sourced, from: llmResult), others: [await wiki]) }
             return withSources(llmResult, others: [await ddg, await wiki])
         }
 

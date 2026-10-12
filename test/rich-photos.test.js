@@ -133,3 +133,18 @@ test("the proxy's AI answer keeps its photo, and a non-https photo is dropped", 
   assert.equal(b.body, "William Shakespeare wrote Hamlet.");
   assert.ok(!b.image);
 });
+
+test("a numeric AI answer keeps its photo when DDG supplies the sourced number", async () => {
+  consent = "yes";
+  globalThis.fetch = async (url, opts) => {
+    url = String(url);
+    if (url.includes("nimble-answers") && opts && opts.method === "POST")
+      return json({ answer: "Mount Everest is 8,848.86 meters tall.", source: "Qwen", image: { url: PHOTO.source, width: 800, height: 533 } });
+    if (url.includes("nimble-answers") && url.includes("ddg="))
+      return json({ Heading: "Mount Everest", AbstractText: "Mount Everest is 8,848 meters tall.", AbstractSource: "Britannica", AbstractURL: "https://www.britannica.com/place/Mount-Everest" });
+    return { ok: false };
+  };
+  const a = await E.answer("how tall is mount everest");
+  assert.equal(a.src, "Britannica");
+  assert.equal(a.image.url, PHOTO.source);
+});
