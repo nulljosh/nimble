@@ -109,3 +109,19 @@ test("old clients still get answer, source, image and refs", async () => {
   assert.deepEqual(Object.keys(j).filter((k) => ["answer", "source", "image", "refs", "topic", "topicUrl"].includes(k)).sort(),
     ["answer", "image", "refs", "source", "topic", "topicUrl"]);
 });
+
+// Dates: a date sentence past the lead reaches the model only when the question asks when,
+// or when its year also appears in the lead. The printing press case failed when neither held.
+const PRESS = { title: "Printing press", index: 1, extract: "The printing press is a mechanical printing device. It was a major development in printing technology. Movable type was used in Europe. Books became cheaper to make. The first press was built by Johannes Gutenberg around 1440 in Mainz." };
+const FRANCE_OLYMPICS = { title: "France", index: 1, extract: "France is a country in Western Europe. Its capital is Paris. It is a republic. It has many regions. The country hosted the Olympics in 1924." };
+
+test("a when question keeps the date sentence past the lead", async () => {
+  const { seen } = await run("when was the printing press invented", { wiki: [PRESS], answers: {} });
+  assert.match(seen[0].system, /around 1440 in Mainz/);
+});
+
+test("a non-date question drops an unrelated date sentence past the lead", async () => {
+  const { seen } = await run("capital of france", { wiki: [FRANCE_OLYMPICS], answers: {} });
+  assert.doesNotMatch(seen[0].system, /1924/);
+  assert.match(seen[0].system, /Its capital is Paris/);
+});

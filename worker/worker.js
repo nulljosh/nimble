@@ -25,9 +25,20 @@ async function freshContext(q, attempt = 0) {
     const sorted = [...pages].sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
     // Officeholder intros bury "The current prime minister is X" ten sentences deep, so keep
     // the lead plus any sentence naming who holds something now.
+    // Dates are kept in two cases: the question asks when (or what year), so "when was the printing
+    // press invented" gets its date sentence; or the sentence's year also appears in the lead, so it
+    // is on the same subject. "since 1944" in an unrelated sentence of a France page stays out.
+    const when = WHEN.test(q);
     const trim = (t = "") => {
       const sents = t.split(/(?<=[.!?])\s+/);
-      return [...sents.slice(0, 4), ...sents.slice(4).filter((x) => /\b(current|incumbent)\b|\bsince\b[\s\S]*\b(president|minister|premier|ceo|governor|mayor|secretary|chancellor|king|queen|head)\b/i.test(x))].join(" ");
+      const lead = sents.slice(0, 4);
+      const leadYears = new Set(lead.join(" ").match(YEAR_G) || []);
+      const keep = (x) => {
+        if (/\b(current|incumbent)\b|\bsince\b[\s\S]*\b(president|minister|premier|ceo|governor|mayor|secretary|chancellor|king|queen|head)\b/i.test(x)) return true;
+        if (!DATE.test(x)) return false;
+        return when || (x.match(YEAR_G) || []).some((y) => leadYears.has(y));
+      };
+      return [...lead, ...sents.slice(4).filter(keep)].join(" ");
     };
     return { text: pages.map((p) => `${p.title}: ${trim(p.extract)}`).join("\n\n").slice(0, 6000), pages: sorted };
   } catch {
@@ -81,6 +92,10 @@ function groundingRefs(answer, pages) {
 }
 // A date or figure comes only from the reference: "since 1944" from an unrelated page is how the France answer went wrong.
 const GROUNDED = "Do not add a date or figure the reference lacks.";
+// Question shapes that ask for a date, and the date tokens a reference sentence can carry.
+const WHEN = /\b(when|what year|which year|what date|what century|how old)\b/i;
+const DATE = /\b(1\d{3}|20\d{2})s?\b|\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/;
+const YEAR_G = /\b(1\d{3}|20\d{2})s?\b/g;
 const GLUE = new Set("that this with from which were have they their also been into about after there these those when where while would could should will".split(" "));
 
 // Follow-up context from the client: at most 3 {q, a} string pairs, each side cut to 300 chars.
