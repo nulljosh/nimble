@@ -38,6 +38,8 @@ let package = Package(
                 "Sources/Models/OnDeviceAnswers.swift",
                 "Sources/Models/Turns.swift",
                 "Sources/Models/SearchHistory.swift",
+                "Sources/Models/QASandbox.swift",
+                "Sources/Models/SharedAnswer.swift",
                 "tui/main.swift"
             ],
             resources: []
