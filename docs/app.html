@@ -35,16 +35,23 @@ a { color: inherit; }
 .menu-btn svg { width: 20px; height: 20px; }
 .menu-btn[aria-expanded="true"] { color: var(--yellow-deep); }
 /* Phone: the links sit in a full-width sheet under the header. Hidden until the menu button opens it. */
-.top nav { display: none; position: absolute; top: 100%; left: 0; right: 0; z-index: 5; flex-direction: column; align-items: stretch;
-  padding: 0 var(--gutter) var(--space-2); background: var(--bg); border-bottom: 1px solid var(--line); }
+/* The open sheet is opaque (bg2 surface, hairline edge, soft radius), so nothing under it shows through. Rows are full width, 44px. */
+.top nav { display: none; position: absolute; top: calc(100% + var(--space-2)); left: var(--gutter); right: var(--gutter); z-index: 5; flex-direction: column; align-items: stretch;
+  padding: var(--space-2) 0; background: var(--color-bg2); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.top.open { z-index: 6; background: var(--bg); }
 .top.open nav { display: flex; }
-.top nav > * { width: 100%; justify-content: flex-start; text-align: left; }
+.top nav > * { width: 100%; min-height: var(--tap); padding: 0 var(--space-4); justify-content: flex-start; text-align: left; }
 .top nav > * + * { border-top: 1px solid var(--line); }
+/* The scrim dims the page under the sheet and closes the menu on tap. It sits under the header, which stays above it. */
+.scrim { display: none; position: fixed; inset: 0; z-index: 4; background: rgba(0, 0, 0, 0.4); }
+.top.open ~ .scrim { display: block; }
 @media (min-width: 640px) {
   .menu-btn { display: none; }
-  .top nav { display: flex; position: static; flex-direction: row; align-items: center; gap: var(--space-4); margin-left: auto; padding: 0; background: none; border: 0; }
-  .top nav > * { width: auto; }
+  .top nav { display: flex; position: static; flex-direction: row; align-items: center; gap: var(--space-4); margin-left: auto; padding: 0; background: none; border: 0; border-radius: 0; }
+  .top nav > * { width: auto; min-height: var(--tap); padding: 0; }
   .top nav > * + * { border-top: 0; }
+  .top.open { z-index: auto; background: none; }
+  .top.open ~ .scrim { display: none; }
 }
 
 main { flex: 1; width: 100%; max-width: var(--max-app); margin: 0 auto; padding: var(--space-6) var(--gutter) var(--space-7); }
@@ -239,6 +246,7 @@ form { position: relative; }
   <button type="button" class="menu-btn" id="menu-btn" aria-controls="nav" aria-expanded="false" aria-label="Menu" data-i18n-aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
   <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
 <main>
 <div id="ask">
   <h1 data-i18n="Ask anything.">Ask anything.</h1>
@@ -433,6 +441,7 @@ var T=I18N.t;
   menuBtn.addEventListener('click',function(){ setMenu(!top.classList.contains('open')); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && top.classList.contains('open')){ setMenu(false); menuBtn.focus(); } });
   document.addEventListener('click',function(e){ if(top.classList.contains('open') && !top.contains(e.target)) setMenu(false); });
+  document.getElementById('scrim').addEventListener('click',function(){ setMenu(false); menuBtn.focus(); });
   // History: every question with its saved answer, in a modal dialog (the browser traps focus and Esc closes it).
   // A row asks it again; Edit adds a circle per row and the bottom bar: Select all, Copy selected, Delete selected.
   var histDlg=document.getElementById('hist'), histOpen=document.getElementById('hist-open'), histList=document.getElementById('hist-list'),

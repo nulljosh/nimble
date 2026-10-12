@@ -38,6 +38,8 @@ sealed class Answer {
         val grounding: String? = null,
         /** The quiet line under a Wikipedia fallback when the free AI's call failed. Null otherwise. */
         val aiNote: String? = null,
+        /** True when a Wikipedia topic page answers a specific question: it is background, never the answer. */
+        val background: Boolean = false,
     ) : Answer()
     /** "news" or "what's happening in <place>": up to three headlines from the worker's RSS route. */
     data class News(val items: List<NewsItem>, val source: String, val asOf: Freshness? = null) : Answer()
@@ -125,7 +127,7 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
             // A page's own lead photo stays; otherwise the photo is the one of the entity the sentence names (TopicPhoto).
             val pic = if (wiki.photoUrl != null) wiki else TopicPhoto.lookup(input, wiki.body) { fetchText(it) }
                 ?.let { wiki.copy(photoUrl = it.photoUrl, photoCredit = it.photoCredit) } ?: wiki
-            return pic.copy(aiNote = aiFailures.lastOrNull()?.let { aiRestingNote(it, wiki.source) })
+            return QueryEngine.labelIfGeneric(pic.copy(aiNote = aiFailures.lastOrNull()?.let { aiRestingNote(it, wiki.source) }), input)
         }
 
         return Answer.Miss(
@@ -285,7 +287,7 @@ internal fun siteAnswer(host: String, d: AnswerClient.SiteResponse): Answer.Text
 
 /** The quiet note under a Wikipedia fallback when the AI's call failed (quota or outage). Null for any other source. */
 internal fun aiRestingNote(aiError: String?, source: String): String? =
-    if (aiError != null && source == "Wikipedia") "The free AI is resting, showing Wikipedia." else null
+    if (aiError != null && source == "Wikipedia") "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening." else null
 
 /** The worker's `aiError`, present only when its AI call failed and the answer is UNKNOWN. */
 internal fun proxyAiError(body: String): String? =

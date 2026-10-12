@@ -41,7 +41,7 @@ class RichResultsTest {
 
     @Test
     fun aiRestingNoteOnlyUnderAWikipediaFallbackWithAnError() {
-        assertEquals("The free AI is resting, showing Wikipedia.", aiRestingNote("capacity", "Wikipedia"))
+        assertEquals("The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.", aiRestingNote("capacity", "Wikipedia"))
         assertNull(aiRestingNote(null, "Wikipedia"))
         assertNull(aiRestingNote("capacity", "DuckDuckGo"))
     }

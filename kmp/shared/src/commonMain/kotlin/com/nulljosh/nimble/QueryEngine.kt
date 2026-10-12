@@ -135,6 +135,38 @@ object QueryEngine {
 
     fun randomSuggestion(): String = defaultSuggestions.random()
 
+    /** The caption above a background answer. Same words as QueryResult.backgroundCaption in Swift. */
+    const val BACKGROUND_CAPTION = "Not a direct answer to your question. Background from Wikipedia:"
+
+    private val letterRun = Regex("\\p{L}+")
+    private val questionWords = setOf("what", "who", "when", "where", "which", "how")
+    private val questionFiller = questionWords + setOf(
+        "was", "is", "are", "were", "the", "a", "an", "of", "in", "on", "to", "did", "does", "do", "it", "its", "that",
+    )
+
+    /**
+     * A specific question ("what was the first color photograph of a rainbow") that only a generic topic page answers.
+     * Same rule as isSpecificQuestion in docs/engine.js and Sources/Models/QueryEngine.swift.
+     */
+    fun isSpecificQuestion(question: String, topic: String): Boolean {
+        val words = letterRun.findAll(question.lowercase()).map { it.value }.toList()
+        val first = words.firstOrNull() ?: return false
+        if (first !in questionWords) return false
+        val topicWords = letterRun.findAll(topic.lowercase()).map { it.value }.toSet()
+        return words.any { it !in questionFiller && it !in topicWords }
+    }
+
+    /** Marks a Wikipedia topic page that answers a specific question as background. Anything else passes through. */
+    fun labelIfGeneric(answer: Answer.Text, question: String): Answer.Text {
+        val topic = answer.heading ?: return answer
+        if (answer.source != "Wikipedia" || !isSpecificQuestion(question, topic)) return answer
+        return answer.copy(background = true)
+    }
+
+    /** The quiet lines under a text answer's header: one line only, the resting note first, then the background caption. */
+    fun leadLines(background: Boolean, aiNote: String?): List<String> =
+        if (background) listOf(listOfNotNull(aiNote, BACKGROUND_CAPTION).joinToString(" ")) else listOfNotNull(aiNote)
+
     /**
      * Reshapes a question into better search terms, matching the Swift preprocessQuery.
      * Returns the DuckDuckGo query and the Wikipedia query, which differ for "where is X".

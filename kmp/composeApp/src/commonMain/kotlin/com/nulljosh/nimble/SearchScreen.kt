@@ -45,6 +45,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.semantics.Role
+import kotlin.time.Clock
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,13 +65,21 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
     var answer by remember { mutableStateOf<Answer?>(null) }
     var loading by remember { mutableStateOf(false) }
     var recent by remember { mutableStateOf(history.list()) }
+    var showHistory by remember { mutableStateOf(false) }
+    val clipboard = LocalClipboardManager.current
     val placeholder = remember { QueryEngine.randomSuggestion() }
 
-    // Only a real answer is worth remembering; a miss is not.
+    // Only a real answer is worth remembering; a miss is not. The answer's text is kept with the question, on this device only.
     fun record(q: String, a: Answer) {
         if (a is Answer.Miss) return
-        history.add(q)
+        history.add(q, historySnippet(a))
         recent = history.list()
+    }
+
+    fun newQuestion() {
+        query = ""
+        answer = null
+        loading = false
     }
 
     fun submit(text: String = query) {
@@ -87,6 +99,26 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
             loading = false
             record(q, a)
         }
+    }
+
+    if (showHistory) {
+        HistoryScreen(
+            entries = recent,
+            theme = theme,
+            now = Clock.System.now().toEpochMilliseconds(),
+            onBack = { showHistory = false },
+            onAsk = { q ->
+                showHistory = false
+                submit(q)
+            },
+            onCopy = { keys -> clipboard.setText(AnnotatedString(history.copyText(keys))) },
+            onDelete = { keys ->
+                history.remove(keys)
+                recent = history.list()
+            },
+            modifier = modifier,
+        )
+        return
     }
 
     Column(
@@ -135,7 +167,14 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(24.dp))
+        // The tools row: History always; New question once an answer is on screen.
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            ToolButton("History", theme) { showHistory = true }
+            Spacer(Modifier.weight(1f))
+            if (answer != null) ToolButton("New question", theme) { newQuestion() }
+        }
+
+        Spacer(Modifier.height(16.dp))
 
         Box(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())) {
             when {
@@ -159,6 +198,21 @@ fun SearchScreen(history: SearchHistory, modifier: Modifier = Modifier, voice: V
             fontSize = 12.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+    }
+}
+
+/** A labeled 48dp pill button: outlined in the theme's muted colour, text in the theme's text colour. */
+@Composable
+private fun ToolButton(label: String, theme: NimbleTheme, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .defaultMinSize(minHeight = 48.dp)
+            .border(1.dp, theme.muted, RoundedCornerShape(12.dp))
+            .clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
+            .padding(horizontal = 16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, color = theme.text, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -361,6 +415,19 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                 // Whole answer opens its source; AI answers have none, so fall back to a web search.
                 val uriHandler = LocalUriHandler.current
                 Column(Modifier.clickable { answer.sourceUrl?.let(uriHandler::openUri) }) {
+                    // The header word, then the one quiet line (resting note, background caption), as on the web and in Swift.
+                    Text(
+                        if (answer.background) "BACKGROUND" else "ANSWER",
+                        color = theme.muted,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                    )
+                    QueryEngine.leadLines(answer.background, answer.aiNote).forEach { line ->
+                        Spacer(Modifier.height(4.dp))
+                        Text(line, color = theme.muted, fontSize = 13.sp)
+                    }
+                    Spacer(Modifier.height(12.dp))
                     answer.photoUrl?.let {
                         AnswerPhoto(it, theme, client)
                         answer.photoCredit?.let { credit ->
@@ -380,10 +447,6 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                     Text(answer.body, color = theme.text, fontSize = 16.sp, textDecoration = TextDecoration.Underline)
                     Spacer(Modifier.height(12.dp))
                     Text("Source: ${answer.source}", color = theme.muted, fontSize = 12.sp)
-                    answer.aiNote?.let {
-                        Spacer(Modifier.height(8.dp))
-                        Text(it, color = theme.muted, fontSize = 13.sp)
-                    }
                     answer.grounding?.let {
                         Spacer(Modifier.height(8.dp))
                         WhyThisAnswer(it, answer.sourceUrl, theme)
