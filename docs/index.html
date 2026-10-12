@@ -61,92 +61,42 @@ a:hover { text-decoration: underline; }
 .hero {
   position: relative; isolation: isolate; overflow: hidden;
   text-align: center;
-  padding: 1.5rem 0 6rem;
+  padding: var(--s3) 0 6rem;
   background: var(--yellow);
-  --dark: #000;  /* the hero stays yellow in dark mode, so its ink stays black */
+  --dark: var(--black);  /* the hero stays yellow in dark mode, so its ink stays black */
 }
 .hero .container { position: relative; z-index: 2; }
 
-/* A drifting field of bulbs and magnifiers: the two halves of "instant answers".
-   Inset past the edges so icons drift in and out rather than popping at the border. */
-.hero-float {
-  position: absolute; inset: -48px; z-index: 0;
-  /* --yellow-deep, the same ink as the mockup's search icon. Black here goes
-     muddy grey against the yellow; the brand gold stays warm. */
-  color: rgba(176, 131, 0, 0.4);
-  pointer-events: none; user-select: none;
-}
-/* Two nested elements because drift and rock are both `transform` and would
-   otherwise overwrite each other: the div translates, the svg inside it rotates. */
-.float {
-  position: absolute;
-  width: var(--size); height: var(--size);
-  /* centre on the grid point; a translate(-50%) here would collide with drift */
-  margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2);
-  animation: drift var(--dur, 16s) ease-in-out var(--delay, 0s) infinite alternate;
-}
-.float svg {
-  display: block; width: 100%; height: 100%;
-  /* fill/stroke are inherited, so they cross into the <use> shadow tree.
-     A selector like `.float circle` would not, it cannot reach inside. */
-  fill: none; stroke: currentColor; stroke-width: 1.75;
-  stroke-linecap: round; stroke-linejoin: round;
-  animation: bob var(--bdur, 12s) ease-in-out var(--bdelay, 0s) infinite alternate;
-}
-/* No `from`, so each icon eases out of wherever it was placed. The custom
-   properties resolve before interpolation, so one keyframe serves every icon.
-   The fallbacks matter: a missing or unitless var invalidates the whole
-   declaration and the icon silently stops moving. */
-@keyframes drift { to { transform: translate(var(--dx, 0px), var(--dy, 0px)); } }
-@keyframes bob { from { transform: rotate(calc(var(--rot, 0deg) * -1)); } to { transform: rotate(var(--rot, 0deg)); } }
-/* Answered queries scattered among the icons: the product actually working.
-   A zero-size anchor with centred grid content centres the pair on its grid
-   point and overflows evenly both ways, translate(-50%) would collide with
-   drift, and the text width is not known up front. */
-.float.ask {
-  width: 0; height: 0; margin: 0;
-  display: grid; place-content: center;
-  font-size: var(--fs, 14px); line-height: 1.3;
-  text-align: center; white-space: nowrap;
-}
-.float.ask .q { font-weight: 400; opacity: 0.72; }
-.float.ask .a { font-weight: 700; letter-spacing: var(--tracking-tight); }
 
-@media (prefers-reduced-motion: reduce) { .float, .float svg { animation: none; } }
-
-/* Flat yellow wash over the icon band, no gradient by house rule. */
-.hero::after {
-  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: var(--yellow); opacity: .7;
-}
 
 .hero-nav {
   position: relative; z-index: 2;
   display: flex; align-items: center; justify-content: space-between;
-  max-width: 1080px; margin: 0 auto; padding: 0 1.5rem;
+  max-width: 1080px; margin: 0 auto; padding: 0 var(--s3);
 }
-.hero-brand { display: flex; align-items: center; gap: 10px; color: #000; font-weight: 700; font-size: 1.15rem; letter-spacing: var(--tracking-tight); }
+.hero-brand { display: flex; align-items: center; gap: 10px; color: var(--black); font-weight: 700; font-size: 1.15rem; letter-spacing: var(--tracking-tight); }
 .hero-brand svg { width: 40px; height: 40px; } /* 40px puts every rect of the 200 grid on a whole pixel */
 .hero-nav nav { display: flex; align-items: center; gap: 1.25rem; font-size: 0.95rem; }
-.hero-nav nav a { color: rgba(0,0,0,0.7); }
-.hero-nav nav a:hover { color: #000; text-decoration: none; }
+.hero-nav nav a { color: color-mix(in srgb, var(--black) 70%, transparent); }
+.hero-nav nav a:hover { color: var(--black); text-decoration: none; }
 .hero-nav nav .btn { color: var(--yellow); }
 @media (max-width: 600px) { .hero-nav nav a:not(.btn), .hero-brand span { display: none; } }
-.hero-copy { padding-top: 6rem; max-width: 1080px; } /* the nav's width, so the headline and Flit fit on one row at full size */
+.hero-copy { padding-top: 6rem; max-width: 1080px; }
 
-/* Desktop: the headline with Flit to its right. Phones: Flit above the headline. */
-.hero-head { display: flex; align-items: center; justify-content: center; gap: 2.5rem; margin-bottom: 1.5rem; }
+/* Mascot above the headline, centred: the h1 sits on the page axis at every width. */
+.hero-head { display: flex; flex-direction: column; align-items: center; gap: var(--s2); margin-bottom: var(--s3); }
 .hero-head h1 { margin: 0; }
 /* Flit is an inline SVG so the wing and eye can move. Yellow on the yellow hero,
    so an ink outline traces his silhouette. The bob moves the whole bird. */
 .hero-flit {
-  flex: none; display: block; width: 160px; height: 160px; overflow: visible;
-  filter: drop-shadow(2.5px 0 0 #1f1b16) drop-shadow(-2.5px 0 0 #1f1b16)
-          drop-shadow(0 2.5px 0 #1f1b16) drop-shadow(0 -2.5px 0 #1f1b16)
-          drop-shadow(1.8px 1.8px 0 #1f1b16) drop-shadow(-1.8px 1.8px 0 #1f1b16)
-          drop-shadow(1.8px -1.8px 0 #1f1b16) drop-shadow(-1.8px -1.8px 0 #1f1b16);
+  order: -1; flex: none; display: block; width: 128px; height: 128px; overflow: visible;
+  filter: drop-shadow(2px 0 0 var(--black)) drop-shadow(-2px 0 0 var(--black))
+          drop-shadow(0 2px 0 var(--black)) drop-shadow(0 -2px 0 var(--black))
+          drop-shadow(1.5px 1.5px 0 var(--black)) drop-shadow(-1.5px 1.5px 0 var(--black))
+          drop-shadow(1.5px -1.5px 0 var(--black)) drop-shadow(-1.5px -1.5px 0 var(--black));
   animation: flit-bob 2.4s ease-in-out infinite alternate;
 }
+
 /* The wing beats from the top-right end of the blade, a hum. */
 .flit-wing { transform-box: fill-box; transform-origin: 90% 10%; animation: flit-flap 0.22s ease-in-out infinite alternate; }
 /* Shut at 2% of the 4s cycle (80ms), open again at 4% (160ms), open the rest of the time. */
@@ -157,10 +107,6 @@ a:hover { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) {
   .hero-flit, .flit-wing, .flit-eye { animation: none; }
 }
-@media (max-width: 600px) {
-  .hero-head { flex-direction: column; gap: 1rem; }
-  .hero-flit { order: -1; }
-}
 
 .hero h1 {
   font-size: clamp(2.5rem, 7vw, 4rem);
@@ -169,17 +115,17 @@ a:hover { text-decoration: underline; }
   line-height: 1.1;
   text-wrap: balance;
   color: var(--dark);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--s1);
 }
 
 .hero-version {
   font-variant-numeric: tabular-nums;
-  font-size: clamp(1rem, 2.5vw, 1.2rem) !important; color: rgba(0,0,0,0.6) !important;
-  margin: 0 auto 1.5rem !important; min-height: 1.2em;
+  font-size: clamp(1rem, 2.5vw, 1.2rem) !important; color: var(--on-yellow-mid) !important;
+  margin: 0 auto var(--s3) !important; min-height: 1.2em;
 }
 .hero p {
   font-size: clamp(1rem, 2.5vw, 1.2rem);
-  color: rgba(0,0,0,0.6);
+  color: var(--on-yellow-mid);
   max-width: 440px;
   text-wrap: balance;
   margin: 0 auto 3rem;
@@ -187,7 +133,7 @@ a:hover { text-decoration: underline; }
 
 .hero-buttons {
   display: flex;
-  gap: 1rem;
+  gap: var(--s2);
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -224,15 +170,15 @@ a:hover { text-decoration: underline; }
 /* Equal heights: the copy grows, so every card's links sit on one line. */
 .install-card { display: flex; flex-direction: column; }
 .install-card h3 { font-size: 1.1rem; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.4rem; }
-.install-card p { flex: 1; color: var(--mid); margin-bottom: 1.5rem; }
-.install-links { display: flex; align-items: baseline; gap: 1.5rem; }
+.install-card p { flex: 1; color: var(--mid); margin-bottom: var(--s3); }
+.install-links { display: flex; align-items: baseline; gap: var(--s3); }
 .install-links .btn:not(.btn-dark) { padding-left: 0; padding-right: 0; }
 
 /* Mockup, the Mac app. Colours are taken off the real iOS screenshot below
    so the two read as one product; the old light-gold panel looked like a
    different app sitting above its own screenshot. */
 .hero .mockup { margin: 2rem auto; text-align: left; }
-.hero .mockup p { max-width: none; margin: 0; color: var(--panel-mid); font-size: 13px; }
+.hero .mockup p { max-width: none; margin: 0; color: var(--panel-mid); font-size: var(--fs-13); }
 .mockup {
   /* The real app follows the system appearance, so the frame does too. */
   --panel: var(--bg);
@@ -241,17 +187,18 @@ a:hover { text-decoration: underline; }
   --panel-mid: var(--text-mid);
   --panel-gold: var(--yellow-deep);
   background: var(--panel);
-  border-radius: 26px;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
   overflow: hidden;
   text-align: left;
   min-height: 420px;
   display: flex; flex-direction: column;
 }
-.hero .device { margin: 4rem auto 1.5rem; }
+.hero .device { margin: var(--s5) auto var(--s3); }
 /* ponytail: on phones the 280px frame is taller than the viewport; tighten the header and scale the frame so it fits under the tagline. */
 @media (max-height: 820px) and (max-width: 600px) {
-  .hero p { margin-bottom: 1.5rem; }
-  .hero .device { margin: 0 auto 1.5rem; }
+  .hero p { margin-bottom: var(--s3); }
+  .hero .device { margin: 0 auto var(--s3); }
   .hero .device-iphone, .hero .device-android { --device-w: min(280px, calc(58svh * 9 / 19.5)); }
 }
 .device-screen { display: flex; flex-direction: column; }
@@ -262,7 +209,7 @@ a:hover { text-decoration: underline; }
 .mockup-status span:last-child { font-size: 6px; color: var(--panel-mid); letter-spacing: 2px; }
 .mockup-result { flex: 1; }
 .device-mac .mockup-status, .device-windows .mockup-status { display: none; }
-.hero .demo-caption { font-variant: var(--caption); letter-spacing: 0.06em; font-size: 0.9rem; color: rgba(0,0,0,0.55); max-width: none; margin: 1rem auto 0; }
+.hero .demo-caption { font-variant: var(--caption); letter-spacing: 0.06em; font-size: 0.9rem; color: var(--on-yellow-mid); max-width: none; margin: var(--s2) auto 0; }
 .demo-caption a { color: inherit; text-decoration: underline; }
 
 /* The query row, laid out like the app: accent glass, then what you typed. */
@@ -280,11 +227,11 @@ a:hover { text-decoration: underline; }
   border: 0;
   padding: 0;
   font-family: var(--font);
-  font-size: 15px;
+  font-size: var(--fs-15);
   color: var(--panel-text);
 }
 .mockup-input:focus-visible { outline: none; }
-.mockup-bar:focus-within { box-shadow: 0 0 0 2px var(--yellow-deep, #e69a1e); }
+.mockup-bar:focus-within { box-shadow: 0 0 0 2px var(--yellow-deep); }
 :focus-visible { outline: 2px solid var(--yellow-deep); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
@@ -295,47 +242,47 @@ a:hover { text-decoration: underline; }
   position: absolute; inset: 0;
   display: flex; align-items: center;
   pointer-events: none;
-  font-size: 15px; color: var(--panel-mid);
+  font-size: var(--fs-15); color: var(--panel-mid);
   white-space: nowrap; overflow: hidden;
 }
 .mockup-ghost.swap { animation: ghost-swap 700ms cubic-bezier(.22,1,.36,1) both; }
 .mockup-ghost.off { display: none; }
 @keyframes ghost-swap {
-  0%   { opacity: 1; transform: translateY(0); filter: blur(0); }
-  40%  { opacity: 0; transform: translateY(-10px); filter: blur(3px); }
-  50%  { opacity: 0; transform: translateY(12px); filter: blur(3px); }
-  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+  0%   { opacity: 1; transform: translateY(0); }
+  40%  { opacity: 0; transform: translateY(-10px); }
+  50%  { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 .mockup-link { display: block; color: inherit; text-decoration: none; }
 .mockup-link p, .mockup-link h3 { text-decoration: none; }
 .mockup-link:hover p, .mockup-link:hover h3 { color: var(--panel-text); }
-.sources { margin: 12px 0 0; font-size: 13px; color: var(--text-mid); }
+.sources { margin: 12px 0 0; font-size: var(--fs-13); color: var(--text-mid); }
 .sources a { color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .mockup-card p { text-decoration: none; }
 .mockup-card:hover p { text-decoration: underline; text-decoration-color: var(--panel-gold); }
 .news { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 12px; }
 .news li { line-height: 1.35; }
 .news a { color: inherit; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
-.news-src { display: block; font-size: 13px; opacity: .75; margin-top: 2px; }
+.news-src { display: block; font-size: var(--fs-13); opacity: .75; margin-top: 2px; }
 /* Rich results: a photo tops a card (16:9, 12px radius); a news story can carry a 56px square. */
-.mockup-photo { display: block; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background: var(--bg2); margin: 0 0 16px; }
+.mockup-photo { display: block; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: var(--bg2); margin: 0 0 16px; }
 .mockup-photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; opacity: 0; transition: opacity .25s ease; }
 @media (max-width: 600px) { .mockup-photo { max-height: 220px; } }
 .mockup-photo img.on { opacity: 1; }
 .news li.has-thumb { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: start; }
-.news-thumb { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; background: var(--bg2); opacity: 0; transition: opacity .25s ease; }
+.news-thumb { width: 56px; height: 56px; border-radius: var(--radius); object-fit: cover; background: var(--bg2); opacity: 0; transition: opacity .25s ease; }
 .news-thumb.on { opacity: 1; }
-.why { margin-top: 14px; font-size: 13px; opacity: .85; }
+.why { margin-top: 14px; font-size: var(--fs-13); opacity: .85; }
 .why summary { display: inline-block; cursor: pointer; list-style: none; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
 .why summary::-webkit-details-marker { display: none; }
 .why.steps ol { margin: 8px 0 0; padding: 0; list-style: none; counter-reset: step; }
 .why.steps li { counter-increment: step; margin: 0 0 4px; }
 .why.steps li::before { content: counter(step) "."; display: inline-block; width: 22px; font-variant-numeric: tabular-nums; }
-.why p { margin-top: 8px; font-size: 15px; line-height: 1.35; }
+.why p { margin-top: 8px; font-size: var(--fs-15); line-height: 1.35; }
 .why a { display: inline-block; margin-top: 6px; color: inherit; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
 .consent-actions { display: flex; gap: 8px; margin-top: 12px; }
-.consent-actions button { border: 1px solid var(--panel-line); background: none; color: var(--panel-text); border-radius: 8px; padding: 7px 13px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-.consent-actions .consent-yes { border-color: transparent; background: var(--panel-gold); color: #000; }
+.consent-actions button { border: 1px solid var(--panel-line); background: none; color: var(--panel-text); border-radius: var(--radius); padding: 7px 13px; font: inherit; font-size: var(--fs-13); font-weight: 700; cursor: pointer; }
+.consent-actions .consent-yes { border-color: transparent; background: var(--panel-gold); color: var(--black); }
 .mockup-result.swap { animation: result-in 500ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes result-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .mockup-ghost.swap, .mockup-result.swap { animation: none; } }
@@ -349,15 +296,15 @@ a:hover { text-decoration: underline; }
 .mockup-result {
   padding: 16px;
 }
-.mockup-big { font-size: 34px; font-weight: 600; letter-spacing: -0.02em; color: var(--panel-text); margin: 2px 0 4px; }
+.mockup-big { font-size: var(--fs-34); font-weight: 600; letter-spacing: -0.02em; color: var(--panel-text); margin: 2px 0 4px; }
 .mockup-result h3 {
-  font-size: 15px;
+  font-size: var(--fs-15);
   font-weight: 700;
   color: var(--panel-text);
   margin-bottom: 6px;
 }
 .mockup-result p {
-  font-size: 13px;
+  font-size: var(--fs-13);
   color: var(--panel-mid);
   line-height: 1.55;
 }
@@ -391,7 +338,7 @@ main > section:not(.hero) h2 {
   text-align: center;
   margin-bottom: 3rem;
 }
-@media (max-width: 600px) { main > section:not(.hero) { padding: 4rem 0; } .hero-copy { padding-top: 4rem; } }
+@media (max-width: 600px) { main > section:not(.hero) { padding: var(--s5) 0; } .hero-copy { padding-top: var(--s5); } }
 
 .features-grid {
   display: grid;
@@ -415,12 +362,12 @@ main > section:not(.hero) h2 {
 /* Quotes */
 .quote { text-align: center; max-width: 34rem; margin: 0 auto 3rem; }
 .quote:last-child { margin-bottom: 0; }
-.quote p { font-size: 1.1rem; line-height: 1.5; margin-bottom: 0.5rem; }
+.quote p { font-size: 1.1rem; line-height: 1.5; margin-bottom: var(--s1); }
 .quote cite { font-style: normal; font-variant: var(--caption); letter-spacing: 0.06em; font-size: 0.9rem; }
 
 /* Open source and agents */
 .oss, .agents { text-align: center; }
-.oss h2, .agents h2 { margin-bottom: 1.5rem; }
+.oss h2, .agents h2 { margin-bottom: var(--s3); }
 .oss p, .agents p {
   color: var(--mid);
   max-width: 30rem;
@@ -431,18 +378,18 @@ main > section:not(.hero) h2 {
   display: block;
   max-width: 560px;
   margin: 0 auto 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem var(--s2);
   background: var(--color-bg2);
-  border-radius: 10px;
+  border-radius: var(--radius);
   font: inherit;
   font-size: 0.9rem;
   overflow-wrap: anywhere;
 }
-.agents p:last-child { margin: 1.5rem auto 0; }
+.agents p:last-child { margin: var(--s3) auto 0; }
 
 /* Footer */
 footer {
-  padding: 4rem 0;
+  padding: var(--s5) 0;
   text-align: center;
   border-top: 1px solid var(--line);
   font-size: 0.85rem;
@@ -450,7 +397,7 @@ footer {
 }
 
   /* Footer directory: four columns, two-by-two on phones. */
-  footer .foot-rule { display: flex; align-items: center; gap: 16px; max-width: 880px; margin: 0 auto; padding: 14px 20px 28px; font-size: 13px; letter-spacing: .06em; font-weight: 500; color: var(--mid); }
+  footer .foot-rule { display: flex; align-items: center; gap: 16px; max-width: 880px; margin: 0 auto; padding: 14px 20px 28px; font-size: var(--fs-13); letter-spacing: .06em; font-weight: 500; color: var(--mid); }
   footer .foot-rule::before { content: ""; order: 1; flex: 1; height: 1px; background: var(--line); }
   footer .foot-rule > :first-child { order: 0; }
   footer .foot-rule > :last-child { order: 2; }
@@ -458,7 +405,7 @@ footer {
   .foot-dir { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px 24px; max-width: 880px; margin: 0 auto; padding: 0 20px 28px; text-align: left; }
   .foot-col h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--dark); letter-spacing: 0.02em; }
   .foot-col ul { list-style: none; margin: 0; padding: 0; }
-  .foot-col a { position: relative; display: inline-block; padding: 5px 0; margin: 0; color: var(--mid); text-decoration: none; font-size: 13px; line-height: 1.35; }
+  .foot-col a { position: relative; display: inline-block; padding: 5px 0; margin: 0; color: var(--mid); text-decoration: none; font-size: var(--fs-13); line-height: 1.35; }
   .foot-col a::after { content: ""; position: absolute; top: 50%; left: 0; transform: translateY(-50%); width: 100%; height: 44px; min-width: 44px; }
   .foot-col a:hover { color: var(--dark); text-decoration: underline; }
   .foot-bar { max-width: 880px; margin: 0 auto; padding: 18px 20px 0; border-top: 1px solid var(--line); }
@@ -485,32 +432,16 @@ footer {
 }
 
 .credit {
-  margin-top: 0.5rem;
+  margin-top: var(--s1);
   font-size: 0.8rem;
 }
 </style>
 </head>
 <body id="top">
 
-<!-- Icon sprite for the hero field. Sized 0 rather than display:none, which
-     would stop <use> from rendering the symbols in some browsers. -->
-<svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
-  <symbol id="i-bulb" viewBox="0 0 24 24">
-    <path vector-effect="non-scaling-stroke" d="M12 2.75a6 6 0 0 0-3.4 10.94c.53.37.87.95.95 1.59l.15 1.22h4.6l.15-1.22c.08-.64.42-1.22.95-1.59A6 6 0 0 0 12 2.75Z"/>
-    <path vector-effect="non-scaling-stroke" d="M9.7 19.4h4.6"/>
-    <path vector-effect="non-scaling-stroke" d="M10.7 21.8h2.6"/>
-  </symbol>
-  <!-- same geometry as the mockup search icon further down the page -->
-  <symbol id="i-search" viewBox="0 0 24 24">
-    <circle vector-effect="non-scaling-stroke" cx="11" cy="11" r="8"/>
-    <path vector-effect="non-scaling-stroke" d="M21 21l-4.35-4.35"/>
-  </symbol>
-</svg>
-
 <main>
 
 <section class="hero">
-  <div class="hero-float" id="heroFloat" aria-hidden="true"></div>
   <header class="hero-nav">
     <a class="hero-brand" href="/"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nimble">
         <rect width="200" height="200" rx="44" fill="#000"/>
@@ -527,22 +458,22 @@ footer {
       <h1 data-i18n="Ask a question. Get one sentence back.">Ask a question.<br>Get one sentence back.</h1>
       <!-- Mirrors docs/mascot/flit.svg. Keep the two in step. -->
       <svg class="hero-flit" viewBox="0 0 240 240" role="img" aria-label="Flit, Nimble's hummingbird" focusable="false">
-        <ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" fill="#8a6412"/>
-        <ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" fill="#8a6412"/>
-        <ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" fill="#8a6412" opacity="0.5"/>
-        <ellipse cx="108" cy="154" rx="54" ry="46" fill="#ffca30"/>
+        <ellipse style="fill:var(--bulb-deep)" cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)"/>
+        <ellipse style="fill:var(--bulb-deep)" cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)"/>
+        <ellipse style="fill:var(--bulb-deep)" cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" opacity="0.5"/>
+        <ellipse style="fill:var(--bulb)" cx="108" cy="154" rx="54" ry="46"/>
         <path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" fill="#ffe27a"/>
-        <circle cx="156" cy="104" r="52" fill="#ffca30"/>
-        <path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" fill="#8a6412"/>
+        <circle style="fill:var(--bulb)" cx="156" cy="104" r="52"/>
+        <path style="fill:var(--bulb-deep)" d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z"/>
         <circle cx="180" cy="126" r="9" fill="#e07a3f" opacity="0.35"/>
-        <path d="M203 98 L232 108 L203 118 Z" fill="#8a6412" stroke="#8a6412" stroke-width="5" stroke-linejoin="round"/>
+        <path style="fill:var(--bulb-deep);stroke:var(--bulb-deep)" d="M203 98 L232 108 L203 118 Z" stroke-width="5" stroke-linejoin="round"/>
         <g id="flit-eye" class="flit-eye">
-          <circle cx="170" cy="100" r="18" fill="#1f1b16"/>
+          <circle style="fill:var(--black)" cx="170" cy="100" r="18"/>
           <circle cx="176" cy="93" r="6.5" fill="#fff8e1"/>
           <circle cx="164" cy="108" r="3" fill="#fff8e1"/>
         </g>
         <g id="flit-wing" class="flit-wing">
-          <ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" fill="#8a6412"/>
+          <ellipse style="fill:var(--bulb-deep)" cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)"/>
           <ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" fill="#a67c1e"/>
         </g>
       </svg>
@@ -558,10 +489,10 @@ footer {
     <form class="mockup" id="demo" autocomplete="off">
       <div class="mockup-status" aria-hidden="true"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;</span></div>
       <div class="mockup-bar">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#e69a1e" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="stroke:var(--yellow-deep)" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <div class="mockup-field">
           <input class="mockup-input" id="demoQ" value="" aria-label="Ask Nimble" spellcheck="false">
-          <span class="mockup-ghost" id="demoG" aria-hidden="true">define nimble</span>
+          <span class="mockup-ghost" id="demoG" aria-hidden="true">who wrote hamlet</span>
         </div>
         <span class="mockup-caret" aria-hidden="true"></span>
       </div>
@@ -668,8 +599,8 @@ footer {
 <style>
 .jb-signup{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:460px;margin:0 auto;padding:6rem 16px 8rem;font:inherit;color:inherit}
 .jb-signup label{flex-basis:100%;text-align:center;opacity:.7}
-.jb-signup input[type=email]{flex:1;min-width:200px;padding:10px 12px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font:inherit}
-.jb-signup button{padding:10px 16px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+.jb-signup input[type=email]{flex:1;min-width:200px;padding:10px 12px;border:1px solid currentColor;border-radius:var(--radius);background:transparent;color:inherit;font:inherit}
+.jb-signup button{padding:10px 16px;border:1px solid currentColor;border-radius:var(--radius);background:transparent;color:inherit;font:inherit;cursor:pointer}
 .jb-hp{position:absolute;left:-9999px;width:1px;height:1px}
 .jb-msg{display:none;flex-basis:100%;text-align:center;margin:4px 0 0}
 .jb-msg:target{display:block}
@@ -722,171 +653,12 @@ footer {
   </div>
 </footer>
 
-<script>
-// Field of bulbs, magnifiers and answered queries drifting behind the hero.
-(function () {
-  var field = document.getElementById('heroFloat');
-  var hero = document.querySelector('.hero');
-  if (!field || !hero) return;
-
-  // Real questions with their real answers, this is the product demoing
-  // itself, so every one of these has to actually be right.
-  var pairs = [
-    ['2^16 + 42', '65,578'],
-    ['sqrt(1764)', '42'],
-    ['15% of 89.40', '13.41'],
-    ['9! / 7!', '72'],
-    ['1024 / 16', '64'],
-    ['180 lb in kg', '81.6 kg'],
-    ['72 \u00B0F in \u00B0C', '22.2 \u00B0C'],
-    ['30 mi in km', '48.3 km'],
-    ['2.5 TB in GB', '2,500 GB'],
-    ['define ephemeral', 'fleeting, short-lived'],
-    ['define laconic', 'using very few words'],
-    ['define obviate', 'to make unnecessary'],
-    ['speed of light', '299,792,458 m/s'],
-    ['capital of Peru', 'Lima'],
-    ['who wrote Dune', 'Frank Herbert'],
-    ['population of Canada', '40.1 million'],
-    ['height of Everest', '8,849 m'],
-    ['distance to the Moon', '384,400 km'],
-    ['boiling point of water', '100 \u00B0C'],
-    ['when did Apollo 11 land', 'July 20, 1969'],
-    ['half-life of carbon-14', '5,730 years'],
-    ['who was Ada Lovelace', 'the first programmer']
-  ];
-  for (var i = pairs.length - 1; i > 0; i--) {  // shuffle so the hero differs each visit
-    var j = Math.floor(Math.random() * (i + 1));
-    var t = pairs[i]; pairs[i] = pairs[j]; pairs[j] = t;
-  }
-
-  var rand = function (a, b) { return a + Math.random() * (b - a); };
-  var narrow = window.innerWidth < 640;
-  var setDrift = function (el) {
-    // Signed magnitude, so no item draws a near-zero path and sits dead still.
-    var dx = rand(12, 26) * (Math.random() < 0.5 ? -1 : 1);
-    var dy = rand(10, 22) * (Math.random() < 0.5 ? -1 : 1);
-    el.style.setProperty('--dx', dx.toFixed(1) + 'px');
-    el.style.setProperty('--dy', dy.toFixed(1) + 'px');
-    // Negative delays start every item mid-flight, so the field is already
-    // in motion on load and nothing moves in lockstep with anything else.
-    el.style.setProperty('--dur', rand(12, 26).toFixed(1) + 's');
-    el.style.setProperty('--delay', (-rand(0, 26)).toFixed(1) + 's');
-    return { x: Math.abs(dx), y: Math.abs(dy) };
-  };
-  // Fade toward the middle, where the headline and buttons live. Derived from
-  // position rather than random, so it re-tunes itself at any width as the
-  // copy reflows, the scrim alone cannot track that.
-  var edgeAt = function (x, y) {
-    var nx = (x - 50) / 50, ny = (y - 50) / 50;
-    return Math.min(1, Math.sqrt(nx * nx + ny * ny));
-  };
-
-  // ---- Icons: one per cell of a jittered grid. Purely random placement
-  // clumps and leaves bald patches, which reads as a bug, not as scattering.
-  // A phone hero is tall and narrow, so it gets its own grid and smaller
-  // icons, the desktop numbers leave a bare column down one side.
-  // Sparse on purpose: the field is texture behind the copy, not the subject.
-  var cols = narrow ? 2 : Math.max(3, Math.min(5, Math.round(window.innerWidth / 280)));
-  var rows = narrow ? 4 : 3;
-  var minSize = narrow ? 18 : 28, maxSize = narrow ? 34 : 56;
-  for (var r = 0; r < rows; r++) {
-    for (var c = 0; c < cols; c++) {
-      var el = document.createElement('div');
-      var x = (c + rand(0.15, 0.85)) / cols * 100;
-      var y = (r + rand(0.15, 0.85)) / rows * 100;
-      el.className = 'float';
-      el.style.left = x.toFixed(2) + '%';
-      el.style.top = y.toFixed(2) + '%';
-      el.style.opacity = (0.15 + 0.45 * edgeAt(x, y)).toFixed(2);
-      el.style.setProperty('--size', rand(minSize, maxSize).toFixed(1) + 'px');
-      el.style.setProperty('--rot', rand(4, 10).toFixed(1) + 'deg');
-      el.style.setProperty('--bdur', rand(7, 16).toFixed(1) + 's');
-      el.style.setProperty('--bdelay', (-rand(0, 16)).toFixed(1) + 's');
-      setDrift(el);
-      // innerHTML, not createElement('svg'), that yields an unknown HTML
-      // element that never renders. Position is set with left/top rather than
-      // a transform, so `animation: none` under reduced motion leaves each
-      // item in its scattered slot instead of stacking them all at the origin.
-      el.innerHTML = '<svg viewBox="0 0 24 24"><use href="#' +
-        (Math.random() < 0.5 ? 'i-bulb' : 'i-search') + '"/></svg>';
-      field.appendChild(el);
-    }
-  }
-
-  // ---- Answered queries. An icon can sit anywhere and still read, but words
-  // cannot: over the headline they are unreadable, over the buttons they look
-  // broken, and over each other they turn to mush. So rather than tune
-  // percentages per breakpoint, place each pair against the real measured
-  // boxes and keep the ones that land clear. Self-tuning at any width.
-  var blockers = [];
-  ['.hero-nav', '.hero h1', '.hero-flit', '.hero-copy > p', '.hero-version', '.hero-buttons', '.hero .device'].forEach(function (sel) {
-    var n = hero.querySelector(sel);
-    if (n) blockers.push(n.getBoundingClientRect());
-  });
-  var bounds = hero.getBoundingClientRect();
-  var clear = function (box) {
-    if (box.left < bounds.left + 6 || box.right > bounds.right - 6) return false;
-    if (box.top < bounds.top + 6 || box.bottom > bounds.bottom - 6) return false;
-    for (var i = 0; i < blockers.length; i++) {
-      var b = blockers[i];
-      if (box.right > b.left - 14 && box.left < b.right + 14 &&
-          box.bottom > b.top - 14 && box.top < b.bottom + 14) return false;
-    }
-    return true;
-  };
-
-  // On a phone the copy runs the full width, so only the short pairs have
-  // anywhere to go at all.
-  if (narrow) {
-    pairs = pairs.filter(function (p) { return p[0].length <= 17 && p[1].length <= 15; });
-  }
-  var want = narrow ? 0 : Math.min(pairs.length, Math.floor(window.innerWidth / 480));  // phones get icons only
-  for (var n = 0; n < want; n++) {
-    var ask = document.createElement('div');
-    ask.className = 'float ask';
-    ask.style.setProperty('--fs', (narrow ? rand(10.5, 12) : rand(12.5, 16)).toFixed(1) + 'px');
-    var slack = setDrift(ask);
-    ask.innerHTML = '<span class="q"></span><span class="a"></span>';
-    // textContent, not string concatenation, so the copy stays data and never
-    // becomes markup.
-    ask.firstChild.textContent = pairs[n][0];
-    ask.lastChild.textContent = pairs[n][1];
-    field.appendChild(ask);
-
-    var placed = false;
-    for (var tries = 0; tries < 40 && !placed; tries++) {
-      var ax = rand(8, 92), ay = rand(6, 94);
-      if (edgeAt(ax, ay) < 0.45) continue;  // keep them off the middle
-      ask.style.left = ax.toFixed(2) + '%';
-      ask.style.top = ay.toFixed(2) + '%';
-      // Grow the box by the drift amplitude: it has to stay clear for the
-      // whole travel, not just where it happens to sit when measured.
-      // Measure the words, not the anchor: the anchor is zero-size, so its
-      // own rect is a point and every pair used to pass as clear.
-      var q = ask.firstChild.getBoundingClientRect(), a = ask.lastChild.getBoundingClientRect();
-      var box = { left: Math.min(q.left, a.left) - slack.x, right: Math.max(q.right, a.right) + slack.x,
-                  top: q.top - slack.y, bottom: a.bottom + slack.y };
-      if (clear(box)) {
-        // Words need more contrast than a shape does to stay readable.
-        ask.style.opacity = (0.4 + 0.3 * edgeAt(ax, ay)).toFixed(2);
-        // Block out the travel, not the snapshot: rect() reports wherever the
-        // drift has this pair right now, so storing that lets the next one
-        // settle somewhere they later drift through each other.
-        blockers.push(box);
-        placed = true;
-      }
-    }
-    if (!placed) { field.removeChild(ask); break; }  // hero is full; stop here
-  }
-})();
-</script>
-
-<script src="i18n.js"></script>
+<script src="i18n.js"><script src="i18n.js"></script>
 <script src="engine.js?v=offline"></script>
 <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <script>
-// Live demo: the same engine the app ships.
+// Live demo: the same engine the app ships. The showcase runs first: a photo answer, math with steps, news, weather.
+var SHOWCASE=['who wrote hamlet','(3+4)*2','news','weather in Vancouver'];
 (function(){
   var names={iphone:'iPhone',android:'Android',mac:'Mac',windows:'Windows'}, dev=document.documentElement.dataset.device;
   document.getElementById('demoDev').textContent=names[dev]||'iPhone';
@@ -899,7 +671,7 @@ footer {
   // Example queries cycle through the empty field; return runs whichever is showing.
   var examples=[g.textContent], idx=0;
   fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
-    examples=list.sort(function(){return Math.random()-0.5;}); idx=0;
+    examples=SHOWCASE.concat(list.filter(function(x){return SHOWCASE.indexOf(x)<0;}).sort(function(){return Math.random()-0.5;})); idx=0;
   }).catch(function(){});
   function show(res){
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');

@@ -6,6 +6,7 @@ Keep Nimble moving after 5.0.0 with one small, shippable slice at a time: fix wh
 
 ## Where things stand
 
+- 5.12.4 (2026-10-11): Landing audit. Float icon field and text ghosts removed; Flit sits above the headline so the h1 is centred; devices flattened (soft shadows gone, 1px ring, Nimble Sans); hero, mockup and demo colours, sizes, radii and spacing moved onto tokens; demo opens on "who wrote hamlet" then steps, news and weather. Checked at 390 and 1440, npm test green.
 - 5.12.3 (2026-10-11): Landing polish. Hero version label follows the newest release as a bare number (5.12.3, no lowercase v) at body size with tabular figures; h1 to label gap tightened; heading tracking set to -0.02em and line-height 1.1 across the landing h2/h3s. Checked at 390 and 1440.
 - 5.12.2 (2026-10-11): AI answers keep their photo when a sourced number from DDG replaces the model's sentence, and when Samantha answers on a Mac (her grounding pages now carry the same lead-photo rule as the worker); web numeric answers keep the photo too. 98 macOS tests (one skipped) and 120 node tests green.
 - 5.12.1 (2026-10-11): Mac QA pass. Show steps lists sit flush left under the answer (they centred before) and render "×" for "*"; captures of home, photo answer, news, weather, math and Settings checked, 119 node tests and 95 macOS tests green.
