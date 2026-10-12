@@ -60,21 +60,28 @@ final class RichPhotoTests: XCTestCase {
         XCTAssertNil(photo)
     }
 
-    func testAnswerPhotoComesFromThePageThatBacksTheSentence() {
-        let everest = AnswerPhoto(url: "https://upload.wikimedia.org/wikipedia/commons/e/ev/Everest.jpg", width: 800, height: 533)
-        let pages = [
-            GroundingPage(title: "Flag", extract: "The flag of Nepal has a crimson border and a blue frame.", photo: AnswerPhoto(url: "https://upload.wikimedia.org/wikipedia/commons/n/Flag_of_Nepal.svg.png", width: 800, height: 600)),
-            GroundingPage(title: "Mount Everest", extract: "Mount Everest is Earth's highest mountain above sea level, 8,848 meters tall.", photo: everest),
-        ]
-        XCTAssertEqual(QueryEngine.answerPhoto("Mount Everest is 8,848.86 meters tall.", pages: pages), everest)
+    func testAnswerEntitiesAreTheAnswersNamesNotTheQuestions() {
+        XCTAssertEqual(QueryEngine.answerEntities(query: "largest planet", answer: "Jupiter is the largest planet.").map(\.name), ["Jupiter"])
+        XCTAssertEqual(QueryEngine.answerEntities(query: "capital of france", answer: "The capital of France is Paris.").map(\.name), ["Paris"])
+        XCTAssertEqual(QueryEngine.answerEntities(query: "largest planet", answer: "The largest planet in the Solar System is Jupiter.").map(\.name), ["Jupiter"])
+        XCTAssertEqual(QueryEngine.answerEntities(query: "who painted the mona lisa", answer: "Leonardo da Vinci painted it.").map(\.name), ["Leonardo da Vinci"])
+        XCTAssertEqual(QueryEngine.answerEntities(query: "when did the titanic sink", answer: "It sank on April 15, 1912.").map(\.name), [])
     }
 
-    func testAnswerPhotoIsNilWhenNoPageBacksTheSentenceOrHasAPhoto() {
-        let unrelated = GroundingPage(title: "Hamlet", extract: "Hamlet is a tragedy written by William Shakespeare.", photo: AnswerPhoto(url: "https://upload.wikimedia.org/hamlet.jpg", width: nil, height: nil))
-        XCTAssertNil(QueryEngine.answerPhoto("Mount Everest is 8,848.86 meters tall.", pages: [unrelated]))
-        let bare = GroundingPage(title: "Mount Everest", extract: "Mount Everest is 8,848 meters tall.", photo: nil)
-        XCTAssertNil(QueryEngine.answerPhoto("Mount Everest is 8,848.86 meters tall.", pages: [bare]))
-        XCTAssertNil(QueryEngine.answerPhoto("UNKNOWN", pages: [unrelated]))
+    func testAPhotoNeedsTheEntityOnItsOwnPage() {
+        let jupiter = TopicSummary(title: "Jupiter", extract: "A gas giant with a ring system.", type: nil,
+                                   thumbnail: WikiThumbnail(source: "https://upload.wikimedia.org/jupiter.jpg", width: 800, height: 500), contentUrls: nil)
+        let entity = (name: "Jupiter", echo: false)
+        XCTAssertFalse(QueryEngine.photoFromEntity(jupiter, entity: entity, answerWords: ["largest", "planet"]))
+        let named = TopicSummary(title: "Jupiter", extract: "Jupiter is the largest planet in the Solar System.", type: nil,
+                                 thumbnail: WikiThumbnail(source: "https://upload.wikimedia.org/jupiter.jpg", width: 800, height: 500), contentUrls: nil)
+        XCTAssertTrue(QueryEngine.photoFromEntity(named, entity: entity, answerWords: ["largest", "planet"]))
+    }
+
+    func testAnEchoedEntityNeedsASharedWordWithTheAnswer() {
+        let fruit = TopicSummary(title: "Apple", extract: "An apple is a round, edible fruit.", type: nil,
+                                 thumbnail: WikiThumbnail(source: "https://upload.wikimedia.org/apple.jpg", width: 800, height: 500), contentUrls: nil)
+        XCTAssertFalse(QueryEngine.photoFromEntity(fruit, entity: (name: "Apple", echo: true), answerWords: ["founded", "steve", "jobs"]))
     }
 
     func testKeepingPhotoFillsOnlyAnEmptySlot() {

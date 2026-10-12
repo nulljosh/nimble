@@ -498,7 +498,7 @@ final class QueryEngine: Sendable {
         #endif
         // A misconfigured engine (Claude with no key) falls back to the free proxy.
         let local = ai.engine == .ollama || ai.engine == .samantha
-        let (context, pages) = local ? await wikiGrounding(input, session: session) : ("", [])
+        let (context, _) = local ? await wikiGrounding(input, session: session) : ("", [])
         guard var req = ai.request(for: input, turns: turns, context: context) ?? AIConfig().request(for: input, turns: turns) else { return nil }
         if local { req.timeoutInterval = localTimeout } // a local 9B on a busy Mac is slow
         do {
@@ -519,7 +519,8 @@ final class QueryEngine: Sendable {
             let topic = named.map { (title: $0.title, url: $0.url) }
                 ?? refs.first { Self.onTopic($0.title, query: input, body: "") } ?? refs.first { Self.onTopic($0.title, query: input, body: answer) }
             let proxyPhoto = reply?.image.flatMap { AnswerPhoto.https($0.url, width: $0.width, height: $0.height, title: topic?.title) }
-            let photo = proxyPhoto ?? Self.answerPhoto(answer, pages: pages)
+            // No proxy photo: withTopic looks up the picture of the entity the answer names.
+            let photo = proxyPhoto
             let sources = refs.filter { Self.onTopic($0.title, query: input, body: answer) }.prefix(2).map { AnswerSource(name: $0.title, url: $0.url) }
             return .text(heading: nil, body: answer, source: source, sourceURL: named?.url, imageURL: nil, grounding: named?.grounding, sources: Array(sources), photo: photo)
         } catch {
@@ -547,17 +548,6 @@ final class QueryEngine: Sendable {
             return "\(p.title): " + kept.joined(separator: ". ")
         }
         return (String(blocks.joined(separator: "\n\n").prefix(6000)), pages)
-    }
-
-    /// The photo for an AI answer: the first page whose intro backs at least 60% of the sentence's words
-    /// and has a usable lead photo. The same rule as `photoFor` in worker/worker.js.
-    static func answerPhoto(_ answer: String, pages: [GroundingPage]) -> AnswerPhoto? {
-        let want = AnswerSources.keyWords(answer)
-        guard !want.isEmpty else { return nil }
-        let need = Int((Double(want.count) * 0.6).rounded(.up))
-        return pages.first { page in
-            page.photo != nil && want.filter { AnswerSources.keyWords(page.extract).contains($0) }.count >= need
-        }?.photo
     }
 
     /// A Wikipedia page is on topic for an answer when every word of its title (minus a parenthesis) is a word of
@@ -588,6 +578,13 @@ final class QueryEngine: Sendable {
 
     /// Math, units, weather and time never look for a photo (same as `NO_PHOTO_Q` in docs/engine.js).
     private static let noPhotoQuery = #"\b(weather|forecast|temperature|time|clock|convert|math|sum|plus|minus|times|divided|percent)\b|\d"#
+    /// Capitalised runs the answer names, with lowercase particles inside a run ("Leonardo da Vinci").
+    private static let answerEntityPattern = #"\b\p{Lu}[\p{L}'\x{2019}-]+(?:\s+(?:(?:da|de|del|della|der|di|du|la|le|van|von|of|the)\s+)?\p{Lu}[\p{L}'\x{2019}-]+){0,3}"#
+    /// Sentence starters, months and weekdays are never a photo's entity.
+    private static let prepositions: Set<String> = ["of", "in", "from", "at", "on", "near", "into", "across", "between", "among", "within"]
+    private static let photoStopWords: Set<String> = notEntity.union(["January", "February", "March", "April", "May", "June", "July", "August",
+                                                                       "September", "October", "November", "December", "Monday", "Tuesday", "Wednesday",
+                                                                       "Thursday", "Friday", "Saturday", "Sunday"])
     /// Capitalised runs the answer names: "Paris" in "The capital of France is Paris." Not sentence starters.
     private static let entityPattern = #"\b\p{Lu}[\p{L}'\x{2019}-]+(?:\s+\p{Lu}[\p{L}'\x{2019}-]+){0,3}"#
     private static let notEntity: Set<String> = ["The", "A", "An", "It", "This", "That", "In", "On", "At", "As", "Its", "He", "She", "They", "There",
@@ -615,37 +612,72 @@ final class QueryEngine: Sendable {
                      grounding: grounding ?? topic.extract, sources: sources, photo: photo ?? topic.photo)
     }
 
-    /// Candidates, in order: the proper nouns the answer names (two), then the top Wikipedia search hits for the
-    /// question (two, not lists). The first with a real picture gives the photo, the first with text gives the intro.
-    /// Nil when nothing comes back. A page with no picture gives no picture, never a guess.
+    /// The photo comes only from the entities the answer names (see `photoFromEntity`). The intro ("Why this answer")
+    /// comes from those entities first, then the top Wikipedia search hits for the question (two, not lists).
+    /// Nil when nothing comes back. No entity or no passing page means no picture, never a guess.
     static func topicLookup(query: String, body: String, session: URLSession) async -> TopicLookup? {
         if query.range(of: noPhotoQuery, options: [.regularExpression, .caseInsensitive]) != nil { return nil }
-        let q = query.lowercased()
-        var ents: [String] = []
-        if let re = try? NSRegularExpression(pattern: entityPattern) {
-            for m in re.matches(in: body, range: NSRange(body.startIndex..., in: body)) {
-                guard let r = Range(m.range, in: body) else { continue }
-                let e = String(body[r])
-                if !notEntity.contains(e), !q.contains(e.lowercased()), !ents.contains(e) { ents.append(e) }
-            }
-        }
+        let ents = answerEntities(query: query, answer: body)
+        let names = ents.map(\.name)
         let searchTitles = await topSearchTitles(query, session: session)
-            .filter { !$0.lowercased().hasPrefix("list of") && !ents.contains($0) }.prefix(2)
-        let candidates = Array(ents.prefix(2)) + Array(searchTitles)
-        let summaries = await withTaskGroup(of: (Int, TopicSummary?).self, returning: [TopicSummary].self) { group in
+            .filter { !$0.lowercased().hasPrefix("list of") && !names.contains($0) }.prefix(2)
+        let candidates = names + Array(searchTitles)
+        let summaries = await withTaskGroup(of: (Int, TopicSummary?).self, returning: [TopicSummary?].self) { group in
             for (i, title) in candidates.enumerated() {
                 group.addTask { (i, await topicSummary(title, session: session)) }
             }
             var out = [TopicSummary?](repeating: nil, count: candidates.count)
             for await (i, s) in group { out[i] = s }
-            return out.compactMap { $0 }
+            return out
         }
-        let pic = summaries.compactMap { s -> AnswerPhoto? in
-            AnswerPhoto.wikipediaLead(s.thumbnail?.source, width: s.thumbnail?.width, height: s.thumbnail?.height, title: s.title)
-        }.first
-        let text = summaries.first { $0.extract != nil && $0.page != nil }
+        let answerWords = AnswerSources.keyWords(body)
+        var pic: AnswerPhoto?
+        for (i, entity) in ents.enumerated() {
+            guard let s = summaries[i], photoFromEntity(s, entity: entity, answerWords: answerWords),
+                  let photo = AnswerPhoto.wikipediaLead(s.thumbnail?.source, width: s.thumbnail?.width, height: s.thumbnail?.height, title: s.title)
+            else { continue }
+            pic = photo
+            break
+        }
+        let text = summaries.compactMap { $0 }.first { $0.extract != nil && $0.page != nil }
         if pic == nil && text == nil { return nil }
         return TopicLookup(photo: pic, extract: text?.extract, page: text?.page)
+    }
+
+    /// Capitalised runs the answer names, in photo order. A name after a preposition is never the subject
+    /// ("the largest planet in the Solar System is Jupiter" gives Jupiter, and the Solar System is dropped). The question's own words count only when the
+    /// answer names nothing else. Leading sentence words and dates are dropped; a lowercase particle keeps a name whole.
+    /// Same rule as `answerEntities` in docs/engine.js.
+    static func answerEntities(query: String, answer: String) -> [(name: String, echo: Bool)] {
+        let q = query.lowercased()
+        var out: [(name: String, echo: Bool, prep: Bool)] = []
+        if let re = try? NSRegularExpression(pattern: answerEntityPattern) {
+            for m in re.matches(in: answer, range: NSRange(answer.startIndex..., in: answer)) {
+                guard let r = Range(m.range, in: answer) else { continue }
+                var words = answer[r].split(whereSeparator: { $0.isWhitespace }).map(String.init)
+                while let first = words.first, photoStopWords.contains(first) { words.removeFirst() }
+                let name = words.joined(separator: " ")
+                guard !name.isEmpty, !out.contains(where: { $0.name == name }) else { continue }
+                var prior = answer[..<r.lowerBound].split(whereSeparator: { $0.isWhitespace }).map { String($0).lowercased() }
+                while let last = prior.last, ["the", "a", "an", "its", "his", "her", "their", "our"].contains(last) { prior.removeLast() }
+                let previous = prior.last
+                out.append((name: name, echo: q.contains(name.lowercased()), prep: previous.map { prepositions.contains($0) } ?? false))
+            }
+        }
+        let nonEcho = out.filter { !$0.echo }
+        let pool = nonEcho.isEmpty ? out : nonEcho
+        return Array(pool.filter { !$0.prep }.prefix(3)).map { (name: $0.name, echo: $0.echo) }
+    }
+
+    /// The entity's summary gives the photo: a real picture, the page contains the entity, and an echoed entity also
+    /// shares a content word with the answer (its own words do not count). Same rule as `photoFromEntity` in docs/engine.js.
+    static func photoFromEntity(_ s: TopicSummary, entity: (name: String, echo: Bool), answerWords: Set<String>) -> Bool {
+        guard let extract = s.extract, s.thumbnail?.source != nil else { return false }
+        let lower = extract.lowercased()
+        guard entity.name.lowercased().split(whereSeparator: { $0.isWhitespace }).allSatisfy({ lower.contains($0) }) else { return false }
+        guard entity.echo else { return true }
+        let own = AnswerSources.keyWords(entity.name), lead = AnswerSources.keyWords(extract)
+        return answerWords.contains { !own.contains($0) && lead.contains($0) }
     }
 
     /// The top Wikipedia search titles for the question. Empty on any failure.

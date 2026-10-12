@@ -207,13 +207,45 @@ function wikiPhoto(sum){
   if(!u || !/^https:\/\//.test(u) || NOT_PHOTO.test(u) || !PHOTO_EXT.test(u)) return null;
   return {url:u, width:t.width||null, height:t.height||null};
 }
-// Topic photo for an AI answer the proxy sent without one. Candidates, in order: the proper nouns the
-// answer names ("Paris" in "The capital of France is Paris."), then the top Wikipedia search hits for the
-// question. The first page with a real lead photo wins, and its title is the credit. Never a guess:
-// a page with no picture gives nothing. Math, units, weather and time never get one.
+// Topic photo for an AI answer the proxy sent without one. The picture must be of an entity the ANSWER names
+// ("Jupiter" in "Jupiter is the largest planet."). Words in the question never pick a photo. Entities the question
+// does not echo come first. An echoed one ("Titanic" in "when did the titanic sink") is a fallback, and only when its
+// page also shares a content word with the answer. The page must contain the entity and carry a real picture.
+// No entity, or no page that passes, means no photo: a missing picture beats a wrong one.
+// Math, units, weather and time never get one.
 const NO_PHOTO_Q = /\b(weather|forecast|temperature|time|clock|convert|math|sum|plus|minus|times|divided|percent)\b|\d/i;
-const ENTITY_RE = /\b\p{Lu}[\p{L}'\u2019-]+(?:\s+\p{Lu}[\p{L}'\u2019-]+){0,3}/gu;
+const ENTITY_RE = /\b\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+){0,3}/gu;
+// Capitalised runs the answer names. A lowercase particle inside a run keeps it whole ("Leonardo da Vinci").
+const ANSWER_ENTITY_RE = /\b\p{Lu}[\p{L}'’-]+(?:\s+(?:(?:da|de|del|della|der|di|du|la|le|van|von|of|the)\s+)?\p{Lu}[\p{L}'’-]+){0,3}/gu;
 const NOT_ENTITY = new Set(["The","A","An","It","This","That","In","On","At","As","Its","He","She","They","There","Yes","No","I","Of","For","And","But","If","When","Where","Who","What","From","With","By","To","Is","Was","These","Those","We","You"]);
+const DATE_WORD = new Set("January February March April May June July August September October November December Monday Tuesday Wednesday Thursday Friday Saturday Sunday".split(" "));
+// The entities an answer names, in photo order. A name after a preposition is never the subject
+// ("the largest planet in the Solar System is Jupiter" gives Jupiter, and the Solar System is dropped). The question's own words count
+// only when the answer names nothing else. Leading sentence words and dates are dropped.
+const PREP = new Set(["of","in","from","at","on","near","into","across","between","among","within"]);
+function answerEntities(query, body){
+  const q = String(query||"").toLowerCase(), text = String(body||""), out = [];
+  for(const m of text.matchAll(ANSWER_ENTITY_RE)){
+    const words = m[0].split(/\s+/);
+    while(words.length && (NOT_ENTITY.has(words[0]) || DATE_WORD.has(words[0]))) words.shift();
+    const name = words.join(" ");
+    if(!name || out.some(e=>e.name===name)) continue;
+    const before = text.slice(0, m.index).replace(/\b(the|a|an|its|his|her|their|our)\s+$/i, "").match(/(\S+)\s*$/);
+    out.push({name, echo: q.includes(name.toLowerCase()), prep: !!before && PREP.has(before[1].toLowerCase())});
+  }
+  const pool = out.some(e=>!e.echo) ? out.filter(e=>!e.echo) : out;
+  return pool.filter(e=>!e.prep).slice(0,3).map(({name, echo})=>({name, echo}));
+}
+// Does a summary give the photo for this entity? Its page must contain the entity, have a real picture, and for an
+// echoed entity share a content word with the answer (answerWords, already without the entity's own words).
+function photoFromEntity(sum, entity, answerWords){
+  if(!sum || !sum.image || !sum.extract) return false;
+  const have = sum.extract.toLowerCase();
+  if(!entity.name.toLowerCase().split(/\s+/).every(w=>have.includes(w))) return false;
+  if(!entity.echo) return true;
+  const own = new Set(keyWords(entity.name)), lead = new Set(keyWords(sum.extract));
+  return [...answerWords].some(w => !own.has(w) && lead.has(w));
+}
 // One Wikipedia page for the topic: its title, link, lead extract, and lead photo when it is a real picture.
 async function summaryTopic(title){
   const sum = await getJSON(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
@@ -221,20 +253,22 @@ async function summaryTopic(title){
   const page = sum.content_urls?.desktop?.page;
   return {title: sum.title, page: /^https:\/\//.test(page||"") ? page : null, extract: sum.extract || null, image: wikiPhoto(sum)};
 }
-// The photo and the grounding come from the same lookup but are picked separately: the first candidate
-// with a real picture gives the photo, the first with text gives the grounding. Candidates: the proper
-// nouns the answer names, then the top Wikipedia search hits for the question.
+// The photo and the grounding are picked separately. The photo comes only from the entities the answer names
+// (photoFromEntity). The grounding text can still come from the question's search hits, as "Why this answer".
 async function topicFor(query, body){
   if(NO_PHOTO_Q.test(query)) return null;
-  const q = query.toLowerCase();
-  const ents = [...new Set((body||"").match(ENTITY_RE)||[])].filter(e=>!NOT_ENTITY.has(e) && !q.includes(e.toLowerCase()));
+  const ents = answerEntities(query, body);
   const [search, ...first] = await Promise.all([
     getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=3&origin=*`),
-    ...ents.slice(0,2).map(summaryTopic),
+    ...ents.map(e=>summaryTopic(e.name)),
   ]);
-  const titles = (search?.query?.search||[]).map(x=>x.title).filter(t=>t && !/^list of /i.test(t) && !ents.includes(t)).slice(0,2);
+  const answerWords = new Set(keyWords(body||""));
+  const hit = ents.findIndex((e,i)=>photoFromEntity(first[i], e, answerWords));
+  const pic = hit >= 0 ? first[hit] : null;
+  const names = ents.map(e=>e.name);
+  const titles = (search?.query?.search||[]).map(x=>x.title).filter(t=>t && !/^list of /i.test(t) && !names.includes(t)).slice(0,2);
   const all = [...first, ...(await Promise.all(titles.map(summaryTopic)))].filter(Boolean);
-  const pic = all.find(t=>t.image), text = all.find(t=>t.extract && t.page);
+  const text = all.find(t=>t.extract && t.page);
   if(!pic && !text) return null;
   return {
     photo: pic ? {url:pic.image.url, width:pic.image.width, height:pic.image.height, title:pic.title} : null,
@@ -726,4 +760,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};

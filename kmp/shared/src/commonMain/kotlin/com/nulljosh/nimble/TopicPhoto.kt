@@ -13,6 +13,9 @@ import kotlinx.serialization.json.jsonObject
 /** Fetches a URL's body as text, or null on any failure or a non-200 reply. */
 typealias TextFetch = suspend (String) -> String?
 
+/** A proper-noun run the answer names. [echo] is true when the question says it too. */
+internal data class AnswerEntity(val name: String, val echo: Boolean)
+
 /** The Wikipedia topic an answer names: its picture with the "<Title> · Wikipedia" credit, and the intro and page behind it. */
 data class TopicLookup(val photoUrl: String?, val photoCredit: String?, val extract: String?, val page: String?)
 
@@ -27,43 +30,56 @@ object TopicPhoto {
         RegexOption.IGNORE_CASE
     )
 
-    /** Capitalised runs the answer names: "Paris" in "The capital of France is Paris." */
-    private val entityPattern = Regex("""\b\p{Lu}[\p{L}'’-]+(?:\s+\p{Lu}[\p{L}'’-]+){0,3}""")
+    /** Capitalised runs the answer names, with lowercase particles inside a run ("Leonardo da Vinci"). */
+    private val entityPattern = Regex(
+        """\b\p{Lu}[\p{L}'’-]+(?:\s+(?:(?:da|de|del|della|der|di|du|la|le|van|von|of|the)\s+)?\p{Lu}[\p{L}'’-]+){0,3}"""
+    )
 
-    /** Sentence starters and pronouns are never topics. */
+    /** Sentence starters, months and weekdays are never a photo's entity. */
     private val notEntity = setOf(
         "The", "A", "An", "It", "This", "That", "In", "On", "At", "As", "Its", "He", "She", "They", "There",
         "Yes", "No", "I", "Of", "For", "And", "But", "If", "When", "Where", "Who", "What", "From", "With",
         "By", "To", "Is", "Was", "These", "Those", "We", "You",
+        "January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+        "November", "December", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+    )
+
+    private val determiners = setOf("the", "a", "an", "its", "his", "her", "their", "our")
+    private val prepositions = setOf("of", "in", "from", "at", "on", "near", "into", "across", "between", "among", "within")
+
+    private val glue = setOf(
+        "that", "this", "with", "from", "which", "were", "have", "they", "their", "also", "been", "into", "about",
+        "after", "there", "these", "those", "when", "where", "while", "would", "could", "should", "will",
     )
 
     private val topicJson = Json { ignoreUnknownKeys = true; isLenient = true }
 
     /**
-     * Candidates, in order: the proper nouns the answer names (two), then the top Wikipedia search hits for the question
-     * (two, not lists). The first with a real picture gives the photo; the first with text and a page gives the intro.
-     * Null when nothing comes back. A page with no picture gives no picture, never a guess.
+     * The photo comes only from the entities the answer names (see [photoFromEntity]). The intro ("Why this answer")
+     * comes from those entities first, then the top Wikipedia search hits for the question (two, not lists).
+     * Null when nothing comes back. No entity, or no page that passes, gives no picture, never a guess.
      */
     suspend fun lookup(query: String, body: String, get: TextFetch): TopicLookup? {
         if (noPhotoQuery.containsMatchIn(query)) return null
-        val q = query.lowercase()
-        val ents = mutableListOf<String>()
-        for (m in entityPattern.findAll(body)) {
-            val e = m.value
-            if (e !in notEntity && !q.contains(e.lowercase()) && e !in ents) ents.add(e)
-        }
+        val ents = answerEntities(query, body)
+        val names = ents.map { it.name }
         val hits = searchTitles(query, get)
-            .filter { !it.startsWith("list of", ignoreCase = true) && it !in ents }
+            .filter { !it.startsWith("list of", ignoreCase = true) && it !in names }
             .take(2)
-        val candidates = ents.take(2) + hits
-        val summaries = coroutineScope {
-            candidates.map { title -> async { topicSummary(title, get) } }.awaitAll()
+        val entSummaries = coroutineScope {
+            ents.map { e -> async { topicSummary(e.name, get) } }.awaitAll()
+        }
+        val hitSummaries = coroutineScope {
+            hits.map { title -> async { topicSummary(title, get) } }.awaitAll()
         }.filterNotNull()
 
-        val pic = summaries.firstNotNullOfOrNull { s ->
+        val answerWords = keyWords(body)
+        val pic = ents.indices.firstNotNullOfOrNull { i ->
+            val s = entSummaries[i] ?: return@firstNotNullOfOrNull null
+            if (!photoFromEntity(s, ents[i], answerWords)) return@firstNotNullOfOrNull null
             leadPhoto(s.thumbnail?.source)?.let { url -> url to s.title }
         }
-        val text = summaries.firstOrNull { it.extract != null && pageOf(it) != null }
+        val text = (entSummaries.filterNotNull() + hitSummaries).firstOrNull { it.extract != null && pageOf(it) != null }
         if (pic == null && text == null) return null
         return TopicLookup(
             photoUrl = pic?.first,
@@ -72,6 +88,43 @@ object TopicPhoto {
             page = text?.let { pageOf(it) },
         )
     }
+
+    /** The entity's summary gives the photo: a real picture, its page contains the entity, and an echoed entity also shares a content word with the answer. */
+    internal fun photoFromEntity(s: WikiSummary, entity: AnswerEntity, answerWords: Set<String>): Boolean {
+        if (leadPhoto(s.thumbnail?.source) == null) return false
+        val extract = s.extract ?: return false
+        val lower = extract.lowercase()
+        if (!entity.name.lowercase().split(Regex("\\s+")).all { it in lower }) return false
+        if (!entity.echo) return true
+        val own = keyWords(entity.name)
+        val lead = keyWords(extract)
+        return answerWords.any { it !in own && it in lead }
+    }
+
+    /**
+     * Answer entities in photo order. A name after a preposition is never the subject ("the largest planet in the Solar
+     * System is Jupiter" gives Jupiter, and the Solar System is dropped). The question's own words count only when the
+     * answer names nothing else. Max three.
+     */
+    internal fun answerEntities(query: String, answer: String): List<AnswerEntity> {
+        val q = query.lowercase()
+        val out = mutableListOf<Pair<AnswerEntity, Boolean>>()
+        for (m in entityPattern.findAll(answer)) {
+            val words = m.value.split(Regex("\\s+")).toMutableList()
+            while (words.isNotEmpty() && words.first() in notEntity) words.removeAt(0)
+            val name = words.joinToString(" ")
+            if (name.isEmpty() || out.any { it.first.name == name }) continue
+            val prior = answer.substring(0, m.range.first).trim().split(Regex("\\s+")).map { it.lowercase() }.dropLastWhile { it in determiners }
+            val previous = prior.lastOrNull()
+            out.add(AnswerEntity(name, q.contains(name.lowercase())) to (previous != null && previous in prepositions))
+        }
+        val pool = if (out.any { !it.first.echo }) out.filter { !it.first.echo } else out
+        return pool.filter { !it.second }.map { it.first }.take(3)
+    }
+
+    /** Lowercase content words of four or more letters, minus the glue words. */
+    internal fun keyWords(s: String): Set<String> =
+        Regex("[a-z]{4,}").findAll(s.lowercase()).map { it.value }.filter { it !in glue }.toSet()
 
     /**
      * The answer with its topic filled in: a missing picture, and when nothing else backs the answer, the intro

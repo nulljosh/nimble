@@ -55,12 +55,20 @@ test("AI answer: the photo comes from the page that backs the sentence, logos ar
     query: { pages: [
       { title: "Eiffel Tower", index: 1, extract: "The Eiffel Tower is an iron lattice tower in Paris.", thumbnail: { source: "https://upload.wikimedia.org/wiki/Eiffel_Tower_logo.svg/330px.png", width: 330, height: 423 } },
       { title: "Hamlet", index: 2, extract: "Hamlet is a tragedy written by William Shakespeare.", thumbnail: { source: "https://upload.wikimedia.org/hamlet.jpg", width: 800, height: 600 } },
+      { title: "William Shakespeare", index: 3, extract: "William Shakespeare was an English playwright and poet.", thumbnail: { source: "https://upload.wikimedia.org/shakespeare.jpg", width: 600, height: 700 } },
     ] },
   };
   const ask = async (q, text) => {
-    globalThis.fetch = async (url) => String(url).includes("wikipedia")
-      ? new Response(JSON.stringify(wiki), { status: 200 })
-      : new Response("{}", { status: 404 });
+    // The search returns the pages; an entity's own summary returns that page, or a miss.
+    globalThis.fetch = async (url) => {
+      url = String(url);
+      const m = /\/page\/summary\/(.+)$/.exec(url);
+      if (m) {
+        const page = wiki.query.pages.find((p) => p.title === decodeURIComponent(m[1]));
+        return page ? new Response(JSON.stringify(page), { status: 200 }) : new Response("{}", { status: 404 });
+      }
+      return url.includes("wikipedia") ? new Response(JSON.stringify(wiki), { status: 200 }) : new Response("{}", { status: 404 });
+    };
     const res = await worker.fetch(
       new Request("https://w.test/", { method: "POST", headers: { "content-type": "application/json", "cf-connecting-ip": "1.2.3.4" }, body: JSON.stringify({ q }) }),
       { ...env, AI: { run: async () => ({ response: text }) } },
@@ -69,7 +77,8 @@ test("AI answer: the photo comes from the page that backs the sentence, logos ar
   };
   const hamlet = await ask("who wrote hamlet", "William Shakespeare wrote Hamlet.");
   assert.equal(hamlet.answer, "William Shakespeare wrote Hamlet.");
-  assert.deepEqual(hamlet.image, { url: "https://upload.wikimedia.org/hamlet.jpg", width: 800, height: 600 });
+  // The answer names William Shakespeare, so his picture is the photo; Hamlet is only the question's word.
+  assert.deepEqual(hamlet.image, { url: "https://upload.wikimedia.org/shakespeare.jpg", width: 600, height: 700 });
   const unrelated = await ask("who wrote hamlet", "Paris is the capital of France.");
   assert.equal(unrelated.image, undefined);
   const unknown = await ask("who wrote hamlet", "UNKNOWN");

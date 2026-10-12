@@ -83,10 +83,52 @@ class TopicPhotoTest {
     }
 
     @Test
-    fun theSearchHitsFillInWhenTheAnswerNamesNothing() = runBlockingTest {
+    fun theSearchHitsGiveTheTextButNeverThePhotoWhenTheAnswerNamesNothing() = runBlockingTest {
         val wiki = FakeWiki(summaries = mapOf("Paris" to paris), searchTitles = listOf("List of rivers", "Paris"))
         val topic = TopicPhoto.lookup("largest city in france", "It is big.", wiki.get)
-        assertEquals("Paris · Wikipedia", topic?.photoCredit)
+        assertNull(topic?.photoUrl)
+        assertEquals("https://en.wikipedia.org/wiki/Paris", topic?.page)
+    }
+
+    @Test
+    fun thePhotoIsTheAnswersEntityNotTheEarthPageTheQuestionFound() = runBlockingTest {
+        val earth = summaryJson(title = "Earth", extract = "Earth is the third planet from the Sun.",
+            thumb = "https://upload.wikimedia.org/earth.jpg", page = "https://en.wikipedia.org/wiki/Earth")
+        val jupiterPhoto = "https://upload.wikimedia.org/jupiter.jpg"
+        val jupiter = summaryJson(title = "Jupiter", extract = "Jupiter is the largest planet in the Solar System.",
+            thumb = jupiterPhoto, page = "https://en.wikipedia.org/wiki/Jupiter")
+        val wiki = FakeWiki(summaries = mapOf("Jupiter" to jupiter), searchTitles = listOf("Earth"))
+        val topic = TopicPhoto.lookup("largest planet", "Jupiter is the largest planet.", wiki.get)
+        assertEquals(jupiterPhoto, topic?.photoUrl)
+        assertEquals("Jupiter · Wikipedia", topic?.photoCredit)
+    }
+
+    @Test
+    fun aPageThatNeverNamesTheEntityGivesNoPhoto() = runBlockingTest {
+        val jupiter = summaryJson(title = "Jupiter", extract = "A gas giant with a ring system.",
+            thumb = "https://upload.wikimedia.org/jupiter.jpg", page = "https://en.wikipedia.org/wiki/Jupiter")
+        val topic = TopicPhoto.lookup("largest planet", "Jupiter is the largest planet.", FakeWiki(mapOf("Jupiter" to jupiter)).get)
+        assertNull(topic?.photoUrl)
+    }
+
+    @Test
+    fun anEchoedEntityNeedsASharedWordWithTheAnswer() = runBlockingTest {
+        val fruit = summaryJson(title = "Apple", extract = "An apple is a round, edible fruit.",
+            thumb = "https://upload.wikimedia.org/apple.jpg", page = "https://en.wikipedia.org/wiki/Apple")
+        val topic = TopicPhoto.lookup("who founded apple", "Apple was founded by Steve Jobs.", FakeWiki(mapOf("Apple" to fruit)).get)
+        assertNull(topic?.photoUrl)
+    }
+
+    @Test
+    fun aNameWithAParticleStaysWhole() = runBlockingTest {
+        val vinciTown = summaryJson(title = "Vinci", extract = "Vinci is a town in Italy.",
+            thumb = "https://upload.wikimedia.org/vinci.jpg", page = "https://en.wikipedia.org/wiki/Vinci")
+        val leo = summaryJson(title = "Leonardo da Vinci", extract = "Leonardo da Vinci was an Italian painter.",
+            thumb = "https://upload.wikimedia.org/leo.jpg", page = "https://en.wikipedia.org/wiki/Leonardo_da_Vinci")
+        val wiki = FakeWiki(summaries = mapOf("Vinci" to vinciTown, "Leonardo_da_Vinci" to leo))
+        val topic = TopicPhoto.lookup("who painted the mona lisa", "Leonardo da Vinci painted it.", wiki.get)
+        assertEquals("https://upload.wikimedia.org/leo.jpg", topic?.photoUrl)
+        assertEquals(listOf("Leonardo da Vinci"), TopicPhoto.answerEntities("who painted the mona lisa", "Leonardo da Vinci painted it.").map { it.name })
     }
 
     @Test

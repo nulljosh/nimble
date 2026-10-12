@@ -46,33 +46,70 @@ async function freshContext(q, attempt = 0) {
   }
 }
 
-// A photo rides on an AI answer only when the page it came from backs the sentence, the same
-// agreement test the web engine uses. Wikipedia's lead image is sometimes a logo or flag: skipped.
+// A photo rides on an AI answer only when it is the picture of an entity the ANSWER names (the same rule as
+// docs/engine.js answerEntities and photoFromEntity). Words in the question never pick a photo. The entity's own
+// page must contain the entity. Wikipedia's lead image is sometimes a logo or flag: skipped.
 const NOT_A_PHOTO = /\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-/i;
-function photoFor(answer, pages) {
-  const hit = photoPage(answer, pages);
-  if (!hit) return null;
-  const { thumbnail: t } = hit.page;
-  return { image: { url: t.source, width: t.width ?? null, height: t.height ?? null }, page: hit.page };
-}
-function photoPage(answer, pages) {
-  const keys = (s) => (s.toLowerCase().match(/[a-z]{4,}/g) || []).filter((w) => !GLUE.has(w));
-  const want = [...new Set(keys(answer))];
-  if (!want.length) return null;
-  for (const p of pages) {
-    const src = p.thumbnail?.source;
-    if (!src || NOT_A_PHOTO.test(src) || !p.extract) continue;
-    const have = new Set(keys(p.extract));
-    if (want.filter((w) => have.has(w)).length >= Math.ceil(want.length * 0.6)) return { page: p };
+const PHOTO_EXT = /\.(png|jpe?g|webp)(\?|$)/i;
+const ENTITY_RUN = /\b\p{Lu}[\p{L}'’-]+(?:\s+(?:(?:da|de|del|della|der|di|du|la|le|van|von|of|the)\s+)?\p{Lu}[\p{L}'’-]+){0,3}/gu;
+const SENTENCE_WORDS = new Set("The A An It This That In On At As Its He She They There Yes No I Of For And But If When Where Who What From With By To Is Was These Those We You January February March April May June July August September October November December Monday Tuesday Wednesday Thursday Friday Saturday Sunday".split(" "));
+const keyWordsW = (s) => (s.toLowerCase().match(/[a-z]{4,}/g) || []).filter((w) => !GLUE.has(w));
+// The entities the answer names, photo order. A name after a preposition is never the subject
+// ("the largest planet in the Solar System is Jupiter" gives Jupiter, and the Solar System is dropped). The question's own words count only when
+// the answer names nothing else.
+const PREP_W = new Set(["of", "in", "from", "at", "on", "near", "into", "across", "between", "among", "within"]);
+function answerEntities(q, answer) {
+  const ql = q.toLowerCase(), text = String(answer), out = [];
+  for (const m of text.matchAll(ENTITY_RUN)) {
+    const words = m[0].split(/\s+/);
+    while (words.length && SENTENCE_WORDS.has(words[0])) words.shift();
+    const name = words.join(" ");
+    if (!name || out.some((e) => e.name === name)) continue;
+    const before = text.slice(0, m.index).replace(/\b(the|a|an|its|his|her|their|our)\s+$/i, "").match(/(\S+)\s*$/);
+    out.push({ name, echo: ql.includes(name.toLowerCase()), prep: !!before && PREP_W.has(before[1].toLowerCase()) });
   }
-  return null;
+  const pool = out.some((e) => !e.echo) ? out.filter((e) => !e.echo) : out;
+  return pool.filter((e) => !e.prep).slice(0, 3).map(({ name, echo }) => ({ name, echo }));
 }
-// The Wikipedia page a sentence is credited to: the page its photo came from, else the first grounding page.
+// The entity's own Wikipedia summary, or null (missing, disambiguation, or a failed request).
+async function wikiSummary(name) {
+  try {
+    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`,
+      { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" } });
+    const s = r.ok ? await r.json() : null;
+    return s && s.title && s.type !== "disambiguation" ? s : null;
+  } catch {
+    return null;
+  }
+}
+// The summary gives the photo for this entity: a real https picture, the page contains the entity, and an echoed
+// entity also shares a content word with the answer (its own words do not count).
+function photoFromEntity(s, entity, answerWords) {
+  const src = s?.thumbnail?.source;
+  if (!src || !s.extract || !/^https:\/\//.test(src) || NOT_A_PHOTO.test(src) || !PHOTO_EXT.test(src)) return false;
+  const have = s.extract.toLowerCase();
+  if (!entity.name.toLowerCase().split(/\s+/).every((w) => have.includes(w))) return false;
+  if (!entity.echo) return true;
+  const own = new Set(keyWordsW(entity.name)), lead = new Set(keyWordsW(s.extract));
+  return [...answerWords].some((w) => !own.has(w) && lead.has(w));
+}
+// The photo for an AI answer, with the Wikipedia page it came from (its title is the credit). No entity, no photo.
+async function photoFor(q, answer) {
+  const ents = answerEntities(q, answer);
+  if (!ents.length) return null;
+  const answerWords = new Set(keyWordsW(answer));
+  const sums = await Promise.all(ents.map((e) => wikiSummary(e.name)));
+  const i = ents.findIndex((e, k) => photoFromEntity(sums[k], e, answerWords));
+  if (i < 0) return null;
+  const t = sums[i].thumbnail;
+  return { image: { url: t.source, width: t.width ?? null, height: t.height ?? null }, page: sums[i] };
+}
+// The Wikipedia page a sentence is credited to: the photo's page, else the first grounding page.
 // Title and URL use the same format as the refs, so clients can match them.
-function topicOf(answer, pages, refs) {
-  const page = photoPage(answer, pages)?.page || (refs[0] && pages.find((p) => p.title === refs[0].title));
-  if (!page) return null;
-  return { topic: page.title, topicUrl: encodeURI(`https://en.wikipedia.org/wiki/${page.title.replace(/ /g, "_")}`) };
+function topicOf(photoPage, refs) {
+  const title = photoPage?.title || refs[0]?.title;
+  if (!title) return null;
+  return { topic: title, topicUrl: encodeURI(`https://en.wikipedia.org/wiki/${title.replace(/ /g, "_")}`) };
 }
 // The Wikipedia pages behind an AI answer, up to three, each with the same word-overlap test as the
 // photo. The client lists one of them as a second source next to DDG. URLs match DDG's format
@@ -186,11 +223,11 @@ export default {
 
     // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
     const { text: context, pages } = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
-    const reply = (o) => {
+    const reply = async (o) => {
       const known = o.answer !== "UNKNOWN";
-      const photo = known ? photoFor(o.answer, pages) : null;
+      const photo = known ? await photoFor(q, o.answer) : null;
       const refs = known ? groundingRefs(o.answer, pages) : [];
-      const topic = known ? topicOf(o.answer, pages, refs) : null;
+      const topic = known ? topicOf(photo?.page, refs) : null;
       return json({ ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) });
     };
     const today = new Date().toISOString().slice(0, 10);

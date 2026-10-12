@@ -96,11 +96,31 @@ final class TopicPhotoTests: XCTestCase {
         XCTAssertNil(topic)
     }
 
-    func testTheSearchHitsFillInWhenTheAnswerNamesNothing() async {
+    func testTheSearchHitsGiveTheTextButNeverThePhotoWhenTheAnswerNamesNothing() async {
         StubProtocol.searchTitles = ["List of rivers", "Paris"]
         StubProtocol.summaries["Paris"] = paris
         let topic = await QueryEngine.topicLookup(query: "largest city in france", body: "It is big.", session: session)
-        XCTAssertEqual(topic?.photo?.title, "Paris")
+        XCTAssertNil(topic?.photo)
+        XCTAssertEqual(topic?.page, "https://en.wikipedia.org/wiki/Paris")
+    }
+
+    func testThePhotoIsTheAnswersEntityNotTheEarthPageTheQuestionFound() async {
+        StubProtocol.searchTitles = ["Earth"]
+        StubProtocol.summaries["Earth"] = ["title": "Earth", "extract": "Earth is the third planet from the Sun.",
+                                           "thumbnail": ["source": "https://upload.wikimedia.org/earth.jpg", "width": 800, "height": 600]]
+        StubProtocol.summaries["Jupiter"] = ["title": "Jupiter", "extract": "Jupiter is the largest planet in the Solar System.",
+                                             "thumbnail": ["source": "https://upload.wikimedia.org/jupiter.jpg", "width": 800, "height": 600],
+                                             "content_urls": ["desktop": ["page": "https://en.wikipedia.org/wiki/Jupiter"]]]
+        let topic = await QueryEngine.topicLookup(query: "largest planet", body: "Jupiter is the largest planet.", session: session)
+        XCTAssertEqual(topic?.photo?.title, "Jupiter")
+        XCTAssertEqual(topic?.photo?.url, "https://upload.wikimedia.org/jupiter.jpg")
+    }
+
+    func testAPageThatNeverNamesTheEntityGivesNoPhoto() async {
+        StubProtocol.summaries["Jupiter"] = ["title": "Jupiter", "extract": "A gas giant with a ring system.",
+                                             "thumbnail": ["source": "https://upload.wikimedia.org/jupiter.jpg", "width": 800, "height": 600]]
+        let topic = await QueryEngine.topicLookup(query: "largest planet", body: "Jupiter is the largest planet.", session: session)
+        XCTAssertNil(topic?.photo)
     }
 
     func testWithTopicFillsTheWhyTextAndLinksThePageWhenNothingElseBacksTheAnswer() async {
