@@ -186,6 +186,11 @@ struct TextAnswerView: View {
                         }
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .accessibilityLabel(heading ?? source)
+                    if let title = photo.title {
+                        Text("\(title) \u{00B7} Wikipedia")
+                            .font(.nimbleCaption)
+                            .foregroundStyle(Color.soft)
+                    }
                 }
                 HStack(alignment: .top, spacing: 14) {
                     if let imageURL, let url = URL(string: imageURL) {

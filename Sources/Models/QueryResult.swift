@@ -54,6 +54,8 @@ struct AnswerPhoto: Equatable, Decodable {
     let url: String
     let width: Int?
     let height: Int?
+    /// The Wikipedia page the picture belongs to: the "<Title> · Wikipedia" credit. Nil when there is none.
+    var title: String? = nil
 
     /// A photo from any source, when the link is https; nil otherwise.
     static func https(_ url: String?, width: Int? = nil, height: Int? = nil) -> AnswerPhoto? {
@@ -61,12 +63,15 @@ struct AnswerPhoto: Equatable, Decodable {
         return AnswerPhoto(url: url, width: width, height: height)
     }
 
-    /// Wikipedia's lead image, unless it is a logo, flag, icon or SVG drawing (the same rule as the web engine and the worker).
-    static func wikipediaLead(_ url: String?, width: Int? = nil, height: Int? = nil) -> AnswerPhoto? {
+    /// Wikipedia's lead image, unless it is a logo, flag, icon or SVG drawing, or not a png, jpg, jpeg or webp.
+    /// A raw .svg is never a photo; an SVG diagram's rendered ".svg.png" is. Same rule as `wikiPhoto` in docs/engine.js.
+    static func wikipediaLead(_ url: String?, width: Int? = nil, height: Int? = nil, title: String? = nil) -> AnswerPhoto? {
         guard let photo = https(url, width: width, height: height),
-              photo.url.range(of: #"\.svg(\.png)?(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-"#,
-                              options: [.regularExpression, .caseInsensitive]) == nil else { return nil }
-        return photo
+              photo.url.range(of: #"\.svg(\?|$)|logo|flag|icon|coat[_ ]of[_ ]arms|seal|map|commons-"#,
+                              options: [.regularExpression, .caseInsensitive]) == nil,
+              photo.url.range(of: #"\.(png|jpe?g|webp)(\?|$)"#, options: [.regularExpression, .caseInsensitive]) != nil
+        else { return nil }
+        return AnswerPhoto(url: photo.url, width: width, height: height, title: title)
     }
 }
 

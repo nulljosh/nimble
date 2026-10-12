@@ -62,6 +62,26 @@ struct WikiResponse: Codable {
     }
 }
 
+/// A Wikipedia REST summary, as the topic lookup reads it.
+struct TopicSummary: Decodable {
+    let title: String?
+    let extract: String?
+    let type: String?
+    let thumbnail: WikiThumbnail?
+    let contentUrls: WikiContentURLs?
+
+    enum CodingKeys: String, CodingKey {
+        case title, extract, type, thumbnail
+        case contentUrls = "content_urls"
+    }
+
+    /// The article's desktop link, https only.
+    var page: String? {
+        guard let page = contentUrls?.desktop?.page, page.hasPrefix("https://") else { return nil }
+        return page
+    }
+}
+
 /// The photo the answer proxy adds to an AI answer, when its page backs the sentence.
 struct ProxyPhoto: Decodable {
     let image: AnswerPhoto?
@@ -517,6 +537,90 @@ final class QueryEngine: Sendable {
         return .text(heading: h, body: b, source: s, sourceURL: su, imageURL: iu, grounding: g, sources: srcs, photo: photo)
     }
 
+    /// Math, units, weather and time never look for a photo (same as `NO_PHOTO_Q` in docs/engine.js).
+    private static let noPhotoQuery = #"\b(weather|forecast|temperature|time|clock|convert|math|sum|plus|minus|times|divided|percent)\b|\d"#
+    /// Capitalised runs the answer names: "Paris" in "The capital of France is Paris." Not sentence starters.
+    private static let entityPattern = #"\b\p{Lu}[\p{L}'\x{2019}-]+(?:\s+\p{Lu}[\p{L}'\x{2019}-]+){0,3}"#
+    private static let notEntity: Set<String> = ["The", "A", "An", "It", "This", "That", "In", "On", "At", "As", "Its", "He", "She", "They", "There",
+                                                 "Yes", "No", "I", "Of", "For", "And", "But", "If", "When", "Where", "Who", "What", "From", "With",
+                                                 "By", "To", "Is", "Was", "These", "Those", "We", "You"]
+
+    /// The Wikipedia topic an answer names: its picture, and the intro behind it. What the web's `topicFor` does.
+    struct TopicLookup: Equatable {
+        let photo: AnswerPhoto?
+        let extract: String?
+        let page: String?
+    }
+
+    /// Fills a missing picture from the answer's Wikipedia topic, and, when nothing else backs the answer, the
+    /// Wikipedia intro and page behind it ("Why this answer"). Only for answers that went to an AI or to the
+    /// Wikipedia fallback: `enabled` is false when nothing may leave the device or the user said no.
+    static func withTopic(_ result: QueryResult, query: String, session: URLSession, enabled: Bool) async -> QueryResult {
+        guard enabled,
+              case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, let sources, let photo) = result,
+              photo == nil || grounding == nil,
+              let topic = await topicLookup(query: query, body: body, session: session) else { return result }
+        let fromTopic = grounding == nil && topic.extract != nil
+        return .text(heading: heading, body: body, source: source,
+                     sourceURL: fromTopic ? (topic.page ?? sourceURL) : sourceURL, imageURL: imageURL,
+                     grounding: grounding ?? topic.extract, sources: sources, photo: photo ?? topic.photo)
+    }
+
+    /// Candidates, in order: the proper nouns the answer names (two), then the top Wikipedia search hits for the
+    /// question (two, not lists). The first with a real picture gives the photo, the first with text gives the intro.
+    /// Nil when nothing comes back. A page with no picture gives no picture, never a guess.
+    static func topicLookup(query: String, body: String, session: URLSession) async -> TopicLookup? {
+        if query.range(of: noPhotoQuery, options: [.regularExpression, .caseInsensitive]) != nil { return nil }
+        let q = query.lowercased()
+        var ents: [String] = []
+        if let re = try? NSRegularExpression(pattern: entityPattern) {
+            for m in re.matches(in: body, range: NSRange(body.startIndex..., in: body)) {
+                guard let r = Range(m.range, in: body) else { continue }
+                let e = String(body[r])
+                if !notEntity.contains(e), !q.contains(e.lowercased()), !ents.contains(e) { ents.append(e) }
+            }
+        }
+        let searchTitles = await topSearchTitles(query, session: session)
+            .filter { !$0.lowercased().hasPrefix("list of") && !ents.contains($0) }.prefix(2)
+        let candidates = Array(ents.prefix(2)) + Array(searchTitles)
+        let summaries = await withTaskGroup(of: (Int, TopicSummary?).self, returning: [TopicSummary].self) { group in
+            for (i, title) in candidates.enumerated() {
+                group.addTask { (i, await topicSummary(title, session: session)) }
+            }
+            var out = [TopicSummary?](repeating: nil, count: candidates.count)
+            for await (i, s) in group { out[i] = s }
+            return out.compactMap { $0 }
+        }
+        let pic = summaries.compactMap { s -> AnswerPhoto? in
+            AnswerPhoto.wikipediaLead(s.thumbnail?.source, width: s.thumbnail?.width, height: s.thumbnail?.height, title: s.title)
+        }.first
+        let text = summaries.first { $0.extract != nil && $0.page != nil }
+        if pic == nil && text == nil { return nil }
+        return TopicLookup(photo: pic, extract: text?.extract, page: text?.page)
+    }
+
+    /// The top Wikipedia search titles for the question. Empty on any failure.
+    private static func topSearchTitles(_ query: String, session: URLSession) async -> [String] {
+        guard let q = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=\(q)&format=json&srlimit=3"),
+              let (data, response) = try? await session.data(from: url),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let hits = (json["query"] as? [String: Any])?["search"] as? [[String: Any]] else { return [] }
+        return hits.compactMap { $0["title"] as? String }
+    }
+
+    /// One Wikipedia page's REST summary. Nil for a missing page or a disambiguation page.
+    private static func topicSummary(_ title: String, session: URLSession) async -> TopicSummary? {
+        guard let encoded = title.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+              let url = URL(string: "https://en.wikipedia.org/api/rest_v1/page/summary/\(encoded)"),
+              let (data, response) = try? await session.data(from: url),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let s = try? JSONDecoder().decode(TopicSummary.self, from: data),
+              s.type != "disambiguation", s.title != nil else { return nil }
+        return s
+    }
+
     /// "Who made you" is about Nimble, not the Wikipedia article the words happen to match.
     /// Mirrors `identity()` in docs/engine.js.
     func identityAnswer(_ input: String) -> QueryResult? {
@@ -588,16 +692,21 @@ final class QueryEngine: Sendable {
         async let llm: QueryResult? = useLLM ? await queryLLM(input, session: session, ai: ai, turns: turns) : nil
         async let ddg: QueryResult? = localOnly ? nil : queryDDG(ddgInput, session: session)
         async let wiki: QueryResult? = localOnly ? nil : queryWikipedia(wikiInput, session: session)
+        // The answer's Wikipedia topic fills a missing picture and the "Why this answer" text. Only when the
+        // user allowed an AI (useLLM) and nothing stayed on device; a "no" answer is DDG and Wikipedia only.
+        let topicOK = useLLM && !localOnly
         if let llmResult = await llm {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.
             if case .text(_, let body, _, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
-               let sourced = await ddg { return withSources(Self.keepingPhoto(sourced, from: llmResult), others: [await wiki]) }
-            return withSources(llmResult, others: [await ddg, await wiki])
+               let sourced = await ddg {
+                return await Self.withTopic(withSources(Self.keepingPhoto(sourced, from: llmResult), others: [await wiki]), query: input, session: session, enabled: topicOK)
+            }
+            return await Self.withTopic(withSources(llmResult, others: [await ddg, await wiki]), query: input, session: session, enabled: topicOK)
         }
 
-        if let ddgResult = await ddg { return withSources(ddgResult, others: [await wiki]) }
-        if let wikiResult = await wiki { return withSources(wikiResult, others: []) }
+        if let ddgResult = await ddg { return await Self.withTopic(withSources(ddgResult, others: [await wiki]), query: input, session: session, enabled: topicOK) }
+        if let wikiResult = await wiki { return await Self.withTopic(withSources(wikiResult, others: []), query: input, session: session, enabled: topicOK) }
 
         let encoded = input.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? input
         return .error("No instant answer found.", searchURL: "https://duckduckgo.com/?q=\(encoded)")
