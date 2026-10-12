@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Flit, Nimble's hummingbird mascot">
+  <!-- Flit: a chubby hovering hummingbird. Flat tones from the Nimble palette, no gradients, no text.
+       Cute rules: head as big as the body, one huge eye, stubby beak, everything round. -->
+  <!-- tail: two short round feathers -->
+  <ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" fill="#8a6412"/>
+  <ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" fill="#8a6412"/>
+  <!-- back wing, small, peeking over the shoulder -->
+  <ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" fill="#8a6412" opacity="0.5"/>
+  <!-- body -->
+  <ellipse cx="108" cy="154" rx="54" ry="46" fill="#ffca30"/>
+  <!-- belly, hugging the bottom curve -->
+  <path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" fill="#ffe27a"/>
+  <!-- head, big and overlapping the body -->
+  <circle cx="156" cy="104" r="52" fill="#ffca30"/>
+  <!-- tuft: one curl growing out of the crown -->
+  <path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" fill="#8a6412"/>
+  <!-- cheek -->
+  <circle cx="180" cy="126" r="9" fill="#e07a3f" opacity="0.35"/>
+  <!-- beak: short, stubby, warm gold so it stays friendly -->
+  <path d="M203 98 L232 108 L203 118 Z" fill="#8a6412" stroke="#8a6412" stroke-width="5" stroke-linejoin="round"/>
+  <!-- eye: huge, with two highlights -->
+  <circle cx="170" cy="100" r="18" fill="#1f1b16"/>
+  <circle cx="176" cy="93" r="6.5" fill="#fff8e1"/>
+  <circle cx="164" cy="108" r="3" fill="#fff8e1"/>
+  <!-- front wing: a round blade on the body, raised mid-flap, clear of the head -->
+  <ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" fill="#8a6412"/>
+  <ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" fill="#a67c1e"/>
+</svg>

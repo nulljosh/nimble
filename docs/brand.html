@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nimble brand kit</title>
+<meta name="description" content="The Nimble brand kit: logo, app icon, Flit and Fen, colours, type, voice, and the files to download.">
+<meta property="og:title" content="Nimble brand kit">
+<meta property="og:description" content="Logo, app icon, Flit and Fen, colours, type and voice for Nimble.">
+<meta property="og:image" content="https://nimble.jaybulb.com/og-1200x630.png">
+<meta property="og:url" content="https://nimble.jaybulb.com/brand">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://nimble.jaybulb.com/brand">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="tokens.css">
+<style>
+@font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-Medium.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-SemiBold.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-Bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: var(--fs-17);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: var(--yellow-deep); }
+a:hover { text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+::selection { background: var(--yellow); color: var(--black); }
+
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+
+/* Top bar */
+.top { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding-top: 8px; }
+.top a { display: inline-flex; align-items: center; min-height: 44px; color: var(--text); text-decoration: none; font-weight: 600; font-size: var(--fs-15); }
+.top a:hover { text-decoration: underline; }
+.top .mark { width: 28px; height: 28px; margin-right: 8px; }
+
+/* Hero: the yellow block, black ink */
+.hero { background: var(--yellow); color: var(--black); margin: 8px -16px 0; padding: 32px 16px 40px; text-align: left; }
+.hero .wrap { padding: 0; }
+.hero h1 { font-size: var(--fs-34); line-height: var(--lh-display); letter-spacing: var(--track-display); font-weight: 600; }
+.hero p { margin-top: 12px; font-size: var(--fs-17); max-width: 30ch; }
+.hero img { width: 152px; height: auto; margin-top: 24px; }
+
+section { padding: 40px 0 8px; border-top: 1px solid var(--line); margin-top: 40px; }
+section:first-of-type { border-top: 0; margin-top: 0; }
+h2 { font-size: var(--fs-28); line-height: var(--lh-display); letter-spacing: var(--track-display); font-weight: 600; }
+.lede { color: var(--text-mid); margin-top: 8px; max-width: 46ch; }
+h3 { font-size: var(--fs-17); font-weight: 600; margin-bottom: 4px; }
+.note { color: var(--text-light); font-size: var(--fs-13); margin-top: 6px; }
+
+/* Logo and icon */
+.lockup { display: flex; align-items: center; gap: 14px; padding: 24px 16px; background: var(--bg2); }
+.lockup svg { width: 64px; height: 64px; flex: none; }
+.lockup span { font-size: var(--fs-34); font-weight: 600; letter-spacing: var(--track-display); line-height: 1; }
+.pair { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+.pair figure { background: var(--bg2); padding: 24px 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.pair img { width: 128px; height: 128px; }
+
+/* Mascots */
+.cast { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+.cast figure { display: flex; flex-direction: column; gap: 12px; padding: 20px 16px; background: var(--bg2); }
+.cast img { width: 144px; height: 144px; }
+.cast figcaption { color: var(--text-mid); }
+.cast figcaption strong { display: block; color: var(--text); font-weight: 600; font-size: var(--fs-17); }
+
+/* Colour */
+.swatches { list-style: none; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 16px; }
+.swatch .chip { display: block; height: 88px; border: 1px solid var(--line); }
+.swatch .name { display: block; margin-top: 8px; font-size: var(--fs-15); font-weight: 600; }
+.swatch .val { display: block; color: var(--text-light); font-size: var(--fs-13); }
+.swatch .chip.sw-yellow { background: var(--yellow); }
+.swatch .chip.sw-yellow-deep { background: var(--yellow-deep); }
+.swatch .chip.sw-black { background: var(--black); }
+.swatch .chip.sw-white { background: var(--white); }
+.swatch .chip.sw-bg { background: var(--bg); }
+.swatch .chip.sw-text { background: var(--text); }
+.swatch .chip.sw-text-mid { background: var(--text-mid); }
+.swatch .chip.sw-line { background: var(--line); }
+.swatch .chip.sw-belly { background: var(--flit-belly); }
+.swatch .chip.sw-cheek { background: var(--flit-cheek); }
+.swatch .chip.sw-wing { background: var(--flit-wing); }
+.swatch .chip.sw-glint { background: var(--flit-glint); }
+
+/* Type scale */
+.scale { list-style: none; margin-top: 16px; border-top: 1px solid var(--line); }
+.scale li { display: grid; grid-template-columns: 56px 1fr; gap: 8px 12px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.scale .step { color: var(--text-light); font-size: var(--fs-13); }
+.scale .sample { line-height: var(--lh-body); }
+.weights { margin-top: 20px; display: grid; gap: 4px; font-size: var(--fs-22); }
+.weights span:nth-child(1) { font-weight: 400; }
+.weights span:nth-child(2) { font-weight: 500; }
+.weights span:nth-child(3) { font-weight: 600; }
+.weights span:nth-child(4) { font-weight: 700; }
+
+/* Voice */
+.voice { list-style: none; margin-top: 16px; display: grid; gap: 12px; }
+.voice li { font-size: var(--fs-22); line-height: var(--lh-body); padding-left: 16px; border-left: 4px solid var(--yellow); }
+
+/* Do and don't */
+.rules { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+.rules h3 { margin-bottom: 8px; }
+.rules ul { list-style: none; }
+.rules li { padding: 10px 0 10px 28px; position: relative; border-bottom: 1px solid var(--line); }
+.rules li::before { position: absolute; left: 0; top: 10px; font-weight: 700; }
+.rules .do li::before { content: "Yes"; font-size: var(--fs-13); color: var(--yellow-deep); }
+.rules .dont li::before { content: "No"; font-size: var(--fs-13); color: var(--text-light); }
+.rules .do li { padding-left: 40px; }
+.rules .dont li { padding-left: 40px; }
+.rules .do li::before, .rules .dont li::before { left: 0; }
+
+/* Downloads */
+.dl { list-style: none; margin-top: 16px; border-top: 1px solid var(--line); }
+.dl li { border-bottom: 1px solid var(--line); }
+.dl a { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; padding: 10px 0; color: var(--text); text-decoration: none; font-weight: 600; }
+.dl a:hover { text-decoration: underline; }
+.dl a span { color: var(--text-light); font-weight: 400; font-size: var(--fs-13); text-align: right; }
+
+footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 24px 0 40px; color: var(--text-mid); font-size: var(--fs-13); }
+footer a { display: inline-flex; align-items: center; min-height: 44px; }
+
+@media (min-width: 600px) {
+  .pair { grid-template-columns: 1fr 1fr; }
+  .cast { grid-template-columns: 1fr 1fr; }
+  .swatches { grid-template-columns: repeat(4, 1fr); }
+  .rules { grid-template-columns: 1fr 1fr; }
+  .scale li { grid-template-columns: 72px 1fr; }
+}
+</style>
+</head>
+<body id="top">
+
+<div class="wrap">
+  <nav class="top" aria-label="Brand kit">
+    <a href="/"><svg class="mark" viewBox="0 0 200 200" aria-hidden="true">
+        <rect width="200" height="200" rx="44" style="fill:var(--black)"/>
+        <circle cx="100" cy="80" r="44" style="fill:var(--bulb)"/>
+        <rect x="85" y="110" width="30" height="26" style="fill:var(--bulb)"/>
+        <rect x="80" y="130" width="40" height="32" rx="8" style="fill:var(--bulb)"/>
+        <rect x="80" y="140" width="40" height="5" style="fill:var(--black)"/>
+        <rect x="80" y="150" width="40" height="5" style="fill:var(--black)"/>
+      </svg>Nimble</a>
+    <a href="/app">Open the app</a>
+  </nav>
+</div>
+
+<main class="wrap">
+
+  <header class="hero">
+    <h1>Brand kit</h1>
+    <p>How Nimble looks. Flat shapes, one yellow, black ink, Nimble Sans. Take what you need and keep it plain.</p>
+    <img src="mascot/flit.svg" alt="Flit, Nimble's hummingbird">
+  </header>
+
+  <section id="logo" aria-labelledby="logo-h">
+    <h2 id="logo-h">Logo and app icon</h2>
+    <p class="lede">The mark is a bulb with a black base. The word is Nimble Sans, semibold, with no effects.</p>
+    <div class="lockup" role="img" aria-label="Nimble logo">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <rect width="200" height="200" rx="44" style="fill:var(--black)"/>
+        <circle cx="100" cy="80" r="44" style="fill:var(--bulb)"/>
+        <rect x="85" y="110" width="30" height="26" style="fill:var(--bulb)"/>
+        <rect x="80" y="130" width="40" height="32" rx="8" style="fill:var(--bulb)"/>
+        <rect x="80" y="140" width="40" height="5" style="fill:var(--black)"/>
+        <rect x="80" y="150" width="40" height="5" style="fill:var(--black)"/>
+      </svg>
+      <span>Nimble</span>
+    </div>
+    <div class="pair">
+      <figure>
+        <img src="icon-512.png" alt="Nimble app icon">
+        <div>
+          <h3>App icon</h3>
+          <p class="note">A yellow bulb on black. Pictures only, no words.</p>
+        </div>
+      </figure>
+      <figure>
+        <img src="mascot/fen.svg" alt="Fen, the fennec fox">
+        <div>
+          <h3>Fen</h3>
+          <p class="note">The fennec fox. Same three tones as Flit.</p>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section id="mascots" aria-labelledby="mascots-h">
+    <h2 id="mascots-h">Flit</h2>
+    <p class="lede">Flit is the hummingbird. It shows up while an answer loads. Use it as it is.</p>
+    <div class="cast">
+      <figure>
+        <img src="mascot/flit.svg" alt="Flit, flat yellow hummingbird with a black eye">
+        <figcaption><strong>Flit</strong>Hovers while the answer loads.</figcaption>
+      </figure>
+      <figure>
+        <img src="mascot/fen.svg" alt="Fen, the fennec fox with large ears">
+        <figcaption><strong>Fen</strong>The fennec fox, same palette.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="colour" aria-labelledby="colour-h">
+    <h2 id="colour-h">Colour</h2>
+    <p class="lede">Every swatch is a token from tokens.css. The value under each name is read from the page, so it is always the live one.</p>
+    <ul class="swatches">
+      <li class="swatch"><span class="chip sw-yellow"></span><span class="name">--yellow</span><span class="val" data-token="--yellow"></span></li>
+      <li class="swatch"><span class="chip sw-yellow-deep"></span><span class="name">--yellow-deep</span><span class="val" data-token="--yellow-deep"></span></li>
+      <li class="swatch"><span class="chip sw-black"></span><span class="name">--black</span><span class="val" data-token="--black"></span></li>
+      <li class="swatch"><span class="chip sw-white"></span><span class="name">--white</span><span class="val" data-token="--white"></span></li>
+      <li class="swatch"><span class="chip sw-bg"></span><span class="name">--bg</span><span class="val" data-token="--bg"></span></li>
+      <li class="swatch"><span class="chip sw-text"></span><span class="name">--text</span><span class="val" data-token="--text"></span></li>
+      <li class="swatch"><span class="chip sw-text-mid"></span><span class="name">--text-mid</span><span class="val" data-token="--text-mid"></span></li>
+      <li class="swatch"><span class="chip sw-line"></span><span class="name">--line</span><span class="val" data-token="--line"></span></li>
+      <li class="swatch"><span class="chip sw-belly"></span><span class="name">--flit-belly</span><span class="val" data-token="--flit-belly"></span></li>
+      <li class="swatch"><span class="chip sw-cheek"></span><span class="name">--flit-cheek</span><span class="val" data-token="--flit-cheek"></span></li>
+      <li class="swatch"><span class="chip sw-wing"></span><span class="name">--flit-wing</span><span class="val" data-token="--flit-wing"></span></li>
+      <li class="swatch"><span class="chip sw-glint"></span><span class="name">--flit-glint</span><span class="val" data-token="--flit-glint"></span></li>
+    </ul>
+  </section>
+
+  <section id="type" aria-labelledby="type-h">
+    <h2 id="type-h">Type</h2>
+    <p class="lede">Nimble Sans only. Six sizes, and nothing between them.</p>
+    <ul class="scale">
+      <li><span class="step">34</span><span class="sample" style="font-size:var(--fs-34);font-weight:600;letter-spacing:var(--track-display);line-height:var(--lh-display)">Display</span></li>
+      <li><span class="step">28</span><span class="sample" style="font-size:var(--fs-28);font-weight:600;letter-spacing:var(--track-display);line-height:var(--lh-display)">Title</span></li>
+      <li><span class="step">22</span><span class="sample" style="font-size:var(--fs-22);font-weight:600">Headline</span></li>
+      <li><span class="step">17</span><span class="sample" style="font-size:var(--fs-17)">Body. Ask a question, get one sentence back.</span></li>
+      <li><span class="step">15</span><span class="sample" style="font-size:var(--fs-15)">Small body and labels in the app.</span></li>
+      <li><span class="step">13</span><span class="sample" style="font-size:var(--fs-13);color:var(--text-mid)">Caption. Sources, notes and fine print.</span></li>
+    </ul>
+    <div class="weights" aria-label="Weights">
+      <span>Regular</span>
+      <span>Medium</span>
+      <span>Semibold</span>
+      <span>Bold</span>
+    </div>
+  </section>
+
+  <section id="voice" aria-labelledby="voice-h">
+    <h2 id="voice-h">Voice</h2>
+    <p class="lede">Plain and short. Say what it does, then stop.</p>
+    <ul class="voice">
+      <li>Ask a question. Get one sentence back.</li>
+      <li>It says where the answer came from.</li>
+      <li>No accounts. No telemetry.</li>
+    </ul>
+  </section>
+
+  <section id="rules" aria-labelledby="rules-h">
+    <h2 id="rules-h">Do and don't</h2>
+    <div class="rules">
+      <div>
+        <h3>Do</h3>
+        <ul class="do">
+          <li>Use flat fills, one colour per shape.</li>
+          <li>Put black ink on yellow or cream.</li>
+          <li>Set every word in Nimble Sans.</li>
+          <li>Keep Flit and Fen whole.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Don't</h3>
+        <ul class="dont">
+          <li>Add gradients, shadows or glows.</li>
+          <li>Use emojis, in the product or the copy.</li>
+          <li>Use em dashes. A full stop does the job.</li>
+          <li>Reach for purple or teal.</li>
+          <li>Set anything in monospace or a serif.</li>
+          <li>Put words inside the app icon.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="downloads" aria-labelledby="dl-h">
+    <h2 id="dl-h">Downloads</h2>
+    <p class="lede">Files live in the brand folder of the repository.</p>
+    <ul class="dl">
+      <li><a href="https://raw.githubusercontent.com/nulljosh/nimble/main/brand/nimble-icon-1024.png">App icon <span>PNG, 1024 x 1024</span></a></li>
+      <li><a href="https://raw.githubusercontent.com/nulljosh/nimble/main/brand/wordmark.svg">Wordmark <span>SVG, outlined</span></a></li>
+      <li><a href="https://raw.githubusercontent.com/nulljosh/nimble/main/brand/flit.svg">Flit <span>SVG</span></a></li>
+      <li><a href="https://raw.githubusercontent.com/nulljosh/nimble/main/brand/fen.svg">Fen <span>SVG</span></a></li>
+      <li><a href="https://raw.githubusercontent.com/nulljosh/nimble/main/brand/github-social-1280x640.png">GitHub social image <span>PNG, 1280 x 640</span></a></li>
+      <li><a href="https://raw.githubusercontent.com/nulljosh/nimble/main/brand/og-1200x630.png">Link preview <span>PNG, 1200 x 630</span></a></li>
+      <li><a href="https://github.com/nulljosh/nimble/blob/main/brand/README.md">Brand notes and tokens <span>Markdown</span></a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>Nimble brand kit. <a href="/">Back to Nimble</a></p>
+</footer>
+
+<script>
+(function () {
+  var cs = getComputedStyle(document.documentElement);
+  document.querySelectorAll("[data-token]").forEach(function (el) {
+    var v = cs.getPropertyValue(el.getAttribute("data-token")).trim();
+    el.textContent = v || "not loaded";
+  });
+})();
+</script>
+</body>
+</html>

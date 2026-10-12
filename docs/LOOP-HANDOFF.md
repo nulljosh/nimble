@@ -6,6 +6,7 @@ Keep Nimble moving after 5.0.0 with one small, shippable slice at a time: fix wh
 
 ## Where things stand
 
+- 5.13.0 (2026-10-11): Brand kit at nimble.jaybulb.com/brand (logo, icon, Flit and Fen, tokens read live, type, voice, do and don't, downloads), brand/ folder at the repo root with the icon, wordmark, mascots, GitHub social image and link preview; README banner and og:image point at them.
 - 5.12.7 (2026-10-11): Landing phone frame filled: the Hamlet answer opens onto its Wikipedia sentence and the empty credit strip is gone, so no dead band under the sources line; buttons and inline controls at 44px tap targets, tighter hero-to-frame rhythm on phones, checked at 390 (iPhone UA) and 1440, no horizontal scroll.
 - 5.12.6 (2026-10-11): Landing demo shows a local Hamlet photo (docs/hamlet-16x9.jpg, 16:9 top-cropped, precached), the caption is plain Nimble Sans at the 13px token in sentence case, and the Deploy site check is confirmed.
 - 5.12.5 (2026-10-11): Landing A+ pass. Device greys, Flit fills and the theme colour moved onto tokens (zero hex outside tokens.css); the "who wrote hamlet" demo step shows its Hamlet and Prince Hamlet source line from scripted data, Show steps unfold on their own; CLAUDE.md and README version lines fixed.
