@@ -139,7 +139,8 @@ a:hover { text-decoration: underline; }
 }
 
 .btn {
-  display: inline-block;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px;
   padding: 9px 18px;
   font-family: var(--font);
   font-size: 0.95rem;
@@ -281,7 +282,7 @@ a:hover { text-decoration: underline; }
 .why p { margin-top: 8px; font-size: var(--fs-15); line-height: 1.35; }
 .why a { display: inline-block; margin-top: 6px; color: inherit; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
 .consent-actions { display: flex; gap: 8px; margin-top: 12px; }
-.consent-actions button { border: 1px solid var(--panel-line); background: none; color: var(--panel-text); border-radius: var(--radius); padding: 7px 13px; font: inherit; font-size: var(--fs-13); font-weight: 700; cursor: pointer; }
+.consent-actions button { min-height: 44px; border: 1px solid var(--panel-line); background: none; color: var(--panel-text); border-radius: var(--radius); padding: 7px 13px; font: inherit; font-size: var(--fs-13); font-weight: 700; cursor: pointer; }
 .consent-actions .consent-yes { border-color: transparent; background: var(--panel-gold); color: var(--black); }
 .mockup-result.swap { animation: result-in 500ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes result-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
@@ -319,6 +320,7 @@ a:hover { text-decoration: underline; }
   margin-bottom: 8px;
 }
 
+.mockup-credit:empty { display: none; }
 .mockup-credit {
   padding: 10px 16px;
   border-top: 1px solid var(--panel-line);
@@ -338,7 +340,7 @@ main > section:not(.hero) h2 {
   text-align: center;
   margin-bottom: 3rem;
 }
-@media (max-width: 600px) { main > section:not(.hero) { padding: var(--s5) 0; } .hero-copy { padding-top: var(--s5); } }
+@media (max-width: 600px) { main > section:not(.hero) { padding: var(--s5) 0; } .hero-copy { padding-top: var(--s5); } .hero { padding-bottom: var(--s4); } .hero .device { margin-top: var(--s3); } }
 
 .features-grid {
   display: grid;
@@ -660,7 +662,7 @@ footer {
 // Live demo: the same engine the app ships. The showcase runs first: a photo answer, math with steps, news, weather.
 var SHOWCASE=['who wrote hamlet','(3+4)*2','news','weather in Vancouver'];
 // Scripted showcase answers: the Wikipedia lines are written out, so the demo never waits on a lookup or asks for AI consent.
-var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy of Hamlet, Prince of Denmark, often shortened to Hamlet, is a tragedy written by William Shakespeare sometime between 1599 and 1601.',src:'Wikipedia',url:'https://en.wikipedia.org/wiki/Hamlet',image:{url:'hamlet-16x9.jpg',width:361,height:203},sources:[{name:'Hamlet',url:'https://en.wikipedia.org/wiki/Hamlet'},{name:'Prince Hamlet',url:'https://en.wikipedia.org/wiki/Prince_Hamlet'}]}};
+var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy of Hamlet, Prince of Denmark, often shortened to Hamlet, is a tragedy written by William Shakespeare sometime between 1599 and 1601.',src:'Wikipedia',url:'https://en.wikipedia.org/wiki/Hamlet',grounding:'It is Shakespeare\'s longest play.',showWhy:true,image:{url:'hamlet-16x9.jpg',width:361,height:203},sources:[{name:'Hamlet',url:'https://en.wikipedia.org/wiki/Hamlet'},{name:'Prince Hamlet',url:'https://en.wikipedia.org/wiki/Prince_Hamlet'}]}};
 (function(){
   var tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
   var names={iphone:'iPhone',android:'Android',mac:'Mac',windows:'Windows'}, dev=document.documentElement.dataset.device;
@@ -681,6 +683,8 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
     r.innerHTML=res.h;
     // Show steps unfold on their own so a visitor sees the working without tapping.
     var st=r.querySelector('details.steps'); if(st) setTimeout(function(){ st.open=true; }, 700);
+    // The showcase source text opens the same way, so the Hamlet frame reads down to its sources.
+    if(res.a&&res.a.showWhy){ var wy=r.querySelector('details.why'); if(wy) setTimeout(function(){ wy.open=true; }, 700); }
     c.textContent=res.credit;
     // Add "Open in app" link to the credit line when a query is shown
     if(q.value.trim()){
