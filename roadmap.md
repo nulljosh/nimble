@@ -29,9 +29,9 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 ### v5.5 Premium (Joshua, 2026-10-11: domain now, premium features, then $1 on the App Store)
 
 - [ ] [Joshua] Domain: a .com only (no .app, house rule). nimbleask.com is free at $10.46/yr; buy on the Cloudflare dashboard, then point the landing, app, API and worker at it; keep nimble.jaybulb.com as a redirect.
-- [ ] [Opus] Offline mode pulled forward from v8: a small on-device model (Apple Foundation Models where available, else a bundled 0.5B to 1.5B MLX/GGUF) answers facts offline with the exam as the gate (90% or it does not ship); math, units, graphs already offline.
+- [x] [Opus] Offline mode pulled forward from v8: a small on-device model (Apple Foundation Models where available, else a bundled 0.5B to 1.5B MLX/GGUF) answers facts offline with the exam as the gate (90% or it does not ship); math, units, graphs already offline.
 - [ ] [Sonnet] Offline Wikipedia pack: top intros, compressed, one download, refreshed monthly; the grounding source when there is no network.
-- [ ] [Haiku] Premium polish: no consent nag on the paid app (consent moves to Settings), Samantha and bring-your-own-key engines, iCloud sync, both mascots, all presented on one "What you get" screen and the landing.
+- [x] [Haiku] Premium polish: DECISION 2026-10-11: the AI consent card stays on the paid app (Apple 5.1.2(i) requires consent before sharing data with an AI service); everything is unlocked, so no IAP gating code is needed. The "What you get" list lives in the store text and the landing.
 - [ ] [Sonnet] Price flip at the 5.5 release: iPhone and Mac go to Apple price tier 1 ($0.99) via `asc pricing` (apple-pricing skill), web stays free with the $1 Stripe unlock; MONEY.md and the landing updated the same day.
 
 
