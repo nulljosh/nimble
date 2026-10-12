@@ -1,7 +1,7 @@
 /* devices.css: flat device frames for landing-page demos and screenshots.
    Canonical copy lives in nulljosh.github.io (served at jaybulb.com/devices.css);
    repos keep a local copy next to tokens.css, same as tokens.
-   Local copy (Nimble, 5.12.4): no soft shadows, a crisp 1px ring instead, and
+   Local copy (Nimble, 5.12.5): no soft shadows, a crisp 1px ring instead, and
    Nimble Sans through tokens.css.
 
    <div class="device device-iphone"><div class="device-screen"><img …></div></div>
@@ -26,7 +26,7 @@
   width: var(--device-w);
   padding: 3px;
   border-radius: var(--r);
-  background: #c9c7c3;
+  background: var(--device-frame);
   box-shadow: 0 0 0 1px var(--line);
 }
 .device-iphone .device-screen, .device-android .device-screen {
@@ -34,7 +34,7 @@
   border-radius: calc(var(--r) - 3px);
   aspect-ratio: 9 / 19.5;
   background: var(--black);
-  box-shadow: inset 0 0 0 1px #1c1c1e;
+  box-shadow: inset 0 0 0 1px var(--device-body);
 }
 /* Dynamic Island */
 .device-iphone .device-screen::before {
@@ -52,25 +52,25 @@
 }
 /* Buttons: action + volume on the left, power on the right */
 .device-iphone::before, .device-iphone::after, .device-android::before, .device-android::after {
-  content: ''; position: absolute; width: 3px; background: #8a8885;
+  content: ''; position: absolute; width: 3px; background: var(--device-button);
   border-radius: 2px 0 0 2px;
 }
 .device-iphone::before, .device-android::before {
   left: -3px; top: calc(var(--device-w) * 0.22); height: calc(var(--device-w) * 0.10);
   box-shadow:
-    0 calc(var(--device-w) * 0.16) 0 0 #8a8885,
-    0 calc(var(--device-w) * 0.30) 0 0 #8a8885;
+    0 calc(var(--device-w) * 0.16) 0 0 var(--device-button),
+    0 calc(var(--device-w) * 0.30) 0 0 var(--device-button);
 }
 .device-iphone::after, .device-android::after {
   right: -3px; top: calc(var(--device-w) * 0.30); height: calc(var(--device-w) * 0.20);
   border-radius: 0 2px 2px 0;
 }
 /* Android: no island, a punch-hole camera, squarer corners */
-.device-android { --r: calc(var(--device-w) * 0.10); background: #1c1c1e; }
+.device-android { --r: calc(var(--device-w) * 0.10); background: var(--device-body); }
 .device-android .device-screen::before {
   content: ''; position: absolute; z-index: 2; left: 50%; transform: translateX(-50%);
   top: calc(var(--device-w) * 0.03); width: calc(var(--device-w) * 0.045); height: calc(var(--device-w) * 0.045);
-  border-radius: 50%; background: var(--black); box-shadow: inset 0 0 0 1px #2a2a2a;
+  border-radius: 50%; background: var(--black); box-shadow: inset 0 0 0 1px var(--device-punch);
 }
 
 /* iPad: thin black bezel, no island, no buttons */
@@ -79,7 +79,7 @@
   width: var(--device-w);
   padding: 3px;
   border-radius: calc(var(--device-w) * 0.055);
-  background: #c9c7c3;
+  background: var(--device-frame);
   box-shadow: 0 0 0 1px var(--line);
 }
 .device-ipad .device-screen {
@@ -91,7 +91,7 @@
 /* Mac: a macOS window. Titlebar with traffic lights and a centred title. */
 .device-mac, .device-windows {
   --device-w: 560px;
-  --bar: #ececec; --bar-text: #3c3c43; --ring: rgba(0,0,0,.16);
+  --bar: var(--device-bar); --bar-text: var(--device-bar-text); --ring: rgba(0,0,0,.16);
   width: var(--device-w);
   padding-top: 38px;
   border-radius: 11px;
@@ -102,7 +102,7 @@
 .device-mac .device-screen, .device-windows .device-screen { border-radius: 0 0 10px 10px; background: var(--white); }
 .device-mac::before {
   content: ''; position: absolute; top: 13px; left: 14px; width: 12px; height: 12px; border-radius: 50%;
-  background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840;
+  background: var(--device-close); box-shadow: 20px 0 0 var(--device-minimise), 40px 0 0 var(--device-zoom);
 }
 .device-mac::after, .device-windows::after {
   content: attr(data-title); position: absolute; top: 0; left: 0; right: 0; height: 38px;
@@ -115,7 +115,7 @@
 .device-mac.has-chrome::before, .device-mac.has-chrome::after, .device-windows.has-chrome::after { display: none; }
 .device-mac.has-chrome .device-screen, .device-windows.has-chrome .device-screen { border-radius: 10px; }
 /* Windows: controls on the right, square corners */
-.device-windows { border-radius: 8px; --bar: #f3f3f3; }
+.device-windows { border-radius: 8px; --bar: var(--device-win-bar); }
 .device-windows .device-screen { border-radius: 0 0 7px 7px; }
 .device-windows::after { justify-content: flex-start; padding-left: 14px; }
 .device-windows::before {
@@ -124,11 +124,11 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .device-mac, .device-windows { --bar: #3a3a3c; --bar-text: #e5e5ea; --ring: rgba(255,255,255,.14); }
-  .device-mac .device-screen, .device-windows .device-screen { background: #1c1c1e; }
+  .device-mac, .device-windows { --bar: var(--device-bar-dark); --bar-text: var(--device-bar-text-dark); --ring: rgba(255,255,255,.14); }
+  .device-mac .device-screen, .device-windows .device-screen { background: var(--device-body); }
 }
-[data-theme="dark"] .device-mac, [data-theme="dark"] .device-windows { --bar: #3a3a3c; --bar-text: #e5e5ea; --ring: rgba(255,255,255,.14); }
-[data-theme="light"] .device-mac, [data-theme="light"] .device-windows { --bar: #ececec; --bar-text: #3c3c43; --ring: rgba(0,0,0,.16); }
+[data-theme="dark"] .device-mac, [data-theme="dark"] .device-windows { --bar: var(--device-bar-dark); --bar-text: var(--device-bar-text-dark); --ring: rgba(255,255,255,.14); }
+[data-theme="light"] .device-mac, [data-theme="light"] .device-windows { --bar: var(--device-bar); --bar-text: var(--device-bar-text); --ring: rgba(0,0,0,.16); }
 
 @media (max-width: 640px) {
   .device-mac, .device-windows, .device-ipad { --device-w: 100%; }

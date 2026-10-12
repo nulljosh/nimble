@@ -521,7 +521,7 @@ const searchHistory = {
 async function renderAnswer(query, opts){
   const esc=t=>String(t).replace(/</g,"&lt;");
   const T=(opts&&opts.t)||plain;
-  const a=await answer(query, opts); let h='<div class="mockup-label">'+T("Answer")+'</div>', credit='';
+  const a=(opts&&opts.scripted)||await answer(query, opts); let h='<div class="mockup-label">'+T("Answer")+'</div>', credit='';
   if(a.kind==="convert"){ h+='<div class="mockup-big num">'+a.to+' '+esc(a.toUnit)+'</div><p class="num">'+a.from+' '+esc(a.fromUnit)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="card"){
     // Same markup as convert; the whole card opens its source like a text answer does.
