@@ -411,6 +411,8 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
 
             is Answer.News -> NewsResult(answer, theme, client)
 
+            is Answer.Disagree -> DisagreeResult(answer, theme)
+
             is Answer.Text -> {
                 // Whole answer opens its source; AI answers have none, so fall back to a web search.
                 val uriHandler = LocalUriHandler.current

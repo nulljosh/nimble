@@ -278,9 +278,9 @@ final class AppState {
     /// Every answered question goes to history with its answer text, and on iOS to the widget too.
     /// Called only after `result` is set, so the answer is the current result's copy text.
     private func remember(_ text: String) {
-        history.add(text, answer: result.copyText)
+        history.add(text, answer: result.historyText)
         #if os(iOS)
-        if let answer = result.copyText {
+        if let answer = result.historyText {
             SharedAnswer.save(question: text, answer: answer)
             WidgetCenter.shared.reloadAllTimelines()
         }

@@ -102,5 +102,7 @@ fun historySnippet(answer: Answer): String? = when (answer) {
     is Answer.Math -> answer.value
     is Answer.Text -> answer.body
     is Answer.News -> answer.items.joinToString(" ") { it.sentence }
+    // A split keeps only its first answer.
+    is Answer.Disagree -> answer.alts.firstOrNull()?.answer
     else -> null
 }

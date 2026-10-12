@@ -19,7 +19,10 @@ final class QAWorkerStub: URLProtocol {
             client?.urlProtocol(self, didFailWithError: URLError(.badURL))
             return
         }
-        let body = #"{"answer":"UNKNOWN","aiError":"AiError: daily free allocation exceeded"}"#
+        // `-shotDisagree YES` answers with the split the Worker sends when its two models clash (STUBBED reply).
+        let body = UserDefaults.standard.bool(forKey: "shotDisagree")
+            ? #"{"answer":"Kamloops, British Columbia","source":"Gemma + Qwen","disagree":true,"alts":[{"model":"Qwen3 30B","answer":"Kamloops, British Columbia"},{"model":"Gemma 4 26B","answer":"Nelson, British Columbia"}],"refs":[]}"#
+            : #"{"answer":"UNKNOWN","aiError":"AiError: daily free allocation exceeded"}"#
         let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: ["Content-Type": "application/json"])!
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: Data(body.utf8))

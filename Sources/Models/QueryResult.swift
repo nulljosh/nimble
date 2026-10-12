@@ -44,6 +44,12 @@ enum AnswerSources {
     }
 }
 
+/// One answer from a split: the answer text and the model that gave it, as the Worker names it ("Qwen3 30B").
+struct DisputedAnswer: Equatable {
+    let model: String
+    let answer: String
+}
+
 /// One team in a game on the sports card. score is "" before kickoff; winner is ESPN's own flag.
 struct SportsTeam: Equatable {
     let name: String
@@ -172,6 +178,9 @@ enum QueryResult: Equatable {
     case market(title: String, big: String?, change: String?, source: String, url: String, asOf: Freshness? = nil)
     /// Scores from ESPN's scoreboard. Words carry the winner and the status; a missing game or a failed request is said in words.
     case sports(SportsCard)
+    /// The models split and no source settled it: both answers, each with the model that gave it, and no pick.
+    /// sources is the linked row under the answers (up to two); asOf is the freshness line.
+    case disagree(alts: [DisputedAnswer], sources: [AnswerSource] = [], asOf: Freshness? = nil)
 
     static func == (lhs: QueryResult, rhs: QueryResult) -> Bool {
         switch (lhs, rhs) {
@@ -185,6 +194,7 @@ enum QueryResult: Equatable {
         case let (.news(a, _, _), .news(b, _, _)): return a == b
         case let (.market(a, b, c, d, e, _), .market(f, g, h, i, j, _)): return (a, b, c, d, e) == (f, g, h, i, j)
         case let (.sports(a), .sports(b)): return (a.title, a.league, a.games, a.outcome, a.url) == (b.title, b.league, b.games, b.outcome, b.url)
+        case let (.disagree(a, _, _), .disagree(b, _, _)): return a == b
         default: return false
         }
     }
@@ -206,8 +216,16 @@ enum QueryResult: Equatable {
         case .news(let items, _, _): return items.map { "\($0.sentence) (\($0.outlet))" }.joined(separator: "\n")
         // A score is copied line by line; a missing game or a failed request has nothing to copy.
         case .sports(let card): return card.games.isEmpty ? nil : card.games.map { "\($0.line), \($0.status)" }.joined(separator: "\n")
+        // Both answers, each with its model: "A (Qwen3 30B) / B (Gemma 4 26B)". No pick between them.
+        case .disagree(let alts, _, _): return alts.map { "\($0.answer) (\($0.model))" }.joined(separator: " / ")
         case .none, .loading: return nil
         }
+    }
+
+    /// What History and the widget keep: the copy text, except a split keeps only its first answer.
+    var historyText: String? {
+        if case .disagree(let alts, _, _) = self { return alts.first?.answer }
+        return copyText
     }
 
     /// What the share image says and who gets the credit; nil when there is no answer to share.
@@ -220,6 +238,7 @@ enum QueryResult: Equatable {
         case .news(let items, let source, _): return items.first.map { ($0.sentence, source) }
         case .text(_, _, let source, _, _, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _, _), .market(_, _, _, let source, _, _): return (text, source)
         case .sports: return (text, SportsCard.source)
+        case .disagree(let alts, _, _): return (text, alts.map(\.model).joined(separator: " / "))
         }
     }
 }

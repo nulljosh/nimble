@@ -18,7 +18,8 @@ struct WhatsNewSheet: View {
         Color.clear
             .onAppear {
                 guard !CommandLine.arguments.contains(where: { $0.hasPrefix("UITEST_") }) else { return }
-                isPresented = seenVersion != whatsNewVersion
+                // QA: `-shotDisagree YES` skips the overlay so the shot shows the answer.
+                isPresented = seenVersion != whatsNewVersion && !UserDefaults.standard.bool(forKey: "shotDisagree")
             }
             .sheet(isPresented: $isPresented) {
                 VStack(alignment: .leading, spacing: 20) {

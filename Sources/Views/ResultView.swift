@@ -78,6 +78,46 @@ struct ResultView: View {
                 }
             }
 
+        case .disagree(let alts, let sources, let asOf):
+            // The web's card: the title, both answers with their model quiet under each, and no photo or pick.
+            AnswerCard(shareText: state.result.copyText, freshness: asOf?.label(), eyebrow: String(localized: "Sources disagree")) {
+                VStack(alignment: .leading, spacing: 16) {
+                    ForEach(Array(alts.enumerated()), id: \.offset) { _, alt in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(alt.answer)
+                                .font(.nimble(22, .regular, relativeTo: .title2))
+                                .foregroundStyle(Color.text)
+                                .lineSpacing(4)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .textSelection(.enabled)
+                            Text(alt.model)
+                                .font(.nimbleCaption)
+                                .foregroundStyle(Color.soft)
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                    if !sources.isEmpty {
+                        HStack(spacing: 8) {
+                            ForEach(Array(sources.enumerated()), id: \.offset) { index, item in
+                                if index > 0 { Text("\u{00B7}").foregroundStyle(Color.soft) }
+                                if let u = URL(string: item.url) {
+                                    Button { openURL(u) } label: {
+                                        Text(item.name)
+                                            .font(.nimbleCaptionMedium)
+                                            .foregroundStyle(Color.bulbDeep)
+                                            .underline()
+                                    }
+                                    .buttonStyle(.plain)
+                                    .minimumTapTarget()
+                                }
+                            }
+                        }
+                    }
+                }
+            } footer: {
+                EmptyView()
+            }
+
         case .news(let items, let source, let asOf):
             AnswerCard(shareText: state.result.copyText, freshness: asOf?.label()) {
                 VStack(alignment: .leading, spacing: 16) {

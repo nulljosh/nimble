@@ -52,7 +52,11 @@ struct SearchView: View {
             .onAppear {
                 // Screenshots: `-shot "5 miles to km"` launches straight onto an answer.
                 // A shot launch leaves the field unfocused, so no keyboard or "slide to type" overlay lands in the frame.
-                if let q = UserDefaults.standard.string(forKey: "shot") { state.queryText = q; state.performQuery(); return }
+                if let q = UserDefaults.standard.string(forKey: "shot") {
+                    // `-shotDisagree YES` (with -shotStub) also answers the consent prompt, so the shot shows the answer.
+                    if UserDefaults.standard.bool(forKey: "shotDisagree") { state.aiConsent = true }
+                    state.queryText = q; state.performQuery(); return
+                }
                 guard whatsNewSeenVersion == whatsNewVersion else { return }
                 isInputFocused = true
             }

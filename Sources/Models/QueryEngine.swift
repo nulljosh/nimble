@@ -97,6 +97,21 @@ struct ProxyReply: Decodable {
     let topicUrl: String?
     /// Why the AI gave no answer, when an AI call failed (quota, capacity, outage). Set only on UNKNOWN from a failure.
     let aiError: String?
+    /// Set only when the two house models clash and no source settles it. Optional: the live Worker does not send it yet.
+    let disagree: Bool?
+    /// The two answers that clash, each with its model. Lossy per element (see ProxyAlt), so one bad alt cannot drop the reply.
+    let alts: [ProxyAlt]?
+
+    /// The answers to show as a split, or nil. Same rule as docs/engine.js: `disagree` is true and two alternatives
+    /// each name a model and carry a non-empty answer.
+    var disputed: [DisputedAnswer]? {
+        guard disagree == true, let alts else { return nil }
+        let usable = alts.compactMap { alt -> DisputedAnswer? in
+            guard let model = alt.model, let answer = alt.answer?.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty else { return nil }
+            return DisputedAnswer(model: model, answer: answer)
+        }
+        return usable.count >= 2 ? usable : nil
+    }
 
     /// The named page, when the proxy sent a Wikipedia link for it, with its intro from `refs` when there is one.
     var namedTopic: (title: String, url: String, grounding: String?)? {
@@ -105,6 +120,27 @@ struct ProxyReply: Decodable {
         return (title, url, refs?.first { $0.url == url }?.extract?.nonEmpty)
     }
 }
+
+/// One alternative in a split. Each field is read on its own, so a malformed field leaves the rest of the reply intact.
+struct ProxyAlt: Decodable {
+    let model: String?
+    let answer: String?
+
+    private enum Keys: String, CodingKey { case model, answer }
+
+    init(from decoder: Decoder) throws {
+        let c = try? decoder.container(keyedBy: Keys.self)
+        model = c.flatMap { try? $0.decodeIfPresent(String.self, forKey: .model) }
+        answer = c.flatMap { try? $0.decodeIfPresent(String.self, forKey: .answer) }
+    }
+}
+
+#if DEBUG
+extension QueryEngine {
+    /// STUBBED: the split the Worker sends when its two models clash. Used only by the `-shotDisagree` QA launch.
+    static let qaSplitReply = #"{"answer":"Kamloops, British Columbia","source":"Gemma + Qwen","disagree":true,"alts":[{"model":"Qwen3 30B","answer":"Kamloops, British Columbia"},{"model":"Gemma 4 26B","answer":"Nelson, British Columbia"}],"refs":[]}"#
+}
+#endif
 
 struct ProxyRef: Decodable {
     let title: String?
@@ -490,6 +526,13 @@ final class QueryEngine: Sendable {
     // General answer engine: one Gemma call for any factual question. Replaces the
     // old per-shape Wikidata handlers (which dumped every historical officeholder).
     private func queryLLM(_ input: String, session: URLSession, ai: AIConfig, turns: TurnBuffer, localTimeout: TimeInterval = 40, note: AIFailureNote? = nil) async -> QueryResult? {
+        #if DEBUG
+        // QA only: `-shotDisagree YES` answers with the STUBBED split reply below, with no network call, so the card can be shot.
+        if UserDefaults.standard.bool(forKey: "shotDisagree"), ai.engine == .nimble,
+           let reply = try? JSONDecoder().decode(ProxyReply.self, from: Data(Self.qaSplitReply.utf8)), let split = reply.disputed {
+            return .disagree(alts: split, sources: [], asOf: Freshness(date: Date(), isDay: false))
+        }
+        #endif
         // On device never reaches the proxy below: a nil answer means no answer, and the question stays here.
         if ai.engine == .onDevice {
             guard let answer = await OnDeviceAnswers.answer(input, turns: turns) else { return nil }
@@ -511,6 +554,14 @@ final class QueryEngine: Sendable {
         do {
             let (data, response) = try await session.data(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return nil }
+            // The house models split and no source settled it: both answers, no pick. Only the free proxy sends this.
+            if ai.engine == .nimble, let reply = try? JSONDecoder().decode(ProxyReply.self, from: data), let split = reply.disputed {
+                let row = (reply.refs ?? []).compactMap { r -> AnswerSource? in
+                    guard let url = r.url, url.lowercased().hasPrefix("https://"), let title = r.title?.nonEmpty else { return nil }
+                    return AnswerSource(name: title, url: url)
+                }
+                return .disagree(alts: split, sources: Array(row.prefix(2)), asOf: Freshness(date: Date(), isDay: false))
+            }
             guard let (answer, source) = ai.parse(data) else {
                 // UNKNOWN from the proxy: keep the reason only when the worker says an AI call failed.
                 note?.aiError = (try? JSONDecoder().decode(ProxyReply.self, from: data))?.aiError
@@ -792,7 +843,14 @@ final class QueryEngine: Sendable {
         // The answer's Wikipedia topic fills a missing picture and the "Why this answer" text. Only when the
         // user allowed an AI (useLLM) and nothing stayed on device; a "no" answer is DDG and Wikipedia only.
         let topicOK = useLLM && !localOnly
-        if let llmResult = await llm {
+        var llmResult = await llm
+        if let split = llmResult, case .disagree(let alts, _, _) = split {
+            // DDG's sourced answer that backs one of the two settles it, as on the web: the AI answer is dropped and the normal path runs.
+            let backing = Self.settlingText(await ddg)
+            if !alts.contains(where: { AnswerSources.agrees($0.answer, backing) }) { return split }
+            llmResult = nil
+        }
+        if let llmResult {
             // A model's number is a guess with no source. If DDG has a sourced answer
             // for a numeric question, prefer it; otherwise the one-liner stands.
             if case .text(_, let body, _, _, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
@@ -807,6 +865,12 @@ final class QueryEngine: Sendable {
 
         let encoded = input.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? input
         return .error("No instant answer found.", searchURL: "https://duckduckgo.com/?q=\(encoded)")
+    }
+
+    /// The text a sourced answer is checked against: its grounding when it has one, else its sentence. Empty for no answer.
+    static func settlingText(_ result: QueryResult?) -> String {
+        guard case .text(_, let body, _, _, _, let grounding, _, _, _)? = result else { return "" }
+        return grounding?.nonEmpty ?? body
     }
 
     /// The quiet line under a Wikipedia fallback when the AI's call failed. Nil when there is nothing to say.

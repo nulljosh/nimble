@@ -18,6 +18,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlin.math.ceil
 
 sealed class Answer {
     data class Math(val value: String) : Answer()
@@ -63,7 +67,15 @@ sealed class Answer {
         val asOf: Freshness?,
     ) : Answer()
     data class Miss(val message: String, val searchUrl: String) : Answer()
+    /** The models split and no source settled it: both answers, each with its model. No pick. */
+    data class Disagree(val alts: List<DisputedAnswer>, val sources: List<DisputeSource> = emptyList()) : Answer()
 }
+
+/** One answer from a split: the text and the model that gave it, as the Worker names it ("Qwen3 30B"). */
+data class DisputedAnswer(val model: String, val answer: String)
+
+/** A linked source under a split: the name shown and the page it opens. */
+data class DisputeSource(val name: String, val url: String)
 
 /** One story: the sentence, the outlet, the link, and a thumbnail when the feed has one (https only). */
 data class NewsItem(val sentence: String, val outlet: String, val url: String, val imageUrl: String? = null)
@@ -116,9 +128,17 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
         // AI answers have no source page; give them a web search so every answer opens somewhere.
         // An AI answer with no proxy photo takes the picture and intro of the Wikipedia topic it names (TopicPhoto).
         val aiFailures = mutableListOf<String>()
-        gemma(input, aiFailures)?.let { ai ->
-            val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}")
-            return TopicPhoto.withTopic(answer, input) { fetchText(it) }
+        when (val ai = gemma(input, aiFailures)) {
+            is Answer.Text -> {
+                val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}")
+                return TopicPhoto.withTopic(answer, input) { fetchText(it) }
+            }
+            // The split stands unless DDG's sourced answer backs one of the two; then the normal path below runs (the web's rule).
+            is Answer.Disagree -> {
+                val backing = ddg(QueryEngine.preprocess(input).first)?.let { it.grounding ?: it.body }.orEmpty()
+                if (ai.alts.none { backsAnswer(it.answer, backing) }) return ai
+            }
+            else -> Unit
         }
 
         val (ddgQuery, wikiQuery) = QueryEngine.preprocess(input)
@@ -139,13 +159,13 @@ class AnswerClient(private val http: HttpClient = defaultClient()) {
     @Serializable
     private data class ProxyBody(val q: String)
 
-    private suspend fun gemma(input: String, aiFailures: MutableList<String>): Answer.Text? = runCatchingNull {
+    private suspend fun gemma(input: String, aiFailures: MutableList<String>): Answer? = runCatchingNull {
         val res = http.post(PROXY) {
             contentType(ContentType.Application.Json)
             setBody(ProxyBody(input))
         }
         val body = res.bodyAsText()
-        proxyAnswer(body) ?: run {
+        proxyDisputed(body) ?: proxyAnswer(body) ?: run {
             // UNKNOWN: keep the worker's reason only when its AI call failed.
             proxyAiError(body)?.let { aiFailures.add(it) }
             null
@@ -322,7 +342,54 @@ private data class ProxyReply(
     val topicUrl: String? = null,
     val refs: List<ProxyRef>? = null,
     val aiError: String? = null,
+    /** Set only when the two house models clash and no source settles it. The live Worker does not send it yet. */
+    val disagree: Boolean? = null,
+    /** Read element by element in [proxyDisputed], so one malformed alternative cannot drop the reply. */
+    val alts: List<JsonElement>? = null,
 )
+
+/**
+ * The split reply: `disagree` is true and two alternatives each name a model and carry a non-empty answer.
+ * Anything else returns null and the reply reads as it always has. Same rule as docs/engine.js and Swift's ProxyReply.disputed.
+ */
+internal fun proxyDisputed(body: String): Answer.Disagree? {
+    val d = runCatching { rich.decodeFromString<ProxyReply>(body) }.getOrNull() ?: return null
+    if (d.disagree != true) return null
+    val alts = d.alts.orEmpty().mapNotNull { el ->
+        val o = el as? JsonObject ?: return@mapNotNull null
+        val model = (o["model"] as? JsonPrimitive)?.takeIf { it.isString }?.content ?: return@mapNotNull null
+        val answer = (o["answer"] as? JsonPrimitive)?.takeIf { it.isString }?.content?.trim()?.takeIf { it.isNotEmpty() }
+            ?: return@mapNotNull null
+        DisputedAnswer(model, answer)
+    }
+    if (alts.size < 2) return null
+    val sources = d.refs.orEmpty().mapNotNull { r ->
+        val url = r.url?.takeIf { it.lowercase().startsWith("https://") } ?: return@mapNotNull null
+        val title = r.title?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null
+        DisputeSource(title, url)
+    }.take(2)
+    return Answer.Disagree(alts, sources)
+}
+
+private val glueWords = setOf(
+    "that", "this", "with", "from", "which", "were", "have", "they", "their", "also",
+    "been", "into", "about", "after", "there", "these", "those", "when", "where",
+    "while", "would", "could", "should", "will",
+)
+
+/** Words of four letters or more, lowercased, glue words dropped. */
+private fun keyWords(s: String): Set<String> =
+    Regex("[a-z]+").findAll(s.lowercase()).map { it.value }.filter { it.length >= 4 && it !in glueWords }.toSet()
+
+/** Most content words of [body] must appear in [text], and every number in [body] too. Same rule as AnswerSources.agrees in Swift. */
+internal fun backsAnswer(body: String, text: String): Boolean {
+    val want = keyWords(body)
+    if (want.isEmpty() || text.isEmpty()) return false
+    val have = keyWords(text)
+    val hits = want.count { it in have }
+    val nums = Regex("[0-9]+").findAll(body).map { it.value }.toList()
+    return hits >= ceil(want.size * 0.6).toInt() && nums.all { text.contains(it) }
+}
 
 @Serializable
 private data class ProxyRef(val title: String? = null, val url: String? = null, val extract: String? = null)
