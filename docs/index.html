@@ -171,14 +171,28 @@ a:hover { text-decoration: underline; }
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-7);
 }
-@media (min-width: 1024px) { .install-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Three equal columns from 720px (at 168px, 600px columns wrap "Download for Windows" onto two lines); below that the cards stack. */
+@media (min-width: 720px) { .install-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-5); } }
+@media (min-width: 1024px) { .install-grid { column-gap: var(--space-7); } }
 /* Equal heights: the copy grows, so every card's actions sit on the same bottom line. */
 .install-card { display: flex; flex-direction: column; }
 .install-card h3 { font-size: var(--fs-17); letter-spacing: -0.02em; line-height: var(--lh-md); margin-bottom: var(--space-2); }
 .install-card p { flex: 1; color: var(--mid); margin-bottom: var(--s3); }
-/* One action style for every install path: full-width solid button, 44px tall. */
+/* Phones: one full-width solid button per path, stacked, 44px tall. */
 .install-links { display: flex; flex-direction: column; gap: var(--space-3); }
 .install-links .btn { width: 100%; }
+/* 600 to 719px: stacked cards, each button sized to its label (44px tall, capped at 280px). */
+@media (min-width: 600px) and (max-width: 719px) {
+  .install-links { align-items: flex-start; }
+  .install-links .btn { width: auto; max-width: 280px; }
+}
+/* 720px and up: three columns, each button capped at 280px; the actions block is two rows tall so the primary buttons share one top line. */
+@media (min-width: 720px) {
+  .install-links { min-height: calc(2 * 44px + var(--space-3)); }
+  .install-links .btn { max-width: 280px; }
+}
+/* Secondary action: a quiet underlined text link that still has a 44px tap height. */
+.install-links .btn-quiet { width: auto; padding: 0; justify-content: flex-start; background: none; color: var(--dark); text-decoration: underline; }
 
 /* Mockup, the Mac app. Colours are taken off the real iOS screenshot below
    so the two read as one product; the old light-gold panel looked like a
@@ -357,7 +371,9 @@ main > section:not(.hero) h2 {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-7);
 }
-@media (min-width: 1024px) { .features-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+/* Three equal columns from 768px; below that the features stack in one column. */
+@media (min-width: 768px) { .features-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-5); } }
+@media (min-width: 1024px) { .features-grid { column-gap: var(--space-7); } }
 
 .feature h3 {
   font-size: var(--fs-17);
@@ -531,7 +547,7 @@ footer {
         <p>Native SwiftUI, on the App Store. On the Mac it lives in the menu bar, one keystroke from anywhere.</p>
         <div class="install-links">
           <a href="https://apps.apple.com/app/nimble-answers/id6807858746" class="btn btn-dark">App Store</a>
-          <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-dark" data-asset="macOS.zip">Direct download</a>
+          <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-quiet" data-asset="macOS.zip">Direct download</a>
         </div>
       </div>
       <div class="install-card">
