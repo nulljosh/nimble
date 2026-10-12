@@ -12,6 +12,10 @@ struct NimbleApp: App {
                 .environment(appState)
                 .background(VisualEffectView(material: .hudWindow, blendingMode: .behindWindow))
                 .onAppear {
+                    // Screenshots: `-shotAppearance light|dark` pins this process only, never the system setting.
+                    if let mode = UserDefaults.standard.string(forKey: "shotAppearance") {
+                        NSApp.appearance = NSAppearance(named: mode == "light" ? .aqua : .darkAqua)
+                    }
                     configureWindow()
                     GlobalHotkey.register { GlobalHotkey.toggleNimble { showMain() } }
                 }

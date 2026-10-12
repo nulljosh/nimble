@@ -150,7 +150,8 @@ struct TextAnswerView: View {
     /// The picture above the card; nil keeps the plain layout.
     let photo: AnswerPhoto?
     let shareText: String?
-    @State private var showWhy = false
+    // Screenshots: `-shotWhy YES` opens the "Why this answer" block on launch.
+    @State private var showWhy = UserDefaults.standard.bool(forKey: "shotWhy")
 
     /// The grounding text, only when it says more than the sentence did.
     private var whyText: String? {
