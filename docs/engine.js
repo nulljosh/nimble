@@ -868,6 +868,43 @@ async function news(query){
   return items.length ? {kind:"news", items, src:[...new Set(items.map(i=>i.outlet))].join(", "), asOf:new Date().toISOString()} : null;
 }
 
+// --- offline pack lookup (docs/pack/wikipedia-top-v1.json.gz, held in IndexedDB by the page) ---
+// Plain on purpose: title or alias match wins, else a keyword score over title, description and extract.
+// A hit needs a title or alias word and a score of at least PACK_MIN. Otherwise: not in the pack. Never a guess.
+const PACK_MIN = 3;
+const PACK_STOP = new Set("a an and are as at be by did do does for from how i in is it its of on or that the to was were what when where which who whom whose why with".split(" "));
+function packTokens(s){
+  return String(s||"").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g," ").trim()
+    .split(" ").filter(Boolean);  // exact words: stemming turned "Frances" into "france"
+}
+function packSearch(query, pack){
+  if(!pack || !Array.isArray(pack.entries)) return null;
+  const want = new Set(packTokens(query).filter(w => !PACK_STOP.has(w)));
+  if(!want.size) return null;
+  let best = null;
+  pack.entries.forEach((e, i) => {
+    const title = new Set(packTokens(e.t).concat((e.a||[]).flatMap(packTokens)));
+    const desc = new Set(packTokens(e.d)), text = new Set(packTokens(e.e));
+    let score = 0, named = false;
+    for(const w of want){
+      if(title.has(w)){ score += 3; named = true; }
+      else if(desc.has(w)) score += 2;
+      else if(text.has(w)) score += 1;
+    }
+    // Ties go to the shorter title (the plainer article), then to the more-viewed entry (earlier in the pack).
+    const len = packTokens(e.t).length;
+    if(named && score >= PACK_MIN && (!best || score > best.score || (score === best.score && len < best.len))) best = {entry:e, score, index:i, len};
+  });
+  return best;
+}
+// The answer card for a pack hit: the entry's first sentences, its article link, and the pack's build date.
+function packAnswer(query, pack){
+  const hit = packSearch(query, pack);
+  if(!hit) return null;
+  const e = hit.entry;
+  return {kind:"pack", title:e.t, text:e.e, url:e.u, asOf:pack.builtAt||"", src:"Offline pack · Wikipedia (CC BY-SA)"};
+}
+
 // First non-null wins, in order. Sources are functions so a throw in one never kills the chain.
 async function firstOf(query, fns){
   for(const fn of fns){ const r = await fn(query).catch(()=>null); if(r) return r; }
@@ -883,7 +920,8 @@ async function answer(query, opts={}){
   if(m !== null) return {kind:"math", value:m};
   const ge = graphExpr(query), svg = ge && graph(ge);
   if(svg) return {kind:"graph", expr:ge, svg};
-  if(typeof navigator!=="undefined" && navigator.onLine===false) return {kind:"offline"};
+  // opts.pack: the downloaded offline pack, when the page has one. Offline it is the only answer source left.
+  if(typeof navigator!=="undefined" && navigator.onLine===false) return opts.pack ? (packAnswer(query, opts.pack) || {kind:"pack-miss"}) : {kind:"offline"};
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
   if(cur) return cur;
@@ -898,7 +936,7 @@ async function answer(query, opts={}){
   if(consent===null) return {kind:"consent", recipient:aiRecipient()};
   if(consent==="no"){
     const hit = labelIfGeneric(await firstOf(query, [ddg, wiki]), query);
-    return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit])} : {kind:"none"};
+    return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit])} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
   }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const aiNote = {};
@@ -926,7 +964,8 @@ async function answer(query, opts={}){
   // The proxy's Wikipedia pages fill the second link (web shows at most two): the first ones that are not DDG's own article.
   const wikiRefs = (ai?.refs || []).filter(r => !dd || norm(r.url) !== norm(dd.url)).filter(r => onTopic(r.title, query, hit && hit.body)).slice(0,2).map(r => ({src:r.title, url:r.url, grounding:r.grounding}));
   // The worker's aiError rides on the fallback only when the AI call failed and gave no answer.
-  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2), ...(!ai && aiNote.aiError ? {aiError:aiNote.aiError} : {})} : {kind:"none"};
+  // Every online source came up empty: the offline pack, when there is one, answers instead of "none".
+  return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2), ...(!ai && aiNote.aiError ? {aiError:aiNote.aiError} : {})} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
 }
 
 // The consent card, same words as the native prompt. Pages wire the buttons by data-consent.
@@ -1050,6 +1089,12 @@ async function renderAnswer(query, opts){
   }
   else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
   else if(a.kind==="offline"){ h+="<p>"+T("You're offline. Math, units and graphs still work.")+"</p>"; }
+  else if(a.kind==="pack-miss"){ h+="<p>"+T("Not in the offline pack. Math, units and graphs still work offline.")+"</p>"; }
+  else if(a.kind==="pack"){
+    // Offline pack hit: the entry's first sentences, credited to Wikipedia with its article link and the pack's build date.
+    h+='<p>'+esc(a.text)+'</p>'+(a.asOf?'<p class="as-of num">'+esc(T("as of {t}",{t:a.asOf}))+'</p>':'');
+    credit='<a href="'+esc(a.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(T("Offline pack \u00B7 Wikipedia (CC BY-SA)"))+'</a>';
+  }
   else if(a.kind==="text"){
     // Click through to the source; AI answers have none, so fall back to a web search.
     const href=a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query);
@@ -1090,6 +1135,7 @@ function shareText(a){
     case "card": return a.big+(a.unit?(a.unit[0]==="\u00B0"?"":" ")+a.unit:"")+(a.sub?", "+a.sub:"");
     case "market": return a.unavailable ? null : a.title+" "+a.big+(a.change?", "+a.change:"");
     case "text": return a.body ? first(a.body) : null;
+    case "pack": return a.text ? first(a.text) : null;
     case "news": return a.items[0] ? a.items[0].sentence : null;
     default: return null;
   }
@@ -1166,4 +1212,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={packSearch,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};

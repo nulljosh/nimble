@@ -105,5 +105,12 @@
   "Ask again": "Reposer la question",
   "No questions yet.": "Aucune question pour l'instant.",
   "Select all": "Tout sélectionner",
-  "Menu": "Menu"
+  "Menu": "Menu",
+  "Download offline answers": "Télécharger les réponses hors ligne",
+  "Download offline answers (about {n} MB)": "Télécharger les réponses hors ligne (environ {n} Mo)",
+  "Downloading offline answers…": "Téléchargement des réponses hors ligne…",
+  "Remove offline pack": "Supprimer le pack hors ligne",
+  "Could not download the offline pack. Try again on a connection.": "Impossible de télécharger le pack hors ligne. Réessayez avec une connexion.",
+  "Offline pack · Wikipedia (CC BY-SA)": "Pack hors ligne · Wikipédia (CC BY-SA)",
+  "Not in the offline pack. Math, units and graphs still work offline.": "Absent du pack hors ligne. Les calculs, unités et graphiques marchent toujours hors ligne."
 }

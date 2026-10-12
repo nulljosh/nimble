@@ -30,6 +30,8 @@ a { color: inherit; }
 .brand img { width: 30px; height: 30px; border-radius: var(--radius-sm); }
 .top nav a, .top nav button { display: flex; align-items: center; min-height: var(--tap); padding: 0; border: 0; background: none; font: inherit; font-size: var(--fs-15); color: var(--text-mid); text-decoration: none; cursor: pointer; }
 .top nav a:hover, .top nav button:hover { color: var(--text); }
+/* The offline pack buttons are long labels; the header keeps every tap target at 44px or more. */
+.top nav #ai, .top nav #mascot, .top nav #pack-get, .top nav #pack-drop { flex: none; white-space: nowrap; }
 .menu-btn { display: grid; place-items: center; flex: none; width: var(--tap); height: var(--tap); padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--text); cursor: pointer; }
 .menu-btn:hover { color: var(--yellow-deep); }
 .menu-btn svg { width: 20px; height: 20px; }
@@ -47,7 +49,7 @@ a { color: inherit; }
 .top.open ~ .scrim { display: block; }
 @media (min-width: 640px) {
   .menu-btn { display: none; }
-  .top nav { display: flex; position: static; flex-direction: row; align-items: center; gap: var(--space-4); margin-left: auto; padding: 0; background: none; border: 0; border-radius: 0; }
+  .top nav { display: flex; position: static; flex-direction: row; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: var(--space-2) var(--space-4); margin-left: auto; padding: 0; background: none; border: 0; border-radius: 0; }
   .top nav > * { width: auto; min-height: var(--tap); padding: 0; }
   .top nav > * + * { border-top: 0; }
   .top.open { z-index: auto; background: none; }
@@ -244,7 +246,7 @@ form { position: relative; }
 <header class="top" id="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
   <button type="button" class="menu-btn" id="menu-btn" aria-controls="nav" aria-expanded="false" aria-label="Menu" data-i18n-aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
-  <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
+  <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><button type="button" id="pack-get" data-i18n="Download offline answers">Download offline answers</button><button type="button" id="pack-drop" hidden data-i18n="Remove offline pack">Remove offline pack</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
 <div class="scrim" id="scrim" aria-hidden="true"></div>
 <main>
@@ -333,7 +335,8 @@ var T=I18N.t;
     r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><div class="thinking">'+(mascot()==='fen'?FEN:FLIT)+'<p>'+T('Thinking…')+'</p></div>';
     // Shareable: /app?q=... opens straight onto the answer.
     history.replaceState(null,'','?q='+encodeURIComponent(query));
-    var res=await renderAnswer(query,{t:T});
+    await packReady;
+    var res=await renderAnswer(query,{t:T, pack:OFFLINE_PACK});
     if(q.value.trim()!==query) return;  // a newer question already went out
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
     last={q:query, a:res.a};
@@ -342,7 +345,7 @@ var T=I18N.t;
     newBtn.hidden=false;
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
     // The saved answer is the first 280 characters of the answer's text, on this device only.
-    if(['consent','none','offline'].indexOf(res.kind)<0){ var snip=shareText(res.a); hist.add(query, typeof snip==='string'?snip:null); paintRecent(); }
+    if(['consent','none','offline','pack-miss'].indexOf(res.kind)<0){ var snip=shareText(res.a); hist.add(query, typeof snip==='string'?snip:null); paintRecent(); }
   }
   // Share sheet with the PNG where the browser can, a download of nimble-answer.png where it can't.
   async function shareAnswer(){
@@ -435,6 +438,49 @@ var T=I18N.t;
     last=null; q.value=''; r.innerHTML=''; r.hidden=true; newBtn.hidden=true; paintFlit();
     history.replaceState(null,'',location.pathname); q.focus();
   });
+  // Offline pack: an explicit download, kept in IndexedDB (never localStorage). Nothing fetches it on its own.
+  // Every step is wrapped: if storage or the download fails, the page simply answers as it did before.
+  var PACK_URL='pack/wikipedia-top-v1.json.gz', PACK_INDEX='pack/index.json', PACK_KEY='wikipedia-top-v1';
+  var OFFLINE_PACK=null, packGetBtn=document.getElementById('pack-get'), packDropBtn=document.getElementById('pack-drop'), packBytes=0, packBusy=false;
+  function packIO(mode, fn){
+    return new Promise(function(resolve,reject){
+      var rq=indexedDB.open('nimble-offline',1);
+      rq.onupgradeneeded=function(){ rq.result.createObjectStore('packs'); };
+      rq.onerror=function(){ reject(rq.error); };
+      rq.onsuccess=function(){
+        var db=rq.result, tx=db.transaction('packs',mode), req=fn(tx.objectStore('packs'));
+        tx.oncomplete=function(){ db.close(); resolve(req.result); };
+        tx.onerror=function(){ db.close(); reject(tx.error); };
+      };
+    });
+  }
+  var packReady=packIO('readonly',function(st){ return st.get(PACK_KEY); }).then(function(p){ OFFLINE_PACK=p||null; }).catch(function(){ OFFLINE_PACK=null; });
+  function packPaint(){
+    packDropBtn.hidden=!OFFLINE_PACK; packGetBtn.hidden=!!OFFLINE_PACK;
+    packGetBtn.disabled=packBusy;
+    if(packBusy){ packGetBtn.textContent=T('Downloading offline answers…'); return; }
+    packGetBtn.textContent=packBytes ? T('Download offline answers (about {n} MB)',{n:(packBytes/1048576).toFixed(1)}) : T('Download offline answers');
+  }
+  async function packSizeLabel(){ try{ var r=await fetch(PACK_INDEX); if(r.ok){ var j=await r.json(); packBytes=j.bytes||0; } }catch(err){} packPaint(); }
+  async function packDownload(){
+    if(packBusy) return;
+    packBusy=true; packPaint();
+    try{
+      var r=await fetch(PACK_URL); if(!r.ok) throw new Error('pack '+r.status);
+      var text=await new Response(r.body.pipeThrough(new DecompressionStream('gzip'))).text();
+      var obj=JSON.parse(text); if(!obj||!Array.isArray(obj.entries)) throw new Error('bad pack');
+      await packIO('readwrite',function(st){ return st.put(obj,PACK_KEY); });
+      OFFLINE_PACK=obj;
+    }catch(err){ alert(T('Could not download the offline pack. Try again on a connection.')); }
+    packBusy=false; packPaint();
+  }
+  packGetBtn.addEventListener('click',packDownload);
+  packDropBtn.addEventListener('click',async function(){
+    try{ await packIO('readwrite',function(st){ return st.delete(PACK_KEY); }); }catch(err){}
+    OFFLINE_PACK=null; packPaint();
+  });
+  // Size label: a small index file, read when the menu is painted (explicit page open, never a download).
+  packReady.then(function(){ packPaint(); if(!OFFLINE_PACK) packSizeLabel(); });
   // Phone menu: the links sit in a sheet behind one 44px button. Esc or a tap outside closes it and returns focus to the button.
   var top=document.getElementById('top'), menuBtn=document.getElementById('menu-btn');
   function setMenu(on){ top.classList.toggle('open',on); menuBtn.setAttribute('aria-expanded',on?'true':'false'); }

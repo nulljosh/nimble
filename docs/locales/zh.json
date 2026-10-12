@@ -105,5 +105,12 @@
   "Ask again": "再问一次",
   "No questions yet.": "还没有问题。",
   "Select all": "全选",
-  "Menu": "菜单"
+  "Menu": "菜单",
+  "Download offline answers": "下载离线答案",
+  "Download offline answers (about {n} MB)": "下载离线答案（约 {n} MB）",
+  "Downloading offline answers…": "正在下载离线答案…",
+  "Remove offline pack": "删除离线包",
+  "Could not download the offline pack. Try again on a connection.": "无法下载离线包。请在联网时重试。",
+  "Offline pack · Wikipedia (CC BY-SA)": "离线包 · 维基百科 (CC BY-SA)",
+  "Not in the offline pack. Math, units and graphs still work offline.": "不在离线包中。数学、单位和图表离线仍可使用。"
 }

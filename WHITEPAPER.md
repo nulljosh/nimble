@@ -1,6 +1,6 @@
 # Nimble Technical Whitepaper
 
-**v5.19.0** | October 2026
+**v5.20.0** | October 2026
 
 Ask a question. Get one sentence back.
 
@@ -55,6 +55,10 @@ every question asked.
 
 One night of releases, 2.0 to 5.0. 2.0 opened the engine to agents: REST at /api and MCP at /mcp on the same code the app runs, and the web app started asking before a question goes to a model. 3.0 gave Nimble a memory: recent questions on every surface, stored on the device, and follow-ups that carry the last three turns. 4.0 turned live answers into cards (weather, currency, time, word origins), added a share image, a widget and a menu bar quick ask. 5.0 made it reach everywhere: voice on web, iPhone, Mac and Android, five languages, cards on Windows and Android, and a landing page with room to breathe.
 
+
+## Offline pack
+
+The web app can hold a small copy of Wikipedia. It is the opening two sentences of the 4,000 most-viewed English articles, gzipped plain JSON, about 0.6 MB. The user downloads it with one tap; it sits in IndexedDB, never in localStorage or the service worker cache. When the network is down, or every online source comes back empty, the same lookup runs against the pack: a title or alias match, then a keyword score. A weak score says "Not in the offline pack." It never guesses. The pack is rebuilt monthly by `scripts/build-offline-pack.mjs` from Wikimedia pageviews and Wikipedia summaries, and is credited CC BY-SA 4.0 on every answer.
 
 ## License
 

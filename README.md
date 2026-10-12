@@ -2,7 +2,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v5.19.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v5.20.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -41,6 +41,10 @@ Every answer names its source. Light and dark follow the system. 8 accent themes
 ## What else it does
 
 Weather, currency, local time and word origins come back as cards. Recent questions sit under the field on every surface and never leave the device. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. A home screen widget keeps your last answer on iPhone; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Five languages: English, French, Spanish, Chinese, Punjabi.
+
+## Offline pack
+
+On the web, you can download a small pack of Wikipedia article intros once: the top 4,000 English articles, about 0.6 MB. Tap "Download offline answers" in the menu. After that, when the network is gone, questions about those articles still get an answer, with the article link and the date the pack was built. Nothing downloads on its own. Math, units and graphs never needed the network. See `docs/pack/README.md` for the format and the license.
 
 ## Development
 

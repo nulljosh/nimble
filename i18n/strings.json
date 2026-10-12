@@ -761,5 +761,54 @@
     "es": "Menú",
     "zh": "菜单",
     "pa": "ਮੀਨੂ"
+  },
+  "Download offline answers": {
+    "en": "Download offline answers",
+    "fr": "Télécharger les réponses hors ligne",
+    "es": "Descargar respuestas sin conexión",
+    "zh": "下载离线答案",
+    "pa": "Download offline answers"
+  },
+  "Download offline answers (about {n} MB)": {
+    "en": "Download offline answers (about {n} MB)",
+    "fr": "Télécharger les réponses hors ligne (environ {n} Mo)",
+    "es": "Descargar respuestas sin conexión (unos {n} MB)",
+    "zh": "下载离线答案（约 {n} MB）",
+    "pa": "Download offline answers (about {n} MB)"
+  },
+  "Downloading offline answers…": {
+    "en": "Downloading offline answers…",
+    "fr": "Téléchargement des réponses hors ligne…",
+    "es": "Descargando respuestas sin conexión…",
+    "zh": "正在下载离线答案…",
+    "pa": "Downloading offline answers…"
+  },
+  "Remove offline pack": {
+    "en": "Remove offline pack",
+    "fr": "Supprimer le pack hors ligne",
+    "es": "Quitar el paquete sin conexión",
+    "zh": "删除离线包",
+    "pa": "Remove offline pack"
+  },
+  "Could not download the offline pack. Try again on a connection.": {
+    "en": "Could not download the offline pack. Try again on a connection.",
+    "fr": "Impossible de télécharger le pack hors ligne. Réessayez avec une connexion.",
+    "es": "No se pudo descargar el paquete sin conexión. Inténtalo con conexión.",
+    "zh": "无法下载离线包。请在联网时重试。",
+    "pa": "Could not download the offline pack. Try again on a connection."
+  },
+  "Offline pack · Wikipedia (CC BY-SA)": {
+    "en": "Offline pack · Wikipedia (CC BY-SA)",
+    "fr": "Pack hors ligne · Wikipédia (CC BY-SA)",
+    "es": "Paquete sin conexión · Wikipedia (CC BY-SA)",
+    "zh": "离线包 · 维基百科 (CC BY-SA)",
+    "pa": "Offline pack · Wikipedia (CC BY-SA)"
+  },
+  "Not in the offline pack. Math, units and graphs still work offline.": {
+    "en": "Not in the offline pack. Math, units and graphs still work offline.",
+    "fr": "Absent du pack hors ligne. Les calculs, unités et graphiques marchent toujours hors ligne.",
+    "es": "No está en el paquete sin conexión. Las matemáticas, unidades y gráficos siguen funcionando sin conexión.",
+    "zh": "不在离线包中。数学、单位和图表离线仍可使用。",
+    "pa": "Not in the offline pack. Math, units and graphs still work offline."
   }
 }

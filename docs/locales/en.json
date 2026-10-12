@@ -105,5 +105,12 @@
   "Ask again": "Ask again",
   "No questions yet.": "No questions yet.",
   "Select all": "Select all",
-  "Menu": "Menu"
+  "Menu": "Menu",
+  "Download offline answers": "Download offline answers",
+  "Download offline answers (about {n} MB)": "Download offline answers (about {n} MB)",
+  "Downloading offline answers…": "Downloading offline answers…",
+  "Remove offline pack": "Remove offline pack",
+  "Could not download the offline pack. Try again on a connection.": "Could not download the offline pack. Try again on a connection.",
+  "Offline pack · Wikipedia (CC BY-SA)": "Offline pack · Wikipedia (CC BY-SA)",
+  "Not in the offline pack. Math, units and graphs still work offline.": "Not in the offline pack. Math, units and graphs still work offline."
 }

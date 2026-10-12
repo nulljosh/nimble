@@ -105,5 +105,12 @@
   "Ask again": "Preguntar de nuevo",
   "No questions yet.": "Aún no hay preguntas.",
   "Select all": "Seleccionar todo",
-  "Menu": "Menú"
+  "Menu": "Menú",
+  "Download offline answers": "Descargar respuestas sin conexión",
+  "Download offline answers (about {n} MB)": "Descargar respuestas sin conexión (unos {n} MB)",
+  "Downloading offline answers…": "Descargando respuestas sin conexión…",
+  "Remove offline pack": "Quitar el paquete sin conexión",
+  "Could not download the offline pack. Try again on a connection.": "No se pudo descargar el paquete sin conexión. Inténtalo con conexión.",
+  "Offline pack · Wikipedia (CC BY-SA)": "Paquete sin conexión · Wikipedia (CC BY-SA)",
+  "Not in the offline pack. Math, units and graphs still work offline.": "No está en el paquete sin conexión. Las matemáticas, unidades y gráficos siguen funcionando sin conexión."
 }
