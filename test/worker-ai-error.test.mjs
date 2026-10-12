@@ -58,5 +58,6 @@ test("an UNKNOWN from one failure and one plain UNKNOWN still reports the failur
 test("the existing fields are unchanged on an answer", async () => {
   const j = await ask({ answers: { [QWEN]: "Paris is the capital of France.", [GEMMA]: "Paris is the capital of France." } });
   assert.equal(j.answer, "Paris is the capital of France.");
-  assert.equal(j.source, "Gemma + Qwen");
+  // One house model answers a plain question alone, so only Qwen ran and only Qwen is named.
+  assert.equal(j.source, "Qwen");
 });

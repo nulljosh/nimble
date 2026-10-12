@@ -56,7 +56,7 @@ test("an answer with a photo names the page the photo came from as topic", async
   assert.equal(j.topicUrl, "https://en.wikipedia.org/wiki/William_Shakespeare");
   assert.equal(j.image.url, "https://upload.wikimedia.org/shakespeare.jpg");
   assert.equal(j.image.title, undefined, "the photo object keeps its old shape");
-  assert.equal(j.source, "Gemma + Qwen");
+  assert.equal(j.source, "Qwen", "one house model answers a plain question alone");
   assert.ok(Array.isArray(j.refs));
 });
 

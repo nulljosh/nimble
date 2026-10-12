@@ -5,6 +5,8 @@
 const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 const LLAMA = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+// House model: Qwen3 30B bills 4,625 neurons per M input tokens, Gemma 4 26B 9,091 (Workers AI pricing, Oct 2026).
+// Input dominates here (grounding plus question), so Qwen is the one asked first and alone.
 const SYSTEM =
   "Answer in one short factual sentence. No preamble, no markdown. If you do not know, reply exactly UNKNOWN.";
 // Model weights are frozen at their training cutoff, so "who is the current president"
@@ -152,6 +154,69 @@ function cleanTurns(raw) {
     .map((t) => ({ q: t.q.slice(0, 300), a: t.a.slice(0, 300) }));
 }
 
+// ---- Neuron guard, answer cache, /stats ------------------------------------------------------
+// Free Workers AI is 10,000 neurons a day, resetting 00:00 UTC. Per call we assume ~1,700 input tokens
+// (grounding plus question) and up to 80 output tokens: about 10 neurons on Qwen. NEURONS_PER_CALL is a
+// deliberate 6x overestimate so the guard trips early, never late. Calibrate it from the dashboard later.
+export const NEURONS_PER_CALL = 60;
+export const BUDGET_NEURONS = 8500;
+const BUDGET_NOTE = "AiError: daily free AI budget nearly used";
+export const TTL_CACHE = 6 * 3600; // seconds
+export const TTL_TIMELY = 3600; // time-sensitive answers go stale fast
+const TIMELY = /\b(current|latest|today|price|score|now)\b|\bwho is the\b/i;
+export const isTimeSensitive = (q) => TIMELY.test(q);
+// Question shapes where two models clashing is worth a second call (see the flow below).
+export const needsSecondModel = (q) => isTimeSensitive(q) || WHEN.test(q) || /\d/.test(q);
+export const normalizeQuestion = (q) => String(q).trim().toLowerCase().replace(/\s+/g, " ");
+export const cacheUrl = (origin, q) => `${origin}/__nimble/answer?q=${encodeURIComponent(normalizeQuestion(q))}`;
+const statsUrl = (origin, day) => `${origin}/__nimble/stats/${day}`;
+const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
+export const estNeurons = (aiCalls) => aiCalls * NEURONS_PER_CALL;
+export const overBudget = (c) => estNeurons(c.aiCalls) > BUDGET_NEURONS;
+// The Cache API is per data center and per Worker version, so every count and cached answer here is
+// best effort: a colo only sees its own traffic. A global count needs a KV namespace (see wrangler.jsonc).
+const store = () => globalThis.caches?.default ?? null;
+let mem = { day: "", aiCalls: 0, cacheHits: 0 };
+export function _resetForTests() {
+  mem = { day: "", aiCalls: 0, cacheHits: 0 };
+}
+async function cacheGet(key) {
+  try {
+    const hit = await store()?.match(new Request(key));
+    return hit ? await hit.text() : null;
+  } catch {
+    return null;
+  }
+}
+async function cachePut(key, body, ttl) {
+  try {
+    await store()?.put(new Request(key), new Response(JSON.stringify(body), { headers: { "content-type": "application/json", "cache-control": `max-age=${ttl}` } }));
+  } catch {
+    // best effort: a failed put only costs a repeat AI call
+  }
+}
+// Today's counts: this isolate's numbers, raised to whatever the Cache API holds for today.
+async function loadCounts(origin) {
+  const day = dayKey();
+  if (mem.day !== day) mem = { day, aiCalls: 0, cacheHits: 0 };
+  const text = await cacheGet(statsUrl(origin, day));
+  try {
+    const s = JSON.parse(text || "{}");
+    mem.aiCalls = Math.max(mem.aiCalls, Number(s.aiCalls) || 0);
+    mem.cacheHits = Math.max(mem.cacheHits, Number(s.cacheHits) || 0);
+  } catch {
+    // unreadable counter: keep the isolate's own numbers
+  }
+  return mem;
+}
+async function saveCounts(origin, c) {
+  await cachePut(statsUrl(origin, c.day), { aiCalls: c.aiCalls, cacheHits: c.cacheHits }, 2 * 86400);
+}
+async function statsReply(origin) {
+  const c = await loadCounts(origin);
+  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls) });
+}
+
 export default {
   async fetch(req, env) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
@@ -161,6 +226,8 @@ export default {
     const isDDG = req.method === "GET" && url.searchParams.has("ddg");
     const isSite = req.method === "GET" && url.searchParams.has("site");
     const isNews = req.method === "GET" && url.searchParams.has("news");
+    const isStats = req.method === "GET" && url.pathname === "/stats";
+    if (isStats) return statsReply(url.origin);
     if (req.method !== "POST" && !isDDG && !isSite && !isNews) return new Response("POST only", { status: 405, headers: CORS });
 
     if (isDDG) {
@@ -228,17 +295,34 @@ export default {
     if (typeof q !== "string" || !q.trim()) return json({ error: "empty q" }, 400);
     if (q.length > 500) return json({ error: "too long" }, 400);
 
+    const counts = await loadCounts(url.origin);
+    // An identical question (normalized) inside the TTL is served from the Cache API: no AI, no neurons.
+    // Follow-up turns depend on the conversation, so they skip the cache.
+    const cKey = turns.length === 0 ? cacheUrl(url.origin, q) : null;
+    const hit = cKey ? await cacheGet(cKey) : null;
+    if (hit) {
+      counts.cacheHits++;
+      await saveCounts(url.origin, counts);
+      return new Response(hit, { headers: { "content-type": "application/json", ...CORS } });
+    }
+    // Past the daily estimate: no AI call. The client shows its resting note because aiError is set.
+    if (overBudget(counts)) return json({ answer: "UNKNOWN", resting: true, aiError: BUDGET_NOTE });
+
     // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
     const { text: context, pages } = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
-    // Set only when an AI call threw and the answer is UNKNOWN because of it (see reply below).
+    // Set only when an AI call threw and the answer is UNKNOWN because of it (see the flow below).
     const aiFailures = [];
-    const reply = async (o) => {
+    // Every reply goes through here. Known answers are cached (UNKNOWN and errors never are), and the counts are saved.
+    const finish = async (o) => {
       const known = o.answer !== "UNKNOWN";
       // A disagreement has no photo: the sources do not say which answer is right, so no picture leans either way.
       const photo = known && !o.disagree ? await photoFor(q, o.answer) : null;
       const refs = known ? groundingRefs(o.answer, pages) : [];
       const topic = known ? topicOf(photo?.page, refs) : null;
-      return json({ ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) });
+      const body = { ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) };
+      if (cKey && known && !o.aiError) await cachePut(cKey, body, isTimeSensitive(q) ? TTL_TIMELY : TTL_CACHE);
+      await saveCounts(url.origin, counts);
+      return json(body);
     };
     const today = new Date().toISOString().slice(0, 10);
     const system =
@@ -278,46 +362,36 @@ export default {
           return "UNKNOWN";
         });
 
-    const [qwenAnswer, gemmaAnswer] = await Promise.all([ask(QWEN), ask(GEMMA)]);
-    // Only adds fields (disagree, alts) when the two house models clash and the reference does not settle it.
-    const dis = disagreement(qwenAnswer, gemmaAnswer, pages.map((p) => p.extract || "").join(" "), q);
+    // Every model call goes through askCounted so the day's estimate sees it, failures included.
+    const askCounted = (model) => {
+      counts.aiCalls++;
+      return ask(model);
+    };
+    // One house model first. The second model runs only when the first gave no answer, or when the question
+    // is time-sensitive, asks a date, or has a number: the cases where a "Sources disagree" card is worth a call.
+    const first = await askCounted(QWEN);
+    if (first !== "UNKNOWN" && !needsSecondModel(q)) return finish({ answer: first, source: "Qwen" });
+    const second = await askCounted(GEMMA);
 
-    // The client shows `source` under the answer, so it has to name the models that
-    // actually produced it — it used to hardcode "Gemma" for all four branches.
-    if (qwenAnswer === "UNKNOWN" && gemmaAnswer === "UNKNOWN")
-      return reply({ answer: "UNKNOWN", ...(aiFailures.length ? { aiError: aiFailures[aiFailures.length - 1] } : {}) });
-    if (qwenAnswer === "UNKNOWN") return reply({ answer: gemmaAnswer, source: "Gemma" });
-    if (gemmaAnswer === "UNKNOWN") return reply({ answer: qwenAnswer, source: "Qwen" });
-    if (normalize(qwenAnswer) === normalize(gemmaAnswer)) return reply({ answer: qwenAnswer, source: "Gemma + Qwen" });
+    // The client shows `source` under the answer, so it names only the models that actually produced it.
+    if (first === "UNKNOWN" && second === "UNKNOWN")
+      return finish({ answer: "UNKNOWN", ...(aiFailures.length ? { aiError: aiFailures[aiFailures.length - 1] } : {}) });
+    if (first === "UNKNOWN") return finish({ answer: second, source: "Gemma" });
+    if (second === "UNKNOWN") return finish({ answer: first, source: "Qwen" });
+    if (normalize(first) === normalize(second)) return finish({ answer: first, source: "Gemma + Qwen" });
 
     // Qwen and Gemma disagree. Rather than let Qwen arbitrate its own dispute, ask a third,
-    // independent model and take the majority — neutral, same call count either way.
-    const llamaAnswer = await ask(LLAMA);
-    if (llamaAnswer !== "UNKNOWN") {
-      if (normalize(llamaAnswer) === normalize(qwenAnswer)) return reply({ answer: qwenAnswer, source: "Qwen + Llama", ...dis });
-      if (normalize(llamaAnswer) === normalize(gemmaAnswer)) return reply({ answer: gemmaAnswer, source: "Gemma + Llama", ...dis });
+    // independent model and take the majority. Only adds fields (disagree, alts) when the reference does not settle it.
+    const dis = disagreement(first, second, pages.map((p) => p.extract || "").join(" "), q);
+    const third = await askCounted(LLAMA);
+    if (third !== "UNKNOWN") {
+      if (normalize(third) === normalize(first)) return finish({ answer: first, source: "Qwen + Llama", ...dis });
+      if (normalize(third) === normalize(second)) return finish({ answer: second, source: "Gemma + Llama", ...dis });
     }
 
-    // All three differ (or Llama came back UNKNOWN) — fall back to synthesizing one sentence.
-    const synthesis = await env.AI.run(QWEN, {
-      messages: [
-        {
-          role: "system",
-          content:
-            "Two AI models answered the same question. Merge them into one short, accurate factual sentence. No preamble, no markdown. Use only facts both answers state; never add a date or number that neither gives.",
-        },
-        {
-          role: "user",
-          content: `${turns.map((t) => `Earlier: ${t.q} -> ${t.a}\n`).join("")}Question: ${q}\nAnswer A: ${qwenAnswer}\nAnswer B: ${gemmaAnswer}`,
-        },
-      ],
-      temperature: 0,
-      max_tokens: 200,
-    }).catch(() => null);
-
-    const answer =
-      (synthesis?.response || synthesis?.choices?.[0]?.message?.content || "").trim() || qwenAnswer;
-    return reply({ answer, source: "Gemma + Qwen", ...dis });
+    // All three differ (or Llama said UNKNOWN). No synthesis call any more: the house model's answer, with
+    // both answers in alts when the reference does not settle the clash.
+    return finish({ answer: first, source: "Qwen", ...dis });
   },
 };
 

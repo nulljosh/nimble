@@ -15,5 +15,8 @@
         "simple": { "limit": 20, "period": 60 }
       }
     ]
-  }
+  },
+  // Not created yet. The daily neuron counter uses the Cache API (per data center, best effort).
+  // For a global counter: `npx wrangler kv namespace create NIMBLE_KV`, then uncomment and paste the id it prints.
+  // "kv_namespaces": [{ "binding": "NIMBLE_KV", "id": "<id from the command>" }]
 }

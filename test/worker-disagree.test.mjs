@@ -67,7 +67,7 @@ const SHAKE_PHOTO = { title: "William Shakespeare", index: 3, extract: "William 
 
 test("the route adds disagree and alts when the two models clash and no page settles it", async () => {
   // No reference page: nothing settles the clash, and the page that would have given a photo is absent too.
-  const j = await ask("who wrote hamlet", {
+  const j = await ask("who wrote hamlet, and when?", {
     wiki: [],
     answers: { [QWEN]: "Hamlet was written by William Shakespeare.", [GEMMA]: "Hamlet was written by Christopher Marlowe." },
   });
@@ -78,7 +78,7 @@ test("the route adds disagree and alts when the two models clash and no page set
 });
 
 test("a reference that names one clash token settles it: no disagree, the answer stays as before", async () => {
-  const j = await ask("who wrote hamlet", {
+  const j = await ask("who wrote hamlet, and when?", {
     wiki: [SHAKE_PHOTO],
     answers: { [QWEN]: "Hamlet was written by William Shakespeare.", [GEMMA]: "Hamlet was written by Christopher Marlowe." },
   });
@@ -88,7 +88,7 @@ test("a reference that names one clash token settles it: no disagree, the answer
 });
 
 test("the route adds no disagreement fields when the models agree", async () => {
-  const j = await ask("who wrote hamlet", {
+  const j = await ask("who wrote hamlet, and when?", {
     wiki: [SHAKE_PHOTO],
     answers: { [QWEN]: "Hamlet was written by William Shakespeare.", [GEMMA]: "Hamlet was written by William Shakespeare." },
   });
