@@ -218,4 +218,26 @@ extension QueryEngineTests {
         guard case let .graph(_, sine)? = engine.sampleGraph("3sin(x)") else { return XCTFail("no sine") }
         XCTAssertEqual(sine[100].y, 0, accuracy: 1e-9)
     }
+
+    func testMathStepsFollowEvaluationOrder() {
+        XCTAssertEqual(engine.mathSteps("(3+4)*2"), ["3+4 = 7", "7*2 = 14"])
+        XCTAssertEqual(engine.mathSteps("3 + 4 * 2"), ["4*2 = 8", "3+8 = 11"])
+        XCTAssertEqual(engine.mathSteps("2^3^2"), ["3^2 = 9", "2^9 = 512"])
+    }
+
+    func testMathStepsForPercentOfAndNaturalLanguage() {
+        XCTAssertEqual(engine.mathSteps("15% of 240"), ["15/100 = 0.15", "0.15*240 = 36"])
+        XCTAssertEqual(engine.mathSteps("whats three plus four times two"), ["4*2 = 8", "3+8 = 11"])
+    }
+
+    func testMathStepsFunctionCallIsOneStep() {
+        XCTAssertEqual(engine.mathSteps("sqrt(16)+1"), ["sqrt(16) = 4", "4+1 = 5"])
+    }
+
+    func testNoStepsForSingleOperationOrBareNumber() {
+        XCTAssertNil(engine.mathSteps("2 + 2"))
+        XCTAssertNil(engine.mathSteps("42"))
+        XCTAssertNil(engine.mathSteps("-(3+4)"))
+        XCTAssertNil(engine.mathSteps("(3+4)/0"))
+    }
 }

@@ -20,29 +20,46 @@ async function getJSON(url, opts){
 // A small recursive-descent evaluator over the whitelisted text. No eval and no Function:
 // Cloudflare Workers forbid both, and the agent API at /api runs this same engine there.
 const MATH_FNS = new Set(["sqrt","sin","cos","tan","log","log2","log10","abs","round","floor","ceil","cbrt"]);
-function evalMath(src){
+// Every number on screen goes through here, so steps and the answer round the same way.
+const mathFmt = v => String(+v.toPrecision(12));
+// Steps show the operator as typed, so ** reads as ^.
+const mathSym = op => op === "**" ? "^" : op;
+// When steps is an array, each operation pushes one line "a op b = result" in evaluation order.
+// Each node carries its display text: a typed literal, or the value of a reduced sub-expression.
+function evalMath(src, steps){
   const tk = src.match(/Math\.[A-Za-z0-9]+|\d+\.?\d*|\.\d+|\*\*|[-+*\/(),]/g) || [];
   if(tk.join("") !== src.replace(/\s+/g,"")) throw 0;
   let i = 0;
   const peek = () => tk[i], next = () => tk[i++];
-  const expr = () => { let v = term(); while(peek()==="+"||peek()==="-") v = next()==="+" ? v+term() : v-term(); return v; };
-  const term = () => { let v = unary(); while(peek()==="*"||peek()==="/") v = next()==="*" ? v*unary() : v/unary(); return v; };
-  const unary = () => peek()==="-" ? (i++, -unary()) : peek()==="+" ? (i++, unary()) : power();
-  const power = () => { const b = atom(); return peek()==="**" ? (i++, b**unary()) : b; };
+  const bin = (a, op, b, v) => {
+    if(steps) steps.push(a.text + mathSym(op) + b.text + " = " + mathFmt(v));
+    return {text: mathFmt(v), value: v};
+  };
+  const expr = () => { let v = term(); while(peek()==="+"||peek()==="-"){ const op = next(), b = term(); v = bin(v, op, b, op==="+" ? v.value+b.value : v.value-b.value); } return v; };
+  const term = () => { let v = unary(); while(peek()==="*"||peek()==="/"){ const op = next(), b = unary(); v = bin(v, op, b, op==="*" ? v.value*b.value : v.value/b.value); } return v; };
+  const unary = () => {
+    if(peek()==="-"){ i++; const a = unary(); return a.leaf ? {text:"-"+a.text, value:-a.value, leaf:true} : {text:mathFmt(-a.value), value:-a.value}; }
+    if(peek()==="+"){ i++; return unary(); }
+    return power();
+  };
+  const power = () => { const b = atom(); if(peek()!=="**") return b; i++; const e = unary(); return bin(b, "**", e, b.value ** e.value); };
   const atom = () => {
     const t = next();
     if(t===undefined) throw 0;
     if(t==="("){ const v = expr(); if(next()!==")") throw 0; return v; }
-    if(t==="Math.PI") return Math.PI;
-    if(t==="Math.E") return Math.E;
+    if(t==="Math.PI") return {text:"pi", value:Math.PI, leaf:true};
+    if(t==="Math.E") return {text:"e", value:Math.E, leaf:true};
     if(t.startsWith("Math.")){
       const f = t.slice(5);
       if(!MATH_FNS.has(f) || next()!=="(") throw 0;
-      const v = expr(); if(next()!==")") throw 0; return Math[f](v);
+      const a = expr(); if(next()!==")") throw 0;
+      const v = Math[f](a.value);
+      if(steps) steps.push(f + "(" + a.text + ") = " + mathFmt(v));
+      return {text: mathFmt(v), value: v};
     }
-    const n = Number(t); if(Number.isNaN(n)) throw 0; return n;
+    const n = Number(t); if(Number.isNaN(n)) throw 0; return {text:t, value:n, leaf:true};
   };
-  const v = expr(); if(i!==tk.length) throw 0; return v;
+  const v = expr(); if(i!==tk.length) throw 0; return v.value;
 }
 // "what's nine plus ten" is math, not a Wikipedia search for Vine. Spoken numbers 0-20, the
 // tens and the usual operator words; anything left over fails the whitelist below.
@@ -53,15 +70,30 @@ function spokenMath(s){
     .replace(/\b(multiplied by|times)\b/g,"*").replace(/\bdivided by\b/g,"/").replace(/\bto the power of\b/g,"^").replace(/\bplus\b/g,"+").replace(/\bminus\b/g,"-")
     .replace(/\b[a-z]+\b/g,w=>w in WORD_NUM ? WORD_NUM[w] : w);
 }
-function tryMath(s){
+// The on-device expression behind a math query, or null. Percent-of is rewritten to a division
+// and a product, so "20% of 50" evaluates as 20/100*50.
+function mathSource(s){
   const t = spokenMath(s).trim().replace(/([\d.]+)\s*%\s*of\s*/g,"$1/100*").replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E")
     .replace(/\b(sqrt|sin|cos|tan|log|log2|log10|abs|round|floor|ceil|cbrt)\b/g,"Math.$1")
     .replace(/\bln\b/g,"Math.log");
   if(!/^[0-9+\-*/(). ,]*(Math\.[a-z0-9]+|[0-9+\-*/(). ,])*$/.test(t)) return null;
   if(!/[0-9]/.test(t) || !/[+\-*/]|Math\./.test(t)) return null;
+  return t;
+}
+function tryMath(s){
+  const t = mathSource(s); if(t===null) return null;
   try{ const v = evalMath(t);
     return (typeof v==="number" && isFinite(v)) ? v : null; }
   catch{ return null; }
+}
+// "Show steps": one line per evaluation step, or null. A single operation has one step and
+// nothing to expand, so it gets null too: a plain "2+2" shows no button.
+function mathSteps(s){
+  const t = mathSource(s); if(t===null) return null;
+  const steps = [];
+  try{ const v = evalMath(t, steps); if(!(typeof v==="number" && isFinite(v))) return null; }
+  catch{ return null; }
+  return steps.length >= 2 ? steps : null;
 }
 
 // --- units (ponytail: flat table in base units; add rows, not code) ---
@@ -422,7 +454,12 @@ async function renderAnswer(query, opts){
     h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big">'+esc(a.big)+(a.unit?(a.unit[0]==="°"?"":" ")+esc(a.unit):"")+'</div><p>'+esc(a.sub)+'</p></a>';
     credit=T("powered by {s}",{s:a.src});
   }
-  else if(a.kind==="math"){ h+='<div class="mockup-big">'+a.value+'</div>'; credit=T("computed offline"); }
+  else if(a.kind==="math"){
+    h+='<div class="mockup-big">'+a.value+'</div>';
+    const steps = mathSteps(query);
+    if(steps) h+='<details class="why steps"><summary>'+esc(T("Show steps"))+'</summary><ol>'+steps.map(l=>"<li>"+esc(l)+"</li>").join("")+"</ol></details>";
+    credit=T("computed offline");
+  }
   else if(a.kind==="graph"){ h+=a.svg+'<p>y = '+esc(a.expr)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
   else if(a.kind==="offline"){ h+="<p>"+T("You're offline. Math, units and graphs still work.")+"</p>"; }
@@ -530,4 +567,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};
+if(typeof module!=="undefined") module.exports={identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,first,answer,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns};

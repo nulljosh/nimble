@@ -91,6 +91,9 @@ form { position: relative; }
 .why summary::-webkit-details-marker { display: none; }
 .why summary::after { content: ""; display: inline-block; width: 6px; height: 6px; margin: 0 0 3px 8px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg); vertical-align: middle; }
 .why[open] summary::after { transform: rotate(-135deg); margin-bottom: 0; }
+.why.steps ol { margin: 8px 0 0; padding: 0; list-style: none; counter-reset: step; }
+.why.steps li { counter-increment: step; margin: 0 0 4px; }
+.why.steps li::before { content: counter(step) "."; display: inline-block; width: 22px; color: var(--text-light); font-variant-numeric: tabular-nums; }
 .card .why p { font-size: 16px; line-height: 1.5; color: var(--text-mid); margin-top: 10px; }
 .why a { display: inline-block; margin-top: 8px; color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 

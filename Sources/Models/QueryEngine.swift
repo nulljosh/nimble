@@ -138,6 +138,19 @@ final class QueryEngine: Sendable {
     }
 
     func evaluateMath(_ input: String) -> String? {
+        guard let expr = mathExpression(input), let value = Self.evaluateExpression(expr) else { return nil }
+        return formatResult(value)
+    }
+
+    /// Show steps: one line per evaluation step ("3+4 = 7", "7*2 = 14"), or nil. A single
+    /// operation has one step and nothing to expand, so "2+2" gets nil.
+    func mathSteps(_ input: String) -> [String]? {
+        guard let expr = mathExpression(input), let result = Self.evaluate(expr), result.steps.count >= 2 else { return nil }
+        return result.steps
+    }
+
+    /// The expression a query means: the input as typed, or its natural-language reading.
+    private func mathExpression(_ input: String) -> String? {
         // "15% of 240" -> "15/100*240"; bare % stays modulo.
         let expr = input.trimmingCharacters(in: .whitespaces)
             .replacingOccurrences(of: "([\\d.]+)\\s*%\\s*of\\s*", with: "$1/100*", options: [.regularExpression, .caseInsensitive])
@@ -146,12 +159,10 @@ final class QueryEngine: Sendable {
         // Parse the literal expression first; the parser must consume the whole
         // string, so trailing junk ("2 + 2 banana", "sqrt(9)log") is rejected
         // rather than silently ignored.
-        if let value = Self.evaluateExpression(expr) { return formatResult(value) }
+        if Self.evaluateExpression(expr) != nil { return expr }
 
         // Then natural language ("whats nine plus ten" -> "9 + 10").
-        if let nl = parseNaturalLanguageMath(expr), let value = Self.evaluateExpression(nl) {
-            return formatResult(value)
-        }
+        if let nl = parseNaturalLanguageMath(expr), Self.evaluateExpression(nl) != nil { return nl }
         return nil
     }
 
@@ -159,12 +170,17 @@ final class QueryEngine: Sendable {
     /// not one. Replaces NSExpression, which both ignored trailing junk and threw
     /// an uncatchable NSInvalidArgumentException on malformed input.
     static func evaluateExpression(_ input: String) -> Double? {
+        evaluate(input)?.value
+    }
+
+    /// The value and the steps that reach it, or nil when the input is not a complete expression.
+    static func evaluate(_ input: String) -> (value: Double, steps: [String])? {
         guard let tokens = MathLexer.tokenize(input) else { return nil }
         // A bare number is not a calculation ("42" must stay a search query).
         guard tokens.count > 1 else { return nil }
         var parser = MathParser(tokens: tokens)
-        guard let value = parser.parseExpression(), parser.isAtEnd, value.isFinite else { return nil }
-        return value
+        guard let node = parser.parseExpression(), parser.isAtEnd, node.value.isFinite else { return nil }
+        return (node.value, parser.steps)
     }
 
     enum MathToken: Equatable {
@@ -235,6 +251,13 @@ final class QueryEngine: Sendable {
         }
     }
 
+    /// A reduced piece of the expression: its display text ("7", or a typed "2") and its value.
+    struct MathNode {
+        let text: String
+        let value: Double
+        let isLiteral: Bool
+    }
+
     /// expression := term (("+" | "-") term)*
     /// term       := power (("*" | "/" | "%") power)*
     /// power      := unary ("^" power)?        -- right associative
@@ -243,6 +266,8 @@ final class QueryEngine: Sendable {
     struct MathParser {
         let tokens: [MathToken]
         var pos = 0
+        /// One line per operation, in evaluation order: "3+4 = 7".
+        private(set) var steps: [String] = []
 
         init(tokens: [MathToken]) { self.tokens = tokens }
 
@@ -254,66 +279,81 @@ final class QueryEngine: Sendable {
             return nil
         }
 
-        mutating func parseExpression() -> Double? {
+        /// Records "lhs op rhs = result" as a step and returns the reduced node.
+        private mutating func reduce(_ lhs: MathNode, _ op: String, _ rhs: MathNode, _ value: Double) -> MathNode {
+            let shown = QueryEngine.formatNumber(value)
+            steps.append("\(lhs.text)\(op)\(rhs.text) = \(shown)")
+            return MathNode(text: shown, value: value, isLiteral: false)
+        }
+
+        mutating func parseExpression() -> MathNode? {
             guard var lhs = parseTerm() else { return nil }
             while let op = match(["+", "-"]) {
                 guard let rhs = parseTerm() else { return nil }
-                lhs = op == "+" ? lhs + rhs : lhs - rhs
+                lhs = reduce(lhs, String(op), rhs, op == "+" ? lhs.value + rhs.value : lhs.value - rhs.value)
             }
             return lhs
         }
 
-        private mutating func parseTerm() -> Double? {
+        private mutating func parseTerm() -> MathNode? {
             guard var lhs = parsePower() else { return nil }
             while let op = match(["*", "/", "%"]) {
                 guard let rhs = parsePower() else { return nil }
                 switch op {
-                case "*": lhs *= rhs
+                case "*":
+                    lhs = reduce(lhs, "*", rhs, lhs.value * rhs.value)
                 case "/":
-                    guard rhs != 0 else { return nil }
-                    lhs /= rhs
+                    guard rhs.value != 0 else { return nil }
+                    lhs = reduce(lhs, "/", rhs, lhs.value / rhs.value)
                 default:
-                    guard rhs != 0 else { return nil }
-                    lhs = lhs.truncatingRemainder(dividingBy: rhs)
+                    guard rhs.value != 0 else { return nil }
+                    lhs = reduce(lhs, "%", rhs, lhs.value.truncatingRemainder(dividingBy: rhs.value))
                 }
             }
             return lhs
         }
 
-        private mutating func parsePower() -> Double? {
+        private mutating func parsePower() -> MathNode? {
             guard let base = parseUnary() else { return nil }
             if match(["^"]) != nil {
                 guard let exponent = parsePower() else { return nil }
-                return pow(base, exponent)
+                return reduce(base, "^", exponent, pow(base.value, exponent.value))
             }
             return base
         }
 
-        private mutating func parseUnary() -> Double? {
+        private mutating func parseUnary() -> MathNode? {
             if let op = match(["+", "-"]) {
-                guard let value = parseUnary() else { return nil }
-                return op == "-" ? -value : value
+                guard let node = parseUnary() else { return nil }
+                guard op == "-" else { return node }
+                // A negated literal stays a literal. A negated result folds its sign in without a step.
+                let value = -node.value
+                if node.isLiteral { return MathNode(text: "-" + node.text, value: value, isLiteral: true) }
+                return MathNode(text: QueryEngine.formatNumber(value), value: value, isLiteral: false)
             }
             return parsePrimary()
         }
 
-        private mutating func parsePrimary() -> Double? {
+        private mutating func parsePrimary() -> MathNode? {
             switch current {
             case let .number(value)?:
                 pos += 1
-                return value
+                return MathNode(text: QueryEngine.formatNumber(value), value: value, isLiteral: true)
             case .lparen?:
                 pos += 1
-                guard let value = parseExpression(), current == .rparen else { return nil }
+                guard let node = parseExpression(), current == .rparen else { return nil }
                 pos += 1
-                return value
+                return node
             case let .function(name)?:
                 pos += 1
                 guard current == .lparen else { return nil }
                 pos += 1
                 guard let arg = parseExpression(), current == .rparen else { return nil }
                 pos += 1
-                return MathParser.apply(name, arg)
+                guard let value = MathParser.apply(name, arg.value) else { return nil }
+                let shown = QueryEngine.formatNumber(value)
+                steps.append("\(name)(\(arg.text)) = \(shown)")
+                return MathNode(text: shown, value: value, isLiteral: false)
             default:
                 return nil
             }
@@ -334,6 +374,10 @@ final class QueryEngine: Sendable {
     }
 
     private func formatResult(_ value: Double) -> String {
+        Self.formatNumber(value)
+    }
+
+    static func formatNumber(_ value: Double) -> String {
         if value.isNaN || value.isInfinite { return String(value) }
         if value == value.rounded() && abs(value) < 1e15 {
             return String(format: "%.0f", value)

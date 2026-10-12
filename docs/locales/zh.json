@@ -88,5 +88,6 @@
   "Checking Samantha": "正在检查 Samantha",
   "Start": "启动",
   "Test": "测试",
-  "Last answer: {s}": "上次回答：{s}"
+  "Last answer: {s}": "上次回答：{s}",
+  "Show steps": "显示步骤"
 }

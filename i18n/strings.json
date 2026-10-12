@@ -642,5 +642,12 @@
     "es": "Última respuesta: {s}",
     "zh": "上次回答：{s}",
     "pa": "ਆਖਰੀ ਜਵਾਬ: {s}"
+  },
+  "Show steps": {
+    "en": "Show steps",
+    "fr": "Voir les étapes",
+    "es": "Ver los pasos",
+    "zh": "显示步骤",
+    "pa": "ਕਦਮ ਵੇਖੋ"
   }
 }

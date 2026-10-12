@@ -312,6 +312,9 @@ a:hover { text-decoration: underline; }
 .why { margin-top: 14px; font-size: 13px; opacity: .85; }
 .why summary { display: inline-block; cursor: pointer; list-style: none; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
 .why summary::-webkit-details-marker { display: none; }
+.why.steps ol { margin: 8px 0 0; padding: 0; list-style: none; counter-reset: step; }
+.why.steps li { counter-increment: step; margin: 0 0 4px; }
+.why.steps li::before { content: counter(step) "."; display: inline-block; width: 22px; font-variant-numeric: tabular-nums; }
 .why p { margin-top: 8px; font-size: 15px; line-height: 1.5; }
 .why a { display: inline-block; margin-top: 6px; color: inherit; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
 .consent-actions { display: flex; gap: 8px; margin-top: 12px; }

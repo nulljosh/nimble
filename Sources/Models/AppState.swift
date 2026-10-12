@@ -155,7 +155,7 @@ final class AppState {
         }
         if mathEnabled {
             if let mathResult = queryEngine.evaluateMath(text) {
-                result = .math(mathResult)
+                result = .math(mathResult, steps: queryEngine.mathSteps(text) ?? [])
                 remember(text)
                 return
             }

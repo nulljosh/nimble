@@ -10,7 +10,7 @@ func describe(_ result: QueryResult) -> String {
     switch result {
     case .none: return "No answer."
     case .loading: return "..."
-    case .math(let value): return value
+    case .math(let value, _): return value
     case .text(let heading, let body, let source, _, _, _):
         return [heading, body, "— \(source)"].compactMap { $0 }.joined(separator: "\n")
     case .list(let items, let source):

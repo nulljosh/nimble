@@ -5,7 +5,8 @@ import CoreGraphics
 enum QueryResult: Equatable {
     case none
     case loading
-    case math(String)
+    /// steps is the "Show steps" list (one line per operation); empty when there is nothing to expand.
+    case math(String, steps: [String] = [])
     /// grounding is the text the body sentence was cut from ("Why this answer"); nil when there is none.
     case text(heading: String?, body: String, source: String, sourceURL: String?, imageURL: String?, grounding: String? = nil)
     case list(items: [String], source: String)
@@ -19,7 +20,7 @@ enum QueryResult: Equatable {
     static func == (lhs: QueryResult, rhs: QueryResult) -> Bool {
         switch (lhs, rhs) {
         case (.none, .none), (.loading, .loading): return true
-        case let (.math(a), .math(b)): return a == b
+        case let (.math(a, _), .math(b, _)): return a == b
         case let (.error(a, _), .error(b, _)): return a == b
         case let (.color(a), .color(b)): return a == b
         case let (.convert(a, b, c, d), .convert(e, f, g, h)): return (a, b, c, d) == (e, f, g, h)
@@ -32,7 +33,7 @@ enum QueryResult: Equatable {
     /// What Copy Result puts on the pasteboard; nil when there is nothing to copy.
     var copyText: String? {
         switch self {
-        case .math(let s): return s
+        case .math(let s, _): return s
         case .text(_, let body, _, _, _, _): return body
         case .list(let items, _): return items.joined(separator: "\n")
         case .error(let msg, _): return msg

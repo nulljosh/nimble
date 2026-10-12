@@ -17,9 +17,9 @@ struct ResultView: View {
                 EmptyView()
             }
 
-        case .math(let value):
+        case .math(let value, let steps):
             AnswerCard(shareText: state.result.copyText) {
-                MathResultView(value: value)
+                MathResultView(value: value, steps: steps)
             } footer: {
                 Text("computed offline")
             }
@@ -388,18 +388,37 @@ private struct GraphResultView: View {
 
 private struct MathResultView: View {
     let value: String
+    let steps: [String]
     @State private var appeared = false
+    @State private var showSteps = false
 
     var body: some View {
-        Text(value)
-            .nimbleFont(34, weight: .bold)
-            .foregroundStyle(Color.text)
-            .textSelection(.enabled)
-            .scaleEffect(appeared ? 1.0 : 0.88)
-            .opacity(appeared ? 1.0 : 0)
-            .onAppear {
-                withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true }
+        VStack(alignment: .leading, spacing: 14) {
+            Text(value)
+                .nimbleFont(34, weight: .bold)
+                .foregroundStyle(Color.text)
+                .textSelection(.enabled)
+                .scaleEffect(appeared ? 1.0 : 0.88)
+                .opacity(appeared ? 1.0 : 0)
+                .onAppear {
+                    withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true }
+                }
+            if !steps.isEmpty {
+                DisclosureGroup("Show steps", isExpanded: $showSteps) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        ForEach(Array(steps.enumerated()), id: \.offset) { _, step in
+                            Text(step)
+                                .nimbleFont(15)
+                                .foregroundStyle(Color.dim)
+                                .textSelection(.enabled)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
+                .nimbleFont(14, weight: .medium)
+                .foregroundStyle(Color.bulbDeep)
             }
+        }
     }
 }
 
