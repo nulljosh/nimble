@@ -1,7 +1,7 @@
-# Nightly question exam against the live engine. A miss opens (or comments on) one issue.
+# Weekly question exam against the live engine (Sundays). Nightly runs ate the free Workers AI quota (10k neurons/day) before real users woke up. A miss opens (or comments on) one issue.
 name: Exam
 on:
-  schedule: [{cron: '17 9 * * *'}]
+  schedule: [{cron: '17 9 * * 0'}]
   workflow_dispatch:
 permissions: {contents: read, issues: write}
 jobs:
