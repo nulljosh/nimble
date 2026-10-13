@@ -91,6 +91,8 @@ class AnswerClient(
     private val http: HttpClient = defaultClient(),
     /** The downloaded offline pack, or null when none is installed. Read only on the offline path. */
     private val offlinePack: suspend () -> OfflinePack? = { null },
+    /** Private mode: no request leaves the device, so only math and the offline pack answer. */
+    private val privateMode: () -> Boolean = { loadPrivateMode() },
 ) {
 
     private val cards = CardClient(http)
@@ -117,7 +119,9 @@ class AnswerClient(
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
 
         // Offline: the pack answers first, else an honest miss. Math above already worked with no network.
-        if (!networkAvailable()) return offlineAnswer(input)
+        // Private mode takes the same path, so no request is made at all.
+        val private = privateMode()
+        if (private || !networkAvailable()) return offlineAnswer(input, private)
 
         // Sports before markets, so a league name in capitals ("NFL") never reads as a ticker. A score is a card or the calm state.
         Scores.answer(input) { url -> fetchScoreboard(url) }?.let { return it }
@@ -166,7 +170,7 @@ class AnswerClient(
     }
 
     /** Same labels as the Swift and web apps. The pack's source line carries its build date. */
-    private suspend fun offlineAnswer(input: String): Answer {
+    private suspend fun offlineAnswer(input: String, private: Boolean = false): Answer {
         val pack = offlinePack()
         pack?.answer(input)?.let { hit ->
             val asOf = packAsOfLabel(hit.builtAt)?.let { " · as of $it" }.orEmpty()
@@ -179,6 +183,8 @@ class AnswerClient(
         }
         val message = if (pack != null) {
             "Not in the offline pack. Math still works offline."
+        } else if (private) {
+            "Private mode is on, so nothing leaves this device. Math works. Download the offline answers to look up facts."
         } else {
             "You're offline. Math still works."
         }

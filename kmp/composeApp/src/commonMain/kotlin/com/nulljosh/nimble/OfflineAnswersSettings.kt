@@ -34,11 +34,12 @@ private sealed class PackUi {
     data object Failed : PackUi()
 }
 
-/** Settings: today it holds the offline answers section. Nothing downloads until the user taps Download. */
+/** Settings: Private mode and the offline answers section. Nothing downloads until the user taps Download. */
 @Composable
 fun SettingsScreen(store: OfflinePackStore, theme: NimbleTheme, onBack: () -> Unit, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     var ui by remember { mutableStateOf<PackUi>(PackUi.Checking) }
+    var privateOn by remember { mutableStateOf(loadPrivateMode()) }
 
     LaunchedEffect(store) {
         ui = store.load()?.let { PackUi.Ready(it.count, it.builtAt) } ?: PackUi.NotInstalled(store.remoteBytes())
@@ -74,6 +75,17 @@ fun SettingsScreen(store: OfflinePackStore, theme: NimbleTheme, onBack: () -> Un
             Text("Settings", color = theme.text, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         }
         ToolButton("Back", theme, onBack)
+
+        Text("Private mode", color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+        Text(
+            "When on, no question leaves this device. Math and the offline answers still work.",
+            color = theme.muted,
+            fontSize = 15.sp,
+        )
+        ToolButton(if (privateOn) "Private mode: on" else "Private mode: off", theme) {
+            privateOn = !privateOn
+            savePrivateMode(privateOn)
+        }
 
         Text("Offline answers", color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         Text(

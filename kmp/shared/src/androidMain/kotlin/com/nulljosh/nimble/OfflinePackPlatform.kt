@@ -28,6 +28,14 @@ actual fun networkAvailable(): Boolean {
     return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
+private fun prefs() = AndroidAppContext.context?.getSharedPreferences("nimble", Context.MODE_PRIVATE)
+
+actual fun loadPrivateMode(): Boolean = prefs()?.getBoolean("private_mode", false) ?: false
+
+actual fun savePrivateMode(on: Boolean) {
+    prefs()?.edit()?.putBoolean("private_mode", on)?.apply()
+}
+
 internal actual fun nfkdLowercase(s: String): String =
     Normalizer.normalize(s.lowercase(), Normalizer.Form.NFKD)
 

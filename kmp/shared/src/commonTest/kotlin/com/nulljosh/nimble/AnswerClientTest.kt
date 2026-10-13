@@ -19,6 +19,26 @@ class AnswerClientTest {
         assertTrue(a is Answer.Math && a.value == "12", "expected offline math, got $a")
     }
 
+    private val tinyPack = """
+        {"version":1,"builtAt":"2026-10-12","source":"Wikipedia, CC BY-SA 4.0","count":1,"entries":[
+        {"t":"France","d":"Country in Western Europe","e":"France, officially the French Republic, is a country in Western Europe. Its capital and largest city is Paris.","u":"https://en.wikipedia.org/wiki/France","a":[]}]}
+    """.trimIndent()
+
+    @Test
+    fun privateModeWithNoPackSaysSoAndStillDoesMath() = runBlockingTest {
+        val client = AnswerClient(privateMode = { true })
+        assertTrue(client.query("sqrt(144)") is Answer.Math)
+        val a = client.query("who wrote hamlet")
+        assertTrue(a is Answer.Miss && a.message.contains("Private mode is on"), "expected the private message, got $a")
+    }
+
+    @Test
+    fun privateModeAnswersFromThePack() = runBlockingTest {
+        val pack = OfflinePack.parse(tinyPack)
+        val a = AnswerClient(offlinePack = { pack }, privateMode = { true }).query("capital of france")
+        assertTrue(a is Answer.Text && a.source.startsWith("Offline pack"), "expected a pack answer, got $a")
+    }
+
     @Test
     fun networkQueryReturnsAnAnswerOrACleanMiss() = runBlockingTest {
         val a = AnswerClient().query("Population of Canada")

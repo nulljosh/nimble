@@ -9,3 +9,7 @@ internal actual fun nfkdLowercase(s: String): String =
     Normalizer.normalize(s.lowercase(), Normalizer.Form.NFKD)
 
 actual fun platformOfflinePackStore(): OfflinePackStore? = null
+
+private var privateMode = false
+actual fun loadPrivateMode(): Boolean = privateMode
+actual fun savePrivateMode(on: Boolean) { privateMode = on }
