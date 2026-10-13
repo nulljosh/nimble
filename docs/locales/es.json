@@ -119,5 +119,6 @@
   "Click to answer only from this device": "Haz clic para responder solo desde este dispositivo",
   "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": "El modo privado está activado, así que nada sale de este dispositivo. Las matemáticas, unidades y gráficos funcionan. Descarga las respuestas sin conexión para consultar datos.",
   "Listen": "Escuchar",
-  "Stop": "Detener"
+  "Stop": "Detener",
+  "Copy": "Copiar"
 }

@@ -345,6 +345,8 @@ var T=I18N.t;
     var share=shareText(res.a)?'<button type="button" data-share>'+T('Share')+'</button>':'';
     // Listen: the browser's own voice reads the answer aloud; nothing is sent anywhere.
     if(share&&'speechSynthesis' in window) share='<button type="button" data-listen>'+T('Listen')+'</button>'+share;
+    // Copy sits next to the answer, first, as on the iPhone.
+    if(share) share='<button type="button" data-copy>'+T('Copy')+'</button>'+share;
     r.innerHTML=res.h+(res.credit||share?'<div class="credit">'+(res.credit?'<span>'+res.credit+'</span>':'')+share+'</div>':'');
     newBtn.hidden=false;
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
@@ -440,6 +442,12 @@ var T=I18N.t;
       var u=new SpeechSynthesisUtterance(say); u.lang=document.documentElement.lang||'en';
       u.onend=u.onerror=function(){ lb.textContent=T('Listen'); };
       lb.textContent=T('Stop'); ss.speak(u); return;
+    }
+    var cb=e.target.closest('[data-copy]');
+    if(cb){
+      var text=last&&shareText(last.a); if(!text) return;
+      try{ navigator.clipboard.writeText(text).then(function(){ cb.textContent=T('Copied'); setTimeout(function(){ cb.textContent=T('Copy'); },1500); },function(){}); }catch(err){}
+      return;
     }
     if(e.target.closest('[data-share]')){ shareAnswer(); return; }
     var b=e.target.closest('[data-consent]'); if(!b) return;
@@ -586,7 +594,8 @@ var T=I18N.t;
     var flash=function(){ histCopy.textContent=T('Copied'); setTimeout(function(){ histCopy.textContent=T('Copy selected'); },1500); };
     try{ navigator.clipboard.writeText(text).then(flash,function(){}); }catch(err){}
   });
-  var start=new URLSearchParams(location.search).get('q'); if(start) run(start);
+  // ?q= from links and the share sheet (manifest share_target sends text as q, a link as url); capped like the apps.
+  var sp=new URLSearchParams(location.search), start=((sp.get('q')||sp.get('url')||'').trim()).slice(0,300); if(start) run(start);
 });
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});
 </script>

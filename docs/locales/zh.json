@@ -119,5 +119,6 @@
   "Click to answer only from this device": "点击后只在此设备上回答",
   "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": "隐私模式已开启，没有任何内容离开此设备。数学、单位和图表可用。下载离线答案即可查询事实。",
   "Listen": "朗读",
-  "Stop": "停止"
+  "Stop": "停止",
+  "Copy": "复制"
 }
