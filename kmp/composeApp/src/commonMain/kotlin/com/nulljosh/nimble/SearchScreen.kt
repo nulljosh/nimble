@@ -60,6 +60,8 @@ fun SearchScreen(
     history: SearchHistory,
     modifier: Modifier = Modifier,
     voice: Voice? = null,
+    /** Reads an answer aloud, or null where the platform has no voice. */
+    speech: Speech? = null,
     /** The offline pack's store on this platform, or null: no Settings button when null. */
     packStore: OfflinePackStore? = null,
 ) {
@@ -87,12 +89,14 @@ fun SearchScreen(
         query = ""
         answer = null
         loading = false
+        speech?.speak(null) {}
     }
 
     fun submit(text: String = query) {
         val q = text.trim()
         if (q.isEmpty()) return
         query = q
+        speech?.speak(null) {}  // a new question stops the last answer's reading
         // Math resolves synchronously and offline; no spinner for something instant.
         val offline = QueryEngine.evaluateMath(q)
         if (offline != null) {
@@ -197,7 +201,21 @@ fun SearchScreen(
         Box(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())) {
             when {
                 loading -> CircularProgressIndicator(color = theme.accent, modifier = Modifier.size(28.dp))
-                answer != null -> answer?.let { ResultCard(it, theme, client) }
+                answer != null -> answer?.let { a ->
+                    Column {
+                        ResultCard(a, theme, client)
+                        val say = historySnippet(a)
+                        if (speech != null && a !is Answer.Miss && !say.isNullOrBlank()) {
+                            // Listen: the phone's own voice reads the answer. A second tap stops it.
+                            var speaking by remember(a) { mutableStateOf(false) }
+                            Spacer(Modifier.height(12.dp))
+                            ToolButton(if (speaking) "Stop" else "Listen", theme) {
+                                if (speaking) { speech.speak(null) {}; speaking = false }
+                                else { speaking = true; speech.speak(say) { speaking = false } }
+                            }
+                        }
+                    }
+                }
                 query.isBlank() && recent.isNotEmpty() -> RecentList(
                     entries = recent.take(8),
                     theme = theme,

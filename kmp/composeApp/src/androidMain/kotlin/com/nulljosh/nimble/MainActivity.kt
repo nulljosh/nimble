@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
         val history = SearchHistory(PrefsHistoryStorage(this), System::currentTimeMillis)
         setContent {
             MaterialTheme {
-                SearchScreen(history, voice = rememberVoice(), packStore = remember { platformOfflinePackStore() })
+                SearchScreen(history, voice = rememberVoice(), speech = rememberSpeech(), packStore = remember { platformOfflinePackStore() })
             }
         }
     }

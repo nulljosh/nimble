@@ -27,6 +27,14 @@ fun interface Voice {
     fun listen(onHeard: (String) -> Unit)
 }
 
+/**
+ * Text to speech where the platform has it (Android TextToSpeech); desktop passes none, so no Listen button there.
+ * [speak] reads [text] and calls [onDone] when it ends or is stopped; a null text stops whatever is playing.
+ */
+fun interface Speech {
+    fun speak(text: String?, onDone: () -> Unit)
+}
+
 /** A 20dp stroke mic in a 40dp touch target: capsule, cradle, stem, base. */
 @Composable
 fun MicButton(tint: Color, onClick: () -> Unit) {
