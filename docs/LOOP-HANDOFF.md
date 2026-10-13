@@ -6,8 +6,8 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 
 ## Where things stand
 
-- Version 6.5.0, released. Since 6.0: Ask Nimble in Siri, Spotlight, Shortcuts and the Action button on iPhone (6.1.0, not yet run on a device). Private mode on the web (6.2.0), iPhone and Mac (6.3.0) and Android (6.4.0, proven in CI only). A Listen button on the web reads answers aloud (6.5.0). Related links must carry the answer's own words (6.0.2), and the What's new sheet scrolls at large text (6.0.1).
-- Tests: `npm test` 298 (297 pass, 1 skipped). Swift 221 (`xcodebuild test`, 2 skipped). Kotlin `:shared:jvmTest` runs in CI only, because this Mac has no Java.
+- Version 6.6.0: Listen on iPhone and Mac (system voice, Stop on a second tap or when the card goes away). Since 6.0: Ask Nimble in Siri, Spotlight, Shortcuts and the Action button on iPhone (6.1.0, not yet run on a device). Private mode on the web (6.2.0), iPhone and Mac (6.3.0) and Android (6.4.0, proven in CI only). A Listen button on the web reads answers aloud (6.5.0). Related links must carry the answer's own words (6.0.2), and the What's new sheet scrolls at large text (6.0.1).
+- Tests: `npm test` 298 (297 pass, 1 skipped). Swift 223 (`xcodebuild test`, 2 skipped). Kotlin `:shared:jvmTest` runs in CI only, because this Mac has no Java.
 - Worker: the quota fix has been live since 17:10 PDT on 2026-10-12. Qwen answers first, and Gemma only joins for time-sensitive or number questions. Answers are cached for 6h, and a daily guard stops at 8,500 estimated neurons. `GET https://nimble-answers.trommatic.workers.dev/stats` gives the day's numbers (per data center). It counts as proven only after the 2026-10-13 17:00 PDT reset passes with no dry day. Until then, nothing is called fixed.
 - Price: free. The $0.99 flip waits until the free AI is proven to last all day. Joshua runs it himself.
 - QA: `-shot*` launch flags sandbox all storage. On iPhone, `-shotHistory YES` and `-shotSettings YES` open those tabs. The web uses Playwright with a static server on a fresh port. measure4 checks spacing, taps and contrast, but it misses duplicate or hidden controls, so read every shot by eye.
@@ -15,12 +15,11 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 
 ## Next, in order
 
-1. Listen on iPhone and Mac (6.6.0): a button beside Share that reads the answer with the built-in voice, Stop on a second tap or a new question, 44pt taps, VoiceOver label, and an XCTest.
-2. Listen on Android (6.7.0): TextToSpeech, with CI as the proof.
-3. Read /stats once per tick. After the 2026-10-13 17:00 PDT reset, report the result to Joshua.
-4. Ask Nimble about this: a share extension on iPhone and Mac that answers the selected text or a link.
-5. Ask Nimble as a Shortcuts action on the Mac.
-6. Then the next biggest A+ gap from roadmap.md v7 to v8, checked against the code first.
+1. Listen on Android (6.7.0): TextToSpeech, with CI as the proof.
+2. Read /stats once per tick. After the 2026-10-13 17:00 PDT reset, report the result to Joshua.
+3. Ask Nimble about this: a share extension on iPhone and Mac that answers the selected text or a link.
+4. Ask Nimble as a Shortcuts action on the Mac.
+5. Then the next biggest A+ gap from roadmap.md v7 to v8, checked against the code first.
 
 ## Restart prompt
 

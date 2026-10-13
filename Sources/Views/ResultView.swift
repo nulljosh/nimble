@@ -428,6 +428,16 @@ struct AnswerCard<Content: View, Footer: View>: View {
                     .minimumTapTarget()
                     .accessibilityLabel("Copy")
 #endif
+                    let listening = Speaker.shared.speaking == shareText
+                    Button { Speaker.shared.toggle(shareText) } label: {
+                        Text(listening ? String(localized: "Stop") : String(localized: "Listen"))
+                            .font(.nimbleSmall)
+                            .foregroundStyle(Color.dim)
+                            .underline()
+                    }
+                    .buttonStyle(.plain)
+                    .minimumTapTarget()
+                    .accessibilityLabel(listening ? "Stop reading" : "Read the answer aloud")
                     ShareLink(item: shareText) {
                         Text("Share")
                             .font(.nimbleSmall)
@@ -443,6 +453,8 @@ struct AnswerCard<Content: View, Footer: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.hairline, lineWidth: 1))
         .transition(.opacity.combined(with: .move(edge: .top)))
+        // A new answer or a new question takes this card away; its reading stops with it.
+        .onDisappear { if let shareText, Speaker.shared.speaking == shareText { Speaker.shared.stop() } }
     }
 }
 
