@@ -17,6 +17,8 @@ struct PreferencesData: Codable {
     /// "flit" (default) or "fen". Optional so prefs files written before this field still decode;
     /// a non-optional field would throw on old files and load() would drop every other setting.
     var mascot: String? = nil
+    /// Private mode: nothing leaves the device. Optional for the same reason as `mascot`.
+    var privateMode: Bool? = nil
 }
 
 final class Preferences {

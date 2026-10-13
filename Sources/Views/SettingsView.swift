@@ -72,6 +72,9 @@ struct SettingsView: View {
                 Toggle("Offline math", isOn: $state.mathEnabled)
                     .onChange(of: state.mathEnabled) { state.savePreferences() }
 
+                Toggle("Private mode", isOn: $state.privateMode)
+                    .onChange(of: state.privateMode) { state.savePreferences() }
+
                 Toggle("Launch on Startup", isOn: $state.launchOnStartup)
                     .onChange(of: state.launchOnStartup) { state.savePreferences() }
 

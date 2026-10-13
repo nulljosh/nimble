@@ -8,6 +8,7 @@ private let whatsNewBullets = [
     "Works offline: the opening lines of 9,000 Wikipedia articles, downloaded once",
     "When sources disagree, you see both answers, and live answers say how fresh they are",
     "Ask Nimble from Siri, Spotlight, Shortcuts and the Action button",
+    "Private mode in Settings: nothing leaves your phone",
 ]
 
 struct WhatsNewSheet: View {

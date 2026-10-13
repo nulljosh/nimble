@@ -61,6 +61,8 @@ enum NimbleTheme: String, CaseIterable, Codable {
 final class AppState {
     var theme: NimbleTheme = .yellow  // brand yellow #FFCA30, same ink as tokens.css --yellow
     var mathEnabled: Bool = true
+    /// Private mode: no request leaves the device. Answers come from math, units, graphs, the offline pack and the on-device model.
+    var privateMode = false
     var launchOnStartup: Bool = false
     var centerWindow: Bool = false
     var defaultSuggestions: Bool = true
@@ -138,6 +140,7 @@ final class AppState {
         ai = p.ai ?? AIConfig()
         aiConsent = p.aiConsent
         mascot = p.mascot ?? "flit"
+        privateMode = p.privateMode ?? false
     }
 
     func savePreferences() {
@@ -151,7 +154,8 @@ final class AppState {
             lastUpdateCheck: lastUpdateCheck,
             ai: ai,
             aiConsent: aiConsent,
-            mascot: mascot
+            mascot: mascot,
+            privateMode: privateMode
         )
         prefs.save(p)
         applyLaunchOnStartup()
@@ -225,8 +229,10 @@ final class AppState {
 
         // Fail fast offline instead of spinning through three request timeouts. With Apple's on-device
         // model ready, a question still gets an answer, and nothing leaves the device to get it.
-        if !isOnline {
-            let offline = "You're offline. Math, units and graphs still work."
+        if !isOnline || privateMode {
+            let offline = privateMode
+                ? "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts."
+                : "You're offline. Math, units and graphs still work."
             // The offline pack answers first, when it is on this device. A miss says so, in the pack's own words.
             var packMiss = offline
             if offlinePack.pack != nil {

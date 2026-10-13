@@ -57,6 +57,10 @@ struct PreferencesView: View {
                     get: { state.mathEnabled },
                     set: { state.mathEnabled = $0; state.savePreferences() }
                 ))
+                Toggle("Private mode", isOn: Binding(
+                    get: { state.privateMode },
+                    set: { state.privateMode = $0; state.savePreferences() }
+                ))
                 Toggle("Default Suggestions", isOn: Binding(
                     get: { state.defaultSuggestions },
                     set: { state.defaultSuggestions = $0; state.savePreferences() }
