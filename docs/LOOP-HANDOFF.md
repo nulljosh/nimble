@@ -1,4 +1,4 @@
-# Nimble loop handoff (2026-10-12, evening)
+# Nimble loop handoff (2026-10-12, night)
 
 ## What the loop is
 
@@ -16,11 +16,17 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 ## Next, in order
 
 1. Read /stats once per tick. After the 2026-10-13 17:00 PDT reset, report the result to Joshua.
-2. Mac answer card: add Copy beside Listen and Share (the web and iPhone have it; Mac relies on Cmd-C).
-3. Next biggest A+ gap from roadmap.md v7 to v8, checked against the code first.
+2. Tag 6.11.0 (c2f7eb3) and 6.12.0 (7e3e1cb) once each one's Tests and Build native apps are green.
+3. Mac answer card: Copy beside Listen and Share (the web and iPhone have it; the Mac relies on Cmd-C).
+4. Voice loop (roadmap v7): a question asked by voice gets its answer read back on its own. Web first, then iPhone and Mac, then Android. Listen already exists on every platform, so this only wires mic to Listen.
+5. Privacy page and consent copy for the three modes: free cloud, your own key, Private (roadmap v8, small).
+6. Share card variants, square and story (roadmap v7).
+7. Then v9: a browser extension (select text, get the one-sentence answer) and `nimble "question"` from brew.
+
+Already in the code, so don't rebuild: Why this answer, follow-ups, step math, multiple sources, the News, Markets and Sports cards, the offline pack, Private mode, Listen, Ask Nimble from every platform's share sheet, Siri and Shortcuts.
 
 ## Restart prompt
 
 ```
-/loop until v10-20. Nimble: ship one slice per version, web then Swift then Kotlin, toward v10 then v20. Read docs/LOOP-HANDOFF.md first and work "Next, in order" top down. No idle ticks: while CI runs, start the next slice. Each slice: npm test and `xcodebuild test -scheme Nimble -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO` green, bump version (project.yml, kmp/composeApp/build.gradle.kts versionName+versionCode, README badge, WHITEPAPER, CLAUDE.md, this file), stage explicit paths only (never roadmap.md or kmp/.kotlin), push, one-shot `gh run list` until Tests and Build native apps are green, tag, gh release. Screenshot every UI change and read it by eye before sending. Each tick: one curl of the Worker /stats; tell Joshua the quota is fixed only after the 2026-10-13 17:00 PDT reset passes. Never run the $0.99 flip, npm run exam, bulk AI calls, background CI wait loops or uv cache clean. Keep 10GB disk free. One Haiku agent at a time. Stop at 88% usage with /checkpoint. Replies: 1-2 lines.
+/loop until v10-20. Nimble: ship one slice per version, web then Swift then Kotlin, toward v10 then v20. Read docs/LOOP-HANDOFF.md first and work "Next, in order" top down. Re-arm ScheduleWakeup every tick and update this file's Next list as items ship. No idle ticks: while CI runs, start the next slice. Each slice: npm test and `xcodebuild test -scheme Nimble -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO` green, bump version (project.yml, kmp/composeApp/build.gradle.kts versionName+versionCode, README badge, WHITEPAPER, CLAUDE.md, this file), stage explicit paths only (never roadmap.md or kmp/.kotlin), push, one-shot `gh run list` until Tests and Build native apps are green, tag, gh release. Screenshot every UI change and read it by eye before sending. Each tick: one curl of the Worker /stats; tell Joshua the quota is fixed only after the 2026-10-13 17:00 PDT reset passes. Never run the $0.99 flip, npm run exam, bulk AI calls, background CI wait loops or uv cache clean. Keep 10GB disk free. One Haiku agent at a time. Stop at 88% usage with /checkpoint. Replies: 1-2 lines.
 ```
