@@ -37,34 +37,45 @@ strong { color: var(--dark); }
 <body>
 <main class="container">
   <h1>Privacy Policy</h1>
-  <p class="updated">Nimble Answers &middot; Last updated 21 September 2026</p>
+  <p class="updated">Nimble Answers &middot; Last updated 12 October 2026</p>
 
   <p><strong>Nimble Answers has no accounts, no sign-in, no analytics and no advertising.
   Nothing about you is collected, stored or sold.</strong> The app is not able to identify
   you, because it never asks who you are.</p>
 
-  <h2>What leaves your device</h2>
-  <p>Only the text of the question you type, and only when answering it requires
-  information the app does not already have.</p>
+  <h2>Three ways to answer</h2>
+  <p>You pick how far a question travels. Before any question reaches an AI, the app asks your permission first.</p>
   <ul>
-    <li><strong>Math stays on your device.</strong> Arithmetic and related calculations are evaluated locally. Nothing is sent.</li>
-    <li><strong>Factual and definition questions are sent</strong> to DuckDuckGo's Instant Answer API and to Wikipedia.</li>
-    <li><strong>AI answers need your permission.</strong> The first time you search, the app asks before sending anything to an AI service. If you allow it, your question text goes to the app's own answering service at <code>nimble-answers.trommatic.workers.dev</code>, which runs Google's Gemma and Alibaba's Qwen models on Cloudflare Workers AI. If you pick Claude or OpenAI in Settings and enter your own key, the question goes to Anthropic or OpenAI instead. If you don't allow it, nothing is sent to any AI service. You can change your answer in Settings at any time.</li>
+    <li><strong>Free cloud (the default).</strong> Your question goes to the app's own answering service at <code>nimble-answers.trommatic.workers.dev</code>, which runs Alibaba's Qwen and Google's Gemma models on Cloudflare Workers AI, and to DuckDuckGo and Wikipedia for sources.</li>
+    <li><strong>Your own key.</strong> Pick Claude or OpenAI in Settings and enter your key, and the question goes straight from your device to Anthropic or OpenAI. Pick Ollama and it goes to the Ollama server you run. The key stays on your device.</li>
+    <li><strong>Private.</strong> Turn on Private mode in Settings and nothing leaves your device. Math, units, graphs and the offline Wikipedia pack still answer; on an iPhone or Mac with Apple Intelligence, Apple's on-device model answers too. Anything else says plainly that it cannot be answered while Private is on.</li>
+  </ul>
+
+  <h2>What leaves your device</h2>
+  <p>Only the text of your question, and only when answering it needs something the app does not already have.</p>
+  <ul>
+    <li><strong>Math, units and graphs never leave.</strong> They are worked out on your device.</li>
+    <li><strong>Live cards ask the source directly.</strong> Weather asks Open-Meteo, currency asks Frankfurter or ExchangeRate-API, prices ask CoinGecko or Stooq, scores ask ESPN, and news reads public feeds from outlets such as the BBC, CBC, NPR and The Guardian. A word definition asks Wiktionary or the Free Dictionary.</li>
+    <li><strong>Asking about a website</strong> sends that site's address to the answering service, which reads the page and answers from it.</li>
+    <li><strong>The microphone</strong> uses your device's own speech recognition. On iPhone and Mac it runs on the device where Apple supports it. In a browser it is the browser's own service; in Chrome that service is Google's.</li>
+    <li><strong>Listen</strong> reads answers aloud with your device's own voice. Nothing is sent.</li>
   </ul>
   <p>These requests carry your question and nothing else. No identifier, no account, no
   device fingerprint, no location, no contacts, no history of what you asked before.</p>
 
   <h2>What is kept</h2>
-  <p>The answering service keeps no record of your questions or the answers it returns.
-  It holds a short-lived count of requests per network address purely to enforce a rate
-  limit and prevent abuse. That count expires on its own and is never linked to a person.</p>
-  <p>Your recent searches and your chosen theme are stored on your device only, and are
-  removed when you delete the app.</p>
+  <p>The answering service keeps no log of who asked what. Three things live there briefly, and none is linked to a person:</p>
+  <ul>
+    <li>A cached answer for a question, keyed by the question's text alone, kept for up to six hours (one hour for anything time-sensitive) so a repeat question costs nothing.</li>
+    <li>A daily count of how many AI calls and cache hits it served, as numbers only, so the free AI lasts the day.</li>
+    <li>A short-lived count of requests per network address, purely to enforce a rate limit. It expires on its own.</li>
+  </ul>
+  <p>Your recent searches, their answers and your settings are stored on your device. On iPhone and Mac,
+  recent searches also sync between your own devices through your iCloud account. Clear them in History, or delete the app to remove them.</p>
 
   <h2>Third parties</h2>
-  <p>DuckDuckGo, Wikipedia, Cloudflare and, if you chose them, Anthropic or OpenAI each receive the question text when a request
-  reaches them, and each handles that request under its own privacy policy. The app shares
-  nothing with them beyond the question itself.</p>
+  <p>Each service named above receives the question text when a request reaches it, and handles
+  that request under its own privacy policy. The app shares nothing with them beyond the question itself.</p>
 
   <h2>Children</h2>
   <p>The app collects no personal information from anyone, including children under 13.</p>
