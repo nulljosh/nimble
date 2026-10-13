@@ -33,7 +33,7 @@ struct WhatsNewSheet: View {
                     VStack(alignment: .leading, spacing: 12) {
                         ForEach(whatsNewBullets, id: \.self) { bullet in
                             HStack(alignment: .top, spacing: 8) {
-                                Circle().fill(Color(red: 1.0, green: 0.79, blue: 0.19)).frame(width: 6, height: 6).padding(.top, 8)
+                                Circle().fill(Color.bulb).frame(width: 6, height: 6).padding(.top, 8)
                                 Text(bullet)
                             }
                         }
@@ -50,22 +50,18 @@ struct WhatsNewSheet: View {
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(Color(red: 1.0, green: 0.79, blue: 0.19))  // brand yellow, not system blue
+                    .tint(Color.bulb)  // brand yellow, not system blue
                     .foregroundStyle(.black)
                     .controlSize(.large)
                 }
-                .padding(24)
-                .background(GeometryReader { geo in
-                    Color.clear.preference(key: SheetHeightKey.self, value: geo.size.height)
-                })
+                .padding(.horizontal, 28)
+                .padding(.top, 36)  // clears the grabber
+                .padding(.bottom, 24)
+                // The old preference-key measure never reached the sheet, so it opened at the 220pt default and cut off the button.
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
                 }
-                .onPreferenceChange(SheetHeightKey.self) { contentHeight = $0 }
-                .presentationDetents([.height(contentHeight + 34), .large]) // ponytail: +34 covers home-indicator safe area GeometryReader doesn't include
+                .presentationDetents([.height(contentHeight + 34), .large]) // ponytail: +34 covers the home-indicator inset
+                .presentationDragIndicator(.visible)
             }
     }
-}
-
-private struct SheetHeightKey: PreferenceKey {
-    nonisolated(unsafe) static var defaultValue: CGFloat = 220
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
