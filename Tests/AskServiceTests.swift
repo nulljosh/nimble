@@ -13,3 +13,15 @@ final class AskServiceTests: XCTestCase {
         XCTAssertEqual(AskService.clean(String(repeating: "a", count: 500)).count, 300)
     }
 }
+
+@MainActor
+final class AskServiceHookTests: XCTestCase {
+    func testQuestionBeforeHookIsKept() {
+        let service = AskService()
+        service.ask("early")
+        var got: [String] = []
+        service.hook { got.append($0) }
+        service.ask("late")
+        XCTAssertEqual(got, ["early", "late"])
+    }
+}

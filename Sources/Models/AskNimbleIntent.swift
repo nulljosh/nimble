@@ -1,7 +1,7 @@
 import AppIntents
 
-/// "Ask Nimble" in Siri, Spotlight, Shortcuts and the Action button. The intent only parks the question;
-/// RootTabView picks it up when the app comes forward and runs it on the Ask tab.
+/// "Ask Nimble" in Siri, Spotlight, Shortcuts and the Action button. On iPhone the intent parks the question
+/// and RootTabView runs it on the Ask tab; on the Mac it goes straight to the HUD through AskService.
 struct AskNimbleIntent: AppIntent {
     static let title: LocalizedStringResource = "Ask Nimble"
     static let description = IntentDescription("Ask Nimble a question and get one sentence and a source.")
@@ -12,8 +12,13 @@ struct AskNimbleIntent: AppIntent {
 
     static let pendingKey = "pending_question"
 
+    @MainActor
     func perform() async throws -> some IntentResult {
+        #if os(macOS)
+        AskService.shared.ask(AskService.clean(question))
+        #else
         NimbleStorage.defaults().set(question, forKey: Self.pendingKey)
+        #endif
         return .result()
     }
 }

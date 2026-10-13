@@ -24,7 +24,7 @@ struct NimbleApp: App {
                     configureWindow()
                     GlobalHotkey.register { GlobalHotkey.toggleNimble { showMain() } }
                     // ponytail: registered when the HUD first appears, which is at launch; move to an app delegate if that changes.
-                    AskService.shared.ask = { ask($0) }
+                    AskService.shared.hook { ask($0) }
                     NSApp.servicesProvider = AskService.shared
                 }
                 .onOpenURL { url in

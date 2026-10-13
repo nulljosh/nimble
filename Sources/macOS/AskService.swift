@@ -5,7 +5,18 @@ import AppKit
 @MainActor
 final class AskService: NSObject {
     static let shared = AskService()
-    var ask: (String) -> Void = { _ in }
+    /// Until the HUD hooks in, a question waits here, so a Shortcut run at launch is not lost.
+    private var handler: ((String) -> Void)?
+    private var waiting: String?
+
+    func ask(_ q: String) {
+        if let handler { handler(q) } else { waiting = q }
+    }
+
+    func hook(_ handler: @escaping (String) -> Void) {
+        self.handler = handler
+        if let q = waiting { waiting = nil; handler(q) }
+    }
 
     /// The question from a nimble://ask?q= link, or nil for any other link.
     nonisolated static func question(from url: URL) -> String? {
