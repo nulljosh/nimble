@@ -1,5 +1,5 @@
 # Nimble
-v6.13.0
+v6.14.0
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Gemma + Qwen3 on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 
@@ -10,7 +10,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - AI engine is user-selectable in Settings (`Sources/Models/AIEngine.swift`, `ENGINES` in `engine.js`): Nimble proxy (default, free), Claude, OpenAI, Ollama. Keys stay on device (prefs file / localStorage), calls go straight to the vendor; no key = silent fallback to the proxy
 - DuckDuckGo Instant Answer API + Wikipedia REST API as fallback
 - macOS window is borderless (`styleMask = [.resizable, .fullSizeContentView]`), dropping `.titled` is what removes the titlebar strip; do not restore it
-- Tests at 6.13.0: 298 web (`npm test`: 297 pass, 1 skipped, 0 fail); 226 Swift tests, all run with `xcodebuild test` (0 failures, 1 skipped); 171 `@Test` in `kmp/` (`:shared:jvmTest` runs in CI)
+- Tests at 6.14.0: 298 web (`npm test`: 297 pass, 1 skipped, 0 fail); 227 Swift tests, all run with `xcodebuild test` (0 failures, 1 skipped); 171 `@Test` in `kmp/` (`:shared:jvmTest` runs in CI)
 
 ## Structure
 - `Sources/Models/QueryEngine.swift`: classification, math eval, API queries

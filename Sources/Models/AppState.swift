@@ -81,7 +81,16 @@ final class AppState {
     #endif
 
     var queryText: String = ""
-    var result: QueryResult = .none
+    var result: QueryResult = .none {
+        // Voice loop: a question asked out loud gets its answer read back, through the same voice Listen uses.
+        didSet {
+            guard speakNextAnswer, result != .loading, result != .none else { return }
+            speakNextAnswer = false
+            if let text = result.copyText { Speaker.shared.toggle(text) }
+        }
+    }
+    /// Set when the mic hands over a question; the next real answer is spoken, then it clears.
+    var speakNextAnswer = false
     /// When a live text answer to a time-sensitive question was fetched; the card shows it as "as of". Nil otherwise.
     var textAsOf: Freshness? = nil
     /// Why the free AI gave no answer for the current result, when its call failed. Nil otherwise.
@@ -110,7 +119,7 @@ final class AppState {
         _ = pathMonitor
         #if canImport(Speech)
         voice.onTranscript = { [weak self] in self?.queryText = $0 }
-        voice.onFinish = { [weak self] in self?.queryText = $0; self?.performQuery() }
+        voice.onFinish = { [weak self] in self?.queryText = $0; self?.speakNextAnswer = true; self?.performQuery() }
         #endif
         loadPreferences()
         rotatePlaceholder()

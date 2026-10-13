@@ -330,7 +330,7 @@ var T=I18N.t;
     });
   }
   document.getElementById('clear').addEventListener('click',function(){ hist.clear(); paintRecent(); });
-  async function run(query){
+  async function run(query, opts){
     query=(query||q.value||q.placeholder).trim(); if(!query) return;
     q.value=query; r.hidden=false; paintFlit();
     newBtn.hidden=true;
@@ -348,6 +348,8 @@ var T=I18N.t;
     // Copy sits next to the answer, first, as on the iPhone.
     if(share) share='<button type="button" data-copy>'+T('Copy')+'</button>'+share;
     r.innerHTML=res.h+(res.credit||share?'<div class="credit">'+(res.credit?'<span>'+res.credit+'</span>':'')+share+'</div>':'');
+    // Voice loop: a question asked out loud gets its answer read back, through the same Listen button.
+    if(opts&&opts.spoken){ var lb=r.querySelector('[data-listen]'); if(lb) lb.click(); }
     newBtn.hidden=false;
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
     // The saved answer is the first 280 characters of the answer's text, on this device only.
@@ -397,7 +399,7 @@ var T=I18N.t;
           heard=t.trim(); q.value=heard;
         };
         s.onerror=function(e){ if(e && e.error!=='no-speech' && e.error!=='network') heard=''; };
-        s.onend=function(){ rec=null; paintMic('idle'); if(heard) run(heard); };
+        s.onend=function(){ rec=null; paintMic('idle'); if(heard) run(heard,{spoken:true}); };
         rec=s; s.start(); paintMic('listening');
       }catch(err){ rec=null; paintMic('idle'); }
     });

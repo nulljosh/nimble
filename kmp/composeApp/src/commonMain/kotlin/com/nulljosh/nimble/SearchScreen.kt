@@ -75,6 +75,8 @@ fun SearchScreen(
     var query by remember { mutableStateOf("") }
     var answer by remember { mutableStateOf<Answer?>(null) }
     var loading by remember { mutableStateOf(false) }
+    /** Voice loop: set when the mic hands over a question, so its answer is read back once. */
+    var speakNext by remember { mutableStateOf(false) }
     var recent by remember { mutableStateOf(history.list()) }
     var showHistory by remember { mutableStateOf(false) }
     var showSettings by remember { mutableStateOf(false) }
@@ -83,7 +85,7 @@ fun SearchScreen(
 
     // Only a real answer is worth remembering; a miss is not. The answer's text is kept with the question, on this device only.
     fun record(q: String, a: Answer) {
-        if (a is Answer.Miss) return
+        if (a is Answer.Miss) { speakNext = false; return }
         history.add(q, historySnippet(a))
         recent = history.list()
     }
@@ -184,7 +186,7 @@ fun SearchScreen(
             keyboardActions = KeyboardActions(onSearch = { submit() }),
             // The mic sits at the trailing edge; the first transcript fills the field and runs.
             trailingIcon = if (voice != null) {
-                { MicButton(theme.muted) { voice.listen { heard -> submit(heard) } } }
+                { MicButton(theme.muted) { voice.listen { heard -> speakNext = true; submit(heard) } } }
             } else null,
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
@@ -218,6 +220,10 @@ fun SearchScreen(
                         if (speech != null && a !is Answer.Miss && !say.isNullOrBlank()) {
                             // Listen: the phone's own voice reads the answer. A second tap stops it.
                             var speaking by remember(a) { mutableStateOf(false) }
+                            // A spoken question hears its answer without a tap.
+                            LaunchedEffect(a) {
+                                if (speakNext) { speakNext = false; speaking = true; speech.speak(say) { speaking = false } }
+                            }
                             Spacer(Modifier.height(12.dp))
                             ToolButton(if (speaking) "Stop" else "Listen", theme) {
                                 if (speaking) { speech.speak(null) {}; speaking = false }

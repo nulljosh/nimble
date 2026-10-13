@@ -20,3 +20,19 @@ final class SpeakerTests: XCTestCase {
         XCTAssertNil(s.speaking)
     }
 }
+
+@MainActor
+final class VoiceLoopTests: XCTestCase {
+    func testASpokenQuestionsAnswerIsReadBackOnce() {
+        let state = AppState()
+        state.speakNextAnswer = true
+        state.result = .loading
+        XCTAssertTrue(state.speakNextAnswer, "loading is not the answer yet")
+        state.result = .math("10", steps: [])
+        XCTAssertEqual(Speaker.shared.speaking, "10")
+        XCTAssertFalse(state.speakNextAnswer)
+        Speaker.shared.stop()
+        state.result = .math("20", steps: [])
+        XCTAssertNil(Speaker.shared.speaking, "a typed question is not read aloud")
+    }
+}
