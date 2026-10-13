@@ -5,5 +5,36 @@
 	<!-- Nimble Sans ships at the bundle root (fonts/ in project.yml). macOS reads the fonts from here. -->
 	<key>ATSApplicationFontsPath</key>
 	<string>.</string>
+	<!-- nimble://ask?q=... asks a question, the same link the iPhone uses. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.nulljosh.nimble</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nimble</string>
+			</array>
+		</dict>
+	</array>
+	<!-- Right-click selected text anywhere, Services, Ask Nimble. AskService.swift answers it. -->
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Ask Nimble</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>askNimble</string>
+			<key>NSPortName</key>
+			<string>Nimble</string>
+			<key>NSSendTypes</key>
+			<array>
+				<string>public.utf8-plain-text</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

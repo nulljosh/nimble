@@ -23,6 +23,12 @@ struct NimbleApp: App {
                     }
                     configureWindow()
                     GlobalHotkey.register { GlobalHotkey.toggleNimble { showMain() } }
+                    // ponytail: registered when the HUD first appears, which is at launch; move to an app delegate if that changes.
+                    AskService.shared.ask = { ask($0) }
+                    NSApp.servicesProvider = AskService.shared
+                }
+                .onOpenURL { url in
+                    if let q = AskService.question(from: url) { ask(AskService.clean(q)) }
                 }
         }
         .windowStyle(.hiddenTitleBar)
@@ -54,6 +60,13 @@ struct NimbleApp: App {
                 .environment(appState)
         }
         .menuBarExtraStyle(.window)
+    }
+
+    private func ask(_ q: String) {
+        guard !q.isEmpty else { return }
+        appState.queryText = q
+        appState.performQuery()
+        showMain()
     }
 
     private func showMain() {
