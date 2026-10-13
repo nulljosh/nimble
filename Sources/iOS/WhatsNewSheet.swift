@@ -7,6 +7,7 @@ private let whatsNewBullets = [
     "Three tabs: Ask, History and Settings",
     "Works offline: the opening lines of 9,000 Wikipedia articles, downloaded once",
     "When sources disagree, you see both answers, and live answers say how fresh they are",
+    "Ask Nimble from Siri, Spotlight, Shortcuts and the Action button",
 ]
 
 struct WhatsNewSheet: View {

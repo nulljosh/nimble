@@ -4,6 +4,7 @@ import UIKit
 /// The iPhone shell: Ask, History and Settings in the system tab bar.
 struct RootTabView: View {
     @Environment(AppState.self) private var state
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         // Tab labels in the Nimble face at the web's small size. The bar itself stays cream, like the screens.
@@ -43,9 +44,21 @@ struct RootTabView: View {
         .environment(state)
         .tint(state.theme.ink)
         .preferredColorScheme(state.theme.colorScheme)
+        // A question parked by the "Ask Nimble" intent (Siri, Spotlight, Shortcuts, Action button) runs on the Ask tab.
+        .onChange(of: scenePhase) { _, phase in if phase == .active { runParkedQuestion() } }
         .onAppear {
+            runParkedQuestion()
             guard QASandbox.launch, UserDefaults.standard.bool(forKey: "shotHistory") else { return }
             for stub in QASandbox.historyStubs.reversed() { state.history.add(stub.q, answer: stub.a) }
         }
+    }
+
+    private func runParkedQuestion() {
+        let store = NimbleStorage.defaults()
+        guard let q = store.string(forKey: AskNimbleIntent.pendingKey)?.trimmingCharacters(in: .whitespacesAndNewlines), !q.isEmpty else { return }
+        store.removeObject(forKey: AskNimbleIntent.pendingKey)
+        tab = 0
+        state.queryText = q
+        state.performQuery()
     }
 }

@@ -2,7 +2,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v6.0.2-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v6.1.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -40,7 +40,7 @@ Every answer names its source, and time-sensitive answers carry an "as of" line.
 
 ## What else it does
 
-Weather, currency, local time, word origins, markets and the latest game score come back as cards. Recent questions sit under the field on every surface and never leave the device. On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer, and you can select several to share or delete. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. A home screen widget keeps your last answer on iPhone; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Five languages: English, French, Spanish, Chinese, Punjabi.
+Weather, currency, local time, word origins, markets and the latest game score come back as cards. Recent questions sit under the field on every surface and never leave the device. On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer, and you can select several to share or delete. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. A home screen widget keeps your last answer on iPhone, and "Ask Nimble" works from Siri, Spotlight, Shortcuts and the Action button; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Five languages: English, French, Spanish, Chinese, Punjabi.
 
 ## Offline pack
 
