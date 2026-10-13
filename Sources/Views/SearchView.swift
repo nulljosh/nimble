@@ -71,25 +71,16 @@ struct SearchView: View {
                     .font(.nimbleSmall)
                     .foregroundStyle(Color.soft)
                     .disabled(showingHistory || state.history.entries.isEmpty)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 // Theme lives in Settings only, the swatch here duplicated the grid
                 // in SettingsView. (iOS keeps its inline picker: no menu bar there.)
-                Spacer()
                 Text("Nimble v\(Bundle.main.marketingVersion)")
                     .font(.nimbleMicro)
                     .foregroundStyle(Color.dim)
                     .tracking(0.8)
                     .textCase(.uppercase)
-                Spacer()
-                HStack(spacing: 10) {
-                    Button(action: { state.copyResultText() }) {
-                        Text("⎘")
-                            .font(.nimbleCaption)
-                            .foregroundStyle(Color.dim)
-                    }
-                    .buttonStyle(.plain)
-                    .help("Copy Result")
-                    .accessibilityLabel("Copy Result")
-                }
+                // Copy moved onto the answer card, beside Listen and Share; this keeps the version centred.
+                Color.clear.frame(maxWidth: .infinity, maxHeight: 1)
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 9)

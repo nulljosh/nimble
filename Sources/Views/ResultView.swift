@@ -361,9 +361,7 @@ struct TextAnswerView: View {
 /// The answer card: hairline border, 24pt padding, an eyebrow, the answer, then one row with the source and Share.
 struct AnswerCard<Content: View, Footer: View>: View {
     let shareText: String?
-#if os(iOS)
     @State private var copied = false
-#endif
     /// The quiet "as of" line under the answer, at the same left edge as the source row. Nil when there is none.
     let freshness: String?
     /// The header word: "Answer" by default, "Background" for the generic topic page.
@@ -413,9 +411,13 @@ struct AnswerCard<Content: View, Footer: View>: View {
                     .foregroundStyle(Color.dim)
                 Spacer(minLength: 8)
                 if let shareText, !shareText.isEmpty {
-#if os(iOS)
                     Button {
+                        #if os(iOS)
                         UIPasteboard.general.string = shareText
+                        #else
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(shareText, forType: .string)
+                        #endif
                         copied = true
                         Task { try? await Task.sleep(for: .seconds(1)); copied = false }
                     } label: {
@@ -427,7 +429,6 @@ struct AnswerCard<Content: View, Footer: View>: View {
                     .buttonStyle(.plain)
                     .minimumTapTarget()
                     .accessibilityLabel("Copy")
-#endif
                     let listening = Speaker.shared.speaking == shareText
                     Button { Speaker.shared.toggle(shareText) } label: {
                         Text(listening ? String(localized: "Stop") : String(localized: "Listen"))
@@ -444,6 +445,7 @@ struct AnswerCard<Content: View, Footer: View>: View {
                             .foregroundStyle(Color.dim)
                             .underline()
                     }
+                    .buttonStyle(.plain)  // the Mac drew a grey bezel the other two links don't have
                     .minimumTapTarget()
                     .accessibilityLabel("Share")
                 }
