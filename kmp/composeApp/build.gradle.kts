@@ -37,8 +37,8 @@ android {
         applicationId = "com.nulljosh.nimble.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 53
-        versionName = "6.7.1"
+        versionCode = 54
+        versionName = "6.8.0"
     }
 }
 

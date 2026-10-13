@@ -9,6 +9,7 @@ private let whatsNewBullets = [
     "When sources disagree, you see both answers, and live answers say how fresh they are",
     "Ask Nimble from Siri, Spotlight, Shortcuts and the Action button",
     "Private mode in Settings: nothing leaves your phone",
+    "Share text or a link to Ask Nimble, and the app answers it when you open it",
 ]
 
 struct WhatsNewSheet: View {

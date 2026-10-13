@@ -7,7 +7,7 @@ settings:
     # and signing fails with "requires a development team".
     DEVELOPMENT_TEAM: QMM486NPYC
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "6.7.1"
+    MARKETING_VERSION: "6.8.0"
     CURRENT_PROJECT_VERSION: "45"
 targets:
   Nimble:
@@ -101,6 +101,7 @@ targets:
         CODE_SIGN_ENTITLEMENTS: Nimble-iOS.entitlements
     dependencies:
       - target: NimbleWidget
+      - target: NimbleShare
   # Home screen widget: the last answer, tap to ask. Reads the app group the app writes.
   NimbleWidget:
     type: app-extension
@@ -122,6 +123,27 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: Nimble
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: Widget/NimbleWidget.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"
+  # Share sheet: "Ask Nimble" parks the shared text or link in the app group; the app asks it on open.
+  NimbleShare:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: ShareExtension
+        excludes:
+          - "*.plist"
+          - "*.entitlements"
+      - path: Sources/Models/SharedAnswer.swift
+      - path: Sources/Models/QASandbox.swift
+      - path: Sources/Views/Tokens.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios.share
+        PRODUCT_NAME: NimbleShare
+        INFOPLIST_FILE: ShareExtension/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: ShareExtension/NimbleShare.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
   NimbleTests:
     type: bundle.unit-test

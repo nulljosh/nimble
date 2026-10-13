@@ -54,8 +54,10 @@ struct RootTabView: View {
     }
 
     private func runParkedQuestion() {
-        let store = NimbleStorage.defaults()
-        guard let q = store.string(forKey: AskNimbleIntent.pendingKey)?.trimmingCharacters(in: .whitespacesAndNewlines), !q.isEmpty else { return }
+        // The intent parks in the app's own defaults; the share extension can only reach the app group.
+        let stores = [NimbleStorage.defaults(), NimbleStorage.sharedDefaults()].compactMap { $0 }
+        guard let store = stores.first(where: { !($0.string(forKey: AskNimbleIntent.pendingKey) ?? "").isEmpty }),
+              let q = store.string(forKey: AskNimbleIntent.pendingKey)?.trimmingCharacters(in: .whitespacesAndNewlines), !q.isEmpty else { return }
         store.removeObject(forKey: AskNimbleIntent.pendingKey)
         tab = 0
         state.queryText = q

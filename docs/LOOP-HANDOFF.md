@@ -6,7 +6,7 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 
 ## Where things stand
 
-- Version 6.7.1: the What's new sheet measures itself again, so the button never hides. 6.7.0: Listen on Android (TextToSpeech, CI-proven only). 6.6.0: Listen on iPhone and Mac (system voice, Stop on a second tap or when the card goes away). Since 6.0: Ask Nimble in Siri, Spotlight, Shortcuts and the Action button on iPhone (6.1.0, not yet run on a device). Private mode on the web (6.2.0), iPhone and Mac (6.3.0) and Android (6.4.0, proven in CI only). A Listen button on the web reads answers aloud (6.5.0). Related links must carry the answer's own words (6.0.2), and the What's new sheet scrolls at large text (6.0.1).
+- Version 6.8.0: Ask Nimble in the iPhone share sheet (NimbleShare extension parks the text in the app group; the app asks it on open; the extension UI itself not yet run through a real share sheet). 6.7.1: the What's new sheet measures itself again, so the button never hides. 6.7.0: Listen on Android (TextToSpeech, CI-proven only). 6.6.0: Listen on iPhone and Mac (system voice, Stop on a second tap or when the card goes away). Since 6.0: Ask Nimble in Siri, Spotlight, Shortcuts and the Action button on iPhone (6.1.0, not yet run on a device). Private mode on the web (6.2.0), iPhone and Mac (6.3.0) and Android (6.4.0, proven in CI only). A Listen button on the web reads answers aloud (6.5.0). Related links must carry the answer's own words (6.0.2), and the What's new sheet scrolls at large text (6.0.1).
 - Tests: `npm test` 298 (297 pass, 1 skipped). Swift 223 (`xcodebuild test`, 2 skipped). Kotlin `:shared:jvmTest` runs in CI only, because this Mac has no Java.
 - Worker: the quota fix has been live since 17:10 PDT on 2026-10-12. Qwen answers first, and Gemma only joins for time-sensitive or number questions. Answers are cached for 6h, and a daily guard stops at 8,500 estimated neurons. `GET https://nimble-answers.trommatic.workers.dev/stats` gives the day's numbers (per data center). It counts as proven only after the 2026-10-13 17:00 PDT reset passes with no dry day. Until then, nothing is called fixed.
 - Price: free. The $0.99 flip waits until the free AI is proven to last all day. Joshua runs it himself.
@@ -16,7 +16,7 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 ## Next, in order
 
 1. Read /stats once per tick. After the 2026-10-13 17:00 PDT reset, report the result to Joshua.
-2. Ask Nimble about this: a share extension on iPhone and Mac that answers the selected text or a link.
+2. Ask Nimble about this on the Mac (iPhone shipped in 6.8.0): a share extension that can open the app with NSWorkspace.
 3. Ask Nimble as a Shortcuts action on the Mac.
 4. Then the next biggest A+ gap from roadmap.md v7 to v8, checked against the code first.
 
