@@ -343,6 +343,8 @@ var T=I18N.t;
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
     last={q:query, a:res.a};
     var share=shareText(res.a)?'<button type="button" data-share>'+T('Share')+'</button>':'';
+    // Listen: the browser's own voice reads the answer aloud; nothing is sent anywhere.
+    if(share&&'speechSynthesis' in window) share='<button type="button" data-listen>'+T('Listen')+'</button>'+share;
     r.innerHTML=res.h+(res.credit||share?'<div class="credit">'+(res.credit?'<span>'+res.credit+'</span>':'')+share+'</div>':'');
     newBtn.hidden=false;
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
@@ -430,6 +432,15 @@ var T=I18N.t;
   mascotBtn.addEventListener('click',function(){ mascot(mascot()==='fen'?'flit':'fen'); paintMascot(); });
   // The consent card lives inside the result; Allow and Don't allow re-run the same question.
   r.addEventListener('click',function(e){
+    var lb=e.target.closest('[data-listen]');
+    if(lb){
+      var ss=window.speechSynthesis;
+      if(ss.speaking){ ss.cancel(); lb.textContent=T('Listen'); return; }
+      var say=last&&shareText(last.a); if(!say) return;
+      var u=new SpeechSynthesisUtterance(say); u.lang=document.documentElement.lang||'en';
+      u.onend=u.onerror=function(){ lb.textContent=T('Listen'); };
+      lb.textContent=T('Stop'); ss.speak(u); return;
+    }
     if(e.target.closest('[data-share]')){ shareAnswer(); return; }
     var b=e.target.closest('[data-consent]'); if(!b) return;
     aiConsent(b.dataset.consent); paintAI();
