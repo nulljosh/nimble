@@ -116,14 +116,19 @@ function topicOf(photoPage, refs) {
 // The Wikipedia pages behind an AI answer, up to three, each with the same word-overlap test as the
 // photo. The client lists one of them as a second source next to DDG. URLs match DDG's format
 // (underscores, the article's own title) so the client can dedupe them.
-function groundingRefs(answer, pages) {
+export function groundingRefs(answer, pages, q = "") {
   const keys = (s) => (s.toLowerCase().match(/[a-z]{4,}/g) || []).filter((w) => !GLUE.has(w));
   const want = [...new Set(keys(answer))];
   if (!want.length) return [];
+  // The words the answer adds to the question carry the answer ("Paris"); a page that only repeats the question
+  // ("Capital punishment in France") must not pass on echoed words alone.
+  const asked = new Set(keys(q));
+  const added = want.filter((w) => !asked.has(w));
   return pages
     .filter((p) => p.title && p.extract && !/^list of /i.test(p.title))
     .filter((p) => {
       const have = new Set(keys(p.extract));
+      if (added.length && added.filter((w) => have.has(w)).length < Math.ceil(added.length * 0.6)) return false;
       return want.filter((w) => have.has(w)).length >= Math.ceil(want.length * 0.6);
     })
     .slice(0, 3)
@@ -317,7 +322,7 @@ export default {
       const known = o.answer !== "UNKNOWN";
       // A disagreement has no photo: the sources do not say which answer is right, so no picture leans either way.
       const photo = known && !o.disagree ? await photoFor(q, o.answer) : null;
-      const refs = known ? groundingRefs(o.answer, pages) : [];
+      const refs = known ? groundingRefs(o.answer, pages, q) : [];
       const topic = known ? topicOf(photo?.page, refs) : null;
       const body = { ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) };
       if (cKey && known && !o.aiError) await cachePut(cKey, body, isTimeSensitive(q) ? TTL_TIMELY : TTL_CACHE);
