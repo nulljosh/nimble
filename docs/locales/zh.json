@@ -112,5 +112,10 @@
   "Remove offline pack": "删除离线包",
   "Could not download the offline pack. Try again on a connection.": "无法下载离线包。请在联网时重试。",
   "Offline pack · Wikipedia (CC BY-SA)": "离线包 · 维基百科 (CC BY-SA)",
-  "Not in the offline pack. Math, units and graphs still work offline.": "不在离线包中。数学、单位和图表离线仍可使用。"
+  "Not in the offline pack. Math, units and graphs still work offline.": "不在离线包中。数学、单位和图表离线仍可使用。",
+  "Private: on": "隐私模式：开",
+  "Private: off": "隐私模式：关",
+  "Nothing leaves this device. Click to turn private mode off": "没有任何内容离开此设备。点击关闭隐私模式",
+  "Click to answer only from this device": "点击后只在此设备上回答",
+  "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": "隐私模式已开启，没有任何内容离开此设备。数学、单位和图表可用。下载离线答案即可查询事实。"
 }

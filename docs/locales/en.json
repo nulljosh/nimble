@@ -112,5 +112,10 @@
   "Remove offline pack": "Remove offline pack",
   "Could not download the offline pack. Try again on a connection.": "Could not download the offline pack. Try again on a connection.",
   "Offline pack · Wikipedia (CC BY-SA)": "Offline pack · Wikipedia (CC BY-SA)",
-  "Not in the offline pack. Math, units and graphs still work offline.": "Not in the offline pack. Math, units and graphs still work offline."
+  "Not in the offline pack. Math, units and graphs still work offline.": "Not in the offline pack. Math, units and graphs still work offline.",
+  "Private: on": "Private: on",
+  "Private: off": "Private: off",
+  "Nothing leaves this device. Click to turn private mode off": "Nothing leaves this device. Click to turn private mode off",
+  "Click to answer only from this device": "Click to answer only from this device",
+  "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts."
 }

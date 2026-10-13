@@ -2,7 +2,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v6.1.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v6.2.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -44,7 +44,7 @@ Weather, currency, local time, word origins, markets and the latest game score c
 
 ## Offline pack
 
-You can download a small pack of Wikipedia article intros once: the top 9,000 English articles, about 1.9 MB. It works on the web, iPhone, Mac and Android. On the web, tap "Download offline answers" in the menu; on the apps, use the Offline answers row in Settings. After that, when the network is gone, questions about those articles still get an answer, with the article link and the date the pack was built. Nothing downloads on its own. Math is offline everywhere; units and graphs are offline on the web, iPhone and Mac. See `docs/pack/README.md` for the format and the license.
+You can download a small pack of Wikipedia article intros once: the top 9,000 English articles, about 1.9 MB. It works on the web, iPhone, Mac and Android. On the web, tap "Download offline answers" in the menu; on the apps, use the Offline answers row in Settings. After that, when the network is gone, questions about those articles still get an answer, with the article link and the date the pack was built. Nothing downloads on its own. On the web, Private mode (in the menu) goes further: with it on, no question leaves the page, and answers come only from math, units, graphs and this pack. Math is offline everywhere; units and graphs are offline on the web, iPhone and Mac. See `docs/pack/README.md` for the format and the license.
 
 ## Development
 

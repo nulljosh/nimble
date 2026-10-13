@@ -30,8 +30,10 @@ a { color: inherit; }
 .brand img { width: 30px; height: 30px; border-radius: var(--radius-sm); }
 .top nav a, .top nav button { display: flex; align-items: center; min-height: var(--tap); padding: 0; border: 0; background: none; font: inherit; font-size: var(--fs-15); color: var(--text-mid); text-decoration: none; cursor: pointer; }
 .top nav a:hover, .top nav button:hover { color: var(--text); }
+/* display:flex above beats the hidden attribute, so Download and Remove offline pack both showed at once. */
+.top nav button[hidden] { display: none; }
 /* The offline pack buttons are long labels; the header keeps every tap target at 44px or more. */
-.top nav #ai, .top nav #mascot, .top nav #pack-get, .top nav #pack-drop { flex: none; white-space: nowrap; }
+.top nav #ai, .top nav #private, .top nav #mascot, .top nav #pack-get, .top nav #pack-drop { flex: none; white-space: nowrap; }
 .menu-btn { display: grid; place-items: center; flex: none; width: var(--tap); height: var(--tap); padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--text); cursor: pointer; }
 .menu-btn:hover { color: var(--yellow-deep); }
 .menu-btn svg { width: 20px; height: 20px; }
@@ -246,7 +248,7 @@ form { position: relative; }
 <header class="top" id="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
   <button type="button" class="menu-btn" id="menu-btn" aria-controls="nav" aria-expanded="false" aria-label="Menu" data-i18n-aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
-  <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="mascot"></button><button type="button" id="pack-get" data-i18n="Download offline answers">Download offline answers</button><button type="button" id="pack-drop" hidden data-i18n="Remove offline pack">Remove offline pack</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
+  <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="private"></button><button type="button" id="mascot"></button><button type="button" id="pack-get" data-i18n="Download offline answers">Download offline answers</button><button type="button" id="pack-drop" hidden data-i18n="Remove offline pack">Remove offline pack</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
 <div class="scrim" id="scrim" aria-hidden="true"></div>
 <main>
@@ -336,7 +338,7 @@ var T=I18N.t;
     // Shareable: /app?q=... opens straight onto the answer.
     history.replaceState(null,'','?q='+encodeURIComponent(query));
     await packReady;
-    var res=await renderAnswer(query,{t:T, pack:OFFLINE_PACK});
+    var res=await renderAnswer(query,{t:T, pack:OFFLINE_PACK, privateMode:privateOn()});
     if(q.value.trim()!==query) return;  // a newer question already went out
     r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
     last={q:query, a:res.a};
@@ -345,7 +347,7 @@ var T=I18N.t;
     newBtn.hidden=false;
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
     // The saved answer is the first 280 characters of the answer's text, on this device only.
-    if(['consent','none','offline','pack-miss'].indexOf(res.kind)<0){ var snip=shareText(res.a); hist.add(query, typeof snip==='string'?snip:null); paintRecent(); }
+    if(['consent','none','offline','pack-miss','private-nopack'].indexOf(res.kind)<0){ var snip=shareText(res.a); hist.add(query, typeof snip==='string'?snip:null); paintRecent(); }
   }
   // Share sheet with the PNG where the browser can, a download of nimble-answer.png where it can't.
   async function shareAnswer(){
@@ -409,6 +411,15 @@ var T=I18N.t;
     if(c===null){ r.hidden=false; newBtn.hidden=true; paintFlit(); r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient(),T); return; }
     aiConsent(c==='yes'?'no':'yes'); paintAI();
   });
+  // Private mode: answers come from math, units, graphs and the offline pack only; no request leaves the page.
+  var privBtn=document.getElementById('private');
+  function privateOn(){ try{ return localStorage.getItem('nimble.private')==='1'; }catch(err){ return false; } }
+  function paintPrivate(){
+    privBtn.textContent=T(privateOn()?'Private: on':'Private: off');
+    privBtn.title=T(privateOn()?'Nothing leaves this device. Click to turn private mode off':'Click to answer only from this device');
+  }
+  paintPrivate();
+  privBtn.addEventListener('click',function(){ try{ privateOn()?localStorage.removeItem('nimble.private'):localStorage.setItem('nimble.private','1'); }catch(err){} paintPrivate(); });
   // Mascot switch: Flit or Fen. Repaints the empty state at once; the next loading card picks it up too.
   var mascotBtn=document.getElementById('mascot');
   function paintMascot(){

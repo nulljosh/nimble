@@ -975,6 +975,8 @@ async function answer(query, opts={}){
   const ge = graphExpr(query), svg = ge && graph(ge);
   if(svg) return {kind:"graph", expr:ge, svg};
   // opts.pack: the downloaded offline pack, when the page has one. Offline it is the only answer source left.
+  // Private mode: nothing leaves the device. Same path as offline, with its own message when there is no pack.
+  if(opts.privateMode) return opts.pack ? (packAnswer(query, opts.pack) || {kind:"pack-miss"}) : {kind:"private-nopack"};
   if(typeof navigator!=="undefined" && navigator.onLine===false) return opts.pack ? (packAnswer(query, opts.pack) || {kind:"pack-miss"}) : {kind:"offline"};
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
@@ -1143,6 +1145,7 @@ async function renderAnswer(query, opts){
   }
   else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
   else if(a.kind==="offline"){ h+="<p>"+T("You're offline. Math, units and graphs still work.")+"</p>"; }
+  else if(a.kind==="private-nopack"){ h+="<p>"+T("Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.")+"</p>"; }
   else if(a.kind==="pack-miss"){ h+="<p>"+T("Not in the offline pack. Math, units and graphs still work offline.")+"</p>"; }
   else if(a.kind==="pack"){
     // Offline pack hit: the entry's first sentences, credited to Wikipedia with its article link and the pack's build date.

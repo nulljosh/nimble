@@ -112,5 +112,10 @@
   "Remove offline pack": "Quitar el paquete sin conexión",
   "Could not download the offline pack. Try again on a connection.": "No se pudo descargar el paquete sin conexión. Inténtalo con conexión.",
   "Offline pack · Wikipedia (CC BY-SA)": "Paquete sin conexión · Wikipedia (CC BY-SA)",
-  "Not in the offline pack. Math, units and graphs still work offline.": "No está en el paquete sin conexión. Las matemáticas, unidades y gráficos siguen funcionando sin conexión."
+  "Not in the offline pack. Math, units and graphs still work offline.": "No está en el paquete sin conexión. Las matemáticas, unidades y gráficos siguen funcionando sin conexión.",
+  "Private: on": "Privado: sí",
+  "Private: off": "Privado: no",
+  "Nothing leaves this device. Click to turn private mode off": "Nada sale de este dispositivo. Haz clic para desactivar el modo privado",
+  "Click to answer only from this device": "Haz clic para responder solo desde este dispositivo",
+  "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": "El modo privado está activado, así que nada sale de este dispositivo. Las matemáticas, unidades y gráficos funcionan. Descarga las respuestas sin conexión para consultar datos."
 }

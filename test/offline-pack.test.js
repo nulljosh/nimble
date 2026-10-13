@@ -159,3 +159,15 @@ test("the web's relation table has no population rule: the pack keeps its own", 
   const a = E.packAnswer("population of japan", REAL);
   assert.ok(a === null || a.kind === "pack");
 });
+
+test("private mode: online, still answers only from the pack and never touches the network", async () => {
+  let calls = 0;
+  globalThis.fetch = async () => { calls++; throw new Error("private mode must not fetch"); };
+  const hit = await E.answer("who wrote hamlet", { pack: PACK, privateMode: true });
+  assert.equal(hit.kind, "pack");
+  assert.equal((await E.answer("zqxv blorptastic flimflam", { pack: PACK, privateMode: true })).kind, "pack-miss");
+  assert.equal((await E.answer("who wrote hamlet", { privateMode: true })).kind, "private-nopack");
+  assert.equal((await E.answer("2 + 2", { privateMode: true })).kind, "math");
+  assert.equal((await E.answer("bitcoin price", { pack: PACK, privateMode: true })).kind, "pack-miss", "market quotes need the network");
+  assert.equal(calls, 0);
+});
