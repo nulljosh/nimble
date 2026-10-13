@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -64,6 +65,8 @@ fun SearchScreen(
     speech: Speech? = null,
     /** The offline pack's store on this platform, or null: no Settings button when null. */
     packStore: OfflinePackStore? = null,
+    /** A question shared in from another app (Android share sheet); asked as soon as it arrives. */
+    sharedQuestion: String? = null,
 ) {
     val client = remember { AnswerClient(offlinePack = { packStore?.load() }) }
     val scope = rememberCoroutineScope()
@@ -110,6 +113,13 @@ fun SearchScreen(
             loading = false
             record(q, a)
         }
+    }
+
+    LaunchedEffect(sharedQuestion) {
+        val q = sharedQuestion ?: return@LaunchedEffect
+        showHistory = false
+        showSettings = false
+        submit(q)
     }
 
     if (showSettings && packStore != null) {
