@@ -20,7 +20,7 @@ Versions are semver: each roadmap major closes as a real major tag (7.0.0, 8.0.0
 **v7 Reliability, closes as 7.0.0.** Done in 6.25 to 6.37 (Groq first, global /stats with latency, shorter grounding, burst handling, Kotlin source-topic, persisted theme, accessibility pass). 7.0.0 is cut once the full exam reads 154 of 154 after the 17:00 PDT cache turnover.
 
 **v8 Everywhere, 7.x closing as 8.0.0.**
-1. 7.1 Linux desktop shot read by eye (capture fixed in 29e2eca); fix what it shows.
+1. 7.1 Done, no version: Linux desktop shot read by eye after the capture fix (29e2eca), clean, matches Windows (Nim waves, header clean, Settings present).
 2. 7.2 Android emulator pass: SDK, platform-tools and an arm64 image on the LaCie (multi-GB, never on the Mac), boot, shoot Ask, History and Settings, fix what shows.
 3. 7.3 Native accessibility: every iPhone and Mac control audited for a VoiceOver label by reading the views, Dynamic Type at the largest size screenshotted with the -shot flags, Reduce Motion already done. A device VoiceOver walk is J.
 4. 7.4 More languages: Compose strings are hardcoded English; move them to a string table and ship the languages Swift already has.
@@ -46,7 +46,7 @@ Roadmap.md is stale and untouched; this list is the roadmap.
 ## Next, in order
 
 1. Tag 6.37.0 (fb2ce04) when Build native apps is green.
-2. 7.1: read the Linux shot from the rerun (run 39156134964).
+2. 7.2 Android emulator pass (SDK on the LaCie).
 3. After 17:00 PDT: `node test/exam.js`, expect 154 of 154, then cut 7.0.0.
 4. Then the sliced list above, top down. Read /stats once per tick.
 
