@@ -24,7 +24,7 @@ Each major is a bundle of minors, one slice per version, same release flow. Road
 
 ## Next, in order
 
-1. v7 next: watch the Groq gauge in /stats for a day, then trim the grounding context and re-run the exam; run `LAST=N node test/exam.js` or the full exam once per slice (Groq caps are separate from Cloudflare's, but a full run still burns about 110k Groq tokens).
+1. v7 next: the grounding trim (Wikipedia context capped at 2800 chars total, 1000 per page) is deployed but not committed, and the full 154-question exam is running against it. Commit worker/worker.js once the exam reads clean, then watch the Groq gauge in /stats for a day; run `LAST=N node test/exam.js` or the full exam once per slice (Groq caps are separate from Cloudflare's, but a full run still burns about 110k Groq tokens).
 2. Kotlin: source-topic port, theme swatches into Settings.
 3. Read /stats once per tick.
 
