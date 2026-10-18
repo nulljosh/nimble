@@ -1,0 +1,7 @@
+/* Nimble brand tokens. The accent is the only colour this app owns; spacing, radii and type come from the shared system. */
+:root {
+  --accent: #f08a00;
+  --accent-light: #ffc23d;
+  --accent-deep: #f08a00;
+  --accent-ring: color-mix(in srgb, #f08a00 30%, transparent);
+}
