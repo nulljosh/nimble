@@ -1,6 +1,6 @@
 # Nimble Technical Whitepaper
 
-**v6.24.2** | October 2026
+**v6.25.0** | October 2026
 
 Ask a question. Get one sentence back.
 
@@ -22,14 +22,17 @@ network call fires:
 2. **Live cards**: weather, currency, local time, markets (crypto, currency pairs,
    stocks) and sports scores each have their own pattern-gated source. A stock quote
    that cannot be fetched says "Quote unavailable right now" and never guesses.
-3. **Everything else**: the answer proxy on Cloudflare Workers AI, with DuckDuckGo
-   and Wikipedia behind it.
+3. **Everything else**: the answer proxy, which asks Groq's free models first and Cloudflare
+   Workers AI second, with DuckDuckGo and Wikipedia behind it.
 
 ## The Answer Proxy
 
 `worker/worker.js` is the one place models run. It is built to stay inside Workers AI's
 free tier of 10,000 neurons a day:
 
+- **Groq first.** With a key set, `openai/gpt-oss-120b`, then `qwen/qwen3.8-27b`, then
+  `openai/gpt-oss-20b` answer from Groq's free tier, each with its own daily cap and no neurons.
+  A capped or failing model hands to the next, then to Workers AI.
 - **One model first.** Qwen3 answers alone unless the question needs a second look:
   a date, a number, a time-sensitive word, or Qwen saying UNKNOWN. Gemma joins then.
 - **A tie-breaker, not a referee.** When Qwen and Gemma split, a third model (Llama)

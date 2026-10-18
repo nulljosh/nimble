@@ -25,7 +25,7 @@ test("consent unset asks and never calls the model", async () => {
   try {
     const a = await E.answer("who wrote Dune");
     assert.equal(a.kind, "consent");
-    assert.match(a.recipient, /Gemma/);
+    assert.match(a.recipient, /Groq and Cloudflare/);
     assert.equal(modelCalls().length, 0);
     assert.equal(calls.filter(c => c.url.includes("?ddg=")).length, 0, "nothing is sent before the visitor chooses");
   } finally { teardown(); }
@@ -88,13 +88,13 @@ test("getter and setter round trip", () => {
 test("recipient names the engine, same text as the native app", () => {
   setup(null);
   try {
-    assert.equal(E.aiRecipient(), "Nimble's answer service (Google Gemma and Alibaba Qwen on Cloudflare)");
+    assert.equal(E.aiRecipient(), "Nimble's answer service (open models from OpenAI, Alibaba and Google, run on Groq and Cloudflare)");
     localStorage.setItem("nimble.ai", JSON.stringify({ engine: "claude", apiKey: "k" }));
     assert.equal(E.aiRecipient(), "Anthropic (Claude)");
     localStorage.setItem("nimble.ai", JSON.stringify({ engine: "ollama" }));
     assert.equal(E.aiRecipient(), "your own Ollama server");
     localStorage.setItem("nimble.ai", JSON.stringify({ engine: "openai" })); // no key: falls back to the house proxy
-    assert.match(E.aiRecipient(), /Gemma/);
+    assert.match(E.aiRecipient(), /Groq and Cloudflare/);
   } finally { teardown(); }
 });
 

@@ -801,7 +801,7 @@ function aiRecipient(){
     case "openai": return "OpenAI";
     case "ollama": return "your own Ollama server";
     case "samantha": return "Samantha, running on this Mac";
-    default: return "Nimble's answer service (Google Gemma and Alibaba Qwen on Cloudflare)";
+    default: return "Nimble's answer service (open models from OpenAI, Alibaba and Google, run on Groq and Cloudflare)";
   }
 }
 // --- Mascot: Flit (default) or Fen, the one in the empty state and the loading card. This device only. ---

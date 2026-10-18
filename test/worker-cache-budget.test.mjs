@@ -241,3 +241,54 @@ test("without the Cache API (plain Node) the route still answers and nothing thr
   assert.equal(calls.length, 1);
   assert.equal(json.source, "Qwen");
 });
+// ---- Groq free tier first ---------------------------------------------------------------------
+
+// Routes Groq calls to `groq(model)`; everything else is the empty Wikipedia stub.
+function stubGroq(groq) {
+  const seen = [];
+  globalThis.fetch = async (url, init) => {
+    if (String(url).startsWith("https://api.groq.com/")) {
+      seen.push(JSON.parse(init.body).model);
+      return groq();
+    }
+    return new Response(JSON.stringify({ query: { pages: [] } }), { status: 200 });
+  };
+  return seen;
+}
+const groqSays = (text) => new Response(JSON.stringify({ choices: [{ message: { content: text } }] }), { status: 200 });
+
+test("groq: with a key, Groq answers first and Workers AI is never called", async () => {
+  installCaches(fakeCaches());
+  stubGroq(() => groqSays("Leo Tolstoy wrote *War and Peace*."));
+  const { json, calls } = await post("who wrote war and peace", { env: { GROQ_KEY: "k" } });
+  assert.equal(json.answer, "Leo Tolstoy wrote War and Peace.");
+  assert.equal(json.source, "Groq");
+  assert.deepEqual(calls, []);
+});
+
+test("groq: every model capped falls back to Qwen on Workers AI", async () => {
+  installCaches(fakeCaches());
+  const seen = stubGroq(() => new Response("{}", { status: 429 }));
+  const { json, calls } = await post("capital of france", { env: { GROQ_KEY: "k" }, answers: { [QWEN]: "Paris." } });
+  assert.equal(seen.length, 3);
+  assert.equal(json.source, "Qwen");
+  assert.deepEqual(calls, [QWEN]);
+});
+
+test("groq: past the Workers AI budget, Groq still answers", async () => {
+  const c = fakeCaches();
+  installCaches(c);
+  await seedToday(c, 142);
+  stubGroq(() => groqSays("Paris."));
+  const { json, calls } = await post("capital of france", { env: { GROQ_KEY: "k" } });
+  assert.equal(json.answer, "Paris.");
+  assert.deepEqual(calls, []);
+});
+
+test("groq: no key, past the budget, still the resting reply", async () => {
+  const c = fakeCaches();
+  installCaches(c);
+  await seedToday(c, 142);
+  const { json } = await post("capital of france");
+  assert.equal(json.resting, true);
+});

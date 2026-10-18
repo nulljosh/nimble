@@ -46,7 +46,7 @@ strong { color: var(--dark); }
   <h2>Three ways to answer</h2>
   <p>You pick how far a question travels. Before any question reaches an AI, the app asks your permission first.</p>
   <ul>
-    <li><strong>Free cloud (the default).</strong> Your question goes to the app's own answering service at <code>nimble-answers.trommatic.workers.dev</code>, which runs Alibaba's Qwen and Google's Gemma models on Cloudflare Workers AI, and to DuckDuckGo and Wikipedia for sources.</li>
+    <li><strong>Free cloud (the default).</strong> Your question goes to the app's own answering service at <code>nimble-answers.trommatic.workers.dev</code>, which asks open models (OpenAI's gpt-oss and Alibaba's Qwen on Groq, with Alibaba's Qwen and Google's Gemma on Cloudflare Workers AI as backup), and to DuckDuckGo and Wikipedia for sources. Groq and Cloudflare each see the question text and nothing else.</li>
     <li><strong>Your own key.</strong> Pick Claude or OpenAI in Settings and enter your key, and the question goes straight from your device to Anthropic or OpenAI. Pick Ollama and it goes to the Ollama server you run. The key stays on your device.</li>
     <li><strong>Private.</strong> Turn on Private mode in Settings and nothing leaves your device. Math, units, graphs and the offline Wikipedia pack still answer; on an iPhone or Mac with Apple Intelligence, Apple's on-device model answers too. Anything else says plainly that it cannot be answered while Private is on.</li>
   </ul>

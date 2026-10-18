@@ -5,6 +5,11 @@
 const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 const LLAMA = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+// Groq's free tier, asked first when the GROQ_KEY secret is set: separate daily caps per model and no neurons.
+// A model that errors or hits its cap (429) hands over to the next, then to Workers AI.
+export const GROQ_MODELS = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"];
+// gpt-oss reasons before it answers: low effort, reasoning dropped from the reply, room for both in max_tokens.
+const groqParams = (model) => (model.startsWith("qwen/") ? { reasoning_format: "hidden", max_tokens: 80 } : { reasoning_effort: "low", include_reasoning: false, max_tokens: 300 });
 // House model: Qwen3 30B bills 4,625 neurons per M input tokens, Gemma 4 26B 9,091 (Workers AI pricing, Oct 2026).
 // Input dominates here (grounding plus question), so Qwen is the one asked first and alone.
 const SYSTEM =
@@ -313,7 +318,8 @@ export default {
       return new Response(hit, { headers: { "content-type": "application/json", ...CORS } });
     }
     // Past the daily estimate: no AI call. The client shows its resting note because aiError is set.
-    if (overBudget(counts)) return json({ answer: "UNKNOWN", resting: true, aiError: BUDGET_NOTE });
+    const resting = () => json({ answer: "UNKNOWN", resting: true, aiError: BUDGET_NOTE });
+    if (overBudget(counts) && !env.GROQ_KEY) return resting();
 
     // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
     const { text: context, pages } = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
@@ -335,16 +341,17 @@ export default {
     const system =
       `${SYSTEM} Today is ${today}. Your training data is out of date; when the reference text below ` +
       `covers the question, trust it over your memory. Never mention the reference text.` + (context ? ` ${GROUNDED}` : "") + (context ? `\n\nReference (live Wikipedia):\n${context}` : "");
+    const messages = [
+      { role: "system", content: system },
+      ...turns.flatMap((t) => [
+        { role: "user", content: `${t.q} /no_think` },
+        { role: "assistant", content: t.a },
+      ]),
+      { role: "user", content: `${q} /no_think` },
+    ];
     const ask = (model) =>
       env.AI.run(model, {
-        messages: [
-          { role: "system", content: system },
-          ...turns.flatMap((t) => [
-            { role: "user", content: `${t.q} /no_think` },
-            { role: "assistant", content: t.a },
-          ]),
-          { role: "user", content: `${q} /no_think` },
-        ],
+        messages,
         temperature: 0,
         max_tokens: 80, // ponytail: neurons bill per token; a sentence never needs 600
       })
@@ -352,22 +359,41 @@ export default {
           const msg = d?.choices?.[0]?.message;
           // Reasoning models sometimes hit max_tokens mid-thought and leave content null;
           // fall back to the last sentence of the reasoning trace.
-          const text = d?.response || msg?.content || msg?.reasoning?.split(/(?<=[.!?])\s+/).pop() || "";
-          // Models narrate the grounding ("not mentioned in the provided reference") instead of
-          // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
-          // The same goes for the model quoting its own rules back ("The instructions say: ... reply exactly UNKNOWN").
-          if (/\b(reference|provided (text|context))\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) return "UNKNOWN";
-          // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
-          // The date is ours, not the answer's; drop the preamble and recapitalize.
-          const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "");
-          // A reply with no letter or digit (a stray "*" from a reasoning trace) is no answer.
-          return /[a-z0-9]/i.test(clean) ? clean[0].toUpperCase() + clean.slice(1) : "UNKNOWN";
+          return cleanReply(d?.response || msg?.content || msg?.reasoning?.split(/(?<=[.!?])\s+/).pop() || "");
         })
         .catch((e) => {
           lastAiError = aiErrorText(e);
           aiFailures.push(lastAiError);
           return "UNKNOWN";
         });
+    // The free Groq models in order. Null when there is no key or every model refused (cap, error), so Workers AI takes over.
+    const askGroq = async () => {
+      for (const model of GROQ_MODELS) {
+        try {
+          const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: { authorization: `Bearer ${env.GROQ_KEY}`, "content-type": "application/json" },
+            body: JSON.stringify({ model, messages, temperature: 0, ...groqParams(model) }),
+          });
+          if (!r.ok) continue;
+          const d = await r.json();
+          // gpt-oss italicizes titles (*War and Peace*); the answer is plain text.
+          return cleanReply((d?.choices?.[0]?.message?.content || "").replace(/\*/g, ""));
+        } catch {}
+      }
+      return null;
+    };
+    const cleanReply = (text) => {
+      // Models narrate the grounding ("not mentioned in the provided reference") instead of
+      // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
+      // The same goes for the model quoting its own rules back ("The instructions say: ... reply exactly UNKNOWN").
+      if (/\b(reference|provided (text|context))\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) return "UNKNOWN";
+      // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
+      // The date is ours, not the answer's; drop the preamble and recapitalize.
+      const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "");
+      // A reply with no letter or digit (a stray "*" from a reasoning trace) is no answer.
+      return /[a-z0-9]/i.test(clean) ? clean[0].toUpperCase() + clean.slice(1) : "UNKNOWN";
+    };
 
     // Every model call goes through askCounted so the day's estimate sees it, failures included.
     const askCounted = (model) => {
@@ -376,29 +402,33 @@ export default {
     };
     // One house model first. The second model runs only when the first gave no answer, or when the question
     // is time-sensitive, asks a date, or has a number: the cases where a "Sources disagree" card is worth a call.
-    const first = await askCounted(QWEN);
-    if (first !== "UNKNOWN" && !needsSecondModel(q)) return finish({ answer: first, source: "Qwen" });
+    // Groq answers first when it can; past the Workers AI estimate its answer (or UNKNOWN) is final.
+    const groq = env.GROQ_KEY ? await askGroq() : null;
+    if (groq === null && overBudget(counts)) return resting();
+    const [first, house] = groq !== null ? [groq, "Groq"] : [await askCounted(QWEN), "Qwen"];
+    if (first !== "UNKNOWN" && (!needsSecondModel(q) || overBudget(counts))) return finish({ answer: first, source: house });
+    if (overBudget(counts)) return resting();
     const second = await askCounted(GEMMA);
 
     // The client shows `source` under the answer, so it names only the models that actually produced it.
     if (first === "UNKNOWN" && second === "UNKNOWN")
       return finish({ answer: "UNKNOWN", ...(aiFailures.length ? { aiError: aiFailures[aiFailures.length - 1] } : {}) });
     if (first === "UNKNOWN") return finish({ answer: second, source: "Gemma" });
-    if (second === "UNKNOWN") return finish({ answer: first, source: "Qwen" });
-    if (normalize(first) === normalize(second)) return finish({ answer: first, source: "Gemma + Qwen" });
+    if (second === "UNKNOWN") return finish({ answer: first, source: house });
+    if (normalize(first) === normalize(second)) return finish({ answer: first, source: `Gemma + ${house}` });
 
     // Qwen and Gemma disagree. Rather than let Qwen arbitrate its own dispute, ask a third,
     // independent model and take the majority. Only adds fields (disagree, alts) when the reference does not settle it.
     const dis = disagreement(first, second, pages.map((p) => p.extract || "").join(" "), q);
     const third = await askCounted(LLAMA);
     if (third !== "UNKNOWN") {
-      if (normalize(third) === normalize(first)) return finish({ answer: first, source: "Qwen + Llama", ...dis });
+      if (normalize(third) === normalize(first)) return finish({ answer: first, source: `${house} + Llama`, ...dis });
       if (normalize(third) === normalize(second)) return finish({ answer: second, source: "Gemma + Llama", ...dis });
     }
 
     // All three differ (or Llama said UNKNOWN). No synthesis call any more: the house model's answer, with
     // both answers in alts when the reference does not settle the clash.
-    return finish({ answer: first, source: "Qwen", ...dis });
+    return finish({ answer: first, source: house, ...dis });
   },
 };
 

@@ -358,7 +358,7 @@ final class AppState {
     /// Who receives the query, named in the consent prompt.
     var aiRecipient: String {
         switch ai.engine {
-        case .nimble: return "Nimble's answer service (Google Gemma and Alibaba Qwen on Cloudflare)"
+        case .nimble: return "Nimble's answer service (open models from OpenAI, Alibaba and Google, run on Groq and Cloudflare)"
         case .onDevice: return "Apple Intelligence on this device, nothing leaves it"
         case .claude: return "Anthropic (Claude)"
         case .openai: return "OpenAI"
