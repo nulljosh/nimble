@@ -1,4 +1,5 @@
-// AI consent on web: unset = ask, "no" = DuckDuckGo and Wikipedia only, "yes" = model allowed.
+// The AI switch on the web: unset or "yes" = the model may answer, "no" = DuckDuckGo and Wikipedia only.
+// The web never asks mid-question; the Apple apps ask once at first launch (App Review 5.1.2(i)).
 // Offline: fetch and localStorage are stubbed, nothing leaves the machine.
 const test = require("node:test"), assert = require("node:assert/strict");
 const E = require("../docs/engine.js");
@@ -20,14 +21,13 @@ function setup(consent, reply = () => ({ ok: false })) {
 function teardown() { delete globalThis.localStorage; globalThis.fetch = realFetch; }
 const modelCalls = () => calls.filter(c => c.url === PROXY);
 
-test("consent unset asks and never calls the model", async () => {
-  setup(null);
+test("untouched switch lets the model answer, nothing asked", async () => {
+  setup(null, (url, opts) => url === PROXY && opts?.method === "POST"
+    ? { ok: true, json: async () => ({ answer: "Frank Herbert wrote Dune.", source: "Groq" }) } : { ok: false });
   try {
     const a = await E.answer("who wrote Dune");
-    assert.equal(a.kind, "consent");
-    assert.match(a.recipient, /Groq and Cloudflare/);
-    assert.equal(modelCalls().length, 0);
-    assert.equal(calls.filter(c => c.url.includes("?ddg=")).length, 0, "nothing is sent before the visitor chooses");
+    assert.equal(a.kind, "text");
+    assert.equal(modelCalls().length, 1);
   } finally { teardown(); }
 });
 
@@ -66,7 +66,7 @@ test("ifUnset no behaves like no, but a stored choice wins", async () => {
   } finally { teardown(); }
 });
 
-test("offline kinds never ask", async () => {
+test("offline kinds never touch the network", async () => {
   setup(null);
   try {
     assert.equal((await E.answer("2+2")).kind, "math");

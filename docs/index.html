@@ -307,9 +307,6 @@ a:hover { text-decoration: underline; }
 .why.steps li::before { content: counter(step) "."; display: inline-block; width: 22px; font-variant-numeric: tabular-nums; }
 .why p { margin-top: var(--space-2); font-size: var(--fs-15); line-height: var(--lh-md); }
 .why a { display: inline-block; padding-block: var(--tap-pad); margin-top: calc(var(--space-2) - var(--tap-pad)); margin-bottom: calc(var(--tap-pad) * -1); color: inherit; text-decoration: underline; text-decoration-color: var(--panel-gold); text-underline-offset: 3px; }
-.consent-actions { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
-.consent-actions button { min-height: 44px; border: 1px solid var(--panel-line); background: none; color: var(--panel-text); border-radius: var(--radius); padding: var(--space-2) var(--space-3); font: inherit; font-size: var(--fs-13); font-weight: 700; cursor: pointer; }
-.consent-actions .consent-yes { border-color: transparent; background: var(--panel-gold); color: var(--black); }
 .mockup-result.swap { animation: result-in 500ms cubic-bezier(.22,1,.36,1) both; }
 @keyframes result-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .mockup-ghost.swap, .mockup-result.swap { animation: none; } }
@@ -683,7 +680,7 @@ footer {
 <script>
 // Live demo: the same engine the app ships. The showcase runs first: a photo answer, math with steps, news, weather.
 var SHOWCASE=['who wrote hamlet','(3+4)*2','news','weather in Vancouver'];
-// Scripted showcase answers: the Wikipedia lines are written out, so the demo never waits on a lookup or asks for AI consent.
+// Scripted showcase answers: the Wikipedia lines are written out, so the demo never waits on a lookup or spends an AI call.
 var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy of Hamlet, Prince of Denmark, often shortened to Hamlet, is a tragedy written by William Shakespeare sometime between 1599 and 1601.',src:'Wikipedia',url:'https://en.wikipedia.org/wiki/Hamlet',grounding:'It is Shakespeare\'s longest play.',showWhy:true,image:{url:'hamlet-16x9.jpg',width:361,height:203},sources:[{name:'Hamlet',url:'https://en.wikipedia.org/wiki/Hamlet'},{name:'Prince Hamlet',url:'https://en.wikipedia.org/wiki/Prince_Hamlet'}]}};
 (function(){
   var tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
@@ -720,7 +717,7 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
   // 8s keeps a visitor well under the worker's 20/min AI cap (math/units are offline).
   setInterval(async function(){
     if(q.value || document.hidden) return;
-    // Examples are not the visitor's question: until they choose, treat consent as "no".
+    // Examples are not the visitor's question: they never spend an AI call.
     var next=examples[(idx+1)%examples.length], res=await renderAnswer(next,{ifUnset:'no',scripted:SCRIPTED[next]});
     if(q.value) return;
     idx=(idx+1)%examples.length;
@@ -728,17 +725,13 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
     setTimeout(function(){ g.textContent=next; show(res); }, 330);
   }, 8000);
   q.addEventListener('input',function(){ g.classList.toggle('off', !!q.value); });
-  // Only a question the visitor typed can ask for consent; the showing example never does.
+  // A question the visitor typed may reach the AI; the showing example never does.
   async function run(){
     var typed=q.value.trim(), query=(typed||g.textContent).trim(); if(!query) return;
     r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>'; c.textContent='';
     show(await renderAnswer(query, typed?{}:{ifUnset:'no',scripted:SCRIPTED[query]}));
   }
   f.addEventListener('submit',function(e){e.preventDefault();run();});
-  r.addEventListener('click',function(e){
-    var b=e.target.closest('[data-consent]'); if(!b) return;
-    aiConsent(b.dataset.consent); run();
-  });
   run();
 })();
 // Point download buttons at the latest release assets.

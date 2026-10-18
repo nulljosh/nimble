@@ -778,8 +778,10 @@ function aiConfig(){
   catch{ return {engine:"nimble", apiKey:"", model:"", baseURL:""}; }
 }
 function saveAIConfig(c){ try{ localStorage.setItem("nimble.ai", JSON.stringify(c)); }catch{} }
-// --- AI consent (same rule as the native apps) ---
-// unset = ask, "no" = DuckDuckGo and Wikipedia only, "yes" = the model may answer.
+// --- AI answers switch ---
+// unset or "yes" = the model may answer, "no" = DuckDuckGo and Wikipedia only (Settings, "AI: off").
+// The web never interrupts a question to ask; the privacy page names every service. Apple builds ask once at
+// first launch instead, because App Review 5.1.2(i) requires it there.
 // Outside a browser (the /api and /mcp workers) there is no localStorage and the caller
 // asked for an answer on purpose, so that side counts as "yes".
 let memConsent = null; // fallback when storage is blocked, so a choice still lasts the page
@@ -793,7 +795,7 @@ function aiConsent(v){
   try{ const s = localStorage.getItem("nimble.aiConsent"); return s==="yes"||s==="no" ? s : null; }
   catch{ return memConsent; }
 }
-// Who receives the question, named in the consent card. Mirrors AppState.aiRecipient.
+// Who receives the question, named on the privacy page and in the Apple apps' first-launch prompt. Mirrors AppState.aiRecipient.
 function aiRecipient(){
   const c = aiConfig(), e = ENGINES[c.engine] || ENGINES.nimble;
   switch(e.key && !c.apiKey ? "nimble" : c.engine){
@@ -977,8 +979,8 @@ async function firstOf(query, fns){
   return null;
 }
 
-// One call, one normalized answer. kind: convert | math | graph | card | text | consent | none
-// opts.ifUnset: what to assume while consent is unset ("no" for the landing demo's examples).
+// One call, one normalized answer. kind: convert | math | graph | card | text | none
+// opts.ifUnset: what to assume while the AI switch is untouched ("no" for the landing demo's examples).
 async function answer(query, opts={}){
   const c = tryConvert(query);
   if(c) return {kind:"convert", ...c};
@@ -1000,8 +1002,8 @@ async function answer(query, opts={}){
   if(mk) return mk;
   const live = await firstOf(query, [identity, news, site, etymology, dictionary, weather, localTime]);
   if(live) return live.kind ? live : {kind:"text", ...live, sources:sourcesFor(live.body, [live])};
-  const consent = aiConsent() || opts.ifUnset || null;
-  if(consent===null) return {kind:"consent", recipient:aiRecipient()};
+  // ifUnset: the landing's rotating examples pass "no" so a visitor who never typed spends no AI calls.
+  const consent = aiConsent() || opts.ifUnset || "yes";
   if(consent==="no"){
     const hit = labelIfGeneric(await firstOf(query, [ddg, wiki]), query);
     return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit]), ...(isTimeSensitive(query) ? {asOf:new Date().toISOString()} : {})} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
@@ -1036,15 +1038,6 @@ async function answer(query, opts={}){
   return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2), ...(!ai && aiNote.aiError ? {aiError:aiNote.aiError} : {}), ...(isTimeSensitive(query) ? {asOf:new Date().toISOString()} : {})} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
 }
 
-// The consent card, same words as the native prompt. Pages wire the buttons by data-consent.
-// t is the page's translator (I18N.t); without one the English below is used as is.
-function consentHTML(recipient, t){
-  const esc=t=>String(t).replace(/</g,"&lt;");
-  const T=t||plain;
-  return '<div class="mockup-label">'+T("Before I answer")+'</div><h3 class="consent-q">'+T("Send your question to an AI service?")+'</h3><p class="consent-copy">'
-    +T("Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.",{s:esc(recipient)})+'</p>'
-    +'<div class="consent-actions"><button type="button" class="consent-yes" data-consent="yes">'+T("Allow")+'</button><button type="button" class="consent-no" data-consent="no">'+T("Don't allow")+'</button></div>';
-}
 // Photo markup. The frame reserves its 16:9 box before the picture arrives (no layout jump), the cream
 // fills it until load, and a picture that fails to load is removed rather than shown broken.
 function photoHTML(url, alt){
@@ -1155,7 +1148,6 @@ async function renderAnswer(query, opts){
       +fresh(a)+((a.sources||[]).length ? '<p class="sources">'+sourceRow(a.sources)+'</p>' : "");
     credit="";
   }
-  else if(a.kind==="consent"){ h=consentHTML(a.recipient, opts&&opts.t); }
   else if(a.kind==="offline"){ h+="<p>"+T("You're offline. Math, units and graphs still work.")+"</p>"; }
   else if(a.kind==="private-nopack"){ h+="<p>"+T("Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.")+"</p>"; }
   else if(a.kind==="pack-miss"){ h+="<p>"+T("Not in the offline pack. Math, units and graphs still work offline.")+"</p>"; }

@@ -112,10 +112,6 @@ form { position: relative; }
 .sources a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); color: var(--text-mid); text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .mockup-card p { text-decoration: none; color: var(--text-mid); }
 .mockup-card:hover p { text-decoration: underline; }
-.consent-actions { display: flex; gap: var(--space-3); margin-top: var(--space-4); }
-.consent-actions button { min-height: 48px; border: 1px solid var(--line); background: none; color: var(--text); border-radius: 999px; padding: var(--space-2) var(--space-4); font: inherit; font-weight: 700; font-size: var(--fs-15); cursor: pointer; }
-.consent-actions .consent-yes { border-color: transparent; background: var(--yellow); color: var(--black); }
-.consent-actions .consent-no:hover { border-color: var(--yellow-deep); }
 .credit { margin-top: var(--space-4); font-size: var(--fs-13); color: var(--text-mid); display: flex; align-items: baseline; gap: var(--space-4); }
 .credit button { min-width: var(--tap); border: 0; background: none; padding: var(--tap-pad) var(--space-2); margin-block: calc(var(--tap-pad) * -1); font: inherit; color: var(--text-mid); cursor: pointer; text-decoration: underline; text-decoration-color: var(--yellow); text-underline-offset: 3px; }
 .credit button:hover { color: var(--text); }
@@ -213,8 +209,6 @@ form { position: relative; }
 .card .disagree-model, .disagree-model { font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); margin: var(--space-1) 0 0; }
 .card .thinking p { font-size: var(--fs-17); color: var(--text-mid); }
 /* Consent: the question is the headline, the explanation reads as body copy. */
-.card .consent-q { font-size: var(--fs-22); line-height: var(--lh-lg); letter-spacing: -0.01em; font-weight: var(--fw-semibold); color: var(--text); margin-bottom: var(--space-2); }
-.card .consent-copy { font-size: var(--fs-17); line-height: var(--lh-md); color: var(--text-mid); }
 
 .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; margin-top: var(--space-5); }
 .chips[hidden] { display: none; }
@@ -359,7 +353,7 @@ var T=I18N.t;
     newBtn.hidden=false;
     if(shot) shareImage(query,res.a).then(function(b){ if(b) document.getElementById('shareDebug').src=URL.createObjectURL(b); }); // screenshots only
     // The saved answer is the first 280 characters of the answer's text, on this device only.
-    if(['consent','none','offline','pack-miss','private-nopack'].indexOf(res.kind)<0){ var snip=shareText(res.a); hist.add(query, typeof snip==='string'?snip:null); paintRecent(); }
+    if(['none','offline','pack-miss','private-nopack'].indexOf(res.kind)<0){ var snip=shareText(res.a); hist.add(query, typeof snip==='string'?snip:null); paintRecent(); }
   }
   // Share sheet with the PNG where the browser can, a download of nimble-answer.png where it can't.
   async function shareAnswer(){
@@ -410,18 +404,16 @@ var T=I18N.t;
       }catch(err){ rec=null; paintMic('idle'); }
     });
   }
-  // AI switch: on = the model may answer, off = DuckDuckGo and Wikipedia only, ask = not chosen yet.
+  // AI switch: on (the default) = the model may answer, off = DuckDuckGo and Wikipedia only.
   var ai=document.getElementById('ai');
   function paintAI(){
     var c=aiConsent();
-    ai.textContent=T(c==='yes'?'AI: on':c==='no'?'AI: off':'AI: ask');
-    ai.title=T(c===null?'Not chosen yet. Click to choose.':c==='yes'?'Click to turn AI answers off':'Click to turn AI answers on');
+    ai.textContent=T(c==='no'?'AI: off':'AI: on');
+    ai.title=T(c==='no'?'Click to turn AI answers on':'Click to turn AI answers off');
   }
   paintAI();
   ai.addEventListener('click',function(){
-    var c=aiConsent();
-    if(c===null){ r.hidden=false; newBtn.hidden=true; paintFlit(); r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=consentHTML(aiRecipient(),T); return; }
-    aiConsent(c==='yes'?'no':'yes'); paintAI();
+    aiConsent(aiConsent()==='no'?'yes':'no'); paintAI();
   });
   // Private mode: answers come from math, units, graphs and the offline pack only; no request leaves the page.
   var privBtn=document.getElementById('private');
@@ -445,7 +437,7 @@ var T=I18N.t;
   function paintShape(){ shapeBtn.textContent=T('Card: {s}',{s:T(cardShape()==='wide'?'Wide':cardShape()==='square'?'Square':'Story')}); }
   paintShape();
   shapeBtn.addEventListener('click',function(){ cardShape(SHAPES[(SHAPES.indexOf(cardShape())+1)%3]); paintShape(); });
-  // The consent card lives inside the result; Allow and Don't allow re-run the same question.
+  // Listen, Copy and Share live inside the result card.
   r.addEventListener('click',function(e){
     var lb=e.target.closest('[data-listen]');
     if(lb){
@@ -463,9 +455,6 @@ var T=I18N.t;
       return;
     }
     if(e.target.closest('[data-share]')){ shareAnswer(); return; }
-    var b=e.target.closest('[data-consent]'); if(!b) return;
-    aiConsent(b.dataset.consent); paintAI();
-    if(q.value.trim()) run(q.value); else { r.hidden=true; paintFlit(); }
   });
   fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
     list.sort(function(){return Math.random()-0.5;}).slice(0,6).forEach(function(s){
