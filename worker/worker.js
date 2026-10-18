@@ -188,8 +188,8 @@ const statsUrl = (origin, day) => `${origin}/__nimble/stats/${day}`;
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
 export const estNeurons = (aiCalls) => aiCalls * NEURONS_PER_CALL;
 export const overBudget = (c) => estNeurons(c.aiCalls) > BUDGET_NEURONS;
-// The Cache API is per data center and per Worker version, so every count and cached answer here is
-// best effort: a colo only sees its own traffic. A global count needs a KV namespace (see wrangler.jsonc).
+// The Cache API is per data center (it survives a deploy: a cached answer outlives the fix that changes it, until
+// its TTL ends), so every cached answer here is best effort: a colo only sees its own traffic. A global count needs a KV namespace (see wrangler.jsonc).
 const store = () => globalThis.caches?.default ?? null;
 const fresh = (day = "") => ({ day, aiCalls: 0, cacheHits: 0, groqCalls: 0, groqRefused: 0 });
 let mem = fresh();
@@ -382,7 +382,9 @@ export default {
         { role: "user", content: `${t.q} /no_think` },
         { role: "assistant", content: t.a },
       ]),
-      { role: "user", content: `${q} /no_think` },
+      // The model gets the same Earth rewrite the search does ("tallest mountain on Earth"): gpt-oss answered
+      // Olympus Mons from memory with only the system prompt and the grounding saying Earth.
+      { role: "user", content: `${earthTerm(q)} /no_think` },
     ];
     const ask = (model) =>
       env.AI.run(model, {
