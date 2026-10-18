@@ -4,9 +4,9 @@ import SwiftUI
 // it was pinned at "1.2.0" while the project shipped 1.0.0, a version that never existed.
 let whatsNewVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
 private let whatsNewBullets = [
-    "Three tabs: Ask, History and Settings",
+    "Nimble on Apple Watch, and on the lock screen",
+    "Nine languages, from English to Japanese",
     "Works offline: the opening lines of 9,000 Wikipedia articles, downloaded once",
-    "When sources disagree, you see both answers, and live answers say how fresh they are",
     "Ask Nimble from Siri, Spotlight, Shortcuts and the Action button",
     "Private mode in Settings: nothing leaves your phone",
     "Share text or a link to Ask Nimble, and the app answers it when you open it",
@@ -22,6 +22,8 @@ struct WhatsNewSheet: View {
             .onAppear {
                 guard !CommandLine.arguments.contains(where: { $0.hasPrefix("UITEST_") }) else { return }
                 // QA: any shot launch skips the overlay so the screen under it is what the shot shows.
+                // A fresh install has nothing new to read, and the first-launch AI ask is already on screen.
+                if seenVersion.isEmpty && !QASandbox.launch { seenVersion = whatsNewVersion; return }
                 isPresented = seenVersion != whatsNewVersion && !QASandbox.launch
             }
             .sheet(isPresented: $isPresented) {
