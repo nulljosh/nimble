@@ -360,6 +360,14 @@ struct TextAnswerView: View {
 
 /// The answer card: hairline border, 24pt padding, an eyebrow, the answer, then one row with the source and Share.
 struct AnswerCard<Content: View, Footer: View>: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// Source label and the Copy, Listen and Share links: one row, stacked at accessibility sizes so no word breaks mid-letter.
+    private var footerRow: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 12))
+    }
     let shareText: String?
     @State private var copied = false
     /// The quiet "as of" line under the answer, at the same left edge as the source row. Nil when there is none.
@@ -411,11 +419,11 @@ struct AnswerCard<Content: View, Footer: View>: View {
                 }
             }
             .accessibilityElement(children: .combine)
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
+            footerRow {
                 footer
                     .font(.nimbleSmall)
                     .foregroundStyle(Color.dim)
-                Spacer(minLength: 8)
+                if !dynamicTypeSize.isAccessibilitySize { Spacer(minLength: 8) }
                 if let shareText, !shareText.isEmpty {
                     Button {
                         #if os(iOS)
