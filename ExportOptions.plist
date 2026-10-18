@@ -1,5 +1,25 @@
-<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict>
-<key>method</key><string>app-store-connect</string><key>teamID</key><string>QMM486NPYC</string><key>signingStyle</key><string>manual</string>
-<key>signingCertificate</key><string>iPhone Distribution: Joshua Trommel (QMM486NPYC)</string>
-<key>provisioningProfiles</key><dict><key>com.nulljosh.nimble.ios</key><string>IOS_APP_STORE-20261011</string><key>com.nulljosh.nimble.ios.widget</key><string>Nimble Widget AppStore 20261011</string></dict>
-</dict></plist>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>com.nulljosh.nimble.ios</key>
+		<string>IOS_APP_STORE-20261011</string>
+		<key>com.nulljosh.nimble.ios.share</key>
+		<string>Nimble Share AppStore 20261018</string>
+		<key>com.nulljosh.nimble.ios.watchkitapp</key>
+		<string>Nimble Watch AppStore 20261018</string>
+		<key>com.nulljosh.nimble.ios.widget</key>
+		<string>Nimble Widget AppStore 20261011</string>
+	</dict>
+	<key>signingCertificate</key>
+	<string>iPhone Distribution: Joshua Trommel (QMM486NPYC)</string>
+	<key>signingStyle</key>
+	<string>manual</string>
+	<key>teamID</key>
+	<string>QMM486NPYC</string>
+</dict>
+</plist>

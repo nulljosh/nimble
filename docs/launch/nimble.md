@@ -1,6 +1,6 @@
 # Nimble launch drafts
 
-Drafts only. Nothing here is posted. Joshua posts, from his own accounts. Every number below is on `docs/BENCHMARK.md` and live at `/stats`. The price line is blank until Joshua decides (free or $0.99).
+Drafts only. Nothing here is posted. Joshua posts, from his own accounts. Every number below is on `docs/BENCHMARK.md` and live at `/stats`. The price is free; use the Free line at the bottom. A $0.99 flip is parked until the free AI has all-day headroom.
 
 ## Show HN
 

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 // Answer cache, one-model-first flow, neuron guard and /stats in the worker. Offline: Wikipedia, Workers AI
 // and the Cache API are all stubbed. The Cache API is a Map here, so tests never touch real caches.
 import test from "node:test";
@@ -420,4 +421,8 @@ test("api key: no key keeps the per-IP limit, and a key's bucket can run out", a
   assert.deepEqual((await postKeyed({})).used, ["ip"]);
   const r = await postKeyed({ "x-api-key": "good1" }, { API_LIMITER: { limit: async () => ({ success: false }) } });
   assert.equal(r.res.status, 429);
+});
+
+test("grounding: the prompt tells the model to ignore a reference about the wrong thing", () => {
+  assert.match(readFileSync(new URL("../worker/worker.js", import.meta.url), "utf8"), /ignore it and answer the best-known meaning/);
 });
