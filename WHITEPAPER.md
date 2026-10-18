@@ -1,6 +1,6 @@
 # Nimble Technical Whitepaper
 
-**v9.4.2** | October 2026
+**v9.4.3** | October 2026
 
 Ask a question. Get one sentence back.
 

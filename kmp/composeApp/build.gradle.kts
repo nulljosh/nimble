@@ -37,8 +37,8 @@ android {
         applicationId = "com.nulljosh.nimble.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 115
-        versionName = "9.4.2"
+        versionCode = 116
+        versionName = "9.4.3"
     }
 }
 
@@ -52,7 +52,7 @@ compose.desktop {
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
             )
             packageName = "Nimble"
-            packageVersion = "9.4.2"
+            packageVersion = "9.4.3"
             description = "Instant answers -- math, facts, definitions."
         }
     }

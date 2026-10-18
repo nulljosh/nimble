@@ -150,6 +150,8 @@ final class AppState {
         lastUpdateCheck = p.lastUpdateCheck
         ai = p.ai ?? AIConfig()
         aiConsent = p.aiConsent
+        // Asked once, at first launch, so the first question is never interrupted. QA launches keep asking at the question.
+        askingAIConsent = p.aiConsent == nil && !QASandbox.launch
         // Flit retired in 6.21.0: a saved "flit" becomes Nim, so the picker still shows a selection.
         mascot = p.mascot == "fen" ? "fen" : "nim"
         cardShape = p.cardShape ?? "wide"
