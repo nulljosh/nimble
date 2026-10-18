@@ -13,20 +13,44 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 - QA: `-shot*` launch flags sandbox all storage. On iPhone, `-shotHistory YES` and `-shotSettings YES` open those tabs. The web uses Playwright with a static server on a fresh port. measure4 checks spacing, taps and contrast, but it misses duplicate or hidden controls, so read every shot by eye.
 - roadmap.md carries another session's unstaged edit, and many of its checkboxes are stale. Read it, verify against the code, and never stage it.
 
-## Roadmap to v10 (set 2026-10-18)
+## Roadmap to v10 (sliced 2026-10-18)
 
-- **v7 Reliability.** Done in 6.25 to 6.36: real Groq caps read, global /stats (Durable Object), p50/p95 per source, shorter grounding context, Kotlin source-topic filter, theme and Private mode persisted, accessibility pass. Burst handling shipped in 6.37.0. Left: a 154 of 154 exam confirmed after the 17:00 PDT cache turnover, then v8.
-- **v8 Everywhere.** A real Android emulator pass (needs the SDK), real Windows and Linux runs from the Desktop screenshots workflow, native accessibility audit (VoiceOver, Dynamic Type, reduced motion), Kotlin settings screen (mascot done in 6.28.0), more languages, extension store submissions (Joshua's accounts).
-- **v9 Our own model.** Samantha (or the Turing model) in the answer chain: first benchmark it against Groq on the exam (local 9B scored 147 of 154 vs Groq 150), then a tunnel to the Mini or on-device shipping. Public API with a free key tier, brew tap and CLI kept in step.
-- **v10 Launch.** A 1000-question benchmark published with its method, README, whitepaper and landing rebuilt around the numbers, the price decision (free vs $0.99, Joshua's call), launch posts.
+Versions are semver: each roadmap major closes as a real major tag (7.0.0, 8.0.0, 9.0.0, 10.0.0) and its slices are the minors before it. One slice per version, same release flow, top down. "J" marks the part only Joshua can do; the loop ships everything around it and leaves J in "Blocked on Joshua".
 
-Each major is a bundle of minors, one slice per version, same release flow. Roadmap.md is stale and untouched.
+**v7 Reliability, closes as 7.0.0.** Done in 6.25 to 6.37 (Groq first, global /stats with latency, shorter grounding, burst handling, Kotlin source-topic, persisted theme, accessibility pass). 7.0.0 is cut once the full exam reads 154 of 154 after the 17:00 PDT cache turnover.
+
+**v8 Everywhere, 7.x closing as 8.0.0.**
+1. 7.1 Linux desktop shot read by eye (capture fixed in 29e2eca); fix what it shows.
+2. 7.2 Android emulator pass: SDK, platform-tools and an arm64 image on the LaCie (multi-GB, never on the Mac), boot, shoot Ask, History and Settings, fix what shows.
+3. 7.3 Native accessibility: every iPhone and Mac control audited for a VoiceOver label by reading the views, Dynamic Type at the largest size screenshotted with the -shot flags, Reduce Motion already done. A device VoiceOver walk is J.
+4. 7.4 More languages: Compose strings are hardcoded English; move them to a string table and ship the languages Swift already has.
+5. 7.5 Extension zips (Chrome, Firefox) built in CI on every tag. Store submission is J.
+6. 8.0.0 when 7.1 to 7.5 are tagged.
+
+**v9 Our own model, 8.x closing as 9.0.0.**
+1. 8.1 Samantha benchmark written up: `ENGINE=samantha node test/exam.js` (147 of 154 on 2026-10-18) beside Groq in docs/BENCHMARK.md, with the method.
+2. 8.2 Worker takes an optional SAMANTHA_URL secret: tried first when set, any error falls through to Groq. The tunnel and keeping the Mini on are J.
+3. 8.3 Public API: the POST contract documented in docs/API.md, a free key tier rate-limited per key in the Durable Object, keys issued by hand (J decides who).
+4. 8.4 Homebrew tap formula for bin/nimble.js, bumped by the release flow.
+5. 9.0.0 when 8.1 to 8.4 are tagged.
+
+**v10 Launch, 9.x closing as 10.0.0.**
+1. 9.1 A 1,000-question exam (test/exam-1000.js) built by category (capitals, science, people, dates, math, units, cards), run nightly in exam.yml with a budget cap.
+2. 9.2 Results and method published: docs/BENCHMARK.md, README and landing carry the numbers.
+3. 9.3 Whitepaper and landing rebuilt around the numbers; axe and screenshots clean.
+4. 9.4 Price decision (free or $0.99) is J; launch posts drafted in docs/launch/ either way.
+5. 10.0.0 when 9.1 to 9.4 are tagged and the stores carry a 9.x build (store submission is J).
+
+Roadmap.md is stale and untouched; this list is the roadmap.
 
 ## Next, in order
 
-1. v7 next: the grounding trim (Wikipedia context capped at 2800 chars total, 1000 per page) is deployed but not committed, and the full 154-question exam is running against it. Commit worker/worker.js once the exam reads clean, then watch the Groq gauge in /stats for a day; run `LAST=N node test/exam.js` or the full exam once per slice (Groq caps are separate from Cloudflare's, but a full run still burns about 110k Groq tokens).
-2. Kotlin: an Android emulator pass (needs the SDK) and a desktop screenshot of Settings with the swatches.
-3. Read /stats once per tick.
+1. Tag 6.37.0 (fb2ce04) when Build native apps is green.
+2. 7.1: read the Linux shot from the rerun (run 39156134964).
+3. After 17:00 PDT: `node test/exam.js`, expect 154 of 154, then cut 7.0.0.
+4. Then the sliced list above, top down. Read /stats once per tick.
+
+Blocked on Joshua: App Store submission of a 6.x or 7.x build (stores carry iPhone 5.4.0, Mac 5.0.1), a real-device walk (Siri, share sheet, VoiceOver, Android), extension store submissions, the price call.
 
 Already in the code, so don't rebuild: Why this answer, follow-ups, step math, multiple sources, the News, Markets and Sports cards, the offline pack, Private mode, Listen, the voice loop, Ask Nimble from every platform's share sheet, Siri and Shortcuts.
 
