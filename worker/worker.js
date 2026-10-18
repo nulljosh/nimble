@@ -225,6 +225,12 @@ export class NimbleCounts {
       const inc = await req.json();
       if (inc.day !== s.day) s = s.day > inc.day ? s : fresh(inc.day);
       if (inc.day === s.day) for (const k of FIELDS) s[k] = Math.max(s[k], Number(inc[k]) || 0);
+      // One latency sample per answered request, the last 50 per source: enough for a p95 that moves.
+      if (inc.day === s.day && inc.sample?.source && Number.isFinite(inc.sample.ms)) {
+        const ring = ((s.lat ??= {})[inc.sample.source] ??= []);
+        ring.push(inc.sample.ms);
+        if (ring.length > 50) ring.shift();
+      }
       await this.state.storage.put("c", s);
     }
     return json(s);
@@ -241,7 +247,10 @@ async function loadCounts(origin, env) {
   const day = dayKey();
   if (mem.day !== day) mem = fresh(day);
   const g = await globalCounts(env)?.catch(() => null);
-  if (g?.day === day) for (const k of FIELDS) mem[k] = Math.max(mem[k], Number(g[k]) || 0);
+  if (g?.day === day) {
+    for (const k of FIELDS) mem[k] = Math.max(mem[k], Number(g[k]) || 0);
+    mem.lat = g.lat || {};
+  }
   const text = await cacheGet(statsUrl(origin, day));
   try {
     const s = JSON.parse(text || "{}");
@@ -256,12 +265,16 @@ async function loadCounts(origin, env) {
 }
 async function saveCounts(origin, c, env) {
   await globalCounts(env, { method: "POST", body: JSON.stringify(c) })?.catch(() => null);
+  delete c.sample; // sent once
   await cachePut(statsUrl(origin, c.day), { aiCalls: c.aiCalls, cacheHits: c.cacheHits, groqCalls: c.groqCalls, groqRefused: c.groqRefused }, 2 * 86400);
 }
 async function statsReply(origin, env) {
   const c = await loadCounts(origin, env);
   // groqCalls counts every request sent to Groq, groqRefused the ones it turned away (cap or error): the capacity gauge.
-  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused });
+  const pct = (v, p) => [...v].sort((a, b) => a - b)[Math.max(0, Math.ceil(p * v.length) - 1)];
+  // latency: per answering source, from the global counter's last 50 samples; empty without the Durable Object.
+  const latency = Object.fromEntries(Object.entries(c.lat || {}).map(([k, v]) => [k, { n: v.length, p50: pct(v, 0.5), p95: pct(v, 0.95) }]));
+  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused, latency });
 }
 
 export default {
@@ -341,6 +354,7 @@ export default {
     }
     if (typeof q !== "string" || !q.trim()) return json({ error: "empty q" }, 400);
     if (q.length > 500) return json({ error: "too long" }, 400);
+    const t0 = Date.now();
 
     const counts = await loadCounts(url.origin, env);
     // An identical question (normalized) inside the TTL is served from the Cache API: no AI, no neurons.
@@ -369,6 +383,8 @@ export default {
       const topic = known ? topicOf(photo?.page, refs) : null;
       const body = { ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) };
       if (cKey && known && !o.aiError) await cachePut(cKey, body, isTimeSensitive(q) ? TTL_TIMELY : TTL_CACHE);
+      // Keyed by the first source that answered (Groq, Qwen, Gemma), whole request time as the user felt it.
+      if (o.source) counts.sample = { source: o.source.split(" ")[0], ms: Date.now() - t0 };
       await saveCounts(url.origin, counts, env);
       return json(body);
     };

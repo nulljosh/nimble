@@ -217,7 +217,7 @@ test("GET /stats returns exactly the day, the counts and the Groq gauge, with no
   const res = await worker.fetch(new Request(`${ORIGIN}/stats`), { RATE_LIMITER: { limit: async () => ({ success: true }) }, AI: { run: async () => { throw new Error("no AI on /stats"); } } });
   assert.equal(res.status, 200);
   const j = await res.json();
-  assert.deepEqual(Object.keys(j).sort(), ["aiCalls", "cacheHits", "day", "estNeurons", "groqCalls", "groqRefused"]);
+  assert.deepEqual(Object.keys(j).sort(), ["aiCalls", "cacheHits", "day", "estNeurons", "groqCalls", "groqRefused", "latency"]);
   assert.equal(j.day, new Date().toISOString().slice(0, 10));
   assert.equal(j.aiCalls, 10);
   assert.equal(j.estNeurons, 600);
@@ -332,6 +332,7 @@ test("global counter: a second isolate sees the first one's calls, and /stats re
   const r = await worker.fetch(new Request(`${ORIGIN}/stats`), { COUNTS });
   const s = await r.json();
   assert.ok(s.aiCalls >= 1, "the first isolate's AI call shows up in the second one's /stats");
+  assert.ok(s.latency?.Qwen?.n >= 1 && Number.isFinite(s.latency.Qwen.p95), "latency per source comes from the global counter");
 });
 
 test("global counter: a broken binding never breaks an answer", async () => {
