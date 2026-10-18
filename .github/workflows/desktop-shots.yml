@@ -14,7 +14,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - run: sudo apt-get update && sudo apt-get install -y xvfb scrot
+      - run: sudo apt-get update && sudo apt-get install -y xvfb scrot xdotool
+      # A cold build takes longer than any fixed sleep, so build first, then wait for the window itself.
+      - name: Build
+        working-directory: kmp
+        run: ./gradlew :composeApp:compileKotlinDesktop --console=plain
       - name: Run the app and capture it
         working-directory: kmp
         run: |
@@ -22,8 +26,14 @@ jobs:
           Xvfb :99 -screen 0 1280x800x24 &
           sleep 2
           ./gradlew :composeApp:run --console=plain > ../run.log 2>&1 &
-          sleep 120
+          for i in $(seq 1 60); do xdotool search --name Nimble >/dev/null 2>&1 && break; sleep 3; done
+          sleep 8
           scrot ../linux.png
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nimble-linux-log
+          path: run.log
       - uses: actions/upload-artifact@v4
         with:
           name: nimble-linux-shot
