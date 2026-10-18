@@ -66,9 +66,11 @@ function evalMath(src, steps){
 // ponytail: no "twenty one" compounds, add when someone asks for one
 const WORD_NUM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,thousand:1000,million:1e6};
 function spokenMath(s){
-  return s.toLowerCase().replace(/[?!]+$/,"").replace(/^\s*(what(?:'s|\u2019s| is)|whats|calculate|compute|how much is|solve|evaluate)\s+/,"")
+  return s.toLowerCase().replace(/[?!]+$/,"").replace(/^\s*(what(?:'s|\u2019s| is)|whats|calculate|compute|how much is|solve|evaluate)\s+(?:the\s+)?/,"")
     .replace(/\b(multiplied by|times)\b/g,"*").replace(/\bdivided by\b/g,"/").replace(/\bto the power of\b/g,"^").replace(/\bplus\b/g,"+").replace(/\bminus\b/g,"-")
-    .replace(/\b[a-z]+\b/g,w=>w in WORD_NUM ? WORD_NUM[w] : w);
+    .replace(/\b[a-z]+\b/g,w=>w in WORD_NUM ? WORD_NUM[w] : w)
+    .replace(/\bsquared\b/g,"^2").replace(/\bcubed\b/g,"^3")
+    .replace(/\b(square root|sqrt|cube root|cbrt) of ([\d.]+)/g,(_,k,n)=>(/^c/.test(k)?"cbrt(":"sqrt(")+n+")");
 }
 // The on-device expression behind a math query, or null. Percent-of is rewritten to a division
 // and a product, so "20% of 50" evaluates as 20/100*50.

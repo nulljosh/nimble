@@ -102,3 +102,12 @@ test("a bare domain question reads the site, not Wikipedia", async () => {
     assert.equal(await E.site("acme.dev"), null);
   } finally { global.fetch = real; }
 });
+
+test("spoken powers and roots are math", () => {
+  assert.equal(E.tryMath("12 squared"), 144);
+  assert.equal(E.tryMath("3 cubed"), 27);
+  assert.equal(E.tryMath("cube root of 27"), 3);
+  assert.equal(E.tryMath("what is the square root of 16"), 4);
+  assert.equal(E.tryMath("sqrt of 81"), 9);
+  assert.equal(E.tryMath("what is the capital of france"), null);
+});

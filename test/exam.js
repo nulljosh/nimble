@@ -2,6 +2,7 @@
 // sites, geography, people, tech and live cards, graded by regex. Hits the real sources, so it is
 // not part of `npm test`.  Run:  npm run exam   (ENGINE=samantha npm run exam grades Samantha on :8000)
 // Free-engine questions are paced 3.2s apart: the proxy allows 20 AI calls a minute per IP.
+// LAST=45 runs only the newest 45, to fit what is left of a day's quota.
 // Exit code 1 on any miss, so CI can open an issue.
 if(process.env.ENGINE){ global.localStorage={_:{"nimble.ai":JSON.stringify({engine:process.env.ENGINE}),"nimble.aiConsent":"yes"},getItem(k){return this._[k]??null},setItem(k,v){this._[k]=v},removeItem(k){delete this._[k]}}; }
 const E=require("../docs/engine.js");
@@ -44,7 +45,7 @@ const Q=[
  ["who made you",/Trommel/],
 ];
 (async()=>{let pass=0,fail=[];
- for(const [q,re] of Q){
+ for(const [q,re] of (process.env.LAST?Q.slice(-process.env.LAST):Q)){
   // The proxy allows 20 AI calls a minute per IP; a real person never asks faster, so pace the exam.
   if(!process.env.ENGINE && !E.tryMath(q) && !E.tryConvert(q)) await new Promise(ok=>setTimeout(ok,3200));
   let r; try{ r=await E.answer(q,{ifUnset:"yes"}); }catch(e){ r={kind:"throw",body:String(e)}; }
