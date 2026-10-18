@@ -1,5 +1,5 @@
 # Nimble
-v9.2.0
+v9.3.0
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Groq's free models first (gpt-oss 120B, Qwen 27B, gpt-oss 20B), then Qwen3 + Gemma on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 

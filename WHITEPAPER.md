@@ -1,6 +1,6 @@
 # Nimble Technical Whitepaper
 
-**v9.2.0** | October 2026
+**v9.3.0** | October 2026
 
 Ask a question. Get one sentence back.
 
@@ -42,6 +42,12 @@ a definition or a fact. It is one search bar on iPhone, Mac, Windows, Android an
 Keys for Claude, OpenAI or Ollama stay on the device if you add them in Settings, and the
 call goes straight to that vendor.
 
+## The public API
+
+`POST /` takes `{q}` and returns `{answer, source, refs}`. Without a key it is 20 questions
+a minute per IP; a key from `API_KEYS` gets its own 60 a minute. Keys are issued by hand.
+The contract is in `docs/API.md`. `brew install nulljosh/nimble/nimble` gives the CLI.
+
 ## Offline pack
 
 Any client can hold a small copy of Wikipedia: the opening sentences of the 9,000
@@ -65,7 +71,10 @@ History stays on the device; iCloud only gets questions and times.
 
 ## Checked
 
-A 154-question exam runs against the live Worker. The latest run through Groq passed 152.
+A 154-question exam runs against the live Worker: Groq passed 152, Samantha (a local 9B
+model, tried first when `SAMANTHA_URL` is set) passed 147. A second exam of 1,049 questions
+runs weekly; its math and units are computed and offline (810 of 810), its facts a rotating
+slice. Method and numbers are in `docs/BENCHMARK.md`.
 `npm test` runs the web tests, `xcodebuild test` the Swift ones, and Gradle the Kotlin ones.
 
 ## License

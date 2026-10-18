@@ -354,7 +354,7 @@ a:hover { text-decoration: underline; }
 
 
 /* Inline text links: the hit area grows with padding; the matching negative margin keeps every line where it was. */
-.news a, .sources a, .oss p a, .quote cite a, .demo-caption a, .foot-bar .foot-meta a, .mockup-credit a, .credit a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); }
+.news a, .sources a, .oss p a, .offline p a, .quote cite a, .demo-caption a, .foot-bar .foot-meta a, .mockup-credit a, .credit a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); }
 
 /* Every section after the hero: one padding, one hairline, one headline. */
 main > section:not(.hero) { padding: var(--space-8) 0; border-top: var(--rule); }
@@ -401,6 +401,7 @@ main > section:not(.hero) h2 {
 .oss, .agents, .offline { text-align: center; }
 .oss h2, .agents h2, .offline h2 { margin-bottom: var(--s3); }
 .offline p { color: var(--mid); max-width: 30rem; margin: 0 auto var(--space-4); }
+.offline p a { text-decoration: underline; }
 /* Freshness line under the feature grid: one quiet centred line, 13px on the caption size. */
 .features .as-of { text-align: center; margin: var(--space-7) auto 0; max-width: 30rem; color: var(--text-mid); }
 .oss p, .agents p {
@@ -562,6 +563,14 @@ footer {
     <h2>Works offline.</h2>
     <p>Math is always on the device. Download the offline pack once and Wikipedia questions answer with no signal too: the 9,000 most-read English articles, about 1.9 MB. Nothing downloads on its own.</p>
     <p>Each answer from the pack names its article and the date the pack was built. When a question is not in the pack, it says so instead of guessing. iPhone, Mac, Android and the web all have it.</p>
+  </div>
+</section>
+
+<section class="offline" id="measured">
+  <div class="container">
+    <h2>Measured.</h2>
+    <p>A 154-question exam against the live service: Groq's free models score 152, and our own small model, running on a Mac mini, scores 147. A second exam of 1,049 questions runs every week.</p>
+    <p>Math and units are checked offline, 810 of 810. Method and every number are in the <a href="https://github.com/nulljosh/nimble/blob/main/docs/BENCHMARK.md">benchmark</a>.</p>
   </div>
 </section>
 
