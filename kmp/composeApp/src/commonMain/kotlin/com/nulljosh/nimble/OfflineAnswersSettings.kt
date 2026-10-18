@@ -1,6 +1,7 @@
 package com.nulljosh.nimble
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -71,6 +72,7 @@ fun SettingsScreen(store: OfflinePackStore?, theme: NimbleTheme, onTheme: (Nimbl
         modifier = modifier
             .fillMaxSize()
             .background(theme.background)
+            .safeDrawingPadding()
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {

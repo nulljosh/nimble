@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,7 +58,7 @@ fun HistoryScreen(
     val live = picked.filter { it in shown }.toSet()
     if (live != picked) picked = live
 
-    Column(modifier.fillMaxSize().background(theme.background).padding(24.dp)) {
+    Column(modifier.fillMaxSize().background(theme.background).safeDrawingPadding().padding(24.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 "Back",
