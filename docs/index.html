@@ -86,8 +86,7 @@ a:hover { text-decoration: underline; }
 /* Mascot above the headline, centred: the h1 sits on the page axis at every width. */
 .hero-head { display: flex; flex-direction: column; align-items: center; gap: var(--s2); margin-bottom: var(--s3); }
 .hero-head h1 { margin: 0; }
-/* Flit is an inline SVG so the wing and eye can move. Yellow on the yellow hero,
-   so an ink outline traces his silhouette. The bob moves the whole bird. */
+/* Nim sits on her own yellow disc; on the yellow hero an ink outline traces it. The bob moves her. */
 .hero-flit {
   order: -1; flex: none; display: block; width: 128px; height: 128px; overflow: visible;
   filter: drop-shadow(2px 0 0 var(--black)) drop-shadow(-2px 0 0 var(--black))
@@ -476,27 +475,8 @@ footer {
   <div class="container hero-copy">
     <div class="hero-head">
       <h1 data-i18n="Ask a question. Get one sentence back.">Ask a question.<br>Get one sentence back.</h1>
-      <!-- Mirrors docs/mascot/flit.svg. Keep the two in step. -->
-      <svg class="hero-flit" viewBox="0 0 240 240" role="img" aria-label="Flit, Nimble's hummingbird" focusable="false">
-        <ellipse style="fill:var(--bulb-deep)" cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)"/>
-        <ellipse style="fill:var(--bulb-deep)" cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)"/>
-        <ellipse style="fill:var(--bulb-deep)" cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" opacity="0.5"/>
-        <ellipse style="fill:var(--bulb)" cx="108" cy="154" rx="54" ry="46"/>
-        <path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" style="fill:var(--flit-belly)"/>
-        <circle style="fill:var(--bulb)" cx="156" cy="104" r="52"/>
-        <path style="fill:var(--bulb-deep)" d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z"/>
-        <circle cx="180" cy="126" r="9" opacity="0.35" style="fill:var(--flit-cheek)"/>
-        <path style="fill:var(--bulb-deep);stroke:var(--bulb-deep)" d="M203 98 L232 108 L203 118 Z" stroke-width="5" stroke-linejoin="round"/>
-        <g id="flit-eye" class="flit-eye">
-          <circle style="fill:var(--black)" cx="170" cy="100" r="18"/>
-          <circle cx="176" cy="93" r="6.5" style="fill:var(--flit-glint)"/>
-          <circle cx="164" cy="108" r="3" style="fill:var(--flit-glint)"/>
-        </g>
-        <g id="flit-wing" class="flit-wing">
-          <ellipse style="fill:var(--bulb-deep)" cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)"/>
-          <ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" style="fill:var(--flit-wing)"/>
-        </g>
-      </svg>
+      <!-- Nim, cheering with the lit bulb. Drawn by scripts/nim-poses.py. -->
+      <img class="hero-flit" src="mascot/nim-cheer.svg" width="128" height="128" alt="Nim, Nimble's mascot, holding up a lit lightbulb">
     </div>
     <p class="hero-version" id="ver" aria-live="polite"></p>
     <p data-i18n="Math and units answer on your device. Everything else, one sentence with a source.">Math and units answer on your device. Everything else, one sentence with a source.</p>

@@ -14,7 +14,7 @@ struct PreferencesData: Codable {
     var ai: AIConfig? = nil
     /// Answer to the AI data-sharing prompt; nil means "not asked yet".
     var aiConsent: Bool? = nil
-    /// "flit" (default) or "fen". Optional so prefs files written before this field still decode;
+    /// "nim" (default) or "fen"; "flit" from before 6.21.0 reads as "nim". Optional so prefs files written before this field still decode;
     /// a non-optional field would throw on old files and load() would drop every other setting.
     var mascot: String? = nil
     /// Private mode: nothing leaves the device. Optional for the same reason as `mascot`.

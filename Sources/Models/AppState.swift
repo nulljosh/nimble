@@ -75,8 +75,8 @@ final class AppState {
     /// nil = not asked yet, false = answers come from DuckDuckGo and Wikipedia only.
     var aiConsent: Bool? = nil
     var askingAIConsent = false
-    /// Which mascot sits in the empty state and the loading card: "flit" (default) or "fen".
-    var mascot: String = "flit"
+    /// Which mascot sits in the empty state and the loading card: "nim" (default) or "fen".
+    var mascot: String = "nim"
     /// Shape of the shared answer card: "wide" (default), "square" or "story".
     var cardShape: String = "wide"
     #if os(macOS)
@@ -136,8 +136,8 @@ final class AppState {
         #endif
     }
 
-    /// Asset name of the chosen mascot. Flit is the default; anything but "fen" falls back to him.
-    var mascotAsset: String { mascot == "fen" ? "Fen" : "Flit" }
+    /// Asset name of the chosen mascot. Nim is the default; anything but "fen" (an old "flit" too) is Nim.
+    var mascotAsset: String { mascot == "fen" ? "Fen" : "Nim" }
 
     func loadPreferences() {
         let p = prefs.load()
@@ -150,7 +150,8 @@ final class AppState {
         lastUpdateCheck = p.lastUpdateCheck
         ai = p.ai ?? AIConfig()
         aiConsent = p.aiConsent
-        mascot = p.mascot ?? "flit"
+        // Flit retired in 6.21.0: a saved "flit" becomes Nim, so the picker still shows a selection.
+        mascot = p.mascot == "fen" ? "fen" : "nim"
         cardShape = p.cardShape ?? "wide"
         privateMode = p.privateMode ?? false
     }

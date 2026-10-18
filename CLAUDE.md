@@ -1,5 +1,5 @@
 # Nimble
-v6.20.0
+v6.21.0
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Gemma + Qwen3 on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 

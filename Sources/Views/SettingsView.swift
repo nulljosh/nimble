@@ -55,7 +55,7 @@ struct SettingsView: View {
                     Text(String(localized: "Mascot"))
                     Spacer()
                     Picker(String(localized: "Mascot"), selection: $state.mascot) {
-                        Text(verbatim: "Flit").tag("flit")
+                        Text(verbatim: "Nim").tag("nim")
                         Text(verbatim: "Fen").tag("fen")
                     }
                     .pickerStyle(.segmented)

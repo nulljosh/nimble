@@ -37,7 +37,7 @@ struct PreferencesView: View {
             Section(String(localized: "Mascot")) {
                 HStack(spacing: 12) {
                     Picker(String(localized: "Mascot"), selection: $state.mascot) {
-                        Text(verbatim: "Flit").tag("flit")
+                        Text(verbatim: "Nim").tag("nim")
                         Text(verbatim: "Fen").tag("fen")
                     }
                     .pickerStyle(.segmented)

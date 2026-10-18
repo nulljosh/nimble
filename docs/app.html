@@ -241,13 +241,13 @@ form { position: relative; }
 /* While an answer is on its way, Flit hums in the card: wing beat plus a bob. Stops the moment
    the answer replaces her. Off under reduced motion. */
 .thinking { display: flex; align-items: center; gap: var(--space-4); }
-.thinking svg { flex: none; width: 72px; height: 72px; overflow: visible; animation: flit-bob 1.2s ease-in-out infinite alternate; }
+.thinking svg, .thinking img { flex: none; width: 72px; height: 72px; overflow: visible; animation: flit-bob 1.2s ease-in-out infinite alternate; }
 .thinking .flit-wing { transform-box: fill-box; transform-origin: 90% 10%; animation: flit-flap 0.22s ease-in-out infinite alternate; }
 .thinking .flit-eye { transform-box: fill-box; transform-origin: center; animation: flit-blink 4s ease-in-out infinite; }
 @keyframes flit-bob { from { transform: translateY(0); } to { transform: translateY(-5px); } }
 @keyframes flit-flap { from { transform: rotate(-14deg); } to { transform: rotate(14deg); } }
 @keyframes flit-blink { 0%, 100% { transform: scaleY(1); } 2% { transform: scaleY(0.1); } 4% { transform: scaleY(1); } }
-@media (prefers-reduced-motion: reduce) { .thinking svg, .thinking .flit-wing, .thinking .flit-eye { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .thinking svg, .thinking img, .thinking .flit-wing, .thinking .flit-eye { animation: none; } }
 </style>
 </head>
 <body>
@@ -272,7 +272,7 @@ form { position: relative; }
     <button type="button" id="new" data-i18n="New question" hidden>New question</button>
   </div>
   <section class="card" id="r" aria-live="polite" hidden></section>
-  <img class="flit" id="flit" src="mascot/flit.svg" width="96" height="96" alt="Flit, Nimble's hummingbird">
+  <img class="flit" id="flit" src="mascot/nim-wave.svg" width="96" height="96" alt="Nim, Nimble's mascot, waving">
   <div class="chips" id="chips"></div>
   <section class="recent" id="recent" aria-label="Recent searches" data-i18n-aria-label="Recent searches" hidden>
     <div class="recent-head"><div class="mockup-label" data-i18n="Recent">Recent</div><button type="button" id="clear" data-i18n="Clear">Clear</button></div>
@@ -304,15 +304,14 @@ form { position: relative; }
 <script src="engine.js?v=offline"></script>
 <script>
 document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
-// The two mascots. Flit is the default; Fen is the fennec from docs/mascot/fen.svg, inlined so the
-// empty state and the loading card work offline too.
-var FLIT='<svg viewBox="0 0 240 240" aria-hidden="true" focusable="false"><ellipse cx="56" cy="178" rx="26" ry="11" transform="rotate(-38 56 178)" style="fill:var(--bulb-deep)"/><ellipse cx="72" cy="194" rx="24" ry="10" transform="rotate(-60 72 194)" style="fill:var(--bulb-deep)"/><ellipse cx="110" cy="106" rx="11" ry="26" transform="rotate(44 110 106)" opacity="0.5" style="fill:var(--bulb-deep)"/><ellipse cx="108" cy="154" rx="54" ry="46" style="fill:var(--bulb)"/><path d="M66 168 C 82 194, 138 196, 158 170 C 144 182, 90 184, 66 168 Z" style="fill:var(--flit-belly)"/><circle cx="156" cy="104" r="52" style="fill:var(--bulb)"/><path d="M146 54 C 142 40, 152 30, 162 36 C 154 38, 150 46, 152 56 Z" style="fill:var(--bulb-deep)"/><circle cx="180" cy="126" r="9" opacity="0.35" style="fill:var(--flit-cheek)"/><path d="M203 98 L232 108 L203 118 Z" stroke-width="5" stroke-linejoin="round" style="fill:var(--bulb-deep);stroke:var(--bulb-deep)"/><g class="flit-eye"><circle cx="170" cy="100" r="18" style="fill:var(--black)"/><circle cx="176" cy="93" r="6.5" style="fill:var(--flit-glint)"/><circle cx="164" cy="108" r="3" style="fill:var(--flit-glint)"/></g><g class="flit-wing"><ellipse cx="84" cy="138" rx="16" ry="38" transform="rotate(40 84 138)" style="fill:var(--bulb-deep)"/><ellipse cx="88" cy="142" rx="8" ry="26" transform="rotate(40 88 142)" style="fill:var(--flit-wing)"/></g></svg>';
+// The two mascots. Nim is the default (docs/mascot/nim-*.svg, drawn by scripts/nim-poses.py); Fen is the
+// fennec from docs/mascot/fen.svg, inlined so the empty state and the loading card work offline too.
 var FEN='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" aria-hidden="true" focusable="false"><path style="fill:var(--bulb-deep)" d="M60 196 C 30 190, 26 160, 48 152 C 44 172, 60 180, 82 178 Z" /><circle style="fill:var(--flit-belly)" cx="48" cy="156" r="10" /><ellipse style="fill:var(--bulb)" cx="120" cy="178" rx="48" ry="36" /><ellipse style="fill:var(--flit-belly)" cx="120" cy="190" rx="28" ry="18" /><path style="fill:var(--bulb)" d="M74 118 C 50 60, 62 30, 84 36 C 98 44, 104 90, 100 122 Z" /><path style="fill:var(--flit-cheek)" d="M80 112 C 66 70, 72 48, 84 48 C 92 56, 96 92, 94 118 Z"  opacity="0.45"/><path style="fill:var(--bulb)" d="M166 118 C 190 60, 178 30, 156 36 C 142 44, 136 90, 140 122 Z" /><path style="fill:var(--flit-cheek)" d="M160 112 C 174 70, 168 48, 156 48 C 148 56, 144 92, 146 118 Z"  opacity="0.45"/><circle style="fill:var(--bulb)" cx="120" cy="120" r="50" /><ellipse style="fill:var(--flit-belly)" cx="120" cy="140" rx="24" ry="16" /><circle style="fill:var(--flit-cheek)" cx="86" cy="134" r="8"  opacity="0.35"/><circle style="fill:var(--flit-cheek)" cx="154" cy="134" r="8"  opacity="0.35"/><circle style="fill:var(--black)" cx="100" cy="112" r="14" /><circle style="fill:var(--flit-glint)" cx="105" cy="106" r="5" /><circle style="fill:var(--black)" cx="140" cy="112" r="14" /><circle style="fill:var(--flit-glint)" cx="145" cy="106" r="5" /><path style="fill:var(--black);stroke:var(--black)" d="M112 136 L128 136 L120 146 Z"   stroke-width="3" stroke-linejoin="round"/></svg>';
-// The empty-state image: a data URI for Fen (no network, works offline), the file for Flit.
+// The empty-state image: a data URI for Fen (no network, works offline), Nim waving for everyone else.
 function paintMascotImg(){
   var fen=mascot()==='fen', el=document.getElementById('flit');
-  el.src=fen?'data:image/svg+xml,'+encodeURIComponent(FEN):'mascot/flit.svg';
-  el.alt=fen?"Fen, Nimble's fennec":"Flit, Nimble's hummingbird";
+  el.src=fen?'data:image/svg+xml,'+encodeURIComponent(FEN):'mascot/nim-wave.svg';
+  el.alt=fen?"Fen, Nimble's fennec":"Nim, Nimble's mascot, waving";
 }
 paintMascotImg();
 // Everything below speaks the visitor's language, so it starts once the locale has loaded.
@@ -340,7 +339,7 @@ var T=I18N.t;
     query=(query||q.value||q.placeholder).trim(); if(!query) return;
     q.value=query; r.hidden=false; paintFlit();
     newBtn.hidden=true;
-    r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><div class="thinking">'+(mascot()==='fen'?FEN:FLIT)+'<p>'+T('Thinking…')+'</p></div>';
+    r.innerHTML='<div class="mockup-label">'+T('Answer')+'</div><div class="thinking">'+(mascot()==='fen'?FEN:'<img src="mascot/nim-think.svg" width="72" height="72" alt="">')+'<p>'+T('Thinking…')+'</p></div>';
     // Shareable: /app?q=... opens straight onto the answer.
     history.replaceState(null,'','?q='+encodeURIComponent(query));
     await packReady;
@@ -432,14 +431,14 @@ var T=I18N.t;
   }
   paintPrivate();
   privBtn.addEventListener('click',function(){ try{ privateOn()?localStorage.removeItem('nimble.private'):localStorage.setItem('nimble.private','1'); }catch(err){} paintPrivate(); });
-  // Mascot switch: Flit or Fen. Repaints the empty state at once; the next loading card picks it up too.
+  // Mascot switch: Nim or Fen. Repaints the empty state at once; the next loading card picks it up too.
   var mascotBtn=document.getElementById('mascot');
   function paintMascot(){
-    mascotBtn.textContent=T('Mascot: {s}',{s:mascot()==='fen'?'Fen':'Flit'});
+    mascotBtn.textContent=T('Mascot: {s}',{s:mascot()==='fen'?'Fen':'Nim'});
     paintMascotImg();
   }
   paintMascot();
-  mascotBtn.addEventListener('click',function(){ mascot(mascot()==='fen'?'flit':'fen'); paintMascot(); });
+  mascotBtn.addEventListener('click',function(){ mascot(mascot()==='fen'?'nim':'fen'); paintMascot(); });
   // Share card shape: wide, square or story, a click cycles it.
   var shapeBtn=document.getElementById('shape'), SHAPES=['wide','square','story'];
   function paintShape(){ shapeBtn.textContent=T('Card: {s}',{s:T(cardShape()==='wide'?'Wide':cardShape()==='square'?'Square':'Story')}); }

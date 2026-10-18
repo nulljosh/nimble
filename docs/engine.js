@@ -804,10 +804,11 @@ function aiRecipient(){
 }
 // --- Mascot: Flit (default) or Fen, the one in the empty state and the loading card. This device only. ---
 // Storage blocked (private windows, site data cleared) keeps the choice for the page instead.
-let memMascot = "flit";
+let memMascot = "nim";
 function mascot(v){
   if(v!==undefined){ memMascot = v; try{ localStorage.setItem("nimble.mascot", v); }catch{} return v; }
-  try{ return localStorage.getItem("nimble.mascot")==="fen" ? "fen" : "flit"; }
+  // A saved "flit" (retired 6.21.0) reads as Nim.
+  try{ return localStorage.getItem("nimble.mascot")==="fen" ? "fen" : "nim"; }
   catch{ return memMascot; }
 }
 // --- Share card shape: wide, square or story. This device only; storage blocked keeps the choice for the page. ---
