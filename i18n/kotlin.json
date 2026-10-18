@@ -4,209 +4,329 @@
     "fr": "Demander à voix haute",
     "es": "Preguntar en voz alta",
     "zh": "语音提问",
-    "pa": "ਬੋਲ ਕੇ ਪੁੱਛੋ"
+    "pa": "ਬੋਲ ਕੇ ਪੁੱਛੋ",
+    "de": "Laut fragen",
+    "pt": "Perguntar em voz alta",
+    "hi": "बोलकर पूछें",
+    "ja": "声で質問"
   },
   "Back to search": {
     "en": "Back to search",
     "fr": "Retour à la recherche",
     "es": "Volver a la búsqueda",
     "zh": "返回搜索",
-    "pa": "ਖੋਜ ਤੇ ਵਾਪਸ"
+    "pa": "ਖੋਜ ਤੇ ਵਾਪਸ",
+    "de": "Zurück zur Suche",
+    "pt": "Voltar à busca",
+    "hi": "खोज पर वापस",
+    "ja": "検索に戻る"
   },
   "Cancel": {
     "en": "Cancel",
     "fr": "Annuler",
     "es": "Cancelar",
     "zh": "取消",
-    "pa": "ਰੱਦ ਕਰੋ"
+    "pa": "ਰੱਦ ਕਰੋ",
+    "de": "Abbrechen",
+    "pt": "Cancelar",
+    "hi": "रद्द करें",
+    "ja": "キャンセル"
   },
   "No questions yet. Ask one and it lands here.": {
     "en": "No questions yet. Ask one and it lands here.",
     "fr": "Aucune question pour l'instant. Posez-en une et elle apparaîtra ici.",
     "es": "Aún no hay preguntas. Haz una y aparecerá aquí.",
     "zh": "还没有提问。问一个，它就会出现在这里。",
-    "pa": "ਹਾਲੇ ਕੋਈ ਸਵਾਲ ਨਹੀਂ। ਇੱਕ ਪੁੱਛੋ ਅਤੇ ਇਹ ਇੱਥੇ ਆ ਜਾਵੇਗਾ।"
+    "pa": "ਹਾਲੇ ਕੋਈ ਸਵਾਲ ਨਹੀਂ। ਇੱਕ ਪੁੱਛੋ ਅਤੇ ਇਹ ਇੱਥੇ ਆ ਜਾਵੇਗਾ।",
+    "de": "Noch keine Fragen. Stell eine, dann erscheint sie hier.",
+    "pt": "Nenhuma pergunta ainda. Faça uma e ela aparece aqui.",
+    "hi": "अभी कोई सवाल नहीं। एक पूछिए, वह यहाँ दिखेगा।",
+    "ja": "まだ質問がありません。質問するとここに表示されます。"
   },
   "Open {s}": {
     "en": "Open {s}",
     "fr": "Ouvrir {s}",
     "es": "Abrir {s}",
     "zh": "打开 {s}",
-    "pa": "{s} ਖੋਲ੍ਹੋ"
+    "pa": "{s} ਖੋਲ੍ਹੋ",
+    "de": "{s} öffnen",
+    "pt": "Abrir {s}",
+    "hi": "{s} खोलें",
+    "ja": "{s}を開く"
   },
   "Source: {s}": {
     "en": "Source: {s}",
     "fr": "Source : {s}",
     "es": "Fuente: {s}",
     "zh": "来源：{s}",
-    "pa": "ਸਰੋਤ: {s}"
+    "pa": "ਸਰੋਤ: {s}",
+    "de": "Quelle: {s}",
+    "pt": "Fonte: {s}",
+    "hi": "स्रोत: {s}",
+    "ja": "情報源：{s}"
   },
   "as of {s}": {
     "en": "as of {s}",
     "fr": "au {s}",
     "es": "a {s}",
     "zh": "截至 {s}",
-    "pa": "{s} ਤੱਕ"
+    "pa": "{s} ਤੱਕ",
+    "de": "Stand {s}",
+    "pt": "em {s}",
+    "hi": "{s} तक",
+    "ja": "{s}時点"
   },
   "Quote unavailable right now": {
     "en": "Quote unavailable right now",
     "fr": "Cours indisponible pour le moment",
     "es": "Cotización no disponible ahora mismo",
     "zh": "暂时无法获取报价",
-    "pa": "ਇਸ ਵੇਲੇ ਕੀਮਤ ਉਪਲਬਧ ਨਹੀਂ"
+    "pa": "ਇਸ ਵੇਲੇ ਕੀਮਤ ਉਪਲਬਧ ਨਹੀਂ",
+    "de": "Kurs derzeit nicht verfügbar",
+    "pt": "Cotação indisponível no momento",
+    "hi": "अभी भाव उपलब्ध नहीं",
+    "ja": "現在、相場を取得できません"
   },
   "Scores unavailable right now": {
     "en": "Scores unavailable right now",
     "fr": "Scores indisponibles pour le moment",
     "es": "Resultados no disponibles ahora mismo",
     "zh": "暂时无法获取比分",
-    "pa": "ਇਸ ਵੇਲੇ ਸਕੋਰ ਉਪਲਬਧ ਨਹੀਂ"
+    "pa": "ਇਸ ਵੇਲੇ ਸਕੋਰ ਉਪਲਬਧ ਨਹੀਂ",
+    "de": "Ergebnisse derzeit nicht verfügbar",
+    "pt": "Placares indisponíveis no momento",
+    "hi": "अभी स्कोर उपलब्ध नहीं",
+    "ja": "現在、スコアを取得できません"
   },
   "Open ESPN scoreboard": {
     "en": "Open ESPN scoreboard",
     "fr": "Ouvrir le tableau ESPN",
     "es": "Abrir el marcador de ESPN",
     "zh": "打开 ESPN 比分板",
-    "pa": "ESPN ਸਕੋਰਬੋਰਡ ਖੋਲ੍ਹੋ"
+    "pa": "ESPN ਸਕੋਰਬੋਰਡ ਖੋਲ੍ਹੋ",
+    "de": "ESPN-Anzeigetafel öffnen",
+    "pt": "Abrir o placar da ESPN",
+    "hi": "ESPN स्कोरबोर्ड खोलें",
+    "ja": "ESPNスコアボードを開く"
   },
   "Math runs offline.": {
     "en": "Math runs offline.",
     "fr": "Les calculs se font hors ligne.",
     "es": "Las cuentas se hacen sin conexión.",
     "zh": "计算无需联网。",
-    "pa": "ਹਿਸਾਬ ਔਫ਼ਲਾਈਨ ਚੱਲਦਾ ਹੈ।"
+    "pa": "ਹਿਸਾਬ ਔਫ਼ਲਾਈਨ ਚੱਲਦਾ ਹੈ।",
+    "de": "Rechnen läuft offline.",
+    "pt": "As contas rodam offline.",
+    "hi": "गणित ऑफ़लाइन चलता है।",
+    "ja": "計算はオフラインで動きます。"
   },
   "Clear history": {
     "en": "Clear history",
     "fr": "Effacer l'historique",
     "es": "Borrar el historial",
     "zh": "清除历史记录",
-    "pa": "ਇਤਿਹਾਸ ਮਿਟਾਓ"
+    "pa": "ਇਤਿਹਾਸ ਮਿਟਾਓ",
+    "de": "Verlauf löschen",
+    "pt": "Limpar histórico",
+    "hi": "इतिहास मिटाएँ",
+    "ja": "履歴を消去"
   },
   "Select": {
     "en": "Select",
     "fr": "Sélectionner",
     "es": "Seleccionar",
     "zh": "选择",
-    "pa": "ਚੁਣੋ"
+    "pa": "ਚੁਣੋ",
+    "de": "Auswählen",
+    "pt": "Selecionar",
+    "hi": "चुनें",
+    "ja": "選択"
   },
   "{s} theme": {
     "en": "{s} theme",
     "fr": "Thème {s}",
     "es": "Tema {s}",
     "zh": "{s}主题",
-    "pa": "{s} ਥੀਮ"
+    "pa": "{s} ਥੀਮ",
+    "de": "Design {s}",
+    "pt": "Tema {s}",
+    "hi": "{s} थीम",
+    "ja": "{s}テーマ"
   },
   "Hide why this answer": {
     "en": "Hide why this answer",
     "fr": "Masquer pourquoi cette réponse",
     "es": "Ocultar por qué esta respuesta",
     "zh": "隐藏答案依据",
-    "pa": "ਇਸ ਜਵਾਬ ਦਾ ਕਾਰਨ ਲੁਕਾਓ"
+    "pa": "ਇਸ ਜਵਾਬ ਦਾ ਕਾਰਨ ਲੁਕਾਓ",
+    "de": "Begründung ausblenden",
+    "pt": "Ocultar por que esta resposta",
+    "hi": "इस जवाब का कारण छिपाएँ",
+    "ja": "この回答の理由を隠す"
   },
   "Why this answer": {
     "en": "Why this answer",
     "fr": "Pourquoi cette réponse",
     "es": "Por qué esta respuesta",
     "zh": "答案依据",
-    "pa": "ਇਹ ਜਵਾਬ ਕਿਉਂ"
+    "pa": "ਇਹ ਜਵਾਬ ਕਿਉਂ",
+    "de": "Warum diese Antwort",
+    "pt": "Por que esta resposta",
+    "hi": "यह जवाब क्यों",
+    "ja": "この回答の理由"
   },
   "Read on Wikipedia": {
     "en": "Read on Wikipedia",
     "fr": "Lire sur Wikipédia",
     "es": "Leer en Wikipedia",
     "zh": "在维基百科阅读",
-    "pa": "ਵਿਕੀਪੀਡੀਆ ਤੇ ਪੜ੍ਹੋ"
+    "pa": "ਵਿਕੀਪੀਡੀਆ ਤੇ ਪੜ੍ਹੋ",
+    "de": "Auf Wikipedia lesen",
+    "pt": "Ler na Wikipedia",
+    "hi": "Wikipedia पर पढ़ें",
+    "ja": "Wikipediaで読む"
   },
   "Private mode": {
     "en": "Private mode",
     "fr": "Mode privé",
     "es": "Modo privado",
     "zh": "隐私模式",
-    "pa": "ਨਿੱਜੀ ਮੋਡ"
+    "pa": "ਨਿੱਜੀ ਮੋਡ",
+    "de": "Privater Modus",
+    "pt": "Modo privado",
+    "hi": "निजी मोड",
+    "ja": "プライベートモード"
   },
   "When on, no question leaves this device. Math and the offline answers still work.": {
     "en": "When on, no question leaves this device. Math and the offline answers still work.",
     "fr": "Activé, aucune question ne quitte cet appareil. Les calculs et les réponses hors ligne fonctionnent toujours.",
     "es": "Si está activado, ninguna pregunta sale de este dispositivo. Las cuentas y las respuestas sin conexión siguen funcionando.",
     "zh": "开启后，任何问题都不会离开此设备。计算和离线答案仍可使用。",
-    "pa": "ਚਾਲੂ ਹੋਣ ਤੇ ਕੋਈ ਵੀ ਸਵਾਲ ਇਸ ਡਿਵਾਈਸ ਤੋਂ ਬਾਹਰ ਨਹੀਂ ਜਾਂਦਾ। ਹਿਸਾਬ ਅਤੇ ਔਫ਼ਲਾਈਨ ਜਵਾਬ ਫਿਰ ਵੀ ਕੰਮ ਕਰਦੇ ਹਨ।"
+    "pa": "ਚਾਲੂ ਹੋਣ ਤੇ ਕੋਈ ਵੀ ਸਵਾਲ ਇਸ ਡਿਵਾਈਸ ਤੋਂ ਬਾਹਰ ਨਹੀਂ ਜਾਂਦਾ। ਹਿਸਾਬ ਅਤੇ ਔਫ਼ਲਾਈਨ ਜਵਾਬ ਫਿਰ ਵੀ ਕੰਮ ਕਰਦੇ ਹਨ।",
+    "de": "Wenn aktiv, verlässt keine Frage dieses Gerät. Rechnen und Offline-Antworten funktionieren weiter.",
+    "pt": "Ligado, nenhuma pergunta sai deste aparelho. Contas e respostas offline continuam funcionando.",
+    "hi": "चालू होने पर कोई सवाल इस डिवाइस से बाहर नहीं जाता। गणित और ऑफ़लाइन जवाब फिर भी चलते हैं।",
+    "ja": "オンのとき、質問はこの端末の外に出ません。計算とオフライン回答は使えます。"
   },
   "Private mode: on": {
     "en": "Private mode: on",
     "fr": "Mode privé : activé",
     "es": "Modo privado: activado",
     "zh": "隐私模式：开",
-    "pa": "ਨਿੱਜੀ ਮੋਡ: ਚਾਲੂ"
+    "pa": "ਨਿੱਜੀ ਮੋਡ: ਚਾਲੂ",
+    "de": "Privater Modus: an",
+    "pt": "Modo privado: ligado",
+    "hi": "निजी मोड: चालू",
+    "ja": "プライベートモード：オン"
   },
   "Private mode: off": {
     "en": "Private mode: off",
     "fr": "Mode privé : désactivé",
     "es": "Modo privado: desactivado",
     "zh": "隐私模式：关",
-    "pa": "ਨਿੱਜੀ ਮੋਡ: ਬੰਦ"
+    "pa": "ਨਿੱਜੀ ਮੋਡ: ਬੰਦ",
+    "de": "Privater Modus: aus",
+    "pt": "Modo privado: desligado",
+    "hi": "निजी मोड: बंद",
+    "ja": "プライベートモード：オフ"
   },
   "Offline answers": {
     "en": "Offline answers",
     "fr": "Réponses hors ligne",
     "es": "Respuestas sin conexión",
     "zh": "离线答案",
-    "pa": "ਔਫ਼ਲਾਈਨ ਜਵਾਬ"
+    "pa": "ਔਫ਼ਲਾਈਨ ਜਵਾਬ",
+    "de": "Offline-Antworten",
+    "pt": "Respostas offline",
+    "hi": "ऑफ़लाइन जवाब",
+    "ja": "オフライン回答"
   },
   "The opening lines of the 9,000 most-read Wikipedia articles. Download once, on your tap. Answers work with no network.": {
     "en": "The opening lines of the 9,000 most-read Wikipedia articles. Download once, on your tap. Answers work with no network.",
     "fr": "Les premières lignes des 9 000 articles Wikipédia les plus lus. Téléchargez une fois, quand vous le décidez. Les réponses fonctionnent sans réseau.",
     "es": "Las primeras líneas de los 9.000 artículos más leídos de Wikipedia. Se descarga una vez, cuando tú lo pidas. Las respuestas funcionan sin red.",
     "zh": "维基百科阅读量最高的 9,000 篇文章的开头几行。点一下下载一次。无网络也能回答。",
-    "pa": "ਵਿਕੀਪੀਡੀਆ ਦੇ ਸਭ ਤੋਂ ਵੱਧ ਪੜ੍ਹੇ ਗਏ 9,000 ਲੇਖਾਂ ਦੀਆਂ ਸ਼ੁਰੂਆਤੀ ਸਤਰਾਂ। ਤੁਹਾਡੇ ਟੈਪ ਕਰਨ ਤੇ ਇੱਕ ਵਾਰ ਡਾਊਨਲੋਡ ਕਰੋ। ਬਿਨਾਂ ਨੈੱਟਵਰਕ ਦੇ ਵੀ ਜਵਾਬ ਮਿਲਦੇ ਹਨ।"
+    "pa": "ਵਿਕੀਪੀਡੀਆ ਦੇ ਸਭ ਤੋਂ ਵੱਧ ਪੜ੍ਹੇ ਗਏ 9,000 ਲੇਖਾਂ ਦੀਆਂ ਸ਼ੁਰੂਆਤੀ ਸਤਰਾਂ। ਤੁਹਾਡੇ ਟੈਪ ਕਰਨ ਤੇ ਇੱਕ ਵਾਰ ਡਾਊਨਲੋਡ ਕਰੋ। ਬਿਨਾਂ ਨੈੱਟਵਰਕ ਦੇ ਵੀ ਜਵਾਬ ਮਿਲਦੇ ਹਨ।",
+    "de": "Die ersten Zeilen der 9.000 meistgelesenen Wikipedia-Artikel. Einmal laden, wenn du tippst. Antworten funktionieren ohne Netz.",
+    "pt": "As primeiras linhas dos 9.000 artigos mais lidos da Wikipedia. Baixe uma vez, quando você tocar. As respostas funcionam sem rede.",
+    "hi": "Wikipedia के सबसे ज़्यादा पढ़े गए 9,000 लेखों की शुरुआती पंक्तियाँ। आपके टैप करने पर एक बार डाउनलोड करें। बिना नेटवर्क के भी जवाब मिलते हैं।",
+    "ja": "最も読まれているWikipedia記事9,000件の冒頭部分。タップしたときに一度だけダウンロードします。ネットワークなしでも回答できます。"
   },
   "Download ({s})": {
     "en": "Download ({s})",
     "fr": "Télécharger ({s})",
     "es": "Descargar ({s})",
     "zh": "下载（{s}）",
-    "pa": "ਡਾਊਨਲੋਡ ({s})"
+    "pa": "ਡਾਊਨਲੋਡ ({s})",
+    "de": "Herunterladen ({s})",
+    "pt": "Baixar ({s})",
+    "hi": "डाउनलोड ({s})",
+    "ja": "ダウンロード（{s}）"
   },
   "Downloading.": {
     "en": "Downloading.",
     "fr": "Téléchargement.",
     "es": "Descargando.",
     "zh": "正在下载。",
-    "pa": "ਡਾਊਨਲੋਡ ਹੋ ਰਿਹਾ ਹੈ।"
+    "pa": "ਡਾਊਨਲੋਡ ਹੋ ਰਿਹਾ ਹੈ।",
+    "de": "Wird geladen.",
+    "pt": "Baixando.",
+    "hi": "डाउनलोड हो रहा है।",
+    "ja": "ダウンロード中。"
   },
   "Downloading. {a} of {b}": {
     "en": "Downloading. {a} of {b}",
     "fr": "Téléchargement. {a} sur {b}",
     "es": "Descargando. {a} de {b}",
     "zh": "正在下载。{a} / {b}",
-    "pa": "ਡਾਊਨਲੋਡ ਹੋ ਰਿਹਾ ਹੈ। {b} ਵਿੱਚੋਂ {a}"
+    "pa": "ਡਾਊਨਲੋਡ ਹੋ ਰਿਹਾ ਹੈ। {b} ਵਿੱਚੋਂ {a}",
+    "de": "Wird geladen. {a} von {b}",
+    "pt": "Baixando. {a} de {b}",
+    "hi": "डाउनलोड हो रहा है। {b} में से {a}",
+    "ja": "ダウンロード中。{a} / {b}"
   },
   "Remove": {
     "en": "Remove",
     "fr": "Supprimer",
     "es": "Quitar",
     "zh": "移除",
-    "pa": "ਹਟਾਓ"
+    "pa": "ਹਟਾਓ",
+    "de": "Entfernen",
+    "pt": "Remover",
+    "hi": "हटाएँ",
+    "ja": "削除"
   },
   "Download failed. Check the connection and try again.": {
     "en": "Download failed. Check the connection and try again.",
     "fr": "Échec du téléchargement. Vérifiez la connexion et réessayez.",
     "es": "La descarga falló. Revisa la conexión e inténtalo de nuevo.",
     "zh": "下载失败。请检查网络连接后重试。",
-    "pa": "ਡਾਊਨਲੋਡ ਅਸਫ਼ਲ ਰਿਹਾ। ਕੁਨੈਕਸ਼ਨ ਜਾਂਚੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"
+    "pa": "ਡਾਊਨਲੋਡ ਅਸਫ਼ਲ ਰਿਹਾ। ਕੁਨੈਕਸ਼ਨ ਜਾਂਚੋ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
+    "de": "Download fehlgeschlagen. Prüf die Verbindung und versuch es nochmal.",
+    "pt": "O download falhou. Verifique a conexão e tente de novo.",
+    "hi": "डाउनलोड विफल रहा। कनेक्शन जाँचें और फिर कोशिश करें।",
+    "ja": "ダウンロードに失敗しました。接続を確認してもう一度お試しください。"
   },
   "Ready. {a} articles, as of {b}.": {
     "en": "Ready. {a} articles, as of {b}.",
     "fr": "Prêt. {a} articles, au {b}.",
     "es": "Listo. {a} artículos, a {b}.",
     "zh": "已就绪。{a} 篇文章，截至 {b}。",
-    "pa": "ਤਿਆਰ। {a} ਲੇਖ, {b} ਤੱਕ।"
+    "pa": "ਤਿਆਰ। {a} ਲੇਖ, {b} ਤੱਕ।",
+    "de": "Bereit. {a} Artikel, Stand {b}.",
+    "pt": "Pronto. {a} artigos, em {b}.",
+    "hi": "तैयार। {a} लेख, {b} तक।",
+    "ja": "準備完了。{a}件の記事、{b}時点。"
   },
   "Background": {
     "en": "Background",
     "fr": "Contexte",
     "es": "Contexto",
     "zh": "背景",
-    "pa": "ਪਿਛੋਕੜ"
+    "pa": "ਪਿਛੋਕੜ",
+    "de": "Hintergrund",
+    "pt": "Contexto",
+    "hi": "पृष्ठभूमि",
+    "ja": "背景"
   }
 }

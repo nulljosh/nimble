@@ -3,7 +3,7 @@
 // exposes t(key, vars) for dynamic strings. Keys are the English literal, so a missing
 // key or a failed load just leaves the English on the page. ?lang=fr overrides for one visit.
 (function () {
-  const SUPPORTED = ["en", "fr", "es", "zh", "pa"];
+  const SUPPORTED = ["en", "fr", "es", "zh", "pa", "de", "pt", "hi", "ja"];
   const FALLBACK = "en";
   const ATTRS = ["aria-label", "title", "placeholder"];
   const pick = (v) => (v || "").slice(0, 2).toLowerCase();

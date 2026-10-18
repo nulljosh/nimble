@@ -33,6 +33,30 @@
             "state": "translated",
             "value": "ਕੁਝ ਵੀ ਪੁੱਛੋ।"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frag einfach."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pergunte qualquer coisa."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कुछ भी पूछिए।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "なんでも聞いてください。"
+          }
         }
       }
     },
@@ -67,6 +91,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਪੁੱਛੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fragen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perguntar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पूछें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "質問"
           }
         }
       }
@@ -103,6 +151,30 @@
             "state": "translated",
             "value": "Nimble ਨੂੰ ਪੁੱਛੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble fragen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pergunte ao Nimble"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble से पूछें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimbleに聞く"
+          }
         }
       }
     },
@@ -137,6 +209,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਐਪ ਲਵੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App laden"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixar o app"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऐप पाएँ"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリを入手"
           }
         }
       }
@@ -173,6 +269,30 @@
             "state": "translated",
             "value": "ਸਰੋਤ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quelle"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fonte"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "स्रोत"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "情報源"
+          }
         }
       }
     },
@@ -207,6 +327,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਹਾਲੀਆ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuletzt"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recentes"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हाल के"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近"
           }
         }
       }
@@ -243,6 +387,30 @@
             "state": "translated",
             "value": "ਹਾਲੀਆ ਖੋਜਾਂ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Suchen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscas recentes"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हाल की खोजें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近の検索"
+          }
         }
       }
     },
@@ -277,6 +445,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਮਿਟਾਓ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मिटाएँ"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "消去"
           }
         }
       }
@@ -313,6 +505,30 @@
             "state": "translated",
             "value": "ਜਵਾਬ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antwort"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resposta"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जवाब"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回答"
+          }
         }
       }
     },
@@ -347,6 +563,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸੋਚ ਰਿਹਾ ਹਾਂ…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denke nach…"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pensando…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सोच रहा है…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "考え中…"
           }
         }
       }
@@ -383,6 +623,30 @@
             "state": "translated",
             "value": "ਸਾਂਝਾ ਕਰੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teilen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "साझा करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共有"
+          }
         }
       }
     },
@@ -417,6 +681,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਹਿਸਾਬ, ਇਕਾਈਆਂ ਅਤੇ ਗ੍ਰਾਫ਼ ਬਿਨਾਂ ਇੰਟਰਨੈੱਟ ਦੇ ਚੱਲਦੇ ਹਨ। ਬਾਕੀ ਸਭ ਲਈ ਇੱਕ ਵਾਕ ਅਤੇ ਇੱਕ ਸਰੋਤ ਮਿਲਦਾ ਹੈ।"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechnen, Einheiten und Diagramme funktionieren offline. Alles andere bekommt einen Satz und eine Quelle."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contas, unidades e gráficos funcionam offline. O resto ganha uma frase e uma fonte."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गणित, इकाइयाँ और ग्राफ़ ऑफ़लाइन चलते हैं। बाकी हर चीज़ का एक वाक्य और एक स्रोत मिलता है।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "計算、単位、グラフはオフラインで使えます。それ以外は一文と情報源でお答えします。"
           }
         }
       }
@@ -453,6 +741,30 @@
             "state": "translated",
             "value": "ਸੁਣਨਾ ਬੰਦ ਕਰੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zuhören beenden"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parar de ouvir"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सुनना बंद करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聞き取りを停止"
+          }
         }
       }
     },
@@ -487,6 +799,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਆਵਾਜ਼ ਨਾਲ ਪੁੱਛੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per Sprache fragen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perguntar por voz"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बोलकर पूछें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "音声で質問"
           }
         }
       }
@@ -523,6 +859,30 @@
             "state": "translated",
             "value": "ਸੁਣ ਰਿਹਾ ਹਾਂ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hört zu"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvindo"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सुन रहा है"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聞き取り中"
+          }
         }
       }
     },
@@ -557,6 +917,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "AI: ਚਾਲੂ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI: an"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA: ligada"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: चालू"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI：オン"
           }
         }
       }
@@ -593,6 +977,30 @@
             "state": "translated",
             "value": "AI: ਬੰਦ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI: aus"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA: desligada"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: बंद"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI：オフ"
+          }
         }
       }
     },
@@ -627,6 +1035,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "AI: ਪੁੱਛੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI: fragen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "IA: perguntar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI: पूछें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI：確認"
           }
         }
       }
@@ -663,6 +1095,30 @@
             "state": "translated",
             "value": "ਅਜੇ ਚੁਣਿਆ ਨਹੀਂ। ਚੁਣਨ ਲਈ ਕਲਿੱਕ ਕਰੋ।"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch nicht gewählt. Zum Wählen klicken."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ainda não escolhido. Clique para escolher."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अभी चुना नहीं गया। चुनने के लिए क्लिक करें।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだ選択されていません。クリックして選択。"
+          }
         }
       }
     },
@@ -697,6 +1153,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "AI ਜਵਾਬ ਬੰਦ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klicken, um KI-Antworten auszuschalten"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clique para desligar as respostas de IA"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI जवाब बंद करने के लिए क्लिक करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クリックでAI回答をオフ"
           }
         }
       }
@@ -733,6 +1213,30 @@
             "state": "translated",
             "value": "AI ਜਵਾਬ ਚਾਲੂ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klicken, um KI-Antworten einzuschalten"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clique para ligar as respostas de IA"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI जवाब चालू करने के लिए क्लिक करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クリックでAI回答をオン"
+          }
         }
       }
     },
@@ -767,6 +1271,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਜਵਾਬ ਦੇਣ ਤੋਂ ਪਹਿਲਾਂ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bevor ich antworte"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antes de responder"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जवाब देने से पहले"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回答の前に"
           }
         }
       }
@@ -803,6 +1331,30 @@
             "state": "translated",
             "value": "ਕੀ ਤੁਹਾਡਾ ਸਵਾਲ ਕਿਸੇ AI ਸੇਵਾ ਨੂੰ ਭੇਜਣਾ ਹੈ?"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frage an einen KI-Dienst senden?"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviar sua pergunta a um serviço de IA?"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "क्या आपका सवाल किसी AI सेवा को भेजें?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "質問をAIサービスに送信しますか？"
+          }
         }
       }
     },
@@ -837,6 +1389,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, %@ ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ ਜਾਂ ਨਿੱਜੀ ਡੇਟਾ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ, ਅਤੇ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਿਆ ਜਾਂਦਾ। ਤੁਸੀਂ ਇਹ ਕਦੇ ਵੀ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble sendet nur den Text deiner Frage an %@. Kein Konto, keine persönlichen Daten, nichts wird gespeichert. Du kannst das jederzeit in den Einstellungen ändern."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Nimble envia o texto da sua pergunta, e mais nada, para %@. Sem conta nem dados pessoais, e nenhum registro é guardado. Você pode mudar isso quando quiser nos ajustes."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble आपके सवाल का सिर्फ़ टेक्स्ट %@ को भेजता है, और कुछ नहीं। कोई खाता या निजी डेटा नहीं, और कोई रिकॉर्ड नहीं रखा जाता। आप इसे कभी भी सेटिंग्स में बदल सकते हैं।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimbleは質問のテキストだけを%@に送ります。アカウントや個人情報は送らず、記録も残しません。設定でいつでも変更できます。"
           }
         }
       }
@@ -873,6 +1449,30 @@
             "state": "translated",
             "value": "%@ ਦੁਆਰਾ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unterstützt von %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "com tecnologia de %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ द्वारा संचालित"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 搭載"
+          }
         }
       }
     },
@@ -907,6 +1507,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਇਜਾਜ਼ਤ ਦਿਓ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erlauben"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अनुमति दें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "許可"
           }
         }
       }
@@ -943,6 +1567,30 @@
             "state": "translated",
             "value": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht erlauben"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não permitir"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अनुमति न दें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "許可しない"
+          }
         }
       }
     },
@@ -977,6 +1625,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਔਫ਼ਲਾਈਨ ਗਿਣਿਆ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "offline berechnet"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "calculado offline"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन गणना"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフラインで計算"
           }
         }
       }
@@ -1013,6 +1685,30 @@
             "state": "translated",
             "value": "ਤੁਸੀਂ ਔਫ਼ਲਾਈਨ ਹੋ। ਹਿਸਾਬ, ਇਕਾਈਆਂ ਅਤੇ ਗ੍ਰਾਫ਼ ਹਾਲੇ ਵੀ ਚੱਲਦੇ ਹਨ।"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Du bist offline. Rechnen, Einheiten und Diagramme funktionieren weiter."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Você está offline. Contas, unidades e gráficos continuam funcionando."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आप ऑफ़लाइन हैं। गणित, इकाइयाँ और ग्राफ़ फिर भी चलते हैं।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフラインです。計算、単位、グラフは使えます。"
+          }
         }
       }
     },
@@ -1047,6 +1743,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਤੁਰੰਤ ਜਵਾਬ ਨਹੀਂ ਮਿਲਿਆ। ਕੋਈ ਸਵਾਲ, ਜੋੜ, ਜਾਂ \"5 miles to km\" ਅਜ਼ਮਾਓ।"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine sofortige Antwort. Probier eine Frage, eine Rechnung oder „5 miles to km“."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sem resposta imediata. Tente uma pergunta, uma conta ou \"5 miles to km\"."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "तुरंत जवाब नहीं मिला। कोई सवाल, जोड़-घटाव या \"5 miles to km\" आज़माएँ।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すぐには答えられません。質問や計算、「5 miles to km」を試してください。"
           }
         }
       }
@@ -1083,6 +1803,30 @@
             "state": "translated",
             "value": "ਫੀਚਰ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Funktionen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recursos"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सुविधाएँ"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "機能"
+          }
         }
       }
     },
@@ -1117,6 +1861,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਡਾਊਨਲੋਡ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herunterladen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "डाउनलोड"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ダウンロード"
           }
         }
       }
@@ -1153,6 +1921,30 @@
             "state": "translated",
             "value": "ਐਪ ਖੋਲ੍ਹੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App öffnen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir o app"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऐप खोलें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アプリを開く"
+          }
         }
       }
     },
@@ -1187,6 +1979,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸਵਾਲ ਪੁੱਛੋ। ਇੱਕ ਵਾਕ ਵਿੱਚ ਜਵਾਬ ਲਵੋ।"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stell eine Frage. Bekomm einen Satz zurück."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Faça uma pergunta. Receba uma frase."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "एक सवाल पूछिए। एक वाक्य में जवाब पाइए।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "質問すると、一文で答えが返ります。"
           }
         }
       }
@@ -1223,6 +2039,30 @@
             "state": "translated",
             "value": "ਹਿਸਾਬ ਅਤੇ ਇਕਾਈਆਂ ਤੁਹਾਡੇ ਡਿਵਾਈਸ ਉੱਤੇ ਹੱਲ ਹੁੰਦੇ ਹਨ। ਬਾਕੀ ਸਭ ਲਈ ਸਰੋਤ ਸਮੇਤ ਇੱਕ ਵਾਕ।"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechnen und Einheiten laufen auf deinem Gerät. Alles andere: ein Satz mit Quelle."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contas e unidades são respondidas no seu aparelho. O resto, uma frase com fonte."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गणित और इकाइयाँ आपके डिवाइस पर ही हल होती हैं। बाकी सब, एक वाक्य और एक स्रोत।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "計算と単位は端末の中で答えます。それ以外は、情報源つきの一文で。"
+          }
         }
       }
     },
@@ -1257,6 +2097,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਵੈੱਬ ਐਪ ਖੋਲ੍ਹੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web-App öffnen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir o app web"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "वेब ऐप खोलें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Webアプリを開く"
           }
         }
       }
@@ -1293,6 +2157,30 @@
             "state": "translated",
             "value": "Mac ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Mac laden"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixar para Mac"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac के लिए डाउनलोड"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac版をダウンロード"
+          }
         }
       }
     },
@@ -1327,6 +2215,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਜਵਾਬ, ਦਸ ਨੀਲੇ ਲਿੰਕ ਨਹੀਂ।"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antworten, keine zehn blauen Links."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respostas, não dez links azuis."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जवाब, दस नीले लिंक नहीं।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "青いリンク10個ではなく、答えを。"
           }
         }
       }
@@ -1363,6 +2275,30 @@
             "state": "translated",
             "value": "ਹਿਸਾਬ ਅਤੇ ਇਕਾਈਆਂ, ਔਫ਼ਲਾਈਨ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechnen und Einheiten, offline"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contas e unidades, offline"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "गणित और इकाइयाँ, ऑफ़लाइन"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "計算と単位、オフラインで"
+          }
         }
       }
     },
@@ -1397,6 +2333,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਦੋ ਮਾਡਲ, ਇੱਕ ਵਾਕ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zwei Modelle, ein Satz"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dois modelos, uma frase"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "दो मॉडल, एक वाक्य"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2つのモデル、一文"
           }
         }
       }
@@ -1433,6 +2393,30 @@
             "state": "translated",
             "value": "ਗ੍ਰਾਫ਼"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diagramme"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gráficos"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ग्राफ़"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "グラフ"
+          }
         }
       }
     },
@@ -1467,6 +2451,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਹਰ ਪਲੇਟਫਾਰਮ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jede Plattform"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todas as plataformas"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हर प्लेटफ़ॉर्म"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべてのプラットフォーム"
           }
         }
       }
@@ -1503,6 +2511,30 @@
             "state": "translated",
             "value": "Nimble ਬਾਰੇ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Über Nimble"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre o Nimble"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble के बारे में"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimbleについて"
+          }
         }
       }
     },
@@ -1537,6 +2569,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nimble ਖੋਲ੍ਹੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble öffnen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir o Nimble"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble खोलें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimbleを開く"
           }
         }
       }
@@ -1573,6 +2629,30 @@
             "state": "translated",
             "value": "ਸੈਟਿੰਗਾਂ…"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen…"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सेटिंग्स…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定…"
+          }
         }
       }
     },
@@ -1607,6 +2687,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸੈਟਿੰਗਾਂ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Einstellungen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सेटिंग्स"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "設定"
           }
         }
       }
@@ -1643,6 +2747,30 @@
             "state": "translated",
             "value": "ਬੰਦ ਕਰੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beenden"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sair"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "बंद करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "終了"
+          }
         }
       }
     },
@@ -1677,6 +2805,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nimble ਬੰਦ ਕਰੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble beenden"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sair do Nimble"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimble बंद करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nimbleを終了"
           }
         }
       }
@@ -1713,6 +2865,30 @@
             "state": "translated",
             "value": "ਨਤੀਜਾ ਕਾਪੀ ਕਰੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ergebnis kopieren"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar resultado"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "नतीजा कॉपी करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結果をコピー"
+          }
         }
       }
     },
@@ -1747,6 +2923,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਨਤੀਜਾ ਕਾਪੀ ਕਰੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ergebnis kopieren"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar resultado"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "नतीजा कॉपी करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結果をコピー"
           }
         }
       }
@@ -1783,6 +2983,30 @@
             "state": "translated",
             "value": "ਖੋਜ ਲਿੰਕ ਕਾਪੀ ਕਰੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suchlink kopieren"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar link da busca"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "खोज का लिंक कॉपी करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "検索リンクをコピー"
+          }
         }
       }
     },
@@ -1817,6 +3041,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "DuckDuckGo ਵਿੱਚ ਖੋਲ੍ਹੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In DuckDuckGo öffnen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir no DuckDuckGo"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DuckDuckGo में खोलें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DuckDuckGoで開く"
           }
         }
       }
@@ -1853,6 +3101,30 @@
             "state": "translated",
             "value": "DuckDuckGo ਉੱਤੇ ਖੋਜੋ →"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf DuckDuckGo suchen →"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar no DuckDuckGo →"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DuckDuckGo पर खोजें →"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DuckDuckGoで検索 →"
+          }
         }
       }
     },
@@ -1887,6 +3159,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਪਸੰਦਾਂ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voreinstellungen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferências"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पसंद"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "環境設定"
           }
         }
       }
@@ -1923,6 +3219,30 @@
             "state": "translated",
             "value": "ਥੀਮ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Design"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "थीम"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "テーマ"
+          }
         }
       }
     },
@@ -1957,6 +3277,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਥੀਮ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DESIGN"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TEMA"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "थीम"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "テーマ"
           }
         }
       }
@@ -1993,6 +3337,30 @@
             "state": "translated",
             "value": "ਪਸੰਦਾਂ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VOREINSTELLUNGEN"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PREFERÊNCIAS"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पसंद"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "環境設定"
+          }
         }
       }
     },
@@ -2027,6 +3395,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "AI ਇੰਜਣ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI-MODELL"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MOTOR DE IA"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI इंजन"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AIエンジン"
           }
         }
       }
@@ -2063,6 +3455,30 @@
             "state": "translated",
             "value": "AI ਇੰਜਣ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI-Modell"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motor de IA"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI इंजन"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AIエンジン"
+          }
         }
       }
     },
@@ -2097,6 +3513,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਅਜ਼ਮਾਓ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PROBIER"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EXPERIMENTE"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आज़माएँ"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "試してみる"
           }
         }
       }
@@ -2133,6 +3573,30 @@
             "state": "translated",
             "value": "ਹਾਲੀਆ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ZULETZT"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RECENTES"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हाल के"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最近"
+          }
         }
       }
     },
@@ -2167,6 +3631,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਨਤੀਜਾ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ERGEBNIS"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RESULTADO"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "नतीजा"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "結果"
           }
         }
       }
@@ -2203,6 +3691,30 @@
             "state": "translated",
             "value": "ਵਰਜਨ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versão"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "संस्करण"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "バージョン"
+          }
         }
       }
     },
@@ -2237,6 +3749,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਔਫ਼ਲਾਈਨ ਹਿਸਾਬ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline-Rechnen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contas offline"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन गणित"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフライン計算"
           }
         }
       }
@@ -2273,6 +3809,30 @@
             "state": "translated",
             "value": "ਔਫ਼ਲਾਈਨ ਹਿਸਾਬ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline-Rechnen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contas offline"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन गणित"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフライン計算"
+          }
         }
       }
     },
@@ -2307,6 +3867,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸ਼ੁਰੂ ਹੁੰਦੇ ਹੀ ਖੋਲ੍ਹੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beim Start öffnen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abrir ao iniciar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "स्टार्टअप पर खोलें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "起動時に開く"
           }
         }
       }
@@ -2343,6 +3927,30 @@
             "state": "translated",
             "value": "ਮੂਲ ਸੁਝਾਅ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standardvorschläge"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sugestões padrão"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "डिफ़ॉल्ट सुझाव"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "標準の候補"
+          }
         }
       }
     },
@@ -2377,6 +3985,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "AI ਜਵਾਬ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KI-Antworten"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respostas de IA"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI जवाब"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI回答"
           }
         }
       }
@@ -2413,6 +4045,30 @@
             "state": "translated",
             "value": "ਮਾਡਲ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modell"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modelo"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मॉडल"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "モデル"
+          }
         }
       }
     },
@@ -2447,6 +4103,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸਰਵਰ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servidor"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सर्वर"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サーバー"
           }
         }
       }
@@ -2483,6 +4163,30 @@
             "state": "translated",
             "value": "ਇੰਜਣ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modell"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Motor"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इंजन"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "エンジン"
+          }
         }
       }
     },
@@ -2517,6 +4221,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸਮਝ ਗਿਆ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verstanden"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entendi"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "समझ गया"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "わかりました"
           }
         }
       }
@@ -2553,6 +4281,30 @@
             "state": "translated",
             "value": "%@ ਵਿੱਚ ਨਵਾਂ ਕੀ ਹੈ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neu in %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Novidades do %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ में नया क्या है"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@の新機能"
+          }
         }
       }
     },
@@ -2587,6 +4339,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht erlauben"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não permitir"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अनुमति न दें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "許可しない"
           }
         }
       }
@@ -2623,6 +4399,30 @@
             "state": "translated",
             "value": "ਜਵਾਬ ਨੂੰ ਤਸਵੀਰ ਵਜੋਂ ਸਾਂਝਾ ਕਰੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antwort als Bild teilen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compartilhar resposta como imagem"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जवाब को तस्वीर के रूप में साझा करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回答を画像で共有"
+          }
         }
       }
     },
@@ -2657,6 +4457,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਚਾਲੂ ਹੋਣ 'ਤੇ ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ %@ ਨੂੰ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਹੋਰ ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ। ਬੰਦ ਹੋਣ 'ਤੇ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ।"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn aktiv, wird der Text, den du tippst, an %@ gesendet. Sonst nichts. Wenn aus, kommen Antworten nur von DuckDuckGo und Wikipedia."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ligado, o texto que você digita é enviado para %@. Nada mais é enviado. Desligado, as respostas vêm só do DuckDuckGo e da Wikipedia."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चालू होने पर, आप जो टेक्स्ट लिखते हैं वह %@ को भेजा जाता है। और कुछ नहीं भेजा जाता। बंद होने पर, जवाब सिर्फ़ DuckDuckGo और Wikipedia से आते हैं।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オンのとき、入力したテキストが%@に送られます。ほかは何も送りません。オフのときは、DuckDuckGoとWikipediaだけから答えます。"
           }
         }
       }
@@ -2693,6 +4517,30 @@
             "state": "translated",
             "value": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, %@ ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ, ਸੰਪਰਕ, ਟਿਕਾਣਾ ਜਾਂ ਪਛਾਣ ਨਹੀਂ ਭੇਜੀ ਜਾਂਦੀ, ਅਤੇ Nimble ਇਸ ਦਾ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਦਾ। ਜੇ ਤੁਸੀਂ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੇ, ਤਾਂ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਤੁਸੀਂ ਇਹ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zum Antworten sendet Nimble den Text, den du tippst, und sonst nichts, an %@. Es werden kein Konto, keine Kontakte, kein Standort und keine Kennungen gesendet, und Nimble speichert nichts davon. Wenn du das nicht erlaubst, kommen Antworten nur von DuckDuckGo und Wikipedia. Du kannst das in den Einstellungen ändern."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para responder, o Nimble envia o texto que você digita, e mais nada, para %@. Nenhuma conta, contato, localização ou identificador é enviado, e o Nimble não guarda registro disso. Se você não permitir, as respostas vêm só do DuckDuckGo e da Wikipedia. Você pode mudar isso nos Ajustes."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जवाब देने के लिए Nimble आपका लिखा टेक्स्ट, और कुछ नहीं, %@ को भेजता है। कोई खाता, संपर्क, स्थान या पहचान नहीं भेजी जाती, और Nimble इसका कोई रिकॉर्ड नहीं रखता। अनुमति न देने पर जवाब सिर्फ़ DuckDuckGo और Wikipedia से आते हैं। आप इसे सेटिंग्स में बदल सकते हैं।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "回答のために、Nimbleは入力したテキストだけを%@に送ります。アカウント、連絡先、位置情報、識別子は送らず、記録も残しません。許可しない場合、答えはDuckDuckGoとWikipediaだけから届きます。設定でいつでも変更できます。"
+          }
         }
       }
     },
@@ -2727,6 +4575,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਤੁਹਾਡੀ ਕੁੰਜੀ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਹੀ ਰਹਿੰਦੀ ਹੈ ਅਤੇ ਸਿਰਫ਼ %@ ਨੂੰ ਭੇਜੀ ਜਾਂਦੀ ਹੈ।"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dein Schlüssel bleibt auf diesem Gerät und wird nur an %@ gesendet."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sua chave fica neste aparelho e só é enviada para %@."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "आपकी कुंजी इसी डिवाइस पर रहती है और सिर्फ़ %@ को भेजी जाती है।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キーはこの端末に残り、%@にだけ送られます。"
           }
         }
       }
@@ -2763,6 +4635,30 @@
             "state": "translated",
             "value": "ਇਹ ਦੁਬਾਰਾ ਪੁੱਛਦਾ ਹੈ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fragt das nochmal"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pergunta isto de novo"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इसे फिर से पूछता है"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もう一度質問します"
+          }
         }
       }
     },
@@ -2797,6 +4693,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਮਾਸਕੌਟ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maskottchen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mascote"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "शुभंकर"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マスコット"
           }
         }
       }
@@ -2833,6 +4753,30 @@
             "state": "translated",
             "value": "ਮਾਸਕੌਟ: %@"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maskottchen: %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mascote: %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "शुभंकर: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "マスコット：%@"
+          }
         }
       }
     },
@@ -2867,6 +4811,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਡਿਵਾਈਸ ’ਤੇ (Apple Intelligence)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf dem Gerät (Apple Intelligence)"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No aparelho (Apple Intelligence)"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "डिवाइस पर (Apple Intelligence)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "端末内（Apple Intelligence）"
           }
         }
       }
@@ -2903,6 +4871,30 @@
             "state": "translated",
             "value": "ਸਮੰਥਾ ਚੱਲ ਰਹੀ ਹੈ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samantha läuft"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samantha está rodando"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samantha चल रही है"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samanthaは実行中"
+          }
         }
       }
     },
@@ -2937,6 +4929,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸਮੰਥਾ ਨਹੀਂ ਚੱਲ ਰਹੀ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samantha läuft nicht"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samantha não está rodando"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samantha नहीं चल रही"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samanthaは停止中"
           }
         }
       }
@@ -2973,6 +4989,30 @@
             "state": "translated",
             "value": "ਸਮੰਥਾ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samantha wird geprüft"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verificando a Samantha"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samantha की जाँच हो रही है"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samanthaを確認中"
+          }
         }
       }
     },
@@ -3007,6 +5047,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸ਼ੁਰੂ ਕਰੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starten"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "शुरू करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "開始"
           }
         }
       }
@@ -3043,6 +5107,30 @@
             "state": "translated",
             "value": "ਜਾਂਚ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Testar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जाँचें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "テスト"
+          }
         }
       }
     },
@@ -3077,6 +5165,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਆਖਰੀ ਜਵਾਬ: %@"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Letzte Antwort: %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Última resposta: %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पिछला जवाब: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "前回の回答：%@"
           }
         }
       }
@@ -3113,6 +5225,30 @@
             "state": "translated",
             "value": "ਕਦਮ ਵੇਖੋ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schritte zeigen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar passos"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चरण दिखाएँ"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手順を表示"
+          }
         }
       }
     },
@@ -3147,6 +5283,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਪਿਛੋਕੜ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hintergrund"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contexto"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पृष्ठभूमि"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景"
           }
         }
       }
@@ -3183,6 +5343,30 @@
             "state": "translated",
             "value": "ਮੁਫ਼ਤ AI ਅੱਜ ਲਈ ਜਵਾਬ ਖ਼ਤਮ ਕਰ ਚੁੱਕਾ ਹੈ, ਇਸ ਲਈ ਇਹ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਹੈ। ਸ਼ਾਮ ਨੂੰ ਇਹ ਮੁੜ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ।"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die kostenlose KI hat für heute keine Antworten mehr, deshalb kommt das von Wikipedia. Am Abend geht es wieder los."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A IA gratuita ficou sem respostas por hoje, então isto vem da Wikipedia. Ela volta à noite."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मुफ़्त AI के आज के जवाब ख़त्म हो गए हैं, इसलिए यह Wikipedia से है। यह शाम को फिर से शुरू होगा।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無料AIは今日の分の回答を使い切ったため、これはWikipediaからです。夜にまた使えるようになります。"
+          }
         }
       }
     },
@@ -3217,6 +5401,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਇਹ ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਸਿੱਧਾ ਜਵਾਬ ਨਹੀਂ ਹੈ। ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਪਿਛੋਕੜ:"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine direkte Antwort auf deine Frage. Hintergrund von Wikipedia:"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não é uma resposta direta à sua pergunta. Contexto da Wikipedia:"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "यह आपके सवाल का सीधा जवाब नहीं है। Wikipedia से पृष्ठभूमि:"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ご質問への直接の答えではありません。Wikipediaからの背景情報:"
           }
         }
       }
@@ -3253,6 +5461,30 @@
             "state": "translated",
             "value": "ਨਵਾਂ ਸਵਾਲ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neue Frage"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova pergunta"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "नया सवाल"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しい質問"
+          }
         }
       }
     },
@@ -3287,6 +5519,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਇਤਿਹਾਸ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verlauf"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Histórico"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इतिहास"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "履歴"
           }
         }
       }
@@ -3323,6 +5579,30 @@
             "state": "translated",
             "value": "ਪਿੱਛੇ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zurück"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "वापस"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "戻る"
+          }
         }
       }
     },
@@ -3357,6 +5637,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸੋਧੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bearbeiten"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "संपादित करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編集"
           }
         }
       }
@@ -3393,6 +5697,30 @@
             "state": "translated",
             "value": "ਹੋਇਆ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fertig"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concluído"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हो गया"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完了"
+          }
         }
       }
     },
@@ -3427,6 +5755,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਮਿਟਾਓ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Löschen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हटाएँ"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "削除"
           }
         }
       }
@@ -3463,6 +5815,30 @@
             "state": "translated",
             "value": "ਚੁਣੇ ਮਿਟਾਓ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auswahl löschen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Excluir selecionados"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चुने हुए हटाएँ"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選択を削除"
+          }
         }
       }
     },
@@ -3497,6 +5873,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਚੁਣੇ ਕਾਪੀ ਕਰੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auswahl kopieren"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar selecionados"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चुने हुए कॉपी करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選択をコピー"
           }
         }
       }
@@ -3533,6 +5933,30 @@
             "state": "translated",
             "value": "ਕਾਪੀ ਹੋਇਆ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiert"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiado"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कॉपी हो गया"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コピーしました"
+          }
         }
       }
     },
@@ -3567,6 +5991,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਦੁਬਾਰਾ ਪੁੱਛੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nochmal fragen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perguntar de novo"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "फिर से पूछें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もう一度質問"
           }
         }
       }
@@ -3603,6 +6051,30 @@
             "state": "translated",
             "value": "ਅਜੇ ਕੋਈ ਸਵਾਲ ਨਹੀਂ।"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noch keine Fragen."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma pergunta ainda."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "अभी कोई सवाल नहीं।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "まだ質問がありません。"
+          }
         }
       }
     },
@@ -3637,6 +6109,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਸਭ ਚੁਣੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle auswählen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecionar tudo"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सब चुनें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべて選択"
           }
         }
       }
@@ -3673,6 +6169,30 @@
             "state": "translated",
             "value": "ਮੀਨੂ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menü"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menu"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "मेन्यू"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メニュー"
+          }
         }
       }
     },
@@ -3707,6 +6227,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Download offline answers"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline-Antworten laden"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixar respostas offline"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन जवाब डाउनलोड करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフライン回答をダウンロード"
           }
         }
       }
@@ -3743,6 +6287,30 @@
             "state": "translated",
             "value": "Download offline answers (about %lld MB)"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline-Antworten laden (ca. %lld MB)"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixar respostas offline (cerca de %lld MB)"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन जवाब डाउनलोड करें (लगभग %lld MB)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフライン回答をダウンロード（約%lld MB）"
+          }
         }
       }
     },
@@ -3777,6 +6345,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Downloading offline answers…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline-Antworten werden geladen…"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Baixando respostas offline…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन जवाब डाउनलोड हो रहे हैं…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフライン回答をダウンロード中…"
           }
         }
       }
@@ -3813,6 +6405,30 @@
             "state": "translated",
             "value": "Remove offline pack"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline-Paket entfernen"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remover pacote offline"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन पैक हटाएँ"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフラインパックを削除"
+          }
         }
       }
     },
@@ -3847,6 +6463,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Could not download the offline pack. Try again on a connection."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Offline-Paket konnte nicht geladen werden. Versuch es mit Verbindung nochmal."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não foi possível baixar o pacote offline. Tente de novo com conexão."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन पैक डाउनलोड नहीं हो सका। कनेक्शन होने पर फिर कोशिश करें।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフラインパックをダウンロードできませんでした。接続のある場所でもう一度お試しください。"
           }
         }
       }
@@ -3883,6 +6523,30 @@
             "state": "translated",
             "value": "Offline pack · Wikipedia (CC BY-SA)"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline-Paket · Wikipedia (CC BY-SA)"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pacote offline · Wikipedia (CC BY-SA)"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन पैक · Wikipedia (CC BY-SA)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフラインパック · Wikipedia (CC BY-SA)"
+          }
         }
       }
     },
@@ -3917,6 +6581,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Not in the offline pack. Math, units and graphs still work offline."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nicht im Offline-Paket. Rechnen, Einheiten und Diagramme funktionieren offline weiter."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Não está no pacote offline. Contas, unidades e gráficos continuam funcionando offline."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ऑफ़लाइन पैक में नहीं है। गणित, इकाइयाँ और ग्राफ़ ऑफ़लाइन फिर भी चलते हैं।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフラインパックにありません。計算、単位、グラフはオフラインでも使えます。"
           }
         }
       }
@@ -3953,6 +6641,30 @@
             "state": "translated",
             "value": "Private: on"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privat: an"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privado: ligado"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "निजी: चालू"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プライベート：オン"
+          }
         }
       }
     },
@@ -3987,6 +6699,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Private: off"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privat: aus"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privado: desligado"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "निजी: बंद"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プライベート：オフ"
           }
         }
       }
@@ -4023,6 +6759,30 @@
             "state": "translated",
             "value": "Nothing leaves this device. Click to turn private mode off"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nichts verlässt dieses Gerät. Klicken, um den privaten Modus auszuschalten"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nada sai deste aparelho. Clique para desligar o modo privado"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कुछ भी इस डिवाइस से बाहर नहीं जाता। निजी मोड बंद करने के लिए क्लिक करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この端末の外には何も出ません。クリックでプライベートモードをオフ"
+          }
         }
       }
     },
@@ -4057,6 +6817,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Click to answer only from this device"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klicken, um nur auf diesem Gerät zu antworten"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clique para responder só neste aparelho"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सिर्फ़ इसी डिवाइस से जवाब देने के लिए क्लिक करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "クリックでこの端末内だけで回答"
           }
         }
       }
@@ -4093,6 +6877,30 @@
             "state": "translated",
             "value": "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts."
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der private Modus ist an, nichts verlässt dieses Gerät. Rechnen, Einheiten und Diagramme funktionieren. Lade die Offline-Antworten, um Fakten nachzuschlagen."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O modo privado está ligado, então nada sai deste aparelho. Contas, unidades e gráficos funcionam. Baixe as respostas offline para consultar fatos."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "निजी मोड चालू है, इसलिए कुछ भी इस डिवाइस से बाहर नहीं जाता। गणित, इकाइयाँ और ग्राफ़ चलते हैं। तथ्य खोजने के लिए ऑफ़लाइन जवाब डाउनलोड करें।"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "プライベートモードがオンなので、何もこの端末の外に出ません。計算、単位、グラフは使えます。事実を調べるにはオフライン回答をダウンロードしてください。"
+          }
         }
       }
     },
@@ -4127,6 +6935,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "Listen"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anhören"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvir"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सुनें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "聞く"
           }
         }
       }
@@ -4163,6 +6995,30 @@
             "state": "translated",
             "value": "Stop"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stopp"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "रोकें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停止"
+          }
         }
       }
     },
@@ -4197,6 +7053,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਕਾਪੀ ਕਰੋ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieren"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कॉपी करें"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "コピー"
           }
         }
       }
@@ -4233,6 +7113,30 @@
             "state": "translated",
             "value": "ਕਾਰਡ: %@"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karte: %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cartão: %@"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कार्ड: %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カード：%@"
+          }
         }
       }
     },
@@ -4267,6 +7171,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਚੌੜਾ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breit"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Largo"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "चौड़ा"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワイド"
           }
         }
       }
@@ -4303,6 +7231,30 @@
             "state": "translated",
             "value": "ਵਰਗ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quadrat"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quadrado"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "वर्ग"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正方形"
+          }
         }
       }
     },
@@ -4338,6 +7290,30 @@
             "state": "translated",
             "value": "ਸਟੋਰੀ"
           }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Story"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Story"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "स्टोरी"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ストーリー"
+          }
         }
       }
     },
@@ -4372,6 +7348,30 @@
           "stringUnit": {
             "state": "translated",
             "value": "ਕਾਰਡ"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Karte"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cartão"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कार्ड"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "カード"
           }
         }
       }

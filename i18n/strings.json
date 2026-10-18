@@ -6,7 +6,11 @@
       "fr",
       "es",
       "zh",
-      "pa"
+      "pa",
+      "de",
+      "pt",
+      "hi",
+      "ja"
     ]
   },
   "Ask anything.": {
@@ -14,154 +18,242 @@
     "fr": "Demandez n'importe quoi.",
     "es": "Pregunta lo que quieras.",
     "zh": "想问什么都行。",
-    "pa": "ਕੁਝ ਵੀ ਪੁੱਛੋ।"
+    "pa": "ਕੁਝ ਵੀ ਪੁੱਛੋ।",
+    "de": "Frag einfach.",
+    "pt": "Pergunte qualquer coisa.",
+    "hi": "कुछ भी पूछिए।",
+    "ja": "なんでも聞いてください。"
   },
   "Ask": {
     "en": "Ask",
     "fr": "Demander",
     "es": "Preguntar",
     "zh": "提问",
-    "pa": "ਪੁੱਛੋ"
+    "pa": "ਪੁੱਛੋ",
+    "de": "Fragen",
+    "pt": "Perguntar",
+    "hi": "पूछें",
+    "ja": "質問"
   },
   "Ask Nimble": {
     "en": "Ask Nimble",
     "fr": "Demander à Nimble",
     "es": "Pregunta a Nimble",
     "zh": "问 Nimble",
-    "pa": "Nimble ਨੂੰ ਪੁੱਛੋ"
+    "pa": "Nimble ਨੂੰ ਪੁੱਛੋ",
+    "de": "Nimble fragen",
+    "pt": "Pergunte ao Nimble",
+    "hi": "Nimble से पूछें",
+    "ja": "Nimbleに聞く"
   },
   "Get the app": {
     "en": "Get the app",
     "fr": "Obtenir l'app",
     "es": "Descargar la app",
     "zh": "获取应用",
-    "pa": "ਐਪ ਲਵੋ"
+    "pa": "ਐਪ ਲਵੋ",
+    "de": "App laden",
+    "pt": "Baixar o app",
+    "hi": "ऐप पाएँ",
+    "ja": "アプリを入手"
   },
   "Source": {
     "en": "Source",
     "fr": "Source",
     "es": "Código",
     "zh": "源码",
-    "pa": "ਸਰੋਤ"
+    "pa": "ਸਰੋਤ",
+    "de": "Quelle",
+    "pt": "Fonte",
+    "hi": "स्रोत",
+    "ja": "情報源"
   },
   "Recent": {
     "en": "Recent",
     "fr": "Récents",
     "es": "Recientes",
     "zh": "最近",
-    "pa": "ਹਾਲੀਆ"
+    "pa": "ਹਾਲੀਆ",
+    "de": "Zuletzt",
+    "pt": "Recentes",
+    "hi": "हाल के",
+    "ja": "最近"
   },
   "Recent searches": {
     "en": "Recent searches",
     "fr": "Recherches récentes",
     "es": "Búsquedas recientes",
     "zh": "最近的搜索",
-    "pa": "ਹਾਲੀਆ ਖੋਜਾਂ"
+    "pa": "ਹਾਲੀਆ ਖੋਜਾਂ",
+    "de": "Letzte Suchen",
+    "pt": "Buscas recentes",
+    "hi": "हाल की खोजें",
+    "ja": "最近の検索"
   },
   "Clear": {
     "en": "Clear",
     "fr": "Effacer",
     "es": "Borrar",
     "zh": "清除",
-    "pa": "ਮਿਟਾਓ"
+    "pa": "ਮਿਟਾਓ",
+    "de": "Löschen",
+    "pt": "Limpar",
+    "hi": "मिटाएँ",
+    "ja": "消去"
   },
   "Answer": {
     "en": "Answer",
     "fr": "Réponse",
     "es": "Respuesta",
     "zh": "答案",
-    "pa": "ਜਵਾਬ"
+    "pa": "ਜਵਾਬ",
+    "de": "Antwort",
+    "pt": "Resposta",
+    "hi": "जवाब",
+    "ja": "回答"
   },
   "Thinking…": {
     "en": "Thinking…",
     "fr": "Je réfléchis…",
     "es": "Pensando…",
     "zh": "思考中…",
-    "pa": "ਸੋਚ ਰਿਹਾ ਹਾਂ…"
+    "pa": "ਸੋਚ ਰਿਹਾ ਹਾਂ…",
+    "de": "Denke nach…",
+    "pt": "Pensando…",
+    "hi": "सोच रहा है…",
+    "ja": "考え中…"
   },
   "Share": {
     "en": "Share",
     "fr": "Partager",
     "es": "Compartir",
     "zh": "分享",
-    "pa": "ਸਾਂਝਾ ਕਰੋ"
+    "pa": "ਸਾਂਝਾ ਕਰੋ",
+    "de": "Teilen",
+    "pt": "Compartilhar",
+    "hi": "साझा करें",
+    "ja": "共有"
   },
   "Math, units and graphs work offline. Everything else gets one sentence and a source.": {
     "en": "Math, units and graphs work offline. Everything else gets one sentence and a source.",
     "fr": "Calculs, unités et graphiques fonctionnent hors ligne. Le reste tient en une phrase, avec sa source.",
     "es": "Las cuentas, unidades y gráficas funcionan sin conexión. Lo demás recibe una frase y su fuente.",
     "zh": "数学、单位换算和图表可离线使用。其他问题给你一句话和出处。",
-    "pa": "ਹਿਸਾਬ, ਇਕਾਈਆਂ ਅਤੇ ਗ੍ਰਾਫ਼ ਬਿਨਾਂ ਇੰਟਰਨੈੱਟ ਦੇ ਚੱਲਦੇ ਹਨ। ਬਾਕੀ ਸਭ ਲਈ ਇੱਕ ਵਾਕ ਅਤੇ ਇੱਕ ਸਰੋਤ ਮਿਲਦਾ ਹੈ।"
+    "pa": "ਹਿਸਾਬ, ਇਕਾਈਆਂ ਅਤੇ ਗ੍ਰਾਫ਼ ਬਿਨਾਂ ਇੰਟਰਨੈੱਟ ਦੇ ਚੱਲਦੇ ਹਨ। ਬਾਕੀ ਸਭ ਲਈ ਇੱਕ ਵਾਕ ਅਤੇ ਇੱਕ ਸਰੋਤ ਮਿਲਦਾ ਹੈ।",
+    "de": "Rechnen, Einheiten und Diagramme funktionieren offline. Alles andere bekommt einen Satz und eine Quelle.",
+    "pt": "Contas, unidades e gráficos funcionam offline. O resto ganha uma frase e uma fonte.",
+    "hi": "गणित, इकाइयाँ और ग्राफ़ ऑफ़लाइन चलते हैं। बाकी हर चीज़ का एक वाक्य और एक स्रोत मिलता है।",
+    "ja": "計算、単位、グラフはオフラインで使えます。それ以外は一文と情報源でお答えします。"
   },
   "Stop listening": {
     "en": "Stop listening",
     "fr": "Arrêter l'écoute",
     "es": "Dejar de escuchar",
     "zh": "停止聆听",
-    "pa": "ਸੁਣਨਾ ਬੰਦ ਕਰੋ"
+    "pa": "ਸੁਣਨਾ ਬੰਦ ਕਰੋ",
+    "de": "Zuhören beenden",
+    "pt": "Parar de ouvir",
+    "hi": "सुनना बंद करें",
+    "ja": "聞き取りを停止"
   },
   "Ask by voice": {
     "en": "Ask by voice",
     "fr": "Demander à la voix",
     "es": "Preguntar por voz",
     "zh": "语音提问",
-    "pa": "ਆਵਾਜ਼ ਨਾਲ ਪੁੱਛੋ"
+    "pa": "ਆਵਾਜ਼ ਨਾਲ ਪੁੱਛੋ",
+    "de": "Per Sprache fragen",
+    "pt": "Perguntar por voz",
+    "hi": "बोलकर पूछें",
+    "ja": "音声で質問"
   },
   "Listening": {
     "en": "Listening",
     "fr": "J'écoute",
     "es": "Escuchando",
     "zh": "正在聆听",
-    "pa": "ਸੁਣ ਰਿਹਾ ਹਾਂ"
+    "pa": "ਸੁਣ ਰਿਹਾ ਹਾਂ",
+    "de": "Hört zu",
+    "pt": "Ouvindo",
+    "hi": "सुन रहा है",
+    "ja": "聞き取り中"
   },
   "AI: on": {
     "en": "AI: on",
     "fr": "IA : activée",
     "es": "IA: sí",
     "zh": "AI：开",
-    "pa": "AI: ਚਾਲੂ"
+    "pa": "AI: ਚਾਲੂ",
+    "de": "KI: an",
+    "pt": "IA: ligada",
+    "hi": "AI: चालू",
+    "ja": "AI：オン"
   },
   "AI: off": {
     "en": "AI: off",
     "fr": "IA : désactivée",
     "es": "IA: no",
     "zh": "AI：关",
-    "pa": "AI: ਬੰਦ"
+    "pa": "AI: ਬੰਦ",
+    "de": "KI: aus",
+    "pt": "IA: desligada",
+    "hi": "AI: बंद",
+    "ja": "AI：オフ"
   },
   "AI: ask": {
     "en": "AI: ask",
     "fr": "IA : demander",
     "es": "IA: preguntar",
     "zh": "AI：询问",
-    "pa": "AI: ਪੁੱਛੋ"
+    "pa": "AI: ਪੁੱਛੋ",
+    "de": "KI: fragen",
+    "pt": "IA: perguntar",
+    "hi": "AI: पूछें",
+    "ja": "AI：確認"
   },
   "Not chosen yet. Click to choose.": {
     "en": "Not chosen yet. Click to choose.",
     "fr": "Pas encore choisi. Cliquez pour choisir.",
     "es": "Aún sin elegir. Haz clic para elegir.",
     "zh": "尚未选择。点击进行选择。",
-    "pa": "ਅਜੇ ਚੁਣਿਆ ਨਹੀਂ। ਚੁਣਨ ਲਈ ਕਲਿੱਕ ਕਰੋ।"
+    "pa": "ਅਜੇ ਚੁਣਿਆ ਨਹੀਂ। ਚੁਣਨ ਲਈ ਕਲਿੱਕ ਕਰੋ।",
+    "de": "Noch nicht gewählt. Zum Wählen klicken.",
+    "pt": "Ainda não escolhido. Clique para escolher.",
+    "hi": "अभी चुना नहीं गया। चुनने के लिए क्लिक करें।",
+    "ja": "まだ選択されていません。クリックして選択。"
   },
   "Click to turn AI answers off": {
     "en": "Click to turn AI answers off",
     "fr": "Cliquez pour désactiver les réponses de l'IA",
     "es": "Haz clic para desactivar las respuestas de IA",
     "zh": "点击关闭 AI 回答",
-    "pa": "AI ਜਵਾਬ ਬੰਦ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ"
+    "pa": "AI ਜਵਾਬ ਬੰਦ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ",
+    "de": "Klicken, um KI-Antworten auszuschalten",
+    "pt": "Clique para desligar as respostas de IA",
+    "hi": "AI जवाब बंद करने के लिए क्लिक करें",
+    "ja": "クリックでAI回答をオフ"
   },
   "Click to turn AI answers on": {
     "en": "Click to turn AI answers on",
     "fr": "Cliquez pour activer les réponses de l'IA",
     "es": "Haz clic para activar las respuestas de IA",
     "zh": "点击开启 AI 回答",
-    "pa": "AI ਜਵਾਬ ਚਾਲੂ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ"
+    "pa": "AI ਜਵਾਬ ਚਾਲੂ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ",
+    "de": "Klicken, um KI-Antworten einzuschalten",
+    "pt": "Clique para ligar as respostas de IA",
+    "hi": "AI जवाब चालू करने के लिए क्लिक करें",
+    "ja": "クリックでAI回答をオン"
   },
   "Before I answer": {
     "en": "Before I answer",
     "fr": "Avant de répondre",
     "es": "Antes de responder",
     "zh": "回答之前",
-    "pa": "ਜਵਾਬ ਦੇਣ ਤੋਂ ਪਹਿਲਾਂ"
+    "pa": "ਜਵਾਬ ਦੇਣ ਤੋਂ ਪਹਿਲਾਂ",
+    "de": "Bevor ich antworte",
+    "pt": "Antes de responder",
+    "hi": "जवाब देने से पहले",
+    "ja": "回答の前に"
   },
   "Send your question to an AI service?": {
     "en": "Send your question to an AI service?",
@@ -169,7 +261,11 @@
     "es": "¿Enviar tu pregunta a un servicio de IA?",
     "zh": "把你的问题发送给 AI 服务？",
     "pa": "ਕੀ ਤੁਹਾਡਾ ਸਵਾਲ ਕਿਸੇ AI ਸੇਵਾ ਨੂੰ ਭੇਜਣਾ ਹੈ?",
-    "review": true
+    "review": true,
+    "de": "Frage an einen KI-Dienst senden?",
+    "pt": "Enviar sua pergunta a um serviço de IA?",
+    "hi": "क्या आपका सवाल किसी AI सेवा को भेजें?",
+    "ja": "質問をAIサービスに送信しますか？"
   },
   "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.": {
     "en": "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.",
@@ -177,378 +273,594 @@
     "es": "Nimble envía el texto de tu pregunta, y nada más, a {s}. No se envía ninguna cuenta ni dato personal, y no se guarda ningún registro. Puedes cambiarlo en cualquier momento en los ajustes.",
     "zh": "Nimble 只会把你的问题文字发送给 {s}，不发送其他任何内容。不发送账号或个人数据，也不保留任何记录。你可以随时在设置中更改。",
     "pa": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, {s} ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ ਜਾਂ ਨਿੱਜੀ ਡੇਟਾ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ, ਅਤੇ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਿਆ ਜਾਂਦਾ। ਤੁਸੀਂ ਇਹ ਕਦੇ ਵੀ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
-    "review": true
+    "review": true,
+    "de": "Nimble sendet nur den Text deiner Frage an {s}. Kein Konto, keine persönlichen Daten, nichts wird gespeichert. Du kannst das jederzeit in den Einstellungen ändern.",
+    "pt": "O Nimble envia o texto da sua pergunta, e mais nada, para {s}. Sem conta nem dados pessoais, e nenhum registro é guardado. Você pode mudar isso quando quiser nos ajustes.",
+    "hi": "Nimble आपके सवाल का सिर्फ़ टेक्स्ट {s} को भेजता है, और कुछ नहीं। कोई खाता या निजी डेटा नहीं, और कोई रिकॉर्ड नहीं रखा जाता। आप इसे कभी भी सेटिंग्स में बदल सकते हैं।",
+    "ja": "Nimbleは質問のテキストだけを{s}に送ります。アカウントや個人情報は送らず、記録も残しません。設定でいつでも変更できます。"
   },
   "powered by {s}": {
     "en": "powered by {s}",
     "fr": "propulsé par {s}",
     "es": "con tecnología de {s}",
     "zh": "由 {s} 提供",
-    "pa": "{s} ਦੁਆਰਾ"
+    "pa": "{s} ਦੁਆਰਾ",
+    "de": "unterstützt von {s}",
+    "pt": "com tecnologia de {s}",
+    "hi": "{s} द्वारा संचालित",
+    "ja": "{s} 搭載"
   },
   "Allow": {
     "en": "Allow",
     "fr": "Autoriser",
     "es": "Permitir",
     "zh": "允许",
-    "pa": "ਇਜਾਜ਼ਤ ਦਿਓ"
+    "pa": "ਇਜਾਜ਼ਤ ਦਿਓ",
+    "de": "Erlauben",
+    "pt": "Permitir",
+    "hi": "अनुमति दें",
+    "ja": "許可"
   },
   "Don't allow": {
     "en": "Don't allow",
     "fr": "Ne pas autoriser",
     "es": "No permitir",
     "zh": "不允许",
-    "pa": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ"
+    "pa": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ",
+    "de": "Nicht erlauben",
+    "pt": "Não permitir",
+    "hi": "अनुमति न दें",
+    "ja": "許可しない"
   },
   "computed offline": {
     "en": "computed offline",
     "fr": "calculé hors ligne",
     "es": "calculado sin conexión",
     "zh": "离线计算",
-    "pa": "ਔਫ਼ਲਾਈਨ ਗਿਣਿਆ"
+    "pa": "ਔਫ਼ਲਾਈਨ ਗਿਣਿਆ",
+    "de": "offline berechnet",
+    "pt": "calculado offline",
+    "hi": "ऑफ़लाइन गणना",
+    "ja": "オフラインで計算"
   },
   "You're offline. Math, units and graphs still work.": {
     "en": "You're offline. Math, units and graphs still work.",
     "fr": "Vous êtes hors ligne. Les calculs, unités et graphiques fonctionnent toujours.",
     "es": "Estás sin conexión. Las cuentas, unidades y gráficas siguen funcionando.",
     "zh": "你已离线。数学、单位换算和图表仍可使用。",
-    "pa": "ਤੁਸੀਂ ਔਫ਼ਲਾਈਨ ਹੋ। ਹਿਸਾਬ, ਇਕਾਈਆਂ ਅਤੇ ਗ੍ਰਾਫ਼ ਹਾਲੇ ਵੀ ਚੱਲਦੇ ਹਨ।"
+    "pa": "ਤੁਸੀਂ ਔਫ਼ਲਾਈਨ ਹੋ। ਹਿਸਾਬ, ਇਕਾਈਆਂ ਅਤੇ ਗ੍ਰਾਫ਼ ਹਾਲੇ ਵੀ ਚੱਲਦੇ ਹਨ।",
+    "de": "Du bist offline. Rechnen, Einheiten und Diagramme funktionieren weiter.",
+    "pt": "Você está offline. Contas, unidades e gráficos continuam funcionando.",
+    "hi": "आप ऑफ़लाइन हैं। गणित, इकाइयाँ और ग्राफ़ फिर भी चलते हैं।",
+    "ja": "オフラインです。計算、単位、グラフは使えます。"
   },
   "No instant answer. Try a question, a sum, or \"5 miles to km\".": {
     "en": "No instant answer. Try a question, a sum, or \"5 miles to km\".",
     "fr": "Pas de réponse instantanée. Essayez une question, un calcul ou \"5 miles to km\".",
     "es": "Sin respuesta instantánea. Prueba con una pregunta, una suma o \"5 miles to km\".",
     "zh": "没有即时答案。试试提问、算式，或 \"5 miles to km\"。",
-    "pa": "ਤੁਰੰਤ ਜਵਾਬ ਨਹੀਂ ਮਿਲਿਆ। ਕੋਈ ਸਵਾਲ, ਜੋੜ, ਜਾਂ \"5 miles to km\" ਅਜ਼ਮਾਓ।"
+    "pa": "ਤੁਰੰਤ ਜਵਾਬ ਨਹੀਂ ਮਿਲਿਆ। ਕੋਈ ਸਵਾਲ, ਜੋੜ, ਜਾਂ \"5 miles to km\" ਅਜ਼ਮਾਓ।",
+    "de": "Keine sofortige Antwort. Probier eine Frage, eine Rechnung oder „5 miles to km“.",
+    "pt": "Sem resposta imediata. Tente uma pergunta, uma conta ou \"5 miles to km\".",
+    "hi": "तुरंत जवाब नहीं मिला। कोई सवाल, जोड़-घटाव या \"5 miles to km\" आज़माएँ।",
+    "ja": "すぐには答えられません。質問や計算、「5 miles to km」を試してください。"
   },
   "Features": {
     "en": "Features",
     "fr": "Fonctionnalités",
     "es": "Funciones",
     "zh": "功能",
-    "pa": "ਫੀਚਰ"
+    "pa": "ਫੀਚਰ",
+    "de": "Funktionen",
+    "pt": "Recursos",
+    "hi": "सुविधाएँ",
+    "ja": "機能"
   },
   "Download": {
     "en": "Download",
     "fr": "Télécharger",
     "es": "Descargar",
     "zh": "下载",
-    "pa": "ਡਾਊਨਲੋਡ"
+    "pa": "ਡਾਊਨਲੋਡ",
+    "de": "Herunterladen",
+    "pt": "Baixar",
+    "hi": "डाउनलोड",
+    "ja": "ダウンロード"
   },
   "Open app": {
     "en": "Open app",
     "fr": "Ouvrir l'app",
     "es": "Abrir app",
     "zh": "打开应用",
-    "pa": "ਐਪ ਖੋਲ੍ਹੋ"
+    "pa": "ਐਪ ਖੋਲ੍ਹੋ",
+    "de": "App öffnen",
+    "pt": "Abrir o app",
+    "hi": "ऐप खोलें",
+    "ja": "アプリを開く"
   },
   "Ask a question. Get one sentence back.": {
     "en": "Ask a question. Get one sentence back.",
     "fr": "Posez une question. Recevez une phrase.",
     "es": "Haz una pregunta. Recibe una frase.",
     "zh": "提个问题，得到一句话。",
-    "pa": "ਸਵਾਲ ਪੁੱਛੋ। ਇੱਕ ਵਾਕ ਵਿੱਚ ਜਵਾਬ ਲਵੋ।"
+    "pa": "ਸਵਾਲ ਪੁੱਛੋ। ਇੱਕ ਵਾਕ ਵਿੱਚ ਜਵਾਬ ਲਵੋ।",
+    "de": "Stell eine Frage. Bekomm einen Satz zurück.",
+    "pt": "Faça uma pergunta. Receba uma frase.",
+    "hi": "एक सवाल पूछिए। एक वाक्य में जवाब पाइए।",
+    "ja": "質問すると、一文で答えが返ります。"
   },
   "Math and units answer on your device. Everything else, one sentence with a source.": {
     "en": "Math and units answer on your device. Everything else, one sentence with a source.",
     "fr": "Les calculs et les unités se font sur votre appareil. Le reste, une phrase avec sa source.",
     "es": "Las cuentas y unidades se resuelven en tu dispositivo. Lo demás, una frase con su fuente.",
     "zh": "数学和单位换算在你的设备上完成。其他问题，给你一句带出处的话。",
-    "pa": "ਹਿਸਾਬ ਅਤੇ ਇਕਾਈਆਂ ਤੁਹਾਡੇ ਡਿਵਾਈਸ ਉੱਤੇ ਹੱਲ ਹੁੰਦੇ ਹਨ। ਬਾਕੀ ਸਭ ਲਈ ਸਰੋਤ ਸਮੇਤ ਇੱਕ ਵਾਕ।"
+    "pa": "ਹਿਸਾਬ ਅਤੇ ਇਕਾਈਆਂ ਤੁਹਾਡੇ ਡਿਵਾਈਸ ਉੱਤੇ ਹੱਲ ਹੁੰਦੇ ਹਨ। ਬਾਕੀ ਸਭ ਲਈ ਸਰੋਤ ਸਮੇਤ ਇੱਕ ਵਾਕ।",
+    "de": "Rechnen und Einheiten laufen auf deinem Gerät. Alles andere: ein Satz mit Quelle.",
+    "pt": "Contas e unidades são respondidas no seu aparelho. O resto, uma frase com fonte.",
+    "hi": "गणित और इकाइयाँ आपके डिवाइस पर ही हल होती हैं। बाकी सब, एक वाक्य और एक स्रोत।",
+    "ja": "計算と単位は端末の中で答えます。それ以外は、情報源つきの一文で。"
   },
   "Open the web app": {
     "en": "Open the web app",
     "fr": "Ouvrir l'app web",
     "es": "Abrir la app web",
     "zh": "打开网页版",
-    "pa": "ਵੈੱਬ ਐਪ ਖੋਲ੍ਹੋ"
+    "pa": "ਵੈੱਬ ਐਪ ਖੋਲ੍ਹੋ",
+    "de": "Web-App öffnen",
+    "pt": "Abrir o app web",
+    "hi": "वेब ऐप खोलें",
+    "ja": "Webアプリを開く"
   },
   "Download for Mac": {
     "en": "Download for Mac",
     "fr": "Télécharger pour Mac",
     "es": "Descargar para Mac",
     "zh": "下载 Mac 版",
-    "pa": "Mac ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ"
+    "pa": "Mac ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ",
+    "de": "Für Mac laden",
+    "pt": "Baixar para Mac",
+    "hi": "Mac के लिए डाउनलोड",
+    "ja": "Mac版をダウンロード"
   },
   "Download for Windows": {
     "en": "Download for Windows",
     "fr": "Télécharger pour Windows",
     "es": "Descargar para Windows",
     "zh": "下载 Windows 版",
-    "pa": "Windows ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ"
+    "pa": "Windows ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ",
+    "de": "Für Windows laden",
+    "pt": "Baixar para Windows",
+    "hi": "Windows के लिए डाउनलोड",
+    "ja": "Windows版をダウンロード"
   },
   "Download for Android": {
     "en": "Download for Android",
     "fr": "Télécharger pour Android",
     "es": "Descargar para Android",
     "zh": "下载 Android 版",
-    "pa": "Android ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ"
+    "pa": "Android ਲਈ ਡਾਊਨਲੋਡ ਕਰੋ",
+    "de": "Für Android laden",
+    "pt": "Baixar para Android",
+    "hi": "Android के लिए डाउनलोड",
+    "ja": "Android版をダウンロード"
   },
   "Answers, not ten blue links.": {
     "en": "Answers, not ten blue links.",
     "fr": "Des réponses, pas dix liens bleus.",
     "es": "Respuestas, no diez enlaces azules.",
     "zh": "要答案，不要十条蓝色链接。",
-    "pa": "ਜਵਾਬ, ਦਸ ਨੀਲੇ ਲਿੰਕ ਨਹੀਂ।"
+    "pa": "ਜਵਾਬ, ਦਸ ਨੀਲੇ ਲਿੰਕ ਨਹੀਂ।",
+    "de": "Antworten, keine zehn blauen Links.",
+    "pt": "Respostas, não dez links azuis.",
+    "hi": "जवाब, दस नीले लिंक नहीं।",
+    "ja": "青いリンク10個ではなく、答えを。"
   },
   "Math and units, offline": {
     "en": "Math and units, offline",
     "fr": "Calculs et unités, hors ligne",
     "es": "Cuentas y unidades, sin conexión",
     "zh": "数学与单位，离线可用",
-    "pa": "ਹਿਸਾਬ ਅਤੇ ਇਕਾਈਆਂ, ਔਫ਼ਲਾਈਨ"
+    "pa": "ਹਿਸਾਬ ਅਤੇ ਇਕਾਈਆਂ, ਔਫ਼ਲਾਈਨ",
+    "de": "Rechnen und Einheiten, offline",
+    "pt": "Contas e unidades, offline",
+    "hi": "गणित और इकाइयाँ, ऑफ़लाइन",
+    "ja": "計算と単位、オフラインで"
   },
   "Two models, one sentence": {
     "en": "Two models, one sentence",
     "fr": "Deux modèles, une phrase",
     "es": "Dos modelos, una frase",
     "zh": "两个模型，一句话",
-    "pa": "ਦੋ ਮਾਡਲ, ਇੱਕ ਵਾਕ"
+    "pa": "ਦੋ ਮਾਡਲ, ਇੱਕ ਵਾਕ",
+    "de": "Zwei Modelle, ein Satz",
+    "pt": "Dois modelos, uma frase",
+    "hi": "दो मॉडल, एक वाक्य",
+    "ja": "2つのモデル、一文"
   },
   "Graphs": {
     "en": "Graphs",
     "fr": "Graphiques",
     "es": "Gráficas",
     "zh": "图表",
-    "pa": "ਗ੍ਰਾਫ਼"
+    "pa": "ਗ੍ਰਾਫ਼",
+    "de": "Diagramme",
+    "pt": "Gráficos",
+    "hi": "ग्राफ़",
+    "ja": "グラフ"
   },
   "Every platform": {
     "en": "Every platform",
     "fr": "Toutes les plateformes",
     "es": "Todas las plataformas",
     "zh": "全平台",
-    "pa": "ਹਰ ਪਲੇਟਫਾਰਮ"
+    "pa": "ਹਰ ਪਲੇਟਫਾਰਮ",
+    "de": "Jede Plattform",
+    "pt": "Todas as plataformas",
+    "hi": "हर प्लेटफ़ॉर्म",
+    "ja": "すべてのプラットフォーム"
   },
   "About Nimble": {
     "en": "About Nimble",
     "fr": "À propos de Nimble",
     "es": "Acerca de Nimble",
     "zh": "关于 Nimble",
-    "pa": "Nimble ਬਾਰੇ"
+    "pa": "Nimble ਬਾਰੇ",
+    "de": "Über Nimble",
+    "pt": "Sobre o Nimble",
+    "hi": "Nimble के बारे में",
+    "ja": "Nimbleについて"
   },
   "Open Nimble": {
     "en": "Open Nimble",
     "fr": "Ouvrir Nimble",
     "es": "Abrir Nimble",
     "zh": "打开 Nimble",
-    "pa": "Nimble ਖੋਲ੍ਹੋ"
+    "pa": "Nimble ਖੋਲ੍ਹੋ",
+    "de": "Nimble öffnen",
+    "pt": "Abrir o Nimble",
+    "hi": "Nimble खोलें",
+    "ja": "Nimbleを開く"
   },
   "Settings…": {
     "en": "Settings…",
     "fr": "Réglages…",
     "es": "Ajustes…",
     "zh": "设置…",
-    "pa": "ਸੈਟਿੰਗਾਂ…"
+    "pa": "ਸੈਟਿੰਗਾਂ…",
+    "de": "Einstellungen…",
+    "pt": "Ajustes…",
+    "hi": "सेटिंग्स…",
+    "ja": "設定…"
   },
   "Settings": {
     "en": "Settings",
     "fr": "Réglages",
     "es": "Ajustes",
     "zh": "设置",
-    "pa": "ਸੈਟਿੰਗਾਂ"
+    "pa": "ਸੈਟਿੰਗਾਂ",
+    "de": "Einstellungen",
+    "pt": "Ajustes",
+    "hi": "सेटिंग्स",
+    "ja": "設定"
   },
   "Quit": {
     "en": "Quit",
     "fr": "Quitter",
     "es": "Salir",
     "zh": "退出",
-    "pa": "ਬੰਦ ਕਰੋ"
+    "pa": "ਬੰਦ ਕਰੋ",
+    "de": "Beenden",
+    "pt": "Sair",
+    "hi": "बंद करें",
+    "ja": "終了"
   },
   "Quit Nimble": {
     "en": "Quit Nimble",
     "fr": "Quitter Nimble",
     "es": "Salir de Nimble",
     "zh": "退出 Nimble",
-    "pa": "Nimble ਬੰਦ ਕਰੋ"
+    "pa": "Nimble ਬੰਦ ਕਰੋ",
+    "de": "Nimble beenden",
+    "pt": "Sair do Nimble",
+    "hi": "Nimble बंद करें",
+    "ja": "Nimbleを終了"
   },
   "Copy Result": {
     "en": "Copy Result",
     "fr": "Copier le résultat",
     "es": "Copiar resultado",
     "zh": "拷贝结果",
-    "pa": "ਨਤੀਜਾ ਕਾਪੀ ਕਰੋ"
+    "pa": "ਨਤੀਜਾ ਕਾਪੀ ਕਰੋ",
+    "de": "Ergebnis kopieren",
+    "pt": "Copiar resultado",
+    "hi": "नतीजा कॉपी करें",
+    "ja": "結果をコピー"
   },
   "Copy result": {
     "en": "Copy result",
     "fr": "Copier le résultat",
     "es": "Copiar resultado",
     "zh": "拷贝结果",
-    "pa": "ਨਤੀਜਾ ਕਾਪੀ ਕਰੋ"
+    "pa": "ਨਤੀਜਾ ਕਾਪੀ ਕਰੋ",
+    "de": "Ergebnis kopieren",
+    "pt": "Copiar resultado",
+    "hi": "नतीजा कॉपी करें",
+    "ja": "結果をコピー"
   },
   "Copy Search Link": {
     "en": "Copy Search Link",
     "fr": "Copier le lien de recherche",
     "es": "Copiar enlace de búsqueda",
     "zh": "拷贝搜索链接",
-    "pa": "ਖੋਜ ਲਿੰਕ ਕਾਪੀ ਕਰੋ"
+    "pa": "ਖੋਜ ਲਿੰਕ ਕਾਪੀ ਕਰੋ",
+    "de": "Suchlink kopieren",
+    "pt": "Copiar link da busca",
+    "hi": "खोज का लिंक कॉपी करें",
+    "ja": "検索リンクをコピー"
   },
   "Open in DuckDuckGo": {
     "en": "Open in DuckDuckGo",
     "fr": "Ouvrir dans DuckDuckGo",
     "es": "Abrir en DuckDuckGo",
     "zh": "在 DuckDuckGo 中打开",
-    "pa": "DuckDuckGo ਵਿੱਚ ਖੋਲ੍ਹੋ"
+    "pa": "DuckDuckGo ਵਿੱਚ ਖੋਲ੍ਹੋ",
+    "de": "In DuckDuckGo öffnen",
+    "pt": "Abrir no DuckDuckGo",
+    "hi": "DuckDuckGo में खोलें",
+    "ja": "DuckDuckGoで開く"
   },
   "Search on DuckDuckGo →": {
     "en": "Search on DuckDuckGo →",
     "fr": "Chercher sur DuckDuckGo →",
     "es": "Buscar en DuckDuckGo →",
     "zh": "在 DuckDuckGo 上搜索 →",
-    "pa": "DuckDuckGo ਉੱਤੇ ਖੋਜੋ →"
+    "pa": "DuckDuckGo ਉੱਤੇ ਖੋਜੋ →",
+    "de": "Auf DuckDuckGo suchen →",
+    "pt": "Buscar no DuckDuckGo →",
+    "hi": "DuckDuckGo पर खोजें →",
+    "ja": "DuckDuckGoで検索 →"
   },
   "Preferences": {
     "en": "Preferences",
     "fr": "Préférences",
     "es": "Preferencias",
     "zh": "偏好设置",
-    "pa": "ਪਸੰਦਾਂ"
+    "pa": "ਪਸੰਦਾਂ",
+    "de": "Voreinstellungen",
+    "pt": "Preferências",
+    "hi": "पसंद",
+    "ja": "環境設定"
   },
   "Theme": {
     "en": "Theme",
     "fr": "Thème",
     "es": "Tema",
     "zh": "主题",
-    "pa": "ਥੀਮ"
+    "pa": "ਥੀਮ",
+    "de": "Design",
+    "pt": "Tema",
+    "hi": "थीम",
+    "ja": "テーマ"
   },
   "THEME": {
     "en": "THEME",
     "fr": "THÈME",
     "es": "TEMA",
     "zh": "主题",
-    "pa": "ਥੀਮ"
+    "pa": "ਥੀਮ",
+    "de": "DESIGN",
+    "pt": "TEMA",
+    "hi": "थीम",
+    "ja": "テーマ"
   },
   "PREFERENCES": {
     "en": "PREFERENCES",
     "fr": "PRÉFÉRENCES",
     "es": "PREFERENCIAS",
     "zh": "偏好设置",
-    "pa": "ਪਸੰਦਾਂ"
+    "pa": "ਪਸੰਦਾਂ",
+    "de": "VOREINSTELLUNGEN",
+    "pt": "PREFERÊNCIAS",
+    "hi": "पसंद",
+    "ja": "環境設定"
   },
   "AI ENGINE": {
     "en": "AI ENGINE",
     "fr": "MOTEUR D'IA",
     "es": "MOTOR DE IA",
     "zh": "AI 引擎",
-    "pa": "AI ਇੰਜਣ"
+    "pa": "AI ਇੰਜਣ",
+    "de": "KI-MODELL",
+    "pt": "MOTOR DE IA",
+    "hi": "AI इंजन",
+    "ja": "AIエンジン"
   },
   "AI Engine": {
     "en": "AI Engine",
     "fr": "Moteur d'IA",
     "es": "Motor de IA",
     "zh": "AI 引擎",
-    "pa": "AI ਇੰਜਣ"
+    "pa": "AI ਇੰਜਣ",
+    "de": "KI-Modell",
+    "pt": "Motor de IA",
+    "hi": "AI इंजन",
+    "ja": "AIエンジン"
   },
   "TRY": {
     "en": "TRY",
     "fr": "ESSAYER",
     "es": "PRUEBA",
     "zh": "试试",
-    "pa": "ਅਜ਼ਮਾਓ"
+    "pa": "ਅਜ਼ਮਾਓ",
+    "de": "PROBIER",
+    "pt": "EXPERIMENTE",
+    "hi": "आज़माएँ",
+    "ja": "試してみる"
   },
   "RECENT": {
     "en": "RECENT",
     "fr": "RÉCENTS",
     "es": "RECIENTES",
     "zh": "最近",
-    "pa": "ਹਾਲੀਆ"
+    "pa": "ਹਾਲੀਆ",
+    "de": "ZULETZT",
+    "pt": "RECENTES",
+    "hi": "हाल के",
+    "ja": "最近"
   },
   "RESULT": {
     "en": "RESULT",
     "fr": "RÉSULTAT",
     "es": "RESULTADO",
     "zh": "结果",
-    "pa": "ਨਤੀਜਾ"
+    "pa": "ਨਤੀਜਾ",
+    "de": "ERGEBNIS",
+    "pt": "RESULTADO",
+    "hi": "नतीजा",
+    "ja": "結果"
   },
   "Version": {
     "en": "Version",
     "fr": "Version",
     "es": "Versión",
     "zh": "版本",
-    "pa": "ਵਰਜਨ"
+    "pa": "ਵਰਜਨ",
+    "de": "Version",
+    "pt": "Versão",
+    "hi": "संस्करण",
+    "ja": "バージョン"
   },
   "Offline Math": {
     "en": "Offline Math",
     "fr": "Calculs hors ligne",
     "es": "Cálculo sin conexión",
     "zh": "离线数学",
-    "pa": "ਔਫ਼ਲਾਈਨ ਹਿਸਾਬ"
+    "pa": "ਔਫ਼ਲਾਈਨ ਹਿਸਾਬ",
+    "de": "Offline-Rechnen",
+    "pt": "Contas offline",
+    "hi": "ऑफ़लाइन गणित",
+    "ja": "オフライン計算"
   },
   "Offline math": {
     "en": "Offline math",
     "fr": "Calculs hors ligne",
     "es": "Cálculo sin conexión",
     "zh": "离线数学",
-    "pa": "ਔਫ਼ਲਾਈਨ ਹਿਸਾਬ"
+    "pa": "ਔਫ਼ਲਾਈਨ ਹਿਸਾਬ",
+    "de": "Offline-Rechnen",
+    "pt": "Contas offline",
+    "hi": "ऑफ़लाइन गणित",
+    "ja": "オフライン計算"
   },
   "Launch on Startup": {
     "en": "Launch on Startup",
     "fr": "Lancer au démarrage",
     "es": "Abrir al iniciar",
     "zh": "开机启动",
-    "pa": "ਸ਼ੁਰੂ ਹੁੰਦੇ ਹੀ ਖੋਲ੍ਹੋ"
+    "pa": "ਸ਼ੁਰੂ ਹੁੰਦੇ ਹੀ ਖੋਲ੍ਹੋ",
+    "de": "Beim Start öffnen",
+    "pt": "Abrir ao iniciar",
+    "hi": "स्टार्टअप पर खोलें",
+    "ja": "起動時に開く"
   },
   "Default Suggestions": {
     "en": "Default Suggestions",
     "fr": "Suggestions par défaut",
     "es": "Sugerencias predeterminadas",
     "zh": "默认建议",
-    "pa": "ਮੂਲ ਸੁਝਾਅ"
+    "pa": "ਮੂਲ ਸੁਝਾਅ",
+    "de": "Standardvorschläge",
+    "pt": "Sugestões padrão",
+    "hi": "डिफ़ॉल्ट सुझाव",
+    "ja": "標準の候補"
   },
   "AI Answers": {
     "en": "AI Answers",
     "fr": "Réponses de l'IA",
     "es": "Respuestas de IA",
     "zh": "AI 回答",
-    "pa": "AI ਜਵਾਬ"
+    "pa": "AI ਜਵਾਬ",
+    "de": "KI-Antworten",
+    "pt": "Respostas de IA",
+    "hi": "AI जवाब",
+    "ja": "AI回答"
   },
   "Model": {
     "en": "Model",
     "fr": "Modèle",
     "es": "Modelo",
     "zh": "模型",
-    "pa": "ਮਾਡਲ"
+    "pa": "ਮਾਡਲ",
+    "de": "Modell",
+    "pt": "Modelo",
+    "hi": "मॉडल",
+    "ja": "モデル"
   },
   "Server": {
     "en": "Server",
     "fr": "Serveur",
     "es": "Servidor",
     "zh": "服务器",
-    "pa": "ਸਰਵਰ"
+    "pa": "ਸਰਵਰ",
+    "de": "Server",
+    "pt": "Servidor",
+    "hi": "सर्वर",
+    "ja": "サーバー"
   },
   "Engine": {
     "en": "Engine",
     "fr": "Moteur",
     "es": "Motor",
     "zh": "引擎",
-    "pa": "ਇੰਜਣ"
+    "pa": "ਇੰਜਣ",
+    "de": "Modell",
+    "pt": "Motor",
+    "hi": "इंजन",
+    "ja": "エンジン"
   },
   "Got it": {
     "en": "Got it",
     "fr": "Compris",
     "es": "Entendido",
     "zh": "知道了",
-    "pa": "ਸਮਝ ਗਿਆ"
+    "pa": "ਸਮਝ ਗਿਆ",
+    "de": "Verstanden",
+    "pt": "Entendi",
+    "hi": "समझ गया",
+    "ja": "わかりました"
   },
   "What's new in {s}": {
     "en": "What's new in {s}",
     "fr": "Nouveautés de la version {s}",
     "es": "Novedades de {s}",
     "zh": "{s} 的新功能",
-    "pa": "{s} ਵਿੱਚ ਨਵਾਂ ਕੀ ਹੈ"
+    "pa": "{s} ਵਿੱਚ ਨਵਾਂ ਕੀ ਹੈ",
+    "de": "Neu in {s}",
+    "pt": "Novidades do {s}",
+    "hi": "{s} में नया क्या है",
+    "ja": "{s}の新機能"
   },
   "Don't Allow": {
     "en": "Don't Allow",
     "fr": "Ne pas autoriser",
     "es": "No permitir",
     "zh": "不允许",
-    "pa": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ"
+    "pa": "ਇਜਾਜ਼ਤ ਨਾ ਦਿਓ",
+    "de": "Nicht erlauben",
+    "pt": "Não permitir",
+    "hi": "अनुमति न दें",
+    "ja": "許可しない"
   },
   "Share answer as image": {
     "en": "Share answer as image",
     "fr": "Partager la réponse en image",
     "es": "Compartir la respuesta como imagen",
     "zh": "将答案分享为图片",
-    "pa": "ਜਵਾਬ ਨੂੰ ਤਸਵੀਰ ਵਜੋਂ ਸਾਂਝਾ ਕਰੋ"
+    "pa": "ਜਵਾਬ ਨੂੰ ਤਸਵੀਰ ਵਜੋਂ ਸਾਂਝਾ ਕਰੋ",
+    "de": "Antwort als Bild teilen",
+    "pt": "Compartilhar resposta como imagem",
+    "hi": "जवाब को तस्वीर के रूप में साझा करें",
+    "ja": "回答を画像で共有"
   },
   "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.": {
     "en": "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.",
@@ -556,7 +868,11 @@
     "es": "Si está activado, el texto que escribes se envía a {s}. No se envía nada más. Si está desactivado, las respuestas vienen solo de DuckDuckGo y Wikipedia.",
     "zh": "开启后，你输入的文字会发送给 {s}，不发送其他任何内容。关闭后，答案只来自 DuckDuckGo 和维基百科。",
     "pa": "ਚਾਲੂ ਹੋਣ 'ਤੇ ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ {s} ਨੂੰ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ। ਹੋਰ ਕੁਝ ਨਹੀਂ ਭੇਜਿਆ ਜਾਂਦਾ। ਬੰਦ ਹੋਣ 'ਤੇ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ।",
-    "review": true
+    "review": true,
+    "de": "Wenn aktiv, wird der Text, den du tippst, an {s} gesendet. Sonst nichts. Wenn aus, kommen Antworten nur von DuckDuckGo und Wikipedia.",
+    "pt": "Ligado, o texto que você digita é enviado para {s}. Nada mais é enviado. Desligado, as respostas vêm só do DuckDuckGo e da Wikipedia.",
+    "hi": "चालू होने पर, आप जो टेक्स्ट लिखते हैं वह {s} को भेजा जाता है। और कुछ नहीं भेजा जाता। बंद होने पर, जवाब सिर्फ़ DuckDuckGo और Wikipedia से आते हैं।",
+    "ja": "オンのとき、入力したテキストが{s}に送られます。ほかは何も送りません。オフのときは、DuckDuckGoとWikipediaだけから答えます。"
   },
   "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.": {
     "en": "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.",
@@ -564,342 +880,538 @@
     "es": "Para responder, Nimble envía el texto que escribes, y nada más, a {s}. No se envía ninguna cuenta, contacto, ubicación ni identificador, y Nimble no guarda ningún registro. Si no lo permites, las respuestas vienen solo de DuckDuckGo y Wikipedia. Puedes cambiarlo en Ajustes.",
     "zh": "为了回答，Nimble 只会把你输入的文字发送给 {s}，不发送其他任何内容。不会发送账号、联系人、位置或标识符，Nimble 也不会保留任何记录。如果你不允许，答案将只来自 DuckDuckGo 和维基百科。你可以随时在“设置”中更改。",
     "pa": "ਜਵਾਬ ਦੇਣ ਲਈ Nimble ਤੁਹਾਡਾ ਲਿਖਿਆ ਟੈਕਸਟ, ਹੋਰ ਕੁਝ ਨਹੀਂ, {s} ਨੂੰ ਭੇਜਦਾ ਹੈ। ਕੋਈ ਖਾਤਾ, ਸੰਪਰਕ, ਟਿਕਾਣਾ ਜਾਂ ਪਛਾਣ ਨਹੀਂ ਭੇਜੀ ਜਾਂਦੀ, ਅਤੇ Nimble ਇਸ ਦਾ ਕੋਈ ਰਿਕਾਰਡ ਨਹੀਂ ਰੱਖਦਾ। ਜੇ ਤੁਸੀਂ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੇ, ਤਾਂ ਜਵਾਬ ਸਿਰਫ਼ DuckDuckGo ਅਤੇ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਆਉਂਦੇ ਹਨ। ਤੁਸੀਂ ਇਹ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਬਦਲ ਸਕਦੇ ਹੋ।",
-    "review": true
+    "review": true,
+    "de": "Zum Antworten sendet Nimble den Text, den du tippst, und sonst nichts, an {s}. Es werden kein Konto, keine Kontakte, kein Standort und keine Kennungen gesendet, und Nimble speichert nichts davon. Wenn du das nicht erlaubst, kommen Antworten nur von DuckDuckGo und Wikipedia. Du kannst das in den Einstellungen ändern.",
+    "pt": "Para responder, o Nimble envia o texto que você digita, e mais nada, para {s}. Nenhuma conta, contato, localização ou identificador é enviado, e o Nimble não guarda registro disso. Se você não permitir, as respostas vêm só do DuckDuckGo e da Wikipedia. Você pode mudar isso nos Ajustes.",
+    "hi": "जवाब देने के लिए Nimble आपका लिखा टेक्स्ट, और कुछ नहीं, {s} को भेजता है। कोई खाता, संपर्क, स्थान या पहचान नहीं भेजी जाती, और Nimble इसका कोई रिकॉर्ड नहीं रखता। अनुमति न देने पर जवाब सिर्फ़ DuckDuckGo और Wikipedia से आते हैं। आप इसे सेटिंग्स में बदल सकते हैं।",
+    "ja": "回答のために、Nimbleは入力したテキストだけを{s}に送ります。アカウント、連絡先、位置情報、識別子は送らず、記録も残しません。許可しない場合、答えはDuckDuckGoとWikipediaだけから届きます。設定でいつでも変更できます。"
   },
   "Your key stays on this device and is sent only to {s}.": {
     "en": "Your key stays on this device and is sent only to {s}.",
     "fr": "Votre clé reste sur cet appareil et n'est envoyée qu'à {s}.",
     "es": "Tu clave se queda en este dispositivo y solo se envía a {s}.",
     "zh": "你的密钥保存在此设备上，只会发送给 {s}。",
-    "pa": "ਤੁਹਾਡੀ ਕੁੰਜੀ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਹੀ ਰਹਿੰਦੀ ਹੈ ਅਤੇ ਸਿਰਫ਼ {s} ਨੂੰ ਭੇਜੀ ਜਾਂਦੀ ਹੈ।"
+    "pa": "ਤੁਹਾਡੀ ਕੁੰਜੀ ਇਸ ਡਿਵਾਈਸ ਉੱਤੇ ਹੀ ਰਹਿੰਦੀ ਹੈ ਅਤੇ ਸਿਰਫ਼ {s} ਨੂੰ ਭੇਜੀ ਜਾਂਦੀ ਹੈ।",
+    "de": "Dein Schlüssel bleibt auf diesem Gerät und wird nur an {s} gesendet.",
+    "pt": "Sua chave fica neste aparelho e só é enviada para {s}.",
+    "hi": "आपकी कुंजी इसी डिवाइस पर रहती है और सिर्फ़ {s} को भेजी जाती है।",
+    "ja": "キーはこの端末に残り、{s}にだけ送られます。"
   },
   "Asks this again": {
     "en": "Asks this again",
     "fr": "Pose à nouveau cette question",
     "es": "Vuelve a preguntar esto",
     "zh": "再问一次",
-    "pa": "ਇਹ ਦੁਬਾਰਾ ਪੁੱਛਦਾ ਹੈ"
+    "pa": "ਇਹ ਦੁਬਾਰਾ ਪੁੱਛਦਾ ਹੈ",
+    "de": "Fragt das nochmal",
+    "pt": "Pergunta isto de novo",
+    "hi": "इसे फिर से पूछता है",
+    "ja": "もう一度質問します"
   },
   "Mascot": {
     "en": "Mascot",
     "fr": "Mascotte",
     "es": "Mascota",
     "zh": "吉祥物",
-    "pa": "ਮਾਸਕੌਟ"
+    "pa": "ਮਾਸਕੌਟ",
+    "de": "Maskottchen",
+    "pt": "Mascote",
+    "hi": "शुभंकर",
+    "ja": "マスコット"
   },
   "Mascot: {s}": {
     "en": "Mascot: {s}",
     "fr": "Mascotte : {s}",
     "es": "Mascota: {s}",
     "zh": "吉祥物：{s}",
-    "pa": "ਮਾਸਕੌਟ: {s}"
+    "pa": "ਮਾਸਕੌਟ: {s}",
+    "de": "Maskottchen: {s}",
+    "pt": "Mascote: {s}",
+    "hi": "शुभंकर: {s}",
+    "ja": "マスコット：{s}"
   },
   "On device (Apple Intelligence)": {
     "en": "On device (Apple Intelligence)",
     "fr": "Sur l’appareil (Apple Intelligence)",
     "es": "En el dispositivo (Apple Intelligence)",
     "zh": "设备端（Apple Intelligence）",
-    "pa": "ਡਿਵਾਈਸ ’ਤੇ (Apple Intelligence)"
+    "pa": "ਡਿਵਾਈਸ ’ਤੇ (Apple Intelligence)",
+    "de": "Auf dem Gerät (Apple Intelligence)",
+    "pt": "No aparelho (Apple Intelligence)",
+    "hi": "डिवाइस पर (Apple Intelligence)",
+    "ja": "端末内（Apple Intelligence）"
   },
   "Samantha is running": {
     "en": "Samantha is running",
     "fr": "Samantha tourne",
     "es": "Samantha está en marcha",
     "zh": "Samantha 正在运行",
-    "pa": "ਸਮੰਥਾ ਚੱਲ ਰਹੀ ਹੈ"
+    "pa": "ਸਮੰਥਾ ਚੱਲ ਰਹੀ ਹੈ",
+    "de": "Samantha läuft",
+    "pt": "Samantha está rodando",
+    "hi": "Samantha चल रही है",
+    "ja": "Samanthaは実行中"
   },
   "Samantha is not running": {
     "en": "Samantha is not running",
     "fr": "Samantha ne tourne pas",
     "es": "Samantha no está en marcha",
     "zh": "Samantha 未在运行",
-    "pa": "ਸਮੰਥਾ ਨਹੀਂ ਚੱਲ ਰਹੀ"
+    "pa": "ਸਮੰਥਾ ਨਹੀਂ ਚੱਲ ਰਹੀ",
+    "de": "Samantha läuft nicht",
+    "pt": "Samantha não está rodando",
+    "hi": "Samantha नहीं चल रही",
+    "ja": "Samanthaは停止中"
   },
   "Checking Samantha": {
     "en": "Checking Samantha",
     "fr": "Vérification de Samantha",
     "es": "Comprobando a Samantha",
     "zh": "正在检查 Samantha",
-    "pa": "ਸਮੰਥਾ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ"
+    "pa": "ਸਮੰਥਾ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ",
+    "de": "Samantha wird geprüft",
+    "pt": "Verificando a Samantha",
+    "hi": "Samantha की जाँच हो रही है",
+    "ja": "Samanthaを確認中"
   },
   "Start": {
     "en": "Start",
     "fr": "Démarrer",
     "es": "Iniciar",
     "zh": "启动",
-    "pa": "ਸ਼ੁਰੂ ਕਰੋ"
+    "pa": "ਸ਼ੁਰੂ ਕਰੋ",
+    "de": "Starten",
+    "pt": "Iniciar",
+    "hi": "शुरू करें",
+    "ja": "開始"
   },
   "Test": {
     "en": "Test",
     "fr": "Tester",
     "es": "Probar",
     "zh": "测试",
-    "pa": "ਜਾਂਚ"
+    "pa": "ਜਾਂਚ",
+    "de": "Testen",
+    "pt": "Testar",
+    "hi": "जाँचें",
+    "ja": "テスト"
   },
   "Last answer: {s}": {
     "en": "Last answer: {s}",
     "fr": "Dernière réponse : {s}",
     "es": "Última respuesta: {s}",
     "zh": "上次回答：{s}",
-    "pa": "ਆਖਰੀ ਜਵਾਬ: {s}"
+    "pa": "ਆਖਰੀ ਜਵਾਬ: {s}",
+    "de": "Letzte Antwort: {s}",
+    "pt": "Última resposta: {s}",
+    "hi": "पिछला जवाब: {s}",
+    "ja": "前回の回答：{s}"
   },
   "Show steps": {
     "en": "Show steps",
     "fr": "Voir les étapes",
     "es": "Ver los pasos",
     "zh": "显示步骤",
-    "pa": "ਕਦਮ ਵੇਖੋ"
+    "pa": "ਕਦਮ ਵੇਖੋ",
+    "de": "Schritte zeigen",
+    "pt": "Mostrar passos",
+    "hi": "चरण दिखाएँ",
+    "ja": "手順を表示"
   },
   "Background": {
     "en": "Background",
     "fr": "Contexte",
     "es": "Antecedentes",
     "zh": "背景",
-    "pa": "ਪਿਛੋਕੜ"
+    "pa": "ਪਿਛੋਕੜ",
+    "de": "Hintergrund",
+    "pt": "Contexto",
+    "hi": "पृष्ठभूमि",
+    "ja": "背景"
   },
   "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.": {
     "en": "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.",
     "fr": "L'IA gratuite n'a plus de réponses pour aujourd'hui, donc ceci vient de Wikipédia. Elle se remet à zéro le soir.",
     "es": "La IA gratuita se quedó sin respuestas por hoy, así que esto viene de Wikipedia. Se reinicia por la noche.",
     "zh": "免费 AI 今天的回答次数已用完，所以这条内容来自维基百科。傍晚会重置。",
-    "pa": "ਮੁਫ਼ਤ AI ਅੱਜ ਲਈ ਜਵਾਬ ਖ਼ਤਮ ਕਰ ਚੁੱਕਾ ਹੈ, ਇਸ ਲਈ ਇਹ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਹੈ। ਸ਼ਾਮ ਨੂੰ ਇਹ ਮੁੜ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ।"
+    "pa": "ਮੁਫ਼ਤ AI ਅੱਜ ਲਈ ਜਵਾਬ ਖ਼ਤਮ ਕਰ ਚੁੱਕਾ ਹੈ, ਇਸ ਲਈ ਇਹ ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਹੈ। ਸ਼ਾਮ ਨੂੰ ਇਹ ਮੁੜ ਸ਼ੁਰੂ ਹੁੰਦਾ ਹੈ।",
+    "de": "Die kostenlose KI hat für heute keine Antworten mehr, deshalb kommt das von Wikipedia. Am Abend geht es wieder los.",
+    "pt": "A IA gratuita ficou sem respostas por hoje, então isto vem da Wikipedia. Ela volta à noite.",
+    "hi": "मुफ़्त AI के आज के जवाब ख़त्म हो गए हैं, इसलिए यह Wikipedia से है। यह शाम को फिर से शुरू होगा।",
+    "ja": "無料AIは今日の分の回答を使い切ったため、これはWikipediaからです。夜にまた使えるようになります。"
   },
   "Not a direct answer to your question. Background from Wikipedia:": {
     "en": "Not a direct answer to your question. Background from Wikipedia:",
     "fr": "Ce n'est pas une réponse directe à votre question. Contexte de Wikipédia :",
     "es": "No es una respuesta directa a tu pregunta. Antecedentes de Wikipedia:",
     "zh": "这不是对你问题的直接回答。以下是维基百科的背景资料：",
-    "pa": "ਇਹ ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਸਿੱਧਾ ਜਵਾਬ ਨਹੀਂ ਹੈ। ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਪਿਛੋਕੜ:"
+    "pa": "ਇਹ ਤੁਹਾਡੇ ਸਵਾਲ ਦਾ ਸਿੱਧਾ ਜਵਾਬ ਨਹੀਂ ਹੈ। ਵਿਕੀਪੀਡੀਆ ਤੋਂ ਪਿਛੋਕੜ:",
+    "de": "Keine direkte Antwort auf deine Frage. Hintergrund von Wikipedia:",
+    "pt": "Não é uma resposta direta à sua pergunta. Contexto da Wikipedia:",
+    "hi": "यह आपके सवाल का सीधा जवाब नहीं है। Wikipedia से पृष्ठभूमि:",
+    "ja": "ご質問への直接の答えではありません。Wikipediaからの背景情報:"
   },
   "New question": {
     "en": "New question",
     "fr": "Nouvelle question",
     "es": "Nueva pregunta",
     "zh": "新问题",
-    "pa": "ਨਵਾਂ ਸਵਾਲ"
+    "pa": "ਨਵਾਂ ਸਵਾਲ",
+    "de": "Neue Frage",
+    "pt": "Nova pergunta",
+    "hi": "नया सवाल",
+    "ja": "新しい質問"
   },
   "History": {
     "en": "History",
     "fr": "Historique",
     "es": "Historial",
     "zh": "历史记录",
-    "pa": "ਇਤਿਹਾਸ"
+    "pa": "ਇਤਿਹਾਸ",
+    "de": "Verlauf",
+    "pt": "Histórico",
+    "hi": "इतिहास",
+    "ja": "履歴"
   },
   "Back": {
     "en": "Back",
     "fr": "Retour",
     "es": "Volver",
     "zh": "返回",
-    "pa": "ਪਿੱਛੇ"
+    "pa": "ਪਿੱਛੇ",
+    "de": "Zurück",
+    "pt": "Voltar",
+    "hi": "वापस",
+    "ja": "戻る"
   },
   "Edit": {
     "en": "Edit",
     "fr": "Modifier",
     "es": "Editar",
     "zh": "编辑",
-    "pa": "ਸੋਧੋ"
+    "pa": "ਸੋਧੋ",
+    "de": "Bearbeiten",
+    "pt": "Editar",
+    "hi": "संपादित करें",
+    "ja": "編集"
   },
   "Done": {
     "en": "Done",
     "fr": "Terminé",
     "es": "Listo",
     "zh": "完成",
-    "pa": "ਹੋਇਆ"
+    "pa": "ਹੋਇਆ",
+    "de": "Fertig",
+    "pt": "Concluído",
+    "hi": "हो गया",
+    "ja": "完了"
   },
   "Delete": {
     "en": "Delete",
     "fr": "Supprimer",
     "es": "Eliminar",
     "zh": "删除",
-    "pa": "ਮਿਟਾਓ"
+    "pa": "ਮਿਟਾਓ",
+    "de": "Löschen",
+    "pt": "Excluir",
+    "hi": "हटाएँ",
+    "ja": "削除"
   },
   "Delete selected": {
     "en": "Delete selected",
     "fr": "Supprimer la sélection",
     "es": "Eliminar lo seleccionado",
     "zh": "删除所选",
-    "pa": "ਚੁਣੇ ਮਿਟਾਓ"
+    "pa": "ਚੁਣੇ ਮਿਟਾਓ",
+    "de": "Auswahl löschen",
+    "pt": "Excluir selecionados",
+    "hi": "चुने हुए हटाएँ",
+    "ja": "選択を削除"
   },
   "Copy selected": {
     "en": "Copy selected",
     "fr": "Copier la sélection",
     "es": "Copiar lo seleccionado",
     "zh": "复制所选",
-    "pa": "ਚੁਣੇ ਕਾਪੀ ਕਰੋ"
+    "pa": "ਚੁਣੇ ਕਾਪੀ ਕਰੋ",
+    "de": "Auswahl kopieren",
+    "pt": "Copiar selecionados",
+    "hi": "चुने हुए कॉपी करें",
+    "ja": "選択をコピー"
   },
   "Copied": {
     "en": "Copied",
     "fr": "Copié",
     "es": "Copiado",
     "zh": "已复制",
-    "pa": "ਕਾਪੀ ਹੋਇਆ"
+    "pa": "ਕਾਪੀ ਹੋਇਆ",
+    "de": "Kopiert",
+    "pt": "Copiado",
+    "hi": "कॉपी हो गया",
+    "ja": "コピーしました"
   },
   "Ask again": {
     "en": "Ask again",
     "fr": "Reposer la question",
     "es": "Preguntar de nuevo",
     "zh": "再问一次",
-    "pa": "ਦੁਬਾਰਾ ਪੁੱਛੋ"
+    "pa": "ਦੁਬਾਰਾ ਪੁੱਛੋ",
+    "de": "Nochmal fragen",
+    "pt": "Perguntar de novo",
+    "hi": "फिर से पूछें",
+    "ja": "もう一度質問"
   },
   "No questions yet.": {
     "en": "No questions yet.",
     "fr": "Aucune question pour l'instant.",
     "es": "Aún no hay preguntas.",
     "zh": "还没有问题。",
-    "pa": "ਅਜੇ ਕੋਈ ਸਵਾਲ ਨਹੀਂ।"
+    "pa": "ਅਜੇ ਕੋਈ ਸਵਾਲ ਨਹੀਂ।",
+    "de": "Noch keine Fragen.",
+    "pt": "Nenhuma pergunta ainda.",
+    "hi": "अभी कोई सवाल नहीं।",
+    "ja": "まだ質問がありません。"
   },
   "Select all": {
     "en": "Select all",
     "fr": "Tout sélectionner",
     "es": "Seleccionar todo",
     "zh": "全选",
-    "pa": "ਸਭ ਚੁਣੋ"
+    "pa": "ਸਭ ਚੁਣੋ",
+    "de": "Alle auswählen",
+    "pt": "Selecionar tudo",
+    "hi": "सब चुनें",
+    "ja": "すべて選択"
   },
   "Menu": {
     "en": "Menu",
     "fr": "Menu",
     "es": "Menú",
     "zh": "菜单",
-    "pa": "ਮੀਨੂ"
+    "pa": "ਮੀਨੂ",
+    "de": "Menü",
+    "pt": "Menu",
+    "hi": "मेन्यू",
+    "ja": "メニュー"
   },
   "Download offline answers": {
     "en": "Download offline answers",
     "fr": "Télécharger les réponses hors ligne",
     "es": "Descargar respuestas sin conexión",
     "zh": "下载离线答案",
-    "pa": "Download offline answers"
+    "pa": "Download offline answers",
+    "de": "Offline-Antworten laden",
+    "pt": "Baixar respostas offline",
+    "hi": "ऑफ़लाइन जवाब डाउनलोड करें",
+    "ja": "オフライン回答をダウンロード"
   },
   "Download offline answers (about {n} MB)": {
     "en": "Download offline answers (about {n} MB)",
     "fr": "Télécharger les réponses hors ligne (environ {n} Mo)",
     "es": "Descargar respuestas sin conexión (unos {n} MB)",
     "zh": "下载离线答案（约 {n} MB）",
-    "pa": "Download offline answers (about {n} MB)"
+    "pa": "Download offline answers (about {n} MB)",
+    "de": "Offline-Antworten laden (ca. {n} MB)",
+    "pt": "Baixar respostas offline (cerca de {n} MB)",
+    "hi": "ऑफ़लाइन जवाब डाउनलोड करें (लगभग {n} MB)",
+    "ja": "オフライン回答をダウンロード（約{n} MB）"
   },
   "Downloading offline answers…": {
     "en": "Downloading offline answers…",
     "fr": "Téléchargement des réponses hors ligne…",
     "es": "Descargando respuestas sin conexión…",
     "zh": "正在下载离线答案…",
-    "pa": "Downloading offline answers…"
+    "pa": "Downloading offline answers…",
+    "de": "Offline-Antworten werden geladen…",
+    "pt": "Baixando respostas offline…",
+    "hi": "ऑफ़लाइन जवाब डाउनलोड हो रहे हैं…",
+    "ja": "オフライン回答をダウンロード中…"
   },
   "Remove offline pack": {
     "en": "Remove offline pack",
     "fr": "Supprimer le pack hors ligne",
     "es": "Quitar el paquete sin conexión",
     "zh": "删除离线包",
-    "pa": "Remove offline pack"
+    "pa": "Remove offline pack",
+    "de": "Offline-Paket entfernen",
+    "pt": "Remover pacote offline",
+    "hi": "ऑफ़लाइन पैक हटाएँ",
+    "ja": "オフラインパックを削除"
   },
   "Could not download the offline pack. Try again on a connection.": {
     "en": "Could not download the offline pack. Try again on a connection.",
     "fr": "Impossible de télécharger le pack hors ligne. Réessayez avec une connexion.",
     "es": "No se pudo descargar el paquete sin conexión. Inténtalo con conexión.",
     "zh": "无法下载离线包。请在联网时重试。",
-    "pa": "Could not download the offline pack. Try again on a connection."
+    "pa": "Could not download the offline pack. Try again on a connection.",
+    "de": "Das Offline-Paket konnte nicht geladen werden. Versuch es mit Verbindung nochmal.",
+    "pt": "Não foi possível baixar o pacote offline. Tente de novo com conexão.",
+    "hi": "ऑफ़लाइन पैक डाउनलोड नहीं हो सका। कनेक्शन होने पर फिर कोशिश करें।",
+    "ja": "オフラインパックをダウンロードできませんでした。接続のある場所でもう一度お試しください。"
   },
   "Offline pack · Wikipedia (CC BY-SA)": {
     "en": "Offline pack · Wikipedia (CC BY-SA)",
     "fr": "Pack hors ligne · Wikipédia (CC BY-SA)",
     "es": "Paquete sin conexión · Wikipedia (CC BY-SA)",
     "zh": "离线包 · 维基百科 (CC BY-SA)",
-    "pa": "Offline pack · Wikipedia (CC BY-SA)"
+    "pa": "Offline pack · Wikipedia (CC BY-SA)",
+    "de": "Offline-Paket · Wikipedia (CC BY-SA)",
+    "pt": "Pacote offline · Wikipedia (CC BY-SA)",
+    "hi": "ऑफ़लाइन पैक · Wikipedia (CC BY-SA)",
+    "ja": "オフラインパック · Wikipedia (CC BY-SA)"
   },
   "Not in the offline pack. Math, units and graphs still work offline.": {
     "en": "Not in the offline pack. Math, units and graphs still work offline.",
     "fr": "Absent du pack hors ligne. Les calculs, unités et graphiques marchent toujours hors ligne.",
     "es": "No está en el paquete sin conexión. Las matemáticas, unidades y gráficos siguen funcionando sin conexión.",
     "zh": "不在离线包中。数学、单位和图表离线仍可使用。",
-    "pa": "Not in the offline pack. Math, units and graphs still work offline."
+    "pa": "Not in the offline pack. Math, units and graphs still work offline.",
+    "de": "Nicht im Offline-Paket. Rechnen, Einheiten und Diagramme funktionieren offline weiter.",
+    "pt": "Não está no pacote offline. Contas, unidades e gráficos continuam funcionando offline.",
+    "hi": "ऑफ़लाइन पैक में नहीं है। गणित, इकाइयाँ और ग्राफ़ ऑफ़लाइन फिर भी चलते हैं।",
+    "ja": "オフラインパックにありません。計算、単位、グラフはオフラインでも使えます。"
   },
   "Private: on": {
     "en": "Private: on",
     "fr": "Privé : oui",
     "es": "Privado: sí",
     "zh": "隐私模式：开",
-    "pa": "Private: on"
+    "pa": "Private: on",
+    "de": "Privat: an",
+    "pt": "Privado: ligado",
+    "hi": "निजी: चालू",
+    "ja": "プライベート：オン"
   },
   "Private: off": {
     "en": "Private: off",
     "fr": "Privé : non",
     "es": "Privado: no",
     "zh": "隐私模式：关",
-    "pa": "Private: off"
+    "pa": "Private: off",
+    "de": "Privat: aus",
+    "pt": "Privado: desligado",
+    "hi": "निजी: बंद",
+    "ja": "プライベート：オフ"
   },
   "Nothing leaves this device. Click to turn private mode off": {
     "en": "Nothing leaves this device. Click to turn private mode off",
     "fr": "Rien ne quitte cet appareil. Cliquez pour désactiver le mode privé",
     "es": "Nada sale de este dispositivo. Haz clic para desactivar el modo privado",
     "zh": "没有任何内容离开此设备。点击关闭隐私模式",
-    "pa": "Nothing leaves this device. Click to turn private mode off"
+    "pa": "Nothing leaves this device. Click to turn private mode off",
+    "de": "Nichts verlässt dieses Gerät. Klicken, um den privaten Modus auszuschalten",
+    "pt": "Nada sai deste aparelho. Clique para desligar o modo privado",
+    "hi": "कुछ भी इस डिवाइस से बाहर नहीं जाता। निजी मोड बंद करने के लिए क्लिक करें",
+    "ja": "この端末の外には何も出ません。クリックでプライベートモードをオフ"
   },
   "Click to answer only from this device": {
     "en": "Click to answer only from this device",
     "fr": "Cliquez pour répondre uniquement depuis cet appareil",
     "es": "Haz clic para responder solo desde este dispositivo",
     "zh": "点击后只在此设备上回答",
-    "pa": "Click to answer only from this device"
+    "pa": "Click to answer only from this device",
+    "de": "Klicken, um nur auf diesem Gerät zu antworten",
+    "pt": "Clique para responder só neste aparelho",
+    "hi": "सिर्फ़ इसी डिवाइस से जवाब देने के लिए क्लिक करें",
+    "ja": "クリックでこの端末内だけで回答"
   },
   "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": {
     "en": "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.",
     "fr": "Le mode privé est activé, rien ne quitte cet appareil. Les calculs, unités et graphiques fonctionnent. Téléchargez les réponses hors ligne pour consulter des faits.",
     "es": "El modo privado está activado, así que nada sale de este dispositivo. Las matemáticas, unidades y gráficos funcionan. Descarga las respuestas sin conexión para consultar datos.",
     "zh": "隐私模式已开启，没有任何内容离开此设备。数学、单位和图表可用。下载离线答案即可查询事实。",
-    "pa": "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts."
+    "pa": "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.",
+    "de": "Der private Modus ist an, nichts verlässt dieses Gerät. Rechnen, Einheiten und Diagramme funktionieren. Lade die Offline-Antworten, um Fakten nachzuschlagen.",
+    "pt": "O modo privado está ligado, então nada sai deste aparelho. Contas, unidades e gráficos funcionam. Baixe as respostas offline para consultar fatos.",
+    "hi": "निजी मोड चालू है, इसलिए कुछ भी इस डिवाइस से बाहर नहीं जाता। गणित, इकाइयाँ और ग्राफ़ चलते हैं। तथ्य खोजने के लिए ऑफ़लाइन जवाब डाउनलोड करें।",
+    "ja": "プライベートモードがオンなので、何もこの端末の外に出ません。計算、単位、グラフは使えます。事実を調べるにはオフライン回答をダウンロードしてください。"
   },
   "Listen": {
     "en": "Listen",
     "fr": "Écouter",
     "es": "Escuchar",
     "zh": "朗读",
-    "pa": "Listen"
+    "pa": "Listen",
+    "de": "Anhören",
+    "pt": "Ouvir",
+    "hi": "सुनें",
+    "ja": "聞く"
   },
   "Stop": {
     "en": "Stop",
     "fr": "Arrêter",
     "es": "Detener",
     "zh": "停止",
-    "pa": "Stop"
+    "pa": "Stop",
+    "de": "Stopp",
+    "pt": "Parar",
+    "hi": "रोकें",
+    "ja": "停止"
   },
   "Copy": {
     "en": "Copy",
     "fr": "Copier",
     "es": "Copiar",
     "zh": "复制",
-    "pa": "ਕਾਪੀ ਕਰੋ"
+    "pa": "ਕਾਪੀ ਕਰੋ",
+    "de": "Kopieren",
+    "pt": "Copiar",
+    "hi": "कॉपी करें",
+    "ja": "コピー"
   },
   "Card: {s}": {
     "en": "Card: {s}",
     "fr": "Carte : {s}",
     "es": "Tarjeta: {s}",
     "zh": "卡片:{s}",
-    "pa": "ਕਾਰਡ: {s}"
+    "pa": "ਕਾਰਡ: {s}",
+    "de": "Karte: {s}",
+    "pt": "Cartão: {s}",
+    "hi": "कार्ड: {s}",
+    "ja": "カード：{s}"
   },
   "Wide": {
     "en": "Wide",
     "fr": "Large",
     "es": "Ancha",
     "zh": "宽",
-    "pa": "ਚੌੜਾ"
+    "pa": "ਚੌੜਾ",
+    "de": "Breit",
+    "pt": "Largo",
+    "hi": "चौड़ा",
+    "ja": "ワイド"
   },
   "Square": {
     "en": "Square",
     "fr": "Carrée",
     "es": "Cuadrada",
     "zh": "方",
-    "pa": "ਵਰਗ"
+    "pa": "ਵਰਗ",
+    "de": "Quadrat",
+    "pt": "Quadrado",
+    "hi": "वर्ग",
+    "ja": "正方形"
   },
   "Story": {
     "en": "Story",
     "fr": "Story",
     "es": "Historia",
     "zh": "竖屏",
-    "pa": "ਸਟੋਰੀ"
+    "pa": "ਸਟੋਰੀ",
+    "de": "Story",
+    "pt": "Story",
+    "hi": "स्टोरी",
+    "ja": "ストーリー"
   },
   "Card": {
     "en": "Card",
     "fr": "Carte",
     "es": "Tarjeta",
     "zh": "卡片",
-    "pa": "ਕਾਰਡ"
+    "pa": "ਕਾਰਡ",
+    "de": "Karte",
+    "pt": "Cartão",
+    "hi": "कार्ड",
+    "ja": "カード"
   }
 }
