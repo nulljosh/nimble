@@ -4,7 +4,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v6.16.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v6.17.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -22,7 +22,7 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 
 ## Get it
 
-[Watch the 23 second promo](docs/promo/nimble-promo.mp4).
+[Watch the 23 second promo](docs/promo/nimble-promo.mp4). In a terminal: `node bin/nimble.js "question"`.
 
 | | |
 |---|---|

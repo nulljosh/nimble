@@ -10,5 +10,8 @@
     "nlp",
     "ai",
     "question-answering"
-  ]
+  ],
+  "bin": {
+    "nimble": "bin/nimble.js"
+  }
 }

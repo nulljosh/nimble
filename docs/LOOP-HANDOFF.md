@@ -16,7 +16,8 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 ## Next, in order
 
 1. Read /stats once per tick. After the 2026-10-13 17:00 PDT reset, report the result to Joshua.
-3. Then v9: a browser extension (select text, get the one-sentence answer) and `nimble "question"` from brew.
+3. QA bug: "capital of France" lists "Capital (French magazine)" as its source. `onTopic` in docs/engine.js accepts a title whose only word is a query word; tighten it without breaking "Hamlet (1996 film)".
+4. Then v9: the `nimble "question"` command is in bin/nimble.js; package it for brew (needs a tap repo and a release tarball). The extension is in extension/; submit it to the Chrome and Firefox stores.
 
 Already in the code, so don't rebuild: Why this answer, follow-ups, step math, multiple sources, the News, Markets and Sports cards, the offline pack, Private mode, Listen, the voice loop, Ask Nimble from every platform's share sheet, Siri and Shortcuts.
 
