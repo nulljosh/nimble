@@ -427,13 +427,21 @@ main > section:not(.hero) h2 {
 
 /* Footer */
 footer {
-  padding: var(--s5) 0;
+  padding: var(--s5) 0 0;
   text-align: center;
   border-top: 1px solid var(--line);
   font-size: var(--fs-13);
   color: var(--mid);
 }
 
+  /* Story block: Nim's mark beside a closing line, above the directory. */
+  footer .foot-story { display: grid; grid-template-columns: 120px 1fr; align-items: start; gap: var(--space-6); max-width: var(--max-wide); margin: 0 auto; padding: var(--space-6) var(--gutter) var(--space-7); text-align: left; }
+  footer .foot-story img { margin-top: var(--space-1); }
+  footer .foot-story h2 { margin: 0 0 var(--space-3); font-size: var(--fs-28); line-height: var(--lh-xl); font-weight: 600; letter-spacing: var(--track-display); color: var(--dark); }
+  footer .foot-story p { margin: 0; max-width: 60ch; font-size: var(--fs-17); line-height: var(--lh-md); color: var(--mid); }
+  @media (max-width: 700px) { footer .foot-story { grid-template-columns: 1fr; gap: var(--space-5); } footer .foot-story img { width: 80px; height: 80px; } }
+  /* The engraved scene under the bar: paper and ink follow the page, light and dark. */
+  .foot-scene { display: block; width: 100%; height: clamp(200px, 30vw, 360px); margin-top: var(--space-6); --scene-paper: var(--bg); --scene-ink: var(--yellow-deep); }
   /* Footer directory: four columns, two-by-two on phones. */
   footer .foot-rule { display: flex; align-items: center; gap: var(--space-4); max-width: var(--max-wide); margin: 0 auto; padding: var(--space-4) var(--gutter) var(--space-6); font-size: var(--fs-13); letter-spacing: .06em; font-weight: 500; color: var(--mid); }
   footer .foot-rule::before { content: ""; order: 1; flex: 1; height: 1px; background: var(--line); }
@@ -615,6 +623,13 @@ footer {
 </main>
 
 <footer>
+  <section class="foot-story" aria-label="About Nimble">
+    <img src="mascot/nim.svg" width="120" height="120" alt="Nim, Nimble's mascot" loading="lazy">
+    <div>
+      <h2>One question.<br>One sentence.</h2>
+      <p>A search bar that skips the results page. Free and open source, on the web, iPhone and Mac, with Android, Windows and Linux builds alongside.</p>
+    </div>
+  </section>
   <div class="foot-rule" aria-hidden="true"><span>Nimble</span><span>Ask a question. Get one sentence back.</span></div>
   <nav class="foot-dir" aria-label="Footer">
     <div class="foot-col">
@@ -658,8 +673,10 @@ footer {
   <div class="foot-bar">
     <p class="foot-meta">Nimble <span id="footver"></span> &middot; MIT License &middot; &copy; 2026 Joshua Trommel &middot; Originally created by <a href="https://maybulb.com">Maybulb</a> &middot; Made in Vancouver, BC</p>
   </div>
+  <canvas id="foot-scene" class="foot-scene" aria-hidden="true"></canvas>
 </footer>
 
+<script src="footer-scene.js" defer></script>
 <script src="i18n.js"></script>
 <script src="engine.js?v=offline"></script>
 <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});</script>
