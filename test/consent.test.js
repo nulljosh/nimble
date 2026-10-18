@@ -102,3 +102,15 @@ test("the API side has no storage and keeps answering", async () => {
   assert.equal(typeof localStorage, "undefined");
   assert.equal(E.aiConsent(), "yes");
 });
+
+test("iPhone, Mac and Apple Watch name the same recipient as the web, word for word", () => {
+  const fs = require("node:fs"), path = require("node:path");
+  setup(null);
+  try {
+    const web = E.aiRecipient();
+    for (const f of ["Sources/Models/AppState.swift", "Watch/WatchAsk.swift"]) {
+      const src = fs.readFileSync(path.join(__dirname, "..", f), "utf8");
+      assert.ok(src.includes(`"${web}"`), `${f} must carry the web's consent recipient exactly`);
+    }
+  } finally { teardown(); }
+});

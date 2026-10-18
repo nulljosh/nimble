@@ -1,5 +1,5 @@
 import Foundation
-#if canImport(FoundationModels)
+#if canImport(FoundationModels) && !os(watchOS)
 import FoundationModels
 #endif
 
@@ -9,7 +9,7 @@ import FoundationModels
 enum OnDeviceAnswers {
     /// True when Apple Intelligence is on and the model is ready on this device.
     static var isAvailable: Bool {
-        #if canImport(FoundationModels)
+        #if canImport(FoundationModels) && !os(watchOS)
         if #available(iOS 26, macOS 26, *) {
             if case .available = SystemLanguageModel.default.availability { return true }
         }
@@ -18,7 +18,7 @@ enum OnDeviceAnswers {
     }
 
     static func answer(_ question: String, turns: TurnBuffer) async -> String? {
-        #if canImport(FoundationModels)
+        #if canImport(FoundationModels) && !os(watchOS)
         if #available(iOS 26, macOS 26, *) {
             guard isAvailable else { return nil }
             let contextual = prompt(for: question, turns: turns)
@@ -35,6 +35,7 @@ enum OnDeviceAnswers {
         return "Earlier in this conversation:\n\(context)\n\nQuestion: \(question)"
     }
 
+    #if canImport(FoundationModels) && !os(watchOS)
     /// The session is made inside the call so nothing crosses task boundaries.
     @available(iOS 26, macOS 26, *)
     private static func modelReply(_ prompt: String) async -> String? {
@@ -46,6 +47,7 @@ enum OnDeviceAnswers {
             return nil
         }
     }
+    #endif
 
     /// Same UNKNOWN rule as AIConfig.parse, plus a trailing period ("UNKNOWN.").
     static func cleaned(_ text: String) -> String? {

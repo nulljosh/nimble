@@ -7,8 +7,8 @@ settings:
     # and signing fails with "requires a development team".
     DEVELOPMENT_TEAM: QMM486NPYC
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "6.40.0"
-    CURRENT_PROJECT_VERSION: "82"
+    MARKETING_VERSION: "6.41.0"
+    CURRENT_PROJECT_VERSION: "83"
 targets:
   Nimble:
     type: application
@@ -102,6 +102,8 @@ targets:
     dependencies:
       - target: NimbleWidget
       - target: NimbleShare
+      # The watch app ships inside the iPhone app.
+      - target: NimbleWatch
   # Home screen widget: the last answer, tap to ask. Reads the app group the app writes.
   NimbleWidget:
     type: app-extension
@@ -145,6 +147,40 @@ targets:
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: ShareExtension/NimbleShare.entitlements
         TARGETED_DEVICE_FAMILY: "1,2"
+  # Apple Watch: ask by voice, read one sentence. The engine files below are the Foundation-only half of Sources/Models.
+  NimbleWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: Watch
+      - path: Sources/Models/AIEngine.swift
+      - path: Sources/Models/OfflinePack.swift
+      - path: Sources/Models/Preferences.swift
+      - path: Sources/Models/QASandbox.swift
+      - path: Sources/Models/SharedAnswer.swift
+      - path: Sources/Models/OnDeviceAnswers.swift
+      - path: Sources/Models/QueryEngine.swift
+      - path: Sources/Models/QueryEngine+Cards.swift
+      - path: Sources/Models/QueryEngine+Compute.swift
+      - path: Sources/Models/QueryEngine+Markets.swift
+      - path: Sources/Models/QueryEngine+Sports.swift
+      - path: Sources/Models/QueryResult.swift
+      - path: Sources/Models/SearchHistory.swift
+      - path: Sources/Models/Turns.swift
+      - path: Resources/Localizable.xcstrings
+        buildPhase: resources
+      - path: Nimble.icon
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios.watchkitapp
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Nimble
+        INFOPLIST_KEY_WKCompanionAppBundleIdentifier: com.nulljosh.nimble.ios
+        INFOPLIST_KEY_WKApplication: YES
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: Nimble
+        CODE_SIGN_STYLE: Automatic
   NimbleTests:
     type: bundle.unit-test
     platform: macOS
