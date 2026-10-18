@@ -127,6 +127,19 @@ object TopicPhoto {
         Regex("[a-z]{4,}").findAll(s.lowercase()).map { it.value }.filter { it !in glue }.toSet()
 
     /**
+     * A Wikipedia page is on topic for an answer when every word of its title (a parenthesized qualifier dropped) is a word of
+     * the question or of the answer's own proper nouns; a disambiguated page must be an entity the answer names.
+     * Same rule as `onTopic` in docs/engine.js and Swift.
+     */
+    fun onTopic(title: String, query: String, body: String): Boolean {
+        val words = keyWords(title.replace(Regex("""\s*\(.*?\)"""), ""))
+        if (words.isEmpty()) return false
+        val entityWords = keyWords(entityPattern.findAll(body).map { it.value }.filter { it !in notEntity }.joinToString(" "))
+        val pool = if (Regex("""\(.*?\)""").containsMatchIn(title)) entityWords else keyWords(query) + entityWords
+        return words.all { it in pool }
+    }
+
+    /**
      * The answer with its topic filled in: a missing picture, and when nothing else backs the answer, the intro
      * ("Why this answer") and the Wikipedia page as its link. An answer that already has a photo is returned as it is.
      */

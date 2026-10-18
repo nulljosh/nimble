@@ -202,7 +202,7 @@ class AnswerClient(
             setBody(ProxyBody(input))
         }
         val body = res.bodyAsText()
-        proxyDisputed(body) ?: proxyAnswer(body) ?: run {
+        proxyDisputed(body) ?: proxyAnswer(body, input) ?: run {
             // UNKNOWN: keep the worker's reason only when its AI call failed.
             proxyAiError(body)?.let { aiFailures.add(it) }
             null
@@ -353,7 +353,7 @@ internal fun proxyAiError(body: String): String? =
     runCatching { rich.decodeFromString<ProxyReply>(body).aiError }.getOrNull()?.takeIf { it.isNotEmpty() }
 
 /** The worker's `/?q=` reply. `image` is an object `{url, width, height}`; a string here would drop the whole answer. */
-internal fun proxyAnswer(body: String): Answer.Text? {
+internal fun proxyAnswer(body: String, query: String? = null): Answer.Text? {
     val d = rich.decodeFromString<ProxyReply>(body)
     val answer = d.answer?.trim().orEmpty()
     if (answer.isEmpty() || answer.uppercase() == "UNKNOWN") return null
@@ -373,7 +373,7 @@ internal fun proxyAnswer(body: String): Answer.Text? {
         sources = d.sources.orEmpty().ifEmpty { d.refs.orEmpty().map { ProxySource(it.title, it.url) } }.mapNotNull { r ->
             val u = r.url?.takeIf { it.startsWith("https://") } ?: return@mapNotNull null
             DisputeSource(r.name?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null, u)
-        }.distinctBy { it.url }.take(2),
+        }.filter { query == null || TopicPhoto.onTopic(it.name, query, answer) }.distinctBy { it.url }.take(2),
     )
 }
 

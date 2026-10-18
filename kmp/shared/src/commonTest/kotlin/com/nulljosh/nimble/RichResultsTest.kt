@@ -156,4 +156,10 @@ class RichResultsTest {
             a.sources,
         )
     }
+
+    @Test
+    fun proxyAnswerDropsOffTopicRefsWhenTheQuestionIsKnown() {
+        val body = """{"answer":"Paris.","source":"Groq","refs":[{"title":"Paris","url":"https://en.wikipedia.org/wiki/Paris","extract":"x"},{"title":"Capital punishment in France","url":"https://en.wikipedia.org/wiki/Capital_punishment_in_France","extract":"y"}]}"""
+        assertEquals(listOf(DisputeSource("Paris", "https://en.wikipedia.org/wiki/Paris")), proxyAnswer(body, "capital of france")!!.sources)
+    }
 }
