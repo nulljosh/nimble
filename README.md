@@ -22,7 +22,7 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 
 ## Get it
 
-[Watch the 23 second promo](docs/promo/nimble-promo.mp4). In a terminal: `node bin/nimble.js "question"`.
+[Watch the 23 second promo](docs/promo/nimble-promo.mp4). In a terminal: `brew install nulljosh/nimble/nimble`, then `nimble "question"`.
 
 | | |
 |---|---|

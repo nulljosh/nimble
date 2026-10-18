@@ -17,7 +17,7 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 
 1. QA loop (Joshua asked 2026-10-18, this overrides "never run npm run exam" while he wants it): run `node test/exam.js` once per slice on a quiet quota day (check /stats first, it costs about 60 neurons per AI question), fix every miss at the root (Worker grounding or engine), add a test, ship. Also tighten loose regexes so a wrong fact (Gregor Robertson as mayor) fails. Grow the exam toward 150 questions.
 2. Read /stats once per tick.
-3. Then v9: the `nimble "question"` command is in bin/nimble.js; package it for brew (needs a tap repo and a release tarball). The extension is in extension/; submit it to the Chrome and Firefox stores.
+3. Then v9: the brew tap is live (github.com/nulljosh/homebrew-nimble, formula pins a release tarball: bump url and sha256 each release that touches the CLI). The extension is in extension/; submit it to the Chrome and Firefox stores.
 
 Already in the code, so don't rebuild: Why this answer, follow-ups, step math, multiple sources, the News, Markets and Sports cards, the offline pack, Private mode, Listen, the voice loop, Ask Nimble from every platform's share sheet, Siri and Shortcuts.
 
