@@ -22,6 +22,8 @@ Free-engine questions are paced 3.2 seconds apart because the proxy allows 20 AI
 | Samantha, local 9B | 147 of 154 | Runs on the Mac mini, no network. |
 | Qwen on Cloudflare | 43 of 45 | Newest 45 only. The free Cloudflare quota ran out that day. |
 
+Rerun at 16:30 PDT the same day through Groq: 152 of 154 as first graded. Both misses were our patterns, not the answers: "Mauna Kea" came with a non-breaking space, and "absolute zero" with an en dash ("–273.15 °C"). With the patterns fixed the same answers pass, so 154 of 154. Note "tallest mountain" can legitimately answer Mauna Kea (tallest from base), and the exam accepts it.
+
 Since the Groq run: the model is now asked the same Earth rewrite the search uses, and the exam accepts Proxima or the Sun. 154 of 154 is confirmed after the cached "tallest mountain" answer expires, then this table gets a new row.
 
 ## The 1,000-question exam
