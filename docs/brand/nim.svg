@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Nim, Nimble's mascot">
+  <!-- Nim: a calm, confident East Asian woman, drawn reductively. Circles and one curve each where a line will do.
+       Sleek black hair with curtain bangs, a leather jacket over a black top, a thin choker, gold hoops as the one brand accent, a knowing half smile.
+       Nimble palette plus skin, no gradients, no text. Not a likeness of anyone. -->
+  <!-- hair, back: a rounded cap that falls straight past the shoulders -->
+  <path d="M60 108 A 60 60 0 0 1 180 108 L 184 240 L 56 240 Z" fill="#1a1412"/>
+  <!-- a plain black top -->
+  <path d="M40 240 C 40 194, 76 186, 120 186 C 164 186, 200 194, 200 240 Z" fill="#1f1b16"/>
+  <!-- neck -->
+  <rect x="104" y="140" width="32" height="40" rx="16" fill="#f3d3b3"/>
+  <!-- leather jacket: two panels, open lapels, a thin zip line, a gold stud -->
+  <path d="M30 240 C 30 200, 62 186, 98 184 L 112 240 Z" fill="#2b2622"/>
+  <path d="M210 240 C 210 200, 178 186, 142 184 L 128 240 Z" fill="#2b2622"/>
+  <path d="M98 184 L 114 214 L 104 224 L 88 196 Z" fill="#3a332d"/>
+  <path d="M142 184 L 126 214 L 136 224 L 152 196 Z" fill="#3a332d"/>
+  <path d="M120 218 L 120 240" stroke="#3a332d" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="92" cy="206" r="2.5" fill="#ffca30"/>
+  <!-- choker: a thin black band with one tiny charm -->
+  <path d="M104 160 Q 120 166 136 160" fill="none" stroke="#1f1b16" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="120" cy="167" r="2.5" fill="#ffca30"/>
+  <!-- face: one circle -->
+  <circle cx="120" cy="108" r="52" fill="#f3d3b3"/>
+  <!-- side locks: one sweep each side, from the temple down past the ear -->
+  <path d="M60 108 C 56 132, 60 152, 74 164 C 68 144, 72 124, 86 108 Z" fill="#1a1412"/>
+  <path d="M180 108 C 184 132, 180 152, 166 164 C 172 144, 168 124, 154 108 Z" fill="#1a1412"/>
+  <!-- hoops -->
+  <circle cx="64" cy="140" r="16" fill="none" stroke="#ffca30" stroke-width="4"/>
+  <circle cx="176" cy="140" r="16" fill="none" stroke="#ffca30" stroke-width="4"/>
+  <!-- curtain bangs, parted in the middle -->
+  <path d="M120 48 C 88 50, 62 74, 60 108 L 86 108 C 90 86, 104 66, 120 48 Z" fill="#1a1412"/>
+  <path d="M120 48 C 152 50, 178 74, 180 108 L 154 108 C 150 86, 136 66, 120 48 Z" fill="#1a1412"/>
+  <!-- cheeks -->
+  <circle cx="94" cy="128" r="8" fill="#e07a3f" opacity="0.28"/>
+  <circle cx="146" cy="128" r="8" fill="#e07a3f" opacity="0.28"/>
+  <!-- brows -->
+  <path d="M88 100 Q 101 95 114 99" fill="none" stroke="#1a1412" stroke-width="3" stroke-linecap="round"/>
+  <path d="M126 99 Q 139 95 152 100" fill="none" stroke="#1a1412" stroke-width="3" stroke-linecap="round"/>
+  <!-- eyes: almond, one liner stroke, one short wing, a big dark iris with a single highlight -->
+  <path d="M84 116 Q 101 108 118 116 Q 101 124 84 116 Z" fill="#fff"/>
+  <path d="M122 116 Q 139 108 156 116 Q 139 124 122 116 Z" fill="#fff"/>
+  <circle cx="102" cy="115" r="6.5" fill="#2a1a12"/>
+  <circle cx="138" cy="115" r="6.5" fill="#2a1a12"/>
+  <circle cx="105" cy="112" r="2.4" fill="#fff"/>
+  <circle cx="141" cy="112" r="2.4" fill="#fff"/>
+  <path d="M78 112 L 84 116 Q 101 108 118 116" fill="none" stroke="#1a1412" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M122 116 Q 139 108 156 116 L 162 112" fill="none" stroke="#1a1412" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- mouth: a knowing half smile, a touch to one side -->
+  <path d="M108 141 Q 122 136 134 140 Q 124 150 108 141 Z" fill="#7a1f3d"/>
+</svg>

@@ -1,6 +1,6 @@
 # Nimble brand kit
 
-Nimble is a yellow bulb on black, a hummingbird called Flit, and one plain sentence of voice: ask a question, get one sentence back. Everything is flat. Yellow and black carry the look, cream holds the page, and Nimble Sans sets every word. The live version of this kit is at [nimble.jaybulb.com/brand](https://nimble.jaybulb.com/brand).
+Nimble is a yellow bulb on black, a mascot called Nim, and one plain sentence of voice: ask a question, get one sentence back. Everything is flat. Yellow and black carry the look, cream holds the page, and Nimble Sans sets every word. The live version of this kit is at [nimble.jaybulb.com/brand](https://nimble.jaybulb.com/brand).
 
 | Token | Value | Use |
 |---|---|---|
@@ -19,7 +19,7 @@ Nimble is a yellow bulb on black, a hummingbird called Flit, and one plain sente
 
 Source of truth: `docs/tokens.css`. The values above are the ones it resolves to today.
 
-Files: `nimble-icon-1024.png` (app icon), `wordmark.svg` (outlined Nimble Sans, tracked at -0.02em), `flit.svg`, `fen.svg`, `github-social-1280x640.png` (repo social preview: the app icon beside the wordmark, no mascot), `og-1200x630.png` (link preview, same lockup).
+Files: `nimble-icon-1024.png` (app icon), `wordmark.svg` (outlined Nimble Sans, tracked at -0.02em), `nim.svg` (plus `nim-wave`, `nim-think`, `nim-cheer`, `nim-doze` in `docs/mascot/`, drawn by `scripts/nim-poses.py`), `fen.svg`, `github-social-1280x640.png` (repo social preview: the app icon beside the wordmark, no mascot), `og-1200x630.png` (link preview, same lockup).
 
 The app icon is Apple-rendered artwork and the only exception to the flat rule. Every other file here is flat.
 

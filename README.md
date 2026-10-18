@@ -4,7 +4,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v6.21.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v6.21.1-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -15,7 +15,7 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 <p>
 <img src="docs/screenshots/ios-site.png" width="180" alt="Ask about a website">
 <img src="docs/screenshots/ios-convert.png" width="180" alt="Unit conversion, offline">
-<img src="docs/screenshots/ios-thinking.png" width="180" alt="Flit while an answer loads">
+<img src="docs/screenshots/ios-thinking.png" width="180" alt="Nim while an answer loads">
 <img src="docs/screenshots/ios-dark.png" width="180" alt="Dark mode">
 </p>
 <img src="docs/screenshots/mac-dark.png" width="480" alt="The Mac app">
