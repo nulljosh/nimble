@@ -139,10 +139,11 @@ fun SearchScreen(
         submit(q)
     }
 
-    if (showSettings && packStore != null) {
+    if (showSettings) {
         SettingsScreen(
             store = packStore,
             theme = theme,
+            onTheme = { theme = it },
             onBack = { showSettings = false },
             modifier = modifier,
         )
@@ -183,7 +184,6 @@ fun SearchScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
             )
-            ThemeSwatches(selected = theme, onSelect = { theme = it })
         }
 
         Spacer(Modifier.height(20.dp))
@@ -206,7 +206,7 @@ fun SearchScreen(
         // The tools row: History always; New question once an answer is on screen.
         Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             ToolButton("History", theme) { showHistory = true }
-            if (packStore != null) ToolButton("Settings", theme) { showSettings = true }
+            ToolButton("Settings", theme) { showSettings = true }
             Spacer(Modifier.weight(1f))
             if (answer != null) ToolButton("New question", theme) { newQuestion() }
         }
@@ -372,7 +372,7 @@ private fun SearchField(
 }
 
 @Composable
-private fun ThemeSwatches(selected: NimbleTheme, onSelect: (NimbleTheme) -> Unit) {
+internal fun ThemeSwatches(selected: NimbleTheme, onSelect: (NimbleTheme) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         for (t in NimbleTheme.entries.filter { it != NimbleTheme.Night }) {
             Box(

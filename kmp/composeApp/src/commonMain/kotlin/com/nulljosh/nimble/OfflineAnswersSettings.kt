@@ -36,16 +36,18 @@ private sealed class PackUi {
 
 /** Settings: Private mode and the offline answers section. Nothing downloads until the user taps Download. */
 @Composable
-fun SettingsScreen(store: OfflinePackStore, theme: NimbleTheme, onBack: () -> Unit, modifier: Modifier = Modifier) {
+/** Settings. [store] is null where there is no offline pack store yet (desktop), and the offline section is left out. */
+fun SettingsScreen(store: OfflinePackStore?, theme: NimbleTheme, onTheme: (NimbleTheme) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     var ui by remember { mutableStateOf<PackUi>(PackUi.Checking) }
     var privateOn by remember { mutableStateOf(loadPrivateMode()) }
 
     LaunchedEffect(store) {
-        ui = store.load()?.let { PackUi.Ready(it.count, it.builtAt) } ?: PackUi.NotInstalled(store.remoteBytes())
+        if (store != null) ui = store.load()?.let { PackUi.Ready(it.count, it.builtAt) } ?: PackUi.NotInstalled(store.remoteBytes())
     }
 
     fun download() {
+        store ?: return
         ui = PackUi.Downloading(0, -1)
         scope.launch {
             ui = try {
@@ -58,6 +60,7 @@ fun SettingsScreen(store: OfflinePackStore, theme: NimbleTheme, onBack: () -> Un
     }
 
     fun remove() {
+        store ?: return
         scope.launch {
             store.remove()
             ui = PackUi.NotInstalled(store.remoteBytes())
@@ -76,6 +79,9 @@ fun SettingsScreen(store: OfflinePackStore, theme: NimbleTheme, onBack: () -> Un
         }
         ToolButton("Back", theme, onBack)
 
+        Text("Theme", color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+        ThemeSwatches(selected = theme, onSelect = onTheme)
+
         Text("Private mode", color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         Text(
             "When on, no question leaves this device. Math and the offline answers still work.",
@@ -87,6 +93,7 @@ fun SettingsScreen(store: OfflinePackStore, theme: NimbleTheme, onBack: () -> Un
             savePrivateMode(privateOn)
         }
 
+        if (store != null) {
         Text("Offline answers", color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         Text(
             "The opening lines of the 9,000 most-read Wikipedia articles. Download once, on your tap. Answers work with no network.",
@@ -135,5 +142,6 @@ fun SettingsScreen(store: OfflinePackStore, theme: NimbleTheme, onBack: () -> Un
                 ToolButton("Download", theme) { download() }
             }
         }
+    }
     }
 }
