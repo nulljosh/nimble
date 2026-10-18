@@ -38,7 +38,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalUriHandler
@@ -213,7 +212,7 @@ fun SearchScreen(
 
         Box(Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState())) {
             when {
-                loading -> CircularProgressIndicator(color = theme.accent, modifier = Modifier.size(28.dp))
+                loading -> NimMark("think", 96.dp)
                 answer != null -> answer?.let { a ->
                     Column {
                         ResultCard(a, theme, client)
@@ -242,6 +241,8 @@ fun SearchScreen(
                         recent = emptyList()
                     },
                 )
+                // Nothing asked yet and no history: Nim waves hello.
+                query.isBlank() -> NimMark("wave", 120.dp)
             }
         }
 
@@ -542,7 +543,11 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                     )
                     QueryEngine.leadLines(answer.background, answer.aiNote).forEach { line ->
                         Spacer(Modifier.height(4.dp))
-                        Text(line, color = theme.muted, fontSize = 13.sp)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            // Nim dozes beside the resting note: the free AI is out for the day.
+                            if (line == RESTING_NOTE) { NimMark("doze", 32.dp); Spacer(Modifier.width(12.dp)) }
+                            Text(line, color = theme.muted, fontSize = 13.sp)
+                        }
                     }
                     Spacer(Modifier.height(12.dp))
                     answer.photoUrl?.let {

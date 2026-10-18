@@ -343,8 +343,10 @@ internal fun siteAnswer(host: String, d: AnswerClient.SiteResponse): Answer.Text
 }
 
 /** The quiet note under a Wikipedia fallback when the AI's call failed (quota or outage). Null for any other source. */
+const val RESTING_NOTE = "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening."
+
 internal fun aiRestingNote(aiError: String?, source: String): String? =
-    if (aiError != null && source == "Wikipedia") "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening." else null
+    if (aiError != null && source == "Wikipedia") RESTING_NOTE else null
 
 /** The worker's `aiError`, present only when its AI call failed and the answer is UNKNOWN. */
 internal fun proxyAiError(body: String): String? =
