@@ -1,5 +1,7 @@
 # Nimble roadmap
 
+> Priority tier 2 (2026-10-17): ship push, this week. Order: live blockers, ship pushes, active features, portfolio, exploratory. See ~/Documents/Code/LOOP-HANDOFF.md.
+
 ## Loop to v10 (from 5.1.0, 2026-10-11, one subagent at a time)
 
 Each line is one shippable slice: tests green, push, minor or patch bump (SemVer: fixes
@@ -16,25 +18,13 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 
 ### v5.x Finish 5.1 (patches and minors until clean)
 
-- [x] [Sonnet] 5.2 Move the 95-question exam into `test/exam.js` (LIVE=1 only, paced 3.2s/question), grade by regex, print a scoreboard; CI runs it nightly and opens an issue on any miss.
-- [x] [Haiku] 5.2 Dark-mode screenshots of iOS and Mac reviewed and fixed; add to `screenshots/`.
-- [x] [Sonnet] 5.2 Kotlin engine (Android, Windows, Linux) gets the site lookup, the "As of today" cleanup and list-article skipping, so every platform answers alike.
-- [x] [Haiku] 5.2 iPhone font and keyboard check, Dynamic Type at the largest sizes, VoiceOver pass on the new cards.
-- [x] [Haiku] 5.3 Flit everywhere: the mascot (docs/mascot/flit.svg, grade A) goes on the landing hero, the README header, the web app and native empty states, and the 404; a waving/hover variant for the landing. Push him to A+ with Joshua's grades.
-- [x] [Haiku] 5.4 Mascot picker in Settings (web, iOS, Mac): Flit the hummingbird (default) or Fen the fennec (docs/mascot/fen.svg); the choice drives the empty state and the loading card.
-- [x] [Opus] 5.4 App icon refreshed in Apple's Icon Composer (Nimble.icon): bulb glyph on the brand yellow, layered for the liquid glass look, exported to the asset catalogs; landing and README icon synced.
 - [ ] [Sonnet] 5.3 Samantha picker: Mac Preferences shows whether she is running, her model and her last latency; one-click start via `omlx start`.
 - [ ] [Sonnet] 5.3 Site answers show a favicon and the page's own name; handle JS-only pages by falling back to the og:description and a one-line "this site loads with JavaScript" note.
 
 ### v5.5 Premium (Joshua, 2026-10-11: domain now, premium features, then $1 on the App Store)
 
-- [x] [Joshua] Domain: DECISION 2026-10-11: stay on nimble.jaybulb.com for now (every short nimble .com is taken; nimbleapp.com is parked for sale at $10,795 on HugeDomains, usenimble.com $1,995; .com only, no .app). Revisit with a lowball offer on nimbleapp.com once the $1 app earns.
-- [x] [Opus] Offline mode pulled forward from v8: a small on-device model (Apple Foundation Models where available, else a bundled 0.5B to 1.5B MLX/GGUF) answers facts offline with the exam as the gate (90% or it does not ship); math, units, graphs already offline.
 - [ ] [Sonnet] Offline Wikipedia pack: top intros, compressed, one download, refreshed monthly; the grounding source when there is no network.
-- [x] [Haiku] Premium polish: DECISION 2026-10-11: the AI consent card stays on the paid app (Apple 5.1.2(i) requires consent before sharing data with an AI service); everything is unlocked, so no IAP gating code is needed. The "What you get" list lives in the store text and the landing.
 - [ ] [Sonnet] Price flip at the 5.5 release: iPhone and Mac go to Apple price tier 1 ($0.99) via `asc pricing` (apple-pricing skill), web stays free with the $1 Stripe unlock; MONEY.md and the landing updated the same day.
-
-
 
 - [ ] [Sonnet] "Why this answer": tap the source line to see the exact text the answer came from, with a link. Every text answer carries a sourceURL.
 - [ ] [Sonnet] News card: top three headlines on "news", "what's happening in <place>", from the RSS set already in the stack, one sentence each with the outlet.
@@ -49,9 +39,6 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 
 - [ ] [Sonnet] Follow-ups on every platform ("and in celsius?", "who was before him?"), a visible thread of the last three turns.
 - [ ] [Sonnet] Tap-to-expand: "tell me more" returns three sentences with sources, still never a wall of text.
-- [ ] [Opus] Voice loop: ask by voice, hear the answer back, hands-free mode on iPhone and Mac.
-- [ ] [Sonnet] App Intents and Shortcuts: "Ask Nimble" in Siri, Spotlight and the Action button; widget answers a question without opening the app.
-- [ ] [Sonnet] "Ask Nimble about this": an iOS and Mac share extension that takes selected text or a URL from any app and answers it (the Arc Search gap); URLs route through the site lookup.
 - [ ] [Haiku] Share card variants (square, story) with the new look.
 
 ### v8 Private and on-device
@@ -60,7 +47,6 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 - [ ] [Sonnet] "Private mode" toggle: answers only from on-device model plus an offline Wikipedia pack, nothing leaves the device; label it honestly with what it cannot answer.
 - [ ] [Sonnet] Offline Wikipedia pack (top-N intros, compressed) downloadable once, refreshed monthly.
 - [ ] [Sonnet] Samantha promoted: if the 9B or a distilled model clears 95% on the exam standalone, she ships as the Mac default without needing oMLX running.
-- [ ] [Haiku] Privacy page and consent copy rewritten for the three modes (free cloud, your key, private).
 
 ### v9 Everywhere
 
@@ -77,7 +63,6 @@ App Store ($1, the house rule) or a $1 one-time unlock, with offline mode as the
 feature and a real domain (getnimbleapp.com or nimbleapp.com; buy via /buy-domain when the name is
 settled). Web stays free with the $1 unlock through Stripe. Decide pricing shape at v8 (private
 mode is the premium feature), buy the domain at v9, flip the switch at v10.
-
 
 - [ ] [Opus] Publish the benchmark: a 1000-question exam across math, science, history, politics, news, sites, units, definitions, with method and results for Nimble, Samantha and the BYO engines, reproducible from the repo.
 - [ ] [Sonnet] Reliability: answer p50 under 2s and p95 under 6s on the free engine, graceful degradation tested with every upstream (Wikipedia, DDG, Workers AI) down in turn.
@@ -206,3 +191,15 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 
 ## Ingested 2026-10-03
 - [ ] Needs better QA testing and filtering of queries. Screenshots (from Joshua's phone, Oct 3): "Who is the president of the United States" returned raw model text ("The instructions say: 'If you do not know, reply exactly UNKNOWN'", source Gemma); "Who created you" returned the Wikipedia YouTube article; "What's nine plus ten" returned the Wikipedia Vine (service) article; "X=5+5. Solve for x." answered x=10 via Qwen (correct).
+
+## Ingested 2026-10-16
+- [ ] UI bump: nav bar at the bottom, Settings as a tab in it, color goes into Settings, copy to clipboard near search. What's New modal needs padding. (screenshots: notes/attachments/2026-10-16/nimble-6.png, notes/attachments/2026-10-16/nimble-7.png, notes/attachments/2026-10-16/nimble-8.png)
+- [ ] Remove "AI answers" from Settings. Default to Samantha, then other LLMs, Wikipedia etc. Filter through them for the user; don't make the user manage APIs. Same with engines.
+- [ ] README: simplify, remove the H1 and the image banner rules, remove the GitHub badge, refresh the primitive.dev screenshots and make examples more generic.
+- [ ] User feedback (email from a user): add a Home / New Question button to leave an answer, a History section via a hamburger menu, and single and multi-select in history (delete, share, organize). (screenshot: notes/attachments/2026-10-16/nimble-10.png)
+- [ ] Old ASC email (Nimble Answers 5.0.1 build 20): ITMS-90061, CFBundleVersion must exceed 202609210930. Likely already fixed by later builds; verify. (screenshot: notes/attachments/2026-10-16/nimble-6.png)
+- [ ] UI bump: nav bar at the bottom, Settings as a tab in it, color goes into Settings, copy to clipboard near search. What's New modal needs padding. (screenshots: notes/attachments/2026-10-16/nimble-6.png, notes/attachments/2026-10-16/nimble-7.png, notes/attachments/2026-10-16/nimble-8.png)
+- [ ] Remove "AI answers" from Settings. Default to Samantha, then other LLMs, Wikipedia etc. Filter through them for the user; don't make the user manage APIs. Same with engines.
+- [ ] README: simplify, remove the H1 and the image banner rules, remove the GitHub badge, refresh the primitive.dev screenshots and make examples more generic.
+- [ ] User feedback (email from a user): add a Home / New Question button to leave an answer, a History section via a hamburger menu, and single and multi-select in history (delete, share, organize). (screenshot: notes/attachments/2026-10-16/nimble-10.png)
+- [ ] Old ASC email (Nimble Answers 5.0.1 build 20): ITMS-90061, CFBundleVersion must exceed 202609210930. Likely already fixed by later builds; verify. (screenshot: notes/attachments/2026-10-16/nimble-6.png)
