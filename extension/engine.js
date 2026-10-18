@@ -188,7 +188,9 @@ function onTopic(title, query, body){
   const ents = (body && body.match(ENTITY_RE)) || [];
   const allowed = new Set([...keyWords(query), ...keyWords(ents.filter(e=>!NOT_ENTITY.has(e)).join(" "))]);
   const words = keyWords(String(title||"").replace(/\s*\(.*?\)/g, ""));
-  return words.length > 0 && words.every(w => allowed.has(w));
+  // A disambiguated page ("Capital (French magazine)") must be an entity the answer names, not just a word of the question.
+  const pool = /\(.*?\)/.test(title||"") ? new Set(keyWords(ents.filter(e=>!NOT_ENTITY.has(e)).join(" "))) : allowed;
+  return words.length > 0 && words.every(w => pool.has(w));
 }
 
 // The linked sources as "Name · Name", each one a link. Names only: no new words in the UI.

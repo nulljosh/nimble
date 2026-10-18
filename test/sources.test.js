@@ -137,6 +137,7 @@ test("onTopic: the question's topic, the answer's entity, or a qualifier-strippe
   assert.equal(E.onTopic("Paris", "capital of france", "The capital of France is Paris."), true);
   assert.equal(E.onTopic("France", "capital of france", "The capital of France is Paris."), true);
   assert.equal(E.onTopic("Hamlet (1996 film)", "who wrote hamlet", "William Shakespeare wrote Hamlet."), true);
+  assert.equal(E.onTopic("Capital (French magazine)", "capital of france", "The capital of France is Paris."), false);
   assert.equal(E.onTopic("Third", "who wrote hamlet", "William Shakespeare wrote Hamlet."), false);
   assert.equal(E.onTopic("", "who wrote hamlet", "William Shakespeare wrote Hamlet."), false);
 });

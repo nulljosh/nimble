@@ -618,6 +618,7 @@ final class QueryEngine: Sendable {
         let stripped = title.replacingOccurrences(of: #"\s*\(.*?\)"#, with: "", options: .regularExpression)
         let words = AnswerSources.keyWords(stripped)
         guard !words.isEmpty else { return false }
+        let qualified = title.range(of: #"\(.*?\)"#, options: .regularExpression) != nil
         var allowed = AnswerSources.keyWords(query)
         var ents: [String] = []
         if let re = try? NSRegularExpression(pattern: entityPattern) {
@@ -627,8 +628,10 @@ final class QueryEngine: Sendable {
                 if !notEntity.contains(e) { ents.append(e) }
             }
         }
-        allowed.formUnion(AnswerSources.keyWords(ents.joined(separator: " ")))
-        return words.allSatisfy { allowed.contains($0) }
+        let entityWords = AnswerSources.keyWords(ents.joined(separator: " "))
+        allowed.formUnion(entityWords)
+        // A disambiguated page ("Capital (French magazine)") must be an entity the answer names, not just a word of the question.
+        return words.allSatisfy { (qualified ? entityWords : allowed).contains($0) }
     }
 
     /// Gives a result the photo from another result when it has none of its own.
