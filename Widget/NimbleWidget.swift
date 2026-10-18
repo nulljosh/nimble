@@ -35,7 +35,35 @@ struct NimbleWidgetView: View {
 
     private static let yellow = Color(red: 1.0, green: 0.792, blue: 0.188)  // #ffca30
 
+    private var accessory: Bool { [.accessoryInline, .accessoryCircular, .accessoryRectangular].contains(family) }
+
     var body: some View {
+        Group {
+            switch family {
+            // Lock screen: the answer in a line, the bulb in a circle, or question over answer in the rectangle.
+            case .accessoryInline:
+                Text(entry.answer)
+            case .accessoryCircular:
+                ZStack {
+                    AccessoryWidgetBackground()
+                    Image(systemName: "lightbulb.fill").font(.title2)
+                }
+                .accessibilityLabel("Ask Nimble")
+            case .accessoryRectangular:
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(entry.question).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                    Text(entry.answer).font(.headline).lineLimit(2).minimumScaleFactor(0.7)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            default:
+                home
+            }
+        }
+        .containerBackground(for: .widget) { accessory ? Color.clear : Color(uiColor: .systemBackground) }
+        .widgetURL(URL(string: "nimble://ask"))
+    }
+
+    private var home: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(entry.question)
                 .font(.system(size: 13))
@@ -55,8 +83,6 @@ struct NimbleWidgetView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .containerBackground(Color(uiColor: .systemBackground), for: .widget)
-        .widgetURL(URL(string: "nimble://ask"))
     }
 }
 
@@ -68,6 +94,6 @@ struct NimbleWidget: Widget {
         }
         .configurationDisplayName("Nimble")
         .description("Your last answer. Tap to ask another.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryInline, .accessoryCircular, .accessoryRectangular])
     }
 }
