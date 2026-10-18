@@ -212,9 +212,36 @@ async function cachePut(key, body, ttl) {
   }
 }
 // Today's counts: this isolate's numbers, raised to whatever the Cache API holds for today.
-async function loadCounts(origin) {
+// With the COUNTS Durable Object bound, one global instance holds the day's numbers (max-merged, so a
+// racing isolate can lose a few counts but never move them backwards); without it, the Cache API is the store.
+const FIELDS = ["aiCalls", "cacheHits", "groqCalls", "groqRefused"];
+export class NimbleCounts {
+  constructor(state) {
+    this.state = state;
+  }
+  async fetch(req) {
+    let s = (await this.state.storage.get("c")) || fresh();
+    if (req.method === "POST") {
+      const inc = await req.json();
+      if (inc.day !== s.day) s = s.day > inc.day ? s : fresh(inc.day);
+      if (inc.day === s.day) for (const k of FIELDS) s[k] = Math.max(s[k], Number(inc[k]) || 0);
+      await this.state.storage.put("c", s);
+    }
+    return json(s);
+  }
+}
+const globalCounts = (env, init) => {
+  try {
+    return env?.COUNTS?.get(env.COUNTS.idFromName("global")).fetch("https://counts/", init).then((r) => r.json());
+  } catch {
+    return null;
+  }
+};
+async function loadCounts(origin, env) {
   const day = dayKey();
   if (mem.day !== day) mem = fresh(day);
+  const g = await globalCounts(env)?.catch(() => null);
+  if (g?.day === day) for (const k of FIELDS) mem[k] = Math.max(mem[k], Number(g[k]) || 0);
   const text = await cacheGet(statsUrl(origin, day));
   try {
     const s = JSON.parse(text || "{}");
@@ -227,11 +254,12 @@ async function loadCounts(origin) {
   }
   return mem;
 }
-async function saveCounts(origin, c) {
+async function saveCounts(origin, c, env) {
+  await globalCounts(env, { method: "POST", body: JSON.stringify(c) })?.catch(() => null);
   await cachePut(statsUrl(origin, c.day), { aiCalls: c.aiCalls, cacheHits: c.cacheHits, groqCalls: c.groqCalls, groqRefused: c.groqRefused }, 2 * 86400);
 }
-async function statsReply(origin) {
-  const c = await loadCounts(origin);
+async function statsReply(origin, env) {
+  const c = await loadCounts(origin, env);
   // groqCalls counts every request sent to Groq, groqRefused the ones it turned away (cap or error): the capacity gauge.
   return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused });
 }
@@ -246,7 +274,7 @@ export default {
     const isSite = req.method === "GET" && url.searchParams.has("site");
     const isNews = req.method === "GET" && url.searchParams.has("news");
     const isStats = req.method === "GET" && url.pathname === "/stats";
-    if (isStats) return statsReply(url.origin);
+    if (isStats) return statsReply(url.origin, env);
     if (req.method !== "POST" && !isDDG && !isSite && !isNews) return new Response("POST only", { status: 405, headers: CORS });
 
     if (isDDG) {
@@ -314,14 +342,14 @@ export default {
     if (typeof q !== "string" || !q.trim()) return json({ error: "empty q" }, 400);
     if (q.length > 500) return json({ error: "too long" }, 400);
 
-    const counts = await loadCounts(url.origin);
+    const counts = await loadCounts(url.origin, env);
     // An identical question (normalized) inside the TTL is served from the Cache API: no AI, no neurons.
     // Follow-up turns depend on the conversation, so they skip the cache.
     const cKey = turns.length === 0 ? cacheUrl(url.origin, q) : null;
     const hit = cKey ? await cacheGet(cKey) : null;
     if (hit) {
       counts.cacheHits++;
-      await saveCounts(url.origin, counts);
+      await saveCounts(url.origin, counts, env);
       return new Response(hit, { headers: { "content-type": "application/json", ...CORS } });
     }
     // Past the daily estimate: no AI call. The client shows its resting note because aiError is set.
@@ -341,7 +369,7 @@ export default {
       const topic = known ? topicOf(photo?.page, refs) : null;
       const body = { ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) };
       if (cKey && known && !o.aiError) await cachePut(cKey, body, isTimeSensitive(q) ? TTL_TIMELY : TTL_CACHE);
-      await saveCounts(url.origin, counts);
+      await saveCounts(url.origin, counts, env);
       return json(body);
     };
     const today = new Date().toISOString().slice(0, 10);

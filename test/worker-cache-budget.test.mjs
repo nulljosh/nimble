@@ -4,7 +4,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import worker, {
   normalizeQuestion, cacheUrl, isTimeSensitive, needsSecondModel, estNeurons, overBudget,
-  NEURONS_PER_CALL, BUDGET_NEURONS, TTL_CACHE, TTL_TIMELY, _resetForTests,
+  NEURONS_PER_CALL, BUDGET_NEURONS, TTL_CACHE, TTL_TIMELY, _resetForTests, NimbleCounts,
 } from "../worker/worker.js";
 
 const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
@@ -312,4 +312,31 @@ test("groq: a short retry-after is waited out and the same model answers", async
   const { json } = await post("capital of france", { env: { GROQ_KEY: "k" } });
   assert.equal(json.source, "Groq");
   assert.deepEqual(seen, ["openai/gpt-oss-120b", "openai/gpt-oss-120b"]);
+});
+
+// ---- global counter (Durable Object) ------------------------------------------------------------
+
+// One fake COUNTS binding shared by every "isolate" in the test, backed by the real NimbleCounts class.
+function fakeCounts() {
+  const store = new Map();
+  const obj = new NimbleCounts({ storage: { get: async (k) => store.get(k), put: async (k, v) => void store.set(k, v) } });
+  return { idFromName: () => "global", get: () => ({ fetch: (u, init) => obj.fetch(new Request(u, init)) }) };
+}
+
+test("global counter: a second isolate sees the first one's calls, and /stats reads the total", async () => {
+  installCaches(fakeCaches());
+  const COUNTS = fakeCounts();
+  await post("capital of france", { answers: { [QWEN]: "Paris is the capital of France." }, env: { COUNTS } });
+  _resetForTests(); // a different isolate, empty memory, and a different data center's empty Cache API
+  installCaches(fakeCaches());
+  const r = await worker.fetch(new Request(`${ORIGIN}/stats`), { COUNTS });
+  const s = await r.json();
+  assert.ok(s.aiCalls >= 1, "the first isolate's AI call shows up in the second one's /stats");
+});
+
+test("global counter: a broken binding never breaks an answer", async () => {
+  installCaches(fakeCaches());
+  const COUNTS = { idFromName: () => { throw new Error("down"); }, get: () => { throw new Error("down"); } };
+  const { json } = await post("capital of france", { answers: { [QWEN]: "Paris is the capital of France." }, env: { COUNTS } });
+  assert.match(json.answer, /Paris/);
 });

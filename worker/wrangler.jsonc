@@ -16,7 +16,7 @@
       }
     ]
   },
-  // Not created yet. The daily neuron counter uses the Cache API (per data center, best effort).
-  // For a global counter: `npx wrangler kv namespace create NIMBLE_KV`, then uncomment and paste the id it prints.
-  // "kv_namespaces": [{ "binding": "NIMBLE_KV", "id": "<id from the command>" }]
+  // One global instance holds the day's /stats numbers (the Cache API is per data center). KV can't: 1,000 writes a day.
+  "durable_objects": { "bindings": [{ "name": "COUNTS", "class_name": "NimbleCounts" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["NimbleCounts"] }]
 }

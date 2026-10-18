@@ -1,12 +1,12 @@
 # Nimble
-v6.29.0
+v6.30.0
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Groq's free models first (gpt-oss 120B, Qwen 27B, gpt-oss 20B), then Qwen3 + Gemma on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 
 ## Stack
 - SwiftUI (macOS 14+ / iOS 17+), @Observable
 - QueryEngine: classifyQuery() enum, hand-written MathLexer/MathParser eval (replaced NSExpression, which silently ignored trailing junk); same logic reimplemented in JS in `docs/engine.js`
-- Answer proxy: Cloudflare Worker + Workers AI binding (no API key). Qwen3 alone by default; Gemma joins for time-sensitive, date or number questions and when Qwen gives UNKNOWN; Llama breaks a clash. Known answers cached 6h (1h time-sensitive) via the Cache API, no neurons on a repeat. With the `GROQ_KEY` secret set, Groq answers first (separate free daily caps, no neurons) and a capped or failing Groq model hands to the next. A neuron guard stops Workers AI at 8,500 estimated neurons a day (Groq keeps answering past it) and `GET /stats` reports the day's counts (per data center, see `worker/wrangler.jsonc` for the KV option). Returns `{answer, source}` and the UI shows `source`
+- Answer proxy: Cloudflare Worker + Workers AI binding (no API key). Qwen3 alone by default; Gemma joins for time-sensitive, date or number questions and when Qwen gives UNKNOWN; Llama breaks a clash. Known answers cached 6h (1h time-sensitive) via the Cache API, no neurons on a repeat. With the `GROQ_KEY` secret set, Groq answers first (separate free daily caps, no neurons) and a capped or failing Groq model hands to the next. A neuron guard stops Workers AI at 8,500 estimated neurons a day (Groq keeps answering past it) and `GET /stats` reports the day's counts (global, kept by the NimbleCounts Durable Object). Returns `{answer, source}` and the UI shows `source`
 - AI engine is user-selectable in Settings (`Sources/Models/AIEngine.swift`, `ENGINES` in `engine.js`): Nimble proxy (default, free), Claude, OpenAI, Ollama. Keys stay on device (prefs file / localStorage), calls go straight to the vendor; no key = silent fallback to the proxy
 - DuckDuckGo Instant Answer API + Wikipedia REST API as fallback
 - macOS window is borderless (`styleMask = [.resizable, .fullSizeContentView]`), dropping `.titled` is what removes the titlebar strip; do not restore it
