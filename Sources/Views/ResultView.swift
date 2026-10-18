@@ -390,10 +390,16 @@ struct AnswerCard<Content: View, Footer: View>: View {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(Array(lead.enumerated()), id: \.offset) { _, line in
                             // Soft, not dim: the 60% ink is 4.3:1 on the light card; soft is 6.3:1 light and 8.2:1 dark.
-                            Text(line)
-                                .font(.nimbleCaption)
-                                .foregroundStyle(Color.soft)
-                                .fixedSize(horizontal: false, vertical: true)
+                            HStack(spacing: 12) {
+                                // Nim dozes beside the resting note: the free AI is out for the day.
+                                if line == QueryEngine.restingNote {
+                                    Image("NimDoze").resizable().frame(width: 32, height: 32).accessibilityHidden(true)
+                                }
+                                Text(line)
+                                    .font(.nimbleCaption)
+                                    .foregroundStyle(Color.soft)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
                         }
                     }
                 }

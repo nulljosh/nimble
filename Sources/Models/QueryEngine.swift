@@ -888,8 +888,10 @@ final class QueryEngine: Sendable {
     /// The quiet line under a Wikipedia fallback when the AI's call failed. Nil when there is nothing to say.
     static func aiRestingNote(aiError: String?, source: String) -> String? {
         guard aiError != nil, source == "Wikipedia" else { return nil }
-        return "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening."
+        return restingNote
     }
+
+    static let restingNote = "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening."
 
     /// Attaches the linked sources to a text answer. `others` are results already fetched for the same question.
     private func withSources(_ result: QueryResult, others: [QueryResult?]) -> QueryResult {
