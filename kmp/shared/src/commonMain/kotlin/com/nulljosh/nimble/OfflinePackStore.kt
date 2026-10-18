@@ -28,9 +28,13 @@ const val OFFLINE_PACK_INDEX_URL = "https://nimble.jaybulb.com/pack/index.json"
 /** True when the device has a network connection. Offline answers take over when it does not. */
 expect fun networkAvailable(): Boolean
 
-/** Private mode: nothing leaves the device. Kept across launches where the platform can (Android); in memory on desktop. */
+/** Private mode: nothing leaves the device. Kept across launches (SharedPreferences on Android, java.util.prefs on desktop). */
 expect fun loadPrivateMode(): Boolean
 expect fun savePrivateMode(on: Boolean)
+
+/** The chosen theme's enum name, kept across launches the same way; null until the user picks one. */
+expect fun loadThemeName(): String?
+expect fun saveThemeName(name: String)
 
 /** NFKD of the lowercased text, the same normalization as the Swift and web lookup (accents split off, then dropped). */
 internal expect fun nfkdLowercase(s: String): String

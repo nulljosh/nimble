@@ -86,7 +86,11 @@ fun SearchScreen(
     val scope = rememberCoroutineScope()
 
     val systemDark = isSystemInDarkTheme()
-    var theme by remember { mutableStateOf(if (systemDark) NimbleTheme.Night else NimbleTheme.Yellow) }
+    // The saved pick wins; a first launch follows the system's light or dark setting.
+    var theme by remember {
+        val saved = loadThemeName()?.let { n -> NimbleTheme.entries.firstOrNull { it.name == n } }
+        mutableStateOf(saved ?: if (systemDark) NimbleTheme.Night else NimbleTheme.Yellow)
+    }
     var query by remember { mutableStateOf("") }
     var answer by remember { mutableStateOf<Answer?>(null) }
     var loading by remember { mutableStateOf(false) }
@@ -143,7 +147,7 @@ fun SearchScreen(
         SettingsScreen(
             store = packStore,
             theme = theme,
-            onTheme = { theme = it },
+            onTheme = { theme = it; saveThemeName(it.name) },
             onBack = { showSettings = false },
             modifier = modifier,
         )

@@ -36,6 +36,12 @@ actual fun savePrivateMode(on: Boolean) {
     prefs()?.edit()?.putBoolean("private_mode", on)?.apply()
 }
 
+actual fun loadThemeName(): String? = prefs()?.getString("theme", null)
+
+actual fun saveThemeName(name: String) {
+    prefs()?.edit()?.putString("theme", name)?.apply()
+}
+
 internal actual fun nfkdLowercase(s: String): String =
     Normalizer.normalize(s.lowercase(), Normalizer.Form.NFKD)
 

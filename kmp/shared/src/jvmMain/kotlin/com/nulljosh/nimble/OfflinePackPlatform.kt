@@ -10,6 +10,8 @@ internal actual fun nfkdLowercase(s: String): String =
 
 actual fun platformOfflinePackStore(): OfflinePackStore? = null
 
-private var privateMode = false
-actual fun loadPrivateMode(): Boolean = privateMode
-actual fun savePrivateMode(on: Boolean) { privateMode = on }
+private val prefs by lazy { java.util.prefs.Preferences.userRoot().node("com.nulljosh.nimble") }
+actual fun loadPrivateMode(): Boolean = prefs.getBoolean("private_mode", false)
+actual fun savePrivateMode(on: Boolean) { prefs.putBoolean("private_mode", on) }
+actual fun loadThemeName(): String? = prefs.get("theme", null)
+actual fun saveThemeName(name: String) { prefs.put("theme", name) }
