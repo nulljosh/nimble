@@ -23,6 +23,6 @@ test("background alone is one caption line with no resting note", async () => {
 
 test("a plain Wikipedia answer with the AI resting keeps only the note", async () => {
   const { h } = await E.renderAnswer("capital of france", { scripted: base({ title: "France", background: false, aiError: "capacity" }) });
-  assert.match(h, /<p class="ai-note">The free AI is out of answers for today/);
+  assert.match(h, /<p class="ai-note"><img src="mascot\/nim-doze\.svg" width="32" height="32" alt="">The free AI is out of answers for today/);
   assert.doesNotMatch(h, /bg-caption/);
 });

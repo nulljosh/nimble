@@ -147,8 +147,9 @@ form { position: relative; }
 .news li.has-thumb { display: grid; grid-template-columns: 56px 1fr; gap: var(--space-3); align-items: start; }
 .news-thumb { width: 56px; height: 56px; border-radius: var(--radius-md); object-fit: cover; background: var(--bg2); opacity: 0; transition: opacity .25s ease; }
 .news-thumb.on { opacity: 1; }
-.ai-note { margin: var(--space-3) 0 0; font-size: var(--fs-13); color: var(--text-light); }
+.ai-note { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-3) 0 0; font-size: var(--fs-13); color: var(--text-light); }
 /* Lead lines sit directly under the card header: the resting note, then the background caption. */
+.ai-note img { flex: none; border-radius: 50%; }
 .card .ai-note, .card .bg-caption, .bg-caption { margin: 0 0 var(--space-2); font-size: var(--fs-13); line-height: var(--lh-md); color: var(--text-mid); }
 /* The tools row under the field: History always, New question once an answer is on screen. */
 .tools { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-4); }

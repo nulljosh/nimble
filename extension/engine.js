@@ -1097,7 +1097,7 @@ async function renderAnswer(query, opts){
     // One quiet line under the header, never two stacked (same as QueryResult.leadLines in Swift): the resting note first when the free AI is out, then the background caption.
     const note = a.aiError && a.src==="Wikipedia" ? T("The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.") : "";
     if(a.background) h+='<p class="bg-caption">'+[note, T("Not a direct answer to your question. Background from Wikipedia:")].filter(Boolean).map(esc).join(" ")+'</p>';
-    else if(note) h+='<p class="ai-note">'+esc(note)+'</p>';
+    else if(note) h+='<p class="ai-note"><img src="mascot/nim-doze.svg" width="32" height="32" alt="">'+esc(note)+'</p>';
   }
   if(a.kind==="convert"){ h+='<div class="mockup-big num">'+a.to+' '+esc(a.toUnit)+'</div><p class="num">'+a.from+' '+esc(a.fromUnit)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="card"){

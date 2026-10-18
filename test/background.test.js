@@ -65,7 +65,7 @@ test("a plain answer keeps the ANSWER header and no caption", async () => {
 
 test("the resting note is the first line under the header, before the answer", async () => {
   const { h } = await E.renderAnswer("capital of france", { t: (s) => s, scripted: { kind: "text", title: "France", body: "Paris is the capital.", src: "Wikipedia", sources: [], aiError: "AiError: daily free allocation exceeded" } });
-  assert.match(h, new RegExp('^<div class="mockup-label">Answer</div><p class="ai-note">' + NOTE.replace(/\./g, "\\.") + "</p>"));
+  assert.match(h, new RegExp('^<div class="mockup-label">Answer</div><p class="ai-note"><img src="mascot/nim-doze.svg" width="32" height="32" alt="">' + NOTE.replace(/\./g, "\\.") + "</p>"));
   assert.ok(h.indexOf("ai-note") < h.indexOf("Paris is the capital."));
 });
 
