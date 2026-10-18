@@ -10,7 +10,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - AI engine is user-selectable in Settings (`Sources/Models/AIEngine.swift`, `ENGINES` in `engine.js`): Nimble proxy (default, free), Claude, OpenAI, Ollama. Keys stay on device (prefs file / localStorage), calls go straight to the vendor; no key = silent fallback to the proxy
 - DuckDuckGo Instant Answer API + Wikipedia REST API as fallback
 - macOS window is borderless (`styleMask = [.resizable, .fullSizeContentView]`), dropping `.titled` is what removes the titlebar strip; do not restore it
-- Tests at 6.15.0: 298 web (`npm test`: 297 pass, 1 skipped, 0 fail); 227 Swift tests, all run with `xcodebuild test` (0 failures, 1 skipped); 171 `@Test` in `kmp/` (`:shared:jvmTest` runs on this Mac, 171 pass, and in CI)
+- Tests at 6.30.0: 309 web (`npm test`, 0 fail); 228 Swift tests, all run with `xcodebuild test` (0 failures, 1 skipped); 171 `@Test` in `kmp/` (`:shared:jvmTest` runs on this Mac, 171 pass, and in CI)
 
 ## Structure
 - `Sources/Models/QueryEngine.swift`: classification, math eval, API queries
@@ -21,7 +21,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - `worker/worker.js`: answer proxy, `npx wrangler deploy` from `worker/`
 - `docs/`: landing page with the live engine (`engine.js`), deployed via Cloudflare Pages to `nimble.jaybulb.com`; the full web app is `docs/app.html`, served at `/app`
 - `docs/index.html`: marketing/landing page, deployed via GitHub Pages (default `nulljosh.github.io/nimble` URL, the custom domain is taken by the web app)
-- `Tests/`: 218 Swift test functions (see the count under Stack); `test/`: 295 web tests
+- `Tests/`: the Swift tests (count under Stack); `test/`: the web tests
 
 ## The loop
 

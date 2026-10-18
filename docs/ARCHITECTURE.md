@@ -60,7 +60,7 @@ Answer pipeline:
 | `docs/devices.css` | CSS for device frames in mockups (iphone, android, windows, mac windows) |
 | `Tests/` | QueryEngine (30 tests: arithmetic, functions, edge cases), Preferences (4 tests), AIConfig (2 tests) |
 | `Package.swift` | Swift Package manifest: macOS/iOS targets, SwiftTUI for TUI variant |
-| `worker/worker.js` | Cloudflare Worker answer proxy: calls Workers AI (Gemma + Qwen3 in parallel), synthesizes on disagreement |
+| `worker/worker.js` | Cloudflare Worker answer proxy: asks Groq's free models first, then Workers AI (Qwen3, with Gemma and Llama on time-sensitive or clashing answers); caches answers and keeps the day's counts in a Durable Object |
 | `kmp/composeApp/src/*/` | Android/desktop Kotlin Multiplatform: common SearchScreen, platform-specific entry points |
 | `kmp/shared/src/commonMain/.../Cards.kt` | Etymology, weather, local time and currency cards: the four gates, pure card builders, and `CardClient` (Ktor, Open-Meteo, Frankfurter with the open.er-api fallback, wordroot); same wording as `engine.js` and `QueryEngine+Cards.swift` |
 | `kmp/shared/src/{jvmMain,androidMain}/.../ZonedClock.kt` | `zonedClock` actuals: wall time and day in a geocoded zone through java.time |
@@ -85,7 +85,7 @@ Answer pipeline:
 | `scripts/bump-version.sh` | Version bump utility: updates MARKETING_VERSION in project.yml and version badges in README/CLAUDE across macOS, iOS, and web app repos |
 | `scripts/release-macos.sh` | macOS release build: archives, Developer ID-signs, notarizes with Apple, staples the ticket, and zips for GitHub release (gatekeeper-opens-on-first-launch) |
 | `vite.config.js` | Vite config for web app builds (if applicable) |
-| `wrangler.toml` | Cloudflare Worker config for the answer proxy |
+| `worker/wrangler.jsonc` | Cloudflare Worker config for the answer proxy |
 | `project.yml` | Project configuration (if using xcodegen) |
 
 ## Query classification
@@ -101,7 +101,7 @@ Math evaluation uses a hand-written lexer + recursive-descent parser (replacing 
 ## AI engine selection
 
 Four engines available:
-- **Nimble** (default): Cloudflare Worker + Workers AI (Gemma + Qwen3), free, no API key needed
+- **Nimble** (default): Cloudflare Worker, Groq and Workers AI, free, no API key needed
 - **Claude/OpenAI/Ollama**: user provides API key or local URL; stays on device, never sent to Nimble's servers
 
 Engine choice saved in Preferences and survives app restart. Missing API key = silent fallback to Nimble proxy.
