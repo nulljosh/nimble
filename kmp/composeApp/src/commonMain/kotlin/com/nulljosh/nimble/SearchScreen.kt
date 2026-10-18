@@ -15,6 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
@@ -60,6 +61,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import kotlin.time.Clock
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -291,7 +294,7 @@ private fun RecentList(
                 "Clear",
                 color = theme.muted,
                 fontSize = 12.sp,
-                modifier = Modifier.clickable(onClick = onClear).padding(vertical = 4.dp)
+                modifier = Modifier.clickable(role = Role.Button, onClickLabel = "Clear history", onClick = onClear).padding(vertical = 4.dp)
             )
         }
         for (e in entries) {
@@ -300,7 +303,7 @@ private fun RecentList(
                 color = theme.text,
                 fontSize = 16.sp,
                 maxLines = 1,
-                modifier = Modifier.fillMaxWidth().clickable { onPick(e.q) }.padding(vertical = 10.dp)
+                modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = "Ask again") { onPick(e.q) }.padding(vertical = 10.dp)
             )
         }
     }
@@ -381,7 +384,8 @@ private fun ThemeSwatches(selected: NimbleTheme, onSelect: (NimbleTheme) -> Unit
                         color = if (t == selected) selected.text else selected.muted,
                         shape = CircleShape
                     )
-                    .clickable { onSelect(t) }
+                    .selectable(selected = t == selected, role = Role.RadioButton, onClick = { onSelect(t) })
+                    .semantics { contentDescription = "${t.label} theme" }
             )
         }
     }

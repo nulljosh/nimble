@@ -617,6 +617,7 @@ private struct GraphResultView: View {
 private struct MathResultView: View {
     let value: String
     let steps: [String]
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var appeared = false
     @State private var showSteps = false
 
@@ -631,7 +632,7 @@ private struct MathResultView: View {
                 .scaleEffect(appeared ? 1.0 : 0.88)
                 .opacity(appeared ? 1.0 : 0)
                 .onAppear {
-                    withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true }
+                    if reduceMotion { appeared = true } else { withAnimation(.spring(duration: 0.35, bounce: 0.4)) { appeared = true } }
                 }
             if !steps.isEmpty {
                 DisclosureGroup("Show steps", isExpanded: $showSteps) {
