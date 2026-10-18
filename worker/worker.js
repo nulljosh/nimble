@@ -340,8 +340,12 @@ export default {
     // Public endpoint, and every AI request bills Workers AI. Throttle per client IP.
     // DDG proxying above is free and stays outside the limit: a page load used to spend
     // two of the 20/min on itself and a few reloads knocked the whole engine offline.
+    // A key from API_KEYS (comma-separated secret, issued by hand) gets its own 60/min bucket instead of the IP's 20.
+    const key = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "") || req.headers.get("x-api-key") || "";
+    if (key && !(env.API_KEYS || "").split(",").map((k) => k.trim()).includes(key)) return json({ error: "bad key" }, 401);
     const ip = req.headers.get("cf-connecting-ip") || "unknown";
-    const { success } = await env.RATE_LIMITER.limit({ key: ip });
+    const limiter = key && env.API_LIMITER ? env.API_LIMITER : env.RATE_LIMITER;
+    const { success } = await limiter.limit({ key: key || ip });
     if (!success) return json({ error: "rate limited" }, 429);
 
     let q, turns;
@@ -535,7 +539,7 @@ export default {
 const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, OPTIONS",
-  "access-control-allow-headers": "content-type",
+  "access-control-allow-headers": "content-type, authorization, x-api-key",
 };
 
 // Two models rarely emit byte-identical sentences even when they agree, so lowercase +

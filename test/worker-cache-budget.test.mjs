@@ -385,3 +385,39 @@ test("samantha: an unreachable tunnel falls through to Groq", async () => {
   const { json } = await post("capital of france", { env: { GROQ_KEY: "k", SAMANTHA_URL: "https://samantha.test" } });
   assert.equal(json.source, "Groq");
 });
+
+// ---- public API keys ----------------------------------------------------------------------------
+
+function postKeyed(headers, extra = {}) {
+  installCaches(fakeCaches());
+  const used = [];
+  const env = {
+    RATE_LIMITER: { limit: async () => { used.push("ip"); return { success: true }; } },
+    API_LIMITER: { limit: async ({ key }) => { used.push(`key:${key}`); return { success: true }; } },
+    AI: { run: async () => ({ response: "Paris." }) },
+    API_KEYS: "good1, good2",
+    ...extra,
+  };
+  const req = new Request(`${ORIGIN}/`, { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify({ q: "capital of france" }) });
+  return worker.fetch(req, env).then(async (r) => ({ res: r, json: await r.json(), used }));
+}
+
+test("api key: a listed key (Bearer or x-api-key) is limited in its own bucket, not the IP's", async () => {
+  const a = await postKeyed({ authorization: "Bearer good2" });
+  assert.equal(a.res.status, 200);
+  assert.deepEqual(a.used, ["key:good2"]);
+  const b = await postKeyed({ "x-api-key": "good1" });
+  assert.deepEqual(b.used, ["key:good1"]);
+});
+
+test("api key: an unknown key is refused with 401 before any limit is spent", async () => {
+  const r = await postKeyed({ authorization: "Bearer nope" });
+  assert.equal(r.res.status, 401);
+  assert.deepEqual(r.used, []);
+});
+
+test("api key: no key keeps the per-IP limit, and a key's bucket can run out", async () => {
+  assert.deepEqual((await postKeyed({})).used, ["ip"]);
+  const r = await postKeyed({ "x-api-key": "good1" }, { API_LIMITER: { limit: async () => ({ success: false }) } });
+  assert.equal(r.res.status, 429);
+});
