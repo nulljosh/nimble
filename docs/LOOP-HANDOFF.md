@@ -15,7 +15,7 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 
 ## Next, in order
 
-1. QA loop (Joshua asked 2026-10-18, this overrides "never run npm run exam" while he wants it): run `node test/exam.js` once per slice on a quiet quota day (check /stats first, it costs about 60 neurons per AI question), fix every miss at the root (Worker grounding or engine), add a test, ship. Also tighten loose regexes so a wrong fact (Gregor Robertson as mayor) fails. Grow the exam toward 150 questions.
+1. QA loop (Joshua asked 2026-10-18, this overrides "never run npm run exam" while he wants it): run `node test/exam.js` once per slice on a quiet quota day (check /stats first, it costs about 60 neurons per AI question), fix every miss at the root (Worker grounding or engine), add a test, ship. Also tighten loose regexes so a wrong fact (Gregor Robertson as mayor) fails. The exam now has about 160 questions (round 5 added 66 stable-fact ones with tight patterns); it costs roughly 6,000 neurons, so run it once, right after the daily quota reset, and never twice in a day.
 2. Read /stats once per tick (2026-10-18: 6180 of 8500 neurons used after the exam; no AI runs until the 17:00 PDT reset). Kotlin has no sourcesFor/onTopic at all, so Android shows no Sources row: port it from docs/engine.js with a jvmTest (CI-only).
 3. Then v9: the brew tap is live (github.com/nulljosh/homebrew-nimble, formula pins a release tarball: bump url and sha256 each release that touches the CLI). The extension is in extension/; submit it to the Chrome and Firefox stores.
 

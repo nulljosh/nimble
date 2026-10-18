@@ -1,4 +1,4 @@
-// The question exam: ~95 live questions across math, units, science, history, politics, definitions,
+// The question exam: ~150 live questions across math, units, science, history, politics, definitions,
 // sites, geography, people, tech and live cards, graded by regex. Hits the real sources, so it is
 // not part of `npm test`.  Run:  npm run exam   (ENGINE=samantha npm run exam grades Samantha on :8000)
 // Free-engine questions are paced 3.2s apart: the proxy allows 20 AI calls a minute per IP.
@@ -33,6 +33,13 @@ const Q=[
  ["who wrote pride and prejudice",/Austen/],["who composed the four seasons",/Vivaldi/],["who directed jaws",/Spielberg/],["what year did the beatles break up",/1970/],
  ["who is the ceo of tesla",/Musk/],["who created python",/van Rossum|Rossum/],["what does cpu stand for",/central processing unit/i],["who founded microsoft",/Gates|Allen/],["what is http",/hypertext|protocol/i],
  ["who is the governor general of canada",/\w+/],["who is the mayor of vancouver",/\w+/],["who won the last super bowl",/\w+/],["who is the secretary general of the un",/\w+/],
+ // round 5: stable facts, tight patterns, to reach 150. A wrong fact must fail, so none of these accept a bare \w+.
+ ["what is the powerhouse of the cell",/mitochondri/i],["chemical symbol for sodium",/\bNa\b/],["how many days in a leap year",/366/],["what planet is the red planet",/Mars/],["what is the ph of pure water",/\b7\b/],["who developed general relativity",/Einstein/],["atomic number of oxygen",/\b8\b/],["how many teeth does an adult have",/\b32\b/],["absolute zero in celsius",/-273/],["largest organ of the human body",/skin/i],["nearest star to earth",/\bSun\b/i],
+ ["who was the first emperor of rome",/Augustus/],["when did world war 1 start",/1914/],["when did the soviet union collapse",/1991/],["when was the magna carta signed",/1215/],["who was british prime minister during world war 2",/Churchill/],["when did humans first land on the moon",/1969/],["who discovered america in 1492",/Columbus/],
+ ["capital of brazil",/Bras[ií]lia/],["capital of egypt",/Cairo/],["capital of italy",/Rome/],["capital of germany",/Berlin/],["capital of spain",/Madrid/],["capital of india",/Delhi/],["capital of south korea",/Seoul/],["capital of argentina",/Buenos Aires/],["capital of turkey",/Ankara/],["capital of new zealand",/Wellington/],["deepest ocean trench",/Mariana/],["smallest country in the world",/Vatican/],["longest river in europe",/Volga/],["how many states in the usa",/\b50\b|fifty/i],["how many provinces does canada have",/\b10\b|ten/i],["tallest mountain on earth",/Everest/],
+ ["who wrote 1984",/Orwell/],["who wrote the odyssey",/Homer/],["who painted starry night",/Gogh/],["who composed the ninth symphony",/Beethoven/],["who directed the godfather",/Coppola/],["who sculpted david",/Michelangelo/],["who wrote the great gatsby",/Fitzgerald/],["who wrote harry potter",/Rowling/],["who wrote war and peace",/Tolstoy/],
+ ["what does html stand for",/hypertext markup/i],["who created javascript",/Eich/],["what does ram stand for",/random access memory/i],["who founded amazon",/Bezos/],["who founded google",/Page|Brin/],["what does gpu stand for",/graphics processing unit/i],
+ ["10 in binary",/1010/],["255 in hex",/\bFF\b/i],["12 squared",/^144$/],["cube root of 27",/^3$/],["20% of 150",/^30$/],["100 km to miles",/62\.1/],["5 feet to cm",/152/],["1 kg to lbs",/2\.2/],["32 F to C",/\b0\b/],["1 gallon to liters",/3\.78/],
  // identity
  ["who made you",/Trommel/],
 ];
