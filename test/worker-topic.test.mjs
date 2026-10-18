@@ -189,6 +189,9 @@ test("who-is questions search for the current holder", async () => {
   const { searchTerm } = await import("../worker/worker.js");
   assert.equal(searchTerm("who is the prime minister of canada"), "current prime minister of canada");
   assert.equal(searchTerm("Who is the mayor of Vancouver?"), "current mayor of Vancouver");
+  assert.equal(searchTerm("tallest mountain"), "tallest mountain on Earth");
+  assert.equal(searchTerm("what is the tallest mountain on mars"), "what is the tallest mountain on mars");
+  assert.equal(searchTerm("tallest mountain in the solar system"), "tallest mountain in the solar system");
   assert.equal(searchTerm("who was the first prime minister of canada"), "who was the first prime minister of canada");
   assert.equal(searchTerm("who is the first man on the moon"), "who is the first man on the moon");
 });

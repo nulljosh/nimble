@@ -13,13 +13,16 @@ const groqParams = (model) => (model.startsWith("qwen/") ? { reasoning_format: "
 // House model: Qwen3 30B bills 4,625 neurons per M input tokens, Gemma 4 26B 9,091 (Workers AI pricing, Oct 2026).
 // Input dominates here (grounding plus question), so Qwen is the one asked first and alone.
 const SYSTEM =
-  "Answer in one short factual sentence. No preamble, no markdown. If you do not know, reply exactly UNKNOWN.";
+  "Answer in one short factual sentence. No preamble, no markdown. Assume Earth and our own Sun unless the question names another world or star. If you do not know, reply exactly UNKNOWN.";
 // Model weights are frozen at their training cutoff, so "who is the current president"
 // came back "Joe Biden". Ground every question in live Wikipedia intros plus today's date
 // and tell the models the context beats their memory.
 // ponytail: top-3 search intros, swap for a real search API if Wikipedia misses too often
 // "who is the prime minister of canada" finds the list and history pages, which bury the holder; "current ..." finds the page that names them.
-export const searchTerm = (q) => (/^who (is|are) (?!(the )?(current|first|last|former|next|youngest|oldest)\b)/i.test(q.trim()) ? q.trim().replace(/^who (is|are) (the )?/i, "current ").replace(/\?$/, "") : q);
+const whoTerm = (q) => (/^who (is|are) (?!(the )?(current|first|last|former|next|youngest|oldest)\b)/i.test(q.trim()) ? q.trim().replace(/^who (is|are) (the )?/i, "current ").replace(/\?$/, "") : q);
+// "tallest mountain" finds the Solar System list and its Olympus Mons; a superlative landform means Earth unless the question names another world.
+const earthTerm = (q) => (/\b(tallest|highest|biggest|largest|longest|deepest) (mountain|volcano|canyon|waterfall)\b/i.test(q) && !/\b(mars|venus|moon|lunar|solar system|jupiter|mercury|planet|titan|io)\b/i.test(q) ? `${q.trim().replace(/\?$/, "")} on Earth` : q);
+export const searchTerm = (q) => earthTerm(whoTerm(q));
 async function freshContext(q, attempt = 0) {
   try {
     const r = await fetch(

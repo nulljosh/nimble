@@ -12,7 +12,7 @@ const Q=[
  // units
  ["10 km to miles",/6\.21/],["180 C to F",/356/],["3 cups to ml",/70[0-9]/],["500 MB to GB",/0\.5/],["100 lbs to kg",/45\.3/],["1 mile in feet",/5280/],
  // science
- ["atomic number of carbon",/\b6\b/],["speed of light",/299[ ,]?792|3 ?× ?10|300,?000/],["boiling point of water in celsius",/100/],["how many planets in the solar system",/\b8\b|eight/i],["what is DNA",/deoxyribonucleic|genetic/i],["chemical symbol for gold",/\bAu\b/],["what is photosynthesis",/light|plant|energy/i],["how many bones in the human body",/206/],
+ ["atomic number of carbon",/\b6\b/],["speed of light",/299[ ,]?792|3 ?× ?10|300,?000/],["boiling point of water in celsius",/100/],["how many planets in the solar system",/\b8\b|eight/i],["what is DNA",/deoxyribonucleic|genetic|double helix|nucleotide/i],["chemical symbol for gold",/\bAu\b/],["what is photosynthesis",/light|plant|energy/i],["how many bones in the human body",/206/],
  // history
  ["when did world war 2 end",/1945/],["who was the first president of the united states",/Washington/],["when was the declaration of independence signed",/1776/],["who built the pyramids",/Egypt/i],["when did the berlin wall fall",/1989/],["who discovered penicillin",/Fleming/],["when did canada become a country",/1867/],
  // politics / current (2026)
