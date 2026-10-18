@@ -13,12 +13,20 @@ Ship Nimble one small slice per version, toward v10 and then v20. Each slice is 
 - QA: `-shot*` launch flags sandbox all storage. On iPhone, `-shotHistory YES` and `-shotSettings YES` open those tabs. The web uses Playwright with a static server on a fresh port. measure4 checks spacing, taps and contrast, but it misses duplicate or hidden controls, so read every shot by eye.
 - roadmap.md carries another session's unstaged edit, and many of its checkboxes are stale. Read it, verify against the code, and never stage it.
 
+## Roadmap to v10 (set 2026-10-18)
+
+- **v7 Reliability.** Read Groq's real daily caps in its console, a KV counter so /stats is global, burst handling (the rare "none" when every Groq model 429s), p50/p95 per source on /stats, a shorter prompt (trim the Wikipedia context) to stretch every free cap. Kotlin gets the on-device onTopic port and the source-topic fix.
+- **v8 Everywhere.** A real Android emulator pass (needs the SDK), real Windows and Linux runs from the Desktop screenshots workflow, native accessibility audit (VoiceOver, Dynamic Type, reduced motion), Kotlin mascot assets and settings screen, more languages, extension store submissions (Joshua's accounts).
+- **v9 Our own model.** Samantha (or the Turing model) in the answer chain: first benchmark it against Groq on the exam (local 9B scored 147 of 154 vs Groq 150), then a tunnel to the Mini or on-device shipping. Public API with a free key tier, brew tap and CLI kept in step.
+- **v10 Launch.** A 1000-question benchmark published with its method, README, whitepaper and landing rebuilt around the numbers, the price decision (free vs $0.99, Joshua's call), launch posts.
+
+Each major is a bundle of minors, one slice per version, same release flow. Roadmap.md is stale and untouched.
+
 ## Next, in order
 
-1. QA loop (Joshua asked 2026-10-18, this overrides "never run npm run exam" while he wants it): run `node test/exam.js` once per slice (LAST=N runs only the newest N, to fit a partial day) on a quiet quota day (check /stats first, it costs about 60 neurons per AI question), fix every miss at the root (Worker grounding or engine), add a test, ship. Also tighten loose regexes so a wrong fact (Gregor Robertson as mayor) fails. The exam now has about 160 questions (round 5 added 66 stable-fact ones with tight patterns); it costs roughly 6,000 neurons, so run it once, right after the daily quota reset, and never twice in a day.
-2. Kotlin UI polish (QA 2026-10-18, desktop app graded C+ on this Mac with `./gradlew :composeApp:run`): the field is a bare underline, History is an outlined box, seven colour dots crowd the header, the title is left-aligned over a big blank, no brand yellow Ask button, no capsule controls. Bring it to the web's A- look: 48dp capsule field with a leading magnifier and a yellow Ask pill, one radius set, an 8dp grid, no theme dots on the main screen (move to Settings). Real Linux and Windows renders come from the manual `Desktop screenshots` workflow (Actions > Run workflow, about 6 minutes, download the two artifacts); both passed by eye at 6.20.0. Android still needs an SDK plus emulator for a real device pass. Nim is the mascot now (6.21.0).
-3. Read /stats once per tick (2026-10-18: 6180 of 8500 neurons used after the exam; no AI runs until the 17:00 PDT reset). Android shows the Worker's `sources` (6.19.0); the on-device onTopic port for the DDG and Wikipedia fallback path is still open.
-4. Then v9: the brew tap is live (github.com/nulljosh/homebrew-nimble, formula pins a release tarball: bump url and sha256 each release that touches the CLI). The extension is in extension/; submit it to the Chrome and Firefox stores.
+1. Start v7: read Groq's real caps (console.groq.com, Joshua is logged in), then trim the grounding context and re-run the exam; run `LAST=N node test/exam.js` or the full exam once per slice (Groq caps are separate from Cloudflare's, but a full run still burns about 110k Groq tokens).
+2. Kotlin: source-topic port, theme swatches into Settings.
+3. Read /stats once per tick.
 
 Already in the code, so don't rebuild: Why this answer, follow-ups, step math, multiple sources, the News, Markets and Sports cards, the offline pack, Private mode, Listen, the voice loop, Ask Nimble from every platform's share sheet, Siri and Shortcuts.
 
