@@ -1,18 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Nim, Nimble's mascot">
   <!-- Nim: a calm, confident East Asian woman, drawn reductively. Circles and one curve each where a line will do.
-       Sleek black hair with curtain bangs, a red mandarin-collar top with gold piping, gold hoops as the one brand accent, a knowing half smile.
+       Sleek black hair with curtain bangs, a leather jacket over a black top, a thin choker, gold hoops as the one brand accent, a knowing half smile.
        Nimble palette plus skin, no gradients, no text. Not a likeness of anyone. -->
   <!-- hair, back: a rounded cap that falls straight past the shoulders -->
   <path d="M60 108 A 60 60 0 0 1 180 108 L 184 240 L 56 240 Z" fill="#1a1412"/>
-  <!-- a mandarin-collar top in brand yellow, with a frog knot at the shoulder -->
-  <path d="M40 240 C 40 194, 76 186, 120 186 C 164 186, 200 194, 200 240 Z" fill="#c8102e"/>
+  <!-- a plain black top -->
+  <path d="M40 240 C 40 194, 76 186, 120 186 C 164 186, 200 194, 200 240 Z" fill="#1f1b16"/>
   <!-- neck -->
   <rect x="104" y="140" width="32" height="40" rx="16" fill="#f3d3b3"/>
-  <path d="M98 168 L 142 168 L 142 184 C 142 192, 134 196, 120 196 C 106 196, 98 192, 98 184 Z" fill="#c8102e"/>
-  <path d="M98 168 L 142 168 L 142 184 C 142 192, 134 196, 120 196 C 106 196, 98 192, 98 184 Z" fill="none" stroke="#ffca30" stroke-width="2.5"/>
-  <path d="M120 196 C 128 204, 144 206, 160 206" fill="none" stroke="#ffca30" stroke-width="2.5" stroke-linecap="round"/>
-  <circle cx="146" cy="203" r="3.5" fill="#ffca30"/>
-  <circle cx="160" cy="206" r="3.5" fill="#ffca30"/>
+  <!-- leather jacket: two panels, open lapels, a thin zip line, a gold stud -->
+  <path d="M30 240 C 30 200, 62 186, 98 184 L 112 240 Z" fill="#2b2622"/>
+  <path d="M210 240 C 210 200, 178 186, 142 184 L 128 240 Z" fill="#2b2622"/>
+  <path d="M98 184 L 114 214 L 104 224 L 88 196 Z" fill="#3a332d"/>
+  <path d="M142 184 L 126 214 L 136 224 L 152 196 Z" fill="#3a332d"/>
+  <path d="M120 218 L 120 240" stroke="#3a332d" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="92" cy="206" r="2.5" fill="#ffca30"/>
+  <!-- choker: a thin black band with one tiny charm -->
+  <path d="M104 160 Q 120 166 136 160" fill="none" stroke="#1f1b16" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="120" cy="167" r="2.5" fill="#ffca30"/>
   <!-- face: one circle -->
   <circle cx="120" cy="108" r="52" fill="#f3d3b3"/>
   <!-- side locks: one sweep each side, from the temple down past the ear -->
@@ -40,5 +45,5 @@
   <path d="M78 112 L 84 116 Q 101 108 118 116" fill="none" stroke="#1a1412" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M122 116 Q 139 108 156 116 L 162 112" fill="none" stroke="#1a1412" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
   <!-- mouth: a knowing half smile, a touch to one side -->
-  <path d="M108 141 Q 122 136 134 140 Q 124 150 108 141 Z" fill="#c8102e"/>
+  <path d="M108 141 Q 122 136 134 140 Q 124 150 108 141 Z" fill="#7a1f3d"/>
 </svg>
