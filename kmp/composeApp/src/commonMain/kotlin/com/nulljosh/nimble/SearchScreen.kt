@@ -92,6 +92,7 @@ fun SearchScreen(
         val saved = loadThemeName()?.let { n -> NimbleTheme.entries.firstOrNull { it.name == n } }
         mutableStateOf(saved ?: if (systemDark) NimbleTheme.Night else NimbleTheme.Yellow)
     }
+    SystemBarsStyle(theme.isDark)
     var query by remember { mutableStateOf("") }
     var answer by remember { mutableStateOf<Answer?>(null) }
     var loading by remember { mutableStateOf(false) }
