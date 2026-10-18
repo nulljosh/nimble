@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -505,6 +506,16 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                         Spacer(Modifier.height(12.dp))
                     }
                     Text("Source: ${answer.source}", color = theme.muted, fontSize = 12.sp)
+                    // Up to two linked pages the answer's own words match, one 48dp tap row each, names only.
+                    answer.sources.forEach { src ->
+                        Text(
+                            src.name,
+                            color = theme.muted,
+                            fontSize = 12.sp,
+                            textDecoration = TextDecoration.Underline,
+                            modifier = Modifier.defaultMinSize(minHeight = 48.dp).clickable { uriHandler.openUri(src.url) }.wrapContentHeight(Alignment.CenterVertically),
+                        )
+                    }
                     answer.grounding?.let {
                         Spacer(Modifier.height(8.dp))
                         WhyThisAnswer(it, answer.sourceUrl, theme)

@@ -135,4 +135,13 @@ class RichResultsTest {
         assertNull(foreign.sourceUrl)
         assertNull(foreign.photoCredit)
     }
+
+    @Test
+    fun proxyAnswerReadsLinkedSources() {
+        val a = proxyAnswer(
+            """{"answer":"Paris.","source":"Qwen","sources":[{"name":"Wikipedia","url":"https://en.wikipedia.org/wiki/Paris"},{"name":"Bad","url":"http://x.test"},{"name":"Wikipedia","url":"https://en.wikipedia.org/wiki/Paris"}]}"""
+        )!!
+        // One https source, deduped; the plain-http one is dropped.
+        assertEquals(listOf(DisputeSource("Wikipedia", "https://en.wikipedia.org/wiki/Paris")), a.sources)
+    }
 }

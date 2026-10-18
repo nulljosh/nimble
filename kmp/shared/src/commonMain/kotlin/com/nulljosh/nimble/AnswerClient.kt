@@ -46,6 +46,8 @@ sealed class Answer {
         val background: Boolean = false,
         /** When a live text answer was fetched, for a time-sensitive question. Null for timeless answers and the offline pack (its source line has the pack date). */
         val asOf: Freshness? = null,
+        /** Up to two linked sources the worker names for an AI answer (its own words backed by a Wikipedia page). Empty otherwise. */
+        val sources: List<DisputeSource> = emptyList(),
     ) : Answer()
     /** "news" or "what's happening in <place>": up to three headlines from the worker's RSS route. */
     data class News(val items: List<NewsItem>, val source: String, val asOf: Freshness? = null) : Answer()
@@ -365,6 +367,10 @@ internal fun proxyAnswer(body: String): Answer.Text? {
         photoUrl = photo,
         photoCredit = title?.takeIf { photo != null }?.let { "$it \u00B7 Wikipedia" },
         grounding = title?.let { t -> d.refs.orEmpty().firstOrNull { it.url == url }?.extract?.takeIf { it.isNotBlank() } },
+        sources = d.sources.orEmpty().mapNotNull { r ->
+            val u = r.url?.takeIf { it.startsWith("https://") } ?: return@mapNotNull null
+            DisputeSource(r.name?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null, u)
+        }.distinctBy { it.url }.take(2),
     )
 }
 
@@ -376,6 +382,7 @@ private data class ProxyReply(
     val topic: String? = null,
     val topicUrl: String? = null,
     val refs: List<ProxyRef>? = null,
+    val sources: List<ProxySource>? = null,
     val aiError: String? = null,
     /** Set only when the two house models clash and no source settles it. The live Worker does not send it yet. */
     val disagree: Boolean? = null,
@@ -425,6 +432,9 @@ internal fun backsAnswer(body: String, text: String): Boolean {
     val nums = Regex("[0-9]+").findAll(body).map { it.value }.toList()
     return hits >= ceil(want.size * 0.6).toInt() && nums.all { text.contains(it) }
 }
+
+@Serializable
+private data class ProxySource(val name: String? = null, val url: String? = null)
 
 @Serializable
 private data class ProxyRef(val title: String? = null, val url: String? = null, val extract: String? = null)
