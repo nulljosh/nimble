@@ -144,4 +144,16 @@ class RichResultsTest {
         // One https source, deduped; the plain-http one is dropped.
         assertEquals(listOf(DisputeSource("Wikipedia", "https://en.wikipedia.org/wiki/Paris")), a.sources)
     }
+
+    /** What the live Worker actually sends: `refs`, no `sources`. */
+    @Test
+    fun proxyAnswerBuildsSourcesFromWorkerRefs() {
+        val a = proxyAnswer(
+            """{"answer":"Paris.","source":"Groq","topic":"Paris","topicUrl":"https://en.wikipedia.org/wiki/Paris","refs":[{"title":"Paris","url":"https://en.wikipedia.org/wiki/Paris","extract":"Paris is the capital of France."},{"title":"France","url":"https://en.wikipedia.org/wiki/France","extract":"x"},{"title":"Third","url":"https://en.wikipedia.org/wiki/Third","extract":"y"}]}"""
+        )!!
+        assertEquals(
+            listOf(DisputeSource("Paris", "https://en.wikipedia.org/wiki/Paris"), DisputeSource("France", "https://en.wikipedia.org/wiki/France")),
+            a.sources,
+        )
+    }
 }

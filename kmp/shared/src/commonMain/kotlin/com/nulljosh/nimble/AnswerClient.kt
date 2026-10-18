@@ -367,7 +367,8 @@ internal fun proxyAnswer(body: String): Answer.Text? {
         photoUrl = photo,
         photoCredit = title?.takeIf { photo != null }?.let { "$it \u00B7 Wikipedia" },
         grounding = title?.let { t -> d.refs.orEmpty().firstOrNull { it.url == url }?.extract?.takeIf { it.isNotBlank() } },
-        sources = d.sources.orEmpty().mapNotNull { r ->
+        // The live Worker sends `refs` (pages that back the answer), not `sources`; the web builds its row from refs the same way.
+        sources = d.sources.orEmpty().ifEmpty { d.refs.orEmpty().map { ProxySource(it.title, it.url) } }.mapNotNull { r ->
             val u = r.url?.takeIf { it.startsWith("https://") } ?: return@mapNotNull null
             DisputeSource(r.name?.takeIf { it.isNotEmpty() } ?: return@mapNotNull null, u)
         }.distinctBy { it.url }.take(2),
