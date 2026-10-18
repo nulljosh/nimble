@@ -4,7 +4,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v6.26.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v6.26.1-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -36,7 +36,7 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 
 1. Units, math and graphs: evaluated on the device. `5 miles to km`, `15% of 240`, `plot sin(x)`.
 2. Dictionary, weather, local time and currency: pattern-gated live sources.
-3. Everything else: Qwen3 answers first on Cloudflare Workers AI through `worker/worker.js`. Gemma joins for time-sensitive, date and number questions, and when Qwen says UNKNOWN. When the two split, a third model breaks the tie. If nothing agrees, the app shows "Sources disagree" with both answers and their model names. Known answers are cached for six hours, and a daily neuron guard keeps the free tier from running out. Both models give up and Wikipedia answers.
+3. Everything else: `worker/worker.js` asks Groq's free models first (gpt-oss 120B, then Qwen 27B, then gpt-oss 20B) and Cloudflare Workers AI second (Qwen3, then Gemma for time-sensitive, date and number questions). When two models split, a third breaks the tie. If nothing agrees, the app shows "Sources disagree" with both answers and their model names. Known answers are cached for six hours, a daily neuron guard protects the Cloudflare free tier, and `GET /stats` shows both providers' usage. If every model is out, Wikipedia answers.
 
 Agents get the same engine at `https://nimble.jaybulb.com/api/answer?q=5+miles+to+km` and over MCP at `https://nimble.jaybulb.com/mcp`. Tools: answer, convert, math, graph.
 

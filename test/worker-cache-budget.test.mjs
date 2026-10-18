@@ -304,3 +304,12 @@ test("groq: /stats counts every Groq request and every refusal", async () => {
   assert.equal(j.groqCalls, 2);
   assert.equal(j.groqRefused, 1);
 });
+
+test("groq: a short retry-after is waited out and the same model answers", async () => {
+  installCaches(fakeCaches());
+  let n = 0;
+  const seen = stubGroq(() => (++n === 1 ? new Response("{}", { status: 429, headers: { "retry-after": "0" } }) : groqSays("Paris.")));
+  const { json } = await post("capital of france", { env: { GROQ_KEY: "k" } });
+  assert.equal(json.source, "Groq");
+  assert.deepEqual(seen, ["openai/gpt-oss-120b", "openai/gpt-oss-120b"]);
+});

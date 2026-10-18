@@ -374,15 +374,26 @@ export default {
           return "UNKNOWN";
         });
     // The free Groq models in order. Null when there is no key or every model refused (cap, error), so Workers AI takes over.
+    const groqCall = (model) => {
+      counts.groqCalls++;
+      return fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { authorization: `Bearer ${env.GROQ_KEY}`, "content-type": "application/json" },
+        body: JSON.stringify({ model, messages, temperature: 0, ...groqParams(model) }),
+      });
+    };
     const askGroq = async () => {
       for (const model of GROQ_MODELS) {
         try {
-          counts.groqCalls++;
-          const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: { authorization: `Bearer ${env.GROQ_KEY}`, "content-type": "application/json" },
-            body: JSON.stringify({ model, messages, temperature: 0, ...groqParams(model) }),
-          });
+          let r = await groqCall(model);
+          // A per-minute cap clears in seconds: wait out a short retry-after once before giving the model up.
+          const ra = r.headers.get("retry-after");
+          const wait = ra == null ? NaN : Number(ra);
+          if (r.status === 429 && wait >= 0 && wait <= 3) {
+            counts.groqRefused++;
+            await new Promise((ok) => setTimeout(ok, wait * 1000));
+            r = await groqCall(model);
+          }
           if (!r.ok) { counts.groqRefused++; continue; }
           const d = await r.json();
           // gpt-oss italicizes titles (*War and Peace*); the answer is plain text.
