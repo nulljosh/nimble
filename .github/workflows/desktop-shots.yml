@@ -42,8 +42,8 @@ jobs:
         working-directory: kmp
         shell: pwsh
         run: |
-          Start-Process -FilePath ./gradlew.bat -ArgumentList ':composeApp:run','--console=plain' -RedirectStandardOutput ../run.log -NoNewWindow
-          Start-Sleep -Seconds 150
+          Start-Process -FilePath ./gradlew.bat -ArgumentList ':composeApp:run','--console=plain' -RedirectStandardOutput ../run.log -WindowStyle Hidden
+          Start-Sleep -Seconds 240
           Add-Type -AssemblyName System.Windows.Forms,System.Drawing
           $b = [System.Windows.Forms.SystemInformation]::VirtualScreen
           $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
