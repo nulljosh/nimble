@@ -428,23 +428,38 @@ export default {
         body: JSON.stringify({ model, messages, temperature: 0, ...groqParams(model) }),
       });
     };
+    // One model: its answer, or null when it refused (cap, error). A bare 429 with no retry-after is a per-minute burst.
+    let burst = false;
+    const tryGroq = async (model) => {
+      try {
+        let r = await groqCall(model);
+        // A per-minute cap clears in seconds: wait out a short retry-after once before giving the model up.
+        const ra = r.headers.get("retry-after");
+        const wait = ra == null ? NaN : Number(ra);
+        if (r.status === 429 && wait >= 0 && wait <= 3) {
+          counts.groqRefused++;
+          await new Promise((ok) => setTimeout(ok, wait * 1000));
+          r = await groqCall(model);
+        }
+        if (r.status === 429 && Number.isNaN(wait)) burst = true;
+        if (!r.ok) { counts.groqRefused++; return null; }
+        const d = await r.json();
+        // gpt-oss italicizes titles (*War and Peace*); the answer is plain text.
+        return cleanReply((d?.choices?.[0]?.message?.content || "").replace(/\*/g, ""));
+      } catch {
+        return null;
+      }
+    };
     const askGroq = async () => {
       for (const model of GROQ_MODELS) {
-        try {
-          let r = await groqCall(model);
-          // A per-minute cap clears in seconds: wait out a short retry-after once before giving the model up.
-          const ra = r.headers.get("retry-after");
-          const wait = ra == null ? NaN : Number(ra);
-          if (r.status === 429 && wait >= 0 && wait <= 3) {
-            counts.groqRefused++;
-            await new Promise((ok) => setTimeout(ok, wait * 1000));
-            r = await groqCall(model);
-          }
-          if (!r.ok) { counts.groqRefused++; continue; }
-          const d = await r.json();
-          // gpt-oss italicizes titles (*War and Peace*); the answer is plain text.
-          return cleanReply((d?.choices?.[0]?.message?.content || "").replace(/\*/g, ""));
-        } catch {}
+        const a = await tryGroq(model);
+        if (a !== null) return a;
+      }
+      // Every model refused with a bare 429: a burst, not the day's cap. One breath, then the first model once more,
+      // so a few simultaneous questions do not all land on Workers AI (or on the resting note past its budget).
+      if (burst) {
+        await new Promise((ok) => setTimeout(ok, Number(env.GROQ_BURST_WAIT_MS ?? 2000)));
+        return tryGroq(GROQ_MODELS[0]);
       }
       return null;
     };

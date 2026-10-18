@@ -269,8 +269,8 @@ test("groq: with a key, Groq answers first and Workers AI is never called", asyn
 test("groq: every model capped falls back to Qwen on Workers AI", async () => {
   installCaches(fakeCaches());
   const seen = stubGroq(() => new Response("{}", { status: 429 }));
-  const { json, calls } = await post("capital of france", { env: { GROQ_KEY: "k" }, answers: { [QWEN]: "Paris." } });
-  assert.equal(seen.length, 3);
+  const { json, calls } = await post("capital of france", { env: { GROQ_KEY: "k", GROQ_BURST_WAIT_MS: 0 }, answers: { [QWEN]: "Paris." } });
+  assert.equal(seen.length, 4, "three models, then one more try on the first after the burst wait");
   assert.equal(json.source, "Qwen");
   assert.deepEqual(calls, [QWEN]);
 });
@@ -340,4 +340,23 @@ test("global counter: a broken binding never breaks an answer", async () => {
   const COUNTS = { idFromName: () => { throw new Error("down"); }, get: () => { throw new Error("down"); } };
   const { json } = await post("capital of france", { answers: { [QWEN]: "Paris is the capital of France." }, env: { COUNTS } });
   assert.match(json.answer, /Paris/);
+});
+
+test("groq: a burst (every model 429 with no retry-after) gets one more try on the first model before Workers AI", async () => {
+  installCaches(fakeCaches());
+  let n = 0;
+  const seen = stubGroq(() => (++n <= 3 ? new Response("{}", { status: 429 }) : groqSays("Paris.")));
+  const { json, calls } = await post("capital of france", { env: { GROQ_KEY: "k", GROQ_BURST_WAIT_MS: 0 }, answers: { [QWEN]: "Paris from Qwen." } });
+  assert.equal(seen.length, 4);
+  assert.equal(seen[3], seen[0]);
+  assert.equal(json.source, "Groq");
+  assert.deepEqual(calls, []);
+});
+
+test("groq: a daily cap (429 with a long retry-after) is not retried as a burst", async () => {
+  installCaches(fakeCaches());
+  const seen = stubGroq(() => new Response("{}", { status: 429, headers: { "retry-after": "3600" } }));
+  const { json } = await post("capital of france", { env: { GROQ_KEY: "k", GROQ_BURST_WAIT_MS: 0 }, answers: { [QWEN]: "Paris." } });
+  assert.equal(seen.length, 3);
+  assert.equal(json.source, "Qwen");
 });
