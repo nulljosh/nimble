@@ -210,14 +210,14 @@ test("the resting reply is never cached", async () => {
   assert.equal([...c.m.keys()].filter((k) => k.includes("/__nimble/answer")).length, 0);
 });
 
-test("GET /stats returns exactly day, aiCalls, cacheHits and estNeurons, with no secrets", async () => {
+test("GET /stats returns exactly the day, the counts and the Groq gauge, with no secrets", async () => {
   const c = fakeCaches();
   installCaches(c);
   await seedToday(c, 10);
   const res = await worker.fetch(new Request(`${ORIGIN}/stats`), { RATE_LIMITER: { limit: async () => ({ success: true }) }, AI: { run: async () => { throw new Error("no AI on /stats"); } } });
   assert.equal(res.status, 200);
   const j = await res.json();
-  assert.deepEqual(Object.keys(j).sort(), ["aiCalls", "cacheHits", "day", "estNeurons"]);
+  assert.deepEqual(Object.keys(j).sort(), ["aiCalls", "cacheHits", "day", "estNeurons", "groqCalls", "groqRefused"]);
   assert.equal(j.day, new Date().toISOString().slice(0, 10));
   assert.equal(j.aiCalls, 10);
   assert.equal(j.estNeurons, 600);
@@ -291,4 +291,16 @@ test("groq: no key, past the budget, still the resting reply", async () => {
   await seedToday(c, 142);
   const { json } = await post("capital of france");
   assert.equal(json.resting, true);
+});
+
+test("groq: /stats counts every Groq request and every refusal", async () => {
+  const c = fakeCaches();
+  installCaches(c);
+  let n = 0;
+  stubGroq(() => (++n === 1 ? new Response("{}", { status: 429 }) : groqSays("Paris.")));
+  await post("capital of france", { env: { GROQ_KEY: "k" } });
+  const res = await worker.fetch(new Request(`${ORIGIN}/stats`), { RATE_LIMITER: { limit: async () => ({ success: true }) } });
+  const j = await res.json();
+  assert.equal(j.groqCalls, 2);
+  assert.equal(j.groqRefused, 1);
 });

@@ -191,9 +191,10 @@ export const overBudget = (c) => estNeurons(c.aiCalls) > BUDGET_NEURONS;
 // The Cache API is per data center and per Worker version, so every count and cached answer here is
 // best effort: a colo only sees its own traffic. A global count needs a KV namespace (see wrangler.jsonc).
 const store = () => globalThis.caches?.default ?? null;
-let mem = { day: "", aiCalls: 0, cacheHits: 0 };
+const fresh = (day = "") => ({ day, aiCalls: 0, cacheHits: 0, groqCalls: 0, groqRefused: 0 });
+let mem = fresh();
 export function _resetForTests() {
-  mem = { day: "", aiCalls: 0, cacheHits: 0 };
+  mem = fresh();
 }
 async function cacheGet(key) {
   try {
@@ -213,23 +214,26 @@ async function cachePut(key, body, ttl) {
 // Today's counts: this isolate's numbers, raised to whatever the Cache API holds for today.
 async function loadCounts(origin) {
   const day = dayKey();
-  if (mem.day !== day) mem = { day, aiCalls: 0, cacheHits: 0 };
+  if (mem.day !== day) mem = fresh(day);
   const text = await cacheGet(statsUrl(origin, day));
   try {
     const s = JSON.parse(text || "{}");
     mem.aiCalls = Math.max(mem.aiCalls, Number(s.aiCalls) || 0);
     mem.cacheHits = Math.max(mem.cacheHits, Number(s.cacheHits) || 0);
+    mem.groqCalls = Math.max(mem.groqCalls, Number(s.groqCalls) || 0);
+    mem.groqRefused = Math.max(mem.groqRefused, Number(s.groqRefused) || 0);
   } catch {
     // unreadable counter: keep the isolate's own numbers
   }
   return mem;
 }
 async function saveCounts(origin, c) {
-  await cachePut(statsUrl(origin, c.day), { aiCalls: c.aiCalls, cacheHits: c.cacheHits }, 2 * 86400);
+  await cachePut(statsUrl(origin, c.day), { aiCalls: c.aiCalls, cacheHits: c.cacheHits, groqCalls: c.groqCalls, groqRefused: c.groqRefused }, 2 * 86400);
 }
 async function statsReply(origin) {
   const c = await loadCounts(origin);
-  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls) });
+  // groqCalls counts every request sent to Groq, groqRefused the ones it turned away (cap or error): the capacity gauge.
+  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused });
 }
 
 export default {
@@ -373,12 +377,13 @@ export default {
     const askGroq = async () => {
       for (const model of GROQ_MODELS) {
         try {
+          counts.groqCalls++;
           const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: { authorization: `Bearer ${env.GROQ_KEY}`, "content-type": "application/json" },
             body: JSON.stringify({ model, messages, temperature: 0, ...groqParams(model) }),
           });
-          if (!r.ok) continue;
+          if (!r.ok) { counts.groqRefused++; continue; }
           const d = await r.json();
           // gpt-oss italicizes titles (*War and Peace*); the answer is plain text.
           return cleanReply((d?.choices?.[0]?.message?.content || "").replace(/\*/g, ""));
