@@ -360,3 +360,28 @@ test("groq: a daily cap (429 with a long retry-after) is not retried as a burst"
   assert.equal(seen.length, 3);
   assert.equal(json.source, "Qwen");
 });
+
+test("samantha: with SAMANTHA_URL set she answers first and Groq is never asked", async () => {
+  installCaches(fakeCaches());
+  let groqAsked = false;
+  globalThis.fetch = async (url) => {
+    if (String(url).startsWith("https://samantha.test/")) return groqSays("Paris.");
+    if (String(url).startsWith("https://api.groq.com/")) { groqAsked = true; return groqSays("Lyon."); }
+    return new Response(JSON.stringify({ query: { pages: [] } }), { status: 200 });
+  };
+  const { json } = await post("capital of france", { env: { GROQ_KEY: "k", SAMANTHA_URL: "https://samantha.test" } });
+  assert.equal(json.answer, "Paris.");
+  assert.equal(json.source, "Samantha");
+  assert.equal(groqAsked, false);
+});
+
+test("samantha: an unreachable tunnel falls through to Groq", async () => {
+  installCaches(fakeCaches());
+  globalThis.fetch = async (url) => {
+    if (String(url).startsWith("https://samantha.test/")) throw new Error("tunnel down");
+    if (String(url).startsWith("https://api.groq.com/")) return groqSays("Paris.");
+    return new Response(JSON.stringify({ query: { pages: [] } }), { status: 200 });
+  };
+  const { json } = await post("capital of france", { env: { GROQ_KEY: "k", SAMANTHA_URL: "https://samantha.test" } });
+  assert.equal(json.source, "Groq");
+});

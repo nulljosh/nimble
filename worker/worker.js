@@ -463,6 +463,24 @@ export default {
       }
       return null;
     };
+    // Samantha, the local 9B model, when SAMANTHA_URL (a tunnel to the Mini's oMLX) is set. Null on any error or
+    // timeout, so Groq takes over the moment the Mini is off.
+    const askSamantha = async () => {
+      try {
+        const r = await fetch(`${env.SAMANTHA_URL}/v1/chat/completions`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ model: "Qwen3.5-9B-OptiQ-4bit", messages, temperature: 0, max_tokens: 80, chat_template_kwargs: { enable_thinking: false } }),
+          signal: AbortSignal.timeout(Number(env.SAMANTHA_TIMEOUT_MS ?? 8000)),
+        });
+        if (!r.ok) return null;
+        const d = await r.json();
+        const a = cleanReply((d?.choices?.[0]?.message?.content || "").replace(/\*/g, ""));
+        return a === "UNKNOWN" ? null : a;
+      } catch {
+        return null;
+      }
+    };
     const cleanReply = (text) => {
       // Models narrate the grounding ("not mentioned in the provided reference") instead of
       // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
@@ -483,6 +501,8 @@ export default {
     // One house model first. The second model runs only when the first gave no answer, or when the question
     // is time-sensitive, asks a date, or has a number: the cases where a "Sources disagree" card is worth a call.
     // Groq answers first when it can; past the Workers AI estimate its answer (or UNKNOWN) is final.
+    const samantha = env.SAMANTHA_URL ? await askSamantha() : null;
+    if (samantha !== null) return finish({ answer: samantha, source: "Samantha" });
     const groq = env.GROQ_KEY ? await askGroq() : null;
     if (groq === null && overBudget(counts)) return resting();
     const [first, house] = groq !== null ? [groq, "Groq"] : [await askCounted(QWEN), "Qwen"];
