@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: 22}
       - run: node test/exam.js | tee exam.txt
+      - run: CAP=200 node test/exam-1000.js | tee -a exam.txt
       - if: failure()
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |

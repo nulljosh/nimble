@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Nimble",
-  "version": "8.4.0",
+  "version": "9.1.0",
   "description": "Select text or press Alt+N, get the one-sentence answer.",
   "action": { "default_popup": "popup.html", "default_icon": "icon.png" },
   "icons": { "128": "icon.png" },

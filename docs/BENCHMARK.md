@@ -24,6 +24,12 @@ Free-engine questions are paced 3.2 seconds apart because the proxy allows 20 AI
 
 Since the Groq run: the model is now asked the same Earth rewrite the search uses, and the exam accepts Proxima or the Sun. 154 of 154 is confirmed after the cached "tallest mountain" answer expires, then this table gets a new row.
 
+## The 1,000-question exam
+
+`test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
+
+First run, 2026-10-18: offline half 810 of 810; a 60-question AI slice (dates and facts) 60 of 60.
+
 ## What it does not measure
 
-Speed is not in the exam. Live latency is at `/stats` on the Worker: Groq answers in about 650 ms at the median. The exam is also ours, so it can flatter us. The 1,000-question exam (slice 9.1) is the fix.
+Speed is not in the exam. Live latency is at `/stats` on the Worker: Groq answers in about 650 ms at the median. The exam is also ours, so it can flatter us. The 1,000-question exam is the start of the fix; its facts are still ours.
