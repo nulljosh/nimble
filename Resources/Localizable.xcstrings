@@ -1299,61 +1299,61 @@
         }
       }
     },
-    "Send your question to an AI service?": {
+    "Use AI to answer?": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Send your question to an AI service?"
+            "value": "Use AI to answer?"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Envoyer votre question à un service d'IA ?"
+            "value": "Utiliser l'IA pour répondre ?"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "¿Enviar tu pregunta a un servicio de IA?"
+            "value": "¿Usar IA para responder?"
           }
         },
         "zh": {
           "stringUnit": {
             "state": "translated",
-            "value": "把你的问题发送给 AI 服务？"
+            "value": "使用 AI 来回答？"
           }
         },
         "pa": {
           "stringUnit": {
             "state": "translated",
-            "value": "ਕੀ ਤੁਹਾਡਾ ਸਵਾਲ ਕਿਸੇ AI ਸੇਵਾ ਨੂੰ ਭੇਜਣਾ ਹੈ?"
+            "value": "ਕੀ ਜਵਾਬ ਲਈ AI ਵਰਤਣੀ ਹੈ?"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Frage an einen KI-Dienst senden?"
+            "value": "KI zum Antworten nutzen?"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Enviar sua pergunta a um serviço de IA?"
+            "value": "Usar IA para responder?"
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "क्या आपका सवाल किसी AI सेवा को भेजें?"
+            "value": "जवाब के लिए AI इस्तेमाल करें?"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "質問をAIサービスに送信しますか？"
+            "value": "回答にAIを使いますか？"
           }
         }
       }

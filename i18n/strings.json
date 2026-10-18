@@ -255,17 +255,17 @@
     "hi": "जवाब देने से पहले",
     "ja": "回答の前に"
   },
-  "Send your question to an AI service?": {
-    "en": "Send your question to an AI service?",
-    "fr": "Envoyer votre question à un service d'IA ?",
-    "es": "¿Enviar tu pregunta a un servicio de IA?",
-    "zh": "把你的问题发送给 AI 服务？",
-    "pa": "ਕੀ ਤੁਹਾਡਾ ਸਵਾਲ ਕਿਸੇ AI ਸੇਵਾ ਨੂੰ ਭੇਜਣਾ ਹੈ?",
+  "Use AI to answer?": {
+    "en": "Use AI to answer?",
+    "fr": "Utiliser l'IA pour répondre ?",
+    "es": "¿Usar IA para responder?",
+    "zh": "使用 AI 来回答？",
+    "pa": "ਕੀ ਜਵਾਬ ਲਈ AI ਵਰਤਣੀ ਹੈ?",
     "review": true,
-    "de": "Frage an einen KI-Dienst senden?",
-    "pt": "Enviar sua pergunta a um serviço de IA?",
-    "hi": "क्या आपका सवाल किसी AI सेवा को भेजें?",
-    "ja": "質問をAIサービスに送信しますか？"
+    "de": "KI zum Antworten nutzen?",
+    "pt": "Usar IA para responder?",
+    "hi": "जवाब के लिए AI इस्तेमाल करें?",
+    "ja": "回答にAIを使いますか？"
   },
   "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.": {
     "en": "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.",

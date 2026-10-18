@@ -47,7 +47,7 @@ struct WatchAsk: View {
 
     private func consentCard(for held: String?) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Send your question to an AI service?").font(.headline)
+            Text("Use AI to answer?").font(.headline)
             Text("Nimble sends your question text, and nothing else, to \(recipient). No account or personal data, and no record is kept.")
                 .font(.footnote)
             Button("Allow") { consent = 1; holding = nil; if let held { ask(held) } }

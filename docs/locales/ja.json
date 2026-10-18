@@ -21,7 +21,7 @@
   "Click to turn AI answers off": "クリックでAI回答をオフ",
   "Click to turn AI answers on": "クリックでAI回答をオン",
   "Before I answer": "回答の前に",
-  "Send your question to an AI service?": "質問をAIサービスに送信しますか？",
+  "Use AI to answer?": "回答にAIを使いますか？",
   "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.": "Nimbleは質問のテキストだけを{s}に送ります。アカウントや個人情報は送らず、記録も残しません。設定でいつでも変更できます。",
   "powered by {s}": "{s} 搭載",
   "Allow": "許可",

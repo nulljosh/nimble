@@ -21,7 +21,7 @@
   "Click to turn AI answers off": "AI जवाब बंद करने के लिए क्लिक करें",
   "Click to turn AI answers on": "AI जवाब चालू करने के लिए क्लिक करें",
   "Before I answer": "जवाब देने से पहले",
-  "Send your question to an AI service?": "क्या आपका सवाल किसी AI सेवा को भेजें?",
+  "Use AI to answer?": "जवाब के लिए AI इस्तेमाल करें?",
   "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.": "Nimble आपके सवाल का सिर्फ़ टेक्स्ट {s} को भेजता है, और कुछ नहीं। कोई खाता या निजी डेटा नहीं, और कोई रिकॉर्ड नहीं रखा जाता। आप इसे कभी भी सेटिंग्स में बदल सकते हैं।",
   "powered by {s}": "{s} द्वारा संचालित",
   "Allow": "अनुमति दें",

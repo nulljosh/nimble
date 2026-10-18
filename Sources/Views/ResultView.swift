@@ -502,7 +502,7 @@ struct ConsentCard: View {
         return VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 16) {
                 Eyebrow(text: "Before I answer")
-                Text("Send your question to an AI service?")
+                Text("Use AI to answer?")
                     .font(.nimbleSubheadBold)
                     .foregroundStyle(Color.soft)
                 Text("Nimble sends your question text, and nothing else, to \(state.aiRecipient). No account or personal data, and no record is kept. Change this any time in settings.")
