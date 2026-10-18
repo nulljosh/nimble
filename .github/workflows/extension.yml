@@ -1,0 +1,24 @@
+# The browser extension zip, built on every published release and attached to it, so the Chrome and Firefox
+# store uploads are one download away. Store submission itself needs the owner's accounts.
+name: extension
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: scripts/build-extension.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nimble-extension
+          path: nimble-extension.zip
+      - name: Attach to the release
+        if: github.event_name == 'release'
+        run: gh release upload "${{ github.event.release.tag_name }}" nimble-extension.zip --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}

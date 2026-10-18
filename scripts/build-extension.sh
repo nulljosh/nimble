@@ -3,7 +3,8 @@
 set -e
 cd "$(dirname "$0")/.."
 V=$(awk -F'"' '/MARKETING_VERSION/ {print $2; exit}' project.yml)
-sed -i '' "s/\"version\": \".*\"/\"version\": \"$V\"/" extension/manifest.json
+# node, not sed -i: BSD and GNU sed disagree on the flag, and CI runs this on Linux.
+node -e 'const f="extension/manifest.json",fs=require("fs");fs.writeFileSync(f,fs.readFileSync(f,"utf8").replace(/"version": "[^"]*"/,`"version": "${process.argv[1]}"`))' "$V"
 cp docs/engine.js extension/engine.js
 (cd extension && zip -qr ../nimble-extension.zip . -x README.md)
 echo "nimble-extension.zip ($V)"
