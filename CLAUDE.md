@@ -25,7 +25,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 
 ## The loop
 
-See `docs/LOOP-HANDOFF.md` (current state at 6.0.0, 2026-10-12). The loop shipped five majors 1.0 to 5.0 in one session, then 6.0.0 on top of 5.23.1: the three-tab iPhone, History, sources disagree, sports and markets cards, freshness lines, the offline Wikipedia pack on four platforms, and a quota-aware Worker. Open: query QA in roadmap.md, three merged remote branches Joshua has to delete, and the zero-issue goal; no blockers.
+See `docs/LOOP-HANDOFF.md` (current state at 8.0.0, 2026-10-18). v8 (Everywhere) is closed: 7.1 to 7.5 are tagged, the browser extension zip is attached to every release by CI, and nine languages run on every platform. Open: the v8.0.0 tag once CI is green, the full exam at 154 of 154 after 17:00 PDT then 7.0.0, and the zero-issue goal; Joshua owns the store submissions and the real-device walk.
 
 ## QA
 QA hooks always sandbox storage: any `-shot*` or `-qaSandbox` launch arg moves history, prefs, the shared answer suite and iCloud sync to a fresh temp root (`Sources/Models/QASandbox.swift`). Never launch the real app bundle for QA against real data.
