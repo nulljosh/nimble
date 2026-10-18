@@ -52,7 +52,7 @@ async function freshContext(q, attempt = 0) {
       };
       return [...lead, ...sents.slice(4).filter(keep)].join(" ");
     };
-    return { text: pages.map((p) => `${p.title}: ${trim(p.extract)}`).join("\n\n").slice(0, 6000), pages: sorted };
+    return { text: pages.map((p) => `${p.title}: ${trim(p.extract)}`.slice(0, 1000)).join("\n\n").slice(0, 2800), pages: sorted };
   } catch {
     return { text: "", pages: [] };
   }
