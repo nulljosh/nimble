@@ -1,6 +1,16 @@
 package com.nulljosh.nimble
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -174,31 +184,19 @@ fun SearchScreen(
 
         Spacer(Modifier.height(20.dp))
 
-        TextField(
-            value = query,
-            onValueChange = {
+        SearchField(
+            query = query,
+            onChange = {
                 query = it
                 if (it.isBlank()) answer = null
             },
-            placeholder = { Text(placeholder, color = theme.muted, fontSize = 18.sp) },
-            singleLine = true,
-            textStyle = LocalTextStyle.current.copy(fontSize = 20.sp),
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { submit() }),
+            placeholder = placeholder,
+            theme = theme,
+            onSubmit = { submit() },
             // The mic sits at the trailing edge; the first transcript fills the field and runs.
-            trailingIcon = if (voice != null) {
+            mic = if (voice != null) {
                 { MicButton(theme.muted) { voice.listen { heard -> speakNext = true; submit(heard) } } }
             } else null,
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent,
-                focusedTextColor = theme.text,
-                unfocusedTextColor = theme.text,
-                cursorColor = theme.accent,
-                focusedIndicatorColor = theme.accent,
-                unfocusedIndicatorColor = theme.muted,
-            ),
-            modifier = Modifier.fillMaxWidth()
         )
 
         // The tools row: History always; New question once an answer is on screen.
@@ -260,7 +258,7 @@ internal fun ToolButton(label: String, theme: NimbleTheme, onClick: () -> Unit) 
     Box(
         Modifier
             .defaultMinSize(minHeight = 48.dp)
-            .border(1.dp, theme.muted, RoundedCornerShape(12.dp))
+            .border(1.dp, theme.hairline, CircleShape)
             .clickable(role = Role.Button, onClickLabel = label, onClick = onClick)
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center,
@@ -305,13 +303,75 @@ private fun RecentList(
     }
 }
 
+/**
+ * The question field: a 56dp glass-free capsule (surface fill, hairline edge, accent ring on focus), a drawn
+ * magnifier at the start, the mic and a yellow Ask pill at the end. Same shape as the web's `.field`.
+ */
+@Composable
+private fun SearchField(
+    query: String,
+    onChange: (String) -> Unit,
+    placeholder: String,
+    theme: NimbleTheme,
+    onSubmit: () -> Unit,
+    mic: (@Composable () -> Unit)?,
+) {
+    val source = remember { MutableInteractionSource() }
+    val focused by source.collectIsFocusedAsState()
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 56.dp)
+            .background(theme.surface, CircleShape)
+            .border(if (focused) 2.dp else 1.dp, if (focused) theme.accent else theme.hairline, CircleShape)
+            .padding(start = 20.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Canvas(Modifier.size(20.dp)) {
+            val w = 2.5.dp.toPx()
+            drawCircle(theme.accent, radius = size.width * 0.34f, center = Offset(size.width * 0.42f, size.height * 0.42f), style = Stroke(w))
+            drawLine(theme.accent, Offset(size.width * 0.68f, size.height * 0.68f), Offset(size.width * 0.92f, size.height * 0.92f), w, StrokeCap.Round)
+        }
+        Spacer(Modifier.width(12.dp))
+        BasicTextField(
+            value = query,
+            onValueChange = onChange,
+            singleLine = true,
+            textStyle = TextStyle(color = theme.text, fontSize = 18.sp),
+            cursorBrush = SolidColor(theme.accent),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSubmit() }),
+            interactionSource = source,
+            modifier = Modifier.weight(1f),
+            decorationBox = { inner ->
+                Box(contentAlignment = Alignment.CenterStart) {
+                    if (query.isEmpty()) Text(placeholder, color = theme.muted, fontSize = 18.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    inner()
+                }
+            },
+        )
+        mic?.invoke()
+        Spacer(Modifier.width(8.dp))
+        Box(
+            Modifier
+                .defaultMinSize(minWidth = 64.dp, minHeight = 48.dp)
+                .background(NimbleTheme.Yellow.accent, CircleShape)
+                .clickable(role = Role.Button, onClickLabel = "Ask", onClick = onSubmit)
+                .padding(horizontal = 20.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text("Ask", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+        }
+    }
+}
+
 @Composable
 private fun ThemeSwatches(selected: NimbleTheme, onSelect: (NimbleTheme) -> Unit) {
-    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         for (t in NimbleTheme.entries) {
             Box(
                 Modifier
-                    .size(18.dp)
+                    .size(24.dp)
                     .background(t.accent, CircleShape)
                     .border(
                         width = if (t == selected) 2.dp else 1.dp,
