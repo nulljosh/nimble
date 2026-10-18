@@ -22,6 +22,8 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 
 ## Get it
 
+[Watch the 23 second promo](docs/promo/nimble-promo.mp4).
+
 | | |
 |---|---|
 | iPhone and Mac | [App Store](https://apps.apple.com/app/nimble-answers/id6807858746) |
