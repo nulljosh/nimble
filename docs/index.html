@@ -19,7 +19,6 @@
 <meta name="theme-color" content="">
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="tokens.css">
-<link rel="stylesheet" href="devices.css">
 <style>
 @font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
 @font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-Medium.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
@@ -214,21 +213,10 @@ a:hover { text-decoration: underline; }
   min-height: 420px;
   display: flex; flex-direction: column;
 }
-.hero .device { margin: var(--s5) auto var(--s3); }
-/* ponytail: on phones the 280px frame is taller than the viewport; tighten the header and scale the frame so it fits under the tagline. */
-@media (max-height: 820px) and (max-width: 600px) {
-  .hero p { margin-bottom: var(--s3); }
-  .hero .device { margin: 0 auto var(--s3); }
-  .hero .device-iphone, .hero .device-android { --device-w: min(280px, calc(58svh * 9 / 19.5)); }
-}
-.device-screen { display: flex; flex-direction: column; }
-.hero .mockup, .mockup { flex: 1; border-radius: 0; min-height: 0; margin: 0; }
-.device-mac, .device-windows { --device-w: 480px; }
-.device-mac .mockup, .device-windows .mockup { min-height: 300px; }
-.mockup-status { display: flex; align-items: center; justify-content: space-between; padding: var(--space-4) var(--space-6) var(--space-1); font-size: var(--fs-13); font-weight: 600; color: var(--panel-text); }
-.mockup-status span:last-child { font-size: var(--fs-13); color: var(--panel-mid); letter-spacing: 2px; }
+/* No device frame: the real app sits directly under the tagline, one 28px card. */
+.demo-wrap { width: min(100%, 480px); margin: var(--space-6) auto var(--space-3); }
+.hero .mockup, .mockup { flex: 1; border-radius: 28px; min-height: 320px; margin: 0; box-shadow: 0 8px 24px rgba(0,0,0,.08); }
 .mockup-result { flex: 1; }
-.device-mac .mockup-status, .device-windows .mockup-status { display: none; }
 .hero .demo-caption { font-family: var(--font); font-variant: normal; text-transform: none; letter-spacing: normal; font-size: var(--fs-13); color: var(--on-yellow-mid); max-width: none; margin: var(--s2) auto 0; }
 .demo-caption a { color: inherit; text-decoration: underline; }
 
@@ -382,7 +370,7 @@ main > section:not(.hero) h2 {
   text-align: center;
   margin-bottom: var(--space-7);
 }
-@media (max-width: 600px) { main > section:not(.hero) { padding: var(--s5) 0; } .hero-copy { padding-top: var(--s5); } .hero { padding-bottom: var(--s4); } .hero .device { margin-top: var(--s3); } }
+@media (max-width: 600px) { main > section:not(.hero) { padding: var(--s5) 0; } .hero-copy { padding-top: var(--s5); } .hero { padding-bottom: var(--s4); } }
 
 .features .container { max-width: var(--max-wide); }
 .features-grid {
@@ -516,10 +504,8 @@ footer {
       <a href="/app" class="btn btn-dark" data-i18n="Open the web app">Open the web app</a>
       <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-outline" data-asset="macOS.zip" id="dl" data-i18n="Download for Mac">Download for Mac</a>
     </div>
-    <div class="device device-iphone" id="demoFrame" data-title="Nimble">
-    <div class="device-screen">
+    <div class="demo-wrap">
     <form class="mockup" id="demo" autocomplete="off">
-      <div class="mockup-status" aria-hidden="true"><span>9:41</span><span>&#9679;&#9679;&#9679;&#9679;</span></div>
       <div class="mockup-bar">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="stroke:var(--yellow-deep)" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <div class="mockup-field">
@@ -535,8 +521,7 @@ footer {
       <div class="mockup-credit" id="demoC">live demo, the real engine</div>
     </form>
     </div>
-    </div>
-    <p class="demo-caption">Fig. 1 &middot; The <span id="demoDev">iPhone</span> app, running the real engine. Type anything.</p>
+    <p class="demo-caption">The real engine, running right here. Type anything.</p>
   </div>
 </section>
 
@@ -706,8 +691,6 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
 (function(){
   var tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
   var names={iphone:'iPhone',android:'Android',mac:'Mac',windows:'Windows'}, dev=document.documentElement.dataset.device;
-  document.getElementById('demoDev').textContent=names[dev]||'iPhone';
-  document.getElementById('demoFrame').className='device device-'+(names[dev]?dev:'iphone');
   var b=document.getElementById('dl');
   if(dev==='windows'){b.dataset.i18n='Download for Windows';b.textContent=I18N.t('Download for Windows');b.dataset.asset='.msi';}
   else if(dev==='android'){b.dataset.i18n='Download for Android';b.textContent=I18N.t('Download for Android');b.dataset.asset='.apk';}
