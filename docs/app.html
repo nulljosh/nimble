@@ -64,9 +64,13 @@ h1 { font-size: var(--fs-28); font-weight: 700; letter-spacing: var(--tracking-t
 form { position: relative; }
 .field {
   display: flex; align-items: center; gap: var(--space-3);
-  background: var(--color-bg2); border: 1px solid var(--line); border-radius: 999px;
+  /* Liquid glass: translucent, blurred, a bright top edge and a soft drop shadow. */
+  background: color-mix(in srgb, var(--color-bg2) 60%, transparent); border: 1px solid var(--line); border-radius: 999px;
+  -webkit-backdrop-filter: blur(30px) saturate(190%); backdrop-filter: blur(30px) saturate(190%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 8px 24px rgba(0,0,0,.08);
   padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
 }
+@media (prefers-color-scheme: dark) { .field { box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 8px 24px rgba(0,0,0,.35); } }
 .field svg { flex: none; }
 .field input {
   flex: 1; min-width: 0; min-height: 44px; border: 0; background: none;
@@ -74,9 +78,9 @@ form { position: relative; }
 }
 /* The ring sits on the whole field, not the text inside it. */
 .field input:focus-visible { outline: none; }
-.field:focus-within { border-color: var(--yellow-deep); box-shadow: 0 0 0 2px var(--yellow-deep); }
+.field:focus-within { border-color: var(--yellow-deep); box-shadow: 0 0 0 2px var(--yellow-deep), 0 8px 24px rgba(0,0,0,.08); }
 :focus-visible { outline: 2px solid var(--yellow-deep); outline-offset: 2px; }
-.field input::placeholder { color: var(--text-light); }
+.field input::placeholder { color: var(--text-light); text-overflow: ellipsis; }
 .mic {
   flex: none; display: grid; place-items: center; width: 44px; height: 44px; margin: 0 calc(-1 * var(--space-1)); padding: 0;
   border: 0; border-radius: var(--radius-sm); background: none; color: var(--text-light); cursor: pointer;
@@ -253,7 +257,6 @@ form { position: relative; }
 <div class="scrim" id="scrim" aria-hidden="true"></div>
 <main>
 <div id="ask">
-  <h1 data-i18n="Ask anything.">Ask anything.</h1>
   <form id="f" autocomplete="off">
     <label class="field">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="color:var(--yellow-deep)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -467,6 +470,12 @@ var T=I18N.t;
       b.onclick=function(){ run(s); }; chips.appendChild(b);
     });
     q.placeholder=list[6]||q.placeholder;
+    // No heading: the placeholder cycles through example questions until something is typed.
+    var cur=q.placeholder, n=7;
+    if(!matchMedia('(prefers-reduced-motion: reduce)').matches) setInterval(function(){
+      if(q.value||document.hidden||q.placeholder!==cur) return;
+      cur=q.placeholder=list[n++%list.length];
+    },3500);
   }).catch(function(){});
   if(location.search.indexOf('seed=1')>-1) ['5 miles to km','capital of Canada','sqrt(144)'].forEach(function(s){ hist.add(s); }); // screenshots only
   paintRecent();

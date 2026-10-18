@@ -7,8 +7,8 @@ settings:
     # and signing fails with "requires a development team".
     DEVELOPMENT_TEAM: QMM486NPYC
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "6.17.2"
-    CURRENT_PROJECT_VERSION: "50"
+    MARKETING_VERSION: "6.18.0"
+    CURRENT_PROJECT_VERSION: "51"
 targets:
   Nimble:
     type: application

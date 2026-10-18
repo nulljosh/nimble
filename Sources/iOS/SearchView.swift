@@ -14,14 +14,8 @@ struct SearchView: View {
             VStack(spacing: 0) {
                 ScrollView {
                     VStack(spacing: 0) {
-                        Text("Ask anything.")
-                            .font(.nimbleTitle)
-                            .tracking(-0.56)
-                            .foregroundStyle(Color.text)
-                            .frame(maxWidth: .infinity)
-                            .accessibilityAddTraits(.isHeader)
-                            .padding(.top, 28)
-                            .padding(.bottom, 24)
+                        // No heading: the field's placeholder cycles through example questions until you type.
+                        Color.clear.frame(height: 28)
 
                         searchField
 
@@ -144,7 +138,7 @@ struct SearchView: View {
                     .foregroundStyle(.black)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 9)
-                    .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
+                    .glass(in: Capsule(), tint: .bulb)
                     .minimumTapTarget()
                     .buttonStyle(.plain)
                     .accessibilityLabel("Ask")
@@ -153,12 +147,15 @@ struct SearchView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color.bg2))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(isInputFocused ? Color.bulbDeep : Color.hairline, lineWidth: isInputFocused ? 2 : 1)
-        )
+        .glass(in: fieldShape(stacked: stacked))
+        .overlay {
+            // The glass has its own edge; only focus draws a ring.
+            if isInputFocused { fieldShape(stacked: stacked).stroke(Color.bulbDeep, lineWidth: 2) }
+        }
     }
+
+    /// A capsule on one line; a rounded block when the field stacks its buttons below.
+    private func fieldShape(stacked: Bool) -> AnyShape { stacked ? AnyShape(RoundedRectangle(cornerRadius: 24)) : AnyShape(Capsule()) }
 
     /// Starter questions until there is history, then the last eight searches.
     @ViewBuilder

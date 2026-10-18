@@ -405,8 +405,10 @@ final class AppState {
     }
 
     private func startPlaceholderTimer() {
-        placeholderTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { [weak self] _ in
+        placeholderTimer = Timer.scheduledTimer(withTimeInterval: 4, repeats: true) { [weak self] _ in
             Task { @MainActor in
+                // The example questions stand in for a heading, so they keep changing until a question is typed.
+                guard self?.queryText.isEmpty == true else { return }
                 self?.rotatePlaceholder()
             }
         }

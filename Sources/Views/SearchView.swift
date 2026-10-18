@@ -157,11 +157,11 @@ struct SearchView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color.bg2))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(isInputFocused ? Color.bulbDeep : Color.hairline, lineWidth: isInputFocused ? 2 : 1)
-        )
+        .glass(in: Capsule())
+        .overlay {
+            // The glass has its own edge; only focus draws a ring.
+            if isInputFocused { Capsule().stroke(Color.bulbDeep, lineWidth: 2) }
+        }
     }
 }
 
