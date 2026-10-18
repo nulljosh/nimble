@@ -248,7 +248,7 @@ form { position: relative; }
 <header class="top" id="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
   <button type="button" class="menu-btn" id="menu-btn" aria-controls="nav" aria-expanded="false" aria-label="Menu" data-i18n-aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
-  <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="private"></button><button type="button" id="mascot"></button><button type="button" id="pack-get" data-i18n="Download offline answers">Download offline answers</button><button type="button" id="pack-drop" hidden data-i18n="Remove offline pack">Remove offline pack</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
+  <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="private"></button><button type="button" id="mascot"></button><button type="button" id="shape"></button><button type="button" id="pack-get" data-i18n="Download offline answers">Download offline answers</button><button type="button" id="pack-drop" hidden data-i18n="Remove offline pack">Remove offline pack</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
 <div class="scrim" id="scrim" aria-hidden="true"></div>
 <main>
@@ -359,7 +359,7 @@ var T=I18N.t;
   async function shareAnswer(){
     if(!last) return;
     try{
-      var blob=await shareImage(last.q,last.a); if(!blob) return;
+      var blob=await shareImage(last.q,last.a,cardShape()); if(!blob) return;
       var file=new File([blob],'nimble-answer.png',{type:'image/png'});
       if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
         try{ await navigator.share({files:[file]}); return; }
@@ -434,6 +434,11 @@ var T=I18N.t;
   }
   paintMascot();
   mascotBtn.addEventListener('click',function(){ mascot(mascot()==='fen'?'flit':'fen'); paintMascot(); });
+  // Share card shape: wide, square or story, a click cycles it.
+  var shapeBtn=document.getElementById('shape'), SHAPES=['wide','square','story'];
+  function paintShape(){ shapeBtn.textContent=T('Card: {s}',{s:T(cardShape()==='wide'?'Wide':cardShape()==='square'?'Square':'Story')}); }
+  paintShape();
+  shapeBtn.addEventListener('click',function(){ cardShape(SHAPES[(SHAPES.indexOf(cardShape())+1)%3]); paintShape(); });
   // The consent card lives inside the result; Allow and Don't allow re-run the same question.
   r.addEventListener('click',function(e){
     var lb=e.target.closest('[data-listen]');

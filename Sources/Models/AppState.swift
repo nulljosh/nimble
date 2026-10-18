@@ -77,6 +77,8 @@ final class AppState {
     var askingAIConsent = false
     /// Which mascot sits in the empty state and the loading card: "flit" (default) or "fen".
     var mascot: String = "flit"
+    /// Shape of the shared answer card: "wide" (default), "square" or "story".
+    var cardShape: String = "wide"
     #if os(macOS)
     #endif
 
@@ -149,6 +151,7 @@ final class AppState {
         ai = p.ai ?? AIConfig()
         aiConsent = p.aiConsent
         mascot = p.mascot ?? "flit"
+        cardShape = p.cardShape ?? "wide"
         privateMode = p.privateMode ?? false
     }
 
@@ -164,7 +167,8 @@ final class AppState {
             ai: ai,
             aiConsent: aiConsent,
             mascot: mascot,
-            privateMode: privateMode
+            privateMode: privateMode,
+            cardShape: cardShape
         )
         prefs.save(p)
         applyLaunchOnStartup()

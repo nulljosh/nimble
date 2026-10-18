@@ -31,4 +31,15 @@ final class ShareCardTests: XCTestCase {
         // Kept in the temp folder so the render can be looked at after a run.
         try data.write(to: FileManager.default.temporaryDirectory.appendingPathComponent("nimble-share-test.png"))
     }
+
+    func testEveryShapeRendersAtItsSize() throws {
+        for shape in ShareCardShape.allCases {
+            let data = try XCTUnwrap(ShareCardRenderer.png(question: "capital of canada", answer: "Ottawa is the capital city of Canada.", source: "Wikipedia", shape: shape))
+            let src = try XCTUnwrap(CGImageSourceCreateWithData(data as CFData, nil))
+            let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(src, 0, nil))
+            XCTAssertEqual(CGFloat(image.width), shape.size.width, "\(shape)")
+            XCTAssertEqual(CGFloat(image.height), shape.size.height, "\(shape)")
+            try data.write(to: FileManager.default.temporaryDirectory.appendingPathComponent("nimble-share-\(shape.rawValue).png"))
+        }
+    }
 }

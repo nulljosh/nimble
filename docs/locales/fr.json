@@ -120,5 +120,10 @@
   "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": "Le mode privé est activé, rien ne quitte cet appareil. Les calculs, unités et graphiques fonctionnent. Téléchargez les réponses hors ligne pour consulter des faits.",
   "Listen": "Écouter",
   "Stop": "Arrêter",
-  "Copy": "Copier"
+  "Copy": "Copier",
+  "Card: {s}": "Carte : {s}",
+  "Wide": "Large",
+  "Square": "Carrée",
+  "Story": "Story",
+  "Card": "Carte"
 }

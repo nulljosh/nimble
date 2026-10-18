@@ -69,6 +69,20 @@ struct SettingsView: View {
                         .accessibilityHidden(true)
                 }
 
+                HStack(spacing: 8) {
+                    Text(String(localized: "Card"))
+                    Spacer()
+                    Picker(String(localized: "Card"), selection: $state.cardShape) {
+                        Text(String(localized: "Wide")).tag("wide")
+                        Text(String(localized: "Square")).tag("square")
+                        Text(String(localized: "Story")).tag("story")
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .frame(width: 210)
+                    .onChange(of: state.cardShape) { state.savePreferences() }
+                }
+
                 Toggle("Offline math", isOn: $state.mathEnabled)
                     .onChange(of: state.mathEnabled) { state.savePreferences() }
 

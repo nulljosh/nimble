@@ -810,5 +810,96 @@
     "es": "No está en el paquete sin conexión. Las matemáticas, unidades y gráficos siguen funcionando sin conexión.",
     "zh": "不在离线包中。数学、单位和图表离线仍可使用。",
     "pa": "Not in the offline pack. Math, units and graphs still work offline."
+  },
+  "Private: on": {
+    "en": "Private: on",
+    "fr": "Privé : oui",
+    "es": "Privado: sí",
+    "zh": "隐私模式：开",
+    "pa": "Private: on"
+  },
+  "Private: off": {
+    "en": "Private: off",
+    "fr": "Privé : non",
+    "es": "Privado: no",
+    "zh": "隐私模式：关",
+    "pa": "Private: off"
+  },
+  "Nothing leaves this device. Click to turn private mode off": {
+    "en": "Nothing leaves this device. Click to turn private mode off",
+    "fr": "Rien ne quitte cet appareil. Cliquez pour désactiver le mode privé",
+    "es": "Nada sale de este dispositivo. Haz clic para desactivar el modo privado",
+    "zh": "没有任何内容离开此设备。点击关闭隐私模式",
+    "pa": "Nothing leaves this device. Click to turn private mode off"
+  },
+  "Click to answer only from this device": {
+    "en": "Click to answer only from this device",
+    "fr": "Cliquez pour répondre uniquement depuis cet appareil",
+    "es": "Haz clic para responder solo desde este dispositivo",
+    "zh": "点击后只在此设备上回答",
+    "pa": "Click to answer only from this device"
+  },
+  "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": {
+    "en": "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.",
+    "fr": "Le mode privé est activé, rien ne quitte cet appareil. Les calculs, unités et graphiques fonctionnent. Téléchargez les réponses hors ligne pour consulter des faits.",
+    "es": "El modo privado está activado, así que nada sale de este dispositivo. Las matemáticas, unidades y gráficos funcionan. Descarga las respuestas sin conexión para consultar datos.",
+    "zh": "隐私模式已开启，没有任何内容离开此设备。数学、单位和图表可用。下载离线答案即可查询事实。",
+    "pa": "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts."
+  },
+  "Listen": {
+    "en": "Listen",
+    "fr": "Écouter",
+    "es": "Escuchar",
+    "zh": "朗读",
+    "pa": "Listen"
+  },
+  "Stop": {
+    "en": "Stop",
+    "fr": "Arrêter",
+    "es": "Detener",
+    "zh": "停止",
+    "pa": "Stop"
+  },
+  "Copy": {
+    "en": "Copy",
+    "fr": "Copier",
+    "es": "Copiar",
+    "zh": "复制",
+    "pa": "ਕਾਪੀ ਕਰੋ"
+  },
+  "Card: {s}": {
+    "en": "Card: {s}",
+    "fr": "Carte : {s}",
+    "es": "Tarjeta: {s}",
+    "zh": "卡片:{s}",
+    "pa": "ਕਾਰਡ: {s}"
+  },
+  "Wide": {
+    "en": "Wide",
+    "fr": "Large",
+    "es": "Ancha",
+    "zh": "宽",
+    "pa": "ਚੌੜਾ"
+  },
+  "Square": {
+    "en": "Square",
+    "fr": "Carrée",
+    "es": "Cuadrada",
+    "zh": "方",
+    "pa": "ਵਰਗ"
+  },
+  "Story": {
+    "en": "Story",
+    "fr": "Story",
+    "es": "Historia",
+    "zh": "竖屏",
+    "pa": "ਸਟੋਰੀ"
+  },
+  "Card": {
+    "en": "Card",
+    "fr": "Carte",
+    "es": "Tarjeta",
+    "zh": "卡片",
+    "pa": "ਕਾਰਡ"
   }
 }

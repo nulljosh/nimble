@@ -808,6 +808,13 @@ function mascot(v){
   try{ return localStorage.getItem("nimble.mascot")==="fen" ? "fen" : "flit"; }
   catch{ return memMascot; }
 }
+// --- Share card shape: wide, square or story. This device only; storage blocked keeps the choice for the page. ---
+let memShape = "wide";
+function cardShape(v){
+  if(v!==undefined){ memShape = v; try{ localStorage.setItem("nimble.shape", v); }catch{} return v; }
+  try{ const s=localStorage.getItem("nimble.shape"); return SHARE_SHAPES[s] ? s : "wide"; }
+  catch{ return memShape; }
+}
 // --- Follow-ups: the last three AI exchanges, memory only, so "and in celsius?" has context ---
 const TURNS_MAX = 3, turnList = [];
 const turns = {
@@ -1221,12 +1228,16 @@ function shareMark(){
     try{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src="icon-512.png"; }catch{ res(null); }
   });
 }
+// The three card shapes: wide for links and feeds, square for posts, story for full-screen. Story keeps clear of the
+// top and bottom strips the story apps cover with their own buttons.
+const SHARE_SHAPES={ wide:{w:1200,h:630,top:72,bottom:72,k:1}, square:{w:1080,h:1080,top:72,bottom:72,k:1.2}, story:{w:1080,h:1920,top:220,bottom:260,k:1.2} };
 // Draws the card on an offscreen canvas. Resolves a PNG Blob, or null where there is no canvas.
-async function shareImage(query, answer){
+async function shareImage(query, answer, shape){
   try{
     const text=shareText(answer);
     if(!text || typeof document==="undefined") return null;
-    const W=1200, H=630, M=72, BOX=W-2*M;
+    const S=SHARE_SHAPES[shape]||SHARE_SHAPES.wide, k=S.k;
+    const W=S.w, H=S.h, M=72, BOX=W-2*M;
     const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
     const ctx=cv.getContext("2d"); if(!ctx) return null;
     const mark=await shareMark();
@@ -1234,13 +1245,15 @@ async function shareImage(query, answer){
     ctx.fillStyle="#ffca30"; ctx.fillRect(0,0,W,H);
     ctx.fillStyle="#000"; ctx.textBaseline="alphabetic"; ctx.textAlign="left";
     // Question: 36px, 400, top-left, two lines at most.
-    ctx.font="400 36px "+SHARE_FONT; spacing(36,0);
+    const qpx=Math.round(36*k), qlh=Math.round(44*k);
+    ctx.font="400 "+qpx+"px "+SHARE_FONT; spacing(qpx,0);
     const q=wrapLines(ctx,query,BOX), qs=q.slice(0,2);
     if(q.length>2){ let l=qs[1]; while(l.length>1 && ctx.measureText(l+"\u2026").width>BOX) l=l.slice(0,-1); qs[1]=l.trimEnd()+"\u2026"; }
-    qs.forEach((l,i)=>ctx.fillText(l,M,M+27+i*44));
+    qs.forEach((l,i)=>ctx.fillText(l,M,S.top+Math.round(27*k)+i*qlh));
     // Answer: up to 96px, 700, tight, centred vertically; shrinks until it fits.
-    const maxH=280, top=H/2; // 160 below the question, 502 above the footer: 280 fits either side of centre
-    let size=96, lines, lh;
+    // Room between the question block and the footer, either side of centre.
+    const maxH=shape==="story"||shape==="square" ? Math.min(H-S.top-S.bottom-2*(qlh*2+60), 1000) : 280, top=H/2;
+    let size=Math.round(96*k), lines, lh;
     for(; size>=28; size-=4){
       ctx.font="700 "+size+"px "+SHARE_FONT; spacing(size,-0.02);
       lines=wrapLines(ctx,text,BOX); lh=Math.round(size*1.1);
@@ -1249,11 +1262,11 @@ async function shareImage(query, answer){
     const y0=top-(lines.length*lh)/2+size*0.82;
     lines.forEach((l,i)=>ctx.fillText(l,M,y0+i*lh));
     // Footer: source small caps bottom-left, the bulb 56px bottom-right.
-    const fy=H-M-28;
+    const fy=H-S.bottom-28;
     spacing(0,0); ctx.fillStyle="rgba(0,0,0,0.6)"; ctx.textBaseline="middle";
     if("fontVariantCaps" in ctx){ ctx.font="500 28px "+SHARE_FONT; ctx.fontVariantCaps="all-small-caps"; spacing(28,0.08); /* font resets the caps variant, so it goes second */ ctx.fillText(shareSource(answer),M,fy); ctx.fontVariantCaps="normal"; }
     else { ctx.font="500 18px "+SHARE_FONT; ctx.fillText(shareSource(answer).toUpperCase(),M,fy); }
-    if(mark){ ctx.imageSmoothingQuality="high"; ctx.drawImage(mark,W-M-56,H-M-56,56,56); }
+    if(mark){ ctx.imageSmoothingQuality="high"; ctx.drawImage(mark,W-M-56,H-S.bottom-56,56,56); }
     return await new Promise(res=>cv.toBlob(b=>res(b||null),"image/png"));
   }catch{ return null; }
 }
@@ -1269,4 +1282,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};

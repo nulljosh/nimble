@@ -120,5 +120,10 @@
   "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": "隐私模式已开启，没有任何内容离开此设备。数学、单位和图表可用。下载离线答案即可查询事实。",
   "Listen": "朗读",
   "Stop": "停止",
-  "Copy": "复制"
+  "Copy": "复制",
+  "Card: {s}": "卡片:{s}",
+  "Wide": "宽",
+  "Square": "方",
+  "Story": "竖屏",
+  "Card": "卡片"
 }

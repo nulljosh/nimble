@@ -19,6 +19,8 @@ struct PreferencesData: Codable {
     var mascot: String? = nil
     /// Private mode: nothing leaves the device. Optional for the same reason as `mascot`.
     var privateMode: Bool? = nil
+    /// Share card shape on the Mac: "wide" (default), "square" or "story". Optional for the same reason as `mascot`.
+    var cardShape: String? = nil
 }
 
 final class Preferences {
