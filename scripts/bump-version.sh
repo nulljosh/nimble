@@ -11,4 +11,5 @@ sed -i '' "s/versionName = \".*\"/versionName = \"$V\"/; s/packageVersion = \".*
 sed -i '' "s/version-v[^-]*-blue/version-v$V-blue/" README.md
 sed -i '' "s/^v[0-9].*/v$V/" CLAUDE.md
 sed -i '' "s/^\*\*v[0-9.]*\*\* | .*/**v$V** | $(date '+%B %Y')/" WHITEPAPER.md
+sed -i "" "s/\"version\": \".*\"/\"version\": \"$V\"/" extension/manifest.json
 git diff --stat

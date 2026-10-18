@@ -25,3 +25,4 @@ signing/
 .asc/dd/
 .build/
 .asc/runs/
+nimble-extension.zip
