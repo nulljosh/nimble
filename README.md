@@ -4,7 +4,7 @@
 
 # Nimble
 
-![version](https://img.shields.io/badge/version-v9.1.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
+![version](https://img.shields.io/badge/version-v9.2.0-blue) [![tests](https://github.com/nulljosh/nimble/actions/workflows/test.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/test.yml) [![exam](https://github.com/nulljosh/nimble/actions/workflows/exam.yml/badge.svg)](https://github.com/nulljosh/nimble/actions/workflows/exam.yml) ![license](https://img.shields.io/badge/license-MIT-green) [![GitHub](https://img.shields.io/badge/GitHub-nulljosh%2Fnimble-black?logo=github)](https://github.com/nulljosh/nimble)
 
 Ask a question. Get one sentence back.
 
@@ -42,9 +42,13 @@ Agents get the same engine at `https://nimble.jaybulb.com/api/answer?q=5+miles+t
 
 Every answer names its source, and time-sensitive answers carry an "as of" line. Light and dark follow the system. 8 accent themes, picked in Settings.
 
+## How good is it
+
+On a 154-question exam, Groq's free models score 152 and the local Samantha model scores 147. A second exam of 1,049 questions runs weekly: math and units are computed and offline (810 of 810), facts are a rotating slice. Method and numbers in [docs/BENCHMARK.md](docs/BENCHMARK.md). The public API, with keys, is in [docs/API.md](docs/API.md).
+
 ## What else it does
 
-Weather, currency, local time, word origins, markets and the latest game score come back as cards. Recent questions sit under the field on every surface and never leave the device. On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer, and you can select several to share or delete. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. Tap Listen to hear any answer read aloud by the device's own voice, on the web, iPhone, Mac and Android. A home screen widget keeps your last answer on iPhone, and "Ask Nimble" works from Siri, Spotlight, Shortcuts and the Action button; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Five languages: English, French, Spanish, Chinese, Punjabi.
+Weather, currency, local time, word origins, markets and the latest game score come back as cards. Recent questions sit under the field on every surface and never leave the device. On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer, and you can select several to share or delete. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. Tap Listen to hear any answer read aloud by the device's own voice, on the web, iPhone, Mac and Android. A home screen widget keeps your last answer on iPhone, and "Ask Nimble" works from Siri, Spotlight, Shortcuts and the Action button; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Nine languages: English, French, Spanish, Chinese, Punjabi, German, Portuguese, Hindi, Japanese. On the Mac or Linux, `brew install nulljosh/nimble/nimble` gives you `nimble "question"` in the terminal. An Apple Watch app and lock screen widgets ship with the iPhone app.
 
 ## Offline pack
 
