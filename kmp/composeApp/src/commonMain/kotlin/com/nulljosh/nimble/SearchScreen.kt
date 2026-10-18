@@ -3,6 +3,7 @@ package com.nulljosh.nimble
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.ui.geometry.Offset
@@ -82,7 +83,8 @@ fun SearchScreen(
     val client = remember { AnswerClient(offlinePack = { packStore?.load() }) }
     val scope = rememberCoroutineScope()
 
-    var theme by remember { mutableStateOf(NimbleTheme.Yellow) }
+    val systemDark = isSystemInDarkTheme()
+    var theme by remember { mutableStateOf(if (systemDark) NimbleTheme.Night else NimbleTheme.Yellow) }
     var query by remember { mutableStateOf("") }
     var answer by remember { mutableStateOf<Answer?>(null) }
     var loading by remember { mutableStateOf(false) }
@@ -368,7 +370,7 @@ private fun SearchField(
 @Composable
 private fun ThemeSwatches(selected: NimbleTheme, onSelect: (NimbleTheme) -> Unit) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        for (t in NimbleTheme.entries) {
+        for (t in NimbleTheme.entries.filter { it != NimbleTheme.Night }) {
             Box(
                 Modifier
                     .size(24.dp)
