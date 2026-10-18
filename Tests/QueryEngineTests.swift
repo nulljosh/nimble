@@ -93,6 +93,18 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertEqual(engine.evaluateMath("2^10"), "1024")
     }
 
+    /// The exam caught "12 squared" and "cube root of 27" answering nothing; web has the same cases in engine.test.js.
+    func testSpokenPowersAndRoots() {
+        XCTAssertEqual(engine.evaluateMath("12 squared"), "144")
+        XCTAssertEqual(engine.evaluateMath("3 cubed"), "27")
+        XCTAssertEqual(engine.evaluateMath("cube root of 27"), "3")
+        XCTAssertEqual(engine.evaluateMath("square root of 49"), "7")
+        XCTAssertEqual(engine.evaluateMath("what is the square root of 16"), "4")
+        XCTAssertEqual(engine.evaluateMath("sqrt of 81"), "9")
+        XCTAssertEqual(engine.evaluateMath("six plus two"), "8")
+        XCTAssertNil(engine.evaluateMath("what is the capital of france"))
+    }
+
     func testSqrt() {
         XCTAssertEqual(engine.evaluateMath("sqrt(144)"), "12")
     }

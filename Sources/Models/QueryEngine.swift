@@ -286,7 +286,7 @@ final class QueryEngine: Sendable {
     }
 
     enum MathLexer {
-        static let functions = ["sqrt", "sin", "cos", "tan", "log", "ln", "abs"]
+        static let functions = ["sqrt", "cbrt", "sin", "cos", "tan", "log", "ln", "abs"]
 
         /// Returns nil on the first character that is not part of a math
         /// expression -- this is what makes trailing junk a hard failure.
@@ -457,6 +457,7 @@ final class QueryEngine: Sendable {
         private static func apply(_ name: String, _ x: Double) -> Double? {
             switch name {
             case "sqrt": return x < 0 ? nil : sqrt(x)
+            case "cbrt": return cbrt(x)
             case "sin": return sin(x)
             case "cos": return cos(x)
             case "tan": return tan(x)
@@ -1182,22 +1183,22 @@ final class QueryEngine: Sendable {
     func parseNaturalLanguageMath(_ input: String) -> String? {
         var text = input.lowercased().trimmingCharacters(in: .whitespaces)
 
-        // Must contain at least one word-number and one word-operator
-        let hasWordNumber = Self.wordNumbers.keys.contains(where: { text.contains($0) })
-        let hasWordOp = Self.wordOperators.keys.contains(where: { text.contains($0) })
-        guard hasWordNumber && hasWordOp else { return nil }
-
-        // Strip filler
-        for filler in Self.fillerPatterns {
-            if text.hasPrefix(filler) {
-                text = String(text.dropFirst(filler.count))
-            }
+        // Strip filler ("what is the ...")
+        for filler in Self.fillerPatterns where text.hasPrefix(filler) {
+            text = String(text.dropFirst(filler.count))
         }
+        text = text.replacingOccurrences(of: "^the\\s+", with: "", options: .regularExpression)
         text = text.replacingOccurrences(of: "?", with: "").trimmingCharacters(in: .whitespaces)
 
-        // Replace multi-word operators first
+        // Must contain a number (digit or word) and an operator word or a root ("12 squared", "cube root of 27").
+        let rootPattern = "\\b(square root|sqrt|cube root|cbrt) of\\s+"
+        let hasNumber = text.range(of: "\\d", options: .regularExpression) != nil || Self.wordNumbers.keys.contains(where: { text.contains($0) })
+        let hasOperator = Self.wordOperators.keys.contains(where: { text.contains($0) }) || text.range(of: rootPattern, options: .regularExpression) != nil
+        guard hasNumber && hasOperator else { return nil }
+
+        // Replace multi-word operators first, whole words only so "six" is not "si" times
         for (word, op) in Self.wordOperators.sorted(by: { $0.key.count > $1.key.count }) {
-            text = text.replacingOccurrences(of: word, with: " \(op) ")
+            text = text.replacingOccurrences(of: "\\b\(word)\\b", with: " \(op) ", options: .regularExpression)
         }
 
         // Replace word numbers
@@ -1205,13 +1206,17 @@ final class QueryEngine: Sendable {
             text = text.replacingOccurrences(of: "\\b\(word)\\b", with: num, options: .regularExpression)
         }
 
+        // Roots: "square root of 49" -> "sqrt(49)"
+        text = text.replacingOccurrences(of: "\\b(square root|sqrt) of\\s+([0-9.]+)", with: "sqrt($2)", options: .regularExpression)
+        text = text.replacingOccurrences(of: "\\b(cube root|cbrt) of\\s+([0-9.]+)", with: "cbrt($2)", options: .regularExpression)
+
         // Clean up whitespace
         text = text.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
             .trimmingCharacters(in: .whitespaces)
 
         // Verify it looks like a math expression now
         let mathChars = CharacterSet(charactersIn: "0123456789.+-*/^%() ").union(.whitespaces)
-        let isMath = text.unicodeScalars.allSatisfy { mathChars.contains($0) }
+        let isMath = text.replacingOccurrences(of: "sqrt|cbrt", with: "", options: .regularExpression).unicodeScalars.allSatisfy { mathChars.contains($0) }
         guard isMath else { return nil }
 
         return text
