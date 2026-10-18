@@ -77,28 +77,28 @@ fun SettingsScreen(store: OfflinePackStore?, theme: NimbleTheme, onTheme: (Nimbl
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Settings", color = theme.text, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text(tr("Settings"), color = theme.text, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         }
-        ToolButton("Back", theme, onBack)
+        ToolButton(tr("Back"), theme, onBack)
 
-        Text("Theme", color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+        Text(tr("Theme"), color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         ThemeSwatches(selected = theme, onSelect = onTheme)
 
-        Text("Private mode", color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+        Text(tr("Private mode"), color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         Text(
-            "When on, no question leaves this device. Math and the offline answers still work.",
+            tr("When on, no question leaves this device. Math and the offline answers still work."),
             color = theme.muted,
             fontSize = 15.sp,
         )
-        ToolButton(if (privateOn) "Private mode: on" else "Private mode: off", theme) {
+        ToolButton(if (privateOn) tr("Private mode: on") else tr("Private mode: off"), theme) {
             privateOn = !privateOn
             savePrivateMode(privateOn)
         }
 
         if (store != null) {
-        Text("Offline answers", color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+        Text(tr("Offline answers"), color = theme.text, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
         Text(
-            "The opening lines of the 9,000 most-read Wikipedia articles. Download once, on your tap. Answers work with no network.",
+            tr("The opening lines of the 9,000 most-read Wikipedia articles. Download once, on your tap. Answers work with no network."),
             color = theme.muted,
             fontSize = 15.sp,
         )
@@ -106,7 +106,7 @@ fun SettingsScreen(store: OfflinePackStore?, theme: NimbleTheme, onTheme: (Nimbl
         when (val s = ui) {
             PackUi.Checking -> Unit
             is PackUi.NotInstalled -> ToolButton(
-                if (s.bytes != null) "Download (${megabytes(s.bytes)})" else "Download",
+                if (s.bytes != null) tr("Download ({s})", "s" to megabytes(s.bytes)) else tr("Download"),
                 theme,
             ) { download() }
             is PackUi.Downloading -> {
@@ -117,31 +117,31 @@ fun SettingsScreen(store: OfflinePackStore?, theme: NimbleTheme, onTheme: (Nimbl
                         color = theme.accent,
                     )
                     Text(
-                        "Downloading. ${megabytes(s.sent)} of ${megabytes(s.total)}",
+                        tr("Downloading. {a} of {b}", "a" to megabytes(s.sent), "b" to megabytes(s.total)),
                         color = theme.muted,
                         fontSize = 15.sp,
                     )
                 } else {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth(), color = theme.accent)
-                    Text("Downloading.", color = theme.muted, fontSize = 15.sp)
+                    Text(tr("Downloading."), color = theme.muted, fontSize = 15.sp)
                 }
             }
             is PackUi.Ready -> {
                 Text(
-                    "Ready. ${thousands(s.count)} articles, as of ${packAsOfLabel(s.builtAt) ?: s.builtAt}.",
+                    tr("Ready. {a} articles, as of {b}.", "a" to thousands(s.count), "b" to (packAsOfLabel(s.builtAt) ?: s.builtAt)),
                     color = theme.text,
                     fontSize = 16.sp,
                 )
                 Spacer(Modifier.height(4.dp))
-                ToolButton("Remove", theme) { remove() }
+                ToolButton(tr("Remove"), theme) { remove() }
             }
             PackUi.Failed -> {
                 Text(
-                    "Download failed. Check the connection and try again.",
+                    tr("Download failed. Check the connection and try again."),
                     color = theme.muted,
                     fontSize = 15.sp,
                 )
-                ToolButton("Download", theme) { download() }
+                ToolButton(tr("Download"), theme) { download() }
             }
         }
     }

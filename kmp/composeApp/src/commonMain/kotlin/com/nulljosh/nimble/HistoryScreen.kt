@@ -61,17 +61,17 @@ fun HistoryScreen(
     Column(modifier.fillMaxSize().background(theme.background).safeDrawingPadding().padding(24.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "Back",
+                tr("Back"),
                 color = theme.text,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .defaultMinSize(minHeight = 48.dp)
-                    .clickable(role = Role.Button, onClickLabel = "Back to search", onClick = onBack)
+                    .clickable(role = Role.Button, onClickLabel = tr("Back to search"), onClick = onBack)
                     .padding(end = 16.dp),
             )
             Text(
-                "History",
+                tr("History"),
                 color = theme.text,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
@@ -93,19 +93,19 @@ fun HistoryScreen(
                     fontSize = 14.sp,
                     modifier = Modifier.weight(1f).padding(start = 8.dp),
                 )
-                BarAction("Copy", theme) { onCopy(picked) }
-                BarAction("Delete", theme) {
+                BarAction(tr("Copy"), theme) { onCopy(picked) }
+                BarAction(tr("Delete"), theme) {
                     onDelete(picked)
                     picked = emptySet()
                 }
-                BarAction("Cancel", theme) { picked = emptySet() }
+                BarAction(tr("Cancel"), theme) { picked = emptySet() }
             }
         }
 
         Spacer(Modifier.height(12.dp))
 
         if (entries.isEmpty()) {
-            Text("No questions yet. Ask one and it lands here.", color = theme.muted, fontSize = 16.sp)
+            Text(tr("No questions yet. Ask one and it lands here."), color = theme.muted, fontSize = 16.sp)
             return@Column
         }
 
@@ -117,8 +117,8 @@ fun HistoryScreen(
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 56.dp)
                         .combinedClickable(
-                            onClickLabel = if (picked.isEmpty()) "Ask again" else "Select",
-                            onLongClickLabel = "Select",
+                            onClickLabel = if (picked.isEmpty()) tr("Ask again") else tr("Select"),
+                            onLongClickLabel = tr("Select"),
                             onLongClick = { picked = picked + e.q },
                             onClick = {
                                 if (picked.isEmpty()) onAsk(e.q)

@@ -212,10 +212,10 @@ fun SearchScreen(
 
         // The tools row: History always; New question once an answer is on screen.
         Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            ToolButton("History", theme) { showHistory = true }
-            ToolButton("Settings", theme) { showSettings = true }
+            ToolButton(tr("History"), theme) { showHistory = true }
+            ToolButton(tr("Settings"), theme) { showSettings = true }
             Spacer(Modifier.weight(1f))
-            if (answer != null) ToolButton("New question", theme) { newQuestion() }
+            if (answer != null) ToolButton(tr("New question"), theme) { newQuestion() }
         }
 
         Spacer(Modifier.height(16.dp))
@@ -235,7 +235,7 @@ fun SearchScreen(
                                 if (speakNext) { speakNext = false; speaking = true; speech.speak(say) { speaking = false } }
                             }
                             Spacer(Modifier.height(12.dp))
-                            ToolButton(if (speaking) "Stop" else "Listen", theme) {
+                            ToolButton(if (speaking) tr("Stop") else tr("Listen"), theme) {
                                 if (speaking) { speech.speak(null) {}; speaking = false }
                                 else { speaking = true; speech.speak(say) { speaking = false } }
                             }
@@ -257,7 +257,7 @@ fun SearchScreen(
         }
 
         Text(
-            "Math runs offline.",
+            tr("Math runs offline."),
             color = theme.muted,
             fontSize = 12.sp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -298,10 +298,10 @@ private fun RecentList(
                 modifier = Modifier.weight(1f)
             )
             Text(
-                "Clear",
+                tr("Clear"),
                 color = theme.muted,
                 fontSize = 12.sp,
-                modifier = Modifier.clickable(role = Role.Button, onClickLabel = "Clear history", onClick = onClear).padding(vertical = 4.dp)
+                modifier = Modifier.clickable(role = Role.Button, onClickLabel = tr("Clear history"), onClick = onClear).padding(vertical = 4.dp)
             )
         }
         for (e in entries) {
@@ -310,7 +310,7 @@ private fun RecentList(
                 color = theme.text,
                 fontSize = 16.sp,
                 maxLines = 1,
-                modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = "Ask again") { onPick(e.q) }.padding(vertical = 10.dp)
+                modifier = Modifier.fillMaxWidth().clickable(role = Role.Button, onClickLabel = tr("Ask again")) { onPick(e.q) }.padding(vertical = 10.dp)
             )
         }
     }
@@ -369,11 +369,11 @@ private fun SearchField(
             Modifier
                 .defaultMinSize(minWidth = 64.dp, minHeight = 48.dp)
                 .background(NimbleTheme.Yellow.accent, CircleShape)
-                .clickable(role = Role.Button, onClickLabel = "Ask", onClick = onSubmit)
+                .clickable(role = Role.Button, onClickLabel = tr("Ask"), onClick = onSubmit)
                 .padding(horizontal = 20.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text("Ask", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(tr("Ask"), color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -392,7 +392,7 @@ internal fun ThemeSwatches(selected: NimbleTheme, onSelect: (NimbleTheme) -> Uni
                         shape = CircleShape
                     )
                     .selectable(selected = t == selected, role = Role.RadioButton, onClick = { onSelect(t) })
-                    .semantics { contentDescription = "${t.label} theme" }
+                    .semantics { contentDescription = tr("{s} theme", "s" to t.label) }
             )
         }
     }
@@ -439,7 +439,7 @@ private fun NewsResult(news: Answer.News, theme: NimbleTheme, client: AnswerClie
         news.items.forEachIndexed { index, item ->
             if (index > 0) Spacer(Modifier.height(16.dp))
             Row(
-                Modifier.fillMaxWidth().clickable(onClickLabel = "Open ${item.outlet}") { uriHandler.openUri(item.url) },
+                Modifier.fillMaxWidth().clickable(onClickLabel = tr("Open {s}", "s" to item.outlet)) { uriHandler.openUri(item.url) },
                 verticalAlignment = Alignment.Top,
             ) {
                 Column(Modifier.weight(1f)) {
@@ -460,7 +460,7 @@ private fun NewsResult(news: Answer.News, theme: NimbleTheme, client: AnswerClie
             AsOfLine(it, theme)
         }
         Spacer(Modifier.height(12.dp))
-        Text("Source: ${news.source}", color = theme.muted, fontSize = 12.sp)
+        Text(tr("Source: {s}", "s" to news.source), color = theme.muted, fontSize = 12.sp)
     }
 }
 
@@ -489,7 +489,7 @@ private fun SiteIcon(url: String, client: AnswerClient) {
 }
 
 /**
- * "Why this answer": a 48dp toggle under the source line. Open, it shows the Wikipedia intro behind the answer and a
+ * tr("Why this answer"): a 48dp toggle under the source line. Open, it shows the Wikipedia intro behind the answer and a
  * 48dp link to the page. Taps here stop at the toggle, so they do not also open the whole answer.
  */
 @Composable
@@ -499,10 +499,10 @@ private fun WhyThisAnswer(text: String, pageUrl: String?, theme: NimbleTheme) {
     Box(
         Modifier
             .defaultMinSize(minHeight = 48.dp)
-            .clickable(onClickLabel = if (open) "Hide why this answer" else "Why this answer") { open = !open },
+            .clickable(onClickLabel = if (open) tr("Hide why this answer") else tr("Why this answer")) { open = !open },
         contentAlignment = Alignment.CenterStart,
     ) {
-        Text(if (open) "Hide why this answer" else "Why this answer", color = theme.accent, fontSize = 14.sp)
+        Text(if (open) tr("Hide why this answer") else tr("Why this answer"), color = theme.accent, fontSize = 14.sp)
     }
     if (open) {
         Text(text, color = theme.text, fontSize = 14.sp)
@@ -510,10 +510,10 @@ private fun WhyThisAnswer(text: String, pageUrl: String?, theme: NimbleTheme) {
             Box(
                 Modifier
                     .defaultMinSize(minHeight = 48.dp)
-                    .clickable(onClickLabel = "Read on Wikipedia") { uriHandler.openUri(it) },
+                    .clickable(onClickLabel = tr("Read on Wikipedia")) { uriHandler.openUri(it) },
                 contentAlignment = Alignment.CenterStart,
             ) {
-                Text("Read on Wikipedia", color = theme.accent, fontSize = 14.sp)
+                Text(tr("Read on Wikipedia"), color = theme.accent, fontSize = 14.sp)
             }
         }
     }
@@ -546,7 +546,7 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                 Column(Modifier.clickable { answer.sourceUrl?.let(uriHandler::openUri) }) {
                     // The header word, then the one quiet line (resting note, background caption), as on the web and in Swift.
                     Text(
-                        if (answer.background) "BACKGROUND" else "ANSWER",
+                        (if (answer.background) tr("Background") else tr("Answer")).uppercase(),
                         color = theme.muted,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
@@ -583,7 +583,7 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                         AsOfLine(it, theme)
                         Spacer(Modifier.height(12.dp))
                     }
-                    Text("Source: ${answer.source}", color = theme.muted, fontSize = 12.sp)
+                    Text(tr("Source: {s}", "s" to answer.source), color = theme.muted, fontSize = 12.sp)
                     // Up to two linked pages the answer's own words match, one 48dp tap row each, names only.
                     answer.sources.forEach { src ->
                         Text(

@@ -32,7 +32,7 @@ fun SportsResult(sports: Answer.Sports, theme: NimbleTheme, modifier: Modifier =
         Text(sports.title, color = theme.muted, fontSize = 15.sp)
         Spacer(Modifier.height(4.dp))
         when (sports.state) {
-            SportsState.Unavailable -> Text("Scores unavailable right now", color = theme.muted, fontSize = 15.sp)
+            SportsState.Unavailable -> Text(tr("Scores unavailable right now"), color = theme.muted, fontSize = 15.sp)
             SportsState.NoGame -> {
                 Text(sports.noGameLine(), color = theme.muted, fontSize = 15.sp)
                 sports.asOf?.let {
@@ -47,7 +47,7 @@ fun SportsResult(sports: Answer.Sports, theme: NimbleTheme, modifier: Modifier =
                         Modifier
                             .fillMaxWidth()
                             .defaultMinSize(minHeight = 48.dp)
-                            .clickable(onClickLabel = "Open ESPN scoreboard") { uriHandler.openUri(sports.url) }
+                            .clickable(onClickLabel = tr("Open ESPN scoreboard")) { uriHandler.openUri(sports.url) }
                     ) {
                         Text(scoreLine(game), color = theme.text, fontSize = 20.sp)
                         Text(game.status, color = theme.muted, fontSize = 15.sp)
@@ -58,7 +58,7 @@ fun SportsResult(sports: Answer.Sports, theme: NimbleTheme, modifier: Modifier =
                     AsOfLine(it, theme)
                 }
                 Spacer(Modifier.height(12.dp))
-                Text("Source: ESPN", color = theme.muted, fontSize = 11.sp)
+                Text(tr("Source: {s}", "s" to "ESPN"), color = theme.muted, fontSize = 11.sp)
             }
         }
     }

@@ -15,3 +15,5 @@ actual fun loadPrivateMode(): Boolean = prefs.getBoolean("private_mode", false)
 actual fun savePrivateMode(on: Boolean) { prefs.putBoolean("private_mode", on) }
 actual fun loadThemeName(): String? = prefs.get("theme", null)
 actual fun saveThemeName(name: String) { prefs.put("theme", name) }
+
+actual fun systemLanguage(): String = java.util.Locale.getDefault().language

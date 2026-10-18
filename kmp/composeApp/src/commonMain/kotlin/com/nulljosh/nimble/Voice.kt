@@ -42,7 +42,7 @@ fun MicButton(tint: Color, onClick: () -> Unit) {
         Modifier
             .size(40.dp)
             .clip(CircleShape)
-            .clickable(onClickLabel = "Ask out loud", role = Role.Button, onClick = onClick),
+            .clickable(onClickLabel = tr("Ask out loud"), role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Canvas(Modifier.size(20.dp)) {

@@ -29,12 +29,12 @@ fun MarketResult(market: Answer.Market, theme: NimbleTheme, modifier: Modifier =
         modifier
             .widthIn(max = 640.dp)
             .defaultMinSize(minHeight = 48.dp)
-            .then(if (priced) Modifier.clickable(onClickLabel = "Open ${market.source}") { uriHandler.openUri(market.url) } else Modifier)
+            .then(if (priced) Modifier.clickable(onClickLabel = tr("Open {s}", "s" to market.source)) { uriHandler.openUri(market.url) } else Modifier)
     ) {
         Text(market.title, color = theme.muted, fontSize = 15.sp)
         Spacer(Modifier.height(4.dp))
         if (big == null) {
-            Text("Quote unavailable right now", color = theme.muted, fontSize = 15.sp)
+            Text(tr("Quote unavailable right now"), color = theme.muted, fontSize = 15.sp)
         } else {
             Text(
                 big,
@@ -55,6 +55,6 @@ fun MarketResult(market: Answer.Market, theme: NimbleTheme, modifier: Modifier =
             AsOfLine(it, theme)
         }
         Spacer(Modifier.height(12.dp))
-        Text("Source: ${market.source}", color = theme.muted, fontSize = 11.sp)
+        Text(tr("Source: {s}", "s" to market.source), color = theme.muted, fontSize = 11.sp)
     }
 }

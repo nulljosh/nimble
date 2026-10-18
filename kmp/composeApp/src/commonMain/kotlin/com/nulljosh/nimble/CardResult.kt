@@ -27,7 +27,7 @@ fun CardResult(card: Card, theme: NimbleTheme, modifier: Modifier = Modifier) {
     Column(
         modifier
             .widthIn(max = 640.dp)
-            .clickable(onClickLabel = "Open ${card.source}") { uriHandler.openUri(card.url) }
+            .clickable(onClickLabel = tr("Open {s}", "s" to card.source)) { uriHandler.openUri(card.url) }
     ) {
         // One headline line, "11 °C": the unit sits after a space and never wraps onto its own line.
         Text(
@@ -54,12 +54,12 @@ fun CardResult(card: Card, theme: NimbleTheme, modifier: Modifier = Modifier) {
             AsOfLine(it, theme)
         }
         Spacer(Modifier.height(12.dp))
-        Text("Source: ${card.source}", color = theme.muted, fontSize = 11.sp)
+        Text(tr("Source: {s}", "s" to card.source), color = theme.muted, fontSize = 11.sp)
     }
 }
 
 /** The quiet freshness line: "as of Oct 12, 3:41 pm", or "as of Oct 9" for a daily value. Same left edge as the source row. */
 @Composable
 fun AsOfLine(asOf: Freshness, theme: NimbleTheme, modifier: Modifier = Modifier) {
-    Text("as of ${asOf.label()}", color = theme.muted, fontSize = 13.sp, modifier = modifier)
+    Text(tr("as of {s}", "s" to asOf.label()), color = theme.muted, fontSize = 13.sp, modifier = modifier)
 }

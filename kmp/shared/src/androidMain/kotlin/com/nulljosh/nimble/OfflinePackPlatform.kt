@@ -95,3 +95,5 @@ class AndroidOfflinePackStore(context: Context, private val http: HttpClient) : 
         withContext(Dispatchers.Default) { file.delete() }
     }
 }
+
+actual fun systemLanguage(): String = java.util.Locale.getDefault().language
