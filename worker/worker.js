@@ -13,11 +13,13 @@ const SYSTEM =
 // came back "Joe Biden". Ground every question in live Wikipedia intros plus today's date
 // and tell the models the context beats their memory.
 // ponytail: top-3 search intros, swap for a real search API if Wikipedia misses too often
+// "who is the prime minister of canada" finds the list and history pages, which bury the holder; "current ..." finds the page that names them.
+export const searchTerm = (q) => (/^who (is|are) (?!(the )?(current|first|last|former|next|youngest|oldest)\b)/i.test(q.trim()) ? q.trim().replace(/^who (is|are) (the )?/i, "current ").replace(/\?$/, "") : q);
 async function freshContext(q, attempt = 0) {
   try {
     const r = await fetch(
       "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=thumbnail&pithumbsize=800&format=json&formatversion=2&gsrsearch=" +
-        encodeURIComponent(q),
+        encodeURIComponent(searchTerm(q)),
       { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" } },
     );
     // A throttled or empty Wikipedia reply leaves the models on their stale memory ("Joe Biden"),
