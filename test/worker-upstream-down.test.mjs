@@ -50,3 +50,11 @@ test("a reply said twice comes back once; a name that repeats a word stays whole
   assert.equal((await ask({ groqSays: "William Shakespeare.William Shakespeare." })).answer, "William Shakespeare.");
   assert.equal((await ask({ groqSays: "Bora Bora." })).answer, "Bora Bora.");
 });
+
+test("a throw anywhere comes back as JSON UNKNOWN with CORS, never Cloudflare's error page", async () => {
+  const env = { RATE_LIMITER: { limit: async () => { throw new Error("limiter down"); } } };
+  const r = await worker.fetch(new Request("https://w.example/", { method: "POST", body: JSON.stringify({ q: "capital of france" }) }), env);
+  assert.equal(r.status, 500);
+  assert.equal(r.headers.get("access-control-allow-origin"), "*");
+  assert.equal((await r.json()).answer, "UNKNOWN");
+});

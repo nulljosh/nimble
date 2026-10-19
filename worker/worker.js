@@ -377,8 +377,20 @@ async function statsReply(origin, env) {
   return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused, latency, exam });
 }
 
+// Any throw becomes a JSON UNKNOWN with CORS headers, so the apps fall through to their next source instead of
+// seeing Cloudflare's error page as a network failure.
 export default {
   async fetch(req, env) {
+    try {
+      return await handle(req, env);
+    } catch (e) {
+      console.error("unhandled:", e?.stack || e);
+      return json({ answer: "UNKNOWN", error: "internal" }, 500);
+    }
+  },
+};
+
+async function handle(req, env) {
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     const url = new URL(req.url);
     // Browsers can't call DuckDuckGo's JSON API directly (no CORS), so the web
@@ -682,8 +694,7 @@ export default {
     // All three differ (or Llama said UNKNOWN). No synthesis call any more: the house model's answer, with
     // both answers in alts when the reference does not settle the clash.
     return finish({ answer: first, source: house, ...dis });
-  },
-};
+}
 
 // Yahoo's chart API: keyless, but it wants a browser user agent. A name ("apple") is looked up to its ticker
 // through Yahoo's search first. {symbol, name, price, currency, pct, time}, or {error} and never a made-up number.
