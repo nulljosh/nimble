@@ -191,6 +191,21 @@ function cleanTurns(raw) {
 export const NEURONS_PER_CALL = 60;
 export const BUDGET_NEURONS = 8500;
 const BUDGET_NOTE = "AiError: daily free AI budget nearly used";
+// "inflation rate in canada": no reference carries this month's number, so it comes from the Bank of Canada's
+// keyless Valet API (StatCan's CPI, year over year). Null when the question is something else or Valet fails.
+export async function canadaInflation(q) {
+  if (!/\b(inflation|cpi)\b/i.test(q) || !/\bcanad/i.test(q)) return null;
+  try {
+    const r = await fetch("https://www.bankofcanada.ca/valet/observations/STATIC_TOTALCPICHANGE/json?recent=1");
+    const o = (await r.json())?.observations?.at(-1);
+    const v = o?.STATIC_TOTALCPICHANGE?.v;
+    if (!v || !o.d) return null;
+    const month = new Date(`${o.d}T00:00:00Z`).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+    return `Canada's inflation rate was ${v}% in ${month} (CPI, year over year).`;
+  } catch {
+    return null;
+  }
+}
 export const TTL_CACHE = 6 * 3600; // seconds
 export const TTL_TIMELY = 3600; // time-sensitive answers go stale fast
 const TIMELY = /\b(current|latest|today|price|score|now)\b|\bwho is the\b/i;
@@ -404,6 +419,8 @@ export default {
       await saveCounts(url.origin, counts, env);
       return new Response(hit, { headers: { "content-type": "application/json", ...CORS } });
     }
+    const cpi = turns.length ? null : await canadaInflation(q);
+    if (cpi) return json({ answer: cpi, source: "Bank of Canada" });
     // Past the daily estimate: no AI call. The client shows its resting note because aiError is set.
     const resting = () => json({ answer: "UNKNOWN", resting: true, aiError: BUDGET_NOTE });
     if (overBudget(counts) && !env.GROQ_KEY) return resting();
