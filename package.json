@@ -4,7 +4,8 @@
   "scripts": {
     "test": "node --test 'test/*.test.*js'",
     "exam": "node test/exam.js",
-    "exam:1000": "node test/exam-1000.js"
+    "exam:1000": "node test/exam-1000.js",
+    "exam:offline": "node test/exam-offline.js"
   },
   "description": "Ask a question, get one sentence back. Math on-device, facts from open models.",
   "keywords": [
