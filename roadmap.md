@@ -130,6 +130,8 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 
 ## Blocked on Joshua
 
+- **Apple Private Cloud Compute.** Apple's bigger cloud model is free for Small Business Program apps (iOS/macOS 27, `PrivateCloudComputeLanguageModel`). It needs the managed entitlement `com.apple.developer.private-cloud-compute`: request it at https://developer.apple.com/contact/request/private-cloud-compute/. Once granted: grade it on the exam, and if it clears 95% it becomes an answer tier on Apple builds (never in Private mode, since it leaves the device).
+
 - **Custom domain.** `nimble.heyitsmejosh.com` is taken by the web app. Candidate: `nimbleapp.com`. Buy when ready.
 - **Play Store.** Needs an Android keystore + $25 Play Console fee.
 - **Microsoft Store.** Needs MSIX signing + $19 dev account.
