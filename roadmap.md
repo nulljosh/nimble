@@ -18,7 +18,7 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 
 ### v5.5 Premium (Joshua, 2026-10-11: domain now, premium features, then $1 on the App Store)
 
-- [ ] [Sonnet] Price flip at the 5.5 release: iPhone and Mac go to Apple price tier 1 ($0.99) via `asc pricing` (apple-pricing skill), web stays free with the $1 Stripe unlock; MONEY.md and the landing updated the same day.
+- [x] [Sonnet] Price flip at the 5.5 release: iPhone and Mac go to Apple price tier 1 ($0.99) via `asc pricing` (apple-pricing skill), web stays free with the $1 Stripe unlock; MONEY.md and the landing updated the same day. Done 2026-10-18: $0.99 on the store, web free with no Stripe unlock, license now Apache 2.0.
 
 ### v8 Private and on-device
 

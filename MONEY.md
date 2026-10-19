@@ -34,6 +34,6 @@ Anyone who got Nimble Answers while it was free keeps it free. Only new customer
 asc pricing schedule create --app 6807858746 --price 0.99 --base-territory USA --start-date YYYY-MM-DD
 ```
 
-Decided 2026-10-18 (Joshua: "Apache and $1"). The store price flip is still to run; until it does, the store says Free.
+Decided and live 2026-10-18 (Joshua: "Apache and $1"): USA base price point 10010, $0.99, $0.84 proceeds. Apple sets the other territories from the US price.
 
 *ASC 6807858746.*
