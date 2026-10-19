@@ -63,7 +63,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 - [x] [Sonnet] Currency: "100 usd to cad" from the Bank of Canada / ECB daily rates, offline fallback to the last fetch. Done 2026-10-18 on web and Apple (last saved rate per pair, labelled); Kotlin keeps it for the session.
 - [x] [Sonnet] Time zones: "time in tokyo", offline from the IANA table. Done 2026-10-18 on web, Apple and Kotlin (about 400 cities from the platform list, works in Private mode; the rest geocode).
 - [ ] [Sonnet] Canada and BC live figures: CPI, policy rate, minimum wage by province (StatCan / Bank of Canada). CPI and the policy rate answer from Bank of Canada Valet since 2026-10-18 (canadaFigure); minimum wage still comes from the models.
-- [ ] [Haiku] Sports scores beyond ESPN's top leagues: NHL, MLS, CFL, with the next game when none is live.
+- [ ] [Haiku] Sports scores beyond ESPN's top leagues: NHL, MLS, CFL, with the next game when none is live. 2026-10-18: NHL and MLS already answer on every platform. CFL has no live feed (ESPN's CFL scoreboard is frozen at the 2022 season), so it waits for another free source. Next game is open.
 
 ### v31-v40 Offline: most questions need no network
 
