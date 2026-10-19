@@ -163,9 +163,9 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
   with a headless model layer.
 
 ## Ingested 2026-10-03
-- [ ] Needs better QA testing and filtering of queries. Screenshots (from Joshua's phone, Oct 3): "Who is the president of the United States" returned raw model text ("The instructions say: 'If you do not know, reply exactly UNKNOWN'", source Gemma); "Who created you" returned the Wikipedia YouTube article; "What's nine plus ten" returned the Wikipedia Vine (service) article; "X=5+5. Solve for x." answered x=10 via Qwen (correct).
+- [x] Needs better QA testing and filtering of queries. Screenshots (from Joshua's phone, Oct 3): "Who is the president of the United States" returned raw model text ("The instructions say: 'If you do not know, reply exactly UNKNOWN'", source Gemma); "Who created you" returned the Wikipedia YouTube article; "What's nine plus ten" returned the Wikipedia Vine (service) article; "X=5+5. Solve for x." answered x=10 via Qwen (correct).
 
 ## Ingested 2026-10-16
-- [ ] UI bump: nav bar at the bottom, Settings as a tab in it, color goes into Settings, copy to clipboard near search. What's New modal needs padding. (screenshots: notes/attachments/2026-10-16/nimble-6.png, notes/attachments/2026-10-16/nimble-7.png, notes/attachments/2026-10-16/nimble-8.png)
-- [ ] Remove "AI answers" from Settings. Default to Samantha, then other LLMs, Wikipedia etc. Filter through them for the user; don't make the user manage APIs. Same with engines.
+- [x] UI bump: nav bar at the bottom, Settings as a tab in it, color goes into Settings, copy to clipboard near search. What's New modal needs padding. (screenshots: notes/attachments/2026-10-16/nimble-6.png, notes/attachments/2026-10-16/nimble-7.png, notes/attachments/2026-10-16/nimble-8.png)
+- [x] Remove "AI answers" from Settings. Default to Samantha, then other LLMs, Wikipedia etc. Filter through them for the user; don't make the user manage APIs. Same with engines. Web done 2026-10-18 (Private mode is the off switch); Apple keeps the switch for App Review 5.1.2(i).
 - [ ] README: refresh the primitive.dev screenshot with a more generic example (banner, H1 and GitHub badge removed 2026-10-18).
