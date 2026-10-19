@@ -129,3 +129,15 @@ test("currency offline falls back to the last saved rate, labelled with its day"
     assert.equal(off.asOfDay, true);
   } finally { teardown(); }
 });
+
+test("number facts offline: factorials exactly, bases in capitals, nothing else", () => {
+  assert.equal(E.numberFact("7 factorial"), "5,040");
+  assert.equal(E.numberFact("7!"), "5,040");
+  assert.equal(E.numberFact("factorial of 20"), "2,432,902,008,176,640,000");
+  assert.equal(E.numberFact("255 in binary"), "11111111");
+  assert.equal(E.numberFact("255 in hex"), "FF");
+  assert.equal(E.numberFact("8 to octal"), "10");
+  assert.equal(E.numberFact("21 factorial"), null);
+  assert.equal(E.numberFact("7 dogs"), null);
+  assert.equal(E.numberFact("10 km to miles"), null);
+});

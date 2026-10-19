@@ -233,8 +233,32 @@ final class QueryEngine: Sendable {
     }
 
     func evaluateMath(_ input: String) -> String? {
+        if let fact = Self.numberFact(input) { return fact }
         guard let expr = mathExpression(input), let value = Self.evaluateExpression(expr) else { return nil }
         return formatResult(value)
+    }
+
+    /// "7 factorial", "7!", "255 in binary", "255 in hex": exact, offline, as text. Factorials stop at 20!, the largest
+    /// that fits 64 bits. Mirrors numberFact() in docs/engine.js.
+    static func numberFact(_ input: String) -> String? {
+        var q = input.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if q.hasSuffix("?") { q.removeLast() }
+        func groups(_ pattern: String) -> [String]? {
+            guard let m = try? NSRegularExpression(pattern: pattern).firstMatch(in: q, range: NSRange(q.startIndex..., in: q)) else { return nil }
+            return (1..<m.numberOfRanges).compactMap { Range(m.range(at: $0), in: q).map { String(q[$0]) } }
+        }
+        if let g = groups(#"^(?:what is )?(\d{1,2})\s*(?:!|factorial)$|^(?:what is )?(?:the )?factorial (?:of )?(\d{1,2})$"#),
+           let n = g.first.flatMap({ UInt64($0) }), n <= 20 {
+            let value = (1...max(n, 1)).reduce(UInt64(1), *)
+            let f = NumberFormatter()
+            f.locale = Locale(identifier: "en_US")
+            f.numberStyle = .decimal
+            return f.string(from: NSNumber(value: value))
+        }
+        if let g = groups(#"^(?:convert )?(\d{1,15}) (?:in|to|into) (binary|hex|hexadecimal|octal)$"#), g.count == 2, let n = Int64(g[0]) {
+            return String(n, radix: ["binary": 2, "octal": 8][g[1]] ?? 16).uppercased()
+        }
+        return nil
     }
 
     /// Show steps: one line per evaluation step ("3+4 = 7", "7*2 = 14"), or nil. A single

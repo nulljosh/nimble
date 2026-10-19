@@ -100,6 +100,17 @@ function tryMath(s){
     return (typeof v==="number" && isFinite(v)) ? +v.toPrecision(12) : null; }
   catch{ return null; }
 }
+// "7 factorial", "7!", "255 in binary", "255 in hex": exact, offline, as text (factorials outgrow a double's digits).
+// Factorials stop at 20!, the largest that fits 64 bits, so the apps give the same answers.
+// Null for anything else. The AI used to answer these, so they failed with no network.
+function numberFact(s){
+  const q = String(s).trim().toLowerCase().replace(/\?$/, "");
+  const f = /^(?:what is )?(\d{1,3})\s*(?:!|factorial)$|^(?:what is )?(?:the )?factorial (?:of )?(\d{1,3})$/.exec(q);
+  if(f && +(f[1] || f[2]) <= 20){ let n = BigInt(f[1] || f[2]), out = 1n; while(n > 1n) out *= n--; return out.toLocaleString("en-US"); }
+  const b = /^(?:convert )?(\d{1,15}) (?:in|to|into) (binary|hex|hexadecimal|octal)$/.exec(q);
+  if(b) return BigInt(b[1]).toString({binary:2, hex:16, hexadecimal:16, octal:8}[b[2]]).toUpperCase();
+  return null;
+}
 // "Show steps": one line per evaluation step, or null. A single operation has one step and
 // nothing to expand, so it gets null too: a plain "2+2" shows no button.
 function mathSteps(s){
@@ -1067,6 +1078,8 @@ async function firstOf(query, fns){
 async function answer(query, opts={}){
   const c = tryConvert(query);
   if(c) return {kind:"convert", ...c};
+  const nf = numberFact(query);
+  if(nf !== null) return {kind:"math", value:nf};
   const m = tryMath(query);
   if(m !== null) return {kind:"math", value:m};
   const ge = graphExpr(query), svg = ge && graph(ge);
@@ -1390,4 +1403,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={numberFact,constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};

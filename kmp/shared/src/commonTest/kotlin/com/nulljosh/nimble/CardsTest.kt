@@ -163,6 +163,18 @@ class CardsTest {
     }
 
     @Test
+    fun numberFactsOffline() {
+        assertEquals("5,040", QueryEngine.numberFact("7 factorial"))
+        assertEquals("5,040", QueryEngine.numberFact("7!"))
+        assertEquals("2,432,902,008,176,640,000", QueryEngine.numberFact("factorial of 20"))
+        assertEquals(null, QueryEngine.numberFact("21 factorial"))
+        assertEquals("11111111", QueryEngine.numberFact("255 in binary"))
+        assertEquals("FF", QueryEngine.numberFact("255 in hex"))
+        assertEquals("10", QueryEngine.numberFact("8 to octal"))
+        assertEquals(null, QueryEngine.numberFact("7 dogs"))
+    }
+
+    @Test
     fun onlyWebLinksOpen() {
         assertEquals(true, isWebUrl("https://en.wikipedia.org/wiki/Paris"))
         assertEquals(true, isWebUrl("HTTP://example.com"))

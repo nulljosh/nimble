@@ -48,6 +48,17 @@ final class CardTests: XCTestCase {
         XCTAssertNil(QueryEngine.deviceTime("time in whistler", now: now))
     }
 
+    func testNumberFactsOffline() {
+        XCTAssertEqual(QueryEngine.numberFact("7 factorial"), "5,040")
+        XCTAssertEqual(QueryEngine.numberFact("7!"), "5,040")
+        XCTAssertEqual(QueryEngine.numberFact("factorial of 20"), "2,432,902,008,176,640,000")
+        XCTAssertNil(QueryEngine.numberFact("21 factorial"))
+        XCTAssertEqual(QueryEngine.numberFact("255 in binary"), "11111111")
+        XCTAssertEqual(QueryEngine.numberFact("255 in hex"), "FF")
+        XCTAssertEqual(QueryEngine.numberFact("8 to octal"), "10")
+        XCTAssertNil(QueryEngine.numberFact("7 dogs"))
+    }
+
     func testEtymologyCard() {
         let card = QueryEngine.etymologyCard(word: "nimble", ancestor: "nymyl", relation: "derived", langCode: "enm")
         XCTAssertEqual(card, .card(big: "nimble", unit: "", sub: "Derived from nymyl, Middle English",

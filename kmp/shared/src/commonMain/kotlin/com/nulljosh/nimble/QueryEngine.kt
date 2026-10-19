@@ -42,9 +42,28 @@ object QueryEngine {
      * offline. Mirrors the Swift ordering: natural language first, then the prose guard,
      * then the evaluator.
      */
+    /** "7 factorial", "7!", "255 in binary", "255 in hex": exact, offline, as text. Factorials stop at 20!, the largest
+     *  that fits 64 bits. Mirrors numberFact() in docs/engine.js. */
+    fun numberFact(input: String): String? {
+        val q = input.trim().lowercase().removeSuffix("?")
+        Regex("""^(?:what is )?(\d{1,2})\s*(?:!|factorial)$|^(?:what is )?(?:the )?factorial (?:of )?(\d{1,2})$""").find(q)?.let { m ->
+            val n = (m.groupValues[1].ifEmpty { m.groupValues[2] }).toLong()
+            if (n > 20) return null
+            var out = 1L
+            for (i in 2..n) out *= i
+            return out.toString().reversed().chunked(3).joinToString(",").reversed()
+        }
+        Regex("""^(?:convert )?(\d{1,15}) (?:in|to|into) (binary|hex|hexadecimal|octal)$""").find(q)?.let { m ->
+            val radix = when (m.groupValues[2]) { "binary" -> 2; "octal" -> 8; else -> 16 }
+            return m.groupValues[1].toLong().toString(radix).uppercase()
+        }
+        return null
+    }
+
     fun evaluateMath(input: String): String? {
         val expr = input.trim()
         if (expr.isEmpty()) return null
+        numberFact(expr)?.let { return it }
 
         parseNaturalLanguageMath(expr)?.let { nl ->
             Expr.eval(nl)?.let { return Expr.format(it) }
