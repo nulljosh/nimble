@@ -99,6 +99,9 @@ class AnswerClient(
 
     private val cards = CardClient(http)
 
+    /** Follow-up memory for the free proxy. New question and clearing history empty it. */
+    val turns = Turns()
+
     companion object {
         // The Cloudflare Worker holds the key; nothing secret ships in the app.
         private const val PROXY = "https://nimble-answers.trommatic.workers.dev"
@@ -145,6 +148,7 @@ class AnswerClient(
         val aiFailures = mutableListOf<String>()
         when (val ai = gemma(input, aiFailures)) {
             is Answer.Text -> {
+                turns.add(input, ai.body)
                 val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}", asOf = asOfForText(input))
                 return TopicPhoto.withTopic(answer, input) { fetchText(it) }
             }
@@ -194,7 +198,7 @@ class AnswerClient(
     }
 
     @Serializable
-    private data class ProxyBody(val q: String, val more: Boolean? = null)
+    private data class ProxyBody(val q: String, val more: Boolean? = null, val turns: List<Turns.Turn> = emptyList())
 
     /** "Tell me more": three sentences from the proxy, or null (nothing more, offline, or Private mode). Mirrors tellMore() in docs/engine.js. */
     suspend fun tellMore(input: String): String? {
@@ -211,7 +215,7 @@ class AnswerClient(
     private suspend fun gemma(input: String, aiFailures: MutableList<String>): Answer? = runCatchingNull {
         val res = http.post(PROXY) {
             contentType(ContentType.Application.Json)
-            setBody(ProxyBody(input))
+            setBody(ProxyBody(input, turns = turns.list()))
         }
         val body = res.bodyAsText()
         proxyDisputed(body) ?: proxyAnswer(body, input) ?: run {

@@ -117,6 +117,7 @@ fun SearchScreen(
     fun newQuestion() {
         query = ""
         answer = null
+        client.turns.clear()  // a new question starts a new conversation
         loading = false
         speech?.speak(null) {}
     }
@@ -272,6 +273,7 @@ fun SearchScreen(
                     onPick = { submit(it) },
                     onClear = {
                         history.clear()
+                        client.turns.clear()
                         recent = emptyList()
                     },
                 )
