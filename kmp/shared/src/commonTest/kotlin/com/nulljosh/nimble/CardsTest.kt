@@ -152,6 +152,17 @@ class CardsTest {
     }
 
     @Test
+    fun aLiveAnswerGoesStaleAfterTenMinutesButADailyRateDoesNot() {
+        val at = 1_790_910_300_000L
+        val weather = Answer.CardAnswer(Card("12", "°C", "Cloudy", "Open-Meteo", "https://open-meteo.com", Freshness(at, false)))
+        assertEquals(false, weather.isStale(at + 9 * 60_000))
+        assertEquals(true, weather.isStale(at + 11 * 60_000))
+        val rate = Answer.CardAnswer(Card("137.12", "CAD", "100 USD", "Frankfurter", "https://frankfurter.dev", Freshness(at, true)))
+        assertEquals(false, rate.isStale(at + 60 * 60_000))
+        assertEquals(false, Answer.Math("4").isStale(at + 60 * 60_000))
+    }
+
+    @Test
     fun deviceTimeNeedsNoNetwork() {
         val at = 1790910300000L // 2026-10-02 03:05 UTC
         assertEquals(

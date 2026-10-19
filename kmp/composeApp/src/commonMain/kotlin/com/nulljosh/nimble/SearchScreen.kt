@@ -82,6 +82,8 @@ fun SearchScreen(
     packStore: OfflinePackStore? = null,
     /** A question shared in from another app (Android share sheet); asked as soon as it arrives. */
     sharedQuestion: String? = null,
+    /** Bumped each time the app comes back to the front; a stale live answer then asks again. */
+    resumed: Int = 0,
 ) {
     val client = remember { AnswerClient(offlinePack = { packStore?.load() }) }
     val scope = rememberCoroutineScope()
@@ -143,6 +145,9 @@ fun SearchScreen(
         }
     }
 
+    LaunchedEffect(resumed) {
+        if (resumed > 0 && answer?.isStale(Freshness.now().epochMillis) == true && query.trim() == asked) submit(asked)
+    }
     LaunchedEffect(sharedQuestion) {
         val q = sharedQuestion ?: return@LaunchedEffect
         showHistory = false

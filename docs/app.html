@@ -372,6 +372,12 @@ var T=I18N.t;
     }catch(err){}
   }
   f.addEventListener('submit',function(e){ e.preventDefault(); run(); });
+  // Back to the tab after a while: a live answer older than ten minutes asks again, so "as of" never goes stale.
+  document.addEventListener('visibilitychange',function(){
+    // A daily value ("2026-10-17", a rate's day) has no time and is skipped: asking again would not change it.
+    var t=last&&last.a&&/T/.test(last.a.asOf||'')&&Date.parse(last.a.asOf);
+    if(!document.hidden && t && Date.now()-t>6e5 && q.value.trim()===last.q) run(last.q);
+  });
   // Voice, only where the browser can listen. Words stream into the field; when it stops, the question runs.
   // Every failure, a denied mic included, just puts the button back to idle.
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;

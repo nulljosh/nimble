@@ -27,6 +27,10 @@ struct NimbleApp: App {
                     AskService.shared.hook { ask($0) }
                     NSApp.servicesProvider = AskService.shared
                 }
+                // Summoned again after a while: a live answer older than ten minutes asks again.
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+                    appState.refreshIfStale()
+                }
                 .onOpenURL { url in
                     if let q = AskService.question(from: url) { ask(AskService.clean(q)) }
                 }

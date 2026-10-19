@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -15,6 +16,8 @@ import com.nulljosh.nimble.AndroidAppContext
 class MainActivity : ComponentActivity() {
     /** Text from the share sheet ("Nimble" under Share), asked on arrival. */
     private var shared by mutableStateOf<String?>(null)
+    /** Bumped on every return to the front, so a stale live answer asks again. */
+    private var resumed by mutableIntStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -25,9 +28,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 SearchScreen(history, voice = rememberVoice(), speech = rememberSpeech(), packStore = remember { platformOfflinePackStore() },
-                    sharedQuestion = shared)
+                    sharedQuestion = shared, resumed = resumed)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        resumed++
     }
 
     // singleTop: a second share lands here instead of stacking another Nimble.

@@ -23,6 +23,19 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlin.math.ceil
 
+/** When a live answer was fetched, or null (a daily value like a rate's day, or nothing live). */
+fun Answer.fetchedAt(): Long? = when (this) {
+    is Answer.CardAnswer -> card.asOf
+    is Answer.Text -> asOf
+    is Answer.News -> asOf
+    is Answer.Market -> asOf
+    is Answer.Sports -> asOf
+    else -> null
+}?.takeUnless { it.isDay }?.epochMillis
+
+/** Back to the app after a while: a live answer older than ten minutes asks again, as on the web. */
+fun Answer.isStale(now: Long): Boolean = fetchedAt()?.let { now - it > 600_000 } == true
+
 sealed class Answer {
     data class Math(val value: String) : Answer()
     /** Etymology, weather, local time or currency: one big number and a quiet line. */

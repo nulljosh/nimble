@@ -45,7 +45,8 @@ struct RootTabView: View {
         .tint(state.theme.ink)
         .preferredColorScheme(state.theme.colorScheme)
         // A question parked by the "Ask Nimble" intent (Siri, Spotlight, Shortcuts, Action button) runs on the Ask tab.
-        .onChange(of: scenePhase) { _, phase in if phase == .active { runParkedQuestion() } }
+        // Back in the app: a parked question runs, else a live answer older than ten minutes asks again.
+        .onChange(of: scenePhase) { _, phase in if phase == .active { runParkedQuestion(); state.refreshIfStale() } }
         .onAppear {
             runParkedQuestion()
             guard QASandbox.launch, UserDefaults.standard.bool(forKey: "shotHistory") else { return }
