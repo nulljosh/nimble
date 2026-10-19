@@ -40,7 +40,7 @@ Apple's bigger Private Cloud Compute model needs a managed entitlement, so it is
 
 ## Offline, 2026-10-19
 
-The same 154 questions with no network at all: math, units, constants, the device's time zones and the 9,000-article offline pack. 45 pass. The pack used to answer 75 of them and get 49 wrong, mostly by matching one word of a title ("how many bones in the human body" gave the article on the penis). It now answers only when its sentence shares the question's own words: 33 answers, 12 wrong, and the rest say "not in the offline pack". Honest misses beat confident wrong answers. The next step is the on-device model reading the pack (roadmap v31-40).
+The same 154 questions with no network at all: math, units, constants, the device's time zones and the 9,000-article offline pack. 49 pass (45, then factorials and base conversion moved offline). The pack used to answer 75 of them and get 49 wrong, mostly by matching one word of a title ("how many bones in the human body" gave the article on the penis). It now answers only when its sentence shares the question's own words: 33 answers, 12 wrong, and the rest say "not in the offline pack". Honest misses beat confident wrong answers. The next step is the on-device model reading the pack (roadmap v31-40).
 
 ## The 1,000-question exam
 
