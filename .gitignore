@@ -26,3 +26,4 @@ signing/
 .build/
 .asc/runs/
 nimble-extension.zip
+.asc/signing-new/
