@@ -63,9 +63,9 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 ### v31-v40 Offline: most questions need no network
 
-- [ ] [Sonnet] The offline pack grows from 9,000 to 50,000 articles under 15 MB, delta updates monthly.
+- [ ] [Sonnet] The offline pack grows from 9,000 to 50,000 articles under 15 MB, delta updates monthly. 2026-10-19: 14,000 (3.2 MB), the 10,000 vital articles first, rebuilt monthly in CI. More needs a longer or split build (one run fits about 14,000 in its two hours).
 - [ ] [Opus] The on-device model (v8) answers from the pack with no network and clears 90% of the exam offline.
-- [ ] [Sonnet] Offline exam: a second score in BENCHMARK.md, airplane mode, every platform. Web 2026-10-19: 49 of 154 offline, and the pack's wrong answers cut from 49 to 12 (BENCHMARK.md). Apple and Kotlin packs got the same rule the same night; their offline exam runs are still to do.
+- [ ] [Sonnet] Offline exam: a second score in BENCHMARK.md, airplane mode, every platform. Web 2026-10-19: 73 of 154 offline on the 14,000-article pack (49 on the old 9,000), and the pack's wrong answers cut from 49 to 12 (BENCHMARK.md). Apple and Kotlin packs got the same rule the same night; their offline exam runs are still to do.
 - [ ] [Haiku] Packs by topic (science, history, geography) so a phone can carry what it needs.
 
 ### v41-v50 Follow-ups: a short conversation, kept on the device
