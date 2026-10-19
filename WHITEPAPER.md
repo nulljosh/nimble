@@ -79,4 +79,4 @@ slice. Method and numbers are in `docs/BENCHMARK.md`.
 
 ## License
 
-MIT 2026, Joshua Trommel
+Apache 2.0, 2026, Joshua Trommel
