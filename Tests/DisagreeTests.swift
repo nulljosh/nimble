@@ -131,4 +131,13 @@ final class DisagreeTests: XCTestCase {
         guard case .text(_, let body, _, _, _, _, _, _, _) = result else { return XCTFail("expected text, got \(result)") }
         XCTAssertEqual(body, "Paris.")
     }
+
+    /// The compare card: the Worker's two rows become two lines; one bad row leaves the plain sentence.
+    func testCompareRowsBecomeTwoLines() async throws {
+        let compare = #"{"answer":"Paris: 2.1 million (2023). London: 8.8 million (2021).","rows":[{"label":"Paris","value":"2.1 million (2023)"},{"label":"London","value":"8.8 million (2021)"}],"source":"Wikidata"}"#
+        let result = await ask(worker: compare)
+        XCTAssertEqual(result, .list(items: ["Paris: 2.1 million (2023)", "London: 8.8 million (2021)"], source: "Wikidata"))
+        XCTAssertNil(try decode(#"{"answer":"x","rows":[{"label":"Paris"},{"label":"London","value":"8.8 million"}]}"#).compareRows)
+        XCTAssertNil(try decode(Self.plain).compareRows)
+    }
 }

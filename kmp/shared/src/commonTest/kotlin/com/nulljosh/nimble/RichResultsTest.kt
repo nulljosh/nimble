@@ -19,6 +19,15 @@ class RichResultsTest {
     }
 
     @Test
+    fun compareRowsReadAsTwoLines() {
+        val a = proxyAnswer("""{"answer":"Paris: 2.1 million (2023). London: 8.8 million (2021).","rows":[{"label":"Paris","value":"2.1 million (2023)"},{"label":"London","value":"8.8 million (2021)"}],"source":"Wikidata"}""")
+        assertEquals("Paris: 2.1 million (2023)\nLondon: 8.8 million (2021)", a?.body)
+        // One bad row: the plain sentence.
+        val b = proxyAnswer("""{"answer":"Paris: 2.1 million.","rows":[{"label":"Paris"},{"label":"London","value":"8.8 million"}]}""")
+        assertEquals("Paris: 2.1 million.", b?.body)
+    }
+
+    @Test
     fun proxyAnswerWithoutImageHasNoPhoto() {
         val a = proxyAnswer("""{"answer":"Forty-two.","source":"Samantha"}""")
         assertEquals("Forty-two.", a?.body)

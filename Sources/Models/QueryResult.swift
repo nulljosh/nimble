@@ -187,6 +187,7 @@ enum QueryResult: Equatable {
         case (.none, .none), (.loading, .loading): return true
         case let (.math(a, _), .math(b, _)): return a == b
         case let (.error(a, _), .error(b, _)): return a == b
+        case let (.list(a, b), .list(c, d)): return (a, b) == (c, d)
         case let (.color(a), .color(b)): return a == b
         case let (.convert(a, b, c, d), .convert(e, f, g, h)): return (a, b, c, d) == (e, f, g, h)
         case let (.graph(a, _), .graph(b, _)): return a == b

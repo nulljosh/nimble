@@ -101,6 +101,17 @@ struct ProxyReply: Decodable {
     let disagree: Bool?
     /// The two answers that clash, each with its model. Lossy per element (see ProxyAlt), so one bad alt cannot drop the reply.
     let alts: [ProxyAlt]?
+    /// A compare ("paris vs london population"): the two sides as label and value. Lossy per element, like alts.
+    let rows: [ProxyRow]?
+
+    /// The compare as two "Paris: 2.1 million (2023)" lines, or nil. Same rule as docs/engine.js: exactly two good rows.
+    var compareRows: [String]? {
+        let usable = (rows ?? []).compactMap { r -> String? in
+            guard let label = r.label?.nonEmpty, let value = r.value?.nonEmpty else { return nil }
+            return "\(label): \(value)"
+        }
+        return usable.count == 2 ? usable : nil
+    }
 
     /// The answers to show as a split, or nil. Same rule as docs/engine.js: `disagree` is true and two alternatives
     /// each name a model and carry a non-empty answer.
@@ -118,6 +129,20 @@ struct ProxyReply: Decodable {
         guard let title = topic?.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty,
               let url = topicUrl, url.lowercased().hasPrefix("https://en.wikipedia.org/wiki/") else { return nil }
         return (title, url, refs?.first { $0.url == url }?.extract?.nonEmpty)
+    }
+}
+
+/// One side of a compare. Each field is read on its own, like ProxyAlt.
+struct ProxyRow: Decodable {
+    let label: String?
+    let value: String?
+
+    private enum Keys: String, CodingKey { case label, value }
+
+    init(from decoder: Decoder) throws {
+        let c = try? decoder.container(keyedBy: Keys.self)
+        label = c.flatMap { try? $0.decodeIfPresent(String.self, forKey: .label) }
+        value = c.flatMap { try? $0.decodeIfPresent(String.self, forKey: .value) }
     }
 }
 
@@ -597,6 +622,8 @@ final class QueryEngine: Sendable {
             // Same rules as docs/engine.js gemma(): the photo's credit is the first on-topic Wikipedia page, and
             // the linked row is the first two on-topic pages. No match, no credit and no link.
             let reply = try? JSONDecoder().decode(ProxyReply.self, from: data)
+            // A compare shows its two sides as two rows, the web's compare card.
+            if ai.engine == .nimble, let rows = reply?.compareRows { return .list(items: rows, source: source) }
             let refs: [(title: String, url: String)] = (reply?.refs ?? []).compactMap { r in
                 guard let url = r.url, url.lowercased().hasPrefix("https://"), let title = r.title?.nonEmpty, r.extract?.nonEmpty != nil else { return nil }
                 return (title, url)

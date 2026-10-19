@@ -443,7 +443,8 @@ internal fun proxyAnswer(body: String, query: String? = null): Answer.Text? {
     val photo = httpsOnly(d.image?.url)
     return Answer.Text(
         heading = null,
-        body = answer,
+        // A compare reads as its two sides, one per line: the web's compare card.
+        body = compareLines(d.rows)?.joinToString("\n") ?: answer,
         source = d.source ?: "Nimble",
         sourceUrl = url.takeIf { title != null },
         photoUrl = photo,
@@ -471,7 +472,19 @@ private data class ProxyReply(
     val disagree: Boolean? = null,
     /** Read element by element in [proxyDisputed], so one malformed alternative cannot drop the reply. */
     val alts: List<JsonElement>? = null,
+    /** A compare ("paris vs london population"): the two sides as {label, value}. Read element by element in [compareLines]. */
+    val rows: List<JsonElement>? = null,
 )
+
+/** The compare as two "Paris: 2.1 million (2023)" lines, or null. Same rule as docs/engine.js: exactly two good rows. */
+private fun compareLines(rows: List<JsonElement>?): List<String>? {
+    val lines = rows.orEmpty().mapNotNull { el ->
+        val o = el as? JsonObject ?: return@mapNotNull null
+        fun s(k: String) = (o[k] as? JsonPrimitive)?.takeIf { it.isString }?.content?.trim()?.takeIf { it.isNotEmpty() }
+        "${s("label") ?: return@mapNotNull null}: ${s("value") ?: return@mapNotNull null}"
+    }
+    return lines.takeIf { it.size == 2 }
+}
 
 /**
  * The split reply: `disagree` is true and two alternatives each name a model and carry a non-empty answer.
