@@ -47,17 +47,21 @@ object Cards {
 
     private val etymologyGate = Regex("""^(?:origin|etymology|root|where\s+does\s+the\s+word)\s+(?:of\s+)?(?:the\s+word\s+)?(.+?)(?:\s+come\s+from)?\s*\??$""", RegexOption.IGNORE_CASE)
     private val weatherGate = Regex("""^(?:what(?:'s| is) the )?weather (?:in|for|at) (.+?)\??$""", RegexOption.IGNORE_CASE)
-    private val timeGate = Regex("""^(?:what(?:'s| is) the )?(?:current )?time (?:in|at) (.+?)\??$""", RegexOption.IGNORE_CASE)
+    private val timeGate = Regex("""^(?:what(?:'s|’s| is) the |what )?(?:current |local )?time (?:is it |now )?(?:in|at) (.+?)(?: right now| now)?\??$""", RegexOption.IGNORE_CASE)
     private val currencyGate = Regex("""^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$""", RegexOption.IGNORE_CASE)
 
     // MARK: Routing, in the web order: etymology, weather, time, currency.
+
+    // Spoken currency names, as on the web: "1 euro to usd". Not "pound": that is a weight.
+    private val currencyNames = mapOf("euro" to "eur", "euros" to "eur", "dollar" to "usd", "dollars" to "usd", "yen" to "jpy",
+        "yuan" to "cny", "rupee" to "inr", "rupees" to "inr", "peso" to "mxn", "pesos" to "mxn")
 
     fun ask(input: String): Ask? {
         val q = input.trim()
         etymologyGate.find(q)?.let { return Ask.Etymology(it.groupValues[1].trim()) }
         weatherGate.find(q)?.let { return Ask.Weather(it.groupValues[1]) }
         timeGate.find(q)?.let { return Ask.Time(it.groupValues[1]) }
-        currencyGate.find(q)?.let { m ->
+        currencyGate.find(q.split(" ").joinToString(" ") { currencyNames[it.lowercase()] ?: it })?.let { m ->
             val amount = m.groupValues[1].toDoubleOrNull() ?: return null
             return Ask.Currency(amount, m.groupValues[2].uppercase(), m.groupValues[3].uppercase())
         }

@@ -39,6 +39,8 @@ final class CardTests: XCTestCase {
         XCTAssertTrue(engine.isCardQuery("weather in Vancouver"))
         XCTAssertTrue(engine.isCardQuery("What's the time in Tokyo?"))
         XCTAssertTrue(engine.isCardQuery("100 usd to cad"))
+        XCTAssertTrue(engine.isCardQuery("what time is it in london"))
+        XCTAssertTrue(engine.isCardQuery("1 euro to usd"))
         XCTAssertTrue(engine.isCardQuery("etymology of nimble"))
         XCTAssertTrue(engine.isCardQuery("origin of nimble"))
         XCTAssertTrue(engine.isCardQuery("root of nimble"))

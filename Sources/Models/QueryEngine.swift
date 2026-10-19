@@ -1258,7 +1258,7 @@ final class QueryEngine: Sendable {
 func firstSentence(_ text: String) -> String {
     let t = text.trimmingCharacters(in: .whitespacesAndNewlines)
     if let r = t.range(of: #"(?<=[.!?])\s+(?=[A-Z0-9"(])"#, options: .regularExpression) {
-        return String(t[..<r.lowerBound])
+        return String(t[..<r.lowerBound]).replacingOccurrences(of: #"\s{2,}"#, with: " ", options: .regularExpression)
     }
-    return t
+    return t.replacingOccurrences(of: #"\s{2,}"#, with: " ", options: .regularExpression)
 }

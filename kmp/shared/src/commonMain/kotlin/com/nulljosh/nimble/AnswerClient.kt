@@ -499,4 +499,4 @@ private inline fun <T> runCatchingNull(block: () -> T?): T? =
 
 // ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
 private val sentenceBreak = Regex("""(?<=[.!?])\s+(?=[A-Z0-9"(])""")
-internal fun firstSentence(text: String): String = text.trim().split(sentenceBreak, limit = 2)[0]
+internal fun firstSentence(text: String): String = text.trim().split(sentenceBreak, limit = 2)[0].replace(Regex("\\s{2,}"), " ")

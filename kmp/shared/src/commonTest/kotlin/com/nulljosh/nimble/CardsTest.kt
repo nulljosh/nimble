@@ -34,6 +34,7 @@ class CardsTest {
         assertEquals(Ask.Time("Tokyo"), Cards.ask("time in Tokyo"))
         assertEquals(Ask.Time("New York"), Cards.ask("what is the current time in New York?"))
         assertEquals(Ask.Time("Lima"), Cards.ask("what's the time at Lima"))
+        assertEquals(Ask.Time("london"), Cards.ask("what time is it in london"))
         assertNull(Cards.ask("time flies"))
         assertNull(Cards.ask("what time is it"))
     }
@@ -44,7 +45,8 @@ class CardsTest {
         assertEquals(Ask.Currency(2.5, "CAD", "JPY"), Cards.ask("convert 2.5 cad in jpy"))
         assertEquals(Ask.Currency(-5.0, "GBP", "USD"), Cards.ask("-5 GBP into USD?"))
         assertNull(Cards.ask("100 to eur"))
-        assertNull(Cards.ask("5 dollars to euros"))
+        assertEquals(Ask.Currency(5.0, "USD", "EUR"), Cards.ask("5 dollars to euros"))
+        assertEquals(Ask.Etymology("dollar"), Cards.ask("origin of dollar"))
         assertNull(Cards.ask("1000 usd"))
     }
 

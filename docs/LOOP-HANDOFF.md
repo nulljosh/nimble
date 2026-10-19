@@ -8,13 +8,14 @@ v9 is closed by 9.4.4. The next major, 10.0.0, closes v10 and is cut the moment 
 
 ## Where things stand
 
-- Repo: 9.4.4 on main. Tags v8.0.0 through v9.4.4 exist. 7.0.0 and 9.0.0 were skipped on purpose (a 9.0.0 tag would sit below the existing 9.1.0 build and compile the wrong version). CI is green. The Homebrew tap is current.
+- Repo: 9.4.5 on main. Tags v8.0.0 through v9.4.5 exist. 7.0.0 and 9.0.0 were skipped on purpose (a 9.0.0 tag would sit below the existing 9.1.0 build and compile the wrong version). CI is green. The Homebrew tap is current.
 - Quality: the 154-question exam reads 154 of 154. The 1,049-question exam (test/exam-1000.js) reads offline 810 of 810, and the AI slice is run a rotating slice per run. Method and numbers are in docs/BENCHMARK.md.
 - Store, iPhone 9.4.4 (build 202610181545) and Mac 9.4.3 (build 202610181537): both WAITING_FOR_REVIEW. The iPhone 9.4.4 build was rejected once under Guideline 5, because the China AI rule flagged the word "OpenAI" in the store metadata. Fixed 2026-10-18: China mainland removed from availability, "OpenAI" removed from the store description on iPhone and Mac, and the build resubmitted. ASC app id 6807858746.
 - Price: free. Joshua decided it on 2026-10-12. The $0.99 flip waits until the Worker has all-day Groq headroom, and Joshua runs it himself.
 - Worker (nimble-answers.trommatic.workers.dev): Groq answers first, then Workers AI. The Samantha tier is in the code and stays off until the SAMANTHA_URL secret is set. API keys are hand-issued through the API_KEYS secret. The grounding-prompt fix is deployed.
 - Launch drafts are in docs/launch/nimble.md. Nothing is posted.
-- Untracked material in the repo: .asc/signing-new/ holds provisioning profiles and signing files. It is not in .gitignore. Never commit it. Stage by exact path only.
+- .asc/signing-new/ holds provisioning profiles and signing files. It is gitignored. Stage by exact path anyway.
+- QA probe, 2026-10-18: 114 fresh real-user questions (word math, typos, office holders, time, currency) read 105, and all nine misses are fixed in 9.4.5 (everyday word math offline, "what time is it in X", "1 euro to usd", Wikipedia's double space). The probe script lives in the session scratchpad; rebuild one from new phrasings each round rather than rerunning the old one.
 
 ## Next, in order
 

@@ -160,7 +160,8 @@ function graph(expr){
 // ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
 // Don't split after a short capitalized abbreviation (Mr., Dr., St., Ver.).
 const SENTENCE_BREAK = /(?<!\b[A-Z][a-z]{0,2}\.)(?<=[.!?])\s+(?=[A-Z0-9"(])/;
-const first = (t) => t.trim().split(SENTENCE_BREAK)[0];
+// Wikipedia drops the pronunciation parenthetical and leaves "Haiku  is"; one space, never two.
+const first = (t) => t.trim().split(SENTENCE_BREAK)[0].replace(/\s{2,}/g," ");
 
 // Multiple sources: a second source is listed only when its text backs the sentence. Same rule as
 // AnswerSources in Sources/Models/QueryResult.swift; keep the two in step.
@@ -442,7 +443,10 @@ async function etymology(query){
 // ECB codes only: Frankfurter serves these, so a pair of words like "the to and" never reads as money.
 const CCY = new Set("USD EUR GBP JPY CAD AUD CHF CNY INR MXN BRL KRW SEK NOK DKK NZD SGD HKD ZAR TRY PLN CZK HUF ILS THB PHP IDR MYR ISK RON BGN".split(" "));
 // "100 usd to eur" is an amount. "eur to usd" and "eur to usd rate" have no amount: those are a pair quote (markets).
+// Spoken names for the common ones: "1 euro to usd". Not "pound": that is a weight.
+const CCY_NAME={euro:"EUR",euros:"EUR",dollar:"USD",dollars:"USD",yen:"JPY",yuan:"CNY",rupee:"INR",rupees:"INR",peso:"MXN",pesos:"MXN"};
 function currencyExpr(s){
+  s=s.replace(/\b[a-z]+\b/gi,w=>CCY_NAME[w.toLowerCase()]||w);
   const m=/^(?:convert\s+)?(?:(-?\d+(?:\.\d+)?)\s*)?([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})(\s+rate)?\??$/i.exec(s.trim());
   if(!m || U[m[2].toLowerCase()] || U[m[3].toLowerCase()]) return null;
   const pair = m[1]===undefined;
@@ -754,7 +758,7 @@ async function weather(query){
   return asOfNow(card(Math.round(c.temperature_2m), "°C", [loc.name, loc.country, sky, `wind ${Math.round(c.wind_speed_10m)} km/h`].filter(Boolean).join(", "), "Open-Meteo", "https://open-meteo.com"));
 }
 async function localTime(query){
-  const place=/^(?:what(?:'s| is) the )?(?:current )?time (?:in|at) (.+?)\??$/i.exec(query.trim())?.[1]; if(!place) return null;
+  const place=/^(?:what(?:'s|’s| is) the |what )?(?:current |local )?time (?:is it |now )?(?:in|at) (.+?)(?: right now| now)?\??$/i.exec(query.trim())?.[1]; if(!place) return null;
   const loc=await geocode(place); if(!loc?.timezone) return null;
   try{
     const now=new Date(), tz=loc.timezone;

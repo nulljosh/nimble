@@ -13,11 +13,15 @@ extension QueryEngine {
     }
 
     private static func ask(_ input: String) -> Ask? {
+        // Spoken currency names, as on the web: "1 euro to usd". Not "pound": that is a weight.
+        let names = ["euro": "eur", "euros": "eur", "dollar": "usd", "dollars": "usd", "yen": "jpy", "yuan": "cny", "rupee": "inr", "rupees": "inr", "peso": "mxn", "pesos": "mxn"]
         let q = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        func groups(_ pattern: String) -> [String]? {
+        let money = q.split(separator: " ", omittingEmptySubsequences: false).map { names[$0.lowercased()] ?? String($0) }.joined(separator: " ")
+        func groups(_ pattern: String, in text: String? = nil) -> [String]? {
+            let s = text ?? q
             guard let m = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
-                .firstMatch(in: q, range: NSRange(q.startIndex..., in: q)) else { return nil }
-            return (1..<m.numberOfRanges).map { (q as NSString).substring(with: m.range(at: $0)) }
+                .firstMatch(in: s, range: NSRange(s.startIndex..., in: s)) else { return nil }
+            return (1..<m.numberOfRanges).map { (s as NSString).substring(with: m.range(at: $0)) }
         }
         if let g = groups(#"^(?:origin|etymology|root|where\s+does\s+the\s+word)\s+(?:of\s+)?(?:the\s+word\s+)?(.+?)(?:\s+come\s+from)?\s*\??$"#) { return .etymology(g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
         // "news" and "what's happening" with no place are the world feed; a place is the search.
@@ -25,8 +29,8 @@ extension QueryEngine {
         if let g = groups(#"^(?:(?:latest|top|breaking)\s+)?news\s+(?:in|from|for|around)\s+(.+?)\s*\??$"#) { return .news(place: g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
         if let g = groups(#"^what(?:'s|\u2019s| is) happening\s+(?:in|at|around)\s+(.+?)\s*\??$"#) { return .news(place: g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
         if let g = groups(#"^(?:what(?:'s| is) the )?weather (?:in|for|at) (.+?)\??$"#) { return .weather(g[0]) }
-        if let g = groups(#"^(?:what(?:'s| is) the )?(?:current )?time (?:in|at) (.+?)\??$"#) { return .time(g[0]) }
-        if let g = groups(#"^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$"#),
+        if let g = groups(#"^(?:what(?:'s|’s| is) the |what )?(?:current |local )?time (?:is it |now )?(?:in|at) (.+?)(?: right now| now)?\??$"#) { return .time(g[0]) }
+        if let g = groups(#"^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$"#, in: money),
            let amount = Double(g[0]) {
             return .currency(amount: amount, from: g[1].uppercased(), to: g[2].uppercased())
         }
