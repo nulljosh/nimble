@@ -333,7 +333,14 @@ final class AppState {
         let turns = self.turns
         Task { @MainActor [weak self] in
             let note = AIFailureNote()
-            let answer = await engine.query(text, ai: ai, useLLM: useLLM, turns: turns, note: note)
+            var answer = await engine.query(text, ai: ai, useLLM: useLLM, turns: turns, note: note)
+            // The free AI is resting: Apple's on-device model answers instead of the Wikipedia fallback, so a paid app
+            // never says "out of answers". Not for fresh facts ("who is the", "latest"): its training is out of date
+            // there (it named Biden and Trudeau on the exam) and Wikipedia is current.
+            if useLLM, note.aiError != nil, OnDeviceAnswers.isAvailable, !QueryEngine.isTimeSensitive(text),
+               let local = await OnDeviceAnswers.answer(text, turns: turns) {
+                answer = .text(heading: nil, body: local, source: "On device", sourceURL: nil, imageURL: nil)
+            }
             guard let self, generation == self.queryGeneration else { return }
             self.result = answer
             if case .text = answer, QueryEngine.isTimeSensitive(text) { self.textAsOf = Freshness(date: Date(), isDay: false) }
@@ -389,25 +396,6 @@ final class AppState {
             let ok = await QueryEngine.reportWrong(q, answer: body)
             if !ok, q == self?.answeredQuery { self?.reported = false }
         }
-    }
-
-    /// When the shown live answer was fetched (a card, a market, a score, a time-sensitive text), else nil.
-    /// A daily value (a rate's day, a close) is nil: asking again would not change it.
-    var resultAsOf: Date? {
-        switch result {
-        case .card(_, _, _, _, _, let asOf), .market(_, _, _, _, _, let asOf): return asOf.flatMap { $0.isDay ? nil : $0.date }
-        case .sports(let card): return card.asOf?.date
-        case .text: return textAsOf?.date
-        default: return nil
-        }
-    }
-
-    /// Back to the app after a while: a live answer older than ten minutes asks again, so "as of" never goes stale.
-    /// Same rule as the web page's visibilitychange.
-    func refreshIfStale(now: Date = Date()) {
-        guard let asOf = resultAsOf, now.timeIntervalSince(asOf) > 600, !answeredQuery.isEmpty,
-              queryText.trimmingCharacters(in: .whitespacesAndNewlines) == answeredQuery else { return }
-        performQuery()
     }
 
     /// Clearing history also forgets the follow-up context.
