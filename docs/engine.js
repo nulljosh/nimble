@@ -954,7 +954,9 @@ async function gemma(query, out={}){
     ? d.alts.filter(x => x && typeof x.model==="string" && typeof x.answer==="string" && x.answer.trim()).map(x => ({model:x.model, answer:x.answer.trim()})) : [];
   if(alts.length >= 2) return {title:query, body:"", src, disagree:alts, ...(refs.length ? {refs} : {})};
   const a = (text||"").trim();
-  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {}), ...(refs.length ? {refs} : {}), ...why} : null;
+  // A compare ("paris vs london population") also comes as two label/value rows, shown side by side.
+  const rows = Array.isArray(d?.rows) ? d.rows.filter(r => r && typeof r.label==="string" && typeof r.value==="string") : [];
+  return a && a.toUpperCase()!=="UNKNOWN" ? {title:query, body:a, src, ...(image ? {image} : {}), ...(refs.length ? {refs} : {}), ...(rows.length===2 ? {rows} : {}), ...why} : null;
 }
 
 // "Who made you" is about us, not the Wikipedia article for whatever the words match (it used to
@@ -1286,7 +1288,8 @@ async function renderAnswer(query, opts){
     h+='<a class="mockup-link" href="'+hrefOf(href)+'" target="_blank" rel="noopener">'
       +photo
       +(a.icon&&!photo?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
-      +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>'+fresh(a);
+      +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')
+      +(a.rows ? '<div class="compare-rows">'+a.rows.map(r=>'<p><span class="compare-label">'+esc(r.label)+'</span> <strong class="num">'+esc(r.value)+'</strong></p>').join("")+'</div>' : '<p>'+esc(a.body)+'</p>')+'</a>'+fresh(a);
     // "Why this answer": the source line opens the exact text the sentence was cut from, with a link.
     // Shown only when that text says more than the sentence did.
     const why = typeof a.grounding==="string" && a.grounding.trim().length > a.body.trim().length;

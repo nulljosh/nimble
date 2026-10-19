@@ -239,8 +239,9 @@ export async function comparePopulation(q) {
   try {
     const [a, b] = await Promise.all([population(m[1]), population(m[2])]);
     if (!a || !b) return null;
-    const line = (p) => `${p.label}: ${bigNumber(p.n)}${p.year ? ` (${p.year})` : ""}`;
-    return `${line(a)}. ${line(b)}.`;
+    // The sentence is for readers and speech; rows let a client lay the two out side by side.
+    const rows = [a, b].map((p) => ({ label: p.label, value: `${bigNumber(p.n)}${p.year ? ` (${p.year})` : ""}` }));
+    return { answer: rows.map((r) => `${r.label}: ${r.value}.`).join(" "), rows };
   } catch {
     return null;
   }
@@ -517,7 +518,7 @@ async function handle(req, env, ctx) {
     const figure = turns.length ? null : await canadaFigure(q);
     if (figure) return json({ answer: figure, source: "Bank of Canada" });
     const compared = turns.length ? null : await comparePopulation(q);
-    if (compared) return json({ answer: compared, source: "Wikidata" });
+    if (compared) return json({ ...compared, source: "Wikidata" });
     // Past the daily estimate: no AI call. The client shows its resting note because aiError is set.
     const resting = () => json({ answer: "UNKNOWN", resting: true, aiError: BUDGET_NOTE });
     if (overBudget(counts) && !env.GROQ_KEY) return resting();

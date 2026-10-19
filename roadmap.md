@@ -71,7 +71,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 ### v41-v50 Follow-ups: a short conversation, kept on the device
 
 - [ ] [Sonnet] Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
-- [ ] [Sonnet] Compare: "paris vs london population" answers as a two-row card. 2026-10-18: answers on every platform from the Worker, as a sentence ("Paris: 2.1 million (2023). London: 8.9 million (2023)."), from Wikidata with no model. The two-row card layout is still open.
+- [ ] [Sonnet] Compare: "paris vs london population" answers as a two-row card. 2026-10-18: answers on every platform from the Worker, as a sentence ("Paris: 2.1 million (2023). London: 8.9 million (2023)."), from Wikidata with no model. 2026-10-19: the Worker also sends the two cities as rows, and the web card lays them out side by side. The Apple and Kotlin cards are next.
 - [ ] [Sonnet] Math shows its steps for algebra and calculus, offline.
 - [ ] [Haiku] Graphs: pinch, pan and trace a point on every surface.
 

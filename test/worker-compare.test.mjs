@@ -26,9 +26,11 @@ function wikidata() {
 test("both populations, the latest year first, preferred on a tie", async () => {
   wikidata();
   const want = "Paris: 2.1 million (2023). London: 8.9 million (2023).";
-  assert.equal(await comparePopulation("paris vs london population"), want);
-  assert.equal(await comparePopulation("population of paris vs london?"), want);
-  assert.equal(await comparePopulation("canada vs paris population"), "Canada: 40 million (2023). Paris: 2.1 million (2023).");
+  const got = await comparePopulation("paris vs london population");
+  assert.equal(got.answer, want);
+  assert.deepEqual(got.rows, [{ label: "Paris", value: "2.1 million (2023)" }, { label: "London", value: "8.9 million (2023)" }]);
+  assert.equal((await comparePopulation("population of paris vs london?")).answer, want);
+  assert.equal((await comparePopulation("canada vs paris population")).answer, "Canada: 40 million (2023). Paris: 2.1 million (2023).");
 });
 
 test("not a comparison, or a name Wikidata does not know, is null", async () => {
