@@ -58,7 +58,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 ### v21-v30 Live: the numbers people check every day
 
-- [ ] [Sonnet] Canada and BC live figures: CPI, policy rate, minimum wage by province (StatCan / Bank of Canada). CPI and the policy rate answer from Bank of Canada Valet since 2026-10-18 (canadaFigure); minimum wage still comes from the models.
+- [x] [Sonnet] Canada and BC live figures: CPI, policy rate, minimum wage by province (StatCan / Bank of Canada). CPI and the policy rate answer from Bank of Canada Valet since 2026-10-18 (canadaFigure); minimum wage for every province, territory and the federal rate answers from the Government of Canada open data table since 2026-10-19 (minimumWage), no model.
 - [ ] [Haiku] Sports scores beyond ESPN's top leagues: NHL, MLS, CFL, with the next game when none is live. 2026-10-18: NHL and MLS already answer on every platform. CFL has no live feed (ESPN's CFL scoreboard is frozen at the 2022 season), so it waits for another free source. Next game shipped 2026-10-18 on web, Apple and Kotlin: after a Final, the team's next game from its ESPN page is a second row.
 
 ### v31-v40 Offline: most questions need no network

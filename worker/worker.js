@@ -212,6 +212,38 @@ export async function canadaFigure(q) {
     return null;
   }
 }
+// "minimum wage in bc": the rate in force today from the Government of Canada's open data table, no model.
+// Rows are jurisdiction,effective_date,$wage,note. The table has slips (BC's 2025 rate is dated 2026-06-01 beside
+// the real 2026 one), so on a tied date the later row wins. A bare "canada" means the federal rate.
+const MIN_WAGE_CSV = "https://open.canada.ca/data/dataset/390ee890-59bb-4f34-a37c-9732781ef8a0/resource/2ddfbfd4-8347-467d-b6d5-797c5421f4fb/download/wages_general-2.csv";
+// Short forms ("bc", "on") count only as "in bc" or at the start: "minimum wage on sundays" is not Ontario.
+const PLACES = [
+  ["British Columbia", "british columbia", "b\\.?c"], ["Alberta", "alberta", "ab"], ["Saskatchewan", "saskatchewan", "sk"],
+  ["Manitoba", "manitoba", "mb"], ["Ontario", "ontario", "on"], ["Quebec", "qu[eé]bec", "qc"],
+  ["New Brunswick", "new brunswick", "nb"], ["Nova Scotia", "nova scotia", "ns"], ["Prince Edward Island", "prince edward island", "pei"],
+  ["Newfoundland and Labrador", "newfoundland|labrador", "nl"], ["Yukon", "yukon", "yt"], ["Northwest Territories", "northwest territories", "nwt"],
+  ["Nunavut", "nunavut", "nu"], ["Federal", "federal|canada", "fed"],
+].map(([name, long, short]) => [name, new RegExp(`\\b(${long})\\b|(^|\\b(in|for)\\s)(${short})\\b`)]);
+export async function minimumWage(q, today = new Date().toISOString().slice(0, 10)) {
+  const s = q.toLowerCase().trim();
+  if (!/\bminimum wage\b/.test(s)) return null;
+  const place = PLACES.find(([, re]) => re.test(s))?.[0];
+  if (!place) return null;
+  try {
+    const text = await (await fetch(MIN_WAGE_CSV, { signal: AbortSignal.timeout(4000), cf: { cacheTtl: 86400 } })).text();
+    let best = null;
+    for (const line of text.split(/\r?\n/)) {
+      const m = /^([^,]+),(\d{4}-\d{2}-\d{2}),\$?([\d.]+)/.exec(line.replace(/^\uFEFF/, ""));
+      if (m && m[1] === place && m[2] <= today && (!best || m[2] >= best.date)) best = { date: m[2], wage: m[3] };
+    }
+    if (!best) return null;
+    const since = new Date(best.date + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+    const who = place === "Federal" ? "The federal minimum wage in Canada" : `${place}'s minimum wage`;
+    return `${who} is $${Number(best.wage).toFixed(2)} an hour, since ${since}.`;
+  } catch {
+    return null;
+  }
+}
 // "paris vs london population": both numbers from Wikidata (P1082), no model. Each name is Wikidata's top search hit,
 // so a bare "new york" can land on the state. No "and": "bosnia and herzegovina" is one country.
 // ponytail: top hit only; add a "city" hint or a type check (P31) if wrong-entity picks show up in reports.
@@ -517,6 +549,8 @@ async function handle(req, env, ctx) {
     }
     const figure = turns.length ? null : await canadaFigure(q);
     if (figure) return json({ answer: figure, source: "Bank of Canada" });
+    const wage = turns.length ? null : await minimumWage(q);
+    if (wage) return json({ answer: wage, source: "Government of Canada" });
     const compared = turns.length ? null : await comparePopulation(q);
     if (compared) return json({ ...compared, source: "Wikidata" });
     // Past the daily estimate: no AI call. The client shows its resting note because aiError is set.
