@@ -485,7 +485,7 @@ footer {
     <p data-i18n="Math and units answer on your device. Everything else, one sentence with a source.">Math and units answer on your device. Everything else, one sentence with a source.</p>
     <div class="hero-buttons">
       <a href="/app" class="btn btn-dark" data-i18n="Open the web app">Open the web app</a>
-      <a href="https://github.com/nulljosh/nimble/releases/latest" class="btn btn-outline" data-asset="macOS.zip" id="dl" data-i18n="Download for Mac">Download for Mac</a>
+      <a href="https://apps.apple.com/app/nimble-answers/id6807858746" class="btn btn-outline" id="dl">App Store</a>
     </div>
     <div class="demo-wrap">
     <form class="mockup" id="demo" autocomplete="off">
@@ -692,9 +692,9 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
   var tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
   var names={iphone:'iPhone',android:'Android',mac:'Mac',windows:'Windows'}, dev=document.documentElement.dataset.device;
   var b=document.getElementById('dl');
-  if(dev==='windows'){b.dataset.i18n='Download for Windows';b.textContent=I18N.t('Download for Windows');b.dataset.asset='.msi';}
-  else if(dev==='android'){b.dataset.i18n='Download for Android';b.textContent=I18N.t('Download for Android');b.dataset.asset='.apk';}
-  else if(dev==='iphone'){b.removeAttribute('data-i18n');b.removeAttribute('data-asset');b.textContent='App Store';b.href='https://apps.apple.com/app/nimble-answers/id6807858746';}
+  if(dev==='windows'){b.href='https://github.com/nulljosh/nimble/releases/latest';b.dataset.i18n='Download for Windows';b.textContent=I18N.t('Download for Windows');b.dataset.asset='.msi';}
+  else if(dev==='android'){b.href='https://github.com/nulljosh/nimble/releases/latest';b.dataset.i18n='Download for Android';b.textContent=I18N.t('Download for Android');b.dataset.asset='.apk';}
+  // iPhone and Mac keep the App Store link (one listing for both).
   var f=document.getElementById('demo'), q=document.getElementById('demoQ'), r=document.getElementById('demoR'), c=document.getElementById('demoC'), g=document.getElementById('demoG');
   // Example queries cycle through the empty field; return runs whichever is showing.
   var examples=[g.textContent], idx=0;
