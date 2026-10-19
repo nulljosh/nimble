@@ -59,6 +59,12 @@ function post(q, { answers = {}, turns, env: extra = {} } = {}) {
 
 test("normalize: trims, lowercases and collapses whitespace", () => {
   assert.equal(normalizeQuestion("  Capital   OF\tFrance  "), "capital of france");
+  assert.equal(normalizeQuestion("What\u2019s the capital of France?"), "what is the capital of france");
+  assert.equal(normalizeQuestion("whats the capital of france ?!"), "what is the capital of france");
+  assert.equal(normalizeQuestion("Who's the PM of Canada."), "who is the pm of canada");
+  // Words that only start like a question word are left alone.
+  assert.equal(normalizeQuestion("whatsapp founder"), "whatsapp founder");
+  assert.equal(normalizeQuestion("1.5 + 2.5"), "1.5 + 2.5");
 });
 
 test("cache key: spacing and case do not change it, different questions do", () => {

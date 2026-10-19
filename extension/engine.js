@@ -273,11 +273,13 @@ async function summaryTopic(title){
 }
 // The photo and the grounding are picked separately. The photo comes only from the entities the answer names
 // (photoFromEntity). The grounding text can still come from the question's search hits, as "Why this answer".
-async function topicFor(query, body){
+// The question's Wikipedia search needs only the question, so answer() starts it next to the AI call and hands it in.
+const topicSearch = query => getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=3&origin=*`);
+async function topicFor(query, body, searching){
   if(NO_PHOTO_Q.test(query)) return null;
   const ents = answerEntities(query, body);
   const [search, ...first] = await Promise.all([
-    getJSON(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=3&origin=*`),
+    searching || topicSearch(query),
     ...ents.map(e=>summaryTopic(e.name)),
   ]);
   const answerWords = new Set(keyWords(body||""));
@@ -1093,6 +1095,8 @@ async function answer(query, opts={}){
   }
   // A model's number is an unsourced guess: for numeric answers prefer DDG when it has one.
   const aiNote = {};
+  // Started now, read only if the answer needs a photo or its source text: it used to wait for the AI (0.3 to 0.7 s more).
+  const searching = NO_PHOTO_Q.test(query) ? null : topicSearch(query).catch(()=>null);
   let [ai, dd] = await Promise.all([gemma(query, aiNote).catch(()=>null), ddg(query).catch(()=>null)]);
   // The models clash. DDG's abstract that backs one of the two settles it (the normal path below); otherwise both answers show, with no pick and no photo.
   if(ai && ai.disagree){
@@ -1107,7 +1111,7 @@ async function answer(query, opts={}){
   let hit = (ai && /\d/.test(ai.body) && dd && /\d/.test(dd.body)) ? {...dd, image: dd.image || ai.image || null} : labelIfGeneric(ai || dd || await firstOf(query, [wiki]), query);
   // The answer's Wikipedia topic can supply a picture (when the proxy sent none) and the text behind the sentence (when nothing else did).
   if(hit && (!hit.image || !hit.grounding)){
-    const t = await topicFor(query, hit.body).catch(()=>null);
+    const t = await topicFor(query, hit.body, searching).catch(()=>null);
     if(t){
       if(!hit.image && t.photo) hit = {...hit, image:t.photo};
       if(!hit.grounding && t.grounding) hit = {...hit, grounding:t.grounding.extract, groundingTitle:t.grounding.title, groundingUrl:t.grounding.url};
@@ -1122,13 +1126,13 @@ async function answer(query, opts={}){
   return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2), ...(!ai && aiNote.aiError ? {aiError:aiNote.aiError} : {}), ...(isTimeSensitive(query) ? {asOf:new Date().toISOString()} : {})} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
 }
 
-// "Tell me more": three sentences from the proxy for a question already answered, with the pages behind them.
-// Null when the proxy has nothing more to say; the one-liner then stands.
 // "This is wrong": the question and the answer text go to the review list, nothing else. True when it was taken.
 async function reportWrong(query, answer){
   const d = await getJSON(ANSWER_PROXY+"/report", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({q:query, answer:String(answer||"").slice(0,500)})});
   return d?.ok === true;
 }
+// "Tell me more": three sentences from the proxy for a question already answered, with the pages behind them.
+// Null when the proxy has nothing more to say; the one-liner then stands.
 async function tellMore(query){
   const d = await getJSON(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({q:query, more:true})});
   const body = typeof d?.answer==="string" ? d.answer.trim() : "";

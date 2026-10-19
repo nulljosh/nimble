@@ -254,7 +254,13 @@ export const isTimeSensitive = (q) => TIMELY.test(q);
 // lone model guesses, so they get the second opinion (and the Sources disagree card when the two clash).
 const ORDINAL = /\b(first|last|earliest|original|founding)\b/i;
 export const needsSecondModel = (q) => isTimeSensitive(q) || WHEN.test(q) || /\d/.test(q) || ORDINAL.test(q);
-export const normalizeQuestion = (q) => String(q).trim().toLowerCase().replace(/\s+/g, " ");
+// The cache key only: "What's the capital of France?" and "what is the capital of france" are one answer.
+// Case, spacing, curly quotes, a trailing ?/!/. and the short forms of what/who/where/when/how fold together.
+export const normalizeQuestion = (q) => String(q).trim().toLowerCase()
+  .replace(/[\u2018\u2019]/g, "'")
+  .replace(/\b(what|who|where|when|how)(?:'s|s)\b/g, "$1 is")
+  .replace(/[\s?!.]+$/, "")
+  .replace(/\s+/g, " ");
 // Bump PROMPT_V when the prompt changes: answers written under the old prompt must not outlive it in the cache.
 const PROMPT_V = 4;
 export const cacheUrl = (origin, q) => `${origin}/__nimble/answer?v=${PROMPT_V}&q=${encodeURIComponent(normalizeQuestion(q))}`;
@@ -620,7 +626,10 @@ export default {
       if (/\b(the|provided|this|given) reference\b(?! (daily|intake|value|range|dose|amount))|\breference text\b|\bprovided (text|context)\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) { console.log("cleanReply rejected:", text.slice(0, 200)); return "UNKNOWN"; }
       // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
       // The date is ours, not the answer's; drop the preamble and recapitalize.
-      const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "");
+      // A model sometimes says it twice ("William Shakespeare.William Shakespeare."): one copy. Only a full sentence
+      // repeated whole, so "Bora Bora" stays.
+      const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "")
+        .replace(/^(.{3,}?[.!?])\s*\1$/s, "$1");
       // A reply with no letter or digit (a stray "*" from a reasoning trace) is no answer.
       return /[a-z0-9]/i.test(clean) ? clean[0].toUpperCase() + clean.slice(1) : "UNKNOWN";
     };
