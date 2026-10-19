@@ -527,7 +527,7 @@ export default {
       // "Reference" alone is a normal word: a haiku's "seasonal reference" turned a good answer into UNKNOWN.
       // A good answer that ends "..., according to the reference" keeps its figure; only the attribution goes.
       text = text.replace(/,?\s+(according to|per|based on|as (stated|given|noted) in|from) the (provided |given )?reference( text)?(?=[.,;!]|$)/i, "");
-      if (/\b(the|provided|this|given) reference\b(?! (daily|intake|value|range|dose|amount))|\breference text\b|\bprovided (text|context)\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) return "UNKNOWN";
+      if (/\b(the|provided|this|given) reference\b(?! (daily|intake|value|range|dose|amount))|\breference text\b|\bprovided (text|context)\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) { console.log("cleanReply rejected:", text.slice(0, 200)); return "UNKNOWN"; }
       // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
       // The date is ours, not the answer's; drop the preamble and recapitalize.
       const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "");
@@ -554,6 +554,14 @@ export default {
     const second = await askCounted(GEMMA);
 
     // The client shows `source` under the answer, so it names only the models that actually produced it.
+    // A reference with no figure makes both models say UNKNOWN to a settled question ("how much vitamin d do
+    // adults need" got the deficiency intro). One more try without the reference, never for a changing fact.
+    if (first === "UNKNOWN" && second === "UNKNOWN" && context && !isTimeSensitive(q) && !more && !overBudget(counts)) {
+      messages[0] = { role: "system", content: `${SYSTEM} Today is ${today}.` };
+      const g = env.GROQ_KEY ? await askGroq() : null;
+      const memory = g !== null ? g : await askCounted(QWEN);
+      if (memory !== "UNKNOWN") return finish({ answer: memory, source: g !== null ? "Groq" : "Qwen" });
+    }
     if (first === "UNKNOWN" && second === "UNKNOWN")
       return finish({ answer: "UNKNOWN", ...(aiFailures.length ? { aiError: aiFailures[aiFailures.length - 1] } : {}) });
     if (first === "UNKNOWN") return finish({ answer: second, source: "Gemma" });
