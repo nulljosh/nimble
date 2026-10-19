@@ -8,7 +8,13 @@
     "de": "Laut fragen",
     "pt": "Perguntar em voz alta",
     "hi": "बोलकर पूछें",
-    "ja": "声で質問"
+    "ja": "声で質問",
+    "it": "Chiedi ad alta voce",
+    "ko": "소리 내어 묻기",
+    "ru": "Спросить вслух",
+    "nl": "Vraag hardop",
+    "tr": "Sesli sor",
+    "pl": "Zapytaj na głos"
   },
   "Back to search": {
     "en": "Back to search",
@@ -19,7 +25,13 @@
     "de": "Zurück zur Suche",
     "pt": "Voltar à busca",
     "hi": "खोज पर वापस",
-    "ja": "検索に戻る"
+    "ja": "検索に戻る",
+    "it": "Torna alla ricerca",
+    "ko": "검색으로 돌아가기",
+    "ru": "Назад к поиску",
+    "nl": "Terug naar zoeken",
+    "tr": "Aramaya dön",
+    "pl": "Wróć do wyszukiwania"
   },
   "Cancel": {
     "en": "Cancel",
@@ -30,7 +42,13 @@
     "de": "Abbrechen",
     "pt": "Cancelar",
     "hi": "रद्द करें",
-    "ja": "キャンセル"
+    "ja": "キャンセル",
+    "it": "Annulla",
+    "ko": "취소",
+    "ru": "Отмена",
+    "nl": "Annuleer",
+    "tr": "Vazgeç",
+    "pl": "Anuluj"
   },
   "No questions yet. Ask one and it lands here.": {
     "en": "No questions yet. Ask one and it lands here.",
@@ -41,7 +59,13 @@
     "de": "Noch keine Fragen. Stell eine, dann erscheint sie hier.",
     "pt": "Nenhuma pergunta ainda. Faça uma e ela aparece aqui.",
     "hi": "अभी कोई सवाल नहीं। एक पूछिए, वह यहाँ दिखेगा।",
-    "ja": "まだ質問がありません。質問するとここに表示されます。"
+    "ja": "まだ質問がありません。質問するとここに表示されます。",
+    "it": "Ancora nessuna domanda. Fanne una e arriva qui.",
+    "ko": "아직 질문이 없습니다. 질문하면 여기에 표시됩니다.",
+    "ru": "Вопросов пока нет. Задайте вопрос, и он появится здесь.",
+    "nl": "Nog geen vragen. Stel er een en hij komt hier.",
+    "tr": "Henüz soru yok. Bir soru sor, buraya gelir.",
+    "pl": "Brak pytań. Zadaj pytanie, a pojawi się tutaj."
   },
   "Open {s}": {
     "en": "Open {s}",
@@ -52,7 +76,13 @@
     "de": "{s} öffnen",
     "pt": "Abrir {s}",
     "hi": "{s} खोलें",
-    "ja": "{s}を開く"
+    "ja": "{s}を開く",
+    "it": "Apri {s}",
+    "ko": "{s} 열기",
+    "ru": "Открыть {s}",
+    "nl": "Open {s}",
+    "tr": "{s} aç",
+    "pl": "Otwórz {s}"
   },
   "Source: {s}": {
     "en": "Source: {s}",
@@ -63,7 +93,13 @@
     "de": "Quelle: {s}",
     "pt": "Fonte: {s}",
     "hi": "स्रोत: {s}",
-    "ja": "情報源：{s}"
+    "ja": "情報源：{s}",
+    "it": "Fonte: {s}",
+    "ko": "출처: {s}",
+    "ru": "Источник: {s}",
+    "nl": "Bron: {s}",
+    "tr": "Kaynak: {s}",
+    "pl": "Źródło: {s}"
   },
   "as of {s}": {
     "en": "as of {s}",
@@ -74,7 +110,13 @@
     "de": "Stand {s}",
     "pt": "em {s}",
     "hi": "{s} तक",
-    "ja": "{s}時点"
+    "ja": "{s}時点",
+    "it": "al {s}",
+    "ko": "{s} 기준",
+    "ru": "на {s}",
+    "nl": "per {s}",
+    "tr": "{s} itibarıyla",
+    "pl": "stan na {s}"
   },
   "Quote unavailable right now": {
     "en": "Quote unavailable right now",
@@ -85,7 +127,13 @@
     "de": "Kurs derzeit nicht verfügbar",
     "pt": "Cotação indisponível no momento",
     "hi": "अभी भाव उपलब्ध नहीं",
-    "ja": "現在、相場を取得できません"
+    "ja": "現在、相場を取得できません",
+    "it": "Quotazione non disponibile al momento",
+    "ko": "지금은 시세를 볼 수 없습니다",
+    "ru": "Котировка сейчас недоступна",
+    "nl": "Koers nu niet beschikbaar",
+    "tr": "Fiyat şu an kullanılamıyor",
+    "pl": "Notowanie jest teraz niedostępne"
   },
   "Scores unavailable right now": {
     "en": "Scores unavailable right now",
@@ -96,7 +144,13 @@
     "de": "Ergebnisse derzeit nicht verfügbar",
     "pt": "Placares indisponíveis no momento",
     "hi": "अभी स्कोर उपलब्ध नहीं",
-    "ja": "現在、スコアを取得できません"
+    "ja": "現在、スコアを取得できません",
+    "it": "Risultati non disponibili al momento",
+    "ko": "지금은 점수를 볼 수 없습니다",
+    "ru": "Счёт сейчас недоступен",
+    "nl": "Scores nu niet beschikbaar",
+    "tr": "Skorlar şu an kullanılamıyor",
+    "pl": "Wyniki są teraz niedostępne"
   },
   "Open ESPN scoreboard": {
     "en": "Open ESPN scoreboard",
@@ -107,7 +161,13 @@
     "de": "ESPN-Anzeigetafel öffnen",
     "pt": "Abrir o placar da ESPN",
     "hi": "ESPN स्कोरबोर्ड खोलें",
-    "ja": "ESPNスコアボードを開く"
+    "ja": "ESPNスコアボードを開く",
+    "it": "Apri il tabellone ESPN",
+    "ko": "ESPN 스코어보드 열기",
+    "ru": "Открыть табло ESPN",
+    "nl": "Open ESPN-scorebord",
+    "tr": "ESPN skor tablosunu aç",
+    "pl": "Otwórz tablicę wyników ESPN"
   },
   "Math runs offline.": {
     "en": "Math runs offline.",
@@ -118,7 +178,13 @@
     "de": "Rechnen läuft offline.",
     "pt": "As contas rodam offline.",
     "hi": "गणित ऑफ़लाइन चलता है।",
-    "ja": "計算はオフラインで動きます。"
+    "ja": "計算はオフラインで動きます。",
+    "it": "La matematica funziona offline.",
+    "ko": "수학은 오프라인에서 작동합니다.",
+    "ru": "Математика работает офлайн.",
+    "nl": "Rekenen werkt offline.",
+    "tr": "Matematik çevrimdışı çalışır.",
+    "pl": "Matematyka działa offline."
   },
   "Clear history": {
     "en": "Clear history",
@@ -129,7 +195,13 @@
     "de": "Verlauf löschen",
     "pt": "Limpar histórico",
     "hi": "इतिहास मिटाएँ",
-    "ja": "履歴を消去"
+    "ja": "履歴を消去",
+    "it": "Cancella cronologia",
+    "ko": "기록 지우기",
+    "ru": "Очистить историю",
+    "nl": "Wis geschiedenis",
+    "tr": "Geçmişi temizle",
+    "pl": "Wyczyść historię"
   },
   "Select": {
     "en": "Select",
@@ -140,7 +212,13 @@
     "de": "Auswählen",
     "pt": "Selecionar",
     "hi": "चुनें",
-    "ja": "選択"
+    "ja": "選択",
+    "it": "Seleziona",
+    "ko": "선택",
+    "ru": "Выбрать",
+    "nl": "Selecteer",
+    "tr": "Seç",
+    "pl": "Zaznacz"
   },
   "{s} theme": {
     "en": "{s} theme",
@@ -151,7 +229,13 @@
     "de": "Design {s}",
     "pt": "Tema {s}",
     "hi": "{s} थीम",
-    "ja": "{s}テーマ"
+    "ja": "{s}テーマ",
+    "it": "Tema {s}",
+    "ko": "{s} 테마",
+    "ru": "Тема {s}",
+    "nl": "Thema {s}",
+    "tr": "{s} teması",
+    "pl": "Motyw {s}"
   },
   "Hide why this answer": {
     "en": "Hide why this answer",
@@ -162,7 +246,13 @@
     "de": "Begründung ausblenden",
     "pt": "Ocultar por que esta resposta",
     "hi": "इस जवाब का कारण छिपाएँ",
-    "ja": "この回答の理由を隠す"
+    "ja": "この回答の理由を隠す",
+    "it": "Nascondi perché questa risposta",
+    "ko": "이 답변의 이유 숨기기",
+    "ru": "Скрыть, почему такой ответ",
+    "nl": "Verberg waarom dit antwoord",
+    "tr": "Bu yanıtın nedenini gizle",
+    "pl": "Ukryj, skąd ta odpowiedź"
   },
   "Why this answer": {
     "en": "Why this answer",
@@ -173,7 +263,13 @@
     "de": "Warum diese Antwort",
     "pt": "Por que esta resposta",
     "hi": "यह जवाब क्यों",
-    "ja": "この回答の理由"
+    "ja": "この回答の理由",
+    "it": "Perché questa risposta",
+    "ko": "이 답변의 이유",
+    "ru": "Почему такой ответ",
+    "nl": "Waarom dit antwoord",
+    "tr": "Bu yanıtın nedeni",
+    "pl": "Skąd ta odpowiedź"
   },
   "Read on Wikipedia": {
     "en": "Read on Wikipedia",
@@ -184,7 +280,13 @@
     "de": "Auf Wikipedia lesen",
     "pt": "Ler na Wikipedia",
     "hi": "Wikipedia पर पढ़ें",
-    "ja": "Wikipediaで読む"
+    "ja": "Wikipediaで読む",
+    "it": "Leggi su Wikipedia",
+    "ko": "Wikipedia에서 읽기",
+    "ru": "Читать в Wikipedia",
+    "nl": "Lees op Wikipedia",
+    "tr": "Wikipedia'da oku",
+    "pl": "Czytaj w Wikipedii"
   },
   "Private mode": {
     "en": "Private mode",
@@ -195,7 +297,13 @@
     "de": "Privater Modus",
     "pt": "Modo privado",
     "hi": "निजी मोड",
-    "ja": "プライベートモード"
+    "ja": "プライベートモード",
+    "it": "Modalità privata",
+    "ko": "비공개 모드",
+    "ru": "Приватный режим",
+    "nl": "Privémodus",
+    "tr": "Gizli mod",
+    "pl": "Tryb prywatny"
   },
   "When on, no question leaves this device. Math and the offline answers still work.": {
     "en": "When on, no question leaves this device. Math and the offline answers still work.",
@@ -206,7 +314,13 @@
     "de": "Wenn aktiv, verlässt keine Frage dieses Gerät. Rechnen und Offline-Antworten funktionieren weiter.",
     "pt": "Ligado, nenhuma pergunta sai deste aparelho. Contas e respostas offline continuam funcionando.",
     "hi": "चालू होने पर कोई सवाल इस डिवाइस से बाहर नहीं जाता। गणित और ऑफ़लाइन जवाब फिर भी चलते हैं।",
-    "ja": "オンのとき、質問はこの端末の外に出ません。計算とオフライン回答は使えます。"
+    "ja": "オンのとき、質問はこの端末の外に出ません。計算とオフライン回答は使えます。",
+    "it": "Se attiva, nessuna domanda lascia questo dispositivo. La matematica e le risposte offline funzionano ancora.",
+    "ko": "켜면 어떤 질문도 이 기기 밖으로 나가지 않습니다. 수학과 오프라인 답변은 계속 작동합니다.",
+    "ru": "Если включено, ни один вопрос не покидает это устройство. Математика и офлайн-ответы работают.",
+    "nl": "Als dit aan staat, verlaat geen enkele vraag dit apparaat. Rekenen en de offline antwoorden werken nog.",
+    "tr": "Açıkken hiçbir soru bu cihazdan çıkmaz. Matematik ve çevrimdışı yanıtlar çalışmaya devam eder.",
+    "pl": "Gdy włączony, żadne pytanie nie opuszcza tego urządzenia. Matematyka i odpowiedzi offline nadal działają."
   },
   "Private mode: on": {
     "en": "Private mode: on",
@@ -217,7 +331,13 @@
     "de": "Privater Modus: an",
     "pt": "Modo privado: ligado",
     "hi": "निजी मोड: चालू",
-    "ja": "プライベートモード：オン"
+    "ja": "プライベートモード：オン",
+    "it": "Modalità privata: attiva",
+    "ko": "비공개 모드: 켬",
+    "ru": "Приватный режим: вкл",
+    "nl": "Privémodus: aan",
+    "tr": "Gizli mod: açık",
+    "pl": "Tryb prywatny: wł."
   },
   "Private mode: off": {
     "en": "Private mode: off",
@@ -228,7 +348,13 @@
     "de": "Privater Modus: aus",
     "pt": "Modo privado: desligado",
     "hi": "निजी मोड: बंद",
-    "ja": "プライベートモード：オフ"
+    "ja": "プライベートモード：オフ",
+    "it": "Modalità privata: disattiva",
+    "ko": "비공개 모드: 끔",
+    "ru": "Приватный режим: выкл",
+    "nl": "Privémodus: uit",
+    "tr": "Gizli mod: kapalı",
+    "pl": "Tryb prywatny: wył."
   },
   "Offline answers": {
     "en": "Offline answers",
@@ -239,7 +365,13 @@
     "de": "Offline-Antworten",
     "pt": "Respostas offline",
     "hi": "ऑफ़लाइन जवाब",
-    "ja": "オフライン回答"
+    "ja": "オフライン回答",
+    "it": "Risposte offline",
+    "ko": "오프라인 답변",
+    "ru": "Офлайн-ответы",
+    "nl": "Offline antwoorden",
+    "tr": "Çevrimdışı yanıtlar",
+    "pl": "Odpowiedzi offline"
   },
   "The opening lines of the 9,000 most-read Wikipedia articles. Download once, on your tap. Answers work with no network.": {
     "en": "The opening lines of the 9,000 most-read Wikipedia articles. Download once, on your tap. Answers work with no network.",
@@ -250,7 +382,13 @@
     "de": "Die ersten Zeilen der 9.000 meistgelesenen Wikipedia-Artikel. Einmal laden, wenn du tippst. Antworten funktionieren ohne Netz.",
     "pt": "As primeiras linhas dos 9.000 artigos mais lidos da Wikipedia. Baixe uma vez, quando você tocar. As respostas funcionam sem rede.",
     "hi": "Wikipedia के सबसे ज़्यादा पढ़े गए 9,000 लेखों की शुरुआती पंक्तियाँ। आपके टैप करने पर एक बार डाउनलोड करें। बिना नेटवर्क के भी जवाब मिलते हैं।",
-    "ja": "最も読まれているWikipedia記事9,000件の冒頭部分。タップしたときに一度だけダウンロードします。ネットワークなしでも回答できます。"
+    "ja": "最も読まれているWikipedia記事9,000件の冒頭部分。タップしたときに一度だけダウンロードします。ネットワークなしでも回答できます。",
+    "it": "Le prime righe dei 9.000 articoli più letti di Wikipedia. Scarica una volta, con un tocco. Le risposte funzionano senza rete.",
+    "ko": "가장 많이 읽힌 Wikipedia 문서 9,000개의 첫 줄. 탭 한 번으로 한 번만 다운로드하세요. 네트워크 없이도 답합니다.",
+    "ru": "Первые строки 9 000 самых читаемых статей Wikipedia. Скачайте один раз, по нажатию. Ответы работают без сети.",
+    "nl": "De openingsregels van de 9.000 meest gelezen Wikipedia-artikelen. Eén keer downloaden, met een tik. Antwoorden werken zonder netwerk.",
+    "tr": "En çok okunan 9.000 Wikipedia makalesinin ilk satırları. Tek dokunuşla bir kez indir. Yanıtlar ağ olmadan çalışır.",
+    "pl": "Pierwsze zdania 9000 najczęściej czytanych artykułów Wikipedii. Pobierz raz, jednym stuknięciem. Odpowiedzi działają bez sieci."
   },
   "Download ({s})": {
     "en": "Download ({s})",
@@ -261,7 +399,13 @@
     "de": "Herunterladen ({s})",
     "pt": "Baixar ({s})",
     "hi": "डाउनलोड ({s})",
-    "ja": "ダウンロード（{s}）"
+    "ja": "ダウンロード（{s}）",
+    "it": "Scarica ({s})",
+    "ko": "다운로드 ({s})",
+    "ru": "Скачать ({s})",
+    "nl": "Download ({s})",
+    "tr": "İndir ({s})",
+    "pl": "Pobierz ({s})"
   },
   "Downloading.": {
     "en": "Downloading.",
@@ -272,7 +416,13 @@
     "de": "Wird geladen.",
     "pt": "Baixando.",
     "hi": "डाउनलोड हो रहा है।",
-    "ja": "ダウンロード中。"
+    "ja": "ダウンロード中。",
+    "it": "Download in corso.",
+    "ko": "다운로드 중.",
+    "ru": "Скачивание.",
+    "nl": "Downloaden.",
+    "tr": "İndiriliyor.",
+    "pl": "Pobieranie."
   },
   "Downloading. {a} of {b}": {
     "en": "Downloading. {a} of {b}",
@@ -283,7 +433,13 @@
     "de": "Wird geladen. {a} von {b}",
     "pt": "Baixando. {a} de {b}",
     "hi": "डाउनलोड हो रहा है। {b} में से {a}",
-    "ja": "ダウンロード中。{a} / {b}"
+    "ja": "ダウンロード中。{a} / {b}",
+    "it": "Download in corso. {a} di {b}",
+    "ko": "다운로드 중. {a}/{b}",
+    "ru": "Скачивание. {a} из {b}",
+    "nl": "Downloaden. {a} van {b}",
+    "tr": "İndiriliyor. {a} / {b}",
+    "pl": "Pobieranie. {a} z {b}"
   },
   "Remove": {
     "en": "Remove",
@@ -294,7 +450,13 @@
     "de": "Entfernen",
     "pt": "Remover",
     "hi": "हटाएँ",
-    "ja": "削除"
+    "ja": "削除",
+    "it": "Rimuovi",
+    "ko": "제거",
+    "ru": "Удалить",
+    "nl": "Verwijder",
+    "tr": "Kaldır",
+    "pl": "Usuń"
   },
   "Download failed. Check the connection and try again.": {
     "en": "Download failed. Check the connection and try again.",
@@ -305,7 +467,13 @@
     "de": "Download fehlgeschlagen. Prüf die Verbindung und versuch es nochmal.",
     "pt": "O download falhou. Verifique a conexão e tente de novo.",
     "hi": "डाउनलोड विफल रहा। कनेक्शन जाँचें और फिर कोशिश करें।",
-    "ja": "ダウンロードに失敗しました。接続を確認してもう一度お試しください。"
+    "ja": "ダウンロードに失敗しました。接続を確認してもう一度お試しください。",
+    "it": "Download non riuscito. Controlla la connessione e riprova.",
+    "ko": "다운로드에 실패했습니다. 연결을 확인하고 다시 시도하세요.",
+    "ru": "Не удалось скачать. Проверьте подключение и попробуйте снова.",
+    "nl": "Download mislukt. Controleer de verbinding en probeer het opnieuw.",
+    "tr": "İndirme başarısız. Bağlantıyı denetleyip yeniden dene.",
+    "pl": "Pobieranie nie powiodło się. Sprawdź połączenie i spróbuj ponownie."
   },
   "Ready. {a} articles, as of {b}.": {
     "en": "Ready. {a} articles, as of {b}.",
@@ -316,7 +484,13 @@
     "de": "Bereit. {a} Artikel, Stand {b}.",
     "pt": "Pronto. {a} artigos, em {b}.",
     "hi": "तैयार। {a} लेख, {b} तक।",
-    "ja": "準備完了。{a}件の記事、{b}時点。"
+    "ja": "準備完了。{a}件の記事、{b}時点。",
+    "it": "Pronto. {a} articoli, aggiornati al {b}.",
+    "ko": "준비 완료. 문서 {a}개, {b} 기준.",
+    "ru": "Готово. Статей: {a}, на {b}.",
+    "nl": "Klaar. {a} artikelen, per {b}.",
+    "tr": "Hazır. {a} makale, {b} itibarıyla.",
+    "pl": "Gotowe. Artykuły: {a}, stan na {b}."
   },
   "Background": {
     "en": "Background",
@@ -327,6 +501,12 @@
     "de": "Hintergrund",
     "pt": "Contexto",
     "hi": "पृष्ठभूमि",
-    "ja": "背景"
+    "ja": "背景",
+    "it": "Contesto",
+    "ko": "배경",
+    "ru": "Справка",
+    "nl": "Achtergrond",
+    "tr": "Arka plan",
+    "pl": "Tło"
   }
 }

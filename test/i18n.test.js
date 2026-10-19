@@ -9,7 +9,7 @@ const keys = Object.keys(master).filter(k => k !== "_meta");
 const load = lng => JSON.parse(fs.readFileSync(path.join(root, "docs/locales", lng + ".json"), "utf8"));
 
 test("the house locale set is there", () => {
-  for (const l of ["en", "fr", "es", "zh", "pa", "de", "pt", "hi", "ja"]) assert.ok(locales.includes(l), l);
+  for (const l of ["en", "fr", "es", "zh", "pa", "de", "pt", "hi", "ja", "it", "ko", "ru", "nl", "tr", "pl"]) assert.ok(locales.includes(l), l);
 });
 
 for (const lng of locales) {

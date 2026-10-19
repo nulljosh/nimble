@@ -28,7 +28,7 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 ### v9 Everywhere
 
 - [ ] [Sonnet] Windows, Android and Linux reach exam parity with iOS and Mac (same 95 questions, same pass bar).
-- [ ] [Haiku] Languages: answers and UI in the five shipped languages, then ten more, checked against the exam translated.
+- [ ] [Haiku] Languages: answers and UI in the five shipped languages, then ten more, checked against the exam translated. 2026-10-18: UI now in 15 (added Italian, Korean, Russian, Dutch, Turkish, Polish on web, Apple and Kotlin); the translated exam is still to do.
 
 ### v10 A+
 

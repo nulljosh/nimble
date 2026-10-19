@@ -10,7 +10,13 @@
       "de",
       "pt",
       "hi",
-      "ja"
+      "ja",
+      "it",
+      "ko",
+      "ru",
+      "nl",
+      "tr",
+      "pl"
     ]
   },
   "Ask anything.": {
@@ -22,7 +28,13 @@
     "de": "Frag einfach.",
     "pt": "Pergunte qualquer coisa.",
     "hi": "कुछ भी पूछिए।",
-    "ja": "なんでも聞いてください。"
+    "ja": "なんでも聞いてください。",
+    "it": "Chiedi qualsiasi cosa.",
+    "ko": "무엇이든 물어보세요.",
+    "ru": "Спросите что угодно.",
+    "nl": "Vraag maar raak.",
+    "tr": "Ne istersen sor.",
+    "pl": "Zapytaj o cokolwiek."
   },
   "Ask": {
     "en": "Ask",
@@ -33,7 +45,13 @@
     "de": "Fragen",
     "pt": "Perguntar",
     "hi": "पूछें",
-    "ja": "質問"
+    "ja": "質問",
+    "it": "Chiedi",
+    "ko": "묻기",
+    "ru": "Спросить",
+    "nl": "Vraag",
+    "tr": "Sor",
+    "pl": "Zapytaj"
   },
   "Ask Nimble": {
     "en": "Ask Nimble",
@@ -44,7 +62,13 @@
     "de": "Nimble fragen",
     "pt": "Pergunte ao Nimble",
     "hi": "Nimble से पूछें",
-    "ja": "Nimbleに聞く"
+    "ja": "Nimbleに聞く",
+    "it": "Chiedi a Nimble",
+    "ko": "Nimble에게 묻기",
+    "ru": "Спросить Nimble",
+    "nl": "Vraag het Nimble",
+    "tr": "Nimble'a sor",
+    "pl": "Zapytaj Nimble"
   },
   "Get the app": {
     "en": "Get the app",
@@ -55,7 +79,13 @@
     "de": "App laden",
     "pt": "Baixar o app",
     "hi": "ऐप पाएँ",
-    "ja": "アプリを入手"
+    "ja": "アプリを入手",
+    "it": "Scarica l'app",
+    "ko": "앱 받기",
+    "ru": "Скачать приложение",
+    "nl": "Download de app",
+    "tr": "Uygulamayı indir",
+    "pl": "Pobierz aplikację"
   },
   "Source": {
     "en": "Source",
@@ -66,7 +96,13 @@
     "de": "Quelle",
     "pt": "Fonte",
     "hi": "स्रोत",
-    "ja": "情報源"
+    "ja": "情報源",
+    "it": "Fonte",
+    "ko": "출처",
+    "ru": "Источник",
+    "nl": "Bron",
+    "tr": "Kaynak",
+    "pl": "Źródło"
   },
   "Recent": {
     "en": "Recent",
@@ -77,7 +113,13 @@
     "de": "Zuletzt",
     "pt": "Recentes",
     "hi": "हाल के",
-    "ja": "最近"
+    "ja": "最近",
+    "it": "Recenti",
+    "ko": "최근",
+    "ru": "Недавние",
+    "nl": "Recent",
+    "tr": "Son",
+    "pl": "Ostatnie"
   },
   "Recent searches": {
     "en": "Recent searches",
@@ -88,7 +130,13 @@
     "de": "Letzte Suchen",
     "pt": "Buscas recentes",
     "hi": "हाल की खोजें",
-    "ja": "最近の検索"
+    "ja": "最近の検索",
+    "it": "Ricerche recenti",
+    "ko": "최근 검색",
+    "ru": "Недавние запросы",
+    "nl": "Recente zoekopdrachten",
+    "tr": "Son aramalar",
+    "pl": "Ostatnie wyszukiwania"
   },
   "Clear": {
     "en": "Clear",
@@ -99,7 +147,13 @@
     "de": "Löschen",
     "pt": "Limpar",
     "hi": "मिटाएँ",
-    "ja": "消去"
+    "ja": "消去",
+    "it": "Cancella",
+    "ko": "지우기",
+    "ru": "Очистить",
+    "nl": "Wissen",
+    "tr": "Temizle",
+    "pl": "Wyczyść"
   },
   "Answer": {
     "en": "Answer",
@@ -110,7 +164,13 @@
     "de": "Antwort",
     "pt": "Resposta",
     "hi": "जवाब",
-    "ja": "回答"
+    "ja": "回答",
+    "it": "Risposta",
+    "ko": "답변",
+    "ru": "Ответ",
+    "nl": "Antwoord",
+    "tr": "Yanıt",
+    "pl": "Odpowiedź"
   },
   "Thinking…": {
     "en": "Thinking…",
@@ -121,7 +181,13 @@
     "de": "Denke nach…",
     "pt": "Pensando…",
     "hi": "सोच रहा है…",
-    "ja": "考え中…"
+    "ja": "考え中…",
+    "it": "Sto pensando…",
+    "ko": "생각 중…",
+    "ru": "Думаю…",
+    "nl": "Even denken…",
+    "tr": "Düşünüyor…",
+    "pl": "Myślę…"
   },
   "Share": {
     "en": "Share",
@@ -132,7 +198,13 @@
     "de": "Teilen",
     "pt": "Compartilhar",
     "hi": "साझा करें",
-    "ja": "共有"
+    "ja": "共有",
+    "it": "Condividi",
+    "ko": "공유",
+    "ru": "Поделиться",
+    "nl": "Delen",
+    "tr": "Paylaş",
+    "pl": "Udostępnij"
   },
   "Math, units and graphs work offline. Everything else gets one sentence and a source.": {
     "en": "Math, units and graphs work offline. Everything else gets one sentence and a source.",
@@ -143,7 +215,13 @@
     "de": "Rechnen, Einheiten und Diagramme funktionieren offline. Alles andere bekommt einen Satz und eine Quelle.",
     "pt": "Contas, unidades e gráficos funcionam offline. O resto ganha uma frase e uma fonte.",
     "hi": "गणित, इकाइयाँ और ग्राफ़ ऑफ़लाइन चलते हैं। बाकी हर चीज़ का एक वाक्य और एक स्रोत मिलता है।",
-    "ja": "計算、単位、グラフはオフラインで使えます。それ以外は一文と情報源でお答えします。"
+    "ja": "計算、単位、グラフはオフラインで使えます。それ以外は一文と情報源でお答えします。",
+    "it": "Matematica, unità e grafici funzionano offline. Tutto il resto riceve una frase e una fonte.",
+    "ko": "수학, 단위, 그래프는 오프라인에서 작동합니다. 나머지는 한 문장과 출처로 답합니다.",
+    "ru": "Математика, единицы и графики работают офлайн. На всё остальное — одно предложение и источник.",
+    "nl": "Rekenen, eenheden en grafieken werken offline. Al het andere krijgt één zin en een bron.",
+    "tr": "Matematik, birimler ve grafikler çevrimdışı çalışır. Geri kalan her şey bir cümle ve bir kaynakla yanıtlanır.",
+    "pl": "Matematyka, jednostki i wykresy działają offline. Na resztę odpowiedź to jedno zdanie i źródło."
   },
   "Stop listening": {
     "en": "Stop listening",
@@ -154,7 +232,13 @@
     "de": "Zuhören beenden",
     "pt": "Parar de ouvir",
     "hi": "सुनना बंद करें",
-    "ja": "聞き取りを停止"
+    "ja": "聞き取りを停止",
+    "it": "Smetti di ascoltare",
+    "ko": "듣기 중지",
+    "ru": "Перестать слушать",
+    "nl": "Stop met luisteren",
+    "tr": "Dinlemeyi durdur",
+    "pl": "Przestań słuchać"
   },
   "Ask by voice": {
     "en": "Ask by voice",
@@ -165,7 +249,13 @@
     "de": "Per Sprache fragen",
     "pt": "Perguntar por voz",
     "hi": "बोलकर पूछें",
-    "ja": "音声で質問"
+    "ja": "音声で質問",
+    "it": "Chiedi a voce",
+    "ko": "음성으로 묻기",
+    "ru": "Спросить голосом",
+    "nl": "Vraag met je stem",
+    "tr": "Sesle sor",
+    "pl": "Zapytaj głosem"
   },
   "Listening": {
     "en": "Listening",
@@ -176,7 +266,13 @@
     "de": "Hört zu",
     "pt": "Ouvindo",
     "hi": "सुन रहा है",
-    "ja": "聞き取り中"
+    "ja": "聞き取り中",
+    "it": "In ascolto",
+    "ko": "듣는 중",
+    "ru": "Слушаю",
+    "nl": "Luistert",
+    "tr": "Dinliyor",
+    "pl": "Słucham"
   },
   "AI: on": {
     "en": "AI: on",
@@ -187,7 +283,13 @@
     "de": "KI: an",
     "pt": "IA: ligada",
     "hi": "AI: चालू",
-    "ja": "AI：オン"
+    "ja": "AI：オン",
+    "it": "IA: attiva",
+    "ko": "AI: 켬",
+    "ru": "ИИ: вкл",
+    "nl": "AI: aan",
+    "tr": "YZ: açık",
+    "pl": "AI: wł."
   },
   "AI: off": {
     "en": "AI: off",
@@ -198,7 +300,13 @@
     "de": "KI: aus",
     "pt": "IA: desligada",
     "hi": "AI: बंद",
-    "ja": "AI：オフ"
+    "ja": "AI：オフ",
+    "it": "IA: disattiva",
+    "ko": "AI: 끔",
+    "ru": "ИИ: выкл",
+    "nl": "AI: uit",
+    "tr": "YZ: kapalı",
+    "pl": "AI: wył."
   },
   "AI: ask": {
     "en": "AI: ask",
@@ -209,7 +317,13 @@
     "de": "KI: fragen",
     "pt": "IA: perguntar",
     "hi": "AI: पूछें",
-    "ja": "AI：確認"
+    "ja": "AI：確認",
+    "it": "IA: chiedi",
+    "ko": "AI: 묻기",
+    "ru": "ИИ: спрашивать",
+    "nl": "AI: vragen",
+    "tr": "YZ: sor",
+    "pl": "AI: pytaj"
   },
   "Not chosen yet. Click to choose.": {
     "en": "Not chosen yet. Click to choose.",
@@ -220,7 +334,13 @@
     "de": "Noch nicht gewählt. Zum Wählen klicken.",
     "pt": "Ainda não escolhido. Clique para escolher.",
     "hi": "अभी चुना नहीं गया। चुनने के लिए क्लिक करें।",
-    "ja": "まだ選択されていません。クリックして選択。"
+    "ja": "まだ選択されていません。クリックして選択。",
+    "it": "Non ancora scelto. Fai clic per scegliere.",
+    "ko": "아직 선택하지 않았습니다. 클릭해서 선택하세요.",
+    "ru": "Ещё не выбрано. Нажмите, чтобы выбрать.",
+    "nl": "Nog niet gekozen. Klik om te kiezen.",
+    "tr": "Henüz seçilmedi. Seçmek için tıkla.",
+    "pl": "Jeszcze nie wybrano. Kliknij, aby wybrać."
   },
   "Click to turn AI answers off": {
     "en": "Click to turn AI answers off",
@@ -231,7 +351,13 @@
     "de": "Klicken, um KI-Antworten auszuschalten",
     "pt": "Clique para desligar as respostas de IA",
     "hi": "AI जवाब बंद करने के लिए क्लिक करें",
-    "ja": "クリックでAI回答をオフ"
+    "ja": "クリックでAI回答をオフ",
+    "it": "Fai clic per disattivare le risposte IA",
+    "ko": "클릭하면 AI 답변이 꺼집니다",
+    "ru": "Нажмите, чтобы выключить ответы ИИ",
+    "nl": "Klik om AI-antwoorden uit te zetten",
+    "tr": "YZ yanıtlarını kapatmak için tıkla",
+    "pl": "Kliknij, aby wyłączyć odpowiedzi AI"
   },
   "Click to turn AI answers on": {
     "en": "Click to turn AI answers on",
@@ -242,7 +368,13 @@
     "de": "Klicken, um KI-Antworten einzuschalten",
     "pt": "Clique para ligar as respostas de IA",
     "hi": "AI जवाब चालू करने के लिए क्लिक करें",
-    "ja": "クリックでAI回答をオン"
+    "ja": "クリックでAI回答をオン",
+    "it": "Fai clic per attivare le risposte IA",
+    "ko": "클릭하면 AI 답변이 켜집니다",
+    "ru": "Нажмите, чтобы включить ответы ИИ",
+    "nl": "Klik om AI-antwoorden aan te zetten",
+    "tr": "YZ yanıtlarını açmak için tıkla",
+    "pl": "Kliknij, aby włączyć odpowiedzi AI"
   },
   "Before I answer": {
     "en": "Before I answer",
@@ -253,7 +385,13 @@
     "de": "Bevor ich antworte",
     "pt": "Antes de responder",
     "hi": "जवाब देने से पहले",
-    "ja": "回答の前に"
+    "ja": "回答の前に",
+    "it": "Prima di rispondere",
+    "ko": "답하기 전에",
+    "ru": "Прежде чем ответить",
+    "nl": "Voordat ik antwoord",
+    "tr": "Yanıtlamadan önce",
+    "pl": "Zanim odpowiem"
   },
   "Use AI to answer?": {
     "en": "Use AI to answer?",
@@ -265,7 +403,13 @@
     "de": "KI zum Antworten nutzen?",
     "pt": "Usar IA para responder?",
     "hi": "जवाब के लिए AI इस्तेमाल करें?",
-    "ja": "回答にAIを使いますか？"
+    "ja": "回答にAIを使いますか？",
+    "it": "Usare l'IA per rispondere?",
+    "ko": "AI로 답할까요?",
+    "ru": "Отвечать с помощью ИИ?",
+    "nl": "AI gebruiken om te antwoorden?",
+    "tr": "Yanıt için YZ kullanılsın mı?",
+    "pl": "Użyć AI do odpowiedzi?"
   },
   "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.": {
     "en": "Nimble sends your question text, and nothing else, to {s}. No account or personal data, and no record is kept. Change this any time in settings.",
@@ -277,7 +421,13 @@
     "de": "Nimble sendet nur den Text deiner Frage an {s}. Kein Konto, keine persönlichen Daten, nichts wird gespeichert. Du kannst das jederzeit in den Einstellungen ändern.",
     "pt": "O Nimble envia o texto da sua pergunta, e mais nada, para {s}. Sem conta nem dados pessoais, e nenhum registro é guardado. Você pode mudar isso quando quiser nos ajustes.",
     "hi": "Nimble आपके सवाल का सिर्फ़ टेक्स्ट {s} को भेजता है, और कुछ नहीं। कोई खाता या निजी डेटा नहीं, और कोई रिकॉर्ड नहीं रखा जाता। आप इसे कभी भी सेटिंग्स में बदल सकते हैं।",
-    "ja": "Nimbleは質問のテキストだけを{s}に送ります。アカウントや個人情報は送らず、記録も残しません。設定でいつでも変更できます。"
+    "ja": "Nimbleは質問のテキストだけを{s}に送ります。アカウントや個人情報は送らず、記録も残しません。設定でいつでも変更できます。",
+    "it": "Nimble invia il testo della tua domanda, e nient'altro, a {s}. Nessun account né dati personali, e non viene conservato nulla. Puoi cambiarlo quando vuoi nelle impostazioni.",
+    "ko": "Nimble은 질문 텍스트만 {s}에 보냅니다. 계정이나 개인 정보는 없고 기록도 남지 않습니다. 설정에서 언제든지 바꿀 수 있습니다.",
+    "ru": "Nimble отправляет только текст вашего вопроса в {s}. Без аккаунта и личных данных, записи не хранятся. Это можно изменить в настройках в любое время.",
+    "nl": "Nimble stuurt de tekst van je vraag, en verder niets, naar {s}. Geen account of persoonsgegevens, en er wordt niets bewaard. Je kunt dit altijd wijzigen in de instellingen.",
+    "tr": "Nimble yalnızca sorunun metnini {s} hizmetine gönderir. Hesap ya da kişisel veri yok, kayıt tutulmaz. Bunu istediğin zaman ayarlardan değiştirebilirsin.",
+    "pl": "Nimble wysyła tylko tekst Twojego pytania do {s}. Bez konta i danych osobowych, nic nie jest zapisywane. Możesz to zmienić w ustawieniach w dowolnej chwili."
   },
   "powered by {s}": {
     "en": "powered by {s}",
@@ -288,7 +438,13 @@
     "de": "unterstützt von {s}",
     "pt": "com tecnologia de {s}",
     "hi": "{s} द्वारा संचालित",
-    "ja": "{s} 搭載"
+    "ja": "{s} 搭載",
+    "it": "offerto da {s}",
+    "ko": "{s} 제공",
+    "ru": "на базе {s}",
+    "nl": "mogelijk gemaakt door {s}",
+    "tr": "{s} tarafından desteklenir",
+    "pl": "dzięki {s}"
   },
   "Allow": {
     "en": "Allow",
@@ -299,7 +455,13 @@
     "de": "Erlauben",
     "pt": "Permitir",
     "hi": "अनुमति दें",
-    "ja": "許可"
+    "ja": "許可",
+    "it": "Consenti",
+    "ko": "허용",
+    "ru": "Разрешить",
+    "nl": "Toestaan",
+    "tr": "İzin ver",
+    "pl": "Zezwól"
   },
   "Don't allow": {
     "en": "Don't allow",
@@ -310,7 +472,13 @@
     "de": "Nicht erlauben",
     "pt": "Não permitir",
     "hi": "अनुमति न दें",
-    "ja": "許可しない"
+    "ja": "許可しない",
+    "it": "Non consentire",
+    "ko": "허용 안 함",
+    "ru": "Не разрешать",
+    "nl": "Niet toestaan",
+    "tr": "İzin verme",
+    "pl": "Nie zezwalaj"
   },
   "computed offline": {
     "en": "computed offline",
@@ -321,7 +489,13 @@
     "de": "offline berechnet",
     "pt": "calculado offline",
     "hi": "ऑफ़लाइन गणना",
-    "ja": "オフラインで計算"
+    "ja": "オフラインで計算",
+    "it": "calcolato offline",
+    "ko": "오프라인 계산",
+    "ru": "вычислено офлайн",
+    "nl": "offline berekend",
+    "tr": "çevrimdışı hesaplandı",
+    "pl": "obliczono offline"
   },
   "You're offline. Math, units and graphs still work.": {
     "en": "You're offline. Math, units and graphs still work.",
@@ -332,7 +506,13 @@
     "de": "Du bist offline. Rechnen, Einheiten und Diagramme funktionieren weiter.",
     "pt": "Você está offline. Contas, unidades e gráficos continuam funcionando.",
     "hi": "आप ऑफ़लाइन हैं। गणित, इकाइयाँ और ग्राफ़ फिर भी चलते हैं।",
-    "ja": "オフラインです。計算、単位、グラフは使えます。"
+    "ja": "オフラインです。計算、単位、グラフは使えます。",
+    "it": "Sei offline. Matematica, unità e grafici funzionano ancora.",
+    "ko": "오프라인 상태입니다. 수학, 단위, 그래프는 계속 작동합니다.",
+    "ru": "Нет сети. Математика, единицы и графики по-прежнему работают.",
+    "nl": "Je bent offline. Rekenen, eenheden en grafieken werken nog.",
+    "tr": "Çevrimdışısın. Matematik, birimler ve grafikler çalışmaya devam eder.",
+    "pl": "Jesteś offline. Matematyka, jednostki i wykresy nadal działają."
   },
   "No instant answer. Try a question, a sum, or \"5 miles to km\".": {
     "en": "No instant answer. Try a question, a sum, or \"5 miles to km\".",
@@ -343,7 +523,13 @@
     "de": "Keine sofortige Antwort. Probier eine Frage, eine Rechnung oder „5 miles to km“.",
     "pt": "Sem resposta imediata. Tente uma pergunta, uma conta ou \"5 miles to km\".",
     "hi": "तुरंत जवाब नहीं मिला। कोई सवाल, जोड़-घटाव या \"5 miles to km\" आज़माएँ।",
-    "ja": "すぐには答えられません。質問や計算、「5 miles to km」を試してください。"
+    "ja": "すぐには答えられません。質問や計算、「5 miles to km」を試してください。",
+    "it": "Nessuna risposta immediata. Prova una domanda, un calcolo o \"5 miglia in km\".",
+    "ko": "바로 답할 수 없습니다. 질문, 계산 또는 \"5 miles to km\"를 입력해 보세요.",
+    "ru": "Нет мгновенного ответа. Попробуйте вопрос, пример или «5 миль в км».",
+    "nl": "Geen direct antwoord. Probeer een vraag, een som of \"5 mijl naar km\".",
+    "tr": "Anında yanıt yok. Bir soru, bir işlem ya da \"5 mil kaç km\" dene.",
+    "pl": "Brak natychmiastowej odpowiedzi. Spróbuj pytania, działania albo \"5 mil na km\"."
   },
   "Features": {
     "en": "Features",
@@ -354,7 +540,13 @@
     "de": "Funktionen",
     "pt": "Recursos",
     "hi": "सुविधाएँ",
-    "ja": "機能"
+    "ja": "機能",
+    "it": "Funzioni",
+    "ko": "기능",
+    "ru": "Возможности",
+    "nl": "Functies",
+    "tr": "Özellikler",
+    "pl": "Funkcje"
   },
   "Download": {
     "en": "Download",
@@ -365,7 +557,13 @@
     "de": "Herunterladen",
     "pt": "Baixar",
     "hi": "डाउनलोड",
-    "ja": "ダウンロード"
+    "ja": "ダウンロード",
+    "it": "Scarica",
+    "ko": "다운로드",
+    "ru": "Скачать",
+    "nl": "Download",
+    "tr": "İndir",
+    "pl": "Pobierz"
   },
   "Open app": {
     "en": "Open app",
@@ -376,7 +574,13 @@
     "de": "App öffnen",
     "pt": "Abrir o app",
     "hi": "ऐप खोलें",
-    "ja": "アプリを開く"
+    "ja": "アプリを開く",
+    "it": "Apri l'app",
+    "ko": "앱 열기",
+    "ru": "Открыть приложение",
+    "nl": "App openen",
+    "tr": "Uygulamayı aç",
+    "pl": "Otwórz aplikację"
   },
   "Ask a question. Get one sentence back.": {
     "en": "Ask a question. Get one sentence back.",
@@ -387,7 +591,13 @@
     "de": "Stell eine Frage. Bekomm einen Satz zurück.",
     "pt": "Faça uma pergunta. Receba uma frase.",
     "hi": "एक सवाल पूछिए। एक वाक्य में जवाब पाइए।",
-    "ja": "質問すると、一文で答えが返ります。"
+    "ja": "質問すると、一文で答えが返ります。",
+    "it": "Fai una domanda. Ricevi una frase.",
+    "ko": "질문하세요. 한 문장으로 답합니다.",
+    "ru": "Задайте вопрос. Получите одно предложение.",
+    "nl": "Stel een vraag. Krijg één zin terug.",
+    "tr": "Bir soru sor. Tek cümlelik yanıt al.",
+    "pl": "Zadaj pytanie. Dostań jedno zdanie."
   },
   "Math and units answer on your device. Everything else, one sentence with a source.": {
     "en": "Math and units answer on your device. Everything else, one sentence with a source.",
@@ -398,7 +608,13 @@
     "de": "Rechnen und Einheiten laufen auf deinem Gerät. Alles andere: ein Satz mit Quelle.",
     "pt": "Contas e unidades são respondidas no seu aparelho. O resto, uma frase com fonte.",
     "hi": "गणित और इकाइयाँ आपके डिवाइस पर ही हल होती हैं। बाकी सब, एक वाक्य और एक स्रोत।",
-    "ja": "計算と単位は端末の中で答えます。それ以外は、情報源つきの一文で。"
+    "ja": "計算と単位は端末の中で答えます。それ以外は、情報源つきの一文で。",
+    "it": "Matematica e unità rispondono sul tuo dispositivo. Tutto il resto, una frase con una fonte.",
+    "ko": "수학과 단위는 기기에서 답합니다. 나머지는 출처와 함께 한 문장으로.",
+    "ru": "Математика и единицы считаются на вашем устройстве. Всё остальное — одно предложение с источником.",
+    "nl": "Rekenen en eenheden antwoorden op je apparaat. Al het andere, één zin met een bron.",
+    "tr": "Matematik ve birimler cihazında yanıtlanır. Geri kalan her şey, kaynaklı tek cümle.",
+    "pl": "Matematyka i jednostki liczą się na Twoim urządzeniu. Reszta to jedno zdanie ze źródłem."
   },
   "Open the web app": {
     "en": "Open the web app",
@@ -409,7 +625,13 @@
     "de": "Web-App öffnen",
     "pt": "Abrir o app web",
     "hi": "वेब ऐप खोलें",
-    "ja": "Webアプリを開く"
+    "ja": "Webアプリを開く",
+    "it": "Apri l'app web",
+    "ko": "웹 앱 열기",
+    "ru": "Открыть веб-приложение",
+    "nl": "Open de web-app",
+    "tr": "Web uygulamasını aç",
+    "pl": "Otwórz aplikację webową"
   },
   "Download for Mac": {
     "en": "Download for Mac",
@@ -420,7 +642,13 @@
     "de": "Für Mac laden",
     "pt": "Baixar para Mac",
     "hi": "Mac के लिए डाउनलोड",
-    "ja": "Mac版をダウンロード"
+    "ja": "Mac版をダウンロード",
+    "it": "Scarica per Mac",
+    "ko": "Mac용 다운로드",
+    "ru": "Скачать для Mac",
+    "nl": "Download voor Mac",
+    "tr": "Mac için indir",
+    "pl": "Pobierz na Maca"
   },
   "Download for Windows": {
     "en": "Download for Windows",
@@ -431,7 +659,13 @@
     "de": "Für Windows laden",
     "pt": "Baixar para Windows",
     "hi": "Windows के लिए डाउनलोड",
-    "ja": "Windows版をダウンロード"
+    "ja": "Windows版をダウンロード",
+    "it": "Scarica per Windows",
+    "ko": "Windows용 다운로드",
+    "ru": "Скачать для Windows",
+    "nl": "Download voor Windows",
+    "tr": "Windows için indir",
+    "pl": "Pobierz na Windows"
   },
   "Download for Android": {
     "en": "Download for Android",
@@ -442,7 +676,13 @@
     "de": "Für Android laden",
     "pt": "Baixar para Android",
     "hi": "Android के लिए डाउनलोड",
-    "ja": "Android版をダウンロード"
+    "ja": "Android版をダウンロード",
+    "it": "Scarica per Android",
+    "ko": "Android용 다운로드",
+    "ru": "Скачать для Android",
+    "nl": "Download voor Android",
+    "tr": "Android için indir",
+    "pl": "Pobierz na Androida"
   },
   "Answers, not ten blue links.": {
     "en": "Answers, not ten blue links.",
@@ -453,7 +693,13 @@
     "de": "Antworten, keine zehn blauen Links.",
     "pt": "Respostas, não dez links azuis.",
     "hi": "जवाब, दस नीले लिंक नहीं।",
-    "ja": "青いリンク10個ではなく、答えを。"
+    "ja": "青いリンク10個ではなく、答えを。",
+    "it": "Risposte, non dieci link blu.",
+    "ko": "파란 링크 열 개가 아닌 답.",
+    "ru": "Ответы, а не десять синих ссылок.",
+    "nl": "Antwoorden, geen tien blauwe links.",
+    "tr": "On mavi bağlantı değil, yanıtlar.",
+    "pl": "Odpowiedzi, nie dziesięć niebieskich linków."
   },
   "Math and units, offline": {
     "en": "Math and units, offline",
@@ -464,7 +710,13 @@
     "de": "Rechnen und Einheiten, offline",
     "pt": "Contas e unidades, offline",
     "hi": "गणित और इकाइयाँ, ऑफ़लाइन",
-    "ja": "計算と単位、オフラインで"
+    "ja": "計算と単位、オフラインで",
+    "it": "Matematica e unità, offline",
+    "ko": "수학과 단위, 오프라인",
+    "ru": "Математика и единицы офлайн",
+    "nl": "Rekenen en eenheden, offline",
+    "tr": "Matematik ve birimler, çevrimdışı",
+    "pl": "Matematyka i jednostki offline"
   },
   "Two models, one sentence": {
     "en": "Two models, one sentence",
@@ -475,7 +727,13 @@
     "de": "Zwei Modelle, ein Satz",
     "pt": "Dois modelos, uma frase",
     "hi": "दो मॉडल, एक वाक्य",
-    "ja": "2つのモデル、一文"
+    "ja": "2つのモデル、一文",
+    "it": "Due modelli, una frase",
+    "ko": "두 모델, 한 문장",
+    "ru": "Две модели, одно предложение",
+    "nl": "Twee modellen, één zin",
+    "tr": "İki model, tek cümle",
+    "pl": "Dwa modele, jedno zdanie"
   },
   "Graphs": {
     "en": "Graphs",
@@ -486,7 +744,13 @@
     "de": "Diagramme",
     "pt": "Gráficos",
     "hi": "ग्राफ़",
-    "ja": "グラフ"
+    "ja": "グラフ",
+    "it": "Grafici",
+    "ko": "그래프",
+    "ru": "Графики",
+    "nl": "Grafieken",
+    "tr": "Grafikler",
+    "pl": "Wykresy"
   },
   "Every platform": {
     "en": "Every platform",
@@ -497,7 +761,13 @@
     "de": "Jede Plattform",
     "pt": "Todas as plataformas",
     "hi": "हर प्लेटफ़ॉर्म",
-    "ja": "すべてのプラットフォーム"
+    "ja": "すべてのプラットフォーム",
+    "it": "Ogni piattaforma",
+    "ko": "모든 플랫폼",
+    "ru": "Все платформы",
+    "nl": "Elk platform",
+    "tr": "Her platform",
+    "pl": "Każda platforma"
   },
   "About Nimble": {
     "en": "About Nimble",
@@ -508,7 +778,13 @@
     "de": "Über Nimble",
     "pt": "Sobre o Nimble",
     "hi": "Nimble के बारे में",
-    "ja": "Nimbleについて"
+    "ja": "Nimbleについて",
+    "it": "Informazioni su Nimble",
+    "ko": "Nimble 정보",
+    "ru": "О Nimble",
+    "nl": "Over Nimble",
+    "tr": "Nimble hakkında",
+    "pl": "O Nimble"
   },
   "Open Nimble": {
     "en": "Open Nimble",
@@ -519,7 +795,13 @@
     "de": "Nimble öffnen",
     "pt": "Abrir o Nimble",
     "hi": "Nimble खोलें",
-    "ja": "Nimbleを開く"
+    "ja": "Nimbleを開く",
+    "it": "Apri Nimble",
+    "ko": "Nimble 열기",
+    "ru": "Открыть Nimble",
+    "nl": "Open Nimble",
+    "tr": "Nimble'ı aç",
+    "pl": "Otwórz Nimble"
   },
   "Settings…": {
     "en": "Settings…",
@@ -530,7 +812,13 @@
     "de": "Einstellungen…",
     "pt": "Ajustes…",
     "hi": "सेटिंग्स…",
-    "ja": "設定…"
+    "ja": "設定…",
+    "it": "Impostazioni…",
+    "ko": "설정…",
+    "ru": "Настройки…",
+    "nl": "Instellingen…",
+    "tr": "Ayarlar…",
+    "pl": "Ustawienia…"
   },
   "Settings": {
     "en": "Settings",
@@ -541,7 +829,13 @@
     "de": "Einstellungen",
     "pt": "Ajustes",
     "hi": "सेटिंग्स",
-    "ja": "設定"
+    "ja": "設定",
+    "it": "Impostazioni",
+    "ko": "설정",
+    "ru": "Настройки",
+    "nl": "Instellingen",
+    "tr": "Ayarlar",
+    "pl": "Ustawienia"
   },
   "Quit": {
     "en": "Quit",
@@ -552,7 +846,13 @@
     "de": "Beenden",
     "pt": "Sair",
     "hi": "बंद करें",
-    "ja": "終了"
+    "ja": "終了",
+    "it": "Esci",
+    "ko": "종료",
+    "ru": "Выйти",
+    "nl": "Stop",
+    "tr": "Çık",
+    "pl": "Zakończ"
   },
   "Quit Nimble": {
     "en": "Quit Nimble",
@@ -563,7 +863,13 @@
     "de": "Nimble beenden",
     "pt": "Sair do Nimble",
     "hi": "Nimble बंद करें",
-    "ja": "Nimbleを終了"
+    "ja": "Nimbleを終了",
+    "it": "Esci da Nimble",
+    "ko": "Nimble 종료",
+    "ru": "Выйти из Nimble",
+    "nl": "Stop Nimble",
+    "tr": "Nimble'dan çık",
+    "pl": "Zakończ Nimble"
   },
   "Copy Result": {
     "en": "Copy Result",
@@ -574,7 +880,13 @@
     "de": "Ergebnis kopieren",
     "pt": "Copiar resultado",
     "hi": "नतीजा कॉपी करें",
-    "ja": "結果をコピー"
+    "ja": "結果をコピー",
+    "it": "Copia risultato",
+    "ko": "결과 복사",
+    "ru": "Скопировать результат",
+    "nl": "Kopieer resultaat",
+    "tr": "Sonucu kopyala",
+    "pl": "Kopiuj wynik"
   },
   "Copy result": {
     "en": "Copy result",
@@ -585,7 +897,13 @@
     "de": "Ergebnis kopieren",
     "pt": "Copiar resultado",
     "hi": "नतीजा कॉपी करें",
-    "ja": "結果をコピー"
+    "ja": "結果をコピー",
+    "it": "Copia risultato",
+    "ko": "결과 복사",
+    "ru": "Скопировать результат",
+    "nl": "Kopieer resultaat",
+    "tr": "Sonucu kopyala",
+    "pl": "Kopiuj wynik"
   },
   "Copy Search Link": {
     "en": "Copy Search Link",
@@ -596,7 +914,13 @@
     "de": "Suchlink kopieren",
     "pt": "Copiar link da busca",
     "hi": "खोज का लिंक कॉपी करें",
-    "ja": "検索リンクをコピー"
+    "ja": "検索リンクをコピー",
+    "it": "Copia link di ricerca",
+    "ko": "검색 링크 복사",
+    "ru": "Скопировать ссылку на поиск",
+    "nl": "Kopieer zoeklink",
+    "tr": "Arama bağlantısını kopyala",
+    "pl": "Kopiuj link wyszukiwania"
   },
   "Open in DuckDuckGo": {
     "en": "Open in DuckDuckGo",
@@ -607,7 +931,13 @@
     "de": "In DuckDuckGo öffnen",
     "pt": "Abrir no DuckDuckGo",
     "hi": "DuckDuckGo में खोलें",
-    "ja": "DuckDuckGoで開く"
+    "ja": "DuckDuckGoで開く",
+    "it": "Apri in DuckDuckGo",
+    "ko": "DuckDuckGo에서 열기",
+    "ru": "Открыть в DuckDuckGo",
+    "nl": "Open in DuckDuckGo",
+    "tr": "DuckDuckGo'da aç",
+    "pl": "Otwórz w DuckDuckGo"
   },
   "Search on DuckDuckGo →": {
     "en": "Search on DuckDuckGo →",
@@ -618,7 +948,13 @@
     "de": "Auf DuckDuckGo suchen →",
     "pt": "Buscar no DuckDuckGo →",
     "hi": "DuckDuckGo पर खोजें →",
-    "ja": "DuckDuckGoで検索 →"
+    "ja": "DuckDuckGoで検索 →",
+    "it": "Cerca su DuckDuckGo →",
+    "ko": "DuckDuckGo에서 검색 →",
+    "ru": "Искать в DuckDuckGo →",
+    "nl": "Zoek op DuckDuckGo →",
+    "tr": "DuckDuckGo'da ara →",
+    "pl": "Szukaj w DuckDuckGo →"
   },
   "Preferences": {
     "en": "Preferences",
@@ -629,7 +965,13 @@
     "de": "Voreinstellungen",
     "pt": "Preferências",
     "hi": "पसंद",
-    "ja": "環境設定"
+    "ja": "環境設定",
+    "it": "Preferenze",
+    "ko": "환경설정",
+    "ru": "Настройки",
+    "nl": "Voorkeuren",
+    "tr": "Tercihler",
+    "pl": "Preferencje"
   },
   "Theme": {
     "en": "Theme",
@@ -640,7 +982,13 @@
     "de": "Design",
     "pt": "Tema",
     "hi": "थीम",
-    "ja": "テーマ"
+    "ja": "テーマ",
+    "it": "Tema",
+    "ko": "테마",
+    "ru": "Тема",
+    "nl": "Thema",
+    "tr": "Tema",
+    "pl": "Motyw"
   },
   "THEME": {
     "en": "THEME",
@@ -651,7 +999,13 @@
     "de": "DESIGN",
     "pt": "TEMA",
     "hi": "थीम",
-    "ja": "テーマ"
+    "ja": "テーマ",
+    "it": "TEMA",
+    "ko": "테마",
+    "ru": "ТЕМА",
+    "nl": "THEMA",
+    "tr": "TEMA",
+    "pl": "MOTYW"
   },
   "PREFERENCES": {
     "en": "PREFERENCES",
@@ -662,7 +1016,13 @@
     "de": "VOREINSTELLUNGEN",
     "pt": "PREFERÊNCIAS",
     "hi": "पसंद",
-    "ja": "環境設定"
+    "ja": "環境設定",
+    "it": "PREFERENZE",
+    "ko": "환경설정",
+    "ru": "НАСТРОЙКИ",
+    "nl": "VOORKEUREN",
+    "tr": "TERCİHLER",
+    "pl": "PREFERENCJE"
   },
   "AI ENGINE": {
     "en": "AI ENGINE",
@@ -673,7 +1033,13 @@
     "de": "KI-MODELL",
     "pt": "MOTOR DE IA",
     "hi": "AI इंजन",
-    "ja": "AIエンジン"
+    "ja": "AIエンジン",
+    "it": "MOTORE IA",
+    "ko": "AI 엔진",
+    "ru": "ДВИЖОК ИИ",
+    "nl": "AI-ENGINE",
+    "tr": "YZ MOTORU",
+    "pl": "SILNIK AI"
   },
   "AI Engine": {
     "en": "AI Engine",
@@ -684,7 +1050,13 @@
     "de": "KI-Modell",
     "pt": "Motor de IA",
     "hi": "AI इंजन",
-    "ja": "AIエンジン"
+    "ja": "AIエンジン",
+    "it": "Motore IA",
+    "ko": "AI 엔진",
+    "ru": "Движок ИИ",
+    "nl": "AI-engine",
+    "tr": "YZ motoru",
+    "pl": "Silnik AI"
   },
   "TRY": {
     "en": "TRY",
@@ -695,7 +1067,13 @@
     "de": "PROBIER",
     "pt": "EXPERIMENTE",
     "hi": "आज़माएँ",
-    "ja": "試してみる"
+    "ja": "試してみる",
+    "it": "PROVA",
+    "ko": "해 보기",
+    "ru": "ПОПРОБУЙТЕ",
+    "nl": "PROBEER",
+    "tr": "DENE",
+    "pl": "SPRÓBUJ"
   },
   "RECENT": {
     "en": "RECENT",
@@ -706,7 +1084,13 @@
     "de": "ZULETZT",
     "pt": "RECENTES",
     "hi": "हाल के",
-    "ja": "最近"
+    "ja": "最近",
+    "it": "RECENTI",
+    "ko": "최근",
+    "ru": "НЕДАВНИЕ",
+    "nl": "RECENT",
+    "tr": "SON",
+    "pl": "OSTATNIE"
   },
   "RESULT": {
     "en": "RESULT",
@@ -717,7 +1101,13 @@
     "de": "ERGEBNIS",
     "pt": "RESULTADO",
     "hi": "नतीजा",
-    "ja": "結果"
+    "ja": "結果",
+    "it": "RISULTATO",
+    "ko": "결과",
+    "ru": "РЕЗУЛЬТАТ",
+    "nl": "RESULTAAT",
+    "tr": "SONUÇ",
+    "pl": "WYNIK"
   },
   "Version": {
     "en": "Version",
@@ -728,7 +1118,13 @@
     "de": "Version",
     "pt": "Versão",
     "hi": "संस्करण",
-    "ja": "バージョン"
+    "ja": "バージョン",
+    "it": "Versione",
+    "ko": "버전",
+    "ru": "Версия",
+    "nl": "Versie",
+    "tr": "Sürüm",
+    "pl": "Wersja"
   },
   "Offline Math": {
     "en": "Offline Math",
@@ -739,7 +1135,13 @@
     "de": "Offline-Rechnen",
     "pt": "Contas offline",
     "hi": "ऑफ़लाइन गणित",
-    "ja": "オフライン計算"
+    "ja": "オフライン計算",
+    "it": "Matematica offline",
+    "ko": "오프라인 수학",
+    "ru": "Офлайн-математика",
+    "nl": "Offline rekenen",
+    "tr": "Çevrimdışı matematik",
+    "pl": "Matematyka offline"
   },
   "Offline math": {
     "en": "Offline math",
@@ -750,7 +1152,13 @@
     "de": "Offline-Rechnen",
     "pt": "Contas offline",
     "hi": "ऑफ़लाइन गणित",
-    "ja": "オフライン計算"
+    "ja": "オフライン計算",
+    "it": "Matematica offline",
+    "ko": "오프라인 수학",
+    "ru": "Офлайн-математика",
+    "nl": "Offline rekenen",
+    "tr": "Çevrimdışı matematik",
+    "pl": "Matematyka offline"
   },
   "Launch on Startup": {
     "en": "Launch on Startup",
@@ -761,7 +1169,13 @@
     "de": "Beim Start öffnen",
     "pt": "Abrir ao iniciar",
     "hi": "स्टार्टअप पर खोलें",
-    "ja": "起動時に開く"
+    "ja": "起動時に開く",
+    "it": "Avvia all'accesso",
+    "ko": "시작 시 실행",
+    "ru": "Запускать при входе",
+    "nl": "Open bij opstarten",
+    "tr": "Açılışta başlat",
+    "pl": "Uruchamiaj przy starcie"
   },
   "Default Suggestions": {
     "en": "Default Suggestions",
@@ -772,7 +1186,13 @@
     "de": "Standardvorschläge",
     "pt": "Sugestões padrão",
     "hi": "डिफ़ॉल्ट सुझाव",
-    "ja": "標準の候補"
+    "ja": "標準の候補",
+    "it": "Suggerimenti predefiniti",
+    "ko": "기본 제안",
+    "ru": "Подсказки по умолчанию",
+    "nl": "Standaardsuggesties",
+    "tr": "Varsayılan öneriler",
+    "pl": "Domyślne podpowiedzi"
   },
   "AI Answers": {
     "en": "AI Answers",
@@ -783,7 +1203,13 @@
     "de": "KI-Antworten",
     "pt": "Respostas de IA",
     "hi": "AI जवाब",
-    "ja": "AI回答"
+    "ja": "AI回答",
+    "it": "Risposte IA",
+    "ko": "AI 답변",
+    "ru": "Ответы ИИ",
+    "nl": "AI-antwoorden",
+    "tr": "YZ yanıtları",
+    "pl": "Odpowiedzi AI"
   },
   "Model": {
     "en": "Model",
@@ -794,7 +1220,13 @@
     "de": "Modell",
     "pt": "Modelo",
     "hi": "मॉडल",
-    "ja": "モデル"
+    "ja": "モデル",
+    "it": "Modello",
+    "ko": "모델",
+    "ru": "Модель",
+    "nl": "Model",
+    "tr": "Model",
+    "pl": "Model"
   },
   "Server": {
     "en": "Server",
@@ -805,7 +1237,13 @@
     "de": "Server",
     "pt": "Servidor",
     "hi": "सर्वर",
-    "ja": "サーバー"
+    "ja": "サーバー",
+    "it": "Server",
+    "ko": "서버",
+    "ru": "Сервер",
+    "nl": "Server",
+    "tr": "Sunucu",
+    "pl": "Serwer"
   },
   "Engine": {
     "en": "Engine",
@@ -816,7 +1254,13 @@
     "de": "Modell",
     "pt": "Motor",
     "hi": "इंजन",
-    "ja": "エンジン"
+    "ja": "エンジン",
+    "it": "Motore",
+    "ko": "엔진",
+    "ru": "Движок",
+    "nl": "Engine",
+    "tr": "Motor",
+    "pl": "Silnik"
   },
   "Got it": {
     "en": "Got it",
@@ -827,7 +1271,13 @@
     "de": "Verstanden",
     "pt": "Entendi",
     "hi": "समझ गया",
-    "ja": "わかりました"
+    "ja": "わかりました",
+    "it": "Ho capito",
+    "ko": "확인",
+    "ru": "Понятно",
+    "nl": "Begrepen",
+    "tr": "Anladım",
+    "pl": "Rozumiem"
   },
   "What's new in {s}": {
     "en": "What's new in {s}",
@@ -838,7 +1288,13 @@
     "de": "Neu in {s}",
     "pt": "Novidades do {s}",
     "hi": "{s} में नया क्या है",
-    "ja": "{s}の新機能"
+    "ja": "{s}の新機能",
+    "it": "Novità della {s}",
+    "ko": "{s}의 새로운 기능",
+    "ru": "Что нового в {s}",
+    "nl": "Nieuw in {s}",
+    "tr": "{s} sürümündeki yenilikler",
+    "pl": "Nowości w {s}"
   },
   "Don't Allow": {
     "en": "Don't Allow",
@@ -849,7 +1305,13 @@
     "de": "Nicht erlauben",
     "pt": "Não permitir",
     "hi": "अनुमति न दें",
-    "ja": "許可しない"
+    "ja": "許可しない",
+    "it": "Non consentire",
+    "ko": "허용 안 함",
+    "ru": "Не разрешать",
+    "nl": "Niet toestaan",
+    "tr": "İzin verme",
+    "pl": "Nie zezwalaj"
   },
   "Share answer as image": {
     "en": "Share answer as image",
@@ -860,7 +1322,13 @@
     "de": "Antwort als Bild teilen",
     "pt": "Compartilhar resposta como imagem",
     "hi": "जवाब को तस्वीर के रूप में साझा करें",
-    "ja": "回答を画像で共有"
+    "ja": "回答を画像で共有",
+    "it": "Condividi la risposta come immagine",
+    "ko": "답변을 이미지로 공유",
+    "ru": "Поделиться ответом как картинкой",
+    "nl": "Deel antwoord als afbeelding",
+    "tr": "Yanıtı görsel olarak paylaş",
+    "pl": "Udostępnij odpowiedź jako obraz"
   },
   "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.": {
     "en": "When on, the text you type is sent to {s}. Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.",
@@ -872,7 +1340,13 @@
     "de": "Wenn aktiv, wird der Text, den du tippst, an {s} gesendet. Sonst nichts. Wenn aus, kommen Antworten nur von DuckDuckGo und Wikipedia.",
     "pt": "Ligado, o texto que você digita é enviado para {s}. Nada mais é enviado. Desligado, as respostas vêm só do DuckDuckGo e da Wikipedia.",
     "hi": "चालू होने पर, आप जो टेक्स्ट लिखते हैं वह {s} को भेजा जाता है। और कुछ नहीं भेजा जाता। बंद होने पर, जवाब सिर्फ़ DuckDuckGo और Wikipedia से आते हैं।",
-    "ja": "オンのとき、入力したテキストが{s}に送られます。ほかは何も送りません。オフのときは、DuckDuckGoとWikipediaだけから答えます。"
+    "ja": "オンのとき、入力したテキストが{s}に送られます。ほかは何も送りません。オフのときは、DuckDuckGoとWikipediaだけから答えます。",
+    "it": "Se attivo, il testo che scrivi viene inviato a {s}. Non viene inviato nient'altro. Se disattivo, le risposte arrivano solo da DuckDuckGo e Wikipedia.",
+    "ko": "켜면 입력한 텍스트가 {s}에 전송됩니다. 그 외에는 아무것도 전송되지 않습니다. 끄면 DuckDuckGo와 Wikipedia에서만 답합니다.",
+    "ru": "Если включено, введённый текст отправляется в {s}. Больше ничего не отправляется. Если выключено, ответы берутся только из DuckDuckGo и Wikipedia.",
+    "nl": "Als dit aan staat, gaat de tekst die je typt naar {s}. Verder wordt niets verstuurd. Als het uit staat, komen antwoorden alleen van DuckDuckGo en Wikipedia.",
+    "tr": "Açıkken yazdığın metin {s} hizmetine gönderilir. Başka hiçbir şey gönderilmez. Kapalıyken yanıtlar yalnızca DuckDuckGo ve Wikipedia'dan gelir.",
+    "pl": "Gdy włączone, wpisany tekst trafia do {s}. Nic więcej nie jest wysyłane. Gdy wyłączone, odpowiedzi pochodzą tylko z DuckDuckGo i Wikipedii."
   },
   "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.": {
     "en": "To answer, Nimble sends the text you type, and nothing else, to {s}. No account, contacts, location or identifiers are sent, and Nimble keeps no record of it. If you don't allow this, answers come from DuckDuckGo and Wikipedia only. You can change this in Settings.",
@@ -884,7 +1358,13 @@
     "de": "Zum Antworten sendet Nimble den Text, den du tippst, und sonst nichts, an {s}. Es werden kein Konto, keine Kontakte, kein Standort und keine Kennungen gesendet, und Nimble speichert nichts davon. Wenn du das nicht erlaubst, kommen Antworten nur von DuckDuckGo und Wikipedia. Du kannst das in den Einstellungen ändern.",
     "pt": "Para responder, o Nimble envia o texto que você digita, e mais nada, para {s}. Nenhuma conta, contato, localização ou identificador é enviado, e o Nimble não guarda registro disso. Se você não permitir, as respostas vêm só do DuckDuckGo e da Wikipedia. Você pode mudar isso nos Ajustes.",
     "hi": "जवाब देने के लिए Nimble आपका लिखा टेक्स्ट, और कुछ नहीं, {s} को भेजता है। कोई खाता, संपर्क, स्थान या पहचान नहीं भेजी जाती, और Nimble इसका कोई रिकॉर्ड नहीं रखता। अनुमति न देने पर जवाब सिर्फ़ DuckDuckGo और Wikipedia से आते हैं। आप इसे सेटिंग्स में बदल सकते हैं।",
-    "ja": "回答のために、Nimbleは入力したテキストだけを{s}に送ります。アカウント、連絡先、位置情報、識別子は送らず、記録も残しません。許可しない場合、答えはDuckDuckGoとWikipediaだけから届きます。設定でいつでも変更できます。"
+    "ja": "回答のために、Nimbleは入力したテキストだけを{s}に送ります。アカウント、連絡先、位置情報、識別子は送らず、記録も残しません。許可しない場合、答えはDuckDuckGoとWikipediaだけから届きます。設定でいつでも変更できます。",
+    "it": "Per rispondere, Nimble invia il testo che scrivi, e nient'altro, a {s}. Non vengono inviati account, contatti, posizione o identificatori, e Nimble non ne conserva traccia. Se non lo consenti, le risposte arrivano solo da DuckDuckGo e Wikipedia. Puoi cambiarlo nelle Impostazioni.",
+    "ko": "답하기 위해 Nimble은 입력한 텍스트만 {s}에 보냅니다. 계정, 연락처, 위치, 식별자는 보내지 않으며 Nimble은 기록을 남기지 않습니다. 허용하지 않으면 DuckDuckGo와 Wikipedia에서만 답합니다. 설정에서 바꿀 수 있습니다.",
+    "ru": "Чтобы ответить, Nimble отправляет только введённый вами текст в {s}. Аккаунт, контакты, местоположение и идентификаторы не отправляются, и Nimble ничего не сохраняет. Если не разрешить, ответы берутся только из DuckDuckGo и Wikipedia. Это можно изменить в Настройках.",
+    "nl": "Om te antwoorden stuurt Nimble de tekst die je typt, en verder niets, naar {s}. Er gaan geen account, contacten, locatie of ID's mee, en Nimble bewaart niets. Sta je dit niet toe, dan komen antwoorden alleen van DuckDuckGo en Wikipedia. Je kunt dit wijzigen in Instellingen.",
+    "tr": "Yanıtlamak için Nimble yalnızca yazdığın metni {s} hizmetine gönderir. Hesap, kişiler, konum veya kimlik bilgisi gönderilmez ve Nimble kayıt tutmaz. İzin vermezsen yanıtlar yalnızca DuckDuckGo ve Wikipedia'dan gelir. Bunu Ayarlar'dan değiştirebilirsin.",
+    "pl": "Aby odpowiedzieć, Nimble wysyła tylko wpisany tekst do {s}. Nie wysyła konta, kontaktów, lokalizacji ani identyfikatorów i niczego nie zapisuje. Jeśli nie zezwolisz, odpowiedzi pochodzą tylko z DuckDuckGo i Wikipedii. Możesz to zmienić w Ustawieniach."
   },
   "Your key stays on this device and is sent only to {s}.": {
     "en": "Your key stays on this device and is sent only to {s}.",
@@ -895,7 +1375,13 @@
     "de": "Dein Schlüssel bleibt auf diesem Gerät und wird nur an {s} gesendet.",
     "pt": "Sua chave fica neste aparelho e só é enviada para {s}.",
     "hi": "आपकी कुंजी इसी डिवाइस पर रहती है और सिर्फ़ {s} को भेजी जाती है।",
-    "ja": "キーはこの端末に残り、{s}にだけ送られます。"
+    "ja": "キーはこの端末に残り、{s}にだけ送られます。",
+    "it": "La tua chiave resta su questo dispositivo e viene inviata solo a {s}.",
+    "ko": "키는 이 기기에 남아 있고 {s}에만 전송됩니다.",
+    "ru": "Ваш ключ остаётся на этом устройстве и отправляется только в {s}.",
+    "nl": "Je sleutel blijft op dit apparaat en gaat alleen naar {s}.",
+    "tr": "Anahtarın bu cihazda kalır ve yalnızca {s} hizmetine gönderilir.",
+    "pl": "Twój klucz zostaje na tym urządzeniu i trafia tylko do {s}."
   },
   "Asks this again": {
     "en": "Asks this again",
@@ -906,7 +1392,13 @@
     "de": "Fragt das nochmal",
     "pt": "Pergunta isto de novo",
     "hi": "इसे फिर से पूछता है",
-    "ja": "もう一度質問します"
+    "ja": "もう一度質問します",
+    "it": "Lo chiede di nuovo",
+    "ko": "다시 묻습니다",
+    "ru": "Спросит снова",
+    "nl": "Vraagt dit opnieuw",
+    "tr": "Bunu yeniden sorar",
+    "pl": "Zapyta ponownie"
   },
   "Mascot": {
     "en": "Mascot",
@@ -917,7 +1409,13 @@
     "de": "Maskottchen",
     "pt": "Mascote",
     "hi": "शुभंकर",
-    "ja": "マスコット"
+    "ja": "マスコット",
+    "it": "Mascotte",
+    "ko": "마스코트",
+    "ru": "Талисман",
+    "nl": "Mascotte",
+    "tr": "Maskot",
+    "pl": "Maskotka"
   },
   "Mascot: {s}": {
     "en": "Mascot: {s}",
@@ -928,7 +1426,13 @@
     "de": "Maskottchen: {s}",
     "pt": "Mascote: {s}",
     "hi": "शुभंकर: {s}",
-    "ja": "マスコット：{s}"
+    "ja": "マスコット：{s}",
+    "it": "Mascotte: {s}",
+    "ko": "마스코트: {s}",
+    "ru": "Талисман: {s}",
+    "nl": "Mascotte: {s}",
+    "tr": "Maskot: {s}",
+    "pl": "Maskotka: {s}"
   },
   "On device (Apple Intelligence)": {
     "en": "On device (Apple Intelligence)",
@@ -939,7 +1443,13 @@
     "de": "Auf dem Gerät (Apple Intelligence)",
     "pt": "No aparelho (Apple Intelligence)",
     "hi": "डिवाइस पर (Apple Intelligence)",
-    "ja": "端末内（Apple Intelligence）"
+    "ja": "端末内（Apple Intelligence）",
+    "it": "Sul dispositivo (Apple Intelligence)",
+    "ko": "기기에서 (Apple Intelligence)",
+    "ru": "На устройстве (Apple Intelligence)",
+    "nl": "Op het apparaat (Apple Intelligence)",
+    "tr": "Cihazda (Apple Intelligence)",
+    "pl": "Na urządzeniu (Apple Intelligence)"
   },
   "Samantha is running": {
     "en": "Samantha is running",
@@ -950,7 +1460,13 @@
     "de": "Samantha läuft",
     "pt": "Samantha está rodando",
     "hi": "Samantha चल रही है",
-    "ja": "Samanthaは実行中"
+    "ja": "Samanthaは実行中",
+    "it": "Samantha è attiva",
+    "ko": "Samantha 실행 중",
+    "ru": "Samantha работает",
+    "nl": "Samantha draait",
+    "tr": "Samantha çalışıyor",
+    "pl": "Samantha działa"
   },
   "Samantha is not running": {
     "en": "Samantha is not running",
@@ -961,7 +1477,13 @@
     "de": "Samantha läuft nicht",
     "pt": "Samantha não está rodando",
     "hi": "Samantha नहीं चल रही",
-    "ja": "Samanthaは停止中"
+    "ja": "Samanthaは停止中",
+    "it": "Samantha non è attiva",
+    "ko": "Samantha가 실행 중이 아닙니다",
+    "ru": "Samantha не запущена",
+    "nl": "Samantha draait niet",
+    "tr": "Samantha çalışmıyor",
+    "pl": "Samantha nie działa"
   },
   "Checking Samantha": {
     "en": "Checking Samantha",
@@ -972,7 +1494,13 @@
     "de": "Samantha wird geprüft",
     "pt": "Verificando a Samantha",
     "hi": "Samantha की जाँच हो रही है",
-    "ja": "Samanthaを確認中"
+    "ja": "Samanthaを確認中",
+    "it": "Controllo di Samantha",
+    "ko": "Samantha 확인 중",
+    "ru": "Проверяю Samantha",
+    "nl": "Samantha controleren",
+    "tr": "Samantha denetleniyor",
+    "pl": "Sprawdzam Samanthę"
   },
   "Start": {
     "en": "Start",
@@ -983,7 +1511,13 @@
     "de": "Starten",
     "pt": "Iniciar",
     "hi": "शुरू करें",
-    "ja": "開始"
+    "ja": "開始",
+    "it": "Avvia",
+    "ko": "시작",
+    "ru": "Запустить",
+    "nl": "Start",
+    "tr": "Başlat",
+    "pl": "Uruchom"
   },
   "Test": {
     "en": "Test",
@@ -994,7 +1528,13 @@
     "de": "Testen",
     "pt": "Testar",
     "hi": "जाँचें",
-    "ja": "テスト"
+    "ja": "テスト",
+    "it": "Prova",
+    "ko": "테스트",
+    "ru": "Проверить",
+    "nl": "Test",
+    "tr": "Dene",
+    "pl": "Testuj"
   },
   "Last answer: {s}": {
     "en": "Last answer: {s}",
@@ -1005,7 +1545,13 @@
     "de": "Letzte Antwort: {s}",
     "pt": "Última resposta: {s}",
     "hi": "पिछला जवाब: {s}",
-    "ja": "前回の回答：{s}"
+    "ja": "前回の回答：{s}",
+    "it": "Ultima risposta: {s}",
+    "ko": "마지막 답변: {s}",
+    "ru": "Последний ответ: {s}",
+    "nl": "Laatste antwoord: {s}",
+    "tr": "Son yanıt: {s}",
+    "pl": "Ostatnia odpowiedź: {s}"
   },
   "Show steps": {
     "en": "Show steps",
@@ -1016,7 +1562,13 @@
     "de": "Schritte zeigen",
     "pt": "Mostrar passos",
     "hi": "चरण दिखाएँ",
-    "ja": "手順を表示"
+    "ja": "手順を表示",
+    "it": "Mostra i passaggi",
+    "ko": "풀이 보기",
+    "ru": "Показать шаги",
+    "nl": "Toon stappen",
+    "tr": "Adımları göster",
+    "pl": "Pokaż kroki"
   },
   "Background": {
     "en": "Background",
@@ -1027,7 +1579,13 @@
     "de": "Hintergrund",
     "pt": "Contexto",
     "hi": "पृष्ठभूमि",
-    "ja": "背景"
+    "ja": "背景",
+    "it": "Contesto",
+    "ko": "배경",
+    "ru": "Справка",
+    "nl": "Achtergrond",
+    "tr": "Arka plan",
+    "pl": "Tło"
   },
   "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.": {
     "en": "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening.",
@@ -1038,7 +1596,13 @@
     "de": "Die kostenlose KI hat für heute keine Antworten mehr, deshalb kommt das von Wikipedia. Am Abend geht es wieder los.",
     "pt": "A IA gratuita ficou sem respostas por hoje, então isto vem da Wikipedia. Ela volta à noite.",
     "hi": "मुफ़्त AI के आज के जवाब ख़त्म हो गए हैं, इसलिए यह Wikipedia से है। यह शाम को फिर से शुरू होगा।",
-    "ja": "無料AIは今日の分の回答を使い切ったため、これはWikipediaからです。夜にまた使えるようになります。"
+    "ja": "無料AIは今日の分の回答を使い切ったため、これはWikipediaからです。夜にまた使えるようになります。",
+    "it": "L'IA gratuita ha finito le risposte per oggi, quindi questa viene da Wikipedia. Si ricarica in serata.",
+    "ko": "오늘은 무료 AI 답변을 모두 썼기 때문에 Wikipedia에서 가져왔습니다. 저녁에 초기화됩니다.",
+    "ru": "Бесплатный ИИ на сегодня исчерпан, поэтому ответ из Wikipedia. Лимит обновится вечером.",
+    "nl": "De gratis AI is op voor vandaag, dus dit komt van Wikipedia. Het wordt 's avonds weer aangevuld.",
+    "tr": "Ücretsiz YZ'nin bugünkü yanıtları bitti, bu yüzden bu Wikipedia'dan. Akşam yenilenir.",
+    "pl": "Darmowe AI wyczerpało dziś odpowiedzi, więc ta pochodzi z Wikipedii. Limit odnawia się wieczorem."
   },
   "Not a direct answer to your question. Background from Wikipedia:": {
     "en": "Not a direct answer to your question. Background from Wikipedia:",
@@ -1049,7 +1613,13 @@
     "de": "Keine direkte Antwort auf deine Frage. Hintergrund von Wikipedia:",
     "pt": "Não é uma resposta direta à sua pergunta. Contexto da Wikipedia:",
     "hi": "यह आपके सवाल का सीधा जवाब नहीं है। Wikipedia से पृष्ठभूमि:",
-    "ja": "ご質問への直接の答えではありません。Wikipediaからの背景情報:"
+    "ja": "ご質問への直接の答えではありません。Wikipediaからの背景情報:",
+    "it": "Non è una risposta diretta alla tua domanda. Contesto da Wikipedia:",
+    "ko": "질문에 대한 직접적인 답은 아닙니다. Wikipedia의 배경 정보:",
+    "ru": "Это не прямой ответ на ваш вопрос. Справка из Wikipedia:",
+    "nl": "Geen direct antwoord op je vraag. Achtergrond van Wikipedia:",
+    "tr": "Sorunun doğrudan yanıtı değil. Wikipedia'dan arka plan:",
+    "pl": "To nie jest bezpośrednia odpowiedź na pytanie. Tło z Wikipedii:"
   },
   "New question": {
     "en": "New question",
@@ -1060,7 +1630,13 @@
     "de": "Neue Frage",
     "pt": "Nova pergunta",
     "hi": "नया सवाल",
-    "ja": "新しい質問"
+    "ja": "新しい質問",
+    "it": "Nuova domanda",
+    "ko": "새 질문",
+    "ru": "Новый вопрос",
+    "nl": "Nieuwe vraag",
+    "tr": "Yeni soru",
+    "pl": "Nowe pytanie"
   },
   "History": {
     "en": "History",
@@ -1071,7 +1647,13 @@
     "de": "Verlauf",
     "pt": "Histórico",
     "hi": "इतिहास",
-    "ja": "履歴"
+    "ja": "履歴",
+    "it": "Cronologia",
+    "ko": "기록",
+    "ru": "История",
+    "nl": "Geschiedenis",
+    "tr": "Geçmiş",
+    "pl": "Historia"
   },
   "Back": {
     "en": "Back",
@@ -1082,7 +1664,13 @@
     "de": "Zurück",
     "pt": "Voltar",
     "hi": "वापस",
-    "ja": "戻る"
+    "ja": "戻る",
+    "it": "Indietro",
+    "ko": "뒤로",
+    "ru": "Назад",
+    "nl": "Terug",
+    "tr": "Geri",
+    "pl": "Wstecz"
   },
   "Edit": {
     "en": "Edit",
@@ -1093,7 +1681,13 @@
     "de": "Bearbeiten",
     "pt": "Editar",
     "hi": "संपादित करें",
-    "ja": "編集"
+    "ja": "編集",
+    "it": "Modifica",
+    "ko": "편집",
+    "ru": "Изменить",
+    "nl": "Wijzig",
+    "tr": "Düzenle",
+    "pl": "Edytuj"
   },
   "Done": {
     "en": "Done",
@@ -1104,7 +1698,13 @@
     "de": "Fertig",
     "pt": "Concluído",
     "hi": "हो गया",
-    "ja": "完了"
+    "ja": "完了",
+    "it": "Fine",
+    "ko": "완료",
+    "ru": "Готово",
+    "nl": "Klaar",
+    "tr": "Bitti",
+    "pl": "Gotowe"
   },
   "Delete": {
     "en": "Delete",
@@ -1115,7 +1715,13 @@
     "de": "Löschen",
     "pt": "Excluir",
     "hi": "हटाएँ",
-    "ja": "削除"
+    "ja": "削除",
+    "it": "Elimina",
+    "ko": "삭제",
+    "ru": "Удалить",
+    "nl": "Verwijder",
+    "tr": "Sil",
+    "pl": "Usuń"
   },
   "Delete selected": {
     "en": "Delete selected",
@@ -1126,7 +1732,13 @@
     "de": "Auswahl löschen",
     "pt": "Excluir selecionados",
     "hi": "चुने हुए हटाएँ",
-    "ja": "選択を削除"
+    "ja": "選択を削除",
+    "it": "Elimina selezionati",
+    "ko": "선택 항목 삭제",
+    "ru": "Удалить выбранное",
+    "nl": "Verwijder selectie",
+    "tr": "Seçilenleri sil",
+    "pl": "Usuń zaznaczone"
   },
   "Copy selected": {
     "en": "Copy selected",
@@ -1137,7 +1749,13 @@
     "de": "Auswahl kopieren",
     "pt": "Copiar selecionados",
     "hi": "चुने हुए कॉपी करें",
-    "ja": "選択をコピー"
+    "ja": "選択をコピー",
+    "it": "Copia selezionati",
+    "ko": "선택 항목 복사",
+    "ru": "Скопировать выбранное",
+    "nl": "Kopieer selectie",
+    "tr": "Seçilenleri kopyala",
+    "pl": "Kopiuj zaznaczone"
   },
   "Copied": {
     "en": "Copied",
@@ -1148,7 +1766,13 @@
     "de": "Kopiert",
     "pt": "Copiado",
     "hi": "कॉपी हो गया",
-    "ja": "コピーしました"
+    "ja": "コピーしました",
+    "it": "Copiato",
+    "ko": "복사됨",
+    "ru": "Скопировано",
+    "nl": "Gekopieerd",
+    "tr": "Kopyalandı",
+    "pl": "Skopiowano"
   },
   "Ask again": {
     "en": "Ask again",
@@ -1159,7 +1783,13 @@
     "de": "Nochmal fragen",
     "pt": "Perguntar de novo",
     "hi": "फिर से पूछें",
-    "ja": "もう一度質問"
+    "ja": "もう一度質問",
+    "it": "Chiedi di nuovo",
+    "ko": "다시 묻기",
+    "ru": "Спросить снова",
+    "nl": "Vraag opnieuw",
+    "tr": "Yeniden sor",
+    "pl": "Zapytaj ponownie"
   },
   "No questions yet.": {
     "en": "No questions yet.",
@@ -1170,7 +1800,13 @@
     "de": "Noch keine Fragen.",
     "pt": "Nenhuma pergunta ainda.",
     "hi": "अभी कोई सवाल नहीं।",
-    "ja": "まだ質問がありません。"
+    "ja": "まだ質問がありません。",
+    "it": "Ancora nessuna domanda.",
+    "ko": "아직 질문이 없습니다.",
+    "ru": "Вопросов пока нет.",
+    "nl": "Nog geen vragen.",
+    "tr": "Henüz soru yok.",
+    "pl": "Brak pytań."
   },
   "Select all": {
     "en": "Select all",
@@ -1181,7 +1817,13 @@
     "de": "Alle auswählen",
     "pt": "Selecionar tudo",
     "hi": "सब चुनें",
-    "ja": "すべて選択"
+    "ja": "すべて選択",
+    "it": "Seleziona tutto",
+    "ko": "모두 선택",
+    "ru": "Выбрать все",
+    "nl": "Alles selecteren",
+    "tr": "Tümünü seç",
+    "pl": "Zaznacz wszystko"
   },
   "Menu": {
     "en": "Menu",
@@ -1192,7 +1834,13 @@
     "de": "Menü",
     "pt": "Menu",
     "hi": "मेन्यू",
-    "ja": "メニュー"
+    "ja": "メニュー",
+    "it": "Menu",
+    "ko": "메뉴",
+    "ru": "Меню",
+    "nl": "Menu",
+    "tr": "Menü",
+    "pl": "Menu"
   },
   "Download offline answers": {
     "en": "Download offline answers",
@@ -1203,7 +1851,13 @@
     "de": "Offline-Antworten laden",
     "pt": "Baixar respostas offline",
     "hi": "ऑफ़लाइन जवाब डाउनलोड करें",
-    "ja": "オフライン回答をダウンロード"
+    "ja": "オフライン回答をダウンロード",
+    "it": "Scarica le risposte offline",
+    "ko": "오프라인 답변 다운로드",
+    "ru": "Скачать офлайн-ответы",
+    "nl": "Download offline antwoorden",
+    "tr": "Çevrimdışı yanıtları indir",
+    "pl": "Pobierz odpowiedzi offline"
   },
   "Download offline answers (about {n} MB)": {
     "en": "Download offline answers (about {n} MB)",
@@ -1214,7 +1868,13 @@
     "de": "Offline-Antworten laden (ca. {n} MB)",
     "pt": "Baixar respostas offline (cerca de {n} MB)",
     "hi": "ऑफ़लाइन जवाब डाउनलोड करें (लगभग {n} MB)",
-    "ja": "オフライン回答をダウンロード（約{n} MB）"
+    "ja": "オフライン回答をダウンロード（約{n} MB）",
+    "it": "Scarica le risposte offline (circa {n} MB)",
+    "ko": "오프라인 답변 다운로드 (약 {n} MB)",
+    "ru": "Скачать офлайн-ответы (около {n} МБ)",
+    "nl": "Download offline antwoorden (ongeveer {n} MB)",
+    "tr": "Çevrimdışı yanıtları indir (yaklaşık {n} MB)",
+    "pl": "Pobierz odpowiedzi offline (około {n} MB)"
   },
   "Downloading offline answers…": {
     "en": "Downloading offline answers…",
@@ -1225,7 +1885,13 @@
     "de": "Offline-Antworten werden geladen…",
     "pt": "Baixando respostas offline…",
     "hi": "ऑफ़लाइन जवाब डाउनलोड हो रहे हैं…",
-    "ja": "オフライン回答をダウンロード中…"
+    "ja": "オフライン回答をダウンロード中…",
+    "it": "Download delle risposte offline…",
+    "ko": "오프라인 답변 다운로드 중…",
+    "ru": "Скачиваю офлайн-ответы…",
+    "nl": "Offline antwoorden downloaden…",
+    "tr": "Çevrimdışı yanıtlar indiriliyor…",
+    "pl": "Pobieranie odpowiedzi offline…"
   },
   "Remove offline pack": {
     "en": "Remove offline pack",
@@ -1236,7 +1902,13 @@
     "de": "Offline-Paket entfernen",
     "pt": "Remover pacote offline",
     "hi": "ऑफ़लाइन पैक हटाएँ",
-    "ja": "オフラインパックを削除"
+    "ja": "オフラインパックを削除",
+    "it": "Rimuovi il pacchetto offline",
+    "ko": "오프라인 팩 제거",
+    "ru": "Удалить офлайн-пакет",
+    "nl": "Verwijder offline pakket",
+    "tr": "Çevrimdışı paketi kaldır",
+    "pl": "Usuń pakiet offline"
   },
   "Could not download the offline pack. Try again on a connection.": {
     "en": "Could not download the offline pack. Try again on a connection.",
@@ -1247,7 +1919,13 @@
     "de": "Das Offline-Paket konnte nicht geladen werden. Versuch es mit Verbindung nochmal.",
     "pt": "Não foi possível baixar o pacote offline. Tente de novo com conexão.",
     "hi": "ऑफ़लाइन पैक डाउनलोड नहीं हो सका। कनेक्शन होने पर फिर कोशिश करें।",
-    "ja": "オフラインパックをダウンロードできませんでした。接続のある場所でもう一度お試しください。"
+    "ja": "オフラインパックをダウンロードできませんでした。接続のある場所でもう一度お試しください。",
+    "it": "Impossibile scaricare il pacchetto offline. Riprova con una connessione.",
+    "ko": "오프라인 팩을 다운로드할 수 없습니다. 연결된 상태에서 다시 시도하세요.",
+    "ru": "Не удалось скачать офлайн-пакет. Попробуйте снова при подключении к сети.",
+    "nl": "Kan het offline pakket niet downloaden. Probeer het opnieuw met een verbinding.",
+    "tr": "Çevrimdışı paket indirilemedi. Bağlantı varken yeniden dene.",
+    "pl": "Nie udało się pobrać pakietu offline. Spróbuj ponownie z połączeniem."
   },
   "Offline pack · Wikipedia (CC BY-SA)": {
     "en": "Offline pack · Wikipedia (CC BY-SA)",
@@ -1258,7 +1936,13 @@
     "de": "Offline-Paket · Wikipedia (CC BY-SA)",
     "pt": "Pacote offline · Wikipedia (CC BY-SA)",
     "hi": "ऑफ़लाइन पैक · Wikipedia (CC BY-SA)",
-    "ja": "オフラインパック · Wikipedia (CC BY-SA)"
+    "ja": "オフラインパック · Wikipedia (CC BY-SA)",
+    "it": "Pacchetto offline · Wikipedia (CC BY-SA)",
+    "ko": "오프라인 팩 · Wikipedia (CC BY-SA)",
+    "ru": "Офлайн-пакет · Wikipedia (CC BY-SA)",
+    "nl": "Offline pakket · Wikipedia (CC BY-SA)",
+    "tr": "Çevrimdışı paket · Wikipedia (CC BY-SA)",
+    "pl": "Pakiet offline · Wikipedia (CC BY-SA)"
   },
   "Not in the offline pack. Math, units and graphs still work offline.": {
     "en": "Not in the offline pack. Math, units and graphs still work offline.",
@@ -1269,7 +1953,13 @@
     "de": "Nicht im Offline-Paket. Rechnen, Einheiten und Diagramme funktionieren offline weiter.",
     "pt": "Não está no pacote offline. Contas, unidades e gráficos continuam funcionando offline.",
     "hi": "ऑफ़लाइन पैक में नहीं है। गणित, इकाइयाँ और ग्राफ़ ऑफ़लाइन फिर भी चलते हैं।",
-    "ja": "オフラインパックにありません。計算、単位、グラフはオフラインでも使えます。"
+    "ja": "オフラインパックにありません。計算、単位、グラフはオフラインでも使えます。",
+    "it": "Non è nel pacchetto offline. Matematica, unità e grafici funzionano ancora offline.",
+    "ko": "오프라인 팩에 없습니다. 수학, 단위, 그래프는 오프라인에서도 작동합니다.",
+    "ru": "Нет в офлайн-пакете. Математика, единицы и графики работают офлайн.",
+    "nl": "Niet in het offline pakket. Rekenen, eenheden en grafieken werken nog offline.",
+    "tr": "Çevrimdışı pakette yok. Matematik, birimler ve grafikler çevrimdışı çalışmaya devam eder.",
+    "pl": "Nie ma tego w pakiecie offline. Matematyka, jednostki i wykresy nadal działają offline."
   },
   "Private: on": {
     "en": "Private: on",
@@ -1280,7 +1970,13 @@
     "de": "Privat: an",
     "pt": "Privado: ligado",
     "hi": "निजी: चालू",
-    "ja": "プライベート：オン"
+    "ja": "プライベート：オン",
+    "it": "Privato: attivo",
+    "ko": "비공개: 켬",
+    "ru": "Приватно: вкл",
+    "nl": "Privé: aan",
+    "tr": "Gizli: açık",
+    "pl": "Prywatnie: wł."
   },
   "Private: off": {
     "en": "Private: off",
@@ -1291,7 +1987,13 @@
     "de": "Privat: aus",
     "pt": "Privado: desligado",
     "hi": "निजी: बंद",
-    "ja": "プライベート：オフ"
+    "ja": "プライベート：オフ",
+    "it": "Privato: disattivo",
+    "ko": "비공개: 끔",
+    "ru": "Приватно: выкл",
+    "nl": "Privé: uit",
+    "tr": "Gizli: kapalı",
+    "pl": "Prywatnie: wył."
   },
   "Nothing leaves this device. Click to turn private mode off": {
     "en": "Nothing leaves this device. Click to turn private mode off",
@@ -1302,7 +2004,13 @@
     "de": "Nichts verlässt dieses Gerät. Klicken, um den privaten Modus auszuschalten",
     "pt": "Nada sai deste aparelho. Clique para desligar o modo privado",
     "hi": "कुछ भी इस डिवाइस से बाहर नहीं जाता। निजी मोड बंद करने के लिए क्लिक करें",
-    "ja": "この端末の外には何も出ません。クリックでプライベートモードをオフ"
+    "ja": "この端末の外には何も出ません。クリックでプライベートモードをオフ",
+    "it": "Nulla lascia questo dispositivo. Fai clic per disattivare la modalità privata",
+    "ko": "이 기기 밖으로 아무것도 나가지 않습니다. 클릭하면 비공개 모드가 꺼집니다",
+    "ru": "Ничего не покидает это устройство. Нажмите, чтобы выключить приватный режим",
+    "nl": "Niets verlaat dit apparaat. Klik om privémodus uit te zetten",
+    "tr": "Hiçbir şey bu cihazdan çıkmaz. Gizli modu kapatmak için tıkla",
+    "pl": "Nic nie opuszcza tego urządzenia. Kliknij, aby wyłączyć tryb prywatny"
   },
   "Click to answer only from this device": {
     "en": "Click to answer only from this device",
@@ -1313,7 +2021,13 @@
     "de": "Klicken, um nur auf diesem Gerät zu antworten",
     "pt": "Clique para responder só neste aparelho",
     "hi": "सिर्फ़ इसी डिवाइस से जवाब देने के लिए क्लिक करें",
-    "ja": "クリックでこの端末内だけで回答"
+    "ja": "クリックでこの端末内だけで回答",
+    "it": "Fai clic per rispondere solo da questo dispositivo",
+    "ko": "클릭하면 이 기기에서만 답합니다",
+    "ru": "Нажмите, чтобы отвечать только с этого устройства",
+    "nl": "Klik om alleen vanaf dit apparaat te antwoorden",
+    "tr": "Yalnızca bu cihazdan yanıtlamak için tıkla",
+    "pl": "Kliknij, aby odpowiadać tylko z tego urządzenia"
   },
   "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.": {
     "en": "Private mode is on, so nothing leaves this device. Math, units and graphs work. Download the offline answers to look up facts.",
@@ -1324,7 +2038,13 @@
     "de": "Der private Modus ist an, nichts verlässt dieses Gerät. Rechnen, Einheiten und Diagramme funktionieren. Lade die Offline-Antworten, um Fakten nachzuschlagen.",
     "pt": "O modo privado está ligado, então nada sai deste aparelho. Contas, unidades e gráficos funcionam. Baixe as respostas offline para consultar fatos.",
     "hi": "निजी मोड चालू है, इसलिए कुछ भी इस डिवाइस से बाहर नहीं जाता। गणित, इकाइयाँ और ग्राफ़ चलते हैं। तथ्य खोजने के लिए ऑफ़लाइन जवाब डाउनलोड करें।",
-    "ja": "プライベートモードがオンなので、何もこの端末の外に出ません。計算、単位、グラフは使えます。事実を調べるにはオフライン回答をダウンロードしてください。"
+    "ja": "プライベートモードがオンなので、何もこの端末の外に出ません。計算、単位、グラフは使えます。事実を調べるにはオフライン回答をダウンロードしてください。",
+    "it": "La modalità privata è attiva, quindi nulla lascia questo dispositivo. Matematica, unità e grafici funzionano. Scarica le risposte offline per cercare i fatti.",
+    "ko": "비공개 모드가 켜져 있어 이 기기 밖으로 아무것도 나가지 않습니다. 수학, 단위, 그래프는 작동합니다. 사실을 찾으려면 오프라인 답변을 다운로드하세요.",
+    "ru": "Приватный режим включён, ничего не покидает это устройство. Математика, единицы и графики работают. Скачайте офлайн-ответы, чтобы искать факты.",
+    "nl": "Privémodus staat aan, dus niets verlaat dit apparaat. Rekenen, eenheden en grafieken werken. Download de offline antwoorden om feiten op te zoeken.",
+    "tr": "Gizli mod açık, hiçbir şey bu cihazdan çıkmaz. Matematik, birimler ve grafikler çalışır. Bilgi aramak için çevrimdışı yanıtları indir.",
+    "pl": "Tryb prywatny jest włączony, więc nic nie opuszcza tego urządzenia. Matematyka, jednostki i wykresy działają. Pobierz odpowiedzi offline, aby wyszukiwać fakty."
   },
   "Listen": {
     "en": "Listen",
@@ -1335,7 +2055,13 @@
     "de": "Anhören",
     "pt": "Ouvir",
     "hi": "सुनें",
-    "ja": "聞く"
+    "ja": "聞く",
+    "it": "Ascolta",
+    "ko": "듣기",
+    "ru": "Слушать",
+    "nl": "Luister",
+    "tr": "Dinle",
+    "pl": "Słuchaj"
   },
   "Stop": {
     "en": "Stop",
@@ -1346,7 +2072,13 @@
     "de": "Stopp",
     "pt": "Parar",
     "hi": "रोकें",
-    "ja": "停止"
+    "ja": "停止",
+    "it": "Ferma",
+    "ko": "중지",
+    "ru": "Стоп",
+    "nl": "Stop",
+    "tr": "Durdur",
+    "pl": "Stop"
   },
   "Copy": {
     "en": "Copy",
@@ -1357,7 +2089,13 @@
     "de": "Kopieren",
     "pt": "Copiar",
     "hi": "कॉपी करें",
-    "ja": "コピー"
+    "ja": "コピー",
+    "it": "Copia",
+    "ko": "복사",
+    "ru": "Копировать",
+    "nl": "Kopieer",
+    "tr": "Kopyala",
+    "pl": "Kopiuj"
   },
   "Card: {s}": {
     "en": "Card: {s}",
@@ -1368,7 +2106,13 @@
     "de": "Karte: {s}",
     "pt": "Cartão: {s}",
     "hi": "कार्ड: {s}",
-    "ja": "カード：{s}"
+    "ja": "カード：{s}",
+    "it": "Scheda: {s}",
+    "ko": "카드: {s}",
+    "ru": "Карточка: {s}",
+    "nl": "Kaart: {s}",
+    "tr": "Kart: {s}",
+    "pl": "Karta: {s}"
   },
   "Wide": {
     "en": "Wide",
@@ -1379,7 +2123,13 @@
     "de": "Breit",
     "pt": "Largo",
     "hi": "चौड़ा",
-    "ja": "ワイド"
+    "ja": "ワイド",
+    "it": "Larga",
+    "ko": "가로",
+    "ru": "Широкая",
+    "nl": "Breed",
+    "tr": "Geniş",
+    "pl": "Szeroka"
   },
   "Square": {
     "en": "Square",
@@ -1390,7 +2140,13 @@
     "de": "Quadrat",
     "pt": "Quadrado",
     "hi": "वर्ग",
-    "ja": "正方形"
+    "ja": "正方形",
+    "it": "Quadrata",
+    "ko": "정사각형",
+    "ru": "Квадрат",
+    "nl": "Vierkant",
+    "tr": "Kare",
+    "pl": "Kwadrat"
   },
   "Story": {
     "en": "Story",
@@ -1401,7 +2157,13 @@
     "de": "Story",
     "pt": "Story",
     "hi": "स्टोरी",
-    "ja": "ストーリー"
+    "ja": "ストーリー",
+    "it": "Storia",
+    "ko": "스토리",
+    "ru": "История",
+    "nl": "Story",
+    "tr": "Hikâye",
+    "pl": "Relacja"
   },
   "Card": {
     "en": "Card",
@@ -1412,7 +2174,13 @@
     "de": "Karte",
     "pt": "Cartão",
     "hi": "कार्ड",
-    "ja": "カード"
+    "ja": "カード",
+    "it": "Scheda",
+    "ko": "카드",
+    "ru": "Карточка",
+    "nl": "Kaart",
+    "tr": "Kart",
+    "pl": "Karta"
   },
   "Tell me more": {
     "en": "Tell me more",
@@ -1423,7 +2191,13 @@
     "de": "Mehr dazu",
     "pt": "Conte mais",
     "hi": "और बताओ",
-    "ja": "もっと詳しく"
+    "ja": "もっと詳しく",
+    "it": "Dimmi di più",
+    "ko": "더 알려 줘",
+    "ru": "Расскажи подробнее",
+    "nl": "Vertel meer",
+    "tr": "Daha fazla anlat",
+    "pl": "Powiedz więcej"
   },
   "Nothing more to add": {
     "en": "Nothing more to add",
@@ -1434,7 +2208,13 @@
     "de": "Mehr gibt es nicht",
     "pt": "Nada mais a acrescentar",
     "hi": "और कुछ नहीं",
-    "ja": "これ以上はありません"
+    "ja": "これ以上はありません",
+    "it": "Nient'altro da aggiungere",
+    "ko": "더 덧붙일 내용이 없습니다",
+    "ru": "Больше нечего добавить",
+    "nl": "Niets meer toe te voegen",
+    "tr": "Eklenecek başka bir şey yok",
+    "pl": "Nic więcej do dodania"
   },
   "from {s}": {
     "en": "from {s}",
@@ -1445,6 +2225,12 @@
     "de": "von {s}",
     "pt": "de {s}",
     "hi": "{s} से",
-    "ja": "{s} より"
+    "ja": "{s} より",
+    "it": "da {s}",
+    "ko": "{s}에서",
+    "ru": "из {s}",
+    "nl": "van {s}",
+    "tr": "{s} kaynağından",
+    "pl": "z {s}"
   }
 }
