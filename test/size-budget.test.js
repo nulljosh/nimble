@@ -15,3 +15,15 @@ test("app.html first load is under 300 KB gzipped", () => {
   const total = sizes.reduce((n, [, s]) => n + s, 0);
   assert.ok(total < BUDGET, `first load ${Math.round(total / 1024)} KB: ${sizes.map(([f, s]) => `${f} ${Math.round(s / 1024)}`).join(", ")}`);
 });
+
+// The site's CSP must allow every form the pages post to, and never a script from another origin.
+test("_headers: the CSP allows each form's action and loads scripts from this site only", () => {
+  const csp = fs.readFileSync(path.join(DOCS, "_headers"), "utf8").match(/Content-Security-Policy: (.+)/)[1];
+  assert.match(csp, /script-src 'self' 'unsafe-inline';/);
+  const pages = fs.readdirSync(DOCS).filter((f) => f.endsWith(".html"));
+  for (const f of pages) {
+    const html = fs.readFileSync(path.join(DOCS, f), "utf8");
+    for (const [, action] of html.matchAll(/<form[^>]+action="(https:\/\/[^/"]+)/g)) assert.ok(csp.includes(action), `${f} posts to ${action}`);
+    for (const [, src] of html.matchAll(/<script[^>]+src="(https?:[^"]+)"/g)) assert.fail(`${f} loads a remote script ${src}`);
+  }
+});

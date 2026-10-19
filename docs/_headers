@@ -1,0 +1,7 @@
+# Cloudflare Pages response headers for every page.
+# script-src: only our own files and the inline blocks in the pages, never a script from anywhere else.
+# Images and fetches stay open: answers show any site's share image and the AI engine can point at your own Ollama.
+/*
+  Content-Security-Policy: script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://authmail.jaybulb.com
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), geolocation=(), payment=(), microphone=(self)
