@@ -1,17 +1,16 @@
-Note: check subreddit rules before posting (self-promo day/flair requirements vary). Public, no beta gate.
-
 ## r/SideProject
 
-Title: I got tired of reading ten blue links for one answer, so I built a search bar that skips them
+Title: I got tired of ten blue links for one answer, so I built a search bar that just answers
 
 Body:
-Every time I googled something simple, arithmetic, a conversion, a definition, a quick fact, I'd land on a results page and have to click through to find the one sentence I actually wanted. So I built Nimble: type a question, get the answer, nothing else.
+Every time I looked up something small, a conversion, a date, who wrote what, I got a page of links and had to dig for the one sentence I wanted. So I built Nimble. You type a question and get one sentence back, with its source.
 
-It classifies what you're asking before it answers. Math runs entirely offline on-device (arithmetic, trig, roots, logs, unit conversion), so it's instant and works with no connection at all. Definitions come from Wikipedia's REST API. Facts come from DuckDuckGo's instant answers, and when those don't have it, two open models (Gemma and Qwen3) run in parallel on Cloudflare Workers AI. If both give up, it falls back to DuckDuckGo and Wikipedia search results instead of failing outright.
+Math and units run on your device, so "15% tip on 62" or "180 C to F" works with no connection. Everything else goes to free open models (Groq first, then Cloudflare's), grounded on a Wikipedia excerpt, so there is no account and no key. If two models disagree, it shows you both.
 
-It's native SwiftUI on macOS and iOS, plus a web version and a terminal client. No API keys in the app or the repo, no accounts, no tracking. Free, MIT licensed.
+It runs on the web, iPhone, Mac, Apple Watch, Android, Windows, Linux and the terminal (brew install nulljosh/tap/nimble). Nine languages. Free and open source (MIT).
 
-Would genuinely like feedback on where the classification gets it wrong, i.e. questions it routes to the wrong source.
+I test it on a 154-question exam, and the free models score 152. It is my exam, so it can flatter me. If it gets something wrong, send me the question and I'll add it.
 
 Web: https://nimble.jaybulb.com
+iPhone and Mac: https://apps.apple.com/app/nimble-answers/id6807858746
 Source: https://github.com/nulljosh/nimble
