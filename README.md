@@ -18,7 +18,7 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 
 ## Get it
 
-[Watch the 23 second promo](docs/promo/nimble-promo.mp4). In a terminal: `brew install nulljosh/nimble/nimble`, then `nimble "question"`.
+[Watch the 23 second promo](docs/promo/nimble-promo.mp4). In a terminal: `brew install nulljosh/tap/nimble`, then `nimble "question"`.
 
 | | |
 |---|---|
@@ -44,7 +44,7 @@ On a 154-question exam, Groq's free models score 152 and the local Samantha mode
 
 ## What else it does
 
-Weather, currency, local time, word origins, markets and the latest game score come back as cards. Recent questions sit under the field on every surface and never leave the device. On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer, and you can select several to share or delete. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. Tap Listen to hear any answer read aloud by the device's own voice, on the web, iPhone, Mac and Android. A home screen widget keeps your last answer on iPhone, and "Ask Nimble" works from Siri, Spotlight, Shortcuts and the Action button; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Nine languages: English, French, Spanish, Chinese, Punjabi, German, Portuguese, Hindi, Japanese. On the Mac or Linux, `brew install nulljosh/nimble/nimble` gives you `nimble "question"` in the terminal. An Apple Watch app and lock screen widgets ship with the iPhone app.
+Weather, currency, local time, word origins, markets and the latest game score come back as cards. Recent questions sit under the field on every surface and never leave the device. On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer, and you can select several to share or delete. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. Tap Listen to hear any answer read aloud by the device's own voice, on the web, iPhone, Mac and Android. A home screen widget keeps your last answer on iPhone, and "Ask Nimble" works from Siri, Spotlight, Shortcuts and the Action button; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Nine languages: English, French, Spanish, Chinese, Punjabi, German, Portuguese, Hindi, Japanese. On the Mac or Linux, `brew install nulljosh/tap/nimble` gives you `nimble "question"` in the terminal. An Apple Watch app and lock screen widgets ship with the iPhone app.
 
 ## Offline pack
 

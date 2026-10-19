@@ -46,7 +46,7 @@ call goes straight to that vendor.
 
 `POST /` takes `{q}` and returns `{answer, source, refs}`. Without a key it is 20 questions
 a minute per IP; a key from `API_KEYS` gets its own 60 a minute. Keys are issued by hand.
-The contract is in `docs/API.md`. `brew install nulljosh/nimble/nimble` gives the CLI.
+The contract is in `docs/API.md`. `brew install nulljosh/tap/nimble` gives the CLI.
 
 ## Offline pack
 

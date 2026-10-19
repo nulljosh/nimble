@@ -12,7 +12,7 @@ Title: Show HN: Nimble, one question in, one sentence out
 
 I got tired of getting ten links when I wanted one fact. Nimble is a search bar that answers in a sentence and names its source. Math and units run on the device. Everything else goes to a small Worker that asks Groq's free open models first, grounds them on a Wikipedia excerpt, and falls back to Cloudflare's models and then Wikipedia.
 
-It runs on iPhone, Mac, Android, Windows, Linux, the web, the Apple Watch and a terminal (`brew install nulljosh/nimble/nimble`). MIT licensed. There is a public API with hand-issued keys.
+It runs on iPhone, Mac, Android, Windows, Linux, the web, the Apple Watch and a terminal (`brew install nulljosh/tap/nimble`). MIT licensed. There is a public API with hand-issued keys.
 
 On my 154-question exam the free Groq models score 152 and a small local model on my Mac mini scores 147. A second exam of 1,049 questions runs weekly. Method and every number: docs/BENCHMARK.md. It is my exam, so it can flatter me; tell me which questions it gets wrong.
 
