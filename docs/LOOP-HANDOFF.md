@@ -51,6 +51,7 @@ Then read docs/LOOP-HANDOFF.md first and work "Next, in order" top down.
 - Never stage roadmap.md, kmp/.kotlin or .asc/signing-new. Roadmap check-offs stay in the working tree until Joshua says otherwise.
 - The Worker deploys by hand: `cd worker && npx wrangler deploy`. A push deploys nothing there.
 - The Worker asks Groq first (secret GROQ_KEY). Never print, paste or commit a key. `wrangler secret put` reads stdin.
+- Read /stats before every live probe round and skip the round when estNeurons is over 6,000 or groqRefused is over a quarter of groqCalls: four rounds on 2026-10-18 took the day to 7,200 neurons and 44% refused, which is the free AI real people need. The day is UTC, so it resets at 17:00 Pacific.
 - Groq caps are tokens a day. One full exam costs about 110K tokens of the 600K a day across the three models, so run it at most once a day. Use `LAST=N` for a slice.
 - Questions go to Groq and Cloudflare. Any change to who sees them updates the recipient string (docs/engine.js, extension/engine.js, AppState.swift, Watch/WatchAsk.swift; test/consent.test.js checks the Swift copies match the web), docs/privacy.html and CLAUDE.md together.
 - Never sign Joshua up or in anywhere. He logs in, then Chrome tools can create the key. Browser tabs only inside the Claude tab group (`tabs_context_mcp` first).
