@@ -32,7 +32,7 @@ const earthTerm = (q) => (/\b(tallest|highest|biggest|largest|longest|deepest) (
 export const searchTerm = (q) => earthTerm(whoTerm(q));
 const ASK_WORDS = /\b(who|what|when|where|why|how|which|is|was|are|were|the|a|an|of|did|does|do|created|invented|made|founded|wrote|built|designed|discovered)\b/gi;
 export const tinySubject = (q) => q.replace(/[?!.]/g, "").replace(ASK_WORDS, "").replace(/\s+/g, "").length <= 2;
-async function freshContext(q, attempt = 0) {
+export async function freshContext(q, attempt = 0) {
   try {
     const r = await fetch(
       "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=thumbnail&pithumbsize=800&format=json&formatversion=2&gsrsearch=" +
@@ -50,11 +50,15 @@ async function freshContext(q, attempt = 0) {
     // press invented" gets its date sentence; or the sentence's year also appears in the lead, so it
     // is on the same subject. "since 1944" in an unrelated sentence of a France page stays out.
     const when = WHEN.test(q);
+    // "first president of south africa": the intro's "The first president ... was Nelson Mandela" has no date, so
+    // without this it was trimmed and the State President page (1961 to 1994) won.
+    const ordinal = q.match(ORDINAL)?.[0];
     const trim = (t = "") => {
       const sents = t.split(/(?<=[.!?])\s+/);
       const lead = sents.slice(0, 4);
       const leadYears = new Set(lead.join(" ").match(YEAR_G) || []);
       const keep = (x) => {
+        if (ordinal && new RegExp(`\\b${ordinal}\\b`, "i").test(x)) return true;
         if (/\b(current|incumbent)\b|\bsince\b[\s\S]*\b(president|minister|premier|ceo|governor|mayor|secretary|chancellor|king|queen|head)\b/i.test(x)) return true;
         if (!DATE.test(x)) return false;
         return when || (x.match(YEAR_G) || []).some((y) => leadYears.has(y));
@@ -194,10 +198,11 @@ export const isTimeSensitive = (q) => TIMELY.test(q);
 // Question shapes where two models clashing is worth a second call (see the flow below).
 // "Who was the first president of South Africa" came back "F.W. de Klerk" from one model: firsts and lasts are where a
 // lone model guesses, so they get the second opinion (and the Sources disagree card when the two clash).
-export const needsSecondModel = (q) => isTimeSensitive(q) || WHEN.test(q) || /\d/.test(q) || /\b(first|last|earliest|original|founding)\b/i.test(q);
+const ORDINAL = /\b(first|last|earliest|original|founding)\b/i;
+export const needsSecondModel = (q) => isTimeSensitive(q) || WHEN.test(q) || /\d/.test(q) || ORDINAL.test(q);
 export const normalizeQuestion = (q) => String(q).trim().toLowerCase().replace(/\s+/g, " ");
 // Bump PROMPT_V when the prompt changes: answers written under the old prompt must not outlive it in the cache.
-const PROMPT_V = 3;
+const PROMPT_V = 4;
 export const cacheUrl = (origin, q) => `${origin}/__nimble/answer?v=${PROMPT_V}&q=${encodeURIComponent(normalizeQuestion(q))}`;
 const statsUrl = (origin, day) => `${origin}/__nimble/stats/${day}`;
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
