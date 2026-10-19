@@ -15,6 +15,7 @@ struct NimbleApp: App {
         Window("Nimble", id: "main") {
             SearchView()
                 .environment(appState)
+                .webOnlyLinks()
                 .background(VisualEffectView(material: .hudWindow, blendingMode: .behindWindow))
                 .onAppear {
                     // Screenshots: `-shotAppearance light|dark` pins this process only, never the system setting.

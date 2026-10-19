@@ -49,3 +49,6 @@ private fun daysFromCivil(year: Int, month: Int, day: Int): Long {
     val doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
     return era * 146_097 + doe - 719_468
 }
+
+/** True for an http(s) link, the only kind the apps open. */
+fun isWebUrl(url: String): Boolean = url.startsWith("https://", ignoreCase = true) || url.startsWith("http://", ignoreCase = true)

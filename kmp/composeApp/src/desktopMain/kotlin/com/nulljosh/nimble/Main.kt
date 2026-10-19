@@ -16,6 +16,6 @@ fun main() = application {
         state = rememberWindowState(size = DpSize(760.dp, 560.dp)),
     ) {
         // No mic on desktop: the JVM has no speech recognizer, so no Voice is passed.
-        MaterialTheme { SearchScreen(history) }
+        MaterialTheme { WebOnlyLinks { SearchScreen(history) } }
     }
 }

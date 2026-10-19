@@ -42,6 +42,7 @@ struct RootTabView: View {
             .tag(2)
         }
         .environment(state)
+        .webOnlyLinks()
         .tint(state.theme.ink)
         .preferredColorScheme(state.theme.colorScheme)
         // A question parked by the "Ask Nimble" intent (Siri, Spotlight, Shortcuts, Action button) runs on the Ask tab.

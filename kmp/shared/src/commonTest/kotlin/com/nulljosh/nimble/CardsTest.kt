@@ -163,6 +163,15 @@ class CardsTest {
     }
 
     @Test
+    fun onlyWebLinksOpen() {
+        assertEquals(true, isWebUrl("https://en.wikipedia.org/wiki/Paris"))
+        assertEquals(true, isWebUrl("HTTP://example.com"))
+        assertEquals(false, isWebUrl("javascript:alert(1)"))
+        assertEquals(false, isWebUrl("intent://scan/#Intent;end"))
+        assertEquals(false, isWebUrl("file:///etc/passwd"))
+    }
+
+    @Test
     fun deviceTimeNeedsNoNetwork() {
         val at = 1790910300000L // 2026-10-02 03:05 UTC
         assertEquals(
