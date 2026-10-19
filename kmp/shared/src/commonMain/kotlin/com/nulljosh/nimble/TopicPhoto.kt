@@ -59,11 +59,11 @@ object TopicPhoto {
      * comes from those entities first, then the top Wikipedia search hits for the question (two, not lists).
      * Null when nothing comes back. No entity, or no page that passes, gives no picture, never a guess.
      */
-    suspend fun lookup(query: String, body: String, get: TextFetch): TopicLookup? {
+    suspend fun lookup(query: String, body: String, get: TextFetch, searched: List<String>? = null): TopicLookup? {
         if (noPhotoQuery.containsMatchIn(query)) return null
         val ents = answerEntities(query, body)
         val names = ents.map { it.name }
-        val hits = searchTitles(query, get)
+        val hits = (searched ?: searchTitles(query, get))
             .filter { !it.startsWith("list of", ignoreCase = true) && it !in names }
             .take(2)
         val entSummaries = coroutineScope {
@@ -143,9 +143,9 @@ object TopicPhoto {
      * The answer with its topic filled in: a missing picture, and when nothing else backs the answer, the intro
      * ("Why this answer") and the Wikipedia page as its link. An answer that already has a photo is returned as it is.
      */
-    suspend fun withTopic(answer: Answer.Text, query: String, get: TextFetch): Answer.Text {
+    suspend fun withTopic(answer: Answer.Text, query: String, searched: List<String>? = null, get: TextFetch): Answer.Text {
         if (answer.photoUrl != null) return answer
-        val topic = lookup(query, answer.body, get) ?: return answer
+        val topic = lookup(query, answer.body, get, searched) ?: return answer
         return answer.copy(
             sourceUrl = topic.page ?: answer.sourceUrl,
             photoUrl = topic.photoUrl,
@@ -153,6 +153,9 @@ object TopicPhoto {
             grounding = answer.grounding ?: topic.extract,
         )
     }
+
+    /** The question's search, for AnswerClient to start next to the AI call (it needs only the question). Null when no photo is wanted. */
+    suspend fun search(query: String, get: TextFetch): List<String>? = if (noPhotoQuery.containsMatchIn(query)) null else searchTitles(query, get)
 
     /** The top Wikipedia search titles for the question. Empty on any failure. */
     private suspend fun searchTitles(query: String, get: TextFetch): List<String> {

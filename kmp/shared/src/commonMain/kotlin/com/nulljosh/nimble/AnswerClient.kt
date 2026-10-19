@@ -16,6 +16,8 @@ import io.ktor.http.encodeURLParameter
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
@@ -160,11 +162,16 @@ class AnswerClient(
         // AI answers have no source page; give them a web search so every answer opens somewhere.
         // An AI answer with no proxy photo takes the picture and intro of the Wikipedia topic it names (TopicPhoto).
         val aiFailures = mutableListOf<String>()
-        when (val ai = gemma(input, aiFailures)) {
+        // The topic's Wikipedia search needs only the question, so it runs next to the AI instead of after it (up to 0.7 s).
+        val (reply, searched) = coroutineScope {
+            val search = async { TopicPhoto.search(input) { fetchText(it) } }
+            gemma(input, aiFailures) to search.await()
+        }
+        when (val ai = reply) {
             is Answer.Text -> {
                 turns.add(input, ai.body)
                 val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}", asOf = asOfForText(input))
-                return TopicPhoto.withTopic(answer, input) { fetchText(it) }
+                return TopicPhoto.withTopic(answer, input, searched) { fetchText(it) }
             }
             // The split stands unless DDG's sourced answer backs one of the two; then the normal path below runs (the web's rule).
             is Answer.Disagree -> {

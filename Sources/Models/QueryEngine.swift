@@ -676,11 +676,12 @@ final class QueryEngine: Sendable {
     /// Fills a missing picture from the answer's Wikipedia topic, and, when nothing else backs the answer, the
     /// Wikipedia intro and page behind it ("Why this answer"). Only for answers that went to an AI or to the
     /// Wikipedia fallback: `enabled` is false when nothing may leave the device or the user said no.
-    static func withTopic(_ result: QueryResult, query: String, session: URLSession, enabled: Bool) async -> QueryResult {
+    static func withTopic(_ result: QueryResult, query: String, session: URLSession, enabled: Bool,
+                          searching: Task<[String], Never>? = nil) async -> QueryResult {
         guard enabled,
               case .text(let heading, let body, let source, let sourceURL, let imageURL, let grounding, let sources, let photo, let bg) = result,
               photo == nil || grounding == nil,
-              let topic = await topicLookup(query: query, body: body, session: session) else { return result }
+              let topic = await topicLookup(query: query, body: body, session: session, searching: searching) else { return result }
         let fromTopic = grounding == nil && topic.extract != nil
         return .text(heading: heading, body: body, source: source,
                      sourceURL: fromTopic ? (topic.page ?? sourceURL) : sourceURL, imageURL: imageURL,
@@ -690,11 +691,15 @@ final class QueryEngine: Sendable {
     /// The photo comes only from the entities the answer names (see `photoFromEntity`). The intro ("Why this answer")
     /// comes from those entities first, then the top Wikipedia search hits for the question (two, not lists).
     /// Nil when nothing comes back. No entity or no passing page means no picture, never a guess.
-    static func topicLookup(query: String, body: String, session: URLSession) async -> TopicLookup? {
+    /// `searching` is the question's Wikipedia search, already started by query() next to the AI call (it needs
+    /// only the question); without it the search runs here, after the answer, as before.
+    static func topicLookup(query: String, body: String, session: URLSession, searching: Task<[String], Never>? = nil) async -> TopicLookup? {
         if query.range(of: noPhotoQuery, options: [.regularExpression, .caseInsensitive]) != nil { return nil }
         let ents = answerEntities(query: query, answer: body)
         let names = ents.map(\.name)
-        let searchTitles = await topSearchTitles(query, session: session)
+        let found: [String]
+        if let searching { found = await searching.value } else { found = await topSearchTitles(query, session: session) }
+        let searchTitles = found
             .filter { !$0.lowercased().hasPrefix("list of") && !names.contains($0) }.prefix(2)
         let candidates = names + Array(searchTitles)
         let summaries = await withTaskGroup(of: (Int, TopicSummary?).self, returning: [TopicSummary?].self) { group in
@@ -880,6 +885,9 @@ final class QueryEngine: Sendable {
         // The answer's Wikipedia topic fills a missing picture and the "Why this answer" text. Only when the
         // user allowed an AI (useLLM) and nothing stayed on device; a "no" answer is DDG and Wikipedia only.
         let topicOK = useLLM && !localOnly
+        // The topic's Wikipedia search needs only the question: started now, it no longer waits for the AI (up to 0.7 s).
+        let searching: Task<[String], Never>? = topicOK && input.range(of: Self.noPhotoQuery, options: [.regularExpression, .caseInsensitive]) == nil
+            ? Task { await Self.topSearchTitles(input, session: session) } : nil
         var llmResult = await llm
         if let split = llmResult, case .disagree(let alts, _, _) = split {
             // DDG's sourced answer that backs one of the two settles it, as on the web: the AI answer is dropped and the normal path runs.
@@ -893,13 +901,13 @@ final class QueryEngine: Sendable {
             if case .text(_, let body, _, _, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
                let sourced = await ddg, case .text(_, let sourcedBody, _, _, _, _, _, _, _) = sourced,
                sourcedBody.rangeOfCharacter(from: .decimalDigits) != nil {
-                return await Self.withTopic(withSources(Self.keepingPhoto(sourced, from: llmResult), others: [await wiki]), query: input, session: session, enabled: topicOK)
+                return await Self.withTopic(withSources(Self.keepingPhoto(sourced, from: llmResult), others: [await wiki]), query: input, session: session, enabled: topicOK, searching: searching)
             }
-            return await Self.withTopic(withSources(llmResult, others: [await ddg, await wiki]), query: input, session: session, enabled: topicOK)
+            return await Self.withTopic(withSources(llmResult, others: [await ddg, await wiki]), query: input, session: session, enabled: topicOK, searching: searching)
         }
 
-        if let ddgResult = await ddg { return await Self.withTopic(withSources(Self.labeledIfGeneric(ddgResult, question: input), others: [await wiki]), query: input, session: session, enabled: topicOK) }
-        if let wikiResult = await wiki { return await Self.withTopic(withSources(wikiResult, others: []), query: input, session: session, enabled: topicOK) }
+        if let ddgResult = await ddg { return await Self.withTopic(withSources(Self.labeledIfGeneric(ddgResult, question: input), others: [await wiki]), query: input, session: session, enabled: topicOK, searching: searching) }
+        if let wikiResult = await wiki { return await Self.withTopic(withSources(wikiResult, others: []), query: input, session: session, enabled: topicOK, searching: searching) }
 
         let encoded = input.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? input
         return .error("No instant answer found.", searchURL: "https://duckduckgo.com/?q=\(encoded)")
