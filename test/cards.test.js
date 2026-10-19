@@ -48,17 +48,27 @@ test("currency is a card", async () => {
   } finally { teardown(); }
 });
 
-test("local time is a card", async () => {
+test("local time is a card, from the device's zone list with no network", async () => {
   setup();
+  globalThis.fetch = async () => { throw new Error("no network"); };
   try {
     const a = await E.answer("time in Vancouver");
     assert.equal(a.kind, "card");
     assert.match(a.big, /^\d\d:\d\d$/);
     assert.equal(a.unit, "Vancouver");
     assert.match(a.sub, /^\w+, \w+ \d+, America\/Vancouver$/);
+    assert.equal(a.src, "IANA time zones");
+    assert.equal((await E.answer("what time is it in new york")).unit, "New York");
+  } finally { teardown(); }
+});
+
+test("a place the zone list does not name goes to the geocoder", async () => {
+  setup();
+  try {
+    const a = await E.answer("time in Whistler");
     assert.equal(a.src, "Open-Meteo");
-    const r = await E.renderAnswer("time in Vancouver");
-    assert.match(r.h, /mockup-big num">\d\d:\d\d Vancouver</);
+    assert.match(a.sub, /America\/Vancouver$/);
+    const r = await E.renderAnswer("time in Whistler");
     assert.match(r.h, /href="https:\/\/open-meteo\.com"/);
   } finally { teardown(); }
 });

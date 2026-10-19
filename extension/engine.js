@@ -785,15 +785,26 @@ async function weather(query){
   const sky={0:"clear",1:"mostly clear",2:"partly cloudy",3:"overcast",45:"fog",48:"fog",51:"drizzle",53:"drizzle",55:"drizzle",61:"rain",63:"rain",65:"heavy rain",71:"snow",73:"snow",75:"heavy snow",80:"showers",81:"showers",82:"heavy showers",95:"thunderstorm"}[c.weather_code]||"";
   return asOfNow(card(Math.round(c.temperature_2m), "°C", [loc.name, loc.country, sky, `wind ${Math.round(c.wind_speed_10m)} km/h`, next12(w.hourly?.temperature_2m)].filter(Boolean).join(", "), "Open-Meteo", "https://open-meteo.com"));
 }
-async function localTime(query){
-  const place=/^(?:what(?:'s|’s| is) the |what )?(?:current |local )?time (?:is it |now )?(?:in|at) (.+?)(?: right now| now)?\??$/i.exec(query.trim())?.[1]; if(!place) return null;
-  const loc=await geocode(place); if(!loc?.timezone) return null;
+const timePlace=q=>/^(?:what(?:'s|’s| is) the |what )?(?:current |local )?time (?:is it |now )?(?:in|at) (.+?)(?: right now| now)?\??$/i.exec(q.trim())?.[1];
+function timeCard(name, tz, src, url, now=new Date()){
   try{
-    const now=new Date(), tz=loc.timezone;
     const big=new Intl.DateTimeFormat("en-GB",{timeZone:tz,hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(now);
     const day=new Intl.DateTimeFormat("en",{timeZone:tz,weekday:"long",month:"long",day:"numeric"}).format(now);
-    return asOfNow(card(big, loc.name, `${day}, ${tz}`, "Open-Meteo", "https://open-meteo.com"));
+    return asOfNow(card(big, name, `${day}, ${tz}`, src, url));
   }catch{ return null; }
+}
+// "time in tokyo" with no network: the device's own IANA list names about 400 cities (Asia/Tokyo, Europe/Paris).
+// Places it does not name (a country, a smaller city) go to the geocoder below.
+function deviceTime(query){
+  const place=timePlace(query); if(!place || typeof Intl.supportedValuesOf!=="function") return null;
+  const want=place.trim().toLowerCase().replace(/\s+/g,"_");
+  const tz=Intl.supportedValuesOf("timeZone").find(z=>z.split("/").pop().toLowerCase()===want);
+  return tz ? timeCard(tz.split("/").pop().replace(/_/g," "), tz, "IANA time zones", "https://www.iana.org/time-zones") : null;
+}
+async function localTime(query){
+  const place=timePlace(query); if(!place) return null;
+  const loc=await geocode(place); if(!loc?.timezone) return null;
+  return timeCard(loc.name, loc.timezone, "Open-Meteo", "https://open-meteo.com");
 }
 
 // --- AI engine (settings) ---
@@ -1044,9 +1055,13 @@ async function answer(query, opts={}){
   if(svg) return {kind:"graph", expr:ge, svg};
   const k = constant(query);
   if(k) return {kind:"text", ...k, sources:sourcesFor(k.body, [k])};
+  const dt = deviceTime(query);
+  if(dt) return dt;
   // opts.pack: the downloaded offline pack, when the page has one. Offline it is the only answer source left.
   // Private mode: nothing leaves the device. Same path as offline, with its own message when there is no pack.
   if(opts.privateMode) return opts.pack ? (packAnswer(query, opts.pack) || {kind:"pack-miss"}) : {kind:"private-nopack"};
+  // Offline, a conversion still answers from the last rate this device saved for the pair (the fetch fails fast).
+  if(typeof navigator!=="undefined" && navigator.onLine===false){ const fx=await currency(query).catch(()=>null); if(fx) return fx; }
   if(typeof navigator!=="undefined" && navigator.onLine===false) return opts.pack ? (packAnswer(query, opts.pack) || {kind:"pack-miss"}) : {kind:"offline"};
   // Pattern-gated live sources: each returns null fast unless the query is shaped for it.
   const cur = await currency(query).catch(()=>null);
