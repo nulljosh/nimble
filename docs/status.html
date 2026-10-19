@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nimble Status</title>
+<meta name="description" content="Is Nimble answering right now? Live check of the answer service, its speed and its exam score.">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="tokens.css">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--black); font-family: var(--font); line-height: 1.65; -webkit-font-smoothing: antialiased; }
+a { color: var(--yellow-deep); }
+.container { max-width: var(--max-text); margin: 0 auto; padding: var(--space-8) var(--gutter); }
+h1 { font-size: 2rem; letter-spacing: -0.02em; margin-bottom: var(--space-2); }
+.state { font-size: 1.15rem; margin-bottom: var(--space-7); color: var(--text-mid); }
+.state strong { color: var(--black); }
+dl { display: grid; grid-template-columns: 1fr auto; gap: var(--space-3) var(--space-5); }
+dt { color: var(--text-mid); }
+dd { font-variant-numeric: tabular-nums; text-align: right; }
+.back { display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--space-7); }
+</style>
+</head>
+<body>
+<main class="container">
+  <h1>Status</h1>
+  <p class="state" id="state">Checking the answer service...</p>
+  <dl id="rows"></dl>
+  <a class="back" href="./">&larr; Back to Nimble Answers</a>
+</main>
+<script>
+// One GET to /stats: if it answers, the service is up, and the numbers come with it.
+const rows = document.getElementById("rows"), state = document.getElementById("state");
+const row = (k, v) => { const dt = document.createElement("dt"), dd = document.createElement("dd"); dt.textContent = k; dd.textContent = v; rows.append(dt, dd); };
+(async () => {
+  const t0 = performance.now();
+  try {
+    const r = await fetch("https://nimble-answers.trommatic.workers.dev/stats", { cache: "no-store", signal: AbortSignal.timeout(8000) });
+    if (!r.ok) throw new Error(r.status);
+    const s = await r.json(), ms = Math.round(performance.now() - t0);
+    state.innerHTML = "<strong>Answering.</strong> The service replied in " + ms + " ms.";
+    if (s.exam) row("Exam score", s.exam.score + " of " + s.exam.total + " (" + new Date(s.exam.at).toLocaleDateString() + ")");
+    for (const [name, l] of Object.entries(s.latency || {})) row(name + " answer time", l.p50 + " ms typical, " + l.p95 + " ms slow");
+    const asked = (s.aiCalls || 0) + (s.cacheHits || 0);
+    if (asked) row("Answered from cache today", Math.round(100 * (s.cacheHits || 0) / asked) + "%");
+    row("Questions to the AI today", String(s.aiCalls || 0));
+  } catch {
+    state.innerHTML = "<strong>Not answering.</strong> The service did not reply. Offline answers still work in the apps.";
+  }
+})();
+</script>
+</body>
+</html>

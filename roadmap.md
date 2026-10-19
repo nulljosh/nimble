@@ -93,7 +93,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 - [ ] [Sonnet] Self-serve API keys with a free tier and the $1 unlock, issued and revoked from a page.
 - [ ] [Haiku] SDKs: a tiny JS and Python client, each one file, tested against the live API.
-- [ ] [Haiku] A public status page from /stats: uptime, latency, exam score.
+- [x] [Haiku] A public status page from /stats: uptime, latency, exam score. 2026-10-19: nimble.jaybulb.com/status checks the service live and shows its reply time, model answer times, cache share and the last exam score. A history of uptime needs stored checks and waits.
 - [ ] [Sonnet] MCP server listed in the public registries with the four tools.
 
 ### v81-v90 Every language, every person
