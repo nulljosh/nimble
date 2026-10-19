@@ -8,7 +8,7 @@ v9 is closed by 9.4.4. The next major, 10.0.0, closes v10 and is cut the moment 
 
 ## Where things stand
 
-- Repo: 9.4.6 on main. Tags v8.0.0 through v9.4.6 exist (9.4.6 tagged once CI is green). 7.0.0 and 9.0.0 were skipped on purpose (a 9.0.0 tag would sit below the existing 9.1.0 build and compile the wrong version). CI is green. The Homebrew tap is current.
+- Repo: 9.5.0 on main. Tags v8.0.0 through v9.4.6 exist; 9.5.0 is tagged once CI is green. 7.0.0 and 9.0.0 were skipped on purpose (a 9.0.0 tag would sit below the existing 9.1.0 build and compile the wrong version). CI is green. The Homebrew tap is current.
 - Quality: the 154-question exam reads 154 of 154. The 1,049-question exam (test/exam-1000.js) reads offline 810 of 810, and the AI slice is run a rotating slice per run. Method and numbers are in docs/BENCHMARK.md.
 - Store, iPhone 9.4.4 (build 202610181545) and Mac 9.4.3 (build 202610181537): both WAITING_FOR_REVIEW. The iPhone 9.4.4 build was rejected once under Guideline 5, because the China AI rule flagged the word "OpenAI" in the store metadata. Fixed 2026-10-18: China mainland removed from availability, "OpenAI" removed from the store description on iPhone and Mac, and the build resubmitted. ASC app id 6807858746.
 - Price: free. Joshua decided it on 2026-10-12. The $0.99 flip waits until the Worker has all-day Groq headroom, and Joshua runs it himself.
@@ -28,7 +28,7 @@ v9 is closed by 9.4.4. The next major, 10.0.0, closes v10 and is cut the moment 
 
 Blocked on Joshua: a native-speaker check of the de, pt, hi and ja strings. A real-device walk (Siri, share sheet, VoiceOver, Android). Chrome and Firefox extension store submissions. Posting the launch drafts. Issuing API keys (`wrangler secret put API_KEYS` with the old list plus the new key). The optional SAMANTHA_URL tunnel. The $0.99 price flip.
 
-Already in the code, so don't rebuild: answers with Why this answer, follow-ups, step math, multiple sources, the News, Markets and Sports cards, the offline Wikipedia pack, Private mode, Listen, the voice loop, Ask Nimble from every share sheet, Siri and Shortcuts, the public API (docs/API.md), the Homebrew tap, nine languages on every platform, the Apple Watch app, lock screen widgets, and the browser extension zip that CI builds.
+Already in the code, so don't rebuild: answers with Why this answer, follow-ups, Tell me more (web in 9.5.0: the Worker's more:true asks one model for three sentences; Swift and Kotlin still to come, next slices), step math, multiple sources, the News, Markets and Sports cards, the offline Wikipedia pack, Private mode, Listen, the voice loop, Ask Nimble from every share sheet, Siri and Shortcuts, the public API (docs/API.md), the Homebrew tap, nine languages on every platform, the Apple Watch app, lock screen widgets, and the browser extension zip that CI builds.
 
 ## Android emulator
 

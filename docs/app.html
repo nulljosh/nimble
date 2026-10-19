@@ -347,6 +347,8 @@ var T=I18N.t;
     if(share&&'speechSynthesis' in window) share='<button type="button" data-listen>'+T('Listen')+'</button>'+share;
     // Copy sits next to the answer, first, as on the iPhone.
     if(share) share='<button type="button" data-copy>'+T('Copy')+'</button>'+share;
+    // Tell me more: a text answer can grow to three sentences, once, on a tap. Not offline or in Private mode.
+    if(res.kind==='text' && !privateOn()) share+='<button type="button" data-more>'+T('Tell me more')+'</button>';
     r.innerHTML=res.h+(res.credit||share?'<div class="credit">'+(res.credit?'<span>'+res.credit+'</span>':'')+share+'</div>':'');
     // Voice loop: a question asked out loud gets its answer read back, through the same Listen button.
     if(opts&&opts.spoken){ var lb=r.querySelector('[data-listen]'); if(lb) lb.click(); }
@@ -455,6 +457,18 @@ var T=I18N.t;
       return;
     }
     if(e.target.closest('[data-share]')){ shareAnswer(); return; }
+    var mb=e.target.closest('[data-more]');
+    if(mb){
+      if(!last||mb.disabled) return;
+      var asked=last; mb.disabled=true; mb.textContent=T('Thinking…');
+      tellMore(asked.q).then(function(m){
+        if(last!==asked) return;  // a newer question replaced this card
+        var p=r.querySelector('.mockup-link p');
+        if(!m||!p){ mb.textContent=T('Nothing more to add'); return; }
+        p.textContent=m.body; asked.a=Object.assign({},asked.a,{body:m.body}); mb.remove();
+      },function(){ mb.disabled=false; mb.textContent=T('Tell me more'); });
+      return;
+    }
   });
   fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
     list.sort(function(){return Math.random()-0.5;}).slice(0,6).forEach(function(s){

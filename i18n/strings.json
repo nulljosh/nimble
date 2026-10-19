@@ -1413,5 +1413,27 @@
     "pt": "Cartão",
     "hi": "कार्ड",
     "ja": "カード"
+  },
+  "Tell me more": {
+    "en": "Tell me more",
+    "fr": "Dis-m'en plus",
+    "es": "Cuéntame más",
+    "zh": "详细一点",
+    "pa": "ਹੋਰ ਦੱਸੋ",
+    "de": "Mehr dazu",
+    "pt": "Conte mais",
+    "hi": "और बताओ",
+    "ja": "もっと詳しく"
+  },
+  "Nothing more to add": {
+    "en": "Nothing more to add",
+    "fr": "Rien de plus à ajouter",
+    "es": "Nada más que añadir",
+    "zh": "没有更多内容",
+    "pa": "ਹੋਰ ਕੁਝ ਨਹੀਂ",
+    "de": "Mehr gibt es nicht",
+    "pt": "Nada mais a acrescentar",
+    "hi": "और कुछ नहीं",
+    "ja": "これ以上はありません"
   }
 }

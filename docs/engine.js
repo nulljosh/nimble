@@ -1049,6 +1049,16 @@ async function answer(query, opts={}){
   return hit ? {kind:"text", ...hit, sources:sourcesFor(hit.body, [hit, dd, ...wikiRefs]).slice(0,2), ...(!ai && aiNote.aiError ? {aiError:aiNote.aiError} : {}), ...(isTimeSensitive(query) ? {asOf:new Date().toISOString()} : {})} : (opts.pack && packAnswer(query, opts.pack)) || {kind:"none"};
 }
 
+// "Tell me more": three sentences from the proxy for a question already answered, with the pages behind them.
+// Null when the proxy has nothing more to say; the one-liner then stands.
+async function tellMore(query){
+  const d = await getJSON(ANSWER_PROXY, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({q:query, more:true})});
+  const body = typeof d?.answer==="string" ? d.answer.trim() : "";
+  if(!body || body==="UNKNOWN") return null;
+  const refs = (Array.isArray(d.refs) ? d.refs : []).filter(r => r && /^https:\/\//.test(r.url||"")).slice(0,2).map(r => ({name:r.title||"Wikipedia", url:r.url}));
+  return {body, src:d.source||"Nimble AI", sources:refs};
+}
+
 // Photo markup. The frame reserves its 16:9 box before the picture arrives (no layout jump), the cream
 // fills it until load, and a picture that fails to load is removed rather than shown broken.
 function photoHTML(url, alt){
@@ -1290,4 +1300,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={tellMore,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};

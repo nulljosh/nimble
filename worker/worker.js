@@ -9,11 +9,14 @@ const LLAMA = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 // A model that errors or hits its cap (429) hands over to the next, then to Workers AI.
 export const GROQ_MODELS = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"];
 // gpt-oss reasons before it answers: low effort, reasoning dropped from the reply, room for both in max_tokens.
-const groqParams = (model) => (model.startsWith("qwen/") ? { reasoning_format: "hidden", max_tokens: 80 } : { reasoning_effort: "low", include_reasoning: false, max_tokens: 300 });
+// "Tell me more" (more) asks for three sentences, so each model gets room for about three times the words.
+const groqParams = (model, more) => (model.startsWith("qwen/") ? { reasoning_format: "hidden", max_tokens: more ? 240 : 80 } : { reasoning_effort: "low", include_reasoning: false, max_tokens: more ? 500 : 300 });
 // House model: Qwen3 30B bills 4,625 neurons per M input tokens, Gemma 4 26B 9,091 (Workers AI pricing, Oct 2026).
 // Input dominates here (grounding plus question), so Qwen is the one asked first and alone.
 const SYSTEM =
   "Answer in one short factual sentence. No preamble, no markdown. Assume Earth and our own Sun unless the question names another world or star. If you do not know, reply exactly UNKNOWN.";
+// "Tell me more": three sentences, still prose, never a wall of text.
+const SYSTEM_MORE = SYSTEM.replace("one short factual sentence", "three short factual sentences of plain prose, no lists");
 // Model weights are frozen at their training cutoff, so "who is the current president"
 // came back "Joe Biden". Ground every question in live Wikipedia intros plus today's date
 // and tell the models the context beats their memory.
@@ -350,10 +353,11 @@ export default {
     const { success } = await limiter.limit({ key: key || ip });
     if (!success) return json({ error: "rate limited" }, 429);
 
-    let q, turns;
+    let q, turns, more;
     try {
       const body = await req.json();
       q = body.q;
+      more = body.more === true;
       turns = cleanTurns(body.turns);
     } catch {
       return json({ error: "bad json" }, 400);
@@ -365,7 +369,7 @@ export default {
     const counts = await loadCounts(url.origin, env);
     // An identical question (normalized) inside the TTL is served from the Cache API: no AI, no neurons.
     // Follow-up turns depend on the conversation, so they skip the cache.
-    const cKey = turns.length === 0 ? cacheUrl(url.origin, q) : null;
+    const cKey = turns.length === 0 ? cacheUrl(url.origin, more ? `more: ${q}` : q) : null;
     const hit = cKey ? await cacheGet(cKey) : null;
     if (hit) {
       counts.cacheHits++;
@@ -396,7 +400,7 @@ export default {
     };
     const today = new Date().toISOString().slice(0, 10);
     const system =
-      `${SYSTEM} Today is ${today}. Your training data is out of date; when the reference text below ` +
+      `${more ? SYSTEM_MORE : SYSTEM} Today is ${today}. Your training data is out of date; when the reference text below ` +
       `covers the question, trust it over your memory. Never mention the reference text.` + (context ? ` ${GROUNDED}` : "") + (context ? `\n\nReference (live Wikipedia):\n${context}` : "");
     const messages = [
       { role: "system", content: system },
@@ -412,7 +416,7 @@ export default {
       env.AI.run(model, {
         messages,
         temperature: 0,
-        max_tokens: 80, // ponytail: neurons bill per token; a sentence never needs 600
+        max_tokens: more ? 240 : 80, // ponytail: neurons bill per token; a sentence never needs 600
       })
         .then((d) => {
           const msg = d?.choices?.[0]?.message;
@@ -431,7 +435,7 @@ export default {
       return fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: { authorization: `Bearer ${env.GROQ_KEY}`, "content-type": "application/json" },
-        body: JSON.stringify({ model, messages, temperature: 0, ...groqParams(model) }),
+        body: JSON.stringify({ model, messages, temperature: 0, ...groqParams(model, more) }),
       });
     };
     // One model: its answer, or null when it refused (cap, error). A bare 429 with no retry-after is a per-minute burst.
@@ -476,7 +480,7 @@ export default {
         const r = await fetch(`${env.SAMANTHA_URL}/v1/chat/completions`, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ model: "Qwen3.5-9B-OptiQ-4bit", messages, temperature: 0, max_tokens: 80, chat_template_kwargs: { enable_thinking: false } }),
+          body: JSON.stringify({ model: "Qwen3.5-9B-OptiQ-4bit", messages, temperature: 0, max_tokens: more ? 240 : 80, chat_template_kwargs: { enable_thinking: false } }),
           signal: AbortSignal.timeout(Number(env.SAMANTHA_TIMEOUT_MS ?? 8000)),
         });
         if (!r.ok) return null;
@@ -491,7 +495,8 @@ export default {
       // Models narrate the grounding ("not mentioned in the provided reference") instead of
       // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
       // The same goes for the model quoting its own rules back ("The instructions say: ... reply exactly UNKNOWN").
-      if (/\b(reference|provided (text|context))\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) return "UNKNOWN";
+      // "Reference" alone is a normal word: a haiku's "seasonal reference" turned a good answer into UNKNOWN.
+      if (/\b(the|provided|this|given) reference\b|\breference text\b|\bprovided (text|context)\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) return "UNKNOWN";
       // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
       // The date is ours, not the answer's; drop the preamble and recapitalize.
       const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "");
@@ -512,7 +517,8 @@ export default {
     const groq = env.GROQ_KEY ? await askGroq() : null;
     if (groq === null && overBudget(counts)) return resting();
     const [first, house] = groq !== null ? [groq, "Groq"] : [await askCounted(QWEN), "Qwen"];
-    if (first !== "UNKNOWN" && (!needsSecondModel(q) || overBudget(counts))) return finish({ answer: first, source: house });
+    // "Tell me more" never asks a second model: three sentences from two models never match word for word.
+    if (first !== "UNKNOWN" && (more || !needsSecondModel(q) || overBudget(counts))) return finish({ answer: first, source: house });
     if (overBudget(counts)) return resting();
     const second = await askCounted(GEMMA);
 
