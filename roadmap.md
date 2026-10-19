@@ -38,7 +38,6 @@ feature and a real domain (getnimbleapp.com or nimbleapp.com; buy via /buy-domai
 settled). Web stays free with the $1 unlock through Stripe. Decide pricing shape at v8 (private
 mode is the premium feature), buy the domain at v9, flip the switch at v10.
 
-- [x] [Sonnet] Reliability: answer p50 under 2s and p95 under 6s on the free engine, graceful degradation tested with every upstream (Wikipedia, DDG, Workers AI) down in turn. Measured 2026-10-18 on 12 uncached questions: p50 0.94 s, p95 2.0 s (the second model now starts beside the first); test/worker-upstream-down.test.mjs takes Wikipedia, Groq and Workers AI down in turn.
 - [ ] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces.
 - [ ] [Haiku] Landing, README, whitepaper and screenshots rebuilt for 10.0 with the new look and the benchmark.
 - [ ] [Opus] 10.0 launch: Product Hunt, HN (when the account allows), release notes, and the What's New that explains what a decade of versions bought you in one screen.
@@ -59,9 +58,6 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 ### v21-v30 Live: the numbers people check every day
 
-- [x] [Sonnet] Weather: "weather in vancouver" from Open-Meteo (keyless), now plus the next 12 hours. Web done 2026-10-18 ("vancouver weather" too, next 12 h range); Swift and Kotlin the same day.
-- [x] [Sonnet] Currency: "100 usd to cad" from the Bank of Canada / ECB daily rates, offline fallback to the last fetch. Done 2026-10-18 on web and Apple (last saved rate per pair, labelled); Kotlin keeps it for the session.
-- [x] [Sonnet] Time zones: "time in tokyo", offline from the IANA table. Done 2026-10-18 on web, Apple and Kotlin (about 400 cities from the platform list, works in Private mode; the rest geocode).
 - [ ] [Sonnet] Canada and BC live figures: CPI, policy rate, minimum wage by province (StatCan / Bank of Canada). CPI and the policy rate answer from Bank of Canada Valet since 2026-10-18 (canadaFigure); minimum wage still comes from the models.
 - [ ] [Haiku] Sports scores beyond ESPN's top leagues: NHL, MLS, CFL, with the next game when none is live. 2026-10-18: NHL and MLS already answer on every platform. CFL has no live feed (ESPN's CFL scoreboard is frozen at the 2022 season), so it waits for another free source. Next game is open.
 
@@ -239,10 +235,5 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
   TUI rollout; the extraction pattern should port cleanly to other Swift apps
   with a headless model layer.
 
-## Ingested 2026-10-03
-- [x] Needs better QA testing and filtering of queries. Screenshots (from Joshua's phone, Oct 3): "Who is the president of the United States" returned raw model text ("The instructions say: 'If you do not know, reply exactly UNKNOWN'", source Gemma); "Who created you" returned the Wikipedia YouTube article; "What's nine plus ten" returned the Wikipedia Vine (service) article; "X=5+5. Solve for x." answered x=10 via Qwen (correct).
-
 ## Ingested 2026-10-16
-- [x] UI bump: nav bar at the bottom, Settings as a tab in it, color goes into Settings, copy to clipboard near search. What's New modal needs padding. (screenshots: notes/attachments/2026-10-16/nimble-6.png, notes/attachments/2026-10-16/nimble-7.png, notes/attachments/2026-10-16/nimble-8.png)
-- [x] Remove "AI answers" from Settings. Default to Samantha, then other LLMs, Wikipedia etc. Filter through them for the user; don't make the user manage APIs. Same with engines. Web done 2026-10-18 (Private mode is the off switch); Apple keeps the switch for App Review 5.1.2(i).
 - [ ] README: refresh the primitive.dev screenshot with a more generic example (banner, H1 and GitHub badge removed 2026-10-18).
