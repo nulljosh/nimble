@@ -14,3 +14,5 @@ internal actual fun zonedClock(zoneId: String, epochMillis: Long?): ZonedClock? 
 } catch (_: Exception) {
     null
 }
+
+internal actual fun zoneIds(): Set<String> = ZoneId.getAvailableZoneIds()

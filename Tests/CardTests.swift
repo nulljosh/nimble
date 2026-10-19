@@ -41,6 +41,13 @@ final class CardTests: XCTestCase {
                                    source: "Open-Meteo", url: "https://open-meteo.com"))
     }
 
+    func testDeviceTimeNeedsNoNetwork() throws {
+        let now = Date(timeIntervalSince1970: 1_790_917_500)
+        XCTAssertEqual(QueryEngine.deviceTime("time in new york", now: now), .card(big: "01:05", unit: "New York", sub: "Friday, October 2, America/New_York",
+                                   source: "IANA time zones", url: "https://www.iana.org/time-zones"))
+        XCTAssertNil(QueryEngine.deviceTime("time in whistler", now: now))
+    }
+
     func testEtymologyCard() {
         let card = QueryEngine.etymologyCard(word: "nimble", ancestor: "nymyl", relation: "derived", langCode: "enm")
         XCTAssertEqual(card, .card(big: "nimble", unit: "", sub: "Derived from nymyl, Middle English",

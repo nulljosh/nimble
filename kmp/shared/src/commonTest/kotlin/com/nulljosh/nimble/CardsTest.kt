@@ -151,6 +151,16 @@ class CardsTest {
         assertNull(Cards.timeCard("Nowhere", "Mars/Olympus", at))
     }
 
+    @Test
+    fun deviceTimeNeedsNoNetwork() {
+        val at = 1790910300000L // 2026-10-02 03:05 UTC
+        assertEquals(
+            Card("23:05", "New York", "Thursday, October 1, America/New_York", "IANA time zones", "https://www.iana.org/time-zones"),
+            Cards.deviceTime("new york", at),
+        )
+        assertNull(Cards.deviceTime("whistler", at))
+    }
+
     // MARK: Currency
 
     @Test

@@ -37,6 +37,9 @@ class ZonedClock(val time: String, val day: String)
 /** java.time on both JVM targets; null for a zone id the platform does not know. epochMillis null means now. */
 internal expect fun zonedClock(zoneId: String, epochMillis: Long? = null): ZonedClock?
 
+/** Every IANA zone id the platform knows (Asia/Tokyo, Europe/Paris). */
+internal expect fun zoneIds(): Set<String>
+
 /**
  * Etymology, weather, local time and currency as cards. Same gates, same free sources
  * (wordroot, Open-Meteo, Frankfurter with the open.er-api fallback) and same wording as
@@ -114,9 +117,16 @@ object Cards {
     fun currencyCard(amount: Double, from: String, to: String, rate: Double, source: String, url: String, saved: Boolean = false): Card =
         Card(money(amount * rate), to, "${trim(amount)} $from at ${if (saved) "the last saved" else "today's"} rate", source, url)
 
-    fun timeCard(place: String, zoneId: String, epochMillis: Long? = null): Card? {
+    fun timeCard(place: String, zoneId: String, epochMillis: Long? = null, source: String = "Open-Meteo", url: String = "https://open-meteo.com"): Card? {
         val clock = zonedClock(zoneId, epochMillis) ?: return null
-        return Card(clock.time, place, "${clock.day}, $zoneId", "Open-Meteo", "https://open-meteo.com")
+        return Card(clock.time, place, "${clock.day}, $zoneId", source, url)
+    }
+
+    /** "time in tokyo" with no network: the platform's IANA list names about 400 cities, as on the web. Others go to the geocoder. */
+    fun deviceTime(place: String, epochMillis: Long? = null): Card? {
+        val want = place.trim().lowercase().replace(Regex("\\s+"), "_")
+        val id = zoneIds().firstOrNull { it.substringAfterLast('/').lowercase() == want } ?: return null
+        return timeCard(id.substringAfterLast('/').replace('_', ' '), id, epochMillis, "IANA time zones", "https://www.iana.org/time-zones")
     }
 
     // MARK: Builders from the raw API bodies
@@ -232,6 +242,7 @@ class CardClient(private val http: HttpClient) {
     }
 
     private suspend fun time(place: String): Card? {
+        Cards.deviceTime(place)?.let { return it.copy(asOf = Freshness.now()) }
         val loc = geocode(place) ?: return null
         return Cards.timeCard(loc.name, loc.timezone ?: return null)?.copy(asOf = Freshness.now())
     }

@@ -248,6 +248,13 @@ final class AppState {
             return
         }
 
+        // A city the device's own time zone list names answers with no network, even in Private mode.
+        if let time = QueryEngine.deviceTime(text) {
+            result = time
+            remember(text)
+            return
+        }
+
         // Fail fast offline instead of spinning through three request timeouts. With Apple's on-device
         // model ready, a question still gets an answer, and nothing leaves the device to get it.
         if !isOnline || privateMode {

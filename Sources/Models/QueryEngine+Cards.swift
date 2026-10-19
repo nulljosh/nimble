@@ -95,7 +95,18 @@ extension QueryEngine {
         return .card(big: big, unit: to, sub: "\(trim(amount)) \(from) at \(saved ? "the last saved" : "today's") rate", source: source, url: url, asOf: asOf)
     }
 
-    static func timeCard(place: String, zone: TimeZone, now: Date) -> QueryResult {
+    /// "time in tokyo" with no network: the device's own IANA list names about 400 cities, as on the web.
+    /// Places it does not name (a country, a smaller city) return nil and go to the geocoder.
+    static func deviceTime(_ input: String, now: Date = Date()) -> QueryResult? {
+        guard case .time(let place) = ask(input) else { return nil }
+        let want = place.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: #"\s+"#, with: "_", options: .regularExpression)
+        guard let id = TimeZone.knownTimeZoneIdentifiers.first(where: { $0.split(separator: "/").last?.lowercased() == want }),
+              let zone = TimeZone(identifier: id) else { return nil }
+        let name = String(id.split(separator: "/").last ?? "").replacingOccurrences(of: "_", with: " ")
+        return timeCard(place: name, zone: zone, now: now, source: "IANA time zones", url: "https://www.iana.org/time-zones")
+    }
+
+    static func timeCard(place: String, zone: TimeZone, now: Date, source: String = "Open-Meteo", url: String = "https://open-meteo.com") -> QueryResult {
         func fmt(_ pattern: String) -> String {
             let f = DateFormatter()
             f.locale = Locale(identifier: "en_US_POSIX")
@@ -104,7 +115,7 @@ extension QueryEngine {
             return f.string(from: now)
         }
         return .card(big: fmt("HH:mm"), unit: place, sub: "\(fmt("EEEE, MMMM d")), \(zone.identifier)",
-                     source: "Open-Meteo", url: "https://open-meteo.com", asOf: Freshness(date: now, isDay: false))
+                     source: source, url: url, asOf: Freshness(date: now, isDay: false))
     }
 
     // MARK: - Fetchers
