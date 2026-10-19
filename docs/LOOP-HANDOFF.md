@@ -2,9 +2,17 @@
 
 ## What the loop is
 
-Ship Nimble one small slice per version, toward v10. Each slice is built on the web first, then Swift (iPhone and Mac), then Kotlin (Android and desktop). Every slice ends the same way: tests green, push, CI green, tag, GitHub release, Homebrew tap bumped, README and docs synced, screenshots retaken and checked by eye. The bar is A+ on every surface, plus a free AI that lasts the whole day.
+Ship Nimble one small slice per version, through v10 and on up the roadmap below. Each slice is built on the web first, then Swift (iPhone and Mac), then Kotlin (Android and desktop). Every slice ends the same way: tests green, push, CI green, tag, GitHub release, Homebrew tap bumped, README and docs synced, screenshots retaken and checked by eye. The bar is A+ on every surface, plus a free AI that lasts the whole day.
 
-v9 is closed by 9.4.4. The next major, 10.0.0, closes v10 and is cut the moment both store builds clear review.
+v9 is closed by 9.4.4. The next major, 10.0.0, closes v10 and is cut the moment both store builds clear review. After that, every major has an exit test ("Roadmap past v10"): its minors ship one slice at a time, and the X.0.0 tag is cut the day the exit test passes, never on a feeling that the work is done.
+
+## Each tick
+
+1. `asc versions list --app 6807858746`: a rejection jumps the queue.
+2. `gh run list --limit 3`: a red run on main jumps the queue.
+3. `curl -s https://nimble-answers.trommatic.workers.dev/stats`: decides whether a live probe round may run.
+4. `df -h /System/Volumes/Data`: under 10 GB free, run /cleanup before any build.
+5. Then the next item in "Next, in order", then the current major's next slice.
 
 ## Where things stand
 
@@ -27,11 +35,29 @@ v9 is closed by 9.4.4. The next major, 10.0.0, closes v10 and is cut the moment 
 2. If either build is rejected, read the reason with `asc web review show --app 6807858746`, fix it, and resubmit. Do not resubmit unchanged.
 3. When both are approved, cut 10.0.0: `scripts/bump-version.sh 10.0.0`, `npm test`, the Xcode test run, the handoff edit, push, CI green, `git tag v10.0.0`, `gh release create`, then `scripts/bump-tap.sh 10.0.0`. Then Joshua posts the rest of docs/launch/nimble.md (the X thread and Product Hunt are already up; Show HN waits for karma).
 4. Until then, keep the loop useful: 100+ questions and QA sweeps, fix every miss, screenshot every UI change, run the exam at most once a day, and read /stats once per tick.
-5. The open work is the unchecked items in roadmap.md, in order. The Worker deploys by hand, so a push does not ship it.
+5. After 10.0.0, work the roadmap below, one major at a time. roadmap.md holds older unchecked items (some already shipped, like the monthly pack and the /mcp docs); fold each into the major it belongs to as you reach it. The Worker deploys by hand, so a push does not ship it.
 
 Blocked on Joshua: a native-speaker check of the de, pt, hi and ja strings. A real-device walk (Siri, share sheet, VoiceOver, Android). Chrome and Firefox extension store submissions. Posting the rest of the launch drafts, and the Reddit modmail follow-up. Issuing API keys (`wrangler secret put API_KEYS` with the old list plus the new key). The optional SAMANTHA_URL tunnel. The $0.99 price flip.
 
 Already in the code, so don't rebuild: answers with Why this answer, follow-ups (Android, Windows and Linux too since 9.8.0: kmp Turns.kt), Tell me more on every platform (9.5.0 web, 9.6.0 Swift and Kotlin: the Worker's more:true asks one model for three sentences; never on a site's own page, which the AI does not know), "from primitive.dev" for a site answer instead of "powered by", step math, multiple sources, the News, Markets and Sports cards, the offline Wikipedia pack, Private mode, Listen, the voice loop, Ask Nimble from every share sheet, Siri and Shortcuts, the public API (docs/API.md), the Homebrew tap, nine languages on every platform, the Apple Watch app, lock screen widgets, and the browser extension zip that CI builds.
+
+## Roadmap past v10
+
+Directions, not dates. Each major's minors are slices; the exit test cuts the X.0.0.
+
+- **v11 Native type.** The apps drop Nimble Sans for the system face with Dynamic Type kept (real `.system` sizes scaled per text style, not a missing-font fallback), plus the square and story share cards. Exit: iPhone, Mac and Android screenshots read as Apple and Android apps, checked on a real iPhone at the largest text size.
+- **v12 Right answers.** Every open probe miss fixed with an exam row: "first <office> of <place>" searches the list of holders, constants answer with the number, health and statistics questions ("vitamin d per day", "inflation in canada") ground on a source instead of UNKNOWN, local questions ("minimum wage in bc") find the right page. Exit: the 1,049-question exam at 99 percent, and four fresh probe rounds of 100 at 97 or better.
+- **v13 Simple settings.** Joshua's 2026-10-16 asks: no AI engine picker (Nimble picks Samantha, then Groq, then Workers AI, then Wikipedia), the nav bar at the bottom with Settings as a tab, copy beside the field, What's New padded. Exit: Settings has no API words in it on any platform.
+- **v14 Sources you can trust.** Site answers show the favicon and page name, JS-only pages fall back to og:description, every answer quotes the sentence it rests on. Exit: every probe answer links a source a person can check in one tap.
+- **v15 On device.** Apple Foundation Models where the device has them, a small local model elsewhere, graded on the exam; the offline pack grows past 9,000 articles. Exit: 90 percent of the 154-question exam with the network off.
+- **v16 Our own model.** Samantha (the Turing pipeline's model) answers first when she clears 95 percent standalone; Groq becomes the fallback. Exit: Samantha is the default on the Mac without oMLX running.
+- **v17 More live cards.** Free public data only: sunrise and sunset, holidays, earthquakes, flight status if a free source holds up, nutrition. Exit: each card has a probe row and a stubbed screenshot.
+- **v18 Hands free.** Voice in and out on every platform, the Watch answers by voice alone, Android app actions. Exit: ten spoken questions answered with no touch on iPhone, Watch and Android.
+- **v19 Fast and steady.** p50 under 2 s and p95 under 6 s on the free engine, every upstream tested down (Wikipedia, DDG, Groq, Workers AI), a public status line. Exit: a week of /stats inside both numbers.
+- **v20 Pays for itself.** Joshua's calls: the $0.99 store price, a paid API key tier through Stripe, twenty languages checked by native speakers. Exit: the Worker's real costs covered by its revenue, or a recorded decision to stay free.
+- **v21 to v30, a platform.** The extension in the Chrome and Firefox stores, Raycast and Alfred plugins, an SDK, and the labs apps asking Nimble through its API.
+- **v31 to v50, its own knowledge.** Offline packs per language and 100,000 articles, a private on-device index of your own notes and files, the on-device model at 95 percent with no network.
+- **v51 to v100, the answer bar of a computer.** Nimble as Joshua Tree's system answer bar and on the Pi appliance offline, every language Wikipedia has, a 10,000-question exam at 99 percent.
 
 ## Android emulator
 
@@ -40,10 +66,10 @@ SDK lives on the LaCie, never the Mac disk: `/Volumes/LaCie/android-sdk` (platfo
 ## Restart prompt
 
 ```
-/loop 100+ questions and QA until a+ results. Then push, deploy and ship, and keep going until v10 (next major semvers). Strengthen the loop and docs/LOOP-HANDOFF.md. In the nimble project.
+/loop 100+ questions and QA until a+ results. Then push, deploy and ship, and keep going until v10, then up the roadmap (v11, v12 and on; each major cut when its exit test passes). Strengthen the loop and docs/LOOP-HANDOFF.md. In the nimble project.
 ```
 
-Then read docs/LOOP-HANDOFF.md first and work "Next, in order" top down.
+Then read docs/LOOP-HANDOFF.md first, run "Each tick", and work "Next, in order" top down.
 
 ## Rules that bite
 
@@ -60,4 +86,5 @@ Then read docs/LOOP-HANDOFF.md first and work "Next, in order" top down.
 - Long commands (npm test, xcodebuild, the exam, gradle) run in the background. Poll nothing and wait for the notification.
 - Screenshot every UI change and read it by eye. Replies are a TLDR of 1 to 3 lines, no bullet walls.
 - Re-arm ScheduleWakeup every tick. Idle ticks run hourly. Never poll. Stop at 88 percent usage with /checkpoint.
-- Keep 10 GB of disk free, one Haiku agent at a time, 0 open issues that the code can close, 0 open PRs, only main.
+- Posting is Joshua's call, per post, with a plain yes. Safari takes AppleScript `do JavaScript` (Reddit and X are logged in there); a direct API send gets blocked, so fill the form and click, then confirm it landed (Reddit's modmail shows as a chat room, not in /message/sent).
+- Keep 10 GB of disk free (20 GB before a heavy build), one Haiku agent at a time, 0 open issues that the code can close, 0 open PRs, only main.
