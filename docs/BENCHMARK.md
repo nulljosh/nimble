@@ -30,6 +30,12 @@ Confirmed at 22:20 PDT the same day, after the Worker changes (vitamin D, Canada
 |---|---|---|---|---|
 | Groq chain, 2026-10-18 22:20 | 154 of 154 | 0.94 s | 2.0 s | Latency on 12 uncached questions, measured from Vancouver. |
 
+## Apple's on-device model, 2026-10-18
+
+Apple's own model (Foundation Models, macOS 27, Apple Intelligence on) took the same 154 questions alone: no reference text, no math engine, no cards. It answered 113 of the 130 questions that need a model (87%) at 0.42 s median, all on the device. The misses fall in two groups. It names the office holders from its training (Biden, Trudeau, Sunak, Horgan), and it says UNKNOWN to easy facts like who wrote the Odyssey or created Linux. That is fine for the offline fallback it already is, and short of the 90% bar to become the default.
+
+Apple's bigger Private Cloud Compute model needs a managed entitlement, so it is not graded yet.
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
