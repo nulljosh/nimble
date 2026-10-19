@@ -16,10 +16,6 @@ Rules: usage line at or above 88% on any window means /checkpoint and stop. One 
 time, 10 minute cap. Mac zip is re-notarized only at majors. `native-v*` tags are Joshua's to
 force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purple/teal.
 
-### v5.5 Premium (Joshua, 2026-10-11: domain now, premium features, then $1 on the App Store)
-
-- [x] [Sonnet] Price flip at the 5.5 release: iPhone and Mac go to Apple price tier 1 ($0.99) via `asc pricing` (apple-pricing skill), web stays free with the $1 Stripe unlock; MONEY.md and the landing updated the same day. Done 2026-10-18: $0.99 on the store, web free with no Stripe unlock, license now Apache 2.0.
-
 ### v8 Private and on-device
 
 - [ ] [Opus] Pick the on-device model (Apple Foundation Models where available, otherwise a small MLX/GGUF), grade it on the exam, and ship it only if it clears 90%. 2026-10-18: Apple Foundation Models scored 87% alone (113 of 130, stale office holders and shy UNKNOWNs; BENCHMARK.md). It stays the offline fallback. A raw Wikipedia reference made it worse (75%), so it stays bare.
@@ -50,15 +46,10 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 ### v11-v20 Trust: every answer shows why
 
-- [x] [Sonnet] Every AI answer carries the sentence it rests on ("Why this answer") on all surfaces, not just web. Checked 2026-10-18: web (details.why), Apple (ResultView whyText) and Compose (WhyThisAnswer) all show it.
 - [ ] [Sonnet] The exam grows to 1,000 questions (the 1,000-question bank in BENCHMARK.md) and holds 99% on the free engine.
-- [x] [Sonnet] A nightly exam in CI posts the score to /stats; a drop of two points opens a roadmap line by itself. Done 2026-10-18 as weekly, not nightly (nightly runs ate the free Workers AI quota): exam.yml posts the 154-question score to POST /exam (secret NIMBLE_REPORTS_KEY) and /stats shows it; any miss already opens the exam issue.
-- [x] [Haiku] "This is wrong" on an answer sends the question (text only) to a review list; the exam adopts each one. Web and Worker done 2026-10-18 (POST /report into the NimbleCounts Durable Object, last 200; GET /report with the key from .env as a Bearer header). Apple and Compose shipped the same day. Adopting reports into the exam is by hand: read GET /report and add each real miss to test/exam.js.
-- [x] [Sonnet] Freshness: every live answer says when it was checked; anything older than its TTL refetches. Done 2026-10-18: every live card already shows "as of"; coming back to the app (tab visible, scene active, Mac activate, Android resume) asks a live answer older than ten minutes again. Daily values (a rate's day) are skipped.
 
 ### v21-v30 Live: the numbers people check every day
 
-- [x] [Sonnet] Canada and BC live figures: CPI, policy rate, minimum wage by province (StatCan / Bank of Canada). CPI and the policy rate answer from Bank of Canada Valet since 2026-10-18 (canadaFigure); minimum wage for every province, territory and the federal rate answers from the Government of Canada open data table since 2026-10-19 (minimumWage), no model.
 - [ ] [Haiku] Sports scores beyond ESPN's top leagues: NHL, MLS, CFL, with the next game when none is live. 2026-10-18: NHL and MLS already answer on every platform. CFL has no live feed (ESPN's CFL scoreboard is frozen at the 2022 season), so it waits for another free source. Next game shipped 2026-10-18 on web, Apple and Kotlin: after a Final, the team's next game from its ESPN page is a second row.
 
 ### v31-v40 Offline: most questions need no network
@@ -71,7 +62,6 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 ### v41-v50 Follow-ups: a short conversation, kept on the device
 
 - [ ] [Sonnet] Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
-- [x] [Sonnet] Compare: "paris vs london population" answers as a two-row card. 2026-10-18: answers on every platform from the Worker, as a sentence ("Paris: 2.1 million (2023). London: 8.9 million (2023)."), from Wikidata with no model. 2026-10-19: the Worker also sends the two cities as rows, and the web card lays them out side by side. iPhone, Mac and Kotlin show the same two rows, one city per line.
 - [ ] [Sonnet] Math shows its steps for algebra and calculus, offline.
 - [ ] [Haiku] Graphs: pinch, pan and trace a point on every surface.
 
@@ -92,8 +82,6 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 ### v71-v80 Developers: the engine as a service
 
 - [ ] [Sonnet] Self-serve API keys with a free tier and the $1 unlock, issued and revoked from a page.
-- [x] [Haiku] SDKs: a tiny JS and Python client, each one file, tested against the live API. 2026-10-19: sdk/nimble.mjs and sdk/nimble.py, standard library only; test/sdk.test.mjs runs offline in CI and live with NIMBLE_LIVE=1 (both passed against the live Worker).
-- [x] [Haiku] A public status page from /stats: uptime, latency, exam score. 2026-10-19: nimble.jaybulb.com/status checks the service live and shows its reply time, model answer times, cache share and the last exam score. A history of uptime needs stored checks and waits.
 - [ ] [Sonnet] MCP server listed in the public registries with the four tools.
 
 ### v81-v90 Every language, every person
@@ -106,7 +94,6 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 ### v91-v99 Craft: fast, small, never crashes
 
 - [ ] [Sonnet] p95 under 1 s on the free engine, cache hit rate above 50%. 2026-10-19: a cached answer went from 0.18 s to 0.10 s median (the counts and cache writes now finish after the response, the cache read runs beside the counts load); the photo search starts with the AI call on every platform (up to 0.7 s off); the cache key folds "what's" and a trailing "?". Live Groq p95 1.5 s; not there yet.
-- [x] [Haiku] Size budgets enforced in CI: web under 300 KB first load, iOS under 15 MB, Mac under 20 MB. Web done 2026-10-18: test/size-budget.test.js (runs in CI) holds app.html plus its direct files under 300 KB gzipped; it reads 127 KB after the header icon went from a 16-bit 665 KB PNG to a 3.7 KB one. Apple enforced 2026-10-19: scripts/app-size.sh builds both Release apps unsigned in CI (test.yml) and fails over budget. It reads Mac 11.9 MB and iPhone 12.9 MB.
 - [ ] [Sonnet] Zero crashes over 30 days on every store build.
 - [ ] [Opus] Design pass on every screen against the web, the newest surface.
 
