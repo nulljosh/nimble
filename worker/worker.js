@@ -278,6 +278,7 @@ let mem = fresh();
 export const groqCooldown = new Map();
 export function _resetForTests() {
   mem = fresh();
+  memAt = 0;
 }
 async function cacheGet(key) {
   try {
@@ -341,15 +342,19 @@ const globalCounts = (env, init) => {
     return null;
   }
 };
-async function loadCounts(origin, env) {
+// The isolate's counts are reused for 30 s: the budget guard is an estimate anyway, and a Durable Object round trip
+// per question cost latency and DO requests. /stats always reads through (force).
+let memAt = 0;
+async function loadCounts(origin, env, force = false) {
   const day = dayKey();
-  if (mem.day !== day) mem = fresh(day);
-  const g = await globalCounts(env)?.catch(() => null);
+  if (mem.day !== day) { mem = fresh(day); memAt = 0; }
+  if (!force && Date.now() - memAt < 30_000) return mem;
+  memAt = Date.now();
+  const [g, text] = await Promise.all([globalCounts(env)?.catch(() => null), cacheGet(statsUrl(origin, day))]);
   if (g?.day === day) {
     for (const k of FIELDS) mem[k] = Math.max(mem[k], Number(g[k]) || 0);
     mem.lat = g.lat || {};
   }
-  const text = await cacheGet(statsUrl(origin, day));
   try {
     const s = JSON.parse(text || "{}");
     mem.aiCalls = Math.max(mem.aiCalls, Number(s.aiCalls) || 0);
@@ -367,7 +372,7 @@ async function saveCounts(origin, c, env) {
   await cachePut(statsUrl(origin, c.day), { aiCalls: c.aiCalls, cacheHits: c.cacheHits, groqCalls: c.groqCalls, groqRefused: c.groqRefused }, 2 * 86400);
 }
 async function statsReply(origin, env) {
-  const c = await loadCounts(origin, env);
+  const c = await loadCounts(origin, env, true);
   // groqCalls counts every request sent to Groq, groqRefused the ones it turned away (cap or error): the capacity gauge.
   const pct = (v, p) => [...v].sort((a, b) => a - b)[Math.max(0, Math.ceil(p * v.length) - 1)];
   // latency: per answering source, from the global counter's last 50 samples; empty without the Durable Object.

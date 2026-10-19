@@ -1,7 +1,7 @@
 // Each upstream down in turn: Wikipedia, Groq, Workers AI. The worker still answers (or says UNKNOWN cleanly), never throws.
 import test from "node:test";
 import assert from "node:assert/strict";
-import worker from "../worker/worker.js";
+import worker, { _resetForTests } from "../worker/worker.js";
 
 const realFetch = globalThis.fetch;
 test.after(() => { globalThis.fetch = realFetch; });
@@ -88,4 +88,18 @@ test("Groq hanging: its timeout hands the question to Workers AI instead of wait
   clearTimeout(hold);
   assert.equal((await r.json()).answer, "Paris.");
   assert.ok(Date.now() - t < 2000);
+});
+
+test("two questions inside 30 s read the day's counts from the Durable Object once", async () => {
+  globalThis.fetch = async (u) => (String(u).includes("groq.com")
+    ? new Response(JSON.stringify({ choices: [{ message: { content: "Paris." } }] }), { status: 200 })
+    : wiki());
+  let reads = 0;
+  const COUNTS = { idFromName: () => "g", get: () => ({ fetch: async (u, init) => { if (!init?.method) reads++; return new Response("{}"); } }) };
+  const env = { GROQ_KEY: "k", COUNTS, RATE_LIMITER: { limit: async () => ({ success: true }) }, AI: { run: async () => ({ response: "Paris." }) } };
+  const ask = (q) => worker.fetch(new Request("https://w.example/", { method: "POST", body: JSON.stringify({ q }) }), env);
+  _resetForTests();
+  await ask("capital of austria");
+  await ask("capital of hungary");
+  assert.equal(reads, 1);
 });
