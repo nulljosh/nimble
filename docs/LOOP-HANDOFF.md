@@ -1,4 +1,8 @@
-# Nimble loop handoff (2026-10-18, evening)
+# Nimble loop handoff (2026-10-19, morning)
+
+## Since then (2026-10-19, morning)
+
+The offline answers got better. The offline benchmark reads 73 of 154 on the 14,000-article pack (was 49), and wrong offline answers fell from 14 to 3 on every platform, after an offline answer started to need a word it shares with the question. Shipped on the web: a status page that checks the answer service, speed and exam score live, minimum wage by province from the Government of Canada table, and a compare card with two label and value rows. Also: one-file JavaScript and Python clients for the answer API (tested offline and live), CI size budgets (a Release Mac build over 20 MB or an iPhone build over 15 MB fails), the review key moved out of the URL into an Authorization header with the old key rotated, and offline unit conversion and time on Kotlin. Store builds in review predate all of this; the next build carries it.
 
 ## Since then (2026-10-19, overnight)
 
