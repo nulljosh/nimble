@@ -70,3 +70,19 @@ test("the answer goes out without waiting on the day's counts being saved", asyn
   assert.equal((await r.json()).answer, "Paris.");
   assert.ok(pending.length >= 1);
 });
+
+test("Groq hanging: its timeout hands the question to Workers AI instead of waiting forever", async () => {
+  globalThis.fetch = (u, init) => {
+    if (!String(u).includes("groq.com")) return Promise.resolve(wiki());
+    return new Promise((_, reject) => init.signal.addEventListener("abort", () => reject(new Error("timeout"))));
+  };
+  const env = {
+    GROQ_KEY: "k", GROQ_TIMEOUT_MS: 20, GROQ_BURST_WAIT_MS: 0,
+    RATE_LIMITER: { limit: async () => ({ success: true }) },
+    AI: { run: async () => ({ response: "Paris." }) },
+  };
+  const t = Date.now();
+  const r = await worker.fetch(new Request("https://w.example/", { method: "POST", body: JSON.stringify({ q: "capital of italy" }) }), env);
+  assert.equal((await r.json()).answer, "Paris.");
+  assert.ok(Date.now() - t < 2000);
+});

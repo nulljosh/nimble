@@ -37,7 +37,7 @@ export async function freshContext(q, attempt = 0) {
     const r = await fetch(
       "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=thumbnail&pithumbsize=800&format=json&formatversion=2&gsrsearch=" +
         encodeURIComponent(searchTerm(q)),
-      { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" } },
+      { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" }, signal: AbortSignal.timeout(4000) },
     );
     // A throttled or empty Wikipedia reply leaves the models on their stale memory ("Joe Biden"),
     // so one retry after a beat is worth more than a fast wrong answer.
@@ -100,7 +100,7 @@ function answerEntities(q, answer) {
 async function wikiSummary(name) {
   try {
     const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name)}`,
-      { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" } });
+      { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" }, signal: AbortSignal.timeout(4000) });
     const s = r.ok ? await r.json() : null;
     return s && s.title && s.type !== "disambiguation" ? s : null;
   } catch {
@@ -204,7 +204,7 @@ export async function canadaFigure(q) {
   const f = /\bcanad/i.test(q) && CANADA_FIGURES.find((f) => f.ask.test(q));
   if (!f) return null;
   try {
-    const r = await fetch(`https://www.bankofcanada.ca/valet/observations/${f.series}/json?recent=1`);
+    const r = await fetch(`https://www.bankofcanada.ca/valet/observations/${f.series}/json?recent=1`, { signal: AbortSignal.timeout(4000) });
     const o = (await r.json())?.observations?.at(-1);
     const v = o?.[f.series]?.v;
     return v && o.d ? f.say(v, o.d) : null;
@@ -215,17 +215,17 @@ export async function canadaFigure(q) {
 // "paris vs london population": both numbers from Wikidata (P1082), no model. Each name is Wikidata's top search hit,
 // so a bare "new york" can land on the state. No "and": "bosnia and herzegovina" is one country.
 // ponytail: top hit only; add a "city" hint or a type check (P31) if wrong-entity picks show up in reports.
-const WD = { headers: { "user-agent": "NimbleAnswers/1.0 (https://nimble.jaybulb.com)" } };
+const WD = () => ({ headers: { "user-agent": "NimbleAnswers/1.0 (https://nimble.jaybulb.com)" }, signal: AbortSignal.timeout(4000) });
 const COMPARE = [
   /^(?:what(?:'s|’s| is) the )?population (?:of )?(.+?)\s+(?:vs\.?|versus|compared (?:to|with))\s+(.+?)\??$/i,
   /^(.+?)\s+(?:vs\.?|versus)\s+(.+?)\s+population\??$/i,
 ];
 const bigNumber = (n) => n >= 1e9 ? `${+(n / 1e9).toFixed(2)} billion` : n >= 1e6 ? `${+(n / 1e6).toFixed(1)} million` : n.toLocaleString("en-US");
 async function population(name) {
-  const s = await (await fetch(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(name)}&language=en&type=item&limit=1&format=json`, WD)).json();
+  const s = await (await fetch(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(name)}&language=en&type=item&limit=1&format=json`, WD())).json();
   const hit = s?.search?.[0];
   if (!hit) return null;
-  const c = (await (await fetch(`https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${hit.id}&property=P1082&format=json`, WD)).json())?.claims?.P1082 || [];
+  const c = (await (await fetch(`https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${hit.id}&property=P1082&format=json`, WD())).json())?.claims?.P1082 || [];
   const year = (x) => x.qualifiers?.P585?.[0]?.datavalue?.value?.time?.slice(1, 5) || "";
   // The latest year wins (Canada's preferred claim is the 2021 census, 37 million; 2023 says 40); preferred breaks a tie.
   const best = c.filter((x) => x.rank !== "deprecated")
@@ -418,7 +418,7 @@ async function handle(req, env, ctx) {
 
     if (isDDG) {
       const ddgQ = url.searchParams.get("ddg").slice(0, 500);
-      const r = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(ddgQ)}&format=json&no_html=1&skip_disambig=1`);
+      const r = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(ddgQ)}&format=json&no_html=1&skip_disambig=1`, { signal: AbortSignal.timeout(5000) });
       return new Response(await r.text(), { status: r.status, headers: { "content-type": "application/json", ...CORS } });
     }
 
@@ -574,6 +574,8 @@ async function handle(req, env, ctx) {
         method: "POST",
         headers: { authorization: `Bearer ${env.GROQ_KEY}`, "content-type": "application/json" },
         body: JSON.stringify({ model, messages, temperature: 0, ...groqParams(model, more) }),
+        // A hung model hands over like a refused one (tryGroq's catch); Groq normally answers in well under 2 s.
+        signal: AbortSignal.timeout(Number(env.GROQ_TIMEOUT_MS ?? 8000)),
       });
     };
     // One model: its answer, or null when it refused (cap, error). A bare 429 with no retry-after is a per-minute burst.
