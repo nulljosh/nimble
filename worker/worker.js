@@ -898,13 +898,16 @@ function interleave(lists) {
   return out;
 }
 
+// The review key rides in the Authorization header, never the URL: request URLs land in the Worker's logs.
+const reviewer = (req, env) => !!env.REPORTS_KEY && (req.headers.get("authorization") || "") === `Bearer ${env.REPORTS_KEY}`;
+
 // POST /report {q, answer}: someone says an answer is wrong. Text only, no IP kept, behind the same 20/min limit.
-// GET /report?key=REPORTS_KEY lists them for review; each one becomes an exam question.
+// GET /report with "Authorization: Bearer REPORTS_KEY" lists them for review; each one becomes an exam question.
 export async function report(req, url, env) {
   const box = env.COUNTS?.get(env.COUNTS.idFromName("global"));
   if (!box) return json({ error: "no store" }, 503);
   if (req.method === "GET") {
-    if (!env.REPORTS_KEY || url.searchParams.get("key") !== env.REPORTS_KEY) return json({ error: "bad key" }, 403);
+    if (!reviewer(req, env)) return json({ error: "bad key" }, 403);
     return json(await (await box.fetch("https://counts/report")).json());
   }
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
@@ -917,12 +920,12 @@ export async function report(req, url, env) {
   return json({ ok: true });
 }
 
-// POST /exam?key=REPORTS_KEY {score, total}: CI's exam run. /stats shows the last one.
+// POST /exam {score, total}, with the review key as a Bearer header: CI's exam run. /stats shows the last one.
 export async function examScore(req, url, env) {
   const box = env.COUNTS?.get(env.COUNTS.idFromName("global"));
   if (!box) return json({ error: "no store" }, 503);
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
-  if (!env.REPORTS_KEY || url.searchParams.get("key") !== env.REPORTS_KEY) return json({ error: "bad key" }, 403);
+  if (!reviewer(req, env)) return json({ error: "bad key" }, 403);
   const b = await req.json().catch(() => null);
   const score = Number(b?.score), total = Number(b?.total);
   if (!Number.isInteger(score) || !Number.isInteger(total) || total < 1 || score < 0 || score > total) return json({ error: "bad score" }, 400);

@@ -19,7 +19,7 @@ jobs:
         env: {KEY: '${{ secrets.NIMBLE_REPORTS_KEY }}'}
         run: |
           read score total < <(grep -oE '^[0-9]+/[0-9]+ pass' exam.txt | head -1 | tr '/' ' ' | cut -d' ' -f1,2)
-          [ -n "$KEY" ] && [ -n "$score" ] && curl -sf -X POST "https://nimble-answers.trommatic.workers.dev/exam?key=$KEY" -d "{\"score\":$score,\"total\":$total}" || true
+          [ -n "$KEY" ] && [ -n "$score" ] && curl -sf -X POST -H "authorization: Bearer $KEY" "https://nimble-answers.trommatic.workers.dev/exam" -d "{\"score\":$score,\"total\":$total}" || true
       - if: failure()
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |

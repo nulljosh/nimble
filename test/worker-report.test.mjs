@@ -13,7 +13,7 @@ const post = (body) => new Request("https://w.example/report", { method: "POST",
 test("a report is kept as text and read back with the key", async () => {
   const e = env();
   assert.equal((await worker.fetch(post({ q: "  who wrote 1984 ", answer: "Murder, She Wrote" }), e)).status, 200);
-  const list = await (await worker.fetch(new Request("https://w.example/report?key=secret"), e)).json();
+  const list = await (await worker.fetch(new Request("https://w.example/report", { headers: { authorization: "Bearer secret" } }), e)).json();
   assert.equal(list.length, 1);
   assert.equal(list[0].q, "who wrote 1984");
   assert.equal(list[0].answer, "Murder, She Wrote");
@@ -22,17 +22,19 @@ test("a report is kept as text and read back with the key", async () => {
 test("no key, a wrong key, an empty question or the rate limit are refused", async () => {
   const e = env();
   assert.equal((await worker.fetch(new Request("https://w.example/report"), e)).status, 403);
-  assert.equal((await worker.fetch(new Request("https://w.example/report?key=nope"), e)).status, 403);
+  assert.equal((await worker.fetch(new Request("https://w.example/report", { headers: { authorization: "Bearer nope" } }), e)).status, 403);
+  // The key in the URL no longer works: URLs are logged.
+  assert.equal((await worker.fetch(new Request("https://w.example/report?key=secret"), e)).status, 403);
   assert.equal((await worker.fetch(post({ q: " " }), e)).status, 400);
   assert.equal((await worker.fetch(post({ q: "x" }), env({ RATE_LIMITER: { limit: async () => ({ success: false }) } }))).status, 429);
 });
 
 test("CI posts the exam score with the key and /stats shows it", async () => {
   const e = env();
-  const exam = (q, body) => worker.fetch(new Request("https://w.example/exam" + q, { method: "POST", body: JSON.stringify(body) }), e);
-  assert.equal((await exam("", { score: 150, total: 154 })).status, 403);
-  assert.equal((await exam("?key=secret", { score: 160, total: 154 })).status, 400);
-  assert.equal((await exam("?key=secret", { score: 150, total: 154 })).status, 200);
+  const exam = (key, body) => worker.fetch(new Request("https://w.example/exam", { method: "POST", headers: key ? { authorization: `Bearer ${key}` } : {}, body: JSON.stringify(body) }), e);
+  assert.equal((await exam(null, { score: 150, total: 154 })).status, 403);
+  assert.equal((await exam("secret", { score: 160, total: 154 })).status, 400);
+  assert.equal((await exam("secret", { score: 150, total: 154 })).status, 200);
   const stats = await (await worker.fetch(new Request("https://w.example/stats"), e)).json();
   assert.equal(stats.exam.score, 150);
   assert.equal(stats.exam.total, 154);

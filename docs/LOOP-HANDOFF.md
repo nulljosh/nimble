@@ -4,7 +4,7 @@
 
 Money: $0.99 on the App Store since 2026-10-18 (Joshua: "Apache and $1"), web free, license Apache 2.0, MONEY.md says what the dollar buys. The paid Apple apps answer from Apple's on-device model when the free AI rests (87% alone on the exam; a Wikipedia reference made it worse, 75%). Private Cloud Compute needs a managed entitlement (Blocked on Joshua).
 
-Shipped on every platform: offline currency and time zones, the next game after a Final, "This is wrong" (POST /report, GET /report?key=REPORTS_KEY from .env), stale live answers ask again after ten minutes, population compares from Wikidata, the Bank of Canada policy rate. /stats shows the exam score, posted by the weekly exam (secret NIMBLE_REPORTS_KEY).
+Shipped on every platform: offline currency and time zones, the next game after a Final, "This is wrong" (POST /report, GET /report with "Authorization: Bearer $REPORTS_KEY" from .env), stale live answers ask again after ten minutes, population compares from Wikidata, the Bank of Canada policy rate. /stats shows the exam score, posted by the weekly exam (secret NIMBLE_REPORTS_KEY).
 
 Speed, stability, security: web first load 127 KB (was about 730; a budget test holds it under 300), cached answers 0.10 s (was 0.18; bookkeeping runs after the response via ctx.waitUntil), the photo search starts with the AI call everywhere, a capped Groq model is skipped until its retry-after, every outbound Worker fetch has a timeout, any throw answers JSON UNKNOWN with CORS, POST bodies over 16 KB and over-eager GET lookups are refused, site CSP in docs/_headers, links open http(s) only on all four surfaces, own AI keys in the Keychain on Apple. Store builds in review predate all of this; the next build carries it.
 
