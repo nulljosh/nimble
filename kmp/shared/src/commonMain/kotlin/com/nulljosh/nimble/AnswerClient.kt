@@ -171,7 +171,7 @@ class AnswerClient(
             is Answer.Text -> {
                 turns.add(input, ai.body)
                 val answer = ai.copy(sourceUrl = ai.sourceUrl ?: "https://duckduckgo.com/?q=${input.encodeURLParameter()}", asOf = asOfForText(input))
-                return TopicPhoto.withTopic(answer, input, searched) { fetchText(it) }
+                return TopicPhoto.withTopic(answer, input, get = { fetchText(it) }, searched = searched)
             }
             // The split stands unless DDG's sourced answer backs one of the two; then the normal path below runs (the web's rule).
             is Answer.Disagree -> {
@@ -185,7 +185,7 @@ class AnswerClient(
         ddg(ddgQuery)?.let { return it.copy(asOf = asOfForText(input)) }
         WikiFallback.answer(wikiQuery) { fetchText(it) }?.let { wiki ->
             // A page's own lead photo stays; otherwise the photo is the one of the entity the sentence names (TopicPhoto).
-            val pic = if (wiki.photoUrl != null) wiki else TopicPhoto.lookup(input, wiki.body) { fetchText(it) }
+            val pic = if (wiki.photoUrl != null) wiki else TopicPhoto.lookup(input, wiki.body, get = { fetchText(it) })
                 ?.let { wiki.copy(photoUrl = it.photoUrl, photoCredit = it.photoCredit) } ?: wiki
             return QueryEngine.labelIfGeneric(pic.copy(aiNote = aiFailures.lastOrNull()?.let { aiRestingNote(it, wiki.source) }, asOf = asOfForText(input)), input)
         }

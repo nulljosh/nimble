@@ -143,7 +143,7 @@ object TopicPhoto {
      * The answer with its topic filled in: a missing picture, and when nothing else backs the answer, the intro
      * ("Why this answer") and the Wikipedia page as its link. An answer that already has a photo is returned as it is.
      */
-    suspend fun withTopic(answer: Answer.Text, query: String, searched: List<String>? = null, get: TextFetch): Answer.Text {
+    suspend fun withTopic(answer: Answer.Text, query: String, get: TextFetch, searched: List<String>? = null): Answer.Text {
         if (answer.photoUrl != null) return answer
         val topic = lookup(query, answer.body, get, searched) ?: return answer
         return answer.copy(
