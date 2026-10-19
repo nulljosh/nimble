@@ -1,5 +1,5 @@
 # Nimble
-v9.8.0
+v9.9.0
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Groq's free models first (gpt-oss 120B, Qwen 27B, gpt-oss 20B), then Qwen3 + Gemma on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 
@@ -10,7 +10,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 - AI engine is user-selectable in Settings (`Sources/Models/AIEngine.swift`, `ENGINES` in `engine.js`): Nimble proxy (default, free), Claude, OpenAI, Ollama. Keys stay on device (prefs file / localStorage), calls go straight to the vendor; no key = silent fallback to the proxy
 - DuckDuckGo Instant Answer API + Wikipedia REST API as fallback
 - macOS window is borderless (`styleMask = [.resizable, .fullSizeContentView]`), dropping `.titled` is what removes the titlebar strip; do not restore it
-- Tests at 6.30.0: 309 web (`npm test`, 0 fail); 228 Swift tests, all run with `xcodebuild test` (0 failures, 1 skipped); 171 `@Test` in `kmp/` (`:shared:jvmTest` runs on this Mac, 171 pass, and in CI)
+- Tests at 9.9.0: 338 web (`npm test`, 0 fail); 232 Swift tests, all run with `xcodebuild test` (0 failures, 2 skipped); 171 `@Test` in `kmp/` (`:shared:jvmTest` runs on this Mac, 171 pass, and in CI)
 
 ## Structure
 - `Sources/Models/QueryEngine.swift`: classification, math eval, API queries
@@ -25,7 +25,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 
 ## The loop
 
-See `docs/LOOP-HANDOFF.md` (current state at 9.8.0, 2026-10-18). v9 is closed. iPhone 9.4.4 and Mac 9.4.3 are WAITING_FOR_REVIEW after one Guideline 5 rejection, fixed and resubmitted. Next: when both clear, cut 10.0.0 (closes v10), then Joshua posts the launch drafts. Joshua owns the store submissions, the real-device walk and the native-speaker check.
+See `docs/LOOP-HANDOFF.md` (current state at 9.9.0, 2026-10-18). v9 is closed. iPhone 9.4.4 and Mac 9.4.3 are WAITING_FOR_REVIEW after one Guideline 5 rejection, fixed and resubmitted. Next: when both clear, cut 10.0.0 (closes v10), then Joshua posts the launch drafts. Joshua owns the store submissions, the real-device walk and the native-speaker check.
 
 ## QA
 QA hooks always sandbox storage: any `-shot*` or `-qaSandbox` launch arg moves history, prefs, the shared answer suite and iCloud sync to a fresh temp root (`Sources/Models/QASandbox.swift`). Never launch the real app bundle for QA against real data.

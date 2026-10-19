@@ -5,17 +5,17 @@ import UIKit
 import AppKit
 #endif
 
-/// The web app's palette (docs/app.html and the shared tokens), light and dark.
+/// The web app's palette (docs/tokens.css): white and true black, as on the site since the 2026-10-18 Apple pass.
 /// Answer screens use these instead of the system colors so iOS and Mac match the web.
 extension Color {
-    static let bg = adaptive(light: 0xf5f0e4, dark: 0x1c1a17)
-    static let bg2 = adaptive(light: 0xebe4d3, dark: 0x26231f)
-    static let text = adaptive(light: 0x1f1b16, dark: 0xf3ede0)
+    static let bg = adaptive(light: 0xffffff, dark: 0x000000)
+    static let bg2 = adaptive(light: 0xf5f5f7, dark: 0x1c1c1e)
+    static let text = adaptive(light: 0x1d1d1f, dark: 0xf5f5f7)
     /// Text at 72%.
-    static let soft = adaptive(light: 0x1f1b16, dark: 0xf3ede0, alpha: 0.72)
+    static let soft = adaptive(light: 0x1d1d1f, dark: 0xf5f5f7, alpha: 0.72)
     /// Text at 60%. Not named `secondary`, which would shadow SwiftUI's own.
-    static let dim = adaptive(light: 0x1f1b16, dark: 0xf3ede0, alpha: 0.6)
-    static let hairline = adaptive(light: 0xdcd2bd, dark: 0x3a352e)
+    static let dim = adaptive(light: 0x1d1d1f, dark: 0xf5f5f7, alpha: 0.6)
+    static let hairline = adaptive(light: 0xe5e5ea, dark: 0x38383a)
     static let bulb = adaptive(light: 0xffca30, dark: 0xffca30)
     static let bulbDeep = adaptive(light: 0x8a6412, dark: 0xffca30)
 

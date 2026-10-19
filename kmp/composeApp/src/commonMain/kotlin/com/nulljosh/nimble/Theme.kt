@@ -16,11 +16,11 @@ enum class NimbleTheme(val accent: Color) {
     Night(Color(1.0f, 0.79f, 0.19f));
 
     val isDark get() = this == Contrast || this == Night
-    // The web and Swift palette: warm cream paper, warm ink. Contrast is the true-black option.
-    val background get() = if (this == Contrast) Color.Black else if (this == Night) Color(0xFF1C1A17) else Color(0xFFF5F0E4)
-    val surface get() = if (isDark) Color(0xFF1C1C1E) else Color(0xFFEBE4D3)
-    val hairline get() = if (isDark) Color(0xFF3A352E) else Color(0xFFDCD2BD)
-    val text get() = if (isDark) Color.White else Color(0xFF1F1B16)
-    val muted get() = if (isDark) Color(0.65f, 0.65f, 0.65f) else Color(0xFF6B6559)
+    // The web and Swift palette: white and true black (the 2026-10-18 Apple pass). Contrast keeps pure white text.
+    val background get() = if (isDark) Color.Black else Color.White
+    val surface get() = if (isDark) Color(0xFF1C1C1E) else Color(0xFFF5F5F7)
+    val hairline get() = if (isDark) Color(0xFF38383A) else Color(0xFFE5E5EA)
+    val text get() = if (this == Contrast) Color.White else if (isDark) Color(0xFFF5F5F7) else Color(0xFF1D1D1F)
+    val muted get() = if (isDark) Color(0.65f, 0.65f, 0.65f) else Color(0xFF6E6E73)
     val label get() = name
 }

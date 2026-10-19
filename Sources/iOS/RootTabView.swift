@@ -7,7 +7,7 @@ struct RootTabView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
-        // Tab labels in the Nimble face at the web's small size. The bar itself stays cream, like the screens.
+        // Tab labels in the Nimble face at the web's small size. The bar takes the screens' background.
         let font = UIFont(name: "NimbleSans-Regular", size: 12) ?? .systemFont(ofSize: 12)
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
