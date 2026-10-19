@@ -43,6 +43,81 @@ mode is the premium feature), buy the domain at v9, flip the switch at v10.
 - [ ] [Haiku] Landing, README, whitepaper and screenshots rebuilt for 10.0 with the new look and the benchmark.
 - [ ] [Opus] 10.0 launch: Product Hunt, HN (when the account allows), release notes, and the What's New that explains what a decade of versions bought you in one screen.
 
+## Loop to v100 (from 9.10, 2026-10-18)
+
+Same rules as the loop to v10: one slice per tick, tests green, exam at 100% on the free engine before a
+slice counts, minors for features, patches for fixes, a major closes a band. Free or $1 only. Each band
+has a theme; its last slice is the major's release (tag, notes, landing, README, What's New).
+
+### v11-v20 Trust: every answer shows why
+
+- [ ] [Sonnet] Every AI answer carries the sentence it rests on ("Why this answer") on all surfaces, not just web.
+- [ ] [Sonnet] The exam grows to 1,000 questions (the 1,000-question bank in BENCHMARK.md) and holds 99% on the free engine.
+- [ ] [Sonnet] A nightly exam in CI posts the score to /stats; a drop of two points opens a roadmap line by itself.
+- [ ] [Haiku] "This is wrong" on an answer sends the question (text only) to a review list; the exam adopts each one.
+- [ ] [Sonnet] Freshness: every live answer says when it was checked; anything older than its TTL refetches.
+
+### v21-v30 Live: the numbers people check every day
+
+- [ ] [Sonnet] Weather: "weather in vancouver" from Open-Meteo (keyless), now plus the next 12 hours.
+- [ ] [Sonnet] Currency: "100 usd to cad" from the Bank of Canada / ECB daily rates, offline fallback to the last fetch.
+- [ ] [Sonnet] Time zones: "time in tokyo", offline from the IANA table.
+- [ ] [Sonnet] Canada and BC live figures: CPI, policy rate, minimum wage by province (StatCan / Bank of Canada).
+- [ ] [Haiku] Sports scores beyond ESPN's top leagues: NHL, MLS, CFL, with the next game when none is live.
+
+### v31-v40 Offline: most questions need no network
+
+- [ ] [Sonnet] The offline pack grows from 9,000 to 50,000 articles under 15 MB, delta updates monthly.
+- [ ] [Opus] The on-device model (v8) answers from the pack with no network and clears 90% of the exam offline.
+- [ ] [Sonnet] Offline exam: a second score in BENCHMARK.md, airplane mode, every platform.
+- [ ] [Haiku] Packs by topic (science, history, geography) so a phone can carry what it needs.
+
+### v41-v50 Follow-ups: a short conversation, kept on the device
+
+- [ ] [Sonnet] Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
+- [ ] [Sonnet] Compare: "paris vs london population" answers as a two-row card.
+- [ ] [Sonnet] Math shows its steps for algebra and calculus, offline.
+- [ ] [Haiku] Graphs: pinch, pan and trace a point on every surface.
+
+### v51-v60 Everywhere: Nimble wherever a question starts
+
+- [ ] [Sonnet] App Intents and Shortcuts: "Ask Nimble" from Siri, Spotlight and the Action button.
+- [ ] [Sonnet] Widgets: a home screen ask box and a "question of the day".
+- [ ] [Sonnet] Apple Watch answers by voice with the same exam score as the phone.
+- [ ] [Haiku] Raycast and Alfred extensions over the public API.
+- [ ] [Haiku] Linux packages (deb, rpm, flatpak) from the KMP desktop build.
+
+### v61-v70 Voice: ask and hear it, hands free
+
+- [ ] [Sonnet] Spoken answers in the device's voice on every surface, one tap to listen (web done).
+- [ ] [Sonnet] Hands-free mode on Mac and iPhone: hold a key or the Action button, ask, hear the answer.
+- [ ] [Opus] Samantha's own voice as an option on the Mac, local, no network.
+
+### v71-v80 Developers: the engine as a service
+
+- [ ] [Sonnet] Self-serve API keys with a free tier and the $1 unlock, issued and revoked from a page.
+- [ ] [Haiku] SDKs: a tiny JS and Python client, each one file, tested against the live API.
+- [ ] [Haiku] A public status page from /stats: uptime, latency, exam score.
+- [ ] [Sonnet] MCP server listed in the public registries with the four tools.
+
+### v81-v90 Every language, every person
+
+- [ ] [Sonnet] The exam translated into all 15 UI languages, each at 95%.
+- [ ] [Sonnet] Right-to-left: Arabic and Hebrew UI, then answers.
+- [ ] [Haiku] 30 UI languages.
+- [ ] [Haiku] Accessibility at WCAG AAA on web; VoiceOver and TalkBack walkthroughs recorded each release.
+
+### v91-v99 Craft: fast, small, never crashes
+
+- [ ] [Sonnet] p95 under 1 s on the free engine, cache hit rate above 50%.
+- [ ] [Haiku] Size budgets enforced in CI: web under 300 KB first load, iOS under 15 MB, Mac under 20 MB.
+- [ ] [Sonnet] Zero crashes over 30 days on every store build.
+- [ ] [Opus] Design pass on every screen against the web, the newest surface.
+
+### v100 The century
+
+- [ ] [Opus] Exam at 99% on 1,000 questions in 15 languages, online and offline, on every platform. Release notes that read like a short history, a launch, and a What's New that fits on one screen.
+
 ## Open for contribution
 
 Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any one.
