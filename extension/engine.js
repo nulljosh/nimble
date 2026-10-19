@@ -990,20 +990,29 @@ function packTokens(s){
 }
 // Every entry that matches the query, best first. A title match counts only when the title is about the query:
 // "Avatar: The Way of Water" is not an article about water, so the one word in its title is a weak match only.
+const TITLE_FILLER = new Set(["inc", "ltd", "corp", "co", "plc"]);
+const SUPERLATIVE = /^(largest|longest|deepest|tallest|highest|biggest|smallest|oldest|hottest|coldest)$/;
 function packHits(query, pack){
   if(!pack || !Array.isArray(pack.entries)) return [];
   const want = new Set(packTokens(query).filter(w => !PACK_STOP.has(w)));
   if(!want.size) return [];
+  const wanted = [...want], sup = wanted.find(w => SUPERLATIVE.test(w));
   const hits = [];
   pack.entries.forEach((e, i) => {
-    const titleWords = packTokens(e.t).filter(w => !PACK_STOP.has(w));
-    const extra = titleWords.filter(w => !want.has(w)).length; // title words the query does not ask for
+    // Title words the query does not ask for. "Alexander the Great" is not about "the great gatsby", so one stray word
+    // is no longer forgiven. A trailing "(film)" and "Inc." do not count, and "sinking" covers "sink". "(TV series)"
+    // and "(2026 film)" do count: "who wrote the odyssey" is not about this year's film.
+    const titleWords = packTokens(e.t.replace(/\s*\((?![^)]*(\d|series))[^)]*\)$/i, "")).filter(w => !PACK_STOP.has(w) && !TITLE_FILLER.has(w));
+    const extra = titleWords.filter(w => !wanted.some(q => w === q || (q.length >= 4 && new RegExp("^" + q + "(ing|ed)$").test(w)))).length;
+    // "largest ocean" is answered by a title the question cannot name (Pacific Ocean): one stray word passes when
+    // the lead sentence says the title "is the largest". "The Don is the fifth-longest river" does not.
+    const ok = extra === 0 || (extra === 1 && !!sup && new RegExp("\\bis the " + sup + "\\b", "i").test(String(e.e||"").split(/(?<=\.)\s/)[0]));
     const title = new Set(packTokens(e.t).concat((e.a||[]).flatMap(packTokens)));
     const desc = new Set(packTokens(e.d)), text = new Set(packTokens(e.e));
     let score = 0, named = false;
     for(const w of want){
       if(title.has(w)){
-        if(extra <= 1){ score += 3; named = true; } else score += 1;
+        if(ok){ score += 3; named = true; } else score += 1;
       }
       else if(desc.has(w)) score += 2;
       else if(text.has(w)) score += 1;

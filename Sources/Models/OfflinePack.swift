@@ -35,6 +35,22 @@ struct OfflinePack: Sendable {
 
     /// A title or description needs this many points to count as a hit (PACK_MIN in engine.js).
     static let minScore = 3
+    static let titleFiller: Set<String> = ["inc", "ltd", "corp", "co", "plc"]
+    static let superlatives: Set<String> = ["largest", "longest", "deepest", "tallest", "highest", "biggest", "smallest", "oldest", "hottest", "coldest"]
+
+    /// The title without a trailing "(film)" or "(company)". "(TV series)" and "(2026 film)" stay: they are other things.
+    static func coreTitle(_ t: String) -> String {
+        guard t.hasSuffix(")"), let open = t.lastIndex(of: "(") else { return t }
+        let inside = t[open...].lowercased()
+        if inside.contains(where: \.isNumber) || inside.contains("series") { return t }
+        return String(t[..<open]).trimmingCharacters(in: .whitespaces)
+    }
+
+    /// True when the lead sentence says "is the <superlative>" as words ("is the fifth-longest" does not).
+    static func leadSays(_ text: String, _ sup: String) -> Bool {
+        let lead = text.components(separatedBy: ". ").first ?? text
+        return lead.range(of: "\\bis the \(sup)\\b", options: [.regularExpression, .caseInsensitive]) != nil
+    }
     /// Words that never count toward a match (PACK_STOP in engine.js).
     static let stop: Set<String> = Set(
         "a an and are as at be by did do does for from how i in is it its of on or that the to was were what when where which who whom whose why with the"
@@ -64,7 +80,7 @@ struct OfflinePack: Sendable {
         index = file.entries.map { e in
             let titleTokens = Self.tokens(e.t)
             return Indexed(
-                titleWords: titleTokens.filter { !Self.stop.contains($0) },
+                titleWords: Self.tokens(Self.coreTitle(e.t)).filter { !Self.stop.contains($0) && !Self.titleFiller.contains($0) },
                 titleSet: Set(titleTokens + (e.a ?? []).flatMap(Self.tokens)),
                 descSet: Set(Self.tokens(e.d ?? "")),
                 textSet: Set(Self.tokens(e.e)))
@@ -95,14 +111,18 @@ struct OfflinePack: Sendable {
     func hits(_ query: String) -> [Hit] {
         let want = Set(Self.tokens(query)).subtracting(Self.stop)
         guard !want.isEmpty else { return [] }
+        let sup = want.first { Self.superlatives.contains($0) }
         var out: [Hit] = []
         for (i, ix) in index.enumerated() {
-            let extra = ix.titleWords.filter { !want.contains($0) }.count
+            // Same rule as docs/engine.js packHits: no stray title word, except one the question cannot name when the
+            // lead sentence says the title "is the largest" (Pacific Ocean for "largest ocean"). "sinking" covers "sink".
+            let extra = ix.titleWords.filter { w in !want.contains { q in w == q || (q.count >= 4 && (w == q + "ing" || w == q + "ed")) } }.count
+            let fits = extra == 0 || (extra == 1 && sup.map { Self.leadSays(entries[i].e, $0) } == true)
             var score = 0
             var named = false
             for w in want {
                 if ix.titleSet.contains(w) {
-                    if extra <= 1 { score += 3; named = true } else { score += 1 }
+                    if fits { score += 3; named = true } else { score += 1 }
                 } else if ix.descSet.contains(w) {
                     score += 2
                 } else if ix.textSet.contains(w) {

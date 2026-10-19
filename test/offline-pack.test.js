@@ -171,3 +171,13 @@ test("private mode: online, still answers only from the pack and never touches t
   assert.equal((await E.answer("bitcoin price", { pack: PACK, privateMode: true })).kind, "pack-miss", "market quotes need the network");
   assert.equal(calls, 0);
 });
+
+// Title rule: a stray title word no longer passes ("Alexander the Great" for "the great gatsby"), except a word the
+// question cannot name when the lead sentence says "is the largest". "(film)" does not count as a stray word.
+const TITLES = {"builtAt": "2026-10-19", "entries": [{"t": "Alexander the Great", "d": "King of Macedon", "e": "Alexander III of Macedon, most commonly known as Alexander the Great, was a king of ancient Macedon. He was a great general.", "u": "https://en.wikipedia.org/wiki/Alexander_the_Great", "a": []}, {"t": "Pacific Ocean", "d": "Largest ocean", "e": "The Pacific Ocean is the largest and deepest of Earth's five oceanic divisions.", "u": "https://en.wikipedia.org/wiki/Pacific_Ocean", "a": []}, {"t": "Don (river)", "d": "River in Russia", "e": "The Don is the fifth-longest river in Europe. It flows into the Sea of Azov.", "u": "https://en.wikipedia.org/wiki/Don_(river)", "a": []}, {"t": "Jaws (film)", "d": "1975 film", "e": "Jaws is a 1975 American thriller film directed by Steven Spielberg.", "u": "https://en.wikipedia.org/wiki/Jaws_(film)", "a": []}]};
+test("a title with a word the question did not ask for is not the answer", () => {
+  assert.equal(E.packAnswer("who wrote the great gatsby", TITLES), null);
+  assert.equal(E.packAnswer("longest river in europe", TITLES), null, "the fifth-longest is not the longest");
+  assert.equal(E.packAnswer("largest ocean", TITLES)?.title, "Pacific Ocean");
+  assert.equal(E.packAnswer("who directed jaws", TITLES)?.title, "Jaws (film)");
+});

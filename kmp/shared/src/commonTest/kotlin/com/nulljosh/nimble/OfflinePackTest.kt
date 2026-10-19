@@ -48,4 +48,14 @@ class OfflinePackTest {
         assertEquals("9,000", thousands(9000))
         assertEquals("1.9 MB", megabytes(1_948_983L))
     }
+
+    /** Same title rule as docs/engine.js packHits, on four entries. */
+    @Test
+    fun strayTitleWordIsNotTheAnswer() {
+        val pack = assertNotNull(OfflinePack.parse("""{"builtAt": "2026-10-19", "entries": [{"t": "Alexander the Great", "d": "King of Macedon", "e": "Alexander III of Macedon, most commonly known as Alexander the Great, was a king of ancient Macedon. He was a great general.", "u": "https://en.wikipedia.org/wiki/Alexander_the_Great", "a": []}, {"t": "Pacific Ocean", "d": "Largest ocean", "e": "The Pacific Ocean is the largest and deepest of Earth's five oceanic divisions.", "u": "https://en.wikipedia.org/wiki/Pacific_Ocean", "a": []}, {"t": "Don (river)", "d": "River in Russia", "e": "The Don is the fifth-longest river in Europe. It flows into the Sea of Azov.", "u": "https://en.wikipedia.org/wiki/Don_(river)", "a": []}, {"t": "Jaws (film)", "d": "1975 film", "e": "Jaws is a 1975 American thriller film directed by Steven Spielberg.", "u": "https://en.wikipedia.org/wiki/Jaws_(film)", "a": []}]}"""))
+        assertNull(pack.answer("who wrote the great gatsby"))
+        assertNull(pack.answer("longest river in europe"), "the fifth-longest is not the longest")
+        assertEquals("Pacific Ocean", pack.answer("largest ocean")?.title)
+        assertEquals("Jaws (film)", pack.answer("who directed jaws")?.title)
+    }
 }

@@ -36,7 +36,7 @@ class OfflinePack internal constructor(file: PackFile) {
     private val index: List<Indexed> = entries.map { e ->
         val titleTokens = packTokens(e.t)
         Indexed(
-            titleWords = titleTokens.filter { it !in STOP },
+            titleWords = packTokens(coreTitle(e.t)).filter { it !in STOP && it !in TITLE_FILLER },
             titleSet = (titleTokens + (e.a.orEmpty()).flatMap(::packTokens)).toSet(),
             descSet = packTokens(e.d.orEmpty()).toSet(),
             textSet = packTokens(e.e).toSet(),
@@ -67,14 +67,18 @@ class OfflinePack internal constructor(file: PackFile) {
     private fun hits(query: String): List<Hit> {
         val want = packTokens(query).toSet() - STOP
         if (want.isEmpty()) return emptyList()
+        val sup = want.firstOrNull { it in SUPERLATIVES }
         val out = ArrayList<Hit>()
         index.forEachIndexed { i, ix ->
-            val extra = ix.titleWords.count { it !in want }
+            // Same rule as docs/engine.js packHits: no stray title word, except one the question cannot name when the
+            // lead sentence says the title "is the largest" (Pacific Ocean for "largest ocean"). "sinking" covers "sink".
+            val extra = ix.titleWords.count { w -> want.none { q -> w == q || (q.length >= 4 && (w == q + "ing" || w == q + "ed")) } }
+            val fits = extra == 0 || (extra == 1 && sup != null && leadSays(entries[i].e, sup))
             var score = 0
             var named = false
             for (w in want) {
                 if (w in ix.titleSet) {
-                    if (extra <= 1) { score += 3; named = true } else score += 1
+                    if (fits) { score += 3; named = true } else score += 1
                 } else if (w in ix.descSet) {
                     score += 2
                 } else if (w in ix.textSet) {
@@ -90,6 +94,22 @@ class OfflinePack internal constructor(file: PackFile) {
     companion object {
         /** A title or description needs this many points to count as a hit (PACK_MIN). */
         const val MIN_SCORE = 3
+
+        private val TITLE_FILLER = setOf("inc", "ltd", "corp", "co", "plc")
+        private val SUPERLATIVES = setOf("largest", "longest", "deepest", "tallest", "highest", "biggest", "smallest", "oldest", "hottest", "coldest")
+
+        /** The title without a trailing "(film)" or "(company)". "(TV series)" and "(2026 film)" stay: they are other things. */
+        internal fun coreTitle(t: String): String {
+            val open = t.lastIndexOf('(')
+            if (!t.endsWith(")") || open < 0) return t
+            val inside = t.substring(open).lowercase()
+            if (inside.any { it.isDigit() } || "series" in inside) return t
+            return t.substring(0, open).trim()
+        }
+
+        /** True when the lead sentence says "is the <superlative>" as words ("is the fifth-longest" does not). */
+        internal fun leadSays(text: String, sup: String): Boolean =
+            Regex("\\bis the $sup\\b", RegexOption.IGNORE_CASE).containsMatchIn(text.substringBefore(". "))
 
         /** Words that never count toward a match (PACK_STOP). */
         private val STOP: Set<String> = (
