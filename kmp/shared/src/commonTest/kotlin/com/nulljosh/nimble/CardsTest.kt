@@ -109,6 +109,16 @@ class CardsTest {
     }
 
     @Test
+    fun weatherShowsTheNext12HoursAndReadsPlaceFirst() {
+        val place = assertNotNull(Cards.placeFromJson(vancouver))
+        val body = """{"current":{"temperature_2m":11.6,"weather_code":3,"wind_speed_10m":12.2},"hourly":{"temperature_2m":[11.6,9.4,8.2,12.1]}}"""
+        assertEquals("Vancouver, Canada, overcast, wind 12 km/h, next 12 h 8 to 12°C", Cards.weatherFromJson(place, body)?.sub)
+        assertEquals(Ask.Weather("vancouver"), Cards.ask("vancouver weather"))
+        assertNull(Cards.next12(emptyList()))
+        assertTrue(Cards.ask("how is the weather") !is Ask.Weather)
+    }
+
+    @Test
     fun weatherRoundingAndGaps() {
         // Half rounds up like Math.round on the web; a negative that rounds to zero is "0", not "-0".
         assertEquals("3", Cards.weatherCard("X", null, 2.5, 0, 0.0).big)

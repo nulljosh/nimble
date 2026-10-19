@@ -28,7 +28,9 @@ extension QueryEngine {
         if groups(#"^(?:(?:latest|top|breaking)\s+)?news\s*\??$|^what(?:'s|\u2019s| is) happening\s*\??$"#) != nil { return .news(place: "") }
         if let g = groups(#"^(?:(?:latest|top|breaking)\s+)?news\s+(?:in|from|for|around)\s+(.+?)\s*\??$"#) { return .news(place: g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
         if let g = groups(#"^what(?:'s|\u2019s| is) happening\s+(?:in|at|around)\s+(.+?)\s*\??$"#) { return .news(place: g[0].trimmingCharacters(in: .whitespacesAndNewlines)) }
-        if let g = groups(#"^(?:what(?:'s| is) the )?weather (?:in|for|at) (.+?)\??$"#) { return .weather(g[0]) }
+        if let g = groups(#"^(?:what(?:'s| is) the )?(?:weather|forecast) (?:in|for|at) (.+?)\??$"#) { return .weather(g[0]) }
+        // "vancouver weather". A leading question word is not a place ("how is the weather").
+        if let g = groups(#"^(?!(?:what|how|is|the|will|does)\b)([a-z][a-z .'-]+?) (?:weather|forecast)(?: today| now)?\??$"#) { return .weather(g[0]) }
         if let g = groups(#"^(?:what(?:'s|’s| is) the |what )?(?:current |local )?time (?:is it |now )?(?:in|at) (.+?)(?: right now| now)?\??$"#) { return .time(g[0]) }
         if let g = groups(#"^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$"#, in: money),
            let amount = Double(g[0]) {
@@ -66,12 +68,19 @@ extension QueryEngine {
         return .card(big: word, unit: "", sub: sub, source: "Wordroot", url: "https://wordroot.jaybulb.com/#search=\(word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? word)")
     }
 
-    static func weatherCard(place: String, country: String?, temp: Double, code: Int, wind: Double, asOf: Freshness? = nil) -> QueryResult {
+    /// The next 12 hours as a range, "next 12 h 8 to 12°C", or one figure when it holds; nil when there are none.
+    static func next12(_ temps: [Double]) -> String? {
+        let v = temps.filter(\.isFinite).map { Int($0.rounded()) }
+        guard let lo = v.min(), let hi = v.max() else { return nil }
+        return "next 12 h \(lo == hi ? "\(lo)" : "\(lo) to \(hi)")°C"
+    }
+
+    static func weatherCard(place: String, country: String?, temp: Double, code: Int, wind: Double, next: [Double] = [], asOf: Freshness? = nil) -> QueryResult {
         let sky = [0: "clear", 1: "mostly clear", 2: "partly cloudy", 3: "overcast", 45: "fog", 48: "fog",
                    51: "drizzle", 53: "drizzle", 55: "drizzle", 61: "rain", 63: "rain", 65: "heavy rain",
                    71: "snow", 73: "snow", 75: "heavy snow", 80: "showers", 81: "showers", 82: "heavy showers",
                    95: "thunderstorm"][code]
-        let parts = [place, country, sky, "wind \(Int(wind.rounded())) km/h"].compactMap { $0 }.filter { !$0.isEmpty }
+        let parts = [place, country, sky, "wind \(Int(wind.rounded())) km/h", next12(next)].compactMap { $0 }.filter { !$0.isEmpty }
         return .card(big: String(Int(temp.rounded())), unit: "°C", sub: parts.joined(separator: ", "),
                      source: "Open-Meteo", url: "https://open-meteo.com", asOf: asOf)
     }
@@ -115,7 +124,12 @@ extension QueryEngine {
             let temperature2m: Double, weatherCode: Int, windSpeed10m: Double
             enum CodingKeys: String, CodingKey { case temperature2m = "temperature_2m", weatherCode = "weather_code", windSpeed10m = "wind_speed_10m" }
         }
+        struct Hours: Decodable {
+            let temperature2m: [Double]
+            enum CodingKeys: String, CodingKey { case temperature2m = "temperature_2m" }
+        }
         let current: Now
+        let hourly: Hours?
     }
     private struct Rates: Decodable { let base: String?; let date: String?; let rates: [String: Double]? }
 
@@ -132,10 +146,10 @@ extension QueryEngine {
 
     private func weatherCard(_ place: String, _ session: URLSession) async -> QueryResult? {
         guard let loc = await geocode(place, session),
-              let w = await fetch(Forecast.self, "https://api.open-meteo.com/v1/forecast?latitude=\(loc.latitude)&longitude=\(loc.longitude)&current=temperature_2m,weather_code,wind_speed_10m", session)
+              let w = await fetch(Forecast.self, "https://api.open-meteo.com/v1/forecast?latitude=\(loc.latitude)&longitude=\(loc.longitude)&current=temperature_2m,weather_code,wind_speed_10m&hourly=temperature_2m&forecast_hours=12", session)
         else { return nil }
         return Self.weatherCard(place: loc.name, country: loc.country, temp: w.current.temperature2m,
-                                code: w.current.weatherCode, wind: w.current.windSpeed10m, asOf: Freshness(date: Date(), isDay: false))
+                                code: w.current.weatherCode, wind: w.current.windSpeed10m, next: w.hourly?.temperature2m ?? [], asOf: Freshness(date: Date(), isDay: false))
     }
 
     private func timeCard(_ place: String, _ session: URLSession) async -> QueryResult? {

@@ -46,7 +46,9 @@ internal expect fun zonedClock(zoneId: String, epochMillis: Long? = null): Zoned
 object Cards {
 
     private val etymologyGate = Regex("""^(?:origin|etymology|root|where\s+does\s+the\s+word)\s+(?:of\s+)?(?:the\s+word\s+)?(.+?)(?:\s+come\s+from)?\s*\??$""", RegexOption.IGNORE_CASE)
-    private val weatherGate = Regex("""^(?:what(?:'s| is) the )?weather (?:in|for|at) (.+?)\??$""", RegexOption.IGNORE_CASE)
+    private val weatherGate = Regex("""^(?:what(?:'s| is) the )?(?:weather|forecast) (?:in|for|at) (.+?)\??$""", RegexOption.IGNORE_CASE)
+    // "vancouver weather". A leading question word is not a place ("how is the weather").
+    private val weatherAfter = Regex("""^(?!(?:what|how|is|the|will|does)\b)([a-z][a-z .'-]+?) (?:weather|forecast)(?: today| now)?\??$""", RegexOption.IGNORE_CASE)
     private val timeGate = Regex("""^(?:what(?:'s|’s| is) the |what )?(?:current |local )?time (?:is it |now )?(?:in|at) (.+?)(?: right now| now)?\??$""", RegexOption.IGNORE_CASE)
     private val currencyGate = Regex("""^(?:convert\s+)?(-?\d+(?:\.\d+)?)\s*([a-z]{3})\s+(?:to|in|into|as)\s+([a-z]{3})\??$""", RegexOption.IGNORE_CASE)
 
@@ -59,7 +61,7 @@ object Cards {
     fun ask(input: String): Ask? {
         val q = input.trim()
         etymologyGate.find(q)?.let { return Ask.Etymology(it.groupValues[1].trim()) }
-        weatherGate.find(q)?.let { return Ask.Weather(it.groupValues[1]) }
+        (weatherGate.find(q) ?: weatherAfter.find(q))?.let { return Ask.Weather(it.groupValues[1]) }
         timeGate.find(q)?.let { return Ask.Time(it.groupValues[1]) }
         currencyGate.find(q.split(" ").joinToString(" ") { currencyNames[it.lowercase()] ?: it })?.let { m ->
             val amount = m.groupValues[1].toDoubleOrNull() ?: return null
@@ -96,8 +98,16 @@ object Cards {
         return Card(word, "", sub, "Wordroot", "https://wordroot.jaybulb.com/#search=${word.encodeURLParameter()}")
     }
 
-    fun weatherCard(place: String, country: String?, temp: Double, code: Int?, wind: Double): Card {
-        val parts = listOfNotNull(place, country, code?.let { sky[it] }, "wind ${wind.roundToInt()} km/h").filter { it.isNotEmpty() }
+    /** The next 12 hours as a range, "next 12 h 8 to 12°C", or one figure when it holds; null when there are none. */
+    fun next12(temps: List<Double>): String? {
+        val v = temps.filter { it.isFinite() }.map { it.roundToInt() }
+        val lo = v.minOrNull() ?: return null
+        val hi = v.max()
+        return "next 12 h ${if (lo == hi) "$lo" else "$lo to $hi"}°C"
+    }
+
+    fun weatherCard(place: String, country: String?, temp: Double, code: Int?, wind: Double, next: List<Double> = emptyList()): Card {
+        val parts = listOfNotNull(place, country, code?.let { sky[it] }, "wind ${wind.roundToInt()} km/h", next12(next)).filter { it.isNotEmpty() }
         return Card(temp.roundToInt().toString(), "°C", parts.joinToString(", "), "Open-Meteo", "https://open-meteo.com")
     }
 
@@ -142,12 +152,15 @@ object Cards {
 
     /** Open-Meteo forecast: "current" holds temperature_2m, weather_code and wind_speed_10m. */
     fun weatherFromJson(place: Place, body: String): Card? {
-        val c = parse(body)?.get("current") as? JsonObject ?: return null
+        val json = parse(body) ?: return null
+        val c = json["current"] as? JsonObject ?: return null
+        val hours = ((json["hourly"] as? JsonObject)?.get("temperature_2m") as? JsonArray)?.mapNotNull { it.num() } ?: emptyList()
         return weatherCard(
             place.name, place.country,
             temp = c["temperature_2m"].num() ?: return null,
             code = c["weather_code"].num()?.toInt(),
             wind = c["wind_speed_10m"].num() ?: return null,
+            next = hours,
         )
     }
 
@@ -210,7 +223,7 @@ class CardClient(private val http: HttpClient) {
         val loc = geocode(place) ?: return null
         val body = fetch(
             "https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}" +
-                "&current=temperature_2m,weather_code,wind_speed_10m"
+                "&current=temperature_2m,weather_code,wind_speed_10m&hourly=temperature_2m&forecast_hours=12"
         ) ?: return null
         return Cards.weatherFromJson(loc, body)?.copy(asOf = Freshness.now())
     }

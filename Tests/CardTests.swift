@@ -13,6 +13,13 @@ final class CardTests: XCTestCase {
                                    source: "Open-Meteo", url: "https://open-meteo.com"))
     }
 
+    func testWeatherCardNext12Hours() {
+        let card = QueryEngine.weatherCard(place: "Vancouver", country: "Canada", temp: 11.6, code: 3, wind: 12.2, next: [11.6, 9.4, 8.2, 12.1])
+        XCTAssertEqual(card, .card(big: "12", unit: "°C", sub: "Vancouver, Canada, overcast, wind 12 km/h, next 12 h 8 to 12°C",
+                                   source: "Open-Meteo", url: "https://open-meteo.com"))
+        XCTAssertNil(QueryEngine.next12([]))
+    }
+
     func testCurrencyCard() {
         let card = QueryEngine.currencyCard(amount: 100, from: "USD", to: "CAD", rate: 1.3712, source: "Frankfurter", url: "https://frankfurter.dev")
         XCTAssertEqual(card, .card(big: "137.12", unit: "CAD", sub: "100 USD at today's rate",
