@@ -383,9 +383,17 @@ export default {
     const isQuote = req.method === "GET" && url.searchParams.has("quote");
     const isStats = req.method === "GET" && url.pathname === "/stats";
     if (isStats) return statsReply(url.origin, env);
+    // A question is 500 characters and three short turns: anything over 16 KB is not one, and is refused unread.
+    if (req.method === "POST" && Number(req.headers.get("content-length") || 0) > 16384) return json({ error: "too large" }, 413);
     if (url.pathname === "/report") return report(req, url, env);
     if (url.pathname === "/exam") return examScore(req, url, env);
     if (req.method !== "POST" && !isDDG && !isSite && !isNews && !isQuote) return new Response("POST only", { status: 405, headers: CORS });
+    // The free lookups (DDG, site, news, quote) cost no AI but each one is a request against the Worker's daily cap and
+    // an outbound fetch, so an IP gets 60 a minute (API_LIMITER's bucket, keyed apart from API keys). A page load uses two.
+    if (req.method === "GET" && env.API_LIMITER) {
+      const { success } = await env.API_LIMITER.limit({ key: "get:" + (req.headers.get("cf-connecting-ip") || "unknown") });
+      if (!success) return json({ error: "rate limited" }, 429);
+    }
 
     if (isDDG) {
       const ddgQ = url.searchParams.get("ddg").slice(0, 500);

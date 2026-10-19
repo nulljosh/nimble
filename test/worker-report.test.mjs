@@ -37,3 +37,11 @@ test("CI posts the exam score with the key and /stats shows it", async () => {
   assert.equal(stats.exam.score, 150);
   assert.equal(stats.exam.total, 154);
 });
+
+test("an oversized POST is refused unread, and the free GET lookups share a per-IP limit", async () => {
+  const e = env();
+  const big = new Request("https://w.example/", { method: "POST", headers: { "content-length": "20000" }, body: "x".repeat(20000) });
+  assert.equal((await worker.fetch(big, e)).status, 413);
+  const limited = env({ API_LIMITER: { limit: async ({ key }) => ({ success: !key.startsWith("get:") }) } });
+  assert.equal((await worker.fetch(new Request("https://w.example/?news=vancouver"), limited)).status, 429);
+});

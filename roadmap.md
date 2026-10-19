@@ -106,7 +106,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 ### v91-v99 Craft: fast, small, never crashes
 
 - [ ] [Sonnet] p95 under 1 s on the free engine, cache hit rate above 50%.
-- [ ] [Haiku] Size budgets enforced in CI: web under 300 KB first load, iOS under 15 MB, Mac under 20 MB. Web done 2026-10-18: test/size-budget.test.js (runs in CI) holds app.html plus its direct files under 300 KB gzipped; it reads 127 KB after the header icon went from a 16-bit 665 KB PNG to a 3.7 KB one. iOS and Mac budgets next.
+- [ ] [Haiku] Size budgets enforced in CI: web under 300 KB first load, iOS under 15 MB, Mac under 20 MB. Web done 2026-10-18: test/size-budget.test.js (runs in CI) holds app.html plus its direct files under 300 KB gzipped; it reads 127 KB after the header icon went from a 16-bit 665 KB PNG to a 3.7 KB one. Measured 2026-10-19 from Release builds: Mac 7.2 MB, iPhone 13 MB, both under; not yet enforced in CI.
 - [ ] [Sonnet] Zero crashes over 30 days on every store build.
 - [ ] [Opus] Design pass on every screen against the web, the newest surface.
 
