@@ -137,6 +137,7 @@ class AnswerClient(
 
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
+        Units.convert(input)?.let { return Answer.Math(it) }
         constantAnswer(input)?.let { return it }
 
         // Offline: the pack answers first, else an honest miss. Math above already worked with no network.
@@ -198,6 +199,8 @@ class AnswerClient(
 
     /** Same labels as the Swift and web apps. The pack's source line carries its build date. */
     private suspend fun offlineAnswer(input: String, private: Boolean = false): Answer {
+        // "time in tokyo" needs no network: the device's own zone list answers it, as on the web.
+        (Cards.ask(input) as? Ask.Time)?.let { Cards.deviceTime(it.place) }?.let { return Answer.CardAnswer(it) }
         val pack = offlinePack()
         pack?.answer(input)?.let { hit ->
             val asOf = packAsOfLabel(hit.builtAt)?.let { " · as of $it" }.orEmpty()

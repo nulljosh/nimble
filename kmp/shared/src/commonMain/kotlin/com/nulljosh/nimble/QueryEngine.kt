@@ -61,7 +61,8 @@ object QueryEngine {
     }
 
     fun evaluateMath(input: String): String? {
-        val expr = input.trim()
+        // "log10(1000)": log is already base 10, and the lexer reads letters only.
+        val expr = input.trim().replace(Regex("(?i)\\blog10\\("), "log(")
         if (expr.isEmpty()) return null
         numberFact(expr)?.let { return it }
 
@@ -123,6 +124,8 @@ object QueryEngine {
             "(${it.groupValues[2]}*(1${if (it.groupValues[1] == "increase" || it.groupValues[1] == "raise") "+" else "-"}${it.groupValues[3]}/100))"
         }
         .replace(Regex("^an? (?=\\d)"), "")
+        // "cube root of 27", "square root of 2": a power, so the plain-math check below still holds.
+        .replace(Regex("^(?:the )?(cube|square) root of ([\\d.]+)$")) { "(${it.groupValues[2]}^(1/${if (it.groupValues[1] == "cube") 3 else 2}))" }
         .replace(Regex("\\b(?:a |one )?(half|third|quarter) of ([\\d.]+)")) { "(${it.groupValues[2]}/${fractions[it.groupValues[1]]})" }
         .replace(Regex("([\\d.]+)\\s*(?:%|percent)\\s*off\\s*([\\d.]+)"), "(\$2-\$2*\$1/100)")
         .replace(Regex("([\\d.]+)\\s*(?:%|percent)\\s*(?:tip\\s+)?(?:of|on)\\s*"), "\$1/100*")
@@ -142,7 +145,8 @@ object QueryEngine {
 
         val everyday = everydayMath(text)
         if (everyday == text) {
-            if (!wordNumbers.keys.any { text.contains(it) }) return null
+            // "what is 9 times 3" has digits, not number words: either kind counts.
+            if (!wordNumbers.keys.any { text.contains(it) } && text.none { it.isDigit() }) return null
             if (!wordOperators.keys.any { text.contains(it) }) return null
         }
         text = everyday
