@@ -136,8 +136,9 @@ struct OfflinePack: Sendable {
     // MARK: - Text
 
     /// The sentences that answer. A relation question takes the lead sentence plus the first sentence with the relation
-    /// word; no such sentence means "", never a guess. Other questions take the one or two sentences sharing the most
-    /// content words with the question, or the first sentence when none do.
+    /// word; no such sentence means "", never a guess. Other questions take the one or two sentences sharing two of the
+    /// question's own words (all of them when it has fewer); a question that is only the title takes the first sentence,
+    /// and anything else with no such sentence is a miss ("Human penis" answered "how many bones in the human body").
     static func text(_ e: Entry, query: String, rel: Relation?) -> String {
         let sents = sentences(e.e)
         guard let first = sents.first else { return "" }
@@ -151,14 +152,15 @@ struct OfflinePack: Sendable {
         for (i, s) in sents.enumerated() {
             let toks = Set(tokens(s))
             let n = want.reduce(0) { $0 + (toks.contains($1) ? 1 : 0) }
-            if n > 0 { scored.append((s, i, n)) }
+            if n >= max(1, min(2, want.count)) { scored.append((s, i, n)) }
         }
         // The two sentences with the most shared words, read back in their order in the intro.
         let best = scored
             .sorted { a, b in a.n != b.n ? a.n > b.n : a.index < b.index }
             .prefix(2)
             .sorted { a, b in a.index < b.index }
-        return best.isEmpty ? first : best.map { $0.sentence }.joined(separator: " ")
+        if best.isEmpty { return want.isEmpty ? first : "" }
+        return best.map { $0.sentence }.joined(separator: " ")
     }
 
     /// Splits after . ! or ? and whitespace, but not after "Apple Inc." or "St." (SENTENCE_BREAK in engine.js).

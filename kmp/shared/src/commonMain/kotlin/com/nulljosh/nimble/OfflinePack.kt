@@ -159,8 +159,9 @@ class OfflinePack internal constructor(file: PackFile) {
 
         /**
          * The sentences that answer. A relation question takes the lead sentence plus the first sentence with the relation
-         * word; no such sentence means "", never a guess. Other questions take the one or two sentences sharing the most
-         * content words with the question, or the first sentence when none do.
+         * word; no such sentence means "", never a guess. Other questions take the one or two sentences sharing two of the
+         * question's own words (all of them when it has fewer); a question that is only the title takes the first sentence,
+         * and anything else with no such sentence is a miss ("Human penis" answered "how many bones in the human body").
          */
         private fun textFor(e: PackEntry, query: String, rel: Relation?): String {
             val sents = sentences(e.e)
@@ -173,11 +174,12 @@ class OfflinePack internal constructor(file: PackFile) {
             val want = packTokens(query).filter { it !in STOP && it !in titleWords }.toSet()
             val best = sents.withIndex()
                 .map { (i, s) -> Triple(s, i, packTokens(s).toSet().let { toks -> want.count { it in toks } }) }
-                .filter { it.third > 0 }
+                .filter { it.third >= maxOf(1, minOf(2, want.size)) }
                 .sortedWith(compareByDescending<Triple<String, Int, Int>> { it.third }.thenBy { it.second })
                 .take(2)
                 .sortedBy { it.second }
-            return if (best.isEmpty()) first else best.joinToString(" ") { it.first }
+            if (best.isEmpty()) return if (want.isEmpty()) first else ""
+            return best.joinToString(" ") { it.first }
         }
     }
 }
