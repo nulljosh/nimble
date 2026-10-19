@@ -14,7 +14,11 @@ const groqParams = (model, more) => (model.startsWith("qwen/") ? { reasoning_for
 // House model: Qwen3 30B bills 4,625 neurons per M input tokens, Gemma 4 26B 9,091 (Workers AI pricing, Oct 2026).
 // Input dominates here (grounding plus question), so Qwen is the one asked first and alone.
 const SYSTEM =
-  "Answer in one short factual sentence. No preamble, no markdown. Assume Earth and our own Sun unless the question names another world or star. If you do not know, reply exactly UNKNOWN.";
+  "Answer in one short factual sentence. No preamble, no markdown. Assume Earth and our own Sun unless the question names another world or star. " +
+  // Round 4: "Planck's constant" got a definition and no number; "the 50th president" got "Donald Trump" (he is the 47th).
+  "When the question names a constant, a quantity or an amount, give its value with its unit, not a definition. " +
+  "If the question rests on something false (a 50th president when there have been 47, a second prize never won), say so instead of answering it. " +
+  "If you do not know, reply exactly UNKNOWN.";
 // "Tell me more": three sentences, still prose, never a wall of text.
 const SYSTEM_MORE = SYSTEM.replace("one short factual sentence", "three short factual sentences of plain prose, no lists");
 // Model weights are frozen at their training cutoff, so "who is the current president"
@@ -26,6 +30,8 @@ const whoTerm = (q) => (/^who (is|are) (?!(the )?(current|first|last|former|next
 // "tallest mountain" finds the Solar System list and its Olympus Mons; a superlative landform means Earth unless the question names another world.
 const earthTerm = (q) => (/\b(tallest|highest|biggest|largest|longest|deepest) (mountain|volcano|canyon|waterfall)\b/i.test(q) && !/\b(mars|venus|moon|lunar|solar system|jupiter|mercury|planet|titan|io)\b/i.test(q) ? `${q.trim().replace(/\?$/, "")} on Earth` : q);
 export const searchTerm = (q) => earthTerm(whoTerm(q));
+const ASK_WORDS = /\b(who|what|when|where|why|how|which|is|was|are|were|the|a|an|of|did|does|do|created|invented|made|founded|wrote|built|designed|discovered)\b/gi;
+export const tinySubject = (q) => q.replace(/[?!.]/g, "").replace(ASK_WORDS, "").replace(/\s+/g, "").length <= 2;
 async function freshContext(q, attempt = 0) {
   try {
     const r = await fetch(
@@ -190,7 +196,9 @@ export const isTimeSensitive = (q) => TIMELY.test(q);
 // lone model guesses, so they get the second opinion (and the Sources disagree card when the two clash).
 export const needsSecondModel = (q) => isTimeSensitive(q) || WHEN.test(q) || /\d/.test(q) || /\b(first|last|earliest|original|founding)\b/i.test(q);
 export const normalizeQuestion = (q) => String(q).trim().toLowerCase().replace(/\s+/g, " ");
-export const cacheUrl = (origin, q) => `${origin}/__nimble/answer?q=${encodeURIComponent(normalizeQuestion(q))}`;
+// Bump PROMPT_V when the prompt changes: answers written under the old prompt must not outlive it in the cache.
+const PROMPT_V = 3;
+export const cacheUrl = (origin, q) => `${origin}/__nimble/answer?v=${PROMPT_V}&q=${encodeURIComponent(normalizeQuestion(q))}`;
 const statsUrl = (origin, day) => `${origin}/__nimble/stats/${day}`;
 const dayKey = (d = new Date()) => d.toISOString().slice(0, 10);
 export const estNeurons = (aiCalls) => aiCalls * NEURONS_PER_CALL;
@@ -396,7 +404,8 @@ export default {
     if (overBudget(counts) && !env.GROQ_KEY) return resting();
 
     // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
-    const { text: context, pages } = await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
+    // A subject of a letter or two ("who created c") finds the wrong pages ("The Who"), so it gets no reference at all.
+    const { text: context, pages } = tinySubject(q) && !turns.length ? { text: "", pages: [] } : await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
     // Set only when an AI call threw and the answer is UNKNOWN because of it (see the flow below).
     const aiFailures = [];
     // Every reply goes through here. Known answers are cached (UNKNOWN and errors never are), and the counts are saved.
@@ -511,7 +520,7 @@ export default {
       // saying UNKNOWN; treat that as UNKNOWN so the client falls through to DDG/Wikipedia.
       // The same goes for the model quoting its own rules back ("The instructions say: ... reply exactly UNKNOWN").
       // "Reference" alone is a normal word: a haiku's "seasonal reference" turned a good answer into UNKNOWN.
-      if (/\b(the|provided|this|given) reference\b|\breference text\b|\bprovided (text|context)\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) return "UNKNOWN";
+      if (/\b(the|provided|this|given) reference\b(?! (daily|intake|value|range|dose|amount))|\breference text\b|\bprovided (text|context)\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) return "UNKNOWN";
       // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
       // The date is ours, not the answer's; drop the preamble and recapitalize.
       const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "");

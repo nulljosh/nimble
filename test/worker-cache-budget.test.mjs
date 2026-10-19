@@ -428,3 +428,11 @@ test("api key: no key keeps the per-IP limit, and a key's bucket can run out", a
 test("grounding: the prompt tells the model to ignore a reference about the wrong thing", () => {
   assert.match(readFileSync(new URL("../worker/worker.js", import.meta.url), "utf8"), /ignore it and answer the best-known meaning/);
 });
+
+test("a subject of a letter or two gets no Wikipedia reference (\"who created c\" found The Who)", async () => {
+  const { tinySubject } = await import("../worker/worker.js");
+  assert.equal(tinySubject("who created c"), true);
+  assert.equal(tinySubject("what is r?"), true);
+  assert.equal(tinySubject("who created python"), false);
+  assert.equal(tinySubject("capital of france"), false);
+});
