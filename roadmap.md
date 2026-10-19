@@ -38,7 +38,7 @@ feature and a real domain (getnimbleapp.com or nimbleapp.com; buy via /buy-domai
 settled). Web stays free with the $1 unlock through Stripe. Decide pricing shape at v8 (private
 mode is the premium feature), buy the domain at v9, flip the switch at v10.
 
-- [ ] [Sonnet] Reliability: answer p50 under 2s and p95 under 6s on the free engine, graceful degradation tested with every upstream (Wikipedia, DDG, Workers AI) down in turn.
+- [x] [Sonnet] Reliability: answer p50 under 2s and p95 under 6s on the free engine, graceful degradation tested with every upstream (Wikipedia, DDG, Workers AI) down in turn. Measured 2026-10-18 on 12 uncached questions: p50 0.94 s, p95 2.0 s (the second model now starts beside the first); test/worker-upstream-down.test.mjs takes Wikipedia, Groq and Workers AI down in turn.
 - [ ] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces.
 - [ ] [Haiku] Landing, README, whitepaper and screenshots rebuilt for 10.0 with the new look and the benchmark.
 - [ ] [Opus] 10.0 launch: Product Hunt, HN (when the account allows), release notes, and the What's New that explains what a decade of versions bought you in one screen.
