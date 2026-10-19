@@ -10,6 +10,19 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertNil(engine.identityAnswer("who created the telephone"))
     }
 
+    /// Mirrors test/constants.test.js.
+    func testConstantAnswer() {
+        for (q, v) in [("what is the gravitational constant", "6.67430 × 10⁻¹¹"), ("What\u{2019}s Planck\u{2019}s constant?", "6.62607015"),
+                       ("avogadro's number", "6.02214076"), ("the value of the gas constant", "8.314462618"), ("acceleration due to gravity", "9.80665")] {
+            guard case .text(_, let body, let source, _, _, _, _, _, _)? = engine.constantAnswer(q) else { return XCTFail(q) }
+            XCTAssertTrue(body.contains(v), q)
+            XCTAssertEqual(source, "NIST")
+        }
+        for q in ["who measured the gravitational constant", "is the speed of light constant", "speed of light in water"] {
+            XCTAssertNil(engine.constantAnswer(q), q)
+        }
+    }
+
     func testSiteHost() {
         XCTAssertEqual(engine.siteHost("What\u{2019}s primitive.dev?"), "primitive.dev")
         XCTAssertEqual(engine.siteHost("tell me about linear.app"), "linear.app")

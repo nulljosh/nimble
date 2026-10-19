@@ -785,6 +785,29 @@ final class QueryEngine: Sendable {
         return .text(heading: nil, body: "Nimble is an instant-answer app made by Joshua Trommel. More of his work is at jaybulb.com.", source: "Nimble", sourceURL: nil, imageURL: nil)
     }
 
+    /// Physical constants from a table, no network: the models gave "the gravitational constant" as a definition
+    /// with no number. Mirrors `constant()` in docs/engine.js; keep the two tables in step.
+    static let constants: [(pattern: String, title: String, value: String)] = [
+        ("^(?:newton'?s )?(?:universal )?(?:gravitational constant|constant of gravitation|big g)$", "Gravitational constant", "6.67430 × 10⁻¹¹ m³⋅kg⁻¹⋅s⁻²"),
+        ("^speed of light(?: in (?:a )?vacuum)?$", "Speed of light", "299,792,458 m/s"),
+        ("^planck'?s? constant$", "Planck constant", "6.62607015 × 10⁻³⁴ J⋅s"),
+        ("^avogadro'?s? (?:number|constant)$", "Avogadro constant", "6.02214076 × 10²³ per mole"),
+        ("^boltzmann'?s? constant$", "Boltzmann constant", "1.380649 × 10⁻²³ J/K"),
+        ("^(?:elementary charge|charge (?:of|on) an? (?:electron|proton))$", "Elementary charge", "1.602176634 × 10⁻¹⁹ C"),
+        ("^(?:ideal |universal |molar )?gas constant$", "Gas constant", "8.314462618 J/(mol⋅K)"),
+        ("^(?:standard gravity|acceleration (?:due to|of) gravity(?: on earth)?|gravitational acceleration(?: on earth)?)$", "Standard gravity", "9.80665 m/s²"),
+    ]
+
+    func constantAnswer(_ input: String) -> QueryResult? {
+        let q = input.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: "’", with: "'")
+            .replacingOccurrences(of: "[?.!]+$", with: "", options: .regularExpression)
+            .replacingOccurrences(of: "^(?:what(?:'s| is) |value of |tell me )?(?:the )?(?:value of (?:the )?)?", with: "", options: .regularExpression)
+            .trimmingCharacters(in: .whitespaces)
+        guard let hit = Self.constants.first(where: { q.range(of: $0.pattern, options: .regularExpression) != nil }) else { return nil }
+        let nist = "https://physics.nist.gov/cuu/Constants/"
+        return .text(heading: hit.title, body: hit.value, source: "NIST", sourceURL: nist, imageURL: nil, sources: [AnswerSource(name: "NIST", url: nist)])
+    }
+
     /// "What's primitive.dev?" is about a website; Wikipedia matched the nearest word instead.
     /// Mirrors `siteHost()` in docs/engine.js.
     func siteHost(_ input: String) -> String? {
@@ -833,6 +856,7 @@ final class QueryEngine: Sendable {
 
     func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer(), note: AIFailureNote? = nil, session injected: URLSession? = nil) async -> QueryResult {
         if let me = identityAnswer(input) { return me }
+        if let k = constantAnswer(input) { return k }
         let session: URLSession
         if let injected {
             session = injected

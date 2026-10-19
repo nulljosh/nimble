@@ -122,6 +122,7 @@ class AnswerClient(
 
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
+        constantAnswer(input)?.let { return it }
 
         // Offline: the pack answers first, else an honest miss. Math above already worked with no network.
         // Private mode takes the same path, so no request is made at all.
@@ -356,6 +357,27 @@ internal fun siteAnswer(host: String, d: AnswerClient.SiteResponse): Answer.Text
         sourceUrl = "https://$host",
         imageUrl = "https://www.google.com/s2/favicons?domain=$host&sz=64",
     )
+}
+
+/** Physical constants from a table, no network: the models gave "the gravitational constant" as a definition with no number.
+ *  Mirrors `constant()` in docs/engine.js; keep the tables in step. */
+private val CONSTANTS = listOf(
+    Triple("^(?:newton'?s )?(?:universal )?(?:gravitational constant|constant of gravitation|big g)$", "Gravitational constant", "6.67430 × 10⁻¹¹ m³⋅kg⁻¹⋅s⁻²"),
+    Triple("^speed of light(?: in (?:a )?vacuum)?$", "Speed of light", "299,792,458 m/s"),
+    Triple("^planck'?s? constant$", "Planck constant", "6.62607015 × 10⁻³⁴ J⋅s"),
+    Triple("^avogadro'?s? (?:number|constant)$", "Avogadro constant", "6.02214076 × 10²³ per mole"),
+    Triple("^boltzmann'?s? constant$", "Boltzmann constant", "1.380649 × 10⁻²³ J/K"),
+    Triple("^(?:elementary charge|charge (?:of|on) an? (?:electron|proton))$", "Elementary charge", "1.602176634 × 10⁻¹⁹ C"),
+    Triple("^(?:ideal |universal |molar )?gas constant$", "Gas constant", "8.314462618 J/(mol⋅K)"),
+    Triple("^(?:standard gravity|acceleration (?:due to|of) gravity(?: on earth)?|gravitational acceleration(?: on earth)?)$", "Standard gravity", "9.80665 m/s²"),
+).map { (p, t, v) -> Triple(Regex(p), t, v) }
+
+internal fun constantAnswer(input: String): Answer.Text? {
+    val q = input.trim().lowercase().replace('’', '\'').replace(Regex("[?.!]+$"), "")
+        .replace(Regex("^(?:what(?:'s| is) |value of |tell me )?(?:the )?(?:value of (?:the )?)?"), "").trim()
+    val (_, title, value) = CONSTANTS.firstOrNull { it.first.matches(q) } ?: return null
+    val nist = "https://physics.nist.gov/cuu/Constants/"
+    return Answer.Text(heading = title, body = value, source = "NIST", sourceUrl = nist, sources = listOf(DisputeSource("NIST", nist)))
 }
 
 /** The quiet note under a Wikipedia fallback when the AI's call failed (quota or outage). Null for any other source. */

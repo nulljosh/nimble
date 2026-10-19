@@ -993,6 +993,24 @@ function packAnswer(query, pack){
   return null;
 }
 
+// Physical constants answer from a table, offline: the models gave "the gravitational constant" as a definition
+// with no number. Exact SI values (2019 redefinition) plus G and standard gravity, from NIST's CODATA list.
+const CONSTANTS = [
+  [/^(?:newton'?s )?(?:universal )?(?:gravitational constant|constant of gravitation|big g)$/, "Gravitational constant", "6.67430 × 10⁻¹¹ m³⋅kg⁻¹⋅s⁻²"],
+  [/^speed of light(?: in (?:a )?vacuum)?$/, "Speed of light", "299,792,458 m/s"],
+  [/^planck'?s? constant$/, "Planck constant", "6.62607015 × 10⁻³⁴ J⋅s"],
+  [/^avogadro'?s? (?:number|constant)$/, "Avogadro constant", "6.02214076 × 10²³ per mole"],
+  [/^boltzmann'?s? constant$/, "Boltzmann constant", "1.380649 × 10⁻²³ J/K"],
+  [/^(?:elementary charge|charge (?:of|on) an? (?:electron|proton))$/, "Elementary charge", "1.602176634 × 10⁻¹⁹ C"],
+  [/^(?:ideal |universal |molar )?gas constant$/, "Gas constant", "8.314462618 J/(mol⋅K)"],
+  [/^(?:standard gravity|acceleration (?:due to|of) gravity(?: on earth)?|gravitational acceleration(?: on earth)?)$/, "Standard gravity", "9.80665 m/s²"],
+];
+function constant(query){
+  const q = query.trim().toLowerCase().replace(/[?.!]+$/, "").replace(/^(?:what(?:'s|’s| is) |value of |tell me )?(?:the )?(?:value of (?:the )?)?/, "").replace(/’/g, "'").trim();
+  const hit = CONSTANTS.find(([re]) => re.test(q));
+  return hit ? {title:hit[1], body:hit[2], src:"NIST", url:"https://physics.nist.gov/cuu/Constants/"} : null;
+}
+
 // First non-null wins, in order. Sources are functions so a throw in one never kills the chain.
 async function firstOf(query, fns){
   for(const fn of fns){ const r = await fn(query).catch(()=>null); if(r) return r; }
@@ -1008,6 +1026,8 @@ async function answer(query, opts={}){
   if(m !== null) return {kind:"math", value:m};
   const ge = graphExpr(query), svg = ge && graph(ge);
   if(svg) return {kind:"graph", expr:ge, svg};
+  const k = constant(query);
+  if(k) return {kind:"text", ...k, sources:sourcesFor(k.body, [k])};
   // opts.pack: the downloaded offline pack, when the page has one. Offline it is the only answer source left.
   // Private mode: nothing leaves the device. Same path as offline, with its own message when there is no pack.
   if(opts.privateMode) return opts.pack ? (packAnswer(query, opts.pack) || {kind:"pack-miss"}) : {kind:"private-nopack"};
@@ -1312,4 +1332,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={tellMore,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={constant,tellMore,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
