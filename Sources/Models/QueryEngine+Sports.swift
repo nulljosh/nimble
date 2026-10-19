@@ -300,25 +300,28 @@ extension QueryEngine {
                               asOf: failed ? nil : fresh)
         }
         let title = Self.titleCase(ask.team ?? "")
-        func card(_ league: String, _ hit: (event: SportsEvent, index: Int), dated: Bool) -> SportsCard {
+        func card(_ league: String, _ hit: (event: SportsEvent, index: Int), dated: Bool) async -> SportsCard {
             let game = Self.gameRow(hit.event, ours: hit.index, league: league, now: now, tz: tz, dated: dated)
-            return SportsCard(title: title, league: nil, games: [game], outcome: .found,
+            // After a Final, the team's next game from its ESPN page, as on the web.
+            let id = hit.event.competitions?.first?.competitors?[hit.index].team?.id
+            let next = Self.sportsState(hit.event) == "post" ? await sportsNext(league, id, now: now, tz: tz, session) : nil
+            return SportsCard(title: title, league: nil, games: [game] + (next.map { [$0] } ?? []), outcome: .found,
                               url: Self.sportsLeagues[league]?.url ?? "https://www.espn.com", asOf: fresh)
         }
         for back in days {
             for entry in ask.teams {
                 guard let events = await sportsBoard(entry.league, Self.sportsDay(now, back: back, tz: tz), session) else { failed = true; continue }
-                if let hit = Self.sportsFind(events, keys: entry.keys) { return card(entry.league, hit, dated: false) }
+                if let hit = Self.sportsFind(events, keys: entry.keys) { return await card(entry.league, hit, dated: false) }
             }
         }
         for entry in ask.teams {
             guard let events = await sportsBoard(entry.league, nil, session) else { failed = true; continue }
-            if let hit = Self.sportsRecent(events, keys: entry.keys) { return card(entry.league, hit, dated: true) }
+            if let hit = Self.sportsRecent(events, keys: entry.keys) { return await card(entry.league, hit, dated: true) }
         }
         for back in 2...7 {
             for entry in ask.teams {
                 guard let events = await sportsBoard(entry.league, Self.sportsDay(now, back: back, tz: tz), session) else { failed = true; continue }
-                if let hit = Self.sportsFind(events, keys: entry.keys) { return card(entry.league, hit, dated: true) }
+                if let hit = Self.sportsFind(events, keys: entry.keys) { return await card(entry.league, hit, dated: true) }
             }
         }
         return SportsCard(title: title, league: nil, games: [],
@@ -330,6 +333,25 @@ extension QueryEngine {
     func sports(_ query: String, now: Date = Date(), tz: TimeZone? = nil, session: URLSession = .shared) async -> SportsCard? {
         guard let ask = Self.sportsAsk(query) else { return nil }
         return await sportsCard(ask, now: now, tz: tz, session: session)
+    }
+
+    /// The next game on a team's ESPN page, when it is still to come. ESPN puts its status on the competition.
+    static func nextGame(_ page: Data, teamID: String, league: String, now: Date, tz: TimeZone?) -> SportsGame? {
+        guard let e = (try? JSONDecoder().decode(SportsEvent.TeamPage.self, from: page))?.team?.nextEvent?.first,
+              let comp = e.competitions?.first,
+              let ours = comp.competitors?.firstIndex(where: { $0.team?.id == teamID }) else { return nil }
+        let ev = SportsEvent(date: e.date, status: e.status ?? comp.status, competitions: e.competitions)
+        return sportsState(ev) == "pre" ? gameRow(ev, ours: ours, league: league, now: now, tz: tz) : nil
+    }
+
+    private func sportsNext(_ league: String, _ teamID: String?, now: Date, tz: TimeZone?, _ session: URLSession) async -> SportsGame? {
+        guard let teamID, let l = Self.sportsLeagues[league],
+              let url = URL(string: "https://site.api.espn.com/apis/site/v2/sports/\(l.path)/teams/\(teamID)") else { return nil }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = Self.sportsTimeout
+        guard let (data, response) = try? await session.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+        return Self.nextGame(data, teamID: teamID, league: league, now: now, tz: tz)
     }
 
     /// One league's events for one day (ymd), or the current scoreboard when ymd is nil: an array (possibly empty),
@@ -364,7 +386,9 @@ struct SportsEvent: Decodable {
         let detail: String?
         let shortDetail: String?
     }
-    struct Competition: Decodable { let competitors: [Competitor]? }
+    struct Competition: Decodable { let competitors: [Competitor]?; var status: Status? = nil }
+    /// A team's ESPN page: only its next game is read.
+    struct TeamPage: Decodable { let team: Body?; struct Body: Decodable { let nextEvent: [SportsEvent]? } }
     struct Competitor: Decodable {
         let homeAway: String?
         let score: LooseText?
@@ -372,6 +396,7 @@ struct SportsEvent: Decodable {
         let team: Team?
     }
     struct Team: Decodable {
+        var id: String? = nil
         let displayName: String?
         let shortDisplayName: String?
         let name: String?

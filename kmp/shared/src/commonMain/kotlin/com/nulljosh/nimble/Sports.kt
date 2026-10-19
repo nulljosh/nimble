@@ -295,10 +295,14 @@ object Scores {
             }
             is SportsAsk.ByTeam -> {
                 val title = titleCase(ask.team)
-                fun found(lg: String, hit: Pair<JsonObject, JsonObject>, dated: Boolean) = Answer.Sports(
-                    title, null, listOf(gameRow(hit.first, hit.second, lg, now, zoneId, dated)),
-                    SportsState.Scores, lastNight, LEAGUES.getValue(lg).url, asOf,
-                )
+                // After a Final, the team's next game from its ESPN page, as on the web.
+                suspend fun found(lg: String, hit: Pair<JsonObject, JsonObject>, dated: Boolean): Answer.Sports {
+                    val next = if (sportsState(hit.first) == "post") next(lg, hit.second, now, zoneId, fetch) else null
+                    return Answer.Sports(
+                        title, null, listOfNotNull(gameRow(hit.first, hit.second, lg, now, zoneId, dated), next),
+                        SportsState.Scores, lastNight, LEAGUES.getValue(lg).url, asOf,
+                    )
+                }
                 for (b in back) for (lg in ask.teams.keys) {
                     val ev = board(lg, day(now, b, zoneId), fetch)
                     if (ev == null) { failed = true; continue }
@@ -318,6 +322,18 @@ object Scores {
                 else Answer.Sports(title, null, emptyList(), SportsState.NoGame, lastNight, "https://www.espn.com", asOf)
             }
         }
+    }
+
+    // The next game on a team's ESPN page, when it is still to come. ESPN puts its status on the competition.
+    private suspend fun next(lg: String, ours: JsonObject, now: Long, zoneId: String?, fetch: suspend (String) -> String?): SportsGame? {
+        val id = ours.obj("team")?.str("id") ?: return null
+        val body = fetch("https://site.api.espn.com/apis/site/v2/sports/${LEAGUES.getValue(lg).path}/teams/$id") ?: return null
+        val root = runCatching { json.parseToJsonElement(body) as? JsonObject }.getOrNull() ?: return null
+        val e = (root.obj("team")?.get("nextEvent") as? JsonArray)?.firstOrNull() as? JsonObject ?: return null
+        val comp = (e["competitions"] as? JsonArray)?.firstOrNull() as? JsonObject ?: return null
+        val ev = if (e.obj("status") != null) e else JsonObject(e + ("status" to (comp.obj("status") ?: EMPTY)))
+        val mine = ev.competitors().firstOrNull { it.obj("team")?.str("id") == id } ?: return null
+        return if (sportsState(ev) == "pre") gameRow(ev, mine, lg, now, zoneId) else null
     }
 
     private fun day(now: Long, back: Int, zoneId: String?): String = zoneClock(now - back * DAY_MS, zoneId, "yyyyMMdd")

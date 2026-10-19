@@ -189,7 +189,9 @@ final class SportsTests: XCTestCase {
 
     func testDateFallbackAsksTodayThenYesterday() async {
         let card = await lookup("did the jaguars win", ["football/nfl|20261011": .success(nfl1011)])
-        XCTAssertEqual(SportsStub.requested(), ["football/nfl|20261012", "football/nfl|20261011"])
+        // The Final is followed by one call for the team's next game (none listed, so one row).
+        XCTAssertEqual(SportsStub.requested(), ["football/nfl|20261012", "football/nfl|20261011", "football/nfl/teams/30|"])
+        XCTAssertEqual(card?.games.count, 1)
         XCTAssertEqual(card?.games.first?.teams.first?.name, "Jaguars")
         XCTAssertEqual(card?.games.first?.teams.first?.winner, true)
         XCTAssertEqual(card?.games.first?.status, "Final")
@@ -222,7 +224,7 @@ final class SportsTests: XCTestCase {
 
     func testCowboysOnTheCurrentBoardIsFinalAndDatedInWords() async {
         let card = await lookup("cowboys score", ["football/nfl|": .success(nflDefault)])
-        XCTAssertEqual(SportsStub.requested(), ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|"])
+        XCTAssertEqual(SportsStub.requested(), ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|", "football/nfl/teams/6|"])
         XCTAssertEqual(card?.outcome, .found)
         XCTAssertEqual(card?.games.first?.line, "Cowboys 16, Buccaneers 24")
         XCTAssertEqual(card?.games.first?.status, "Final, Thursday, Oct 8")
@@ -232,7 +234,7 @@ final class SportsTests: XCTestCase {
     func testLookBackFindsTheGameOnTheFourthDayBackAndStopsThere() async {
         let card = await lookup("cowboys score", ["football/nfl|20261008": .success(nflDefault)])
         XCTAssertEqual(SportsStub.requested(), ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|",
-                                                "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008"])
+                                                "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008", "football/nfl/teams/6|"])
         XCTAssertEqual(card?.games.first?.status, "Final, Thursday, Oct 8")
     }
 
@@ -298,6 +300,14 @@ final class SportsTests: XCTestCase {
         XCTAssertNil(QueryResult.sports(none!).copyText)
         let down = await lookup("lakers score", ["basketball/nba|20261012": .failure(URLError(.timedOut)), "basketball/nba|20261011": .failure(URLError(.timedOut))])
         XCTAssertNil(QueryResult.sports(down!).copyText)
+    }
+
+    func testAfterAFinalTheTeamsNextGameIsASecondRow() async {
+        let page = Data(#"{"team":{"nextEvent":[{"date":"2026-10-18T17:00Z","competitions":[{"status":{"type":{"state":"pre"}},"competitors":[{"homeAway":"home","team":{"id":"30","shortDisplayName":"Jaguars"}},{"homeAway":"away","team":{"id":"11","shortDisplayName":"Colts"}}]}]}]}}"#.utf8)
+        let card = await lookup("did the jaguars win", ["football/nfl|20261011": .success(nfl1011), "football/nfl/teams/30|": .success(page)])
+        XCTAssertEqual(card?.games.count, 2)
+        XCTAssertEqual(card?.games.last?.teams.map(\.name), ["Jaguars", "Colts"])
+        XCTAssertEqual(card?.games.last?.status, "Scheduled for Oct 18, 10:00 am")
     }
 
     func testOnlyESPNIsCalled() async {

@@ -155,7 +155,9 @@ class SportsTest {
         val espn = Espn(mapOf("football/nfl|20261011" to nfl0811))
         val card = Scores.answer("did the jaguars win", now, tz, espn.fetch)
         assertNotNull(card)
-        assertEquals(listOf("football/nfl|20261012", "football/nfl|20261011"), espn.calls)
+        // The Final is followed by one call for the team's next game (none listed, so one row).
+        assertEquals(listOf("football/nfl|20261012", "football/nfl|20261011", "football/nfl/teams/30|"), espn.calls)
+        assertEquals(1, card.rows.size)
         val jaguars = card.rows[0].teams[0]
         assertEquals(SportsTeam("Jaguars", "19", true), jaguars)
         assertEquals(false, card.rows[0].teams[1].winner)
@@ -205,7 +207,7 @@ class SportsTest {
         val card = Scores.answer("cowboys score", now, tz, espn.fetch)
         assertNotNull(card)
         assertEquals(SportsState.Scores, card.state)
-        assertEquals(listOf("football/nfl|20261012", "football/nfl|20261011", "football/nfl|"), espn.calls)
+        assertEquals(listOf("football/nfl|20261012", "football/nfl|20261011", "football/nfl|", "football/nfl/teams/6|"), espn.calls)
         assertEquals(listOf(SportsTeam("Cowboys", "16", false), SportsTeam("Buccaneers", "24", true)), card.rows[0].teams)
         assertEquals("Final, Thursday, Oct 8", card.rows[0].status)
     }
@@ -216,7 +218,7 @@ class SportsTest {
         val card = Scores.answer("cowboys score", now, tz, espn.fetch)
         assertEquals(SportsState.Scores, card?.state)
         assertEquals(listOf("football/nfl|20261012", "football/nfl|20261011", "football/nfl|",
-            "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008"), espn.calls)
+            "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008", "football/nfl/teams/6|"), espn.calls)
         assertEquals("Final, Thursday, Oct 8", card?.rows?.first()?.status)
     }
 
@@ -277,6 +279,17 @@ class SportsTest {
         assertNotNull(card)
         assertEquals(SportsState.NoGame, card.state)
         assertEquals("No NBA games in the last week", card.noGameLine())
+    }
+
+    @Test
+    fun afterAFinalTheTeamsNextGameIsASecondRow() = runBlockingTest {
+        val page = """{"team":{"nextEvent":[{"date":"2026-10-18T17:00Z","competitions":[{"status":{"type":{"state":"pre"}},"competitors":[{"homeAway":"home","team":{"id":"30","shortDisplayName":"Jaguars"}},{"homeAway":"away","team":{"id":"11","shortDisplayName":"Colts"}}]}]}]}}"""
+        val espn = Espn(mapOf("football/nfl|20261011" to nfl0811, "football/nfl/teams/30|" to page))
+        val card = Scores.answer("did the jaguars win", now, tz, espn.fetch)
+        assertNotNull(card)
+        assertEquals(2, card.rows.size)
+        assertEquals(listOf("Jaguars", "Colts"), card.rows[1].teams.map { it.name })
+        assertEquals("Scheduled for Oct 18, 10:00 am", card.rows[1].status)
     }
 
     @Test
