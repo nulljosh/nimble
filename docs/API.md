@@ -50,7 +50,7 @@ curl -s https://nimble.jaybulb.com/mcp -H 'content-type: application/json' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"answer","arguments":{"q":"who wrote hamlet"}}}'
 ```
 
-`convert`, `math` and `graph` run on the server with no AI and no limit. `answer` goes through the proxy above and shares its limits.
+`convert`, `math` and `graph` run on the server with no AI and no limit. `answer` goes through the proxy above and shares its limits. The site endpoints need no key; keys are only for the proxy, and they are issued by hand today.
 
 ## Health
 
