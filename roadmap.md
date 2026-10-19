@@ -50,7 +50,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 ### v11-v20 Trust: every answer shows why
 
-- [ ] [Sonnet] Every AI answer carries the sentence it rests on ("Why this answer") on all surfaces, not just web.
+- [x] [Sonnet] Every AI answer carries the sentence it rests on ("Why this answer") on all surfaces, not just web. Checked 2026-10-18: web (details.why), Apple (ResultView whyText) and Compose (WhyThisAnswer) all show it.
 - [ ] [Sonnet] The exam grows to 1,000 questions (the 1,000-question bank in BENCHMARK.md) and holds 99% on the free engine.
 - [ ] [Sonnet] A nightly exam in CI posts the score to /stats; a drop of two points opens a roadmap line by itself.
 - [ ] [Haiku] "This is wrong" on an answer sends the question (text only) to a review list; the exam adopts each one.
