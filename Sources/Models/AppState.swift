@@ -156,6 +156,7 @@ final class AppState {
         automaticUpdates = p.automaticUpdates
         lastUpdateCheck = p.lastUpdateCheck
         ai = p.ai ?? AIConfig()
+        let movedKey = KeyStore.load(into: &ai)
         aiConsent = p.aiConsent
         // Asked once, at first launch, so the first question is never interrupted. QA launches keep asking at the question.
         askingAIConsent = p.aiConsent == nil && !QASandbox.launch
@@ -163,6 +164,7 @@ final class AppState {
         mascot = p.mascot == "fen" ? "fen" : "nim"
         cardShape = p.cardShape ?? "wide"
         privateMode = p.privateMode ?? false
+        if movedKey { savePreferences() }
     }
 
     func savePreferences() {
@@ -174,7 +176,7 @@ final class AppState {
             defaultSuggestions: defaultSuggestions,
             automaticUpdates: automaticUpdates,
             lastUpdateCheck: lastUpdateCheck,
-            ai: ai,
+            ai: KeyStore.forFile(ai),
             aiConsent: aiConsent,
             mascot: mascot,
             privateMode: privateMode,
