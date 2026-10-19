@@ -10,14 +10,14 @@ concurrency: {group: offline-pack, cancel-in-progress: false}
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 100
+    timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: 22}
-      # One long batch from an empty cache: about 18,000 summaries (10,000 vital articles first) at the builder's polite pace.
+      # One long batch from an empty cache: about 14,000 summaries (10,000 vital articles first) at the builder's polite pace.
       - run: node scripts/build-offline-pack.mjs
-        env: {PACK_CACHE: '${{ runner.temp }}/packcache', PACK_BUDGET_MS: '5100000'}
+        env: {PACK_CACHE: '${{ runner.temp }}/packcache', PACK_BUDGET_MS: '5700000'}
       - name: Commit the new pack and deploy it
         env: {GH_TOKEN: '${{ github.token }}'}
         run: |
