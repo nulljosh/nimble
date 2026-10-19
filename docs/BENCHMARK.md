@@ -38,6 +38,10 @@ Fed the top Wikipedia hit as a reference, it fell to 75%: a loose intro sends it
 
 Apple's bigger Private Cloud Compute model needs a managed entitlement, so it is not graded yet.
 
+## Offline, 2026-10-19
+
+The same 154 questions with no network at all: math, units, constants, the device's time zones and the 9,000-article offline pack. 45 pass. The pack used to answer 75 of them and get 49 wrong, mostly by matching one word of a title ("how many bones in the human body" gave the article on the penis). It now answers only when its sentence shares the question's own words: 33 answers, 12 wrong, and the rest say "not in the offline pack". Honest misses beat confident wrong answers. The next step is the on-device model reading the pack (roadmap v31-40).
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

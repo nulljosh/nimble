@@ -1018,9 +1018,13 @@ function packText(entry, query, rel){
   }
   const titleWords = new Set(packTokens(entry.t));
   const want = new Set(packTokens(query).filter(w => !PACK_STOP.has(w) && !titleWords.has(w)));
+  // A sentence answers only if it shares the question's own words: two of them, or all when the question has fewer.
+  // "how many bones in the human body" matched "Human penis" on one title word, and its first sentence was the answer.
+  // A question that is only the title ("what is DNA") takes the first sentence; anything else with no overlap is a miss.
+  const need = Math.min(2, want.size);
   const best = sents.map((s, i) => { const toks = new Set(packTokens(s)); return {s, i, n:[...want].filter(w => toks.has(w)).length}; })
-    .filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.i - b.i).slice(0, 2).sort((a, b) => a.i - b.i);
-  return best.length ? best.map(x => x.s).join(" ") : sents[0];
+    .filter(x => x.n >= Math.max(1, need)).sort((a, b) => b.n - a.n || a.i - b.i).slice(0, 2).sort((a, b) => a.i - b.i);
+  return best.length ? best.map(x => x.s).join(" ") : want.size ? "" : sents[0];
 }
 // The answer card for a pack hit: the sentences that answer, its article link, and the pack's build date.
 // A relation question tries each matching entry until one carries the relation sentence ("Apple" the fruit has no founder,
