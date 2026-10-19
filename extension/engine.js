@@ -465,11 +465,20 @@ async function currency(query){
   const c=currencyExpr(query); if(!c || c.pair) return null;
   const d=await getJSON(`https://api.frankfurter.dev/v1/latest?base=${c.from}&symbols=${c.to}`)
        || await getJSON(`https://open.er-api.com/v6/latest/${c.from}`); // fallback: same rate map shape
-  const rate=d?.rates?.[c.to]; if(!rate) return null;
   const fmt=n=>n.toLocaleString("en",{minimumFractionDigits:2,maximumFractionDigits:2});
-  return {...card(fmt(c.v*rate), c.to, `${c.v.toLocaleString("en")} ${c.from} at today's rate`,
-    d.base?"Frankfurter":"ExchangeRate-API", d.base?"https://frankfurter.dev":"https://www.exchangerate-api.com"),
-    ...(d.date ? {asOf:d.date, asOfDay:true} : {})};
+  // Offline (or both sources down): the last rate this device fetched for the pair, labelled with its day.
+  const key=`nimble.fx.${c.from}.${c.to}`;
+  let rate=d?.rates?.[c.to], src, url, day=d?.date, saved=false;
+  if(rate){
+    src=d.base?"Frankfurter":"ExchangeRate-API"; url=d.base?"https://frankfurter.dev":"https://www.exchangerate-api.com";
+    try{ localStorage.setItem(key, JSON.stringify({rate, src, url, day: day || new Date().toISOString().slice(0,10)})); }catch{}
+  } else {
+    let last=null; try{ last=JSON.parse(localStorage.getItem(key)); }catch{}
+    if(!last?.rate) return null;
+    ({rate, src, url, day}=last); saved=true;
+  }
+  return {...card(fmt(c.v*rate), c.to, `${c.v.toLocaleString("en")} ${c.from} at ${saved?"the last saved":"today's"} rate`, src, url),
+    ...(day ? {asOf:day, asOfDay:true} : {})};
 }
 
 // --- freshness: "as of Oct 12, 3:41 pm" for anything time-sensitive. asOf is an ISO time, or a date with asOfDay. ---

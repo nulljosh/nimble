@@ -106,3 +106,16 @@ test("'vancouver weather' is a weather card too, with the next 12 hours as a ran
     assert.notEqual((await E.answer("how is the weather")).src, "Open-Meteo");
   } finally { canned["api.open-meteo.com"] = cur; teardown(); }
 });
+
+test("currency offline falls back to the last saved rate, labelled with its day", async () => {
+  setup();
+  try {
+    const live = await E.answer("100 usd to cad");
+    assert.equal(live.big, "137.12");
+    globalThis.fetch = async () => ({ ok: false });
+    const off = await E.answer("100 usd to cad");
+    assert.equal(off.big, "137.12");
+    assert.match(off.sub, /last saved rate/);
+    assert.equal(off.asOfDay, true);
+  } finally { teardown(); }
+});

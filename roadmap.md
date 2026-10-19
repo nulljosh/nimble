@@ -60,7 +60,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 ### v21-v30 Live: the numbers people check every day
 
 - [x] [Sonnet] Weather: "weather in vancouver" from Open-Meteo (keyless), now plus the next 12 hours. Web done 2026-10-18 ("vancouver weather" too, next 12 h range); Swift and Kotlin the same day.
-- [ ] [Sonnet] Currency: "100 usd to cad" from the Bank of Canada / ECB daily rates, offline fallback to the last fetch.
+- [ ] [Sonnet] Currency: "100 usd to cad" from the Bank of Canada / ECB daily rates, offline fallback to the last fetch. Web done 2026-10-18 (last saved rate per pair, labelled with its day); Swift and Kotlin next.
 - [ ] [Sonnet] Time zones: "time in tokyo", offline from the IANA table.
 - [ ] [Sonnet] Canada and BC live figures: CPI, policy rate, minimum wage by province (StatCan / Bank of Canada).
 - [ ] [Haiku] Sports scores beyond ESPN's top leagues: NHL, MLS, CFL, with the next game when none is live.
