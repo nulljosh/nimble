@@ -237,11 +237,14 @@ fun SearchScreen(
                         val canMore = a is Answer.Text && a !== grown && !Regex("^[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+$").matches(a.source)
                         var speaking by remember(a) { mutableStateOf(false) }
                         var telling by remember(a) { mutableStateOf(false) }
+                        // This is wrong: sent once per answer, never in Private mode.
+                        val canReport = a is Answer.Text && client.canReport
+                        var reported by remember(asked) { mutableStateOf(false) }
                         // A spoken question hears its answer without a tap.
                         LaunchedEffect(a) {
                             if (canListen && speakNext) { speakNext = false; speaking = true; speech?.speak(say) { speaking = false } }
                         }
-                        if (canListen || canMore) {
+                        if (canListen || canMore || canReport) {
                             Spacer(Modifier.height(12.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 // Listen: the phone's own voice reads the answer. A second tap stops it.
@@ -262,6 +265,11 @@ fun SearchScreen(
                                             answer = next
                                         }
                                     }
+                                }
+                                if (canReport && a is Answer.Text) ToolButton(if (reported) tr("Thanks, we'll check it") else tr("This is wrong"), theme) {
+                                    if (reported) return@ToolButton
+                                    reported = true
+                                    scope.launch { if (!client.reportWrong(asked, a.body)) reported = false }
                                 }
                             }
                         }

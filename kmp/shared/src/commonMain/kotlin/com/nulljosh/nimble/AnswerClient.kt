@@ -213,6 +213,23 @@ class AnswerClient(
         }
     }
 
+    @Serializable
+    private data class ReportBody(val q: String, val answer: String)
+
+    /** Private mode sends nothing, so "This is wrong" is hidden there. */
+    val canReport: Boolean get() = !privateMode()
+
+    /** "This is wrong": the question and the answer text go to the review list, nothing else. Mirrors reportWrong() in docs/engine.js. */
+    suspend fun reportWrong(input: String, answer: String): Boolean {
+        if (privateMode() || !networkAvailable()) return false
+        return runCatchingNull {
+            http.post("$PROXY/report") {
+                contentType(ContentType.Application.Json)
+                setBody(ReportBody(input, answer.take(500)))
+            }.status.value == 200
+        } ?: false
+    }
+
     private suspend fun gemma(input: String, aiFailures: MutableList<String>): Answer? = runCatchingNull {
         val res = http.post(PROXY) {
             contentType(ContentType.Application.Json)

@@ -242,7 +242,10 @@ struct TextAnswerView: View {
                    lead: QueryResult.leadLines(background: background, aiError: aiError, source: source),
                    // Not for a site's own page: the AI that tells more does not know the site.
                    onMore: state.toldMore || state.privateMode || isSite ? nil : { state.tellMore() },
-                   moreLabel: state.tellingMore ? String(localized: "Thinking…") : String(localized: "Tell me more")) {
+                   moreLabel: state.tellingMore ? String(localized: "Thinking…") : String(localized: "Tell me more"),
+                   onWrong: state.privateMode || state.reported ? nil : { state.reportWrong() },
+                   wrongLabel: state.reported ? String(localized: "Thanks, we'll check it") : String(localized: "This is wrong"),
+                   showWrong: !state.privateMode) {
             VStack(alignment: .leading, spacing: 16) {
                 if let photo, let url = URL(string: photo.url) {
                     // 16:9 box reserved up front, the cream placeholder until the picture loads, so nothing jumps.
@@ -385,11 +388,16 @@ struct AnswerCard<Content: View, Footer: View>: View {
     /// Tell me more, on text answers only: nil hides it, `moreLabel` says what it is doing.
     var onMore: (() -> Void)? = nil
     var moreLabel: String = ""
+    /// This is wrong, on text answers only: nil disables it once sent, `showWrong` false hides it.
+    var onWrong: (() -> Void)? = nil
+    var wrongLabel: String = ""
+    var showWrong = false
     let content: Content
     let footer: Footer
 
     init(shareText: String?, freshness: String? = nil, eyebrow: String = "Answer", lead: [String] = [],
          onMore: (() -> Void)? = nil, moreLabel: String = "",
+         onWrong: (() -> Void)? = nil, wrongLabel: String = "", showWrong: Bool = false,
          @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
         self.shareText = shareText
         self.freshness = freshness
@@ -397,6 +405,9 @@ struct AnswerCard<Content: View, Footer: View>: View {
         self.lead = lead
         self.onMore = onMore
         self.moreLabel = moreLabel
+        self.onWrong = onWrong
+        self.wrongLabel = wrongLabel
+        self.showWrong = showWrong
         self.content = content()
         self.footer = footer()
     }
@@ -476,16 +487,31 @@ struct AnswerCard<Content: View, Footer: View>: View {
                     .accessibilityLabel("Share")
                 }
             }
-            // Its own line under the row: a fourth link squeezed the source label until it broke mid-word on iPhone.
-            if let onMore {
-                Button(action: onMore) {
-                    Text(moreLabel)
-                        .font(.nimbleSmall)
-                        .foregroundStyle(Color.dim)
-                        .underline()
+            // Their own line under the row: a fourth link squeezed the source label until it broke mid-word on iPhone.
+            if onMore != nil || showWrong {
+                HStack(spacing: 16) {
+                    if let onMore {
+                        Button(action: onMore) {
+                            Text(moreLabel)
+                                .font(.nimbleSmall)
+                                .foregroundStyle(Color.dim)
+                                .underline()
+                        }
+                        .buttonStyle(.plain)
+                        .minimumTapTarget()
+                    }
+                    if showWrong {
+                        Button { onWrong?() } label: {
+                            Text(wrongLabel)
+                                .font(.nimbleSmall)
+                                .foregroundStyle(Color.dim)
+                                .underline(onWrong != nil)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(onWrong == nil)
+                        .minimumTapTarget()
+                    }
                 }
-                .buttonStyle(.plain)
-                .minimumTapTarget()
             }
         }
         .padding(24)

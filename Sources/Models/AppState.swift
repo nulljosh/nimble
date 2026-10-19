@@ -108,6 +108,8 @@ final class AppState {
     /// Tell me more is on its way, or already used for this answer (it grows once).
     private(set) var tellingMore = false
     private(set) var toldMore = false
+    /// "This is wrong" was sent for this answer.
+    private(set) var reported = false
 
     private let queryEngine = QueryEngine()
     private let prefs = Preferences()
@@ -349,6 +351,7 @@ final class AppState {
     private func remember(_ text: String) {
         answeredQuery = text
         toldMore = false
+        reported = false
         history.add(text, answer: result.historyText)
         #if os(iOS)
         if let answer = result.historyText {
@@ -374,6 +377,17 @@ final class AppState {
                 self.result = .text(heading: heading, body: more, source: source, sourceURL: sourceURL, imageURL: imageURL,
                                     grounding: grounding, sources: sources, photo: photo, background: background)
             }
+        }
+    }
+
+    /// This is wrong: the question and the shown answer go to the review list. Never in Private mode.
+    func reportWrong() {
+        guard case .text(_, let body, _, _, _, _, _, _, _) = result, !answeredQuery.isEmpty, !reported, !privateMode else { return }
+        let q = answeredQuery
+        reported = true
+        Task { @MainActor [weak self] in
+            let ok = await QueryEngine.reportWrong(q, answer: body)
+            if !ok, q == self?.answeredQuery { self?.reported = false }
         }
     }
 
