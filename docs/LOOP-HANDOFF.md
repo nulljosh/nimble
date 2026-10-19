@@ -1,4 +1,4 @@
-# Nimble loop handoff (2026-10-19, morning)
+# Nimble loop handoff (2026-10-19, afternoon)
 
 ## What the loop is
 
@@ -24,7 +24,7 @@ Rules that bite:
 
 ## Where things stand
 
-- Repo: main at 03ea712 (2026-10-19 morning). Latest tag v9.10.0, Homebrew tap at 9.10.0. The handoff commit's Tests and Deploy site runs were still queued when this was written, so check CI first.
+- Repo: main at 346f7d8 (2026-10-19 afternoon). The Kotlin offline exam at 72 of 154 is in (13d6976); the roadmap was pruned of checked items (346f7d8). Latest tag v9.10.0, Homebrew tap at 9.10.0. The handoff commit's Tests and Deploy site runs were still queued when this was written, so check CI first.
 - Exam: 154 of 154 online on the web. Offline, the 14,000-article pack passes 72 of 154 with 3 wrong, on the web and on Kotlin. The Apple apps' offline run is still to do. Method and numbers are in docs/BENCHMARK.md.
 - Store, checked with asc this morning: iPhone 9.4.4 and Mac 9.4.3 are both WAITING_FOR_REVIEW. The iPhone build was rejected once under Guideline 5 (the word "OpenAI" in the store text, and China mainland), fixed and resubmitted 2026-10-18. These two gate 10.0.0.
 - Price: $0.99 on the App Store since 2026-10-18. License Apache 2.0. Web stays free. MONEY.md says what the dollar buys.
