@@ -1,4 +1,4 @@
-// "This is wrong": POST /report keeps the question and answer, GET /report needs the review key.
+// "This is wrong" and the exam score: POST /report keeps the question and answer, GET /report needs the review key.
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker, { NimbleCounts } from "../worker/worker.js";
@@ -25,4 +25,15 @@ test("no key, a wrong key, an empty question or the rate limit are refused", asy
   assert.equal((await worker.fetch(new Request("https://w.example/report?key=nope"), e)).status, 403);
   assert.equal((await worker.fetch(post({ q: " " }), e)).status, 400);
   assert.equal((await worker.fetch(post({ q: "x" }), env({ RATE_LIMITER: { limit: async () => ({ success: false }) } }))).status, 429);
+});
+
+test("CI posts the exam score with the key and /stats shows it", async () => {
+  const e = env();
+  const exam = (q, body) => worker.fetch(new Request("https://w.example/exam" + q, { method: "POST", body: JSON.stringify(body) }), e);
+  assert.equal((await exam("", { score: 150, total: 154 })).status, 403);
+  assert.equal((await exam("?key=secret", { score: 160, total: 154 })).status, 400);
+  assert.equal((await exam("?key=secret", { score: 150, total: 154 })).status, 200);
+  const stats = await (await worker.fetch(new Request("https://w.example/stats"), e)).json();
+  assert.equal(stats.exam.score, 150);
+  assert.equal(stats.exam.total, 154);
 });

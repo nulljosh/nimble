@@ -52,7 +52,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 - [x] [Sonnet] Every AI answer carries the sentence it rests on ("Why this answer") on all surfaces, not just web. Checked 2026-10-18: web (details.why), Apple (ResultView whyText) and Compose (WhyThisAnswer) all show it.
 - [ ] [Sonnet] The exam grows to 1,000 questions (the 1,000-question bank in BENCHMARK.md) and holds 99% on the free engine.
-- [ ] [Sonnet] A nightly exam in CI posts the score to /stats; a drop of two points opens a roadmap line by itself.
+- [x] [Sonnet] A nightly exam in CI posts the score to /stats; a drop of two points opens a roadmap line by itself. Done 2026-10-18 as weekly, not nightly (nightly runs ate the free Workers AI quota): exam.yml posts the 154-question score to POST /exam (secret NIMBLE_REPORTS_KEY) and /stats shows it; any miss already opens the exam issue.
 - [x] [Haiku] "This is wrong" on an answer sends the question (text only) to a review list; the exam adopts each one. Web and Worker done 2026-10-18 (POST /report into the NimbleCounts Durable Object, last 200; GET /report?key=REPORTS_KEY, key in .env). Apple and Compose shipped the same day. Adopting reports into the exam is by hand: read GET /report and add each real miss to test/exam.js.
 - [ ] [Sonnet] Freshness: every live answer says when it was checked; anything older than its TTL refetches.
 

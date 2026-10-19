@@ -220,7 +220,7 @@ test("GET /stats returns exactly the day, the counts and the Groq gauge, with no
   const res = await worker.fetch(new Request(`${ORIGIN}/stats`), { RATE_LIMITER: { limit: async () => ({ success: true }) }, AI: { run: async () => { throw new Error("no AI on /stats"); } } });
   assert.equal(res.status, 200);
   const j = await res.json();
-  assert.deepEqual(Object.keys(j).sort(), ["aiCalls", "cacheHits", "day", "estNeurons", "groqCalls", "groqRefused", "latency"]);
+  assert.deepEqual(Object.keys(j).sort(), ["aiCalls", "cacheHits", "day", "estNeurons", "exam", "groqCalls", "groqRefused", "latency"]);
   assert.equal(j.day, new Date().toISOString().slice(0, 10));
   assert.equal(j.aiCalls, 10);
   assert.equal(j.estNeurons, 600);

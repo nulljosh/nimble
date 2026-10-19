@@ -261,6 +261,11 @@ export class NimbleCounts {
     this.state = state;
   }
   async fetch(req) {
+    // The last exam score, posted by CI: {score, total, at}.
+    if (new URL(req.url).pathname === "/exam") {
+      if (req.method === "POST") await this.state.storage.put("exam", await req.json());
+      return json((await this.state.storage.get("exam")) || null);
+    }
     // "This is wrong" reports: the last 200, question and answer text only, newest last.
     if (new URL(req.url).pathname === "/report") {
       const list = (await this.state.storage.get("reports")) || [];
@@ -325,7 +330,9 @@ async function statsReply(origin, env) {
   const pct = (v, p) => [...v].sort((a, b) => a - b)[Math.max(0, Math.ceil(p * v.length) - 1)];
   // latency: per answering source, from the global counter's last 50 samples; empty without the Durable Object.
   const latency = Object.fromEntries(Object.entries(c.lat || {}).map(([k, v]) => [k, { n: v.length, p50: pct(v, 0.5), p95: pct(v, 0.95) }]));
-  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused, latency });
+  const box = env?.COUNTS?.get(env.COUNTS.idFromName("global"));
+  const exam = box ? await box.fetch("https://counts/exam").then((r) => r.json()).catch(() => null) : null;
+  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused, latency, exam });
 }
 
 export default {
@@ -341,6 +348,7 @@ export default {
     const isStats = req.method === "GET" && url.pathname === "/stats";
     if (isStats) return statsReply(url.origin, env);
     if (url.pathname === "/report") return report(req, url, env);
+    if (url.pathname === "/exam") return examScore(req, url, env);
     if (req.method !== "POST" && !isDDG && !isSite && !isNews && !isQuote) return new Response("POST only", { status: 405, headers: CORS });
 
     if (isDDG) {
@@ -833,6 +841,19 @@ export async function report(req, url, env) {
   const q = String(b?.q ?? "").trim().slice(0, 300), answer = String(b?.answer ?? "").trim().slice(0, 500);
   if (!q) return json({ error: "no question" }, 400);
   await box.fetch("https://counts/report", { method: "POST", body: JSON.stringify({ q, answer, at: new Date().toISOString() }) });
+  return json({ ok: true });
+}
+
+// POST /exam?key=REPORTS_KEY {score, total}: CI's exam run. /stats shows the last one.
+export async function examScore(req, url, env) {
+  const box = env.COUNTS?.get(env.COUNTS.idFromName("global"));
+  if (!box) return json({ error: "no store" }, 503);
+  if (req.method !== "POST") return json({ error: "POST only" }, 405);
+  if (!env.REPORTS_KEY || url.searchParams.get("key") !== env.REPORTS_KEY) return json({ error: "bad key" }, 403);
+  const b = await req.json().catch(() => null);
+  const score = Number(b?.score), total = Number(b?.total);
+  if (!Number.isInteger(score) || !Number.isInteger(total) || total < 1 || score < 0 || score > total) return json({ error: "bad score" }, 400);
+  await box.fetch("https://counts/exam", { method: "POST", body: JSON.stringify({ score, total, at: new Date().toISOString() }) });
   return json({ ok: true });
 }
 
