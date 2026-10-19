@@ -34,3 +34,11 @@
 
 /* Radius: three steps. Icons and small marks 8, buttons and photos 12, the field and cards 16. */
 :root{--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-photo:var(--radius-md);--ratio-photo:16 / 9;}
+
+/* Apple pass (2026-10-18): white paper and true black instead of the shared cream, the system font, 48px capsule
+   controls, one radius set (cards 28, groups and photos 20, controls round). Overrides only Nimble's pages. */
+:root{--color-bg:#fff;--color-bg2:#f5f5f7;--color-text:#1d1d1f;--color-secondary:rgba(29,29,31,.6);--color-soft:rgba(29,29,31,.72);--color-hairline:#e5e5ea;--color-code-bg:#f5f5f7;
+--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+--control:48px;--radius:20px;--radius-card:28px;--radius-pill:999px;--radius-lg:28px;--radius-md:20px;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--color-bg:#000;--color-bg2:#1c1c1e;--color-text:#f5f5f7;--color-secondary:rgba(245,245,247,.6);--color-soft:rgba(245,245,247,.72);--color-hairline:#38383a;--color-code-bg:#1c1c1e;}}
+:where(button:not(.btn),input:not([type=checkbox]):not([type=radio]),select,textarea){min-height:var(--control)}

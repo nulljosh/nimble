@@ -20,10 +20,6 @@
 <link rel="icon" href="icon.svg">
 <link rel="stylesheet" href="tokens.css">
 <style>
-@font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-Regular.woff2") format("woff2");font-weight:400;font-style:normal;font-display:swap}
-@font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-Medium.woff2") format("woff2");font-weight:500;font-style:normal;font-display:swap}
-@font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-SemiBold.woff2") format("woff2");font-weight:600;font-style:normal;font-display:swap}
-@font-face{font-family:"Nimble Sans";src:url("fonts/NimbleSans-Bold.woff2") format("woff2");font-weight:700;font-style:normal;font-display:swap}
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 /* Page-local aliases onto the design system (tokens.css) */
@@ -141,8 +137,9 @@ a:hover { text-decoration: underline; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  min-height: 44px; min-width: 44px;
-  padding: var(--space-2) var(--space-4);
+  min-height: var(--control); min-width: var(--control);
+  padding: var(--space-2) var(--space-5);
+  border-radius: var(--radius-pill);
   font-family: var(--font);
   font-size: var(--fs-15);
   font-weight: 700;
@@ -186,7 +183,7 @@ a:hover { text-decoration: underline; }
 }
 /* 720px and up: three columns, each button capped at 280px; the actions block is two rows tall so the primary buttons share one top line. */
 @media (min-width: 720px) {
-  .install-links { min-height: calc(2 * 44px + var(--space-3)); }
+  .install-links { min-height: calc(2 * var(--control) + var(--space-3)); }
   .install-links .btn { max-width: 280px; }
 }
 /* Secondary action: a quiet underlined text link that still has a 44px tap height. */
@@ -357,7 +354,7 @@ a:hover { text-decoration: underline; }
 .news a, .sources a, .oss p a, .offline p a, .quote cite a, .demo-caption a, .foot-bar .foot-meta a, .mockup-credit a, .credit a { display: inline-block; padding-block: var(--tap-pad); margin-block: calc(var(--tap-pad) * -1); }
 
 /* Every section after the hero: one padding, one hairline, one headline. */
-main > section:not(.hero) { padding: var(--space-8) 0; border-top: var(--rule); }
+main > section:not(.hero) { padding: var(--space-8) 0; }
 main > section:not(.hero) h2 {
   font-size: var(--fs-28);
   font-weight: 700;
@@ -619,8 +616,8 @@ footer {
 <style>
 .jb-signup{display:flex;flex-wrap:wrap;gap:var(--space-2);justify-content:center;max-width:460px;margin:0 auto;padding:var(--space-8) var(--gutter);font:inherit;color:inherit}
 .jb-signup label{flex-basis:100%;text-align:center;opacity:.7}
-.jb-signup input[type=email]{min-height:44px;flex:1;min-width:200px;padding:var(--space-3) var(--space-3);border:1px solid currentColor;border-radius:var(--radius);background:transparent;color:inherit;font:inherit}
-.jb-signup button{min-height:44px;padding:var(--space-3) var(--space-4);border:1px solid currentColor;border-radius:var(--radius);background:transparent;color:inherit;font:inherit;cursor:pointer}
+.jb-signup input[type=email]{min-height:var(--control);border-radius:var(--radius-pill)!important;padding-inline:var(--space-5)!important;flex:1;min-width:200px;padding:var(--space-3) var(--space-3);border:1px solid currentColor;border-radius:var(--radius);background:transparent;color:inherit;font:inherit}
+.jb-signup button{min-height:var(--control);border-radius:var(--radius-pill)!important;padding-inline:var(--space-5)!important;padding:var(--space-3) var(--space-4);border:1px solid currentColor;border-radius:var(--radius);background:transparent;color:inherit;font:inherit;cursor:pointer}
 .jb-hp{position:absolute;left:-9999px;width:1px;height:1px}
 .jb-msg{display:none;flex-basis:100%;text-align:center;margin:var(--space-1) 0 0}
 .jb-msg:target{display:block}
