@@ -102,7 +102,7 @@ test("a date question runs both models, and agreement names both", async () => {
   const { json, calls } = await post("when did the eiffel tower open", {
     answers: { [QWEN]: "The Eiffel Tower opened in 1889.", [GEMMA]: "The Eiffel Tower opened in 1889." },
   });
-  assert.deepEqual(calls, [QWEN, GEMMA]);
+  assert.deepEqual(calls, [GEMMA, QWEN]);
   assert.equal(json.source, "Gemma + Qwen");
   assert.equal(json.disagree, undefined);
 });
@@ -111,7 +111,7 @@ test("a clash on a year asks Llama too, and disagree lists both answers", async 
   const { json, calls } = await post("when did the eiffel tower open", {
     answers: { [QWEN]: "The Eiffel Tower opened in 1889.", [GEMMA]: "The Eiffel Tower opened in 1887." },
   });
-  assert.deepEqual(calls, [QWEN, GEMMA, LLAMA]);
+  assert.deepEqual(calls, [GEMMA, QWEN, LLAMA]);
   assert.equal(json.disagree, true);
   assert.equal(json.alts.length, 2);
   assert.equal(json.source, "Qwen");

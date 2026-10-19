@@ -562,13 +562,16 @@ export default {
     // Groq answers first when it can; past the Workers AI estimate its answer (or UNKNOWN) is final.
     const samantha = env.SAMANTHA_URL ? await askSamantha() : null;
     if (samantha !== null) return finish({ answer: samantha, source: "Samantha" });
+    // When the second model will run anyway (a date, a number, a changing fact), it starts now, beside the first:
+    // same calls, but the slow one no longer waits for the other (p50 went over 2 s with them in a row).
+    const early = !more && needsSecondModel(q) && !overBudget(counts) ? askCounted(GEMMA) : null;
     const groq = env.GROQ_KEY ? await askGroq() : null;
     if (groq === null && overBudget(counts)) return resting();
     const [first, house] = groq !== null ? [groq, "Groq"] : [await askCounted(QWEN), "Qwen"];
     // "Tell me more" never asks a second model: three sentences from two models never match word for word.
     if (first !== "UNKNOWN" && (more || !needsSecondModel(q) || overBudget(counts))) return finish({ answer: first, source: house });
     if (overBudget(counts)) return resting();
-    const second = await askCounted(GEMMA);
+    const second = await (early ?? askCounted(GEMMA));
 
     // The client shows `source` under the answer, so it names only the models that actually produced it.
     // A reference with no figure makes both models say UNKNOWN to a settled question ("how much vitamin d do
