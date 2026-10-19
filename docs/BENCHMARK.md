@@ -24,7 +24,11 @@ Free-engine questions are paced 3.2 seconds apart because the proxy allows 20 AI
 
 Rerun at 16:30 PDT the same day through Groq: 152 of 154 as first graded. Both misses were our patterns, not the answers: "Mauna Kea" came with a non-breaking space, and "absolute zero" with an en dash ("–273.15 °C"). With the patterns fixed the same answers pass, so 154 of 154. Note "tallest mountain" can legitimately answer Mauna Kea (tallest from base), and the exam accepts it.
 
-Since the Groq run: the model is now asked the same Earth rewrite the search uses, and the exam accepts Proxima or the Sun. 154 of 154 is confirmed after the cached "tallest mountain" answer expires, then this table gets a new row.
+Confirmed at 22:20 PDT the same day, after the Worker changes (vitamin D, Canada inflation, the second model in parallel): 154 of 154 on the free chain.
+
+| Engine | Score | p50 | p95 | Notes |
+|---|---|---|---|---|
+| Groq chain, 2026-10-18 22:20 | 154 of 154 | 0.94 s | 2.0 s | Latency on 12 uncached questions, measured from Vancouver. |
 
 ## The 1,000-question exam
 
