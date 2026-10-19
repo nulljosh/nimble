@@ -22,7 +22,7 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 
 ### v8 Private and on-device
 
-- [ ] [Opus] Pick the on-device model (Apple Foundation Models where available, otherwise a small MLX/GGUF), grade it on the exam, and ship it only if it clears 90%. 2026-10-18: Apple Foundation Models scored 87% alone (113 of 130, stale office holders and shy UNKNOWNs; BENCHMARK.md). It stays the offline fallback. Next try: give it the Wikipedia reference like the Worker does.
+- [ ] [Opus] Pick the on-device model (Apple Foundation Models where available, otherwise a small MLX/GGUF), grade it on the exam, and ship it only if it clears 90%. 2026-10-18: Apple Foundation Models scored 87% alone (113 of 130, stale office holders and shy UNKNOWNs; BENCHMARK.md). It stays the offline fallback. A raw Wikipedia reference made it worse (75%), so it stays bare.
 - [ ] [Sonnet] Samantha promoted: if the 9B or a distilled model clears 95% on the exam standalone, she ships as the Mac default without needing oMLX running.
 
 ### v9 Everywhere

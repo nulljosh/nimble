@@ -34,6 +34,8 @@ Confirmed at 22:20 PDT the same day, after the Worker changes (vitamin D, Canada
 
 Apple's own model (Foundation Models, macOS 27, Apple Intelligence on) took the same 154 questions alone: no reference text, no math engine, no cards. It answered 113 of the 130 questions that need a model (87%) at 0.42 s median, all on the device. The misses fall in two groups. It names the office holders from its training (Biden, Trudeau, Sunak, Horgan), and it says UNKNOWN to easy facts like who wrote the Odyssey or created Linux. That is fine for the offline fallback it already is, and short of the 90% bar to become the default.
 
+Fed the top Wikipedia hit as a reference, it fell to 75%: a loose intro sends it to UNKNOWN or the wrong page (the Puerto Rico Trench, Murder, She Wrote for 1984). Reference first and bare on UNKNOWN gets back to 87%, no better than bare alone. So it stays bare.
+
 Apple's bigger Private Cloud Compute model needs a managed entitlement, so it is not graded yet.
 
 ## The 1,000-question exam
