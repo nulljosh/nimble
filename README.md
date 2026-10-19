@@ -40,7 +40,7 @@ Every answer names its source, and time-sensitive answers carry an "as of" line.
 
 ## How good is it
 
-On a 154-question exam, Groq's free models score 152 and the local Samantha model scores 147. A second exam of 1,049 questions runs weekly: math and units are computed and offline (810 of 810), facts are a rotating slice. Method and numbers in [docs/BENCHMARK.md](docs/BENCHMARK.md). The public API, with keys, is in [docs/API.md](docs/API.md).
+On a 154-question exam, Groq's free models score 154 (answers in 0.94 s at the median, 2.0 s at p95) and the local Samantha model scores 147. A second exam of 1,049 questions runs weekly: math and units are computed and offline (810 of 810), facts are a rotating slice. Method and numbers in [docs/BENCHMARK.md](docs/BENCHMARK.md). The public API, with keys, is in [docs/API.md](docs/API.md).
 
 ## What else it does
 
