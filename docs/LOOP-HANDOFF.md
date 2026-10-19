@@ -1,5 +1,13 @@
 # Nimble loop handoff (2026-10-18, evening)
 
+## Since then (2026-10-19, overnight)
+
+Money: $0.99 on the App Store since 2026-10-18 (Joshua: "Apache and $1"), web free, license Apache 2.0, MONEY.md says what the dollar buys. The paid Apple apps answer from Apple's on-device model when the free AI rests (87% alone on the exam; a Wikipedia reference made it worse, 75%). Private Cloud Compute needs a managed entitlement (Blocked on Joshua).
+
+Shipped on every platform: offline currency and time zones, the next game after a Final, "This is wrong" (POST /report, GET /report?key=REPORTS_KEY from .env), stale live answers ask again after ten minutes, population compares from Wikidata, the Bank of Canada policy rate. /stats shows the exam score, posted by the weekly exam (secret NIMBLE_REPORTS_KEY).
+
+Speed, stability, security: web first load 127 KB (was about 730; a budget test holds it under 300), cached answers 0.10 s (was 0.18; bookkeeping runs after the response via ctx.waitUntil), the photo search starts with the AI call everywhere, a capped Groq model is skipped until its retry-after, every outbound Worker fetch has a timeout, any throw answers JSON UNKNOWN with CORS, POST bodies over 16 KB and over-eager GET lookups are refused, site CSP in docs/_headers, links open http(s) only on all four surfaces, own AI keys in the Keychain on Apple. Store builds in review predate all of this; the next build carries it.
+
 ## What the loop is
 
 Ship Nimble one small slice per version, through v10 and on up the roadmap below. Each slice is built on the web first, then Swift (iPhone and Mac), then Kotlin (Android and desktop). Every slice ends the same way: tests green, push, CI green, tag, GitHub release, Homebrew tap bumped, README and docs synced, screenshots retaken and checked by eye. The bar is A+ on every surface, plus a free AI that lasts the whole day.
