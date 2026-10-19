@@ -27,12 +27,12 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 
 ### v7 Conversation
 
-- [ ] [Haiku] Share card variants (square, story) with the new look.
+- [x] [Haiku] Share card variants (square, story) with the new look.
 
 ### v8 Private and on-device
 
 - [ ] [Opus] Pick the on-device model (Apple Foundation Models where available, otherwise a small MLX/GGUF), grade it on the exam, and ship it only if it clears 90%.
-- [ ] [Haiku] The offline Wikipedia pack refreshes monthly: scripts/build-offline-pack.mjs runs by hand today and no workflow calls it, so the 2026-10-12 pack goes stale.
+- [x] [Haiku] The offline Wikipedia pack refreshes monthly: scripts/build-offline-pack.mjs runs by hand today and no workflow calls it, so the 2026-10-12 pack goes stale.
 - [ ] [Sonnet] Samantha promoted: if the 9B or a distilled model clears 95% on the exam standalone, she ships as the Mac default without needing oMLX running.
 
 ### v9 Everywhere
