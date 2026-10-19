@@ -27,3 +27,4 @@ signing/
 .asc/runs/
 nimble-extension.zip
 .asc/signing-new/
+.env
