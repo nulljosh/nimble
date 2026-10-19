@@ -89,17 +89,33 @@ object QueryEngine {
         "compute ", "solve ", "evaluate ", "the answer to ", "result of "
     )
 
+    private val fractions = mapOf("half" to 2, "third" to 3, "quarter" to 4)
+
+    /** "half of 250", "25% off 80", "15 percent tip on 60", "average of 2, 4 and 9". Mirrors docs/engine.js. */
+    private fun everydayMath(s: String): String = s
+        .replace(Regex("\\b(?:a |one )?(half|third|quarter) of ([\\d.]+)")) { "(${it.groupValues[2]}/${fractions[it.groupValues[1]]})" }
+        .replace(Regex("([\\d.]+)\\s*(?:%|percent)\\s*off\\s*([\\d.]+)"), "(\$2-\$2*\$1/100)")
+        .replace(Regex("([\\d.]+)\\s*(?:%|percent)\\s*(?:tip\\s+)?(?:of|on)\\s*"), "\$1/100*")
+        .replace(Regex("\\b(?:the )?(?:average|mean) of ([\\d.]+(?:\\s*(?:,\\s*and\\b|,|\\band\\b)\\s*[\\d.]+)+)")) {
+            val n = it.groupValues[1].split(Regex("\\s*(?:,|\\band\\b)\\s*")).filter(String::isNotEmpty)
+            "((${n.joinToString("+")})/${n.size})"
+        }
+
     /** "whats nine plus ten" -> "9 + 10". Null when it is not word-math. */
     fun parseNaturalLanguageMath(input: String): String? {
         var text = input.lowercase().trim()
-
-        if (!wordNumbers.keys.any { text.contains(it) }) return null
-        if (!wordOperators.keys.any { text.contains(it) }) return null
 
         for (filler in fillerPatterns) {
             if (text.startsWith(filler)) text = text.removePrefix(filler)
         }
         text = text.replace("?", "").trim()
+
+        val everyday = everydayMath(text)
+        if (everyday == text) {
+            if (!wordNumbers.keys.any { text.contains(it) }) return null
+            if (!wordOperators.keys.any { text.contains(it) }) return null
+        }
+        text = everyday
 
         // Longest first so "to the power of" wins over "over", and "multiplied by" over
         // "multiplied". Word-boundaried so "less" does not chew through "unless".

@@ -102,6 +102,12 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertEqual(engine.evaluateMath("what is the square root of 16"), "4")
         XCTAssertEqual(engine.evaluateMath("sqrt of 81"), "9")
         XCTAssertEqual(engine.evaluateMath("six plus two"), "8")
+        XCTAssertEqual(engine.evaluateMath("half of 250"), "125")
+        XCTAssertEqual(engine.evaluateMath("what is a third of 90"), "30")
+        XCTAssertEqual(engine.evaluateMath("15 percent tip on 60"), "9")
+        XCTAssertEqual(engine.evaluateMath("25% off 80"), "60")
+        XCTAssertEqual(engine.evaluateMath("average of 2, 4 and 9"), "5")
+        XCTAssertNil(engine.evaluateMath("half of the class"))
         XCTAssertNil(engine.evaluateMath("what is the capital of france"))
     }
 

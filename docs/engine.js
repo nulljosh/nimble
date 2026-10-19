@@ -70,7 +70,11 @@ function spokenMath(s){
     .replace(/\b(multiplied by|times)\b/g,"*").replace(/\bdivided by\b/g,"/").replace(/\bto the power of\b/g,"^").replace(/\bplus\b/g,"+").replace(/\bminus\b/g,"-")
     .replace(/\b[a-z]+\b/g,w=>w in WORD_NUM ? WORD_NUM[w] : w)
     .replace(/\bsquared\b/g,"^2").replace(/\bcubed\b/g,"^3")
-    .replace(/\b(square root|sqrt|cube root|cbrt) of ([\d.]+)/g,(_,k,n)=>(/^c/.test(k)?"cbrt(":"sqrt(")+n+")");
+    .replace(/\b(square root|sqrt|cube root|cbrt) of ([\d.]+)/g,(_,k,n)=>(/^c/.test(k)?"cbrt(":"sqrt(")+n+")")
+    .replace(/\b(?:a |one )?(half|third|quarter) of ([\d.]+)/g,(_,k,n)=>"("+n+"/"+{half:2,third:3,quarter:4}[k]+")")
+    .replace(/([\d.]+)\s*(?:%|percent)\s*off\s*([\d.]+)/g,"($2-$2*$1/100)")
+    .replace(/([\d.]+)\s*(?:%|percent)\s*(?:tip\s+)?(?:of|on)\s*/g,"$1/100*")
+    .replace(/\b(?:the )?(?:average|mean) of ([\d.]+(?:\s*(?:,\s*and\b|,|\band\b)\s*[\d.]+)+)/g,(_,l)=>{ const n=l.split(/\s*(?:,|\band\b)\s*/).filter(Boolean); return "(("+n.join("+")+")/"+n.length+")"; });
 }
 // The on-device expression behind a math query, or null. Percent-of is rewritten to a division
 // and a product, so "20% of 50" evaluates as 20/100*50.

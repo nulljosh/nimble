@@ -17,6 +17,13 @@ test("spoken math and identity", async () => {
   assert.equal(E.tryMath("What's nine plus ten?"), 19);
   assert.equal(E.tryMath("what is 9 times 3"), 27);
   assert.equal(E.tryMath("who is the one"), null);
+  // Everyday phrasing stays offline instead of spending an AI call.
+  assert.equal(E.tryMath("half of 250"), 125);
+  assert.equal(E.tryMath("what is a third of 90"), 30);
+  assert.equal(E.tryMath("15 percent tip on 60"), 9);
+  assert.equal(E.tryMath("25% off 80"), 60);
+  assert.equal(E.tryMath("average of 2, 4 and 9"), 5);
+  assert.equal(E.tryMath("half of the class"), null);
   assert.match((await E.identity("Who created you")).body, /Joshua Trommel/);
   assert.equal(await E.identity("who created the telephone"), null);
 });

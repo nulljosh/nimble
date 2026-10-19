@@ -53,6 +53,12 @@ class QueryEngineTest {
     fun naturalLanguageMath() {
         assertEquals("19", math("whats nine plus ten"))
         assertEquals("50", math("what is five times ten"))
+        assertEquals("125", math("half of 250"))
+        assertEquals("30", math("what is a third of 90"))
+        assertEquals("9", math("15 percent tip on 60"))
+        assertEquals("60", math("25% off 80"))
+        assertEquals("5", math("average of 2, 4 and 9"))
+        assertNull(math("half of the class"))
     }
 
     @Test

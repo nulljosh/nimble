@@ -248,7 +248,7 @@ final class QueryEngine: Sendable {
     private func mathExpression(_ input: String) -> String? {
         // "15% of 240" -> "15/100*240"; bare % stays modulo.
         let expr = input.trimmingCharacters(in: .whitespaces)
-            .replacingOccurrences(of: "([\\d.]+)\\s*%\\s*of\\s*", with: "$1/100*", options: [.regularExpression, .caseInsensitive])
+            .replacingOccurrences(of: "([\\d.]+)\\s*%\\s*of\\b\\s*", with: "$1/100*", options: [.regularExpression, .caseInsensitive])
         guard !expr.isEmpty else { return nil }
 
         // Parse the literal expression first; the parser must consume the whole
@@ -1180,6 +1180,28 @@ final class QueryEngine: Sendable {
         "compute ", "solve ", "evaluate ", "the answer to ", "result of "
     ]
 
+    private static let fractionDivisors = ["half": "2", "third": "3", "quarter": "4"]
+
+    /// "half of 250", "25% off 80", "15 percent tip on 60", "average of 2, 4 and 9". Mirrors docs/engine.js.
+    static func everydayMath(_ s: String) -> String {
+        var t = s
+        if let r = try? Regex(#"\b(?:a |one )?(half|third|quarter) of ([\d.]+)"#) {
+            t = t.replacing(r) { m in
+                "(\(m.output[2].substring ?? "")/\(fractionDivisors[String(m.output[1].substring ?? "")] ?? "1"))"
+            }
+        }
+        t = t.replacingOccurrences(of: #"([\d.]+)\s*(?:%|percent)\s*off\s*([\d.]+)"#, with: "($2-$2*$1/100)", options: .regularExpression)
+        t = t.replacingOccurrences(of: #"([\d.]+)\s*(?:%|percent)\s*(?:tip\s+)?(?:of|on)\s*"#, with: "$1/100*", options: .regularExpression)
+        if let r = try? Regex(#"\b(?:the )?(?:average|mean) of ([\d.]+(?:\s*(?:,\s*and\b|,|\band\b)\s*[\d.]+)+)"#),
+           let sep = try? Regex(#"\s*(?:,|\band\b)\s*"#) {
+            t = t.replacing(r) { m in
+                let n = String(m.output[1].substring ?? "").split(separator: sep)
+                return "((\(n.joined(separator: "+")))/\(n.count))"
+            }
+        }
+        return t
+    }
+
     func parseNaturalLanguageMath(_ input: String) -> String? {
         var text = input.lowercased().trimmingCharacters(in: .whitespaces)
 
@@ -1190,11 +1212,15 @@ final class QueryEngine: Sendable {
         text = text.replacingOccurrences(of: "^the\\s+", with: "", options: .regularExpression)
         text = text.replacingOccurrences(of: "?", with: "").trimmingCharacters(in: .whitespaces)
 
-        // Must contain a number (digit or word) and an operator word or a root ("12 squared", "cube root of 27").
-        let rootPattern = "\\b(square root|sqrt|cube root|cbrt) of\\s+"
-        let hasNumber = text.range(of: "\\d", options: .regularExpression) != nil || Self.wordNumbers.keys.contains(where: { text.contains($0) })
-        let hasOperator = Self.wordOperators.keys.contains(where: { text.contains($0) }) || text.range(of: rootPattern, options: .regularExpression) != nil
-        guard hasNumber && hasOperator else { return nil }
+        let everyday = Self.everydayMath(text)
+        if everyday == text {
+            // Must contain a number (digit or word) and an operator word or a root ("12 squared", "cube root of 27").
+            let rootPattern = "\\b(square root|sqrt|cube root|cbrt) of\\s+"
+            let hasNumber = text.range(of: "\\d", options: .regularExpression) != nil || Self.wordNumbers.keys.contains(where: { text.contains($0) })
+            let hasOperator = Self.wordOperators.keys.contains(where: { text.contains($0) }) || text.range(of: rootPattern, options: .regularExpression) != nil
+            guard hasNumber && hasOperator else { return nil }
+        }
+        text = everyday
 
         // Replace multi-word operators first, whole words only so "six" is not "si" times
         for (word, op) in Self.wordOperators.sorted(by: { $0.key.count > $1.key.count }) {
