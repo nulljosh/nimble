@@ -2232,5 +2232,39 @@
     "nl": "van {s}",
     "tr": "{s} kaynağından",
     "pl": "z {s}"
+  },
+  "This is wrong": {
+    "en": "This is wrong",
+    "fr": "C'est faux",
+    "es": "Esto está mal",
+    "zh": "这是错的",
+    "pa": "ਇਹ ਗਲਤ ਹੈ",
+    "de": "Das ist falsch",
+    "pt": "Isto está errado",
+    "hi": "यह गलत है",
+    "ja": "これは間違っています",
+    "it": "È sbagliato",
+    "ko": "틀렸어요",
+    "ru": "Это неверно",
+    "nl": "Dit klopt niet",
+    "tr": "Bu yanlış",
+    "pl": "To jest błędne"
+  },
+  "Thanks, we'll check it": {
+    "en": "Thanks, we'll check it",
+    "fr": "Merci, nous allons vérifier",
+    "es": "Gracias, lo revisaremos",
+    "zh": "谢谢，我们会核实",
+    "pa": "ਧੰਨਵਾਦ, ਅਸੀਂ ਇਸਦੀ ਜਾਂਚ ਕਰਾਂਗੇ",
+    "de": "Danke, wir prüfen das",
+    "pt": "Obrigado, vamos verificar",
+    "hi": "धन्यवाद, हम इसकी जाँच करेंगे",
+    "ja": "ありがとうございます。確認します",
+    "it": "Grazie, lo controlleremo",
+    "ko": "감사합니다. 확인할게요",
+    "ru": "Спасибо, мы проверим",
+    "nl": "Bedankt, we kijken ernaar",
+    "tr": "Teşekkürler, kontrol edeceğiz",
+    "pl": "Dzięki, sprawdzimy to"
   }
 }

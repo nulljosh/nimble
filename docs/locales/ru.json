@@ -128,5 +128,7 @@
   "Card": "Карточка",
   "Tell me more": "Расскажи подробнее",
   "Nothing more to add": "Больше нечего добавить",
-  "from {s}": "из {s}"
+  "from {s}": "из {s}",
+  "This is wrong": "Это неверно",
+  "Thanks, we'll check it": "Спасибо, мы проверим"
 }

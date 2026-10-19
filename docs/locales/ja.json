@@ -128,5 +128,7 @@
   "Card": "カード",
   "Tell me more": "もっと詳しく",
   "Nothing more to add": "これ以上はありません",
-  "from {s}": "{s} より"
+  "from {s}": "{s} より",
+  "This is wrong": "これは間違っています",
+  "Thanks, we'll check it": "ありがとうございます。確認します"
 }

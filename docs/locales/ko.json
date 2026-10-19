@@ -128,5 +128,7 @@
   "Card": "카드",
   "Tell me more": "더 알려 줘",
   "Nothing more to add": "더 덧붙일 내용이 없습니다",
-  "from {s}": "{s}에서"
+  "from {s}": "{s}에서",
+  "This is wrong": "틀렸어요",
+  "Thanks, we'll check it": "감사합니다. 확인할게요"
 }

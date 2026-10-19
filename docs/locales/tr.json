@@ -128,5 +128,7 @@
   "Card": "Kart",
   "Tell me more": "Daha fazla anlat",
   "Nothing more to add": "Eklenecek başka bir şey yok",
-  "from {s}": "{s} kaynağından"
+  "from {s}": "{s} kaynağından",
+  "This is wrong": "Bu yanlış",
+  "Thanks, we'll check it": "Teşekkürler, kontrol edeceğiz"
 }

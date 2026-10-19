@@ -128,5 +128,7 @@
   "Card": "Scheda",
   "Tell me more": "Dimmi di più",
   "Nothing more to add": "Nient'altro da aggiungere",
-  "from {s}": "da {s}"
+  "from {s}": "da {s}",
+  "This is wrong": "È sbagliato",
+  "Thanks, we'll check it": "Grazie, lo controlleremo"
 }

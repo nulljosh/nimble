@@ -261,6 +261,16 @@ export class NimbleCounts {
     this.state = state;
   }
   async fetch(req) {
+    // "This is wrong" reports: the last 200, question and answer text only, newest last.
+    if (new URL(req.url).pathname === "/report") {
+      const list = (await this.state.storage.get("reports")) || [];
+      if (req.method === "POST") {
+        list.push(await req.json());
+        if (list.length > 200) list.shift();
+        await this.state.storage.put("reports", list);
+      }
+      return json(list);
+    }
     let s = (await this.state.storage.get("c")) || fresh();
     if (req.method === "POST") {
       const inc = await req.json();
@@ -330,6 +340,7 @@ export default {
     const isQuote = req.method === "GET" && url.searchParams.has("quote");
     const isStats = req.method === "GET" && url.pathname === "/stats";
     if (isStats) return statsReply(url.origin, env);
+    if (url.pathname === "/report") return report(req, url, env);
     if (req.method !== "POST" && !isDDG && !isSite && !isNews && !isQuote) return new Response("POST only", { status: 405, headers: CORS });
 
     if (isDDG) {
@@ -804,6 +815,25 @@ function interleave(lists) {
   const out = [];
   for (let i = 0; i < Math.max(0, ...lists.map((l) => l.length)); i++) for (const l of lists) if (l[i]) out.push(l[i]);
   return out;
+}
+
+// POST /report {q, answer}: someone says an answer is wrong. Text only, no IP kept, behind the same 20/min limit.
+// GET /report?key=REPORTS_KEY lists them for review; each one becomes an exam question.
+export async function report(req, url, env) {
+  const box = env.COUNTS?.get(env.COUNTS.idFromName("global"));
+  if (!box) return json({ error: "no store" }, 503);
+  if (req.method === "GET") {
+    if (!env.REPORTS_KEY || url.searchParams.get("key") !== env.REPORTS_KEY) return json({ error: "bad key" }, 403);
+    return json(await (await box.fetch("https://counts/report")).json());
+  }
+  if (req.method !== "POST") return json({ error: "POST only" }, 405);
+  const { success } = await env.RATE_LIMITER.limit({ key: req.headers.get("cf-connecting-ip") || "unknown" });
+  if (!success) return json({ error: "rate limited" }, 429);
+  const b = await req.json().catch(() => null);
+  const q = String(b?.q ?? "").trim().slice(0, 300), answer = String(b?.answer ?? "").trim().slice(0, 500);
+  if (!q) return json({ error: "no question" }, 400);
+  await box.fetch("https://counts/report", { method: "POST", body: JSON.stringify({ q, answer, at: new Date().toISOString() }) });
+  return json({ ok: true });
 }
 
 function json(obj, status = 200) {

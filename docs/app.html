@@ -346,6 +346,8 @@ var T=I18N.t;
     // Tell me more: a text answer can grow to three sentences, once, on a tap. Not offline or in Private mode.
     // Not for a site's own page: the AI that tells more does not know the site.
     if(res.kind==='text' && !privateOn() && !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(res.a.src||'')) share+='<button type="button" data-more>'+T('Tell me more')+'</button>';
+    // This is wrong: an AI or looked-up text answer can be sent for review (question and answer only). Not in Private mode.
+    if(res.kind==='text' && !privateOn()) share+='<button type="button" data-wrong>'+T('This is wrong')+'</button>';
     r.innerHTML=res.h+(res.credit||share?'<div class="credit">'+(res.credit?'<span>'+res.credit+'</span>':'')+share+'</div>':'');
     // Voice loop: a question asked out loud gets its answer read back, through the same Listen button.
     if(opts&&opts.spoken){ var lb=r.querySelector('[data-listen]'); if(lb) lb.click(); }
@@ -446,6 +448,13 @@ var T=I18N.t;
       return;
     }
     if(e.target.closest('[data-share]')){ shareAnswer(); return; }
+    var wb=e.target.closest('[data-wrong]');
+    if(wb){
+      if(!last||wb.disabled) return;
+      wb.disabled=true;
+      reportWrong(last.q, last.a&&last.a.body).then(function(ok){ wb.textContent=ok?T("Thanks, we'll check it"):T('This is wrong'); wb.disabled=ok; },function(){ wb.disabled=false; });
+      return;
+    }
     var mb=e.target.closest('[data-more]');
     if(mb){
       if(!last||mb.disabled) return;

@@ -128,5 +128,7 @@
   "Card": "Karta",
   "Tell me more": "Powiedz więcej",
   "Nothing more to add": "Nic więcej do dodania",
-  "from {s}": "z {s}"
+  "from {s}": "z {s}",
+  "This is wrong": "To jest błędne",
+  "Thanks, we'll check it": "Dzięki, sprawdzimy to"
 }

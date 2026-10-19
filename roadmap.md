@@ -53,7 +53,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 - [x] [Sonnet] Every AI answer carries the sentence it rests on ("Why this answer") on all surfaces, not just web. Checked 2026-10-18: web (details.why), Apple (ResultView whyText) and Compose (WhyThisAnswer) all show it.
 - [ ] [Sonnet] The exam grows to 1,000 questions (the 1,000-question bank in BENCHMARK.md) and holds 99% on the free engine.
 - [ ] [Sonnet] A nightly exam in CI posts the score to /stats; a drop of two points opens a roadmap line by itself.
-- [ ] [Haiku] "This is wrong" on an answer sends the question (text only) to a review list; the exam adopts each one.
+- [ ] [Haiku] "This is wrong" on an answer sends the question (text only) to a review list; the exam adopts each one. Web and Worker done 2026-10-18 (POST /report into the NimbleCounts Durable Object, last 200; GET /report?key=REPORTS_KEY, key in .env). Apple and Compose buttons next.
 - [ ] [Sonnet] Freshness: every live answer says when it was checked; anything older than its TTL refetches.
 
 ### v21-v30 Live: the numbers people check every day

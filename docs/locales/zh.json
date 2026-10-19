@@ -128,5 +128,7 @@
   "Card": "卡片",
   "Tell me more": "详细一点",
   "Nothing more to add": "没有更多内容",
-  "from {s}": "来自 {s}"
+  "from {s}": "来自 {s}",
+  "This is wrong": "这是错的",
+  "Thanks, we'll check it": "谢谢，我们会核实"
 }

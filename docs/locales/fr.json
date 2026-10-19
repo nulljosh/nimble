@@ -128,5 +128,7 @@
   "Card": "Carte",
   "Tell me more": "Dis-m'en plus",
   "Nothing more to add": "Rien de plus à ajouter",
-  "from {s}": "de {s}"
+  "from {s}": "de {s}",
+  "This is wrong": "C'est faux",
+  "Thanks, we'll check it": "Merci, nous allons vérifier"
 }

@@ -128,5 +128,7 @@
   "Card": "Card",
   "Tell me more": "Tell me more",
   "Nothing more to add": "Nothing more to add",
-  "from {s}": "from {s}"
+  "from {s}": "from {s}",
+  "This is wrong": "This is wrong",
+  "Thanks, we'll check it": "Thanks, we'll check it"
 }

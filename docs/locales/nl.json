@@ -128,5 +128,7 @@
   "Card": "Kaart",
   "Tell me more": "Vertel meer",
   "Nothing more to add": "Niets meer toe te voegen",
-  "from {s}": "van {s}"
+  "from {s}": "van {s}",
+  "This is wrong": "Dit klopt niet",
+  "Thanks, we'll check it": "Bedankt, we kijken ernaar"
 }

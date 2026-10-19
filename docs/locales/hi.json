@@ -128,5 +128,7 @@
   "Card": "कार्ड",
   "Tell me more": "और बताओ",
   "Nothing more to add": "और कुछ नहीं",
-  "from {s}": "{s} से"
+  "from {s}": "{s} से",
+  "This is wrong": "यह गलत है",
+  "Thanks, we'll check it": "धन्यवाद, हम इसकी जाँच करेंगे"
 }
