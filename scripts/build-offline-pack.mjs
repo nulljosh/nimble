@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Offline Wikipedia pack builder: top English Wikipedia article intros -> docs/pack/wikipedia-top-v1.json.gz
+// Offline Wikipedia pack builder: Wikipedia's vital articles, then the most viewed, as intros -> docs/pack/wikipedia-top-v1.json.gz
 // Usage: node scripts/build-offline-pack.mjs
 // Keyless: Wikimedia pageviews (top lists) + Wikipedia REST summaries. Node built-ins only.
 // Re-runs resume from PACK_CACHE (one JSON file per fetched summary, misses included), so a re-run is free.
@@ -15,12 +15,12 @@ const OUT_DIR = resolve(root, "docs/pack");
 const OUT = join(OUT_DIR, "wikipedia-top-v1.json.gz");
 const CACHE = process.env.PACK_CACHE || "/private/tmp/claude-501/-Users-joshua/ccd069ce-bc60-4205-be42-ac96d855a019/scratchpad/packcache";
 const UA = "NimbleOfflinePack/1.0 (https://nimble.jaybulb.com; trommatic@icloud.com)";
-const CAP = 9000;            // entries in the pack
+const CAP = 18000;           // entries in the pack: the vital articles first, then the most viewed
 const DAYS = 120;            // daily top lists merged into the ranking
 const EXTRACT_MAX = 1000;    // characters of whole sentences kept per entry (France's intro puts "Paris" past 600)
 const CONCURRENCY = 3;
 const SPACING_MS = 150;
-const SIZE_BUDGET = 4 * 1024 * 1024;
+const SIZE_BUDGET = 8 * 1024 * 1024;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const hash = (s) => createHash("sha1").update(s).digest("hex");
@@ -99,6 +99,31 @@ const isSkippedTitle = (raw) => {
 const pad = (n) => String(n).padStart(2, "0");
 const dayPath = (d) => `${d.getUTCFullYear()}/${pad(d.getUTCMonth() + 1)}/${pad(d.getUTCDate())}`;
 
+// Wikipedia's Vital Articles, level 4: about 10,000 core topics (DNA, Photosynthesis, Hamlet). The most-viewed list
+// alone skews to films and celebrities, so the offline exam missed basics; these go first.
+// The list is split across about 40 pages (People/Writers and journalists, Physical sciences/Chemistry): every
+// non-redirect page under "Level 4/" (the old "Level/4/" paths are redirects) except drafts, removals, candidates and alerts.
+async function vitalPages() {
+  const r = await cachedGet("vital:pages", "https://en.wikipedia.org/w/api.php?action=query&list=allpages&apnamespace=4&apprefix=Vital_articles/Level_4/&apfilterredir=nonredirects&aplimit=max&format=json&formatversion=2");
+  return (r.body?.query?.allpages || []).map((p) => p.title).filter((t) => !/alert|removed|draft|candidates/i.test(t));
+}
+async function vitalTitles() {
+  const out = [];
+  for (const page of await vitalPages()) {
+    let cont = "";
+    for (let i = 0; i < 20; i++) {
+      const url = `https://en.wikipedia.org/w/api.php?action=query&prop=links&plnamespace=0&pllimit=max&format=json&formatversion=2&titles=${encodeURIComponent(page)}${cont ? "&plcontinue=" + encodeURIComponent(cont) : ""}`;
+      const r = await cachedGet(`vital:${page}:${cont}`, url);
+      if (r.status !== 200) break;
+      for (const l of r.body?.query?.pages?.[0]?.links || []) out.push(l.title.replace(/ /g, "_"));
+      cont = r.body?.continue?.plcontinue || "";
+      if (!cont) break;
+    }
+  }
+  console.log(`vital articles: ${out.length}`);
+  return out;
+}
+
 async function candidates() {
   const { y, m } = lastCompleteMonth();
   const ym = `${y}/${pad(m)}`;
@@ -121,7 +146,9 @@ async function candidates() {
     }
   }
   console.log(`daily lists merged: ${days} of ${DAYS}`);
-  return { ym: `${ym.replace("/", "-")} plus ${DAYS} daily lists`, ranked: [...score.entries()].sort((a, b) => b[1] - a[1]).map(([t]) => t) };
+  const viewed = [...score.entries()].sort((a, b) => b[1] - a[1]).map(([t]) => t);
+  const ranked = [...new Set([...(await vitalTitles()).filter(isArticleTitle), ...viewed])];
+  return { ym: `${ym.replace("/", "-")} plus ${DAYS} daily lists, vital articles first`, ranked };
 }
 
 // --- 2. summaries ---
