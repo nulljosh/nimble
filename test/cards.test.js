@@ -94,3 +94,15 @@ test("etymology matches origin, root, where does the word patterns", async () =>
     }
   } finally { teardown(); }
 });
+
+test("'vancouver weather' is a weather card too, with the next 12 hours as a range", async () => {
+  setup();
+  const cur = canned["api.open-meteo.com"];
+  canned["api.open-meteo.com"] = { ...cur, hourly: { temperature_2m: [11.6, 9.4, 8.2, 12.1] } };
+  try {
+    const a = await E.answer("vancouver weather");
+    assert.equal(a.kind, "card");
+    assert.match(a.sub, /next 12 h 8 to 12°C$/);
+    assert.notEqual((await E.answer("how is the weather")).src, "Open-Meteo");
+  } finally { canned["api.open-meteo.com"] = cur; teardown(); }
+});

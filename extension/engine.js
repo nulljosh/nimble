@@ -761,13 +761,20 @@ async function geocode(place){
   const g=await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(place)}&count=1&language=en`);
   return g?.results?.[0]||null;
 }
+// The next 12 hours as a range: "next 12 h 8 to 12°C", or one figure when it holds. Empty when Open-Meteo sends none.
+const next12=(t)=>{ const v=(t||[]).filter(Number.isFinite).map(Math.round); if(!v.length) return "";
+  const lo=Math.min(...v), hi=Math.max(...v); return `next 12 h ${lo===hi?lo:`${lo} to ${hi}`}°C`; };
 async function weather(query){
-  const place=/^(?:what(?:'s| is) the )?weather (?:in|for|at) (.+?)\??$/i.exec(query.trim())?.[1]; if(!place) return null;
+  // "weather in vancouver", "vancouver weather", "forecast for tokyo". A leading question word is not a place.
+  const q=query.trim();
+  const place=/^(?:what(?:'s| is) the )?(?:weather|forecast) (?:in|for|at) (.+?)\??$/i.exec(q)?.[1]
+    || (/^(?!(?:what|how|is|the|will|does)\b)([a-z][a-z .'-]+?) (?:weather|forecast)(?: today| now)?\??$/i.exec(q)?.[1]);
+  if(!place) return null;
   const loc=await geocode(place); if(!loc) return null;
-  const w=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m`);
+  const w=await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.latitude}&longitude=${loc.longitude}&current=temperature_2m,weather_code,wind_speed_10m&hourly=temperature_2m&forecast_hours=12`);
   const c=w?.current; if(!c) return null;
   const sky={0:"clear",1:"mostly clear",2:"partly cloudy",3:"overcast",45:"fog",48:"fog",51:"drizzle",53:"drizzle",55:"drizzle",61:"rain",63:"rain",65:"heavy rain",71:"snow",73:"snow",75:"heavy snow",80:"showers",81:"showers",82:"heavy showers",95:"thunderstorm"}[c.weather_code]||"";
-  return asOfNow(card(Math.round(c.temperature_2m), "°C", [loc.name, loc.country, sky, `wind ${Math.round(c.wind_speed_10m)} km/h`].filter(Boolean).join(", "), "Open-Meteo", "https://open-meteo.com"));
+  return asOfNow(card(Math.round(c.temperature_2m), "°C", [loc.name, loc.country, sky, `wind ${Math.round(c.wind_speed_10m)} km/h`, next12(w.hourly?.temperature_2m)].filter(Boolean).join(", "), "Open-Meteo", "https://open-meteo.com"));
 }
 async function localTime(query){
   const place=/^(?:what(?:'s|’s| is) the |what )?(?:current |local )?time (?:is it |now )?(?:in|at) (.+?)(?: right now| now)?\??$/i.exec(query.trim())?.[1]; if(!place) return null;
