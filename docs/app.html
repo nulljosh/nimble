@@ -7,6 +7,9 @@
 <meta name="description" content="Ask a question. Get one sentence back.">
 <meta name="theme-color" content="">
 <link rel="manifest" href="manifest.webmanifest">
+<!-- The answer service and Wikipedia are asked on every question: open both connections while the page loads. -->
+<link rel="preconnect" href="https://nimble-answers.trommatic.workers.dev" crossorigin>
+<link rel="preconnect" href="https://en.wikipedia.org" crossorigin>
 <link rel="icon" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="stylesheet" href="tokens.css">
