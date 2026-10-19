@@ -25,7 +25,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 
 ## The loop
 
-See `docs/LOOP-HANDOFF.md` (current state at 8.0.0, 2026-10-18). v8 (Everywhere) is closed: 7.1 to 7.5 are tagged, the browser extension zip is attached to every release by CI, and nine languages run on every platform. Open: the v8.0.0 tag once CI is green, the full exam at 154 of 154 after 17:00 PDT then 7.0.0, and the zero-issue goal; Joshua owns the store submissions and the real-device walk.
+See `docs/LOOP-HANDOFF.md` (current state at 9.4.4, 2026-10-18). v9 is closed. iPhone 9.4.4 and Mac 9.4.3 are WAITING_FOR_REVIEW after one Guideline 5 rejection, fixed and resubmitted. Next: when both clear, cut 10.0.0 (closes v10), then Joshua posts the launch drafts. Joshua owns the store submissions, the real-device walk and the native-speaker check.
 
 ## QA
 QA hooks always sandbox storage: any `-shot*` or `-qaSandbox` launch arg moves history, prefs, the shared answer suite and iCloud sync to a fresh temp root (`Sources/Models/QASandbox.swift`). Never launch the real app bundle for QA against real data.

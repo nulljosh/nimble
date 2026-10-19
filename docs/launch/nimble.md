@@ -2,6 +2,10 @@
 
 Drafts only. Nothing here is posted. Joshua posts, from his own accounts. Every number below is on `docs/BENCHMARK.md` and live at `/stats`. The price is free; use the Free line at the bottom. A $0.99 flip is parked until the free AI has all-day headroom.
 
+## Order
+
+Post after Apple approves the iPhone and Mac builds, so the links work. Day one: Show HN in the morning Pacific, Reddit the same afternoon, the short post last. Link the store page next to nimble.jaybulb.com. Reply to every comment on the first day; a wrong answer someone reports goes into the exam.
+
 ## Show HN
 
 Title: Show HN: Nimble, one question in, one sentence out
