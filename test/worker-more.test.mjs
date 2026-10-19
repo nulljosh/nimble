@@ -44,3 +44,11 @@ test("a normal use of the word reference is an answer, not the model narrating i
   const j = await worker.fetch(new Request("https://w.example/", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ q: "what is a haiku", more: true }) }), env).then((r) => r.json());
   assert.match(j.answer, /seasonal reference/);
 });
+
+test("an answer that ends 'according to the reference' keeps its figure", async () => {
+  globalThis.fetch = async () => new Response(JSON.stringify({ query: { pages: [] } }), { status: 200 });
+  const env = { RATE_LIMITER: { limit: async () => ({ success: true }) },
+    AI: { run: async () => ({ response: "Most adults need 600 IU of vitamin D daily, according to the reference." }) } };
+  const j = await worker.fetch(new Request("https://w.example/", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ q: "how much vitamin d do adults need" }) }), env).then((r) => r.json());
+  assert.equal(j.answer, "Most adults need 600 IU of vitamin D daily.");
+});
