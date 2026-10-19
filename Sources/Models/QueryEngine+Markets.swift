@@ -111,7 +111,7 @@ extension QueryEngine {
         switch ask {
         case .crypto(let id, let name, let sym): return await cryptoCard(id, name, sym, session)
         case .pair(let from, let to): return await pairCard(from, to, session)
-        case .stock(let sym): return stockCard(sym)
+        case .stock(let sym): return await stockCard(sym, session)
         }
     }
 
@@ -150,9 +150,24 @@ extension QueryEngine {
                        source: source, url: url, asOf: Freshness(date: day, isDay: true))
     }
 
-    /// Stocks: no keyless source works, so no request goes out. The calm state, never a made-up price.
-    private func stockCard(_ sym: String) -> QueryResult {
-        .market(title: sym, big: nil, change: nil, source: "Stooq", url: "https://stooq.com/q/?s=\(sym.lowercased()).us")
+    private struct Quote: Decodable { let symbol: String?; let name: String?; let price: Double?; let currency: String?; let pct: Double?; let time: String? }
+
+    /// Stocks through the free proxy's ?quote= (Yahoo's chart API; a name like "apple" comes back as AAPL). Mirrors
+    /// stockCard() in docs/engine.js. Anything short of a real price is the calm state, never a made-up number.
+    private func stockCard(_ sym: String, _ session: URLSession) async -> QueryResult {
+        let source = "Yahoo Finance"
+        let term = sym.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? sym
+        let d = await quoteJSON(Quote.self, "https://nimble-answers.trommatic.workers.dev/?quote=\(term)", session)
+        guard let d, let symbol = d.symbol, let price = d.price, price.isFinite else {
+            return .market(title: sym, big: nil, change: nil, source: source, url: "https://finance.yahoo.com/quote/\(term)")
+        }
+        let title = d.name.map { $0 == symbol ? symbol : "\($0) (\(symbol))" } ?? symbol
+        let big = (d.currency ?? "USD") == "USD" ? Self.usd(price) : String(format: "%.2f", price) + " " + (d.currency ?? "")
+        let iso = ISO8601DateFormatter()
+        iso.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let when = d.time.flatMap { iso.date(from: $0) } ?? Date()
+        return .market(title: title, big: big, change: Self.changeText(d.pct, "today").nonEmpty, source: source,
+                       url: "https://finance.yahoo.com/quote/\(symbol)", asOf: Freshness(date: when, isDay: false))
     }
 
     private func quoteJSON<T: Decodable>(_ type: T.Type, _ url: String, _ session: URLSession) async -> T? {

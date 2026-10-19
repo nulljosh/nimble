@@ -93,6 +93,17 @@ object QueryEngine {
 
     /** "half of 250", "25% off 80", "15 percent tip on 60", "average of 2, 4 and 9". Mirrors docs/engine.js. */
     private fun everydayMath(s: String): String = s
+        // "1,000" is one thousand; "2, 4 and 9" (comma then space) stays a list.
+        .replace(Regex("(\\d),(\\d{3})\\b"), "\$1\$2")
+        // "split 120 four ways", "double 36", "what percent is 20 of 80", "20 is what percent of 80", "increase 50 by 10%".
+        .replace(Regex("^split ([\\d.]+) (\\w+) ways$")) { m -> "(${m.groupValues[1]}/${wordNumbers[m.groupValues[2]] ?: m.groupValues[2]})" }
+        .replace(Regex("^(double|twice|triple) ([\\d.]+)$")) { "(${it.groupValues[2]}*${if (it.groupValues[1] == "triple") 3 else 2})" }
+        .replace(Regex("^(?:what )?percent(?:age)? is ([\\d.]+) of ([\\d.]+)$"), "(\$1/\$2*100)")
+        .replace(Regex("^([\\d.]+) is what percent(?:age)? of ([\\d.]+)$"), "(\$1/\$2*100)")
+        .replace(Regex("^(increase|decrease|raise|reduce) ([\\d.]+) by ([\\d.]+) ?(?:%|percent)$")) {
+            "(${it.groupValues[2]}*(1${if (it.groupValues[1] == "increase" || it.groupValues[1] == "raise") "+" else "-"}${it.groupValues[3]}/100))"
+        }
+        .replace(Regex("^an? (?=\\d)"), "")
         .replace(Regex("\\b(?:a |one )?(half|third|quarter) of ([\\d.]+)")) { "(${it.groupValues[2]}/${fractions[it.groupValues[1]]})" }
         .replace(Regex("([\\d.]+)\\s*(?:%|percent)\\s*off\\s*([\\d.]+)"), "(\$2-\$2*\$1/100)")
         .replace(Regex("([\\d.]+)\\s*(?:%|percent)\\s*(?:tip\\s+)?(?:of|on)\\s*"), "\$1/100*")

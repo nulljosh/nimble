@@ -65,13 +65,19 @@ function evalMath(src, steps){
 // tens and the usual operator words; anything left over fails the whitelist below.
 const WORD_NUM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,thousand:1000,million:1e6};
 function spokenMath(s){
-  return s.toLowerCase().replace(/[?!]+$/,"").replace(/^\s*(what(?:'s|\u2019s| is)|whats|calculate|compute|how much is|solve|evaluate)\s+(?:the\s+)?/,"")
+  // "1,000" is one thousand; "2, 4 and 9" (comma then space) stays a list.
+  return s.toLowerCase().replace(/[?!]+$/,"").replace(/(\d),(\d{3})\b/g,"$1$2").replace(/^\s*(what(?:'s|\u2019s| is)|whats|calculate|compute|how much is|solve|evaluate)\s+(?:the\s+)?/,"")
     .replace(/\b(multiplied by|times)\b/g,"*").replace(/\bdivided by\b/g,"/").replace(/\bto the power of\b/g,"^").replace(/\bplus\b/g,"+").replace(/\bminus\b/g,"-")
     .replace(/\b[a-z]+\b/g,w=>w in WORD_NUM ? WORD_NUM[w] : w)
     // "twenty one" is 21, "one hundred" is 100, "two thousand" is 2000.
     .replace(/\b([2-9]0) ([1-9])\b/g,(_,a,b)=>+a + +b).replace(/\b(\d+) (100|1000|1000000)\b/g,(_,a,b)=>a*b)
     .replace(/\bsquared\b/g,"^2").replace(/\bcubed\b/g,"^3")
     .replace(/\b(square root|sqrt|cube root|cbrt)(?: of)? ([\d.]+)/g,(_,k,n)=>(/^c/.test(k)?"cbrt(":"sqrt(")+n+")")
+    // "split 120 four ways", "double 36", "what percent is 20 of 80", "20 is what percent of 80", "increase 50 by 10%".
+    .replace(/^split ([\d.]+) ([\d.]+) ways$/,"($1/$2)").replace(/^(double|twice|triple) ([\d.]+)$/,(_,k,n)=>"("+n+"*"+(k==="triple"?3:2)+")")
+    .replace(/^(?:what )?percent(?:age)? is ([\d.]+) of ([\d.]+)$/,"($1/$2*100)").replace(/^([\d.]+) is what percent(?:age)? of ([\d.]+)$/,"($1/$2*100)")
+    .replace(/^(increase|decrease|raise|reduce) ([\d.]+) by ([\d.]+) ?(?:%|percent)$/,(_,k,a,b)=>"("+a+"*(1"+(/^(increase|raise)$/.test(k)?"+":"-")+b+"/100))")
+    .replace(/^an? (?=[\d])/,"")
     .replace(/\b(?:a |one )?(half|third|quarter) of ([\d.]+)/g,(_,k,n)=>"("+n+"/"+{half:2,third:3,quarter:4}[k]+")")
     .replace(/([\d.]+)\s*(?:%|percent)\s*off\s*([\d.]+)/g,"($2-$2*$1/100)")
     .replace(/([\d.]+)\s*(?:%|percent)\s*(?:tip\s+)?(?:of|on)\s*/g,"$1/100*")
@@ -540,11 +546,15 @@ async function cryptoCard(key){
   return {...base, big:usd(q.usd), change:changeText(q.usd_24h_change, "in the last 24 hours"),
     asOf:new Date((q.last_updated_at || Date.now()/1000)*1000).toISOString()};
 }
+// Through the proxy's ?quote= (Yahoo's chart API; Stooq walled its CSV behind a bot check in Oct 2026).
+// A name ("apple stock") comes back as its ticker. Anything short of a real price is the calm unavailable state.
 async function stockCard(sym){
-  const base={kind:"market", title:sym, src:"Stooq", url:`https://stooq.com/q/?s=${sym.toLowerCase()}.us`};
-  const p=parseDaily(await quoteText(`https://stooq.com/q/d/l/?s=${sym.toLowerCase()}.us&i=d`));
-  if(!p) return {...base, unavailable:true};
-  return {...base, big:usd(p.close), change:changeText(p.pct, "on "+dayLabel(p.date)), asOf:p.date, asOfDay:true};
+  const base={kind:"market", title:sym, src:"Yahoo Finance", url:`https://finance.yahoo.com/quote/${encodeURIComponent(sym)}`};
+  const d=await getJSON(`${ANSWER_PROXY}/?quote=${encodeURIComponent(sym)}`,{timeout:QUOTE_TIMEOUT_MS});
+  if(typeof d?.price!=="number" || !isFinite(d.price) || !d.symbol) return {...base, unavailable:true};
+  const big = d.currency && d.currency!=="USD" ? d.price.toFixed(2)+" "+d.currency : usd(d.price);
+  return {...base, title:d.name && d.name!==d.symbol ? `${d.name} (${d.symbol})` : d.symbol, url:`https://finance.yahoo.com/quote/${encodeURIComponent(d.symbol)}`,
+    big, change:changeText(d.pct, "today"), asOf:d.time};
 }
 async function fxCard(from,to){
   const base={kind:"market", title:`${from} to ${to}`, src:"Frankfurter", url:"https://frankfurter.dev"};

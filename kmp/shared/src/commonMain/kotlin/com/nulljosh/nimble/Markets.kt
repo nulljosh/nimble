@@ -5,7 +5,9 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
+import io.ktor.http.encodeURLParameter
 import kotlin.math.abs
 import kotlin.math.roundToLong
 
@@ -140,7 +142,7 @@ object Markets {
         when (ask) {
             is MarketAsk.Crypto -> cryptoQuote(ask, fetch)
             is MarketAsk.Pair -> pairQuote(ask, now, fetch)
-            is MarketAsk.Stock -> stockQuote(ask.symbol)
+            is MarketAsk.Stock -> stockQuote(ask.symbol, fetch)
         }
 
     private suspend fun cryptoQuote(ask: MarketAsk.Crypto, fetch: suspend (String) -> String?): Answer.Market {
@@ -189,9 +191,25 @@ object Markets {
         )
     }
 
-    /** Stocks: no keyless source works, so no request goes out. The calm state, never a made-up price. */
-    private fun stockQuote(sym: String): Answer.Market =
-        Answer.Market(sym, null, null, "Stooq", "https://stooq.com/q/?s=${sym.lowercase()}.us", null)
+    /**
+     * Stocks through the free proxy's ?quote= (Yahoo's chart API; a name like "apple" comes back as AAPL). Mirrors
+     * stockCard() in docs/engine.js. Anything short of a real price is the calm state, never a made-up number.
+     */
+    private suspend fun stockQuote(sym: String, fetch: suspend (String) -> String?): Answer.Market {
+        val source = "Yahoo Finance"
+        val q = fetch("https://nimble-answers.trommatic.workers.dev/?quote=${sym.encodeURLParameter()}")?.let { parse(it) }
+        val symbol = (q?.get("symbol") as? JsonPrimitive)?.contentOrNull
+        val price = q?.get("price").num()
+        if (q == null || symbol == null || price == null || price.isNaN() || price.isInfinite()) {
+            return Answer.Market(sym, null, null, source, "https://finance.yahoo.com/quote/${sym.encodeURLParameter()}", null)
+        }
+        val name = (q["name"] as? JsonPrimitive)?.contentOrNull
+        val currency = (q["currency"] as? JsonPrimitive)?.contentOrNull ?: "USD"
+        val title = if (name == null || name == symbol) symbol else "$name ($symbol)"
+        val big = if (currency == "USD") usd(price) else decimals(price, 2) + " " + currency
+        val priced = q["ts"].num()?.let { Freshness((it * 1000).toLong(), false) } ?: Freshness.now()
+        return Answer.Market(title, big, changeText(q["pct"].num(), "today").ifEmpty { null }, source, "https://finance.yahoo.com/quote/$symbol", priced)
+    }
 
     // MARK: JSON helpers (lenient, a bad body is just "no quote")
 

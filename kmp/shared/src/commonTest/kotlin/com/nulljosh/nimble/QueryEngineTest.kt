@@ -60,6 +60,15 @@ class QueryEngineTest {
         assertEquals("5", math("average of 2, 4 and 9"))
         assertNull(math("half of the class"))
         assertEquals("93", math("one hundred minus seven"))
+        assertEquals("25", math("what percent is 20 of 80"))
+        assertEquals("25", math("20 is what percent of 80"))
+        assertEquals("55", math("increase 50 by 10%"))
+        assertEquals("150", math("what is 15% of 1,000"))
+        assertEquals("72", math("double 36"))
+        assertEquals("45", math("triple 15"))
+        assertEquals("17", math("how much is a 20% tip on 85"))
+        assertEquals("30", math("split 120 four ways"))
+        assertNull(math("triple h"))
         assertEquals("22", math("twenty one plus one"))
     }
 

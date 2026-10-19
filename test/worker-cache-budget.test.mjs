@@ -78,6 +78,8 @@ test("second model: time-sensitive, date and number questions; not a plain fact"
   assert.equal(needsSecondModel("population of 2 cities"), true);
   assert.equal(needsSecondModel("latest iphone"), true);
   assert.equal(needsSecondModel("capital of france"), false);
+  // Firsts and lasts: a lone model guessed "F.W. de Klerk" for the first president of South Africa.
+  assert.equal(needsSecondModel("who was the first president of south africa"), true);
 });
 
 // ---- one-model-first flow ---------------------------------------------------------------------

@@ -1199,7 +1199,18 @@ final class QueryEngine: Sendable {
 
     /// "half of 250", "25% off 80", "15 percent tip on 60", "average of 2, 4 and 9". Mirrors docs/engine.js.
     static func everydayMath(_ s: String) -> String {
-        var t = s
+        // "1,000" is one thousand; "2, 4 and 9" (comma then space) stays a list.
+        var t = s.replacingOccurrences(of: #"(\d),(\d{3})\b"#, with: "$1$2", options: .regularExpression)
+        // "split 120 four ways", "double 36", "what percent is 20 of 80", "20 is what percent of 80", "increase 50 by 10%".
+        for (word, num) in wordNumbers { t = t.replacingOccurrences(of: "^split ([\\d.]+) \(word) ways$", with: "split $1 \(num) ways", options: .regularExpression) }
+        t = t.replacingOccurrences(of: #"^split ([\d.]+) ([\d.]+) ways$"#, with: "($1/$2)", options: .regularExpression)
+            .replacingOccurrences(of: #"^(double|twice) ([\d.]+)$"#, with: "($2*2)", options: .regularExpression)
+            .replacingOccurrences(of: #"^triple ([\d.]+)$"#, with: "($1*3)", options: .regularExpression)
+            .replacingOccurrences(of: #"^(?:what )?percent(?:age)? is ([\d.]+) of ([\d.]+)$"#, with: "($1/$2*100)", options: .regularExpression)
+            .replacingOccurrences(of: #"^([\d.]+) is what percent(?:age)? of ([\d.]+)$"#, with: "($1/$2*100)", options: .regularExpression)
+            .replacingOccurrences(of: #"^(?:increase|raise) ([\d.]+) by ([\d.]+) ?(?:%|percent)$"#, with: "($1*(1+$2/100))", options: .regularExpression)
+            .replacingOccurrences(of: #"^(?:decrease|reduce) ([\d.]+) by ([\d.]+) ?(?:%|percent)$"#, with: "($1*(1-$2/100))", options: .regularExpression)
+            .replacingOccurrences(of: #"^an? (?=\d)"#, with: "", options: .regularExpression)
         if let r = try? Regex(#"\b(?:a |one )?(half|third|quarter) of ([\d.]+)"#) {
             t = t.replacing(r) { m in
                 "(\(m.output[2].substring ?? "")/\(fractionDivisors[String(m.output[1].substring ?? "")] ?? "1"))"

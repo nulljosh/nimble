@@ -106,14 +106,22 @@ class MarketsTest {
     // MARK: Stock
 
     @Test
-    fun stockIsUnavailableAndSendsNoRequest() = runBlockingTest {
-        val http = FakeHttp(mapOf("stooq.com" to "Date,Open,High,Low,Close,Volume\n2026-10-09,1,2,1,200,5\n2026-10-08,1,2,1,198,5\n"))
+    fun stockFromTheProxyQuoteNamedWithTheDaysChange() = runBlockingTest {
+        val http = FakeHttp(mapOf("nimble-answers.trommatic.workers.dev" to """{"symbol":"AAPL","name":"Apple Inc.","price":205,"currency":"USD","pct":2.5,"ts":1791576000}"""))
+        val a = Markets.quote(MarketAsk.Stock("APPLE"), now, http.fetch)
+        assertEquals("Apple Inc. (AAPL)", a.title)
+        assertEquals("$205.00", a.big)
+        assertEquals("Up 2.50% today", a.change)
+        assertEquals("Yahoo Finance", a.source)
+    }
+
+    @Test
+    fun stockWithoutAPriceIsUnavailableNeverMadeUp() = runBlockingTest {
+        val http = FakeHttp(mapOf("nimble-answers.trommatic.workers.dev" to """{"error":"no quote"}"""))
         val a = Markets.quote(MarketAsk.Stock("AAPL"), now, http.fetch)
         assertEquals("AAPL", a.title)
         assertNull(a.big, "never a made-up price")
         assertNull(a.asOf)
-        assertEquals("Stooq", a.source)
-        assertEquals(emptyList(), http.hosts)
     }
 
     // MARK: Pair

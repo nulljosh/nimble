@@ -154,20 +154,25 @@ final class MarketTests: XCTestCase {
 
     // MARK: - Stock
 
-    func testStockIsUnavailableAndSendsNoRequest() async {
-        MarketStub.reset([:])
-        let engine = QueryEngine()
-        let session = stubbedSession()
-        for q in ["AAPL stock", "AAPL"] {
-            let result = await engine.card(q, session: session)
-            guard case let .market(title, big, _, _, _, asOf)? = result else {
-                return XCTFail("\(q) should be a market card, not an AI question")
-            }
-            XCTAssertEqual(title, "AAPL")
-            XCTAssertNil(big, "never a made-up price")
-            XCTAssertNil(asOf)
-        }
-        XCTAssertEqual(MarketStub.requestedHosts(), [])
+    func testStockFromTheProxyQuoteNamedWithTheDaysChange() async {
+        let quote = #"{"symbol":"AAPL","name":"Apple Inc.","price":205,"currency":"USD","pct":2.5,"time":"2026-10-09T20:00:00.000Z","ts":1791576000}"#
+        MarketStub.reset(["nimble-answers.trommatic.workers.dev": .init(status: 200, body: quote)])
+        let result = await QueryEngine().card("apple stock", session: stubbedSession())
+        guard case let .market(title, big, change, source, _, asOf)? = result else { return XCTFail("expected a market card") }
+        XCTAssertEqual(title, "Apple Inc. (AAPL)")
+        XCTAssertEqual(big, "$205.00")
+        XCTAssertEqual(change, "Up 2.50% today")
+        XCTAssertEqual(source, "Yahoo Finance")
+        XCTAssertNotNil(asOf)
+    }
+
+    func testStockWithoutAPriceIsUnavailableNeverMadeUp() async {
+        MarketStub.reset(["nimble-answers.trommatic.workers.dev": .init(status: 200, body: #"{"error":"no quote"}"#)])
+        let result = await QueryEngine().card("AAPL", session: stubbedSession())
+        guard case let .market(title, big, _, _, _, asOf)? = result else { return XCTFail("AAPL should be a market card, not an AI question") }
+        XCTAssertEqual(title, "AAPL")
+        XCTAssertNil(big, "never a made-up price")
+        XCTAssertNil(asOf)
     }
 
     // MARK: - Currency pairs
@@ -249,7 +254,7 @@ final class MarketTests: XCTestCase {
     func testMarketCopyTextAndUnavailableHasNone() {
         let priced = QueryResult.market(title: "Bitcoin (BTC)", big: "$1", change: "Flat today", source: "CoinGecko", url: "https://www.coingecko.com")
         XCTAssertEqual(priced.copyText, "Bitcoin (BTC) $1, Flat today")
-        let failed = QueryResult.market(title: "AAPL", big: nil, change: nil, source: "Stooq", url: "https://stooq.com")
+        let failed = QueryResult.market(title: "AAPL", big: nil, change: nil, source: "Yahoo Finance", url: "https://finance.yahoo.com")
         XCTAssertNil(failed.copyText)
         XCTAssertNil(failed.shareContent)
     }

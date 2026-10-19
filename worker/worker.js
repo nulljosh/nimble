@@ -186,7 +186,9 @@ export const TTL_TIMELY = 3600; // time-sensitive answers go stale fast
 const TIMELY = /\b(current|latest|today|price|score|now)\b|\bwho is the\b/i;
 export const isTimeSensitive = (q) => TIMELY.test(q);
 // Question shapes where two models clashing is worth a second call (see the flow below).
-export const needsSecondModel = (q) => isTimeSensitive(q) || WHEN.test(q) || /\d/.test(q);
+// "Who was the first president of South Africa" came back "F.W. de Klerk" from one model: firsts and lasts are where a
+// lone model guesses, so they get the second opinion (and the Sources disagree card when the two clash).
+export const needsSecondModel = (q) => isTimeSensitive(q) || WHEN.test(q) || /\d/.test(q) || /\b(first|last|earliest|original|founding)\b/i.test(q);
 export const normalizeQuestion = (q) => String(q).trim().toLowerCase().replace(/\s+/g, " ");
 export const cacheUrl = (origin, q) => `${origin}/__nimble/answer?q=${encodeURIComponent(normalizeQuestion(q))}`;
 const statsUrl = (origin, day) => `${origin}/__nimble/stats/${day}`;
@@ -291,9 +293,10 @@ export default {
     const isDDG = req.method === "GET" && url.searchParams.has("ddg");
     const isSite = req.method === "GET" && url.searchParams.has("site");
     const isNews = req.method === "GET" && url.searchParams.has("news");
+    const isQuote = req.method === "GET" && url.searchParams.has("quote");
     const isStats = req.method === "GET" && url.pathname === "/stats";
     if (isStats) return statsReply(url.origin, env);
-    if (req.method !== "POST" && !isDDG && !isSite && !isNews) return new Response("POST only", { status: 405, headers: CORS });
+    if (req.method !== "POST" && !isDDG && !isSite && !isNews && !isQuote) return new Response("POST only", { status: 405, headers: CORS });
 
     if (isDDG) {
       const ddgQ = url.searchParams.get("ddg").slice(0, 500);
@@ -332,6 +335,18 @@ export default {
       } catch {
         return json({ host, title: "", description: "" });
       }
+    }
+
+    // A stock quote for every app (web, Swift, Kotlin): Stooq put a bot wall in front of its CSV in Oct 2026.
+    // Free like DDG, so outside the rate limit; cached a minute so a burst of askers is one Yahoo call.
+    if (isQuote) {
+      const term = url.searchParams.get("quote").trim().toLowerCase().slice(0, 40);
+      const qKey = `${url.origin}/__nimble/quote?t=${encodeURIComponent(term)}`;
+      const cached = await cacheGet(qKey);
+      if (cached) return new Response(cached, { headers: { "content-type": "application/json", ...CORS } });
+      const out = await stockQuote(term);
+      if (!out.error) await cachePut(qKey, out, 60);
+      return json(out, 200);
     }
 
     // "news" and "what's happening in <place>": the top three headlines from keyless RSS.
@@ -543,6 +558,33 @@ export default {
     return finish({ answer: first, source: house, ...dis });
   },
 };
+
+// Yahoo's chart API: keyless, but it wants a browser user agent. A name ("apple") is looked up to its ticker
+// through Yahoo's search first. {symbol, name, price, currency, pct, time}, or {error} and never a made-up number.
+const YAHOO = { "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_0) nimble-answers/1.0" };
+export async function stockQuote(term) {
+  const t = String(term || "").trim();
+  if (!/^[a-z0-9 .&'-]{1,40}$/i.test(t)) return { error: "bad quote" };
+  const chart = async (sym) => {
+    try {
+      const r = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=1d&interval=1d`, { headers: YAHOO, signal: AbortSignal.timeout(5000) });
+      const m = r.ok ? (await r.json())?.chart?.result?.[0]?.meta : null;
+      return m && typeof m.regularMarketPrice === "number" && isFinite(m.regularMarketPrice) ? m : null;
+    } catch { return null; }
+  };
+  let m = /^[a-z]{1,5}$/i.test(t) ? await chart(t.toUpperCase()) : null;
+  if (!m) {
+    try {
+      const r = await fetch(`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(t)}&quotesCount=5&newsCount=0`, { headers: YAHOO, signal: AbortSignal.timeout(5000) });
+      const hit = r.ok ? (await r.json())?.quotes?.find((x) => x.quoteType === "EQUITY" && x.symbol) : null;
+      if (hit) m = await chart(hit.symbol);
+    } catch {}
+  }
+  if (!m) return { error: "no quote" };
+  const pct = typeof m.regularMarketChangePercent === "number" && isFinite(m.regularMarketChangePercent) ? m.regularMarketChangePercent : null;
+  return { symbol: m.symbol, name: m.longName || m.shortName || m.symbol, price: m.regularMarketPrice, currency: m.currency || "USD", pct,
+    time: new Date((m.regularMarketTime || Date.now() / 1000) * 1000).toISOString(), ts: m.regularMarketTime || Math.floor(Date.now() / 1000) };
+}
 
 const CORS = {
   "access-control-allow-origin": "*",

@@ -21,7 +21,8 @@ function stub(routes) {
 function restore() { globalThis.fetch = realFetch; }
 
 const coingecko = { json: { bitcoin: { usd: 83405, usd_24h_change: 0.5632, last_updated_at: 1791800345 } } };
-const stooqDaily = { text: "Date,Open,High,Low,Close,Volume\n2026-10-08,198,201,197,200.00,1000\n2026-10-09,201,207,200,205.00,1200\n" };
+const PROXY = "nimble-answers.trommatic.workers.dev";
+const quote = { json: { symbol: "AAPL", name: "Apple Inc.", price: 205, currency: "USD", pct: 2.5, time: "2026-10-09T20:00:00.000Z" } };
 const frankfurter = { json: { base: "EUR", rates: { "2026-10-08": { USD: 1.08 }, "2026-10-09": { USD: 1.0812 } } } };
 const CHALLENGE = "<!DOCTYPE html><html><body><script>(async()=>{const c=\"AAAA\"})();</script></body></html>";
 
@@ -87,21 +88,21 @@ test("a crypto body with no usd price is unavailable, not zero", async () => {
   finally { restore(); }
 });
 
-test("stock: daily close and day change from the last two rows", async () => {
-  stub({ "stooq.com": stooqDaily });
+test("stock: the proxy's quote, named, with the day's change and the time it was priced", async () => {
+  stub({ [PROXY]: quote });
   try {
-    const m = await E.market("AAPL stock");
-    assert.equal(m.title, "AAPL");
+    const m = await E.market("apple stock");
+    assert.equal(m.title, "Apple Inc. (AAPL)");
     assert.equal(m.big, "$205.00");
-    assert.equal(m.change, "Up 2.50% on Oct 9");
-    assert.equal(m.asOf, "2026-10-09");
-    assert.equal(m.asOfDay, true);
+    assert.equal(m.change, "Up 2.50% today");
+    assert.equal(m.asOf, "2026-10-09T20:00:00.000Z");
+    assert.equal(m.src, "Yahoo Finance");
   } finally { restore(); }
 });
 
-test("stock: a challenge page or a dead host is unavailable, never a price", async () => {
-  for (const hit of [{ text: CHALLENGE }, { status: 503 }, new Error("offline"), { text: "Date,Open,High,Low,Close\n2026-10-09,1,2,1,N/D\n" }]) {
-    stub({ "stooq.com": hit });
+test("stock: an error, a dead proxy or no price is unavailable, never a price", async () => {
+  for (const hit of [{ json: { error: "no quote" } }, { status: 503 }, new Error("offline"), { json: { symbol: "AAPL", price: null } }]) {
+    stub({ [PROXY]: hit });
     try {
       const m = await E.market("AAPL");
       assert.equal(m.unavailable, true);
@@ -111,12 +112,12 @@ test("stock: a challenge page or a dead host is unavailable, never a price", asy
 });
 
 test("stock questions never reach a model or the web search", async () => {
-  stub({ "stooq.com": { status: 500 } });
+  stub({ [PROXY]: { status: 500 } });
   try {
     const a = await E.answer("AAPL");
     assert.equal(a.kind, "market");
     assert.equal(a.unavailable, true);
-    assert.deepEqual(calls, ["stooq.com"]);
+    assert.deepEqual(calls, [PROXY]);
   } finally { restore(); }
 });
 

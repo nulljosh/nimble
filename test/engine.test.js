@@ -25,6 +25,15 @@ test("spoken math and identity", async () => {
   assert.equal(E.tryMath("average of 2, 4 and 9"), 5);
   assert.equal(E.tryMath("half of the class"), null);
   assert.equal(E.tryMath("one hundred minus seven"), 93);
+  assert.equal(E.tryMath("what percent is 20 of 80"), 25);
+  assert.equal(E.tryMath("20 is what percent of 80"), 25);
+  assert.equal(E.tryMath("increase 50 by 10%"), 55);
+  assert.equal(E.tryMath("what is 15% of 1,000"), 150);
+  assert.equal(E.tryMath("double 36"), 72);
+  assert.equal(E.tryMath("triple 15"), 45);
+  assert.equal(E.tryMath("how much is a 20% tip on 85"), 17);
+  assert.equal(E.tryMath("split 120 four ways"), 30);
+  assert.equal(E.tryMath("triple h"), null);
   assert.equal(E.tryMath("twenty one plus one"), 22);
   assert.equal(E.tryMath("0.1 + 0.2"), 0.3);
   assert.equal(E.tryMath("7% of 200"), 14);
