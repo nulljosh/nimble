@@ -1,0 +1,30 @@
+# Monthly rebuild of the offline Wikipedia pack (docs/pack). It was built by hand once, on 2026-10-12, so Private
+# mode and offline answers would have served those intros (officeholders, recent events) for good.
+# A push made with GITHUB_TOKEN starts no other workflow, so this one asks Deploy site to run when the pack changed.
+name: Offline pack
+on:
+  schedule: [{cron: '23 10 3 * *'}]
+  workflow_dispatch:
+permissions: {contents: write, actions: write}
+concurrency: {group: offline-pack, cancel-in-progress: false}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      # One long batch from an empty cache: about 9,000 summaries at the builder's polite pace.
+      - run: node scripts/build-offline-pack.mjs
+        env: {PACK_CACHE: '${{ runner.temp }}/packcache', PACK_BUDGET_MS: '3600000'}
+      - name: Commit the new pack and deploy it
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: |
+          if git diff --quiet -- docs/pack; then echo "pack unchanged or incomplete"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/pack
+          git commit -m "Offline pack: monthly rebuild ($(date -u +%F))"
+          git push
+          gh workflow run deploy-site.yml --ref main

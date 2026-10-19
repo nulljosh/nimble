@@ -32,6 +32,26 @@ Without a key: 20 questions a minute per IP. With a key: 60 a minute, in your ow
 
 Keys are issued by hand. Ask for one at the repo: https://github.com/nulljosh/nimble.
 
+## REST and MCP on the site
+
+The site has the same engine as four read-only tools, for scripts and for agents.
+
+```
+curl -s 'https://nimble.jaybulb.com/api/answer?q=capital+of+france'
+curl -s 'https://nimble.jaybulb.com/api/convert?q=10+km+to+miles'
+curl -s 'https://nimble.jaybulb.com/api/math?q=15%25+of+80'
+curl -s 'https://nimble.jaybulb.com/api/graph?q=sin(x)'
+```
+
+`POST /mcp` speaks MCP over HTTP (JSON-RPC in, JSON-RPC out, no session) with the same four tools: `answer`, `convert`, `math` and `graph`. Point an MCP client at `https://nimble.jaybulb.com/mcp`, or call it by hand:
+
+```
+curl -s https://nimble.jaybulb.com/mcp -H 'content-type: application/json' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"answer","arguments":{"q":"who wrote hamlet"}}}'
+```
+
+`convert`, `math` and `graph` run on the server with no AI and no limit. `answer` goes through the proxy above and shares its limits.
+
 ## Health
 
 `GET /stats` returns the day's counts and the latency per source. It needs no key.
