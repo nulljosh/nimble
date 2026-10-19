@@ -273,7 +273,7 @@ extension QueryEngine {
     /// day's board; then the current scoreboard with no date (the most recent game, Final, else in progress, else next);
     /// then each day back to seven days ago. A failed request with no game found is unavailable, never no game.
     /// now and tz are for tests.
-    func sportsCard(_ ask: SportsAsk, now: Date = Date(), tz: TimeZone? = nil, session: URLSession = .shared) async -> SportsCard {
+    func sportsCard(_ ask: SportsAsk, now: Date = Date(), tz: TimeZone? = nil, session: URLSession = QueryEngine.quick) async -> SportsCard {
         let days = ask.lastNight ? [1] : [0, 1]
         let fresh = Freshness(date: now, isDay: false)
         var failed = false
@@ -330,7 +330,7 @@ extension QueryEngine {
     }
 
     /// A query's sports card, or nil when the query is not about sports.
-    func sports(_ query: String, now: Date = Date(), tz: TimeZone? = nil, session: URLSession = .shared) async -> SportsCard? {
+    func sports(_ query: String, now: Date = Date(), tz: TimeZone? = nil, session: URLSession = QueryEngine.quick) async -> SportsCard? {
         guard let ask = Self.sportsAsk(query) else { return nil }
         return await sportsCard(ask, now: now, tz: tz, session: session)
     }

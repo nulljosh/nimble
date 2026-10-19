@@ -859,6 +859,13 @@ final class QueryEngine: Sendable {
                      imageURL: photo == nil ? "https://www.google.com/s2/favicons?domain=\(host)&sz=64" : nil, grounding: body, photo: photo)
     }
 
+    /// Cards, Tell me more and reports: a hung source gives up after 10 seconds, not URLSession's default 60.
+    static let quick: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 10
+        return URLSession(configuration: config)
+    }()
+
     func query(_ input: String, ai: AIConfig = AIConfig(), useLLM: Bool = true, turns: TurnBuffer = TurnBuffer(), note: AIFailureNote? = nil, session injected: URLSession? = nil) async -> QueryResult {
         if let me = identityAnswer(input) { return me }
         if let k = constantAnswer(input) { return k }
@@ -947,7 +954,7 @@ final class QueryEngine: Sendable {
         return AnswerPhoto.wikipediaLead(wiki.thumbnail?.source, width: wiki.thumbnail?.width, height: wiki.thumbnail?.height)
     }
 
-    private func queryDDG(_ input: String, session: URLSession = .shared) async -> QueryResult? {
+    private func queryDDG(_ input: String, session: URLSession = QueryEngine.quick) async -> QueryResult? {
         guard let encoded = input.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://api.duckduckgo.com/?q=\(encoded)&format=json&no_html=1&skip_disambig=1") else {
             return nil
@@ -1105,7 +1112,7 @@ final class QueryEngine: Sendable {
 
     /// `question` is the user's own words when `input` is a preprocessed search ("what was the" stripped), so the
     /// generic-topic label checks what was actually asked.
-    func queryWikipedia(_ input: String, session: URLSession = .shared, question: String? = nil) async -> QueryResult? {
+    func queryWikipedia(_ input: String, session: URLSession = QueryEngine.quick, question: String? = nil) async -> QueryResult? {
         if let rel = WikiRelation.of(input) {
             // A relation question never falls back to a loose search hit: the subject's own page first, then the top hits.
             let hits = await Self.searchHits(input, session: session)
@@ -1164,7 +1171,7 @@ final class QueryEngine: Sendable {
         return words.contains { !filler.contains($0) && !topicWords.contains($0) }
     }
 
-    private func fetchWikiSummary(url: URL, session: URLSession = .shared) async -> QueryResult? {
+    private func fetchWikiSummary(url: URL, session: URLSession = QueryEngine.quick) async -> QueryResult? {
         guard let url = Optional(url) else { return nil }
 
         do {
@@ -1214,7 +1221,7 @@ final class QueryEngine: Sendable {
     ]
 
     /// "Tell me more": three sentences from the free proxy, or nil when it has nothing more. Mirrors tellMore() in docs/engine.js.
-    static func tellMore(_ question: String, session: URLSession = .shared) async -> String? {
+    static func tellMore(_ question: String, session: URLSession = QueryEngine.quick) async -> String? {
         guard let url = URL(string: AIEngine.nimble.defaultBaseURL) else { return nil }
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
@@ -1228,7 +1235,7 @@ final class QueryEngine: Sendable {
     }
 
     /// "This is wrong": the question and the answer text go to the review list, nothing else. Mirrors reportWrong() in docs/engine.js.
-    static func reportWrong(_ question: String, answer: String, session: URLSession = .shared) async -> Bool {
+    static func reportWrong(_ question: String, answer: String, session: URLSession = QueryEngine.quick) async -> Bool {
         guard let url = URL(string: AIEngine.nimble.defaultBaseURL + "/report") else { return false }
         var req = URLRequest(url: url)
         req.httpMethod = "POST"

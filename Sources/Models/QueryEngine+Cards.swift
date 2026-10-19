@@ -41,7 +41,7 @@ extension QueryEngine {
 
     func isCardQuery(_ input: String) -> Bool { Self.ask(input) != nil || Self.sportsAsk(input) != nil || Self.marketAsk(input) != nil }
 
-    func card(_ input: String, session: URLSession = .shared) async -> QueryResult? {
+    func card(_ input: String, session: URLSession = QueryEngine.quick) async -> QueryResult? {
         // A sports question gets a card before a market one, so a league name in capitals never reads as a ticker.
         if let ask = Self.sportsAsk(input) { return .sports(await sportsCard(ask, session: session)) }
         // A market question always gets a card, even a failed one, so it never falls through to the AI.
