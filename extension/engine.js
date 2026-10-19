@@ -211,7 +211,7 @@ function onTopic(title, query, body){
 // The linked sources as "Name · Name", each one a link. Names only: no new words in the UI.
 function sourceRow(list){
   const esc=t=>String(t).replace(/</g,"&lt;");
-  return list.map(s=>'<a href="'+esc(s.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>').join(" \u00B7 ");
+  return list.map(s=>'<a href="'+hrefOf(s.url)+'" target="_blank" rel="noopener">'+esc(s.name)+'</a>').join(" \u00B7 ");
 }
 
 // Photos: only real pictures from Wikipedia's lead image. Logos, flags, icons and SVG drawings are
@@ -1150,6 +1150,8 @@ function thumbHTML(url, alt){
   return '<img class="news-thumb" src="'+attrEsc(url)+'" alt="'+attrEsc(alt||"")+'" width="56" height="56" loading="lazy" decoding="async" onload="this.classList.add(\'on\')" onerror="this.remove()">';
 }
 function attrEsc(t){ return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+// Every link we render: http(s) only, attribute-escaped. A javascript: or data: URL from a feed or a page becomes "#".
+function hrefOf(u){ const t=String(u||""); return attrEsc(/^https?:\/\//i.test(t) ? t : "#"); }
 // English fallback for the translator hook: fills {name} slots and nothing else.
 function plain(key, vars){ let s=key; if(vars) for(const k in vars) s=s.split("{"+k+"}").join(vars[k]); return s; }
 
@@ -1200,16 +1202,16 @@ async function renderAnswer(query, opts){
   if(a.kind==="convert"){ h+='<div class="mockup-big num">'+a.to+' '+esc(a.toUnit)+'</div><p class="num">'+a.from+' '+esc(a.fromUnit)+'</p>'; credit=T("computed offline"); }
   else if(a.kind==="card"){
     // Same markup as convert; the whole card opens its source like a text answer does.
-    const href=esc(a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query)).replace(/"/g,"&quot;");
+    const href=hrefOf(a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query));
     h+='<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><div class="mockup-big num">'+esc(a.big)+(a.unit?" "+esc(a.unit):"")+'</div><p class="num">'+esc(a.sub)+'</p></a>'+fresh(a);
-    credit=T("powered by {s}",{s:a.src});
+    credit=esc(T("powered by {s}",{s:a.src}));
   }
   else if(a.kind==="market"){
     // Title, the price, the change in words, then the freshness line and the source. A failed quote shows a calm state, never a number.
     if(a.unavailable){ h+='<p class="market-title">'+esc(a.title)+'</p><p class="market-state">'+esc(T("Quote unavailable right now"))+'</p>'; }
     else {
-      h+='<a class="mockup-link mockup-card" href="'+esc(a.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener"><p class="market-title">'+esc(a.title)+'</p><div class="market-price num">'+esc(a.big)+'</div>'+(a.change?'<p class="market-change num">'+esc(a.change)+'</p>':'')+'</a>'+fresh(a);
-      credit=T("powered by {s}",{s:a.src});
+      h+='<a class="mockup-link mockup-card" href="'+hrefOf(a.url)+'" target="_blank" rel="noopener"><p class="market-title">'+esc(a.title)+'</p><div class="market-price num">'+esc(a.big)+'</div>'+(a.change?'<p class="market-change num">'+esc(a.change)+'</p>':'')+'</a>'+fresh(a);
+      credit=esc(T("powered by {s}",{s:a.src}));
     }
   }
   else if(a.kind==="sports"){
@@ -1222,11 +1224,11 @@ async function renderAnswer(query, opts){
       h+=head+'<p class="sports-state">'+esc(msg)+'</p>'+fresh(a);
     }
     else {
-      const href=esc(a.url).replace(/"/g,"&quot;");
+      const href=hrefOf(a.url);
       const line = r => r.state==="pre" && r.teams.length===2 ? esc(r.teams[0].name)+" vs "+esc(r.teams[1].name)
         : r.teams.map(t=>{ const sc=t.score!==""?" "+esc(t.score):""; return t.winner ? "<strong>"+esc(t.name)+sc+"</strong>" : esc(t.name)+sc; }).join(", ");
       h+=head+'<div class="sports-rows">'+a.rows.map(r=>'<a class="mockup-link mockup-card" href="'+href+'" target="_blank" rel="noopener"><p class="sports-score num">'+line(r)+'</p><p class="sports-status num">'+esc(r.status)+'</p></a>').join("")+'</div>'+fresh(a);
-      credit=T("powered by {s}",{s:a.src});
+      credit=esc(T("powered by {s}",{s:a.src}));
     }
   }
   else if(a.kind==="math"){
@@ -1241,8 +1243,8 @@ async function renderAnswer(query, opts){
     // picture gets a 56px square beside its sentence; without one the row is the plain layout.
     h+='<ol class="news">'+a.items.map(i=>'<li'+(i.image?' class="has-thumb"':'')+'>'
       +(i.image?thumbHTML(i.image.url, i.title||i.sentence):'')
-      +'<div><a href="'+esc(i.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(i.sentence)+'</a> <span class="news-src">'+esc(i.outlet)+'</span></div></li>').join("")+'</ol>'+fresh(a);
-    credit=T("powered by {s}",{s:a.src});
+      +'<div><a href="'+hrefOf(i.url)+'" target="_blank" rel="noopener">'+esc(i.sentence)+'</a> <span class="news-src">'+esc(i.outlet)+'</span></div></li>').join("")+'</ol>'+fresh(a);
+    credit=esc(T("powered by {s}",{s:a.src}));
   }
   else if(a.kind==="disagree"){
     // Both answers, each with its model name quiet under it, and no photo: the sources do not say which is right, so the card picks neither.
@@ -1257,14 +1259,14 @@ async function renderAnswer(query, opts){
   else if(a.kind==="pack"){
     // Offline pack hit: the entry's first sentences, credited to Wikipedia with its article link and the pack's build date.
     h+='<p>'+esc(a.text)+'</p>'+(a.asOf?'<p class="as-of num">'+esc(T("as of {t}",{t:asOfLabel(a.asOf,true)}))+'</p>':'');
-    credit='<a href="'+esc(a.url).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(T("Offline pack \u00B7 Wikipedia (CC BY-SA)"))+'</a>';
+    credit='<a href="'+hrefOf(a.url)+'" target="_blank" rel="noopener">'+esc(T("Offline pack \u00B7 Wikipedia (CC BY-SA)"))+'</a>';
   }
   else if(a.kind==="text"){
     // Click through to the source; AI answers have none, so fall back to a web search.
     const href=a.url||"https://duckduckgo.com/?q="+encodeURIComponent(query);
     // A photo (Wikipedia lead image, a site's share image) tops the card; the favicon only stands in when there is none.
     const photo = a.image && a.image.url ? photoHTML(a.image.url, a.title) + (a.image.title ? '<span class="photo-credit">'+esc(a.image.title)+' \u00B7 Wikipedia</span>' : "") : "";
-    h+='<a class="mockup-link" href="'+esc(href).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'
+    h+='<a class="mockup-link" href="'+hrefOf(href)+'" target="_blank" rel="noopener">'
       +photo
       +(a.icon&&!photo?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
       +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')+'<p>'+esc(a.body)+'</p></a>'+fresh(a);
@@ -1277,7 +1279,7 @@ async function renderAnswer(query, opts){
       // The link names the page the text came from: the Wikipedia topic when there is one, else the source.
       const gHref = a.groundingUrl || href, gName = a.groundingTitle ? a.groundingTitle+" \u00B7 Wikipedia" : a.src;
       h+='<details class="why"><summary>'+esc(credited)+'</summary><p>'+esc(a.grounding.trim())+'</p>'
-        +'<a href="'+esc(gHref).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(gName)+'</a></details>';
+        +'<a href="'+hrefOf(gHref)+'" target="_blank" rel="noopener">'+esc(gName)+'</a></details>';
       credit="";
     } else credit=esc(credited);
     // Two or more linked sources sit under the sentence, names only; the row replaces the credit line.
