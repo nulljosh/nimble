@@ -16,30 +16,18 @@ Rules: usage line at or above 88% on any window means /checkpoint and stop. One 
 time, 10 minute cap. Mac zip is re-notarized only at majors. `native-v*` tags are Joshua's to
 force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purple/teal.
 
-### v5.x Finish 5.1 (patches and minors until clean)
-
-- [x] [Sonnet] 5.3 Samantha picker: Mac Preferences shows whether she is running, her model and her last latency; one-click start via `omlx start`.
-- [x] [Sonnet] 5.3 Site answers show a favicon and the page's own name; handle JS-only pages by falling back to the og:description and a one-line "this site loads with JavaScript" note.
-
 ### v5.5 Premium (Joshua, 2026-10-11: domain now, premium features, then $1 on the App Store)
 
 - [ ] [Sonnet] Price flip at the 5.5 release: iPhone and Mac go to Apple price tier 1 ($0.99) via `asc pricing` (apple-pricing skill), web stays free with the $1 Stripe unlock; MONEY.md and the landing updated the same day.
 
-### v7 Conversation
-
-- [x] [Haiku] Share card variants (square, story) with the new look.
-
 ### v8 Private and on-device
 
 - [ ] [Opus] Pick the on-device model (Apple Foundation Models where available, otherwise a small MLX/GGUF), grade it on the exam, and ship it only if it clears 90%.
-- [x] [Haiku] The offline Wikipedia pack refreshes monthly: scripts/build-offline-pack.mjs runs by hand today and no workflow calls it, so the 2026-10-12 pack goes stale.
 - [ ] [Sonnet] Samantha promoted: if the 9B or a distilled model clears 95% on the exam standalone, she ships as the Mac default without needing oMLX running.
 
 ### v9 Everywhere
 
 - [ ] [Sonnet] Windows, Android and Linux reach exam parity with iOS and Mac (same 95 questions, same pass bar).
-- [x] [Haiku] docs/API.md documents /mcp with an example, and says how to get a key (issued by hand today, no free tier).
-- [x] [Haiku] TUI and CLI (`nimble "question"`) installable by brew, same engine.
 - [ ] [Haiku] Languages: answers and UI in the five shipped languages, then ten more, checked against the exam translated.
 
 ### v10 A+
