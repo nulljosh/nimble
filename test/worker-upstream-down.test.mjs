@@ -58,3 +58,15 @@ test("a throw anywhere comes back as JSON UNKNOWN with CORS, never Cloudflare's 
   assert.equal(r.headers.get("access-control-allow-origin"), "*");
   assert.equal((await r.json()).answer, "UNKNOWN");
 });
+
+test("the answer goes out without waiting on the day's counts being saved", async () => {
+  globalThis.fetch = async (u) => (String(u).includes("groq.com")
+    ? new Response(JSON.stringify({ choices: [{ message: { content: "Paris." } }] }), { status: 200 })
+    : new Response(JSON.stringify({ query: { pages: [page] } }), { status: 200 }));
+  const pending = [];
+  const COUNTS = { idFromName: () => "g", get: () => ({ fetch: (u, init) => (init?.method === "POST" ? new Promise(() => {}) : Promise.resolve(new Response("{}"))) }) };
+  const env = { GROQ_KEY: "k", COUNTS, RATE_LIMITER: { limit: async () => ({ success: true }) }, AI: { run: async () => ({ response: "Paris." }) } };
+  const r = await worker.fetch(new Request("https://w.example/", { method: "POST", body: JSON.stringify({ q: "capital of france" }) }), env, { waitUntil: (p) => pending.push(p) });
+  assert.equal((await r.json()).answer, "Paris.");
+  assert.ok(pending.length >= 1);
+});

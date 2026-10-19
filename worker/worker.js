@@ -380,9 +380,9 @@ async function statsReply(origin, env) {
 // Any throw becomes a JSON UNKNOWN with CORS headers, so the apps fall through to their next source instead of
 // seeing Cloudflare's error page as a network failure.
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     try {
-      return await handle(req, env);
+      return await handle(req, env, ctx);
     } catch (e) {
       console.error("unhandled:", e?.stack || e);
       return json({ answer: "UNKNOWN", error: "internal" }, 500);
@@ -390,7 +390,10 @@ export default {
   },
 };
 
-async function handle(req, env) {
+async function handle(req, env, ctx) {
+  // Bookkeeping (the day's counts, the answer cache) finishes after the response is sent, off the user's wait.
+  // Without a ctx (the tests) it is awaited as before.
+  const later = (p) => (ctx?.waitUntil ? (ctx.waitUntil(Promise.resolve(p).catch(() => {})), undefined) : p);
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
     const url = new URL(req.url);
     // Browsers can't call DuckDuckGo's JSON API directly (no CORS), so the web
@@ -496,14 +499,14 @@ async function handle(req, env) {
     if (q.length > 500) return json({ error: "too long" }, 400);
     const t0 = Date.now();
 
-    const counts = await loadCounts(url.origin, env);
     // An identical question (normalized) inside the TTL is served from the Cache API: no AI, no neurons.
-    // Follow-up turns depend on the conversation, so they skip the cache.
+    // Follow-up turns depend on the conversation, so they skip the cache. The cache read and the day's counts
+    // (a Durable Object round trip) run side by side.
     const cKey = turns.length === 0 ? cacheUrl(url.origin, more ? `more: ${q}` : q) : null;
-    const hit = cKey ? await cacheGet(cKey) : null;
+    const [counts, hit] = await Promise.all([loadCounts(url.origin, env), cKey ? cacheGet(cKey) : null]);
     if (hit) {
       counts.cacheHits++;
-      await saveCounts(url.origin, counts, env);
+      await later(saveCounts(url.origin, counts, env));
       return new Response(hit, { headers: { "content-type": "application/json", ...CORS } });
     }
     const figure = turns.length ? null : await canadaFigure(q);
@@ -527,10 +530,10 @@ async function handle(req, env) {
       const refs = known ? groundingRefs(o.answer, pages, q) : [];
       const topic = known ? topicOf(photo?.page, refs) : null;
       const body = { ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) };
-      if (cKey && known && !o.aiError) await cachePut(cKey, body, isTimeSensitive(q) ? TTL_TIMELY : TTL_CACHE);
+      if (cKey && known && !o.aiError) await later(cachePut(cKey, body, isTimeSensitive(q) ? TTL_TIMELY : TTL_CACHE));
       // Keyed by the first source that answered (Groq, Qwen, Gemma), whole request time as the user felt it.
       if (o.source) counts.sample = { source: o.source.split(" ")[0], ms: Date.now() - t0 };
-      await saveCounts(url.origin, counts, env);
+      await later(saveCounts(url.origin, counts, env));
       return json(body);
     };
     const today = new Date().toISOString().slice(0, 10);
