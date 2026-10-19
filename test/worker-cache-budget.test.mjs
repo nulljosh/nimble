@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import worker, {
+  groqCooldown,
   normalizeQuestion, cacheUrl, isTimeSensitive, needsSecondModel, estNeurons, overBudget,
   NEURONS_PER_CALL, BUDGET_NEURONS, TTL_CACHE, TTL_TIMELY, _resetForTests, NimbleCounts,
 } from "../worker/worker.js";
@@ -362,6 +363,13 @@ test("groq: a daily cap (429 with a long retry-after) is not retried as a burst"
   const { json } = await post("capital of france", { env: { GROQ_KEY: "k", GROQ_BURST_WAIT_MS: 0 }, answers: { [QWEN]: "Paris." } });
   assert.equal(seen.length, 3);
   assert.equal(json.source, "Qwen");
+  // The next question skips the capped models without asking them again.
+  seen.length = 0;
+  installCaches(fakeCaches());
+  const next = await post("capital of italy", { env: { GROQ_KEY: "k", GROQ_BURST_WAIT_MS: 0 }, answers: { [QWEN]: "Rome." } });
+  assert.equal(seen.length, 0);
+  assert.equal(next.json.source, "Qwen");
+  groqCooldown.clear();
 });
 
 test("samantha: with SAMANTHA_URL set she answers first and Groq is never asked", async () => {

@@ -267,6 +267,9 @@ export const overBudget = (c) => estNeurons(c.aiCalls) > BUDGET_NEURONS;
 const store = () => globalThis.caches?.default ?? null;
 const fresh = (day = "") => ({ day, aiCalls: 0, cacheHits: 0, groqCalls: 0, groqRefused: 0 });
 let mem = fresh();
+// Groq models at their daily cap, until their retry-after runs out: skipped without a call, so a capped model stops
+// costing every question a refused round trip. ponytail: per isolate; each isolate learns from its own first refusal.
+export const groqCooldown = new Map();
 export function _resetForTests() {
   mem = fresh();
 }
@@ -547,6 +550,7 @@ export default {
     // One model: its answer, or null when it refused (cap, error). A bare 429 with no retry-after is a per-minute burst.
     let burst = false;
     const tryGroq = async (model) => {
+      if (Date.now() < (groqCooldown.get(model) || 0)) return null;
       try {
         let r = await groqCall(model);
         // A per-minute cap clears in seconds: wait out a short retry-after once before giving the model up.
@@ -558,6 +562,7 @@ export default {
           r = await groqCall(model);
         }
         if (r.status === 429 && Number.isNaN(wait)) burst = true;
+        if (r.status === 429 && wait > 3) groqCooldown.set(model, Date.now() + wait * 1000);
         if (!r.ok) { counts.groqRefused++; return null; }
         const d = await r.json();
         // gpt-oss italicizes titles (*War and Peace*); the answer is plain text.
