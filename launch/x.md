@@ -3,12 +3,12 @@
 1/
 Built a search bar that skips the search results.
 
-Nimble: type a question, get one sentence back. Math runs offline on your device. Facts and definitions come from DuckDuckGo and Wikipedia. Two open models catch the rest.
+Nimble: type a question, get one sentence back, with its source. Math and units run offline on your device. Everything else goes to free open models, grounded on Wikipedia.
 
-Free, native, no account. nimble.jaybulb.com
+Free, no account. nimble.jaybulb.com
 
 2/
 The trick is classifying the question before it answers. Math (arithmetic, trig, roots, unit conversion) never touches the network, it's evaluated right on device. Ask "y = x^2" and it draws the curve instead.
 
 3/
-No API keys anywhere, not in the binary, not in the repo. No accounts, no tracking, no subscription. macOS + iOS native, ⌥Space to summon on Mac. Source is open: github.com/nulljosh/nimble
+No accounts, no tracking, no subscription. iPhone, Mac, Watch, Android, Windows, Linux and the web. ⌥Space to summon on Mac. Open source: github.com/nulljosh/nimble
