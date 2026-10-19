@@ -39,7 +39,7 @@ force-push. Free or $1 only, no new paid tiers. No em dashes, no emojis, no purp
 
 - [ ] [Sonnet] Windows, Android and Linux reach exam parity with iOS and Mac (same 95 questions, same pass bar).
 - [x] [Haiku] docs/API.md documents /mcp with an example, and says how to get a key (issued by hand today, no free tier).
-- [ ] [Haiku] TUI and CLI (`nimble "question"`) installable by brew, same engine.
+- [x] [Haiku] TUI and CLI (`nimble "question"`) installable by brew, same engine.
 - [ ] [Haiku] Languages: answers and UI in the five shipped languages, then ten more, checked against the exam translated.
 
 ### v10 A+
