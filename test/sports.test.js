@@ -123,7 +123,9 @@ test("date fallback: no game today, the game is found yesterday, in that order",
   espn({ "football/nfl|20261011": nfl0811 });
   try {
     const card = await E.sports("did the jaguars win", { now: NOW, tz: TZ });
-    assert.deepEqual(calls, ["football/nfl|20261012", "football/nfl|20261011"]);
+    // The Final is followed by one call for the team's next game (none listed here, so one row).
+    assert.deepEqual(calls, ["football/nfl|20261012", "football/nfl|20261011", "football/nfl/teams/30|null"]);
+    assert.equal(card.rows.length, 1);
     assert.equal(card.rows[0].teams[0].name, "Jaguars");
     assert.equal(card.rows[0].teams[0].score, "19");
     assert.equal(card.rows[0].teams[0].winner, true);
@@ -183,7 +185,7 @@ test("Cowboys: not on today or yesterday, but on ESPN's current scoreboard, Fina
   espn({ "football/nfl|null": nflDefault });
   try {
     const card = await E.sports("cowboys score", { now: NOW, tz: TZ });
-    assert.deepEqual(calls, ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|null"]);
+    assert.deepEqual(calls, ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|null", "football/nfl/teams/6|null"]);
     assert.equal(card.none, undefined);
     assert.equal(card.unavailable, undefined);
     assert.equal(card.rows.length, 1);
@@ -201,7 +203,7 @@ test("look-back: a game on the fourth day back is found and dated, and nothing a
   try {
     const card = await E.sports("cowboys score", { now: NOW, tz: TZ });
     assert.deepEqual(calls, ["football/nfl|20261012", "football/nfl|20261011", "football/nfl|null",
-      "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008"]);
+      "football/nfl|20261010", "football/nfl|20261009", "football/nfl|20261008", "football/nfl/teams/6|null"]);
     assert.equal(card.rows[0].status, "Final, Thursday, Oct 8");
   } finally { restore(); }
 });
@@ -305,6 +307,21 @@ test("the score card: the score in words, the winner in bold, the status, the as
     assert.match(r.h, /href="https:\/\/www\.espn\.com\/nfl\/scoreboard"/);
     assert.match(r.credit, /powered by ESPN/);
     assert.doesNotMatch(r.h, /—/);
+  } finally { restore(); }
+});
+
+test("after a Final, the team's next game from its ESPN page is a second row, kickoff in the zone asked for", async () => {
+  const next = { team: { nextEvent: [{ date: "2026-10-18T17:00Z", competitions: [{
+    status: { type: { state: "pre" } },
+    competitors: [{ homeAway: "home", team: { id: "30", shortDisplayName: "Jaguars" } }, { homeAway: "away", team: { id: "11", shortDisplayName: "Colts" } }],
+  }] }] } };
+  espn({ "football/nfl|20261011": nfl0811, "football/nfl/teams/30|null": next });
+  try {
+    const card = await E.sports("did the jaguars win", { now: NOW, tz: TZ });
+    assert.equal(card.rows.length, 2);
+    assert.equal(card.rows[0].status, "Final");
+    assert.deepEqual(card.rows[1].teams.map(t => [t.name, t.score]), [["Jaguars", ""], ["Colts", ""]]);
+    assert.equal(card.rows[1].status, "Scheduled for Oct 18, 10:00 am");
   } finally { restore(); }
 });
 

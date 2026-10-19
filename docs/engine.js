@@ -717,6 +717,15 @@ function sportsRecentDay(events, tz){
   const day = ymdOf(new Date(pick.date), tz);
   return events.filter(e=>ymdOf(new Date(e.date), tz)===day);
 }
+// After a finished game, the team's next one from its ESPN team page (one call), so "canucks score" also says
+// when they play next. Null when ESPN lists none or the call fails.
+async function sportsNext(lg, ours, now, tz){
+  const id = ours?.team?.id; if(!id) return null;
+  const d = await getJSON(`https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[lg].path}/teams/${id}`, {timeout:SPORTS_TIMEOUT_MS});
+  const e = d?.team?.nextEvent?.[0], c = e?.competitions?.[0];
+  const ev = c && {...e, status: e.status || c.status}, mine = c?.competitors?.find(x=>x.team?.id===id);
+  return ev && mine && sportsState(ev)==="pre" ? gameRow(ev, mine, lg, now, tz, false) : null;
+}
 // The sports card for a query, or null when the query is not about sports. The order is fixed:
 // 1. today, then yesterday ("last night" is yesterday only), by the day's board;
 // 2. the team's or league's current scoreboard (no date): the most recent game, Final, else in progress, else next;
@@ -746,7 +755,10 @@ async function sports(query, opts={}){
     return failed ? {...base, unavailable:true} : {...base, none:true, lastNight:p.lastNight, asOf};
   }
   const title = p.team.replace(/\b\w/g, c=>c.toUpperCase()), base = {kind:"sports", src, title};
-  const found = (lg, hit, dated) => ({...base, url: SPORTS_LEAGUES[lg].url, rows:[gameRow(hit.ev, hit.ours, lg, now, tz, dated)], asOf});
+  const found = async (lg, hit, dated) => {
+    const next = sportsState(hit.ev)==="post" ? await sportsNext(lg, hit.ours, now, tz).catch(()=>null) : null;
+    return {...base, url: SPORTS_LEAGUES[lg].url, rows:[gameRow(hit.ev, hit.ours, lg, now, tz, dated), ...(next ? [next] : [])], asOf};
+  };
   for(const back of days) for(const lg of Object.keys(p.teams)){
     const ev = await sportsBoard(lg, sportsDay(now, back, tz));
     if(!ev){ failed = true; continue; }
