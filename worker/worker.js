@@ -145,7 +145,9 @@ export function groundingRefs(answer, pages, q = "") {
     .map((p) => ({ title: p.title, url: encodeURI(`https://en.wikipedia.org/wiki/${p.title.replace(/ /g, "_")}`), extract: p.extract }));
 }
 // A date or figure comes only from the reference: "since 1944" from an unrelated page is how the France answer went wrong.
-const GROUNDED = "Do not add a date or figure the reference lacks. If the reference is about a different thing than the question means (a film or a country when asked about a famous book), ignore it and answer the best-known meaning from what you know.";
+// "How many hours of sleep do adults need" came back UNKNOWN: the Sleep intro has no hours. The rule guards
+// changing facts (dates, office holders, counts); settled ones (constants, guidelines) may come from memory.
+const GROUNDED = "Do not add a date or figure the reference lacks when it is about a person, an event or anything that changes over time; a settled fact, like a physical constant or a standard health guideline, you may answer from what you know. If the reference is about a different thing than the question means (a film or a country when asked about a famous book), ignore it and answer the best-known meaning from what you know.";
 // Question shapes that ask for a date, and the date tokens a reference sentence can carry.
 const WHEN = /\b(when|what year|which year|what date|what century|how old)\b/i;
 const DATE = /\b(1\d{3}|20\d{2})s?\b|\b(January|February|March|April|May|June|July|August|September|October|November|December)\b/;

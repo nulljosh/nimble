@@ -864,10 +864,11 @@ final class QueryEngine: Sendable {
             llmResult = nil
         }
         if let llmResult {
-            // A model's number is a guess with no source. If DDG has a sourced answer
-            // for a numeric question, prefer it; otherwise the one-liner stands.
+            // A model's number is a guess with no source. If DDG has a sourced answer with a number
+            // of its own, prefer it; otherwise the one-liner stands ("speed of sound" lost 343 m/s to a definition).
             if case .text(_, let body, _, _, _, _, _, _, _) = llmResult, body.rangeOfCharacter(from: .decimalDigits) != nil,
-               let sourced = await ddg {
+               let sourced = await ddg, case .text(_, let sourcedBody, _, _, _, _, _, _, _) = sourced,
+               sourcedBody.rangeOfCharacter(from: .decimalDigits) != nil {
                 return await Self.withTopic(withSources(Self.keepingPhoto(sourced, from: llmResult), others: [await wiki]), query: input, session: session, enabled: topicOK)
             }
             return await Self.withTopic(withSources(llmResult, others: [await ddg, await wiki]), query: input, session: session, enabled: topicOK)
@@ -1215,7 +1216,7 @@ final class QueryEngine: Sendable {
         let everyday = Self.everydayMath(text)
         if everyday == text {
             // Must contain a number (digit or word) and an operator word or a root ("12 squared", "cube root of 27").
-            let rootPattern = "\\b(square root|sqrt|cube root|cbrt) of\\s+"
+            let rootPattern = "\\b(square root|sqrt|cube root|cbrt)(?: of)?\\s+"
             let hasNumber = text.range(of: "\\d", options: .regularExpression) != nil || Self.wordNumbers.keys.contains(where: { text.contains($0) })
             let hasOperator = Self.wordOperators.keys.contains(where: { text.contains($0) }) || text.range(of: rootPattern, options: .regularExpression) != nil
             guard hasNumber && hasOperator else { return nil }
@@ -1232,9 +1233,13 @@ final class QueryEngine: Sendable {
             text = text.replacingOccurrences(of: "\\b\(word)\\b", with: num, options: .regularExpression)
         }
 
-        // Roots: "square root of 49" -> "sqrt(49)"
-        text = text.replacingOccurrences(of: "\\b(square root|sqrt) of\\s+([0-9.]+)", with: "sqrt($2)", options: .regularExpression)
-        text = text.replacingOccurrences(of: "\\b(cube root|cbrt) of\\s+([0-9.]+)", with: "cbrt($2)", options: .regularExpression)
+        // "twenty one" is 21, "one hundred" is 100, "two thousand" is 2000 (as on the web).
+        if let r = try? Regex(#"\b([2-9]0) ([1-9])\b"#) { text = text.replacing(r) { m in String((Int(m.output[1].substring ?? "") ?? 0) + (Int(m.output[2].substring ?? "") ?? 0)) } }
+        if let r = try? Regex(#"\b(\d+) (100|1000|1000000)\b"#) { text = text.replacing(r) { m in String((Int(m.output[1].substring ?? "") ?? 0) * (Int(m.output[2].substring ?? "") ?? 0)) } }
+
+        // Roots: "square root of 49" and "sqrt 2" -> "sqrt(49)", "sqrt(2)"
+        text = text.replacingOccurrences(of: "\\b(square root|sqrt)(?: of)?\\s+([0-9.]+)", with: "sqrt($2)", options: .regularExpression)
+        text = text.replacingOccurrences(of: "\\b(cube root|cbrt)(?: of)?\\s+([0-9.]+)", with: "cbrt($2)", options: .regularExpression)
 
         // Clean up whitespace
         text = text.replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)

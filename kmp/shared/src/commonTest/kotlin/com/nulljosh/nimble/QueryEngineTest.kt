@@ -59,6 +59,8 @@ class QueryEngineTest {
         assertEquals("60", math("25% off 80"))
         assertEquals("5", math("average of 2, 4 and 9"))
         assertNull(math("half of the class"))
+        assertEquals("93", math("one hundred minus seven"))
+        assertEquals("22", math("twenty one plus one"))
     }
 
     @Test

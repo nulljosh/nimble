@@ -125,6 +125,9 @@ object QueryEngine {
         for ((word, num) in wordNumbers) {
             text = text.replace(Regex("\\b$word\\b"), num)
         }
+        // "twenty one" is 21, "one hundred" is 100, "two thousand" is 2000 (as on the web).
+        text = text.replace(Regex("\\b([2-9]0) ([1-9])\\b")) { (it.groupValues[1].toInt() + it.groupValues[2].toInt()).toString() }
+            .replace(Regex("\\b(\\d+) (100|1000|1000000)\\b")) { (it.groupValues[1].toLong() * it.groupValues[2].toLong()).toString() }
 
         text = text.replace(Regex("\\s+"), " ").trim()
         if (!text.all { it in "0123456789.+-*/^%() " }) return null

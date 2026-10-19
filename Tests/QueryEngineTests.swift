@@ -108,6 +108,10 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertEqual(engine.evaluateMath("25% off 80"), "60")
         XCTAssertEqual(engine.evaluateMath("average of 2, 4 and 9"), "5")
         XCTAssertNil(engine.evaluateMath("half of the class"))
+        XCTAssertEqual(engine.evaluateMath("one hundred minus seven"), "93")
+        XCTAssertEqual(engine.evaluateMath("twenty one plus one"), "22")
+        XCTAssertEqual(engine.evaluateMath("7% of 200"), "14")
+        XCTAssertEqual(engine.evaluateMath("sqrt 9"), "3")
         XCTAssertNil(engine.evaluateMath("what is the capital of france"))
     }
 

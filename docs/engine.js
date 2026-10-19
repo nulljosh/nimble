@@ -63,14 +63,15 @@ function evalMath(src, steps){
 }
 // "what's nine plus ten" is math, not a Wikipedia search for Vine. Spoken numbers 0-20, the
 // tens and the usual operator words; anything left over fails the whitelist below.
-// ponytail: no "twenty one" compounds, add when someone asks for one
 const WORD_NUM={zero:0,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12,thirteen:13,fourteen:14,fifteen:15,sixteen:16,seventeen:17,eighteen:18,nineteen:19,twenty:20,thirty:30,forty:40,fifty:50,sixty:60,seventy:70,eighty:80,ninety:90,hundred:100,thousand:1000,million:1e6};
 function spokenMath(s){
   return s.toLowerCase().replace(/[?!]+$/,"").replace(/^\s*(what(?:'s|\u2019s| is)|whats|calculate|compute|how much is|solve|evaluate)\s+(?:the\s+)?/,"")
     .replace(/\b(multiplied by|times)\b/g,"*").replace(/\bdivided by\b/g,"/").replace(/\bto the power of\b/g,"^").replace(/\bplus\b/g,"+").replace(/\bminus\b/g,"-")
     .replace(/\b[a-z]+\b/g,w=>w in WORD_NUM ? WORD_NUM[w] : w)
+    // "twenty one" is 21, "one hundred" is 100, "two thousand" is 2000.
+    .replace(/\b([2-9]0) ([1-9])\b/g,(_,a,b)=>+a + +b).replace(/\b(\d+) (100|1000|1000000)\b/g,(_,a,b)=>a*b)
     .replace(/\bsquared\b/g,"^2").replace(/\bcubed\b/g,"^3")
-    .replace(/\b(square root|sqrt|cube root|cbrt) of ([\d.]+)/g,(_,k,n)=>(/^c/.test(k)?"cbrt(":"sqrt(")+n+")")
+    .replace(/\b(square root|sqrt|cube root|cbrt)(?: of)? ([\d.]+)/g,(_,k,n)=>(/^c/.test(k)?"cbrt(":"sqrt(")+n+")")
     .replace(/\b(?:a |one )?(half|third|quarter) of ([\d.]+)/g,(_,k,n)=>"("+n+"/"+{half:2,third:3,quarter:4}[k]+")")
     .replace(/([\d.]+)\s*(?:%|percent)\s*off\s*([\d.]+)/g,"($2-$2*$1/100)")
     .replace(/([\d.]+)\s*(?:%|percent)\s*(?:tip\s+)?(?:of|on)\s*/g,"$1/100*")
@@ -89,7 +90,8 @@ function mathSource(s){
 function tryMath(s){
   const t = mathSource(s); if(t===null) return null;
   try{ const v = evalMath(t);
-    return (typeof v==="number" && isFinite(v)) ? v : null; }
+    // 0.1+0.2 is 0.30000000000000004 in floating point; 12 digits is the same rounding the steps use.
+    return (typeof v==="number" && isFinite(v)) ? +v.toPrecision(12) : null; }
   catch{ return null; }
 }
 // "Show steps": one line per evaluation step, or null. A single operation has one step and
@@ -1028,7 +1030,8 @@ async function answer(query, opts={}){
     ai = null;
   }
   // The model's photo, when its page backs the sentence, stays with the number it was shown with.
-  let hit = (ai && /\d/.test(ai.body) && dd) ? {...dd, image: dd.image || ai.image || null} : labelIfGeneric(ai || dd || await firstOf(query, [wiki]), query);
+  // Only a DDG abstract with a number of its own: "speed of sound" swapped 343 m/s for a definition.
+  let hit = (ai && /\d/.test(ai.body) && dd && /\d/.test(dd.body)) ? {...dd, image: dd.image || ai.image || null} : labelIfGeneric(ai || dd || await firstOf(query, [wiki]), query);
   // The answer's Wikipedia topic can supply a picture (when the proxy sent none) and the text behind the sentence (when nothing else did).
   if(hit && (!hit.image || !hit.grounding)){
     const t = await topicFor(query, hit.body).catch(()=>null);
