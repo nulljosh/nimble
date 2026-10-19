@@ -26,6 +26,22 @@ curl -s https://nimble-answers.trommatic.workers.dev/ \
 
 Repeat questions are cached for six hours (one hour for time-sensitive ones).
 
+## Clients
+
+Two one-file clients live in `sdk/`, with no dependencies. Copy the file into your project.
+
+```js
+import { ask } from "./nimble.mjs";
+const { answer, source } = await ask("capital of france"); // answer is null when no model knew it
+```
+
+```python
+from nimble import ask
+print(ask("capital of france")["answer"])  # None when no model knew it
+```
+
+Both take an optional `key` and `turns`. `python3 sdk/nimble.py minimum wage in bc` works from the shell.
+
 ## Limits and keys
 
 Without a key: 20 questions a minute per IP. With a key: 60 a minute, in your own bucket. Send it as `Authorization: Bearer <key>` or `x-api-key: <key>`. A wrong key gets 401, a spent bucket gets 429.
