@@ -26,5 +26,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/pack
           git commit -m "Offline pack: monthly rebuild ($(date -u +%F))"
+          # The build runs over an hour and main moves under it: replay the pack commit on top before pushing.
+          git pull --rebase origin main
           git push
           gh workflow run deploy-site.yml --ref main
