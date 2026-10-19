@@ -85,14 +85,14 @@ extension QueryEngine {
                      source: "Open-Meteo", url: "https://open-meteo.com", asOf: asOf)
     }
 
-    static func currencyCard(amount: Double, from: String, to: String, rate: Double, source: String, url: String, asOf: Freshness? = nil) -> QueryResult {
+    static func currencyCard(amount: Double, from: String, to: String, rate: Double, source: String, url: String, asOf: Freshness? = nil, saved: Bool = false) -> QueryResult {
         let money = NumberFormatter()
         money.locale = Locale(identifier: "en_US")
         money.numberStyle = .decimal
         money.minimumFractionDigits = 2
         money.maximumFractionDigits = 2
         let big = money.string(from: NSNumber(value: amount * rate)) ?? String(amount * rate)
-        return .card(big: big, unit: to, sub: "\(trim(amount)) \(from) at today's rate", source: source, url: url, asOf: asOf)
+        return .card(big: big, unit: to, sub: "\(trim(amount)) \(from) at \(saved ? "the last saved" : "today's") rate", source: source, url: url, asOf: asOf)
     }
 
     static func timeCard(place: String, zone: TimeZone, now: Date) -> QueryResult {
@@ -158,15 +158,26 @@ extension QueryEngine {
     }
 
     private func currencyCard(_ amount: Double, _ from: String, _ to: String, _ session: URLSession) async -> QueryResult? {
+        // The last rate fetched for each pair, so a conversion still answers offline, labelled with its day.
+        let key = "nimble.fx.\(from).\(to)"
+        func save(_ rate: Double, _ source: String, _ url: String, _ day: Date) {
+            UserDefaults.standard.set(["rate": rate, "source": source, "url": url, "day": day.timeIntervalSince1970], forKey: key)
+        }
         if let d = await fetch(Rates.self, "https://api.frankfurter.dev/v1/latest?base=\(from)&symbols=\(to)", session), let rate = d.rates?[to] {
             // Frankfurter's rate is a daily value, so its freshness is the day it is for.
-            let day = d.date.flatMap { Self.utcDay($0) }.map { Freshness(date: $0, isDay: true) }
-            return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: "Frankfurter", url: "https://frankfurter.dev", asOf: day)
+            let dayDate = d.date.flatMap { Self.utcDay($0) }
+            save(rate, "Frankfurter", "https://frankfurter.dev", dayDate ?? Date())
+            return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: "Frankfurter", url: "https://frankfurter.dev",
+                                     asOf: dayDate.map { Freshness(date: $0, isDay: true) })
         }
         if let d = await fetch(Rates.self, "https://open.er-api.com/v6/latest/\(from)", session), let rate = d.rates?[to] {
+            save(rate, "ExchangeRate-API", "https://www.exchangerate-api.com", Date())
             return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: "ExchangeRate-API", url: "https://www.exchangerate-api.com")
         }
-        return nil
+        guard let last = UserDefaults.standard.dictionary(forKey: key), let rate = last["rate"] as? Double,
+              let source = last["source"] as? String, let url = last["url"] as? String, let day = last["day"] as? Double else { return nil }
+        return Self.currencyCard(amount: amount, from: from, to: to, rate: rate, source: source, url: url,
+                                 asOf: Freshness(date: Date(timeIntervalSince1970: day), isDay: true), saved: true)
     }
 
     /// The worker's keyless RSS route: it already cleans the text and filters by place.

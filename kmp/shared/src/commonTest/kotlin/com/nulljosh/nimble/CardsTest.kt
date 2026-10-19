@@ -119,6 +119,12 @@ class CardsTest {
     }
 
     @Test
+    fun currencyFromTheLastSavedRateSaysSo() {
+        assertEquals("100 USD at the last saved rate", Cards.currencyCard(100.0, "USD", "CAD", 1.3712, "Frankfurter", "https://frankfurter.dev", saved = true).sub)
+        assertEquals(0.0068, Cards.rateFromJson("""{"rates":{"JPY":0.0068}}""", "JPY"))
+    }
+
+    @Test
     fun weatherRoundingAndGaps() {
         // Half rounds up like Math.round on the web; a negative that rounds to zero is "0", not "-0".
         assertEquals("3", Cards.weatherCard("X", null, 2.5, 0, 0.0).big)

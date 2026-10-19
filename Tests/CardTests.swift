@@ -26,6 +26,12 @@ final class CardTests: XCTestCase {
                                    source: "Frankfurter", url: "https://frankfurter.dev"))
     }
 
+    func testCurrencyCardFromTheLastSavedRate() {
+        let card = QueryEngine.currencyCard(amount: 100, from: "USD", to: "CAD", rate: 1.3712, source: "Frankfurter", url: "https://frankfurter.dev", saved: true)
+        XCTAssertEqual(card, .card(big: "137.12", unit: "CAD", sub: "100 USD at the last saved rate",
+                                   source: "Frankfurter", url: "https://frankfurter.dev"))
+    }
+
     func testTimeCard() throws {
         let zone = try XCTUnwrap(TimeZone(identifier: "Asia/Tokyo"))
         // 2026-10-02 05:05 UTC is 14:05 in Tokyo.

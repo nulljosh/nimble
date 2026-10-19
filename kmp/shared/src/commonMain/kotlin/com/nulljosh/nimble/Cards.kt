@@ -111,8 +111,8 @@ object Cards {
         return Card(temp.roundToInt().toString(), "°C", parts.joinToString(", "), "Open-Meteo", "https://open-meteo.com")
     }
 
-    fun currencyCard(amount: Double, from: String, to: String, rate: Double, source: String, url: String): Card =
-        Card(money(amount * rate), to, "${trim(amount)} $from at today's rate", source, url)
+    fun currencyCard(amount: Double, from: String, to: String, rate: Double, source: String, url: String, saved: Boolean = false): Card =
+        Card(money(amount * rate), to, "${trim(amount)} $from at ${if (saved) "the last saved" else "today's"} rate", source, url)
 
     fun timeCard(place: String, zoneId: String, epochMillis: Long? = null): Card? {
         val clock = zonedClock(zoneId, epochMillis) ?: return null
@@ -165,6 +165,9 @@ object Cards {
     }
 
     /** Frankfurter and open.er-api share the shape {"rates": {"EUR": 0.92}}. */
+    /** The raw rate for [to] in a {"rates": {...}} body, unrounded. */
+    fun rateFromJson(body: String, to: String): Double? = (parse(body)?.get("rates") as? JsonObject)?.get(to).num()?.takeIf { it != 0.0 }
+
     fun currencyFromJson(amount: Double, from: String, to: String, body: String, source: String, url: String): Card? {
         val json = parse(body) ?: return null
         val rate = (json["rates"] as? JsonObject)?.get(to).num()?.takeIf { it != 0.0 } ?: return null
@@ -233,11 +236,19 @@ class CardClient(private val http: HttpClient) {
         return Cards.timeCard(loc.name, loc.timezone ?: return null)?.copy(asOf = Freshness.now())
     }
 
+    // ponytail: the last rate per pair lives in memory, so offline works for the rest of the session only;
+    // persist it through a store like HistoryStorage if offline-after-restart matters.
+    private class Rate(val rate: Double, val source: String, val url: String, val asOf: Freshness?)
+    private val lastRates = mutableMapOf<String, Rate>()
+
     private suspend fun currency(amount: Double, from: String, to: String): Card? {
-        fetch("https://api.frankfurter.dev/v1/latest?base=$from&symbols=$to")?.let { body ->
-            Cards.currencyFromJson(amount, from, to, body, "Frankfurter", "https://frankfurter.dev")?.let { return it }
+        fun read(body: String?, source: String, url: String): Rate? {
+            val card = body?.let { Cards.currencyFromJson(1.0, from, to, it, source, url) } ?: return null
+            return Cards.rateFromJson(body, to)?.let { Rate(it, source, url, card.asOf) }
         }
-        val body = fetch("https://open.er-api.com/v6/latest/$from") ?: return null
-        return Cards.currencyFromJson(amount, from, to, body, "ExchangeRate-API", "https://www.exchangerate-api.com")
+        val live = read(fetch("https://api.frankfurter.dev/v1/latest?base=$from&symbols=$to"), "Frankfurter", "https://frankfurter.dev")
+            ?: read(fetch("https://open.er-api.com/v6/latest/$from"), "ExchangeRate-API", "https://www.exchangerate-api.com")
+        val r = live?.also { lastRates["$from.$to"] = it } ?: lastRates["$from.$to"] ?: return null
+        return Cards.currencyCard(amount, from, to, r.rate, r.source, r.url, saved = live == null).copy(asOf = r.asOf)
     }
 }
