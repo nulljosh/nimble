@@ -8,7 +8,7 @@ v9 is closed by 9.4.4. The next major, 10.0.0, closes v10 and is cut the moment 
 
 ## Where things stand
 
-- Repo: 9.9.0 on main. Tags v8.0.0 through v9.8.0 exist; 9.9.0 is tagged once CI is green. There is no 7.0.0: v7's work shipped as 6.25 to 6.37 and the 7.0.0 cut waited on a clean exam until v8 was done too. 9.0.0 was skipped on purpose (a 9.0.0 tag would sit below the existing 9.1.0 build and compile the wrong version). CI is green. The Homebrew tap is current.
+- Repo: 9.9.0 on main. Tags v8.0.0 through v9.9.0 exist. There is no 7.0.0: v7's work shipped as 6.25 to 6.37 and the 7.0.0 cut waited on a clean exam until v8 was done too. 9.0.0 was skipped on purpose (a 9.0.0 tag would sit below the existing 9.1.0 build and compile the wrong version). CI is green. The Homebrew tap is current.
 - Quality: the 154-question exam reads 154 of 154. The 1,049-question exam (test/exam-1000.js) reads offline 810 of 810, and the AI slice is run a rotating slice per run. Method and numbers are in docs/BENCHMARK.md.
 - Store, iPhone 9.4.4 (build 202610181545) and Mac 9.4.3 (build 202610181537): both WAITING_FOR_REVIEW. The iPhone 9.4.4 build was rejected once under Guideline 5, because the China AI rule flagged the word "OpenAI" in the store metadata. Fixed 2026-10-18: China mainland removed from availability, "OpenAI" removed from the store description on iPhone and Mac, and the build resubmitted. ASC app id 6807858746.
 - Price: free. Joshua decided it on 2026-10-12. The $0.99 flip waits until the Worker has all-day Groq headroom, and Joshua runs it himself.
