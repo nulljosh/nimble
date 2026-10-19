@@ -245,7 +245,7 @@ form { position: relative; }
 <header class="top" id="top">
   <a class="brand" href="/"><img src="icon-512.png" alt="">Nimble</a>
   <button type="button" class="menu-btn" id="menu-btn" aria-controls="nav" aria-expanded="false" aria-label="Menu" data-i18n-aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg></button>
-  <nav id="nav" aria-label="Nimble"><button type="button" id="ai" aria-live="polite"></button><button type="button" id="private"></button><button type="button" id="mascot"></button><button type="button" id="shape"></button><button type="button" id="pack-get" data-i18n="Download offline answers">Download offline answers</button><button type="button" id="pack-drop" hidden data-i18n="Remove offline pack">Remove offline pack</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
+  <nav id="nav" aria-label="Nimble"><button type="button" id="private"></button><button type="button" id="mascot"></button><button type="button" id="shape"></button><button type="button" id="pack-get" data-i18n="Download offline answers">Download offline answers</button><button type="button" id="pack-drop" hidden data-i18n="Remove offline pack">Remove offline pack</button><a href="/#install" data-i18n="Get the app">Get the app</a><a href="https://github.com/nulljosh/nimble" data-i18n="Source">Source</a></nav>
 </header>
 <div class="scrim" id="scrim" aria-hidden="true"></div>
 <main>
@@ -403,17 +403,9 @@ var T=I18N.t;
       }catch(err){ rec=null; paintMic('idle'); }
     });
   }
-  // AI switch: on (the default) = the model may answer, off = DuckDuckGo and Wikipedia only.
-  var ai=document.getElementById('ai');
-  function paintAI(){
-    var c=aiConsent();
-    ai.textContent=T(c==='no'?'AI: off':'AI: on');
-    ai.title=T(c==='no'?'Click to turn AI answers on':'Click to turn AI answers off');
-  }
-  paintAI();
-  ai.addEventListener('click',function(){
-    aiConsent(aiConsent()==='no'?'yes':'no'); paintAI();
-  });
+  // No AI switch any more: Private mode is the one off switch. Anyone who had turned AI off lands in Private,
+  // so nothing they kept local starts leaving the page.
+  if(aiConsent()==='no'){ try{ localStorage.setItem('nimble.private','1'); }catch(err){} aiConsent(''); }
   // Private mode: answers come from math, units, graphs and the offline pack only; no request leaves the page.
   var privBtn=document.getElementById('private');
   function privateOn(){ try{ return localStorage.getItem('nimble.private')==='1'; }catch(err){ return false; } }

@@ -44,7 +44,7 @@ strong { color: var(--dark); }
   you, because it never asks who you are.</p>
 
   <h2>Three ways to answer</h2>
-  <p>You pick how far a question travels. AI answers are on by default; one switch in Settings turns them off, and Private mode keeps every question on the device. The iPhone, Mac and Apple Watch apps ask once, the first time they open.</p>
+  <p>You pick how far a question travels. On the web, AI answers are on by default and Private mode keeps every question on the device. The iPhone, Mac and Apple Watch apps ask once, the first time they open, and keep an AI Answers switch in Settings.</p>
   <ul>
     <li><strong>Free cloud (the default).</strong> Your question goes to the app's own answering service at <code>nimble-answers.trommatic.workers.dev</code>, which asks open models (OpenAI's gpt-oss and Alibaba's Qwen on Groq, with Alibaba's Qwen and Google's Gemma on Cloudflare Workers AI as backup), and to DuckDuckGo and Wikipedia for sources. Groq and Cloudflare each see the question text and nothing else.</li>
     <li><strong>Your own key.</strong> Pick Claude or OpenAI in Settings and enter your key, and the question goes straight from your device to Anthropic or OpenAI. Pick Ollama and it goes to the Ollama server you run. The key stays on your device.</li>
