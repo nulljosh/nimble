@@ -26,6 +26,15 @@ jobs:
       - uses: actions/checkout@v4
       - run: swift build
 
+  # Release builds of the Mac and iPhone apps, unsigned, held under their size budgets (scripts/app-size.sh).
+  app-size:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - run: brew install xcodegen
+      - run: scripts/app-size.sh
+
   docs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
