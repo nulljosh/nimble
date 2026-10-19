@@ -1435,5 +1435,16 @@
     "pt": "Nada mais a acrescentar",
     "hi": "और कुछ नहीं",
     "ja": "これ以上はありません"
+  },
+  "from {s}": {
+    "en": "from {s}",
+    "fr": "de {s}",
+    "es": "de {s}",
+    "zh": "来自 {s}",
+    "pa": "{s} ਤੋਂ",
+    "de": "von {s}",
+    "pt": "de {s}",
+    "hi": "{s} से",
+    "ja": "{s} より"
   }
 }

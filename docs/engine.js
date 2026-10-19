@@ -1189,13 +1189,15 @@ async function renderAnswer(query, opts){
     // "Why this answer": the source line opens the exact text the sentence was cut from, with a link.
     // Shown only when that text says more than the sentence did.
     const why = typeof a.grounding==="string" && a.grounding.trim().length > a.body.trim().length;
+    // A site's own page is where the answer came from, not what powered it: "from primitive.dev".
+    const credited = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(a.src) ? T("from {s}",{s:a.src}) : T("powered by {s}",{s:a.src});
     if(why){
       // The link names the page the text came from: the Wikipedia topic when there is one, else the source.
       const gHref = a.groundingUrl || href, gName = a.groundingTitle ? a.groundingTitle+" \u00B7 Wikipedia" : a.src;
-      h+='<details class="why"><summary>'+esc(T("powered by {s}",{s:a.src}))+'</summary><p>'+esc(a.grounding.trim())+'</p>'
+      h+='<details class="why"><summary>'+esc(credited)+'</summary><p>'+esc(a.grounding.trim())+'</p>'
         +'<a href="'+esc(gHref).replace(/"/g,"&quot;")+'" target="_blank" rel="noopener">'+esc(gName)+'</a></details>';
       credit="";
-    } else credit=T("powered by {s}",{s:a.src});
+    } else credit=esc(credited);
     // Two or more linked sources sit under the sentence, names only; the row replaces the credit line.
     if((a.sources||[]).length>1){
       h+='<p class="sources">'+sourceRow(a.sources)+'</p>';

@@ -194,7 +194,19 @@ class AnswerClient(
     }
 
     @Serializable
-    private data class ProxyBody(val q: String)
+    private data class ProxyBody(val q: String, val more: Boolean? = null)
+
+    /** "Tell me more": three sentences from the proxy, or null (nothing more, offline, or Private mode). Mirrors tellMore() in docs/engine.js. */
+    suspend fun tellMore(input: String): String? {
+        if (privateMode() || !networkAvailable()) return null
+        return runCatchingNull {
+            val res = http.post(PROXY) {
+                contentType(ContentType.Application.Json)
+                setBody(ProxyBody(input, more = true))
+            }
+            moreAnswer(res.bodyAsText())
+        }
+    }
 
     private suspend fun gemma(input: String, aiFailures: MutableList<String>): Answer? = runCatchingNull {
         val res = http.post(PROXY) {
@@ -351,6 +363,11 @@ internal fun aiRestingNote(aiError: String?, source: String): String? =
 /** The worker's `aiError`, present only when its AI call failed and the answer is UNKNOWN. */
 internal fun proxyAiError(body: String): String? =
     runCatching { rich.decodeFromString<ProxyReply>(body).aiError }.getOrNull()?.takeIf { it.isNotEmpty() }
+
+/** Tell me more's reply: the three sentences, or null for UNKNOWN or an unreadable body. */
+internal fun moreAnswer(body: String): String? =
+    runCatching { rich.decodeFromString<ProxyReply>(body).answer?.trim() }.getOrNull()
+        ?.takeIf { it.isNotEmpty() && it.uppercase() != "UNKNOWN" }
 
 /** The worker's `/?q=` reply. `image` is an object `{url, width, height}`; a string here would drop the whole answer. */
 internal fun proxyAnswer(body: String, query: String? = null): Answer.Text? {

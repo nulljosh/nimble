@@ -1181,6 +1181,20 @@ final class QueryEngine: Sendable {
         "compute ", "solve ", "evaluate ", "the answer to ", "result of "
     ]
 
+    /// "Tell me more": three sentences from the free proxy, or nil when it has nothing more. Mirrors tellMore() in docs/engine.js.
+    static func tellMore(_ question: String, session: URLSession = .shared) async -> String? {
+        guard let url = URL(string: AIEngine.nimble.defaultBaseURL) else { return nil }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "content-type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["q": question, "more": true])
+        guard let (data, _) = try? await session.data(for: req),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let answer = (json["answer"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !answer.isEmpty, answer != "UNKNOWN" else { return nil }
+        return answer
+    }
+
     private static let fractionDivisors = ["half": "2", "third": "3", "quarter": "4"]
 
     /// "half of 250", "25% off 80", "15 percent tip on 60", "average of 2, 4 and 9". Mirrors docs/engine.js.

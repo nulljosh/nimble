@@ -103,6 +103,11 @@ final class AppState {
     private(set) var focusRequest = 0
     /// Bumped by every query and by newQuestion(). A slow answer that arrives after either is dropped.
     private var queryGeneration = 0
+    /// The question the shown answer belongs to. Tell me more asks it again for three sentences.
+    private(set) var answeredQuery = ""
+    /// Tell me more is on its way, or already used for this answer (it grows once).
+    private(set) var tellingMore = false
+    private(set) var toldMore = false
 
     private let queryEngine = QueryEngine()
     private let prefs = Preferences()
@@ -335,6 +340,8 @@ final class AppState {
     /// Every answered question goes to history with its answer text, and on iOS to the widget too.
     /// Called only after `result` is set, so the answer is the current result's copy text.
     private func remember(_ text: String) {
+        answeredQuery = text
+        toldMore = false
         history.add(text, answer: result.historyText)
         #if os(iOS)
         if let answer = result.historyText {
@@ -342,6 +349,25 @@ final class AppState {
             WidgetCenter.shared.reloadAllTimelines()
         }
         #endif
+    }
+
+    /// Tell me more: the same question to the free proxy with more:true, and the answer grows to three sentences in place.
+    /// Only for a text answer, never in Private mode (the web does the same).
+    func tellMore() {
+        guard case .text(let heading, _, let source, let sourceURL, let imageURL, let grounding, let sources, let photo, let background) = result,
+              !answeredQuery.isEmpty, !tellingMore, !toldMore, !privateMode else { return }
+        let q = answeredQuery, generation = queryGeneration
+        tellingMore = true
+        Task { @MainActor [weak self] in
+            let more = await QueryEngine.tellMore(q)
+            guard let self, generation == self.queryGeneration else { return }
+            self.tellingMore = false
+            self.toldMore = true
+            if let more {
+                self.result = .text(heading: heading, body: more, source: source, sourceURL: sourceURL, imageURL: imageURL,
+                                    grounding: grounding, sources: sources, photo: photo, background: background)
+            }
+        }
     }
 
     /// Clearing history also forgets the follow-up context.

@@ -127,5 +127,6 @@
   "Story": "Story",
   "Card": "Carte",
   "Tell me more": "Dis-m'en plus",
-  "Nothing more to add": "Rien de plus à ajouter"
+  "Nothing more to add": "Rien de plus à ajouter",
+  "from {s}": "de {s}"
 }

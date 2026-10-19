@@ -225,6 +225,9 @@ struct TextAnswerView: View {
     }
 
     private var pageURL: String { sourceURL ?? state.searchURL }
+    /// A site's own page is where the answer came from, not what powered it: "from primitive.dev". Same rule as the web.
+    private var isSite: Bool { source.range(of: #"^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$"#, options: .regularExpression) != nil }
+    private var sourceLabel: String { isSite ? String(localized: "from \(source)") : String(localized: "powered by \(source)") }
 
     /// The "Why this answer" link: "<Title> · Wikipedia" when it opens a Wikipedia article, else the source name.
     private var whyLabel: String {
@@ -236,7 +239,10 @@ struct TextAnswerView: View {
 
     var body: some View {
         AnswerCard(shareText: shareText, freshness: asOf?.label(), eyebrow: QueryResult.eyebrow(background: background),
-                   lead: QueryResult.leadLines(background: background, aiError: aiError, source: source)) {
+                   lead: QueryResult.leadLines(background: background, aiError: aiError, source: source),
+                   // Not for a site's own page: the AI that tells more does not know the site.
+                   onMore: state.toldMore || state.privateMode || isSite ? nil : { state.tellMore() },
+                   moreLabel: state.tellingMore ? String(localized: "Thinking…") : String(localized: "Tell me more")) {
             VStack(alignment: .leading, spacing: 16) {
                 if let photo, let url = URL(string: photo.url) {
                     // 16:9 box reserved up front, the cream placeholder until the picture loads, so nothing jumps.
@@ -336,21 +342,21 @@ struct TextAnswerView: View {
                     withAnimation(.easeOut(duration: 0.2)) { showWhy.toggle() }
                 } label: {
                     HStack(spacing: 8) {
-                        Text("powered by \(source)")
+                        Text(sourceLabel)
                         Image(systemName: showWhy ? "chevron.up" : "chevron.down")
                             .font(.nimbleMicro)
                     }
                 }
                 .buttonStyle(.plain)
                 .minimumTapTarget()
-                .accessibilityLabel(String(localized: "powered by \(source)"))
+                .accessibilityLabel(sourceLabel)
             } else if let u = URL(string: pageURL) {
-                Button { openURL(u) } label: { Text("powered by \(source)") }
+                Button { openURL(u) } label: { Text(sourceLabel) }
                     .buttonStyle(.plain)
                     .minimumTapTarget()
-                    .accessibilityLabel(String(localized: "powered by \(source)"))
+                    .accessibilityLabel(sourceLabel)
             } else {
-                Text("powered by \(source)")
+                Text(sourceLabel)
             }
         }
     }
@@ -376,15 +382,21 @@ struct AnswerCard<Content: View, Footer: View>: View {
     var eyebrow: String = "Answer"
     /// Quiet dim lines directly under the header, before the content (the resting note, the background caption).
     var lead: [String] = []
+    /// Tell me more, on text answers only: nil hides it, `moreLabel` says what it is doing.
+    var onMore: (() -> Void)? = nil
+    var moreLabel: String = ""
     let content: Content
     let footer: Footer
 
     init(shareText: String?, freshness: String? = nil, eyebrow: String = "Answer", lead: [String] = [],
+         onMore: (() -> Void)? = nil, moreLabel: String = "",
          @ViewBuilder content: () -> Content, @ViewBuilder footer: () -> Footer) {
         self.shareText = shareText
         self.freshness = freshness
         self.eyebrow = eyebrow
         self.lead = lead
+        self.onMore = onMore
+        self.moreLabel = moreLabel
         self.content = content()
         self.footer = footer()
     }
@@ -463,6 +475,17 @@ struct AnswerCard<Content: View, Footer: View>: View {
                     .minimumTapTarget()
                     .accessibilityLabel("Share")
                 }
+            }
+            // Its own line under the row: a fourth link squeezed the source label until it broke mid-word on iPhone.
+            if let onMore {
+                Button(action: onMore) {
+                    Text(moreLabel)
+                        .font(.nimbleSmall)
+                        .foregroundStyle(Color.dim)
+                        .underline()
+                }
+                .buttonStyle(.plain)
+                .minimumTapTarget()
             }
         }
         .padding(24)

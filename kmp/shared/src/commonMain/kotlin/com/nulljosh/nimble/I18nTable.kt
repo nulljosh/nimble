@@ -131,6 +131,7 @@ internal val I18N_TABLE: Map<String, Map<String, String>> = mapOf(
     "Card" to mapOf("fr" to "Carte", "es" to "Tarjeta", "zh" to "卡片", "pa" to "ਕਾਰਡ", "de" to "Karte", "pt" to "Cartão", "hi" to "कार्ड", "ja" to "カード"),
     "Tell me more" to mapOf("fr" to "Dis-m'en plus", "es" to "Cuéntame más", "zh" to "详细一点", "pa" to "ਹੋਰ ਦੱਸੋ", "de" to "Mehr dazu", "pt" to "Conte mais", "hi" to "और बताओ", "ja" to "もっと詳しく"),
     "Nothing more to add" to mapOf("fr" to "Rien de plus à ajouter", "es" to "Nada más que añadir", "zh" to "没有更多内容", "pa" to "ਹੋਰ ਕੁਝ ਨਹੀਂ", "de" to "Mehr gibt es nicht", "pt" to "Nada mais a acrescentar", "hi" to "और कुछ नहीं", "ja" to "これ以上はありません"),
+    "from {s}" to mapOf("fr" to "de {s}", "es" to "de {s}", "zh" to "来自 {s}", "pa" to "{s} ਤੋਂ", "de" to "von {s}", "pt" to "de {s}", "hi" to "{s} से", "ja" to "{s} より"),
     "Ask out loud" to mapOf("fr" to "Demander à voix haute", "es" to "Preguntar en voz alta", "zh" to "语音提问", "pa" to "ਬੋਲ ਕੇ ਪੁੱਛੋ", "de" to "Laut fragen", "pt" to "Perguntar em voz alta", "hi" to "बोलकर पूछें", "ja" to "声で質問"),
     "Back to search" to mapOf("fr" to "Retour à la recherche", "es" to "Volver a la búsqueda", "zh" to "返回搜索", "pa" to "ਖੋਜ ਤੇ ਵਾਪਸ", "de" to "Zurück zur Suche", "pt" to "Voltar à busca", "hi" to "खोज पर वापस", "ja" to "検索に戻る"),
     "Cancel" to mapOf("fr" to "Annuler", "es" to "Cancelar", "zh" to "取消", "pa" to "ਰੱਦ ਕਰੋ", "de" to "Abbrechen", "pt" to "Cancelar", "hi" to "रद्द करें", "ja" to "キャンセル"),

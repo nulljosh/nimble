@@ -348,7 +348,8 @@ var T=I18N.t;
     // Copy sits next to the answer, first, as on the iPhone.
     if(share) share='<button type="button" data-copy>'+T('Copy')+'</button>'+share;
     // Tell me more: a text answer can grow to three sentences, once, on a tap. Not offline or in Private mode.
-    if(res.kind==='text' && !privateOn()) share+='<button type="button" data-more>'+T('Tell me more')+'</button>';
+    // Not for a site's own page: the AI that tells more does not know the site.
+    if(res.kind==='text' && !privateOn() && !/^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(res.a.src||'')) share+='<button type="button" data-more>'+T('Tell me more')+'</button>';
     r.innerHTML=res.h+(res.credit||share?'<div class="credit">'+(res.credit?'<span>'+res.credit+'</span>':'')+share+'</div>':'');
     // Voice loop: a question asked out loud gets its answer read back, through the same Listen button.
     if(opts&&opts.spoken){ var lb=r.querySelector('[data-listen]'); if(lb) lb.click(); }

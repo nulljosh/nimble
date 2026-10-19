@@ -23,7 +23,7 @@ test("a multi-sentence source keeps the full text and renders it behind the sour
     assert.equal(a.body, "Ship faster.");
     assert.equal(a.grounding, "Ship faster. Then ship again.");
     const r = await E.renderAnswer("what's acme.io");
-    assert.match(r.h, /<details class="why"><summary>powered by acme\.io<\/summary>/);
+    assert.match(r.h, /<details class="why"><summary>from acme\.io<\/summary>/);
     assert.match(r.h, /<p>Ship faster\. Then ship again\.<\/p>/);
     assert.match(r.h, /<a href="https:\/\/acme\.io" target="_blank" rel="noopener">acme\.io<\/a>/);
     assert.equal(r.credit, "");
@@ -35,7 +35,7 @@ test("a one-sentence source shows no expander and keeps the usual credit line", 
   try {
     const r = await E.renderAnswer("what's acme.io");
     assert.doesNotMatch(r.h, /class="why"/);
-    assert.equal(r.credit, "powered by acme.io");
+    assert.equal(r.credit, "from acme.io");
   } finally { restore(); }
 });
 
@@ -45,6 +45,6 @@ test("a source that is only its title has nothing more to show", async () => {
   try {
     const r = await E.renderAnswer("what's acme.io");
     assert.doesNotMatch(r.h, /class="why"/);
-    assert.equal(r.credit, "powered by acme.io");
+    assert.equal(r.credit, "from acme.io");
   } finally { global.fetch = real; }
 });

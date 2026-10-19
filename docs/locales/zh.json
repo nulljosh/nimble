@@ -127,5 +127,6 @@
   "Story": "竖屏",
   "Card": "卡片",
   "Tell me more": "详细一点",
-  "Nothing more to add": "没有更多内容"
+  "Nothing more to add": "没有更多内容",
+  "from {s}": "来自 {s}"
 }

@@ -127,5 +127,6 @@
   "Story": "Historia",
   "Card": "Tarjeta",
   "Tell me more": "Cuéntame más",
-  "Nothing more to add": "Nada más que añadir"
+  "Nothing more to add": "Nada más que añadir",
+  "from {s}": "de {s}"
 }

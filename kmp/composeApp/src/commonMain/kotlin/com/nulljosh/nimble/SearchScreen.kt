@@ -100,6 +100,9 @@ fun SearchScreen(
     var speakNext by remember { mutableStateOf(false) }
     var recent by remember { mutableStateOf(history.list()) }
     var showHistory by remember { mutableStateOf(false) }
+    // The question the shown answer belongs to, and the answer Tell me more already grew (it grows once).
+    var asked by remember { mutableStateOf("") }
+    var grown by remember { mutableStateOf<Answer?>(null) }
     var showSettings by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
     val placeholder = remember { QueryEngine.randomSuggestion() }
@@ -122,6 +125,7 @@ fun SearchScreen(
         val q = text.trim()
         if (q.isEmpty()) return
         query = q
+        asked = q
         speech?.speak(null) {}  // a new question stops the last answer's reading
         // Math resolves synchronously and offline; no spinner for something instant.
         val offline = QueryEngine.evaluateMath(q)
@@ -227,17 +231,37 @@ fun SearchScreen(
                     Column {
                         ResultCard(a, theme, client)
                         val say = historySnippet(a)
-                        if (speech != null && a !is Answer.Miss && !say.isNullOrBlank()) {
-                            // Listen: the phone's own voice reads the answer. A second tap stops it.
-                            var speaking by remember(a) { mutableStateOf(false) }
-                            // A spoken question hears its answer without a tap.
-                            LaunchedEffect(a) {
-                                if (speakNext) { speakNext = false; speaking = true; speech.speak(say) { speaking = false } }
-                            }
+                        val canListen = speech != null && a !is Answer.Miss && !say.isNullOrBlank()
+                        // Tell me more asks the AI, so a site's own page (source is a host) has nothing to grow into.
+                        val canMore = a is Answer.Text && a !== grown && !Regex("^[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+$").matches(a.source)
+                        var speaking by remember(a) { mutableStateOf(false) }
+                        var telling by remember(a) { mutableStateOf(false) }
+                        // A spoken question hears its answer without a tap.
+                        LaunchedEffect(a) {
+                            if (canListen && speakNext) { speakNext = false; speaking = true; speech?.speak(say) { speaking = false } }
+                        }
+                        if (canListen || canMore) {
                             Spacer(Modifier.height(12.dp))
-                            ToolButton(if (speaking) tr("Stop") else tr("Listen"), theme) {
-                                if (speaking) { speech.speak(null) {}; speaking = false }
-                                else { speaking = true; speech.speak(say) { speaking = false } }
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                // Listen: the phone's own voice reads the answer. A second tap stops it.
+                                if (canListen) ToolButton(if (speaking) tr("Stop") else tr("Listen"), theme) {
+                                    if (speaking) { speech?.speak(null) {}; speaking = false }
+                                    else { speaking = true; speech?.speak(say) { speaking = false } }
+                                }
+                                // Tell me more: the answer grows to three sentences in place, once.
+                                if (canMore && a is Answer.Text) ToolButton(if (telling) tr("Thinking…") else tr("Tell me more"), theme) {
+                                    if (telling) return@ToolButton
+                                    telling = true
+                                    scope.launch {
+                                        val more = client.tellMore(asked)
+                                        telling = false
+                                        if (answer === a) {
+                                            val next = if (more != null) a.copy(body = more) else a
+                                            grown = next
+                                            answer = next
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -290,7 +314,7 @@ private fun RecentList(
     Column(Modifier.widthIn(max = 640.dp).fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "RECENT",
+                tr("RECENT"),
                 color = theme.accent,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
