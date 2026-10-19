@@ -212,6 +212,39 @@ export async function canadaFigure(q) {
     return null;
   }
 }
+// "paris vs london population": both numbers from Wikidata (P1082), no model. Each name is Wikidata's top search hit,
+// so a bare "new york" can land on the state. No "and": "bosnia and herzegovina" is one country.
+// ponytail: top hit only; add a "city" hint or a type check (P31) if wrong-entity picks show up in reports.
+const WD = { headers: { "user-agent": "NimbleAnswers/1.0 (https://nimble.jaybulb.com)" } };
+const COMPARE = [
+  /^(?:what(?:'s|’s| is) the )?population (?:of )?(.+?)\s+(?:vs\.?|versus|compared (?:to|with))\s+(.+?)\??$/i,
+  /^(.+?)\s+(?:vs\.?|versus)\s+(.+?)\s+population\??$/i,
+];
+const bigNumber = (n) => n >= 1e9 ? `${+(n / 1e9).toFixed(2)} billion` : n >= 1e6 ? `${+(n / 1e6).toFixed(1)} million` : n.toLocaleString("en-US");
+async function population(name) {
+  const s = await (await fetch(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(name)}&language=en&type=item&limit=1&format=json`, WD)).json();
+  const hit = s?.search?.[0];
+  if (!hit) return null;
+  const c = (await (await fetch(`https://www.wikidata.org/w/api.php?action=wbgetclaims&entity=${hit.id}&property=P1082&format=json`, WD)).json())?.claims?.P1082 || [];
+  const year = (x) => x.qualifiers?.P585?.[0]?.datavalue?.value?.time?.slice(1, 5) || "";
+  // The latest year wins (Canada's preferred claim is the 2021 census, 37 million; 2023 says 40); preferred breaks a tie.
+  const best = c.filter((x) => x.rank !== "deprecated")
+    .sort((a, b) => year(b).localeCompare(year(a)) || (b.rank === "preferred") - (a.rank === "preferred"))[0];
+  const n = Number(best?.mainsnak?.datavalue?.value?.amount);
+  return Number.isFinite(n) && n > 0 ? { label: hit.label, n, year: year(best) } : null;
+}
+export async function comparePopulation(q) {
+  const m = COMPARE.map((re) => re.exec(q.trim())).find(Boolean);
+  if (!m) return null;
+  try {
+    const [a, b] = await Promise.all([population(m[1]), population(m[2])]);
+    if (!a || !b) return null;
+    const line = (p) => `${p.label}: ${bigNumber(p.n)}${p.year ? ` (${p.year})` : ""}`;
+    return `${line(a)}. ${line(b)}.`;
+  } catch {
+    return null;
+  }
+}
 export const TTL_CACHE = 6 * 3600; // seconds
 export const TTL_TIMELY = 3600; // time-sensitive answers go stale fast
 const TIMELY = /\b(current|latest|today|price|score|now)\b|\bwho is the\b/i;
@@ -446,6 +479,8 @@ export default {
     }
     const figure = turns.length ? null : await canadaFigure(q);
     if (figure) return json({ answer: figure, source: "Bank of Canada" });
+    const compared = turns.length ? null : await comparePopulation(q);
+    if (compared) return json({ answer: compared, source: "Wikidata" });
     // Past the daily estimate: no AI call. The client shows its resting note because aiError is set.
     const resting = () => json({ answer: "UNKNOWN", resting: true, aiError: BUDGET_NOTE });
     if (overBudget(counts) && !env.GROQ_KEY) return resting();
