@@ -136,7 +136,7 @@ const Q = [
   ["solve 2cos x + 1 = 0", /2π\s*\/\s*3.*4π\s*\/\s*3/],
   ["exact value of tan(pi/3)", /√3|1\.73/],
   ["simplify sin x / cos x", /tan/i],
-  ["sector area with radius 4 and angle pi/2", /2π|6\.28/],
+  ["sector area with radius 4 and angle pi/2", /4π|12\.56/],
 ];
 
 (async () => {

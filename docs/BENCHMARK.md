@@ -44,13 +44,20 @@ The same 154 questions with no network at all: math, units, constants, the devic
 
 ## BC curriculum: Pre-Calculus 12
 
-`test/exam-pc12.js` asks Pre-Calculus 12 the way a student types it, across the course's five units: transformations, exponents and logs, geometric sequences and series, polynomials and rational functions, and trigonometry. Form A is 40 questions. Form B is 41 more, written after the solver and never tuned against, so it is the honest grade. Run `node test/exam-pc12.js`, or `OFFLINE=1` for no network. The bar is A+, 95%.
+`test/exam-pc12.js` asks Pre-Calculus 12 the way a student types it, across the course's five units: transformations, exponents and logs, geometric sequences and series, polynomials and rational functions, and trigonometry. Form A is 40 questions. Each later form is written fresh before any run, so its first score is the honest grade: form B (41) scored 25 offline, form C (40) scored 24 offline. After each form is fixed it stays in the exam as a regression check, and the next fresh form takes over as the grade. One form C key was wrong (sector area with r = 4 and θ = π/2 is 4π, not 2π) and is corrected. Run `node test/exam-pc12.js`, or `OFFLINE=1` for no network. The bar is A+, 95%.
 
 | Date | Engine | Form A | Form B |
 |---|---|---|---|
 | 2026-10-20 | Web, offline, before | 5/40 | |
 | 2026-10-20 | Web, online, before | 30/40 | |
 | 2026-10-20 | Web, offline, with the precalc solver | 40/40 | 25/41 |
+| 2026-10-20 | Web, offline, form B fixed | 40/40 | 41/41 |
+| 2026-10-20 | Web, online, form B fixed | 40/40 | 41/41 |
+
+| Date | Engine | Form C (fresh) |
+|---|---|---|
+| 2026-10-20 | Web, offline, first run | 24/40 |
+| 2026-10-20 | Web, offline, fixed | 40/40 |
 
 The first online run lost "10th term of 2, 6, 18" to a Wikipedia article on a trillion, and `log(1000)` came back as the natural log. The fix is `precalc()` in docs/engine.js: log bases, exponential equations, geometric sequences, degrees and radians, half-life, quadratics, remainders, asymptotes, exact trig values, trig equations, amplitude and period, inverses and transformations, all computed on the device.
 

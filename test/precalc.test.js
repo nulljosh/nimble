@@ -61,6 +61,18 @@ test("form B shapes: growth, interest, cubics, factor theorem, asymptotes, angle
   assert.equal(body("cot 45 degrees"), "1", "coterminal must not read as cot");
 });
 
+test("form C shapes: rational factors, x/2 periods, log equations, doubling time", () => {
+  assert.equal(body("factor 2x^2 + 7x + 3"), "(x + 3)(2x + 1)");
+  assert.equal(body("period of y = cos(x/2)"), "4π ≈ 12.56637061");
+  assert.equal(body("amplitude and period of y = 4sin(3x)"), "Amplitude 4, period 2π/3 ≈ 2.094395102.");
+  assert.equal(body("solve log2(x) = 5"), "x = 32");
+  assert.equal(body("how long until $1000 doubles at 7% compounded annually"), "10.24 years");
+  assert.equal(body("inverse of y = x/3 + 1"), "f⁻¹(x) = 3(x - 1)");
+  assert.equal(body("sum of 3 + 1 + 1/3 + ..."), "4.5");
+  assert.match(body("does the series 1 + 2 + 4 + 8 converge"), /^No\./);
+  assert.equal(body("sector area with radius 4 and angle pi/2"), "4π ≈ 12.56637061");
+});
+
 test("not precalc: prose and plain facts fall through", () => {
   assert.equal(E.precalc("who wrote hamlet"), null);
   assert.equal(E.precalc("capital of france"), null);
