@@ -1054,10 +1054,16 @@ function packText(entry, query, rel){
 // The answer card for a pack hit: the sentences that answer, its article link, and the pack's build date.
 // A relation question tries each matching entry until one carries the relation sentence ("Apple" the fruit has no founder,
 // "Apple Inc." does). No entry does: null, and the caller says it is not in the pack.
+// A question that asks for a date or a number is not answered by sentences with no year or no digit in them:
+// "what day, month and year did Dalí's mother die" matched the article "Month".
+const PACK_WANTS_YEAR = /\b(?:what|which) (?:day|month|year|date)\b|\bin what year\b|\bwhen (?:was|were|did|is)\b/;
+const PACK_WANTS_NUMBER = /\bhow (?:many|much|old|long|far|tall|high|deep)\b|\b(?:at )?what age\b|\bwhat (?:number|percentage)\b/;
 function packAnswer(query, pack){
-  const rel = relationOf(query, [...RELATIONS, ...PACK_ONLY_RELATIONS]);
+  const rel = relationOf(query, [...RELATIONS, ...PACK_ONLY_RELATIONS]), q = String(query).toLowerCase();
   for(const hit of packHits(rel ? rel.subject : query, pack)){
     const e = hit.entry, text = packText(e, query, rel);
+    if(text && PACK_WANTS_YEAR.test(q) && !/\b\d{3,4}\b/.test(text)) continue;
+    if(text && PACK_WANTS_NUMBER.test(q) && !/\d/.test(text)) continue;
     if(text) return {kind:"pack", title:e.t, text, url:e.u, asOf:pack.builtAt||"", src:"Offline pack · Wikipedia (CC BY-SA)"};
   }
   return null;

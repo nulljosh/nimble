@@ -395,6 +395,18 @@ The hardest course for an offline table so far: C's first run was 2/40, because 
 
 The engine passed the web app's 300 KB first-load budget with this course (308 KB). The apple-touch-icon was the full 512 px PNG (68 KB); it is now a 180 px copy (22 KB), and the first load is back under budget. Each new course adds about 3 KB gzipped, so lazy-loading the course tables is the next fix if the budget is hit again.
 
+## SimpleQA
+
+`test/exam-simpleqa.js` over `test/fixtures/simpleqa-200.json`: 200 questions sampled (seed 20261020) from OpenAI's public SimpleQA set of 4,326, short fact questions written to be hard for frontier models. It is graded by match, not by a model grader: correct when every part of the gold answer (each name in "X and Y", a date's day, month and year, or the whole normalized answer) appears in what Nimble says. Run `OFFLINE=1 node test/exam-simpleqa.js`; `MISSES=file.jsonl` writes the misses for Samantha's training data.
+
+| Run (2026-10-20) | Correct | Attempted | Wrong but attempted |
+|---|---|---|---|
+| Web offline, first run | 0/200 | 17 | 17 |
+| Web offline, after the pack guard | 0/200 | 10 | 10 |
+| Web online | not run yet (after 17:00, with the neuron budget) | | |
+
+Offline, 0 is the honest number: these questions live in the long tail the 14,000-entry pack does not carry. What mattered was the 17 confident wrong cards, every one a pack article on the wrong topic, like "Month" for "what day, month and year did Dalí's mother die". The pack now skips any article whose answer sentences have no year when the question asks for a date, or no digit when it asks how many, how old or what age. That cut wrong answers to 10 with no change to any other exam (the general offline exam holds at 75/154, every course at its old score). The remaining 10 are subject cards ("Patna" for a question about Patna's planetarium) that a match cannot tell from an answer.
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
