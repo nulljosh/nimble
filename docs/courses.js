@@ -1,6 +1,7 @@
 // The text courses: Social Studies 10, Physical Geography 12, World History 12, Law Studies 12, Economic Theory 12,
 // BC First Peoples 12, the citizenship test and the driver's knowledge test. engine.js loads this after the page so
-// the tables stay off the first load; node evaluates it with the two engine helpers it uses (termAsk, pcNum).
+// the tables stay off the first load. Node and the /api bundle require it and pass in the two helpers it uses.
+(function(install){ if(typeof module!=="undefined" && module.exports) module.exports = install; else install(termAsk, pcNum, TEXT_COURSES); })(function(termAsk, pcNum, TEXT_COURSES){
 // BC Social Studies 10, Canada and the World 1914 to the present: government and elections, the Constitution and the
 // Charter, autonomy, discriminatory policies, Indigenous peoples and reconciliation, the world wars, the Depression,
 // the Cold War, Quebec and the political spectrum. SS_FACTS are phrase questions; SS_TERMS go through termAsk.
@@ -1078,3 +1079,4 @@ function driver(q){
   return null;
 }
 TEXT_COURSES.push(ss10, geo12, hist12, law12, econ12, fp12, citizen, driver);
+});

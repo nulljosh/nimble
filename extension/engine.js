@@ -4794,5 +4794,5 @@ if(typeof document!=="undefined" && document.currentScript && /^https?:$/.test(l
   const src = new URL("courses.js?v=1", document.currentScript.src).href;
   addEventListener("load", () => document.head.append(Object.assign(document.createElement("script"), {src})));
 }
-if(typeof module!=="undefined") new Function("termAsk", "pcNum", "TEXT_COURSES", require("fs").readFileSync(require("path").join(__dirname, "courses.js"), "utf8"))(termAsk, pcNum, TEXT_COURSES);
+if(typeof module!=="undefined") require("./courses.js")(termAsk, pcNum, TEXT_COURSES);
 if(typeof module!=="undefined") module.exports={numberFact,precalc,constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
