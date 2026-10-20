@@ -108,6 +108,14 @@ test("form E shapes: any base function, domains, cubic factors, half-life from t
   assert.equal(E.tryMath("3 log(10)"), 3);
 });
 
+test("form G shapes: tiny trig values are 0, translations, time to grow", () => {
+  assert.equal(E.tryMath("tan(pi)"), 0);
+  assert.equal(E.tryMath("2^-50"), 8.881784197e-16, "a real small number stays");
+  assert.equal(body("y = x^3 translated 4 units up"), "y = x^3 + 4");
+  assert.equal(body("how long until $2000 grows to $3000 at 4% compounded annually"), "10.34 years");
+  assert.equal(body("how is y = 2f(x) - 1 related to y = f(x)"), "It stretches it vertically by a factor of 2, then shifts it 1 units down.");
+});
+
 test("not precalc: prose and plain facts fall through", () => {
   assert.equal(E.precalc("who wrote hamlet"), null);
   assert.equal(E.precalc("capital of france"), null);

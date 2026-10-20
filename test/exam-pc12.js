@@ -260,10 +260,51 @@ const Q = [
   ["solve sin x = -1 for 0 ≤ x < 2π", /3π\s*\/\s*2/],
   ["solve 2cos^2 x - 1 = 0", /π\s*\/\s*4.*3π\s*\/\s*4.*5π\s*\/\s*4.*7π\s*\/\s*4/],
   ["what is the exact value of tan(5pi/6)", /-√3\s*\/\s*3|-0\.577|-1\/√3/],
+  // Form G: written 2026-10-20 after form F was fixed, before any run. Keys checked with node.
+  ["how is y = 2f(x) - 1 related to y = f(x)", /(stretch|scaled|factor of 2).*down|down.*(stretch|scaled)/i],
+  ["describe y = f(3x)", /horizontal.*compress|compress.*horizontal/i],
+  ["y = x^3 translated 4 units up", /x\s*\^?\s*3\s*\+\s*4|x³\s*\+\s*4/],
+  ["inverse of y = 4x + 8", /\(x\s*-\s*8\)\s*\/\s*4|x\s*\/\s*4\s*-\s*2|0\.25x\s*-\s*2/],
+  ["log base 6 of 216", /\b3\b/],
+  ["log_2(0.5)", /-1\b/],
+  ["solve 6^x = 36", /x\s*=\s*2\b|\s2\.?$/],
+  ["solve 7^(x-3) = 1", /x\s*=\s*3\b|\s3\.?$/],
+  ["solve log5(x) = 3", /\b125\b/],
+  ["solve ln(x) = 2", /7\.389|e\s*\^?\s*2|e²/],
+  ["log(4) + log(25)", /^2$|\s2\.?$/],
+  ["2 log(5) + log(4)", /^2$|\s2\.?$/],
+  ["$750 invested at 3.5% compounded annually for 6 years", /921\.94/],
+  ["a culture of 500 bacteria triples every 4 hours, how many after 12 hours", /13,?500/],
+  ["a 200 mg dose has a half-life of 3 hours, how much remains after 9 hours", /\b25\b/],
+  ["how long until $2000 grows to $3000 at 4% compounded annually", /10\.3/],
+  ["10th term of 1, 2, 4", /\b512\b/],
+  ["sum of the first 6 terms of 4, 12, 36", /1,?456/],
+  ["sum of the infinite geometric series 20 + 10 + 5 + ...", /\b40\b/],
+  ["common ratio of 2, 2/3, 2/9", /1\/3|0\.333/],
+  ["is 3, -6, 12, -24 geometric", /\byes\b/i],
+  ["solve x^2 - 3x - 10 = 0", /-2[^\d]+5\b/],
+  ["factor x^2 - 49", /\(x\s*[-+]\s*7\)/],
+  ["factor 6x^2 + x - 2", /\(2x\s*-\s*1\)|\(3x\s*\+\s*2\)/],
+  ["remainder when x^4 + x - 1 is divided by x + 2", /\b13\b/],
+  ["zeros of x^3 - 2x^2 - x + 2", /-1[^\d]+1[^\d]+2/],
+  ["vertical asymptote of y = (x + 1)/(x - 4)", /x\s*=\s*4\b/],
+  ["horizontal asymptote of y = 7/(x^2 + 1)", /y\s*=\s*0\b/],
+  ["solve 2/(x + 1) = 1", /x\s*=\s*1\b|\s1\.?$/],
+  ["y-intercept of y = (x - 2)(x + 3)", /-6\b/],
+  ["sin(5pi/3)", /-0\.866|-√3\s*\/\s*2/],
+  ["cos 225 degrees", /-0\.707|-√2\s*\/\s*2/],
+  ["tan(pi)", /^0$|\s0\.?$/],
+  ["cot(pi/4)", /^1$|\s1\.?$|\b1\b/],
+  ["convert 135 degrees to radians", /3π\s*\/\s*4|2\.356/],
+  ["convert 11pi/6 to degrees", /\b330\b/],
+  ["period of y = 5cos(4x)", /π\s*\/\s*2|1\.57/],
+  ["solve cos x = -1/2 for 0 ≤ x < 2π", /2π\s*\/\s*3.*4π\s*\/\s*3/],
+  ["solve 4sin^2 x = 3", /π\s*\/\s*3.*2π\s*\/\s*3.*4π\s*\/\s*3.*5π\s*\/\s*3/],
+  ["what is the reference angle for 7pi/6", /π\s*\/\s*6/],
 ];
 
 (async () => {
-  let pass = 0, passB = 0, passC = 0, passD = 0, passE = 0, passF = 0; const fail = [];
+  let pass = 0, passB = 0, passC = 0, passD = 0, passE = 0, passF = 0, passG = 0; const fail = [];
   // FROM=121 runs only form D onward, to spare the free AI quota.
   for (const [i, [q, re]] of Q.entries()) {
     if (i < +(process.env.FROM || 0)) continue;
@@ -271,8 +312,8 @@ const Q = [
     let r; try { r = await E.answer(q, offline ? { privateMode: true, pack } : { ifUnset: "yes" }); } catch (e) { r = { kind: "throw", body: String(e) }; }
     // Typographic minus signs and hyphens read as "-": the AI writes "−2" and "[‑2, 4]" for the same answer.
     const text = [r.title, r.body, r.value, r.to, r.toUnit, r.big, r.unit, r.sub, r.text].filter((x) => x != null).join(" ").replace(/[−‑–]/g, "-");
-    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81 && i < 121) passC++; if (ok && i >= 121 && i < 161) passD++; if (ok && i >= 161 && i < 201) passE++; if (ok && i >= 201) passF++;
+    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81 && i < 121) passC++; if (ok && i >= 121 && i < 161) passD++; if (ok && i >= 161 && i < 201) passE++; if (ok && i >= 201 && i < 241) passF++; if (ok && i >= 241) passG++;
     console.log((ok ? "PASS" : "FAIL") + " | " + q + " => " + r.kind + " | " + text.slice(0, 110).replace(/\n/g, " "));
   }
-  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC - passD - passE - passF}/40, form B ${passB}/41, form C ${passC}/40, form D ${passD}/40, form E ${passE}/40, form F ${passF}/${Q.length - 201}). FAIL: ${fail.join(" ; ")}`);
+  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC - passD - passE - passF - passG}/40, form B ${passB}/41, form C ${passC}/40, form D ${passD}/40, form E ${passE}/40, form F ${passF}/40, form G ${passG}/${Q.length - 241}). FAIL: ${fail.join(" ; ")}`);
 })();

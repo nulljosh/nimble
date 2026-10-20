@@ -53,7 +53,8 @@ function evalMath(src, steps){
       const f = t.slice(5);
       if(!MATH_FNS.has(f) || next()!=="(") throw 0;
       const a = expr(); if(next()!==")") throw 0;
-      const v = Math[f](a.value);
+      // Floating point leaves tan(pi) at -1.2e-16; a trig value that small is 0.
+      const raw = Math[f](a.value), v = /^(sin|cos|tan)$/.test(f) && Math.abs(raw) < 1e-12 ? 0 : raw;
       if(steps) steps.push(f + "(" + a.text + ") = " + mathFmt(v));
       return {text: mathFmt(v), value: v};
     }
@@ -1264,6 +1265,15 @@ function precalc(query){
     if(m[8]) say.push("shifts it " + pcNum(m[9]) + " units " + (m[8] === "+" ? "up" : "down"));
     if(say.length) return out("It " + say.join(", then ") + ".");
   }
+  // y = x^3 translated 4 units up
+  if((m = /^(?:y\s*=\s*|f\(x\)\s*=\s*)(.+?)\s+(?:is )?(?:translated|shifted|moved)\s+(.+)$/.exec(q))){
+    let h = 0, k = 0;
+    for(const [, n, dir] of m[2].matchAll(/(\d+(?:\.\d+)?)\s*(?:units?\s*)?(left|right|up|down)\b/g)) ({left:() => h -= +n, right:() => h += +n, up:() => k += +n, down:() => k -= +n})[dir]();
+    if(h || k){
+      const inner = h ? m[1].replace(/x/g, "(x " + (h > 0 ? "- " + pcNum(h) : "+ " + pcNum(-h)) + ")") : m[1];
+      return out("y = " + inner + (k ? (k > 0 ? " + " + pcNum(k) : " - " + pcNum(-k)) : ""));
+    }
+  }
   // y = |x| reflected in the x-axis (or y-axis)
   if((m = /^(?:y\s*=\s*|f\(x\)\s*=\s*)(.+?)\s+(?:is )?reflected (?:in|across|over|about) the ([xy])-?axis$/.exec(q))){
     return out(m[2] === "x" ? "y = -(" + m[1] + ")" : "y = " + m[1].replace(/x/g, "(-x)"));
@@ -1454,6 +1464,10 @@ function precalc(query){
   // $500 invested at 4% compounded monthly for 3 years
   const comp = s => ({daily:365, weekly:52, monthly:12, quarterly:4, "semi-annually":2, semiannually:2}[(/compounded (daily|weekly|monthly|quarterly|semi-?annually|annually|yearly)/.exec(s) || [])[1]] || 1);
   // how long until $1000 doubles at 7% compounded annually
+  if((m = /^how (?:long|many years)\b.*?\$?\s*([\d,]+(?:\.\d+)?)\s*(?:to )?(?:grows?|increases?|becomes?)?\s*(?:to )\$?\s*([\d,]+(?:\.\d+)?)\b.*? at ([\d.]+)\s*%(.*)$/.exec(q))){
+    const n = comp(m[4]), t = Math.log(+m[2].replace(/,/g, "") / +m[1].replace(/,/g, "")) / (n * Math.log(1 + +m[3] / 100 / n));
+    if(isFinite(t) && t > 0) return out(pcNum(+t.toFixed(2)) + " years");
+  }
   if((m = /^how (?:long|many years)\b.*?\b(doubles?|triples?)\b.*? at ([\d.]+)\s*%(.*)$/.exec(q))){
     const n = comp(m[3]), k = /^d/.test(m[1]) ? 2 : 3, t = Math.log(k) / (n * Math.log(1 + +m[2] / 100 / n));
     return out(pcNum(+t.toFixed(2)) + " years");
@@ -1616,7 +1630,7 @@ function precalc(query){
   if((m = /y\s*=\s*(-?)\s*([\d.\/]*)\s*f\s*\(\s*x\s*\/\s*(\d+(?:\.\d+)?)\s*\)/.exec(q)) && /\b(do|does|graph|describe|change|changes|effect)\b/.test(q)){
     const d = +m[3]; return out("It stretches it horizontally by a factor of " + pcNum(d) + ".");
   }
-  if((m = /y\s*=\s*(-?)\s*([\d.\/]*)\s*f\s*\(\s*(-?)\s*([\d.\/]*)\s*(?:\(\s*)?x\s*(?:([+-])\s*([\d.]+))?\s*\)?\s*\)\s*(?:([+-])\s*([\d.]+))?/.exec(q)) && /\b(do|does|graph|transform|transformation|effect|describe|change|changes)\b/.test(q)){
+  if((m = /y\s*=\s*(-?)\s*([\d.\/]*)\s*f\s*\(\s*(-?)\s*([\d.\/]*)\s*(?:\(\s*)?x\s*(?:([+-])\s*([\d.]+))?\s*\)?\s*\)\s*(?:([+-])\s*([\d.]+))?/.exec(q)) && /\b(do|does|graph|transform|transformation|effect|describe|change|changes|related|relate|compare)\b/.test(q)){
     if(m[2]) m[2] = String(pcVal(m[2])); if(m[4]) m[4] = String(pcVal(m[4]));
     const say = [];
     if(m[1]) say.push("reflects it across the x-axis");
