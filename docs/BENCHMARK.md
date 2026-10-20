@@ -420,6 +420,20 @@ Offline, 0 is the honest number: these questions live in the long tail the 14,00
 
 Multi-step word problems need a model; the offline engine is a calculator, so 1/200 is expected. The 46 wrong answers were the real finding. 42 were pack articles ("Number", "Week", "Second") picked because a word problem mentions them, and 4 were the Workplace Math 10 tax and discount solvers taking the first "$400 ... 20% off" in a five-step problem. Three guards fixed them, each with a test: the pack skips a long question with three or more numbers, and a how-many question with two or more; the one-step tax and discount solvers (web and Kotlin) skip questions with more than three numbers. SimpleQA's wrong cards fell from 10 to 8 as a side effect, and every other exam held (general offline 75/154, Pre-Calculus 12 281/281, every course at its old score).
 
+## Canadian citizenship test
+
+`test/courses/citizen.js`: questions in the style of the official citizenship test, drawn from the study guide Discover Canada: rights and responsibilities, history, government, elections, symbols, geography and the economy. Forms A and B were written before any run, the solver was built from form A and the guide with B's topics kept out, and form C was written after A and B passed and run once. Run `COURSE=citizen node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 7/40 (18%) | 11/40 (28%) | 10/40 (25%) |
+| Web offline, after A only | 40/40 | 11/40 (28%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 (116/120 before the Magna Carta, Confederation, the capital of Canada and the Great Lakes got local text) |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (116/120 before the same 4) |
+
+The real test passes at 15 of 20 (75%); offline Nimble scored 18 to 28 percent cold. Surprising misses on the first run were plain ones: "who was Canada's first prime minister" and "what is the capital of British Columbia" were not answered offline at all. Every provincial and territorial capital now comes from one table, which also lifted the general offline exam from 75/154 to 79/154. Names with other meanings need the full name: "Cartier" the jeweller, "Cabot", "CPR" (resuscitation) and "a cabinet" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 28% and C 25%, so this test depends on its online grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
