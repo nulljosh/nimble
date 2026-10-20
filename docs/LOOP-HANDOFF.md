@@ -36,7 +36,7 @@ Rules that bite:
 ## Next, in order
 
 0. Curriculum and public exams (Joshua, 2026-10-20). A+ means 95%, judged on a held-out form written before tuning, offline and online, on web then Swift then Kotlin, with every score in docs/BENCHMARK.md:
-   - BC Pre-Calculus 12 (test/exam-pc12.js): web is A+ (95% online on fresh form G, 2026-10-20). Next: port precalc() in docs/engine.js to Swift (QueryEngine+Compute.swift, localAnswer) and Kotlin, then run the same exam there. Each new form is written fresh, graded once, then fixed.
+   - BC Pre-Calculus 12 (test/exam-pc12.js): A+ everywhere (2026-10-20). Web 95% online on fresh form G, 281/281 offline; Apple 279/281 offline (engine.js in JavaScriptCore); Kotlin 279/281 offline (Precalc.kt, a line-for-line port). A change to precalc() in docs/engine.js must be mirrored in Precalc.kt.
    - Every other BC grade 10 to 12 math, science and socials course, 40 questions plus a held-out form each. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.

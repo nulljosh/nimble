@@ -1,9 +1,13 @@
 package com.nulljosh.nimble
 
 import kotlin.math.abs
+import kotlin.math.cbrt
+import kotlin.math.ceil
 import kotlin.math.cos
+import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.log10
+import kotlin.math.log2
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sin
@@ -30,13 +34,23 @@ internal object Expr {
 
     private val functions: Map<String, (Double) -> Double> = mapOf(
         "sqrt" to ::sqrt,
-        "sin" to ::sin,
-        "cos" to ::cos,
-        "tan" to ::tan,
+        // Floating point leaves tan(pi) at -1.2e-16; a trig value that small is 0, as on the web.
+        "sin" to { x -> snap(sin(x)) },
+        "cos" to { x -> snap(cos(x)) },
+        "tan" to { x -> snap(tan(x)) },
         "log" to ::log10,
+        "log10" to ::log10,
+        "log2" to ::log2,
         "ln" to ::ln,
         "abs" to ::abs,
+        "cbrt" to ::cbrt,
+        "floor" to ::floor,
+        "ceil" to ::ceil,
+        // JavaScript's Math.round: halves go up.
+        "round" to { x -> floor(x + 0.5) },
     )
+
+    private fun snap(v: Double) = if (abs(v) < 1e-12) 0.0 else v
 
     /** Returns null on any malformed input rather than throwing. */
     fun eval(source: String): Double? {
@@ -123,7 +137,8 @@ internal object Expr {
 
             if (c.isLetter()) {
                 val start = i
-                while (i < s.length && s[i].isLetter()) i++
+                // Letters then digits, so "log10" and "log2" are one name.
+                while (i < s.length && (s[i].isLetter() || (i > start && s[i].isDigit()))) i++
                 val name = s.substring(start, i).lowercase()
 
                 if (name == "pi") return kotlin.math.PI

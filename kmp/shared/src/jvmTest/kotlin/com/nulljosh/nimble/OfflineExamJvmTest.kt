@@ -41,4 +41,27 @@ class OfflineExamJvmTest {
         File("build/offline-exam.txt").writeText(report)
         println(report)
     }
+
+    /** BC Pre-Calculus 12 (test/exam-pc12.js, 281 questions on seven forms) on the Kotlin engine, private mode, no pack. */
+    @Test
+    fun preCalc12Exam() = runBlockingTest {
+        if (System.getenv("NIMBLE_EXAM") == null) return@runBlockingTest
+        val q = Regex("""\["((?:[^"\\]|\\.)*)",\s*/((?:[^/\\\n]|\\.)+)/([a-z]*)\]""").findAll(File("../../test/exam-pc12.js").readText()).map { m ->
+            val opts = if ('i' in m.groupValues[3]) setOf(RegexOption.IGNORE_CASE) else emptySet()
+            m.groupValues[1].replace("\\\"", "\"") to Regex(m.groupValues[2], opts)
+        }.toList()
+        val client = AnswerClient(privateMode = { true })
+        val missed = mutableListOf<String>()
+        for ((question, re) in q) {
+            val shown = when (val a = client.query(question)) {
+                is Answer.Math -> a.value
+                is Answer.Text -> listOfNotNull(a.heading, a.body).joinToString(" ")
+                else -> ""
+            }.replace(Regex("[−‑–]"), "-")
+            if (!re.containsMatchIn(shown)) missed += "$question => ${shown.take(60)}"
+        }
+        val report = "pc12 exam: ${q.size - missed.size}/${q.size} pass (Kotlin, offline)\nmissed:\n" + missed.joinToString("\n")
+        File("build/pc12-exam.txt").writeText(report)
+        println(report)
+    }
 }

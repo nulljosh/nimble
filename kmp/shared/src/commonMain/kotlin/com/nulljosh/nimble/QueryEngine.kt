@@ -82,7 +82,8 @@ object QueryEngine {
             expr.lowercase() == "pi" || expr.lowercase() == "e"
         if (!hasOperation) return null
 
-        return Expr.eval(expr)?.let { Expr.format(it) }
+        // "3 log(10)" is 3 times log(10), as on the web.
+        return Expr.eval(expr.replace(Regex("(\\d)\\s+(?=(?:sqrt|sin|cos|tan|log|ln|abs|pi)\\b)"), "$1*"))?.let { Expr.format(it) }
     }
 
     private val wordNumbers = mapOf(

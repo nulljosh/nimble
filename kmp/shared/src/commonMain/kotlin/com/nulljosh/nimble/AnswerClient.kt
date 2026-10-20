@@ -138,6 +138,7 @@ class AnswerClient(
     suspend fun query(input: String): Answer {
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
         Units.convert(input)?.let { return Answer.Math(it) }
+        Precalc.answer(input)?.let { return it }
         constantAnswer(input)?.let { return it }
 
         // Offline: the pack answers first, else an honest miss. Math above already worked with no network.

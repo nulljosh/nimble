@@ -17,6 +17,7 @@ class QueryEngineTest {
     @Test fun division() = assertEquals("25", math("100 / 4"))
     @Test fun log10IsBaseTen() = assertEquals("3", math("log10(1000)"))
     @Test fun whatsWithSymbolsAndCurlyApostrophe() = assertEquals("19", math("What’s 9+10"))
+    @Test fun numberBeforeFunctionMultiplies() = assertEquals("2", math("2 log(5) + log(4)"))
     @Test fun subtraction() = assertEquals("63", math("100 - 37"))
     @Test fun complexExpression() = assertEquals("30", math("(10 + 5) * 2"))
     @Test fun negativeResult() = assertEquals("-5", math("5 - 10"))
