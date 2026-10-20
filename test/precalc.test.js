@@ -158,3 +158,10 @@ test("Environmental Science 11: energy, density, mark and recapture, growth, and
   assert.match(body("which relationship benefits both species"), /^Mutualism\./);
   assert.match(body("how long to double money at 6% using the rule of 72"), /\b12\b/);
 });
+test("Social Studies 10: government, history and terms, and generic words keep their cards", () => {
+  assert.match(body("what are the three levels of government in Canada"), /^Federal/);
+  assert.match(body("when was the Constitution patriated"), /^1982\./);
+  assert.match(body("what was the Komagata Maru incident"), /^In 1914 the ship Komagata Maru/);
+  assert.match(body("who was prime minister of Canada during World War II"), /^William Lyon Mackenzie King/);
+  for (const q of ["what is hong kong", "what is a white paper", "what is cpp", "who is the prime minister of canada", "what is conscription", "who was british prime minister during world war 2", "who is the head of state of france"]) assert.equal(E.precalc(q), null, q);
+});

@@ -146,4 +146,10 @@ class Precalc11Test {
     @Test fun growthRate() = assertEquals("30% (0.3): (260 - 200) ÷ 200.", pc("a population grows from 200 to 260 in one year, what is the growth rate"))
     @Test fun doublingTime() = assertEquals("About 35 years (rule of 70: 70 ÷ 2).", pc("a population with a 2% growth rate doubles in how many years"))
     @Test fun whichRelationship() = assertEquals(true, pc("which relationship benefits both species")?.startsWith("Mutualism."))
+
+    // Social Studies 10 (SocialStudies10.kt)
+    @Test fun levelsOfGovernment() = assertEquals(true, pc("what are the three levels of government in Canada")?.startsWith("Federal"))
+    @Test fun patriation() = assertEquals(true, pc("when was the Constitution patriated")?.startsWith("1982."))
+    @Test fun wartimePrimeMinister() = assertEquals(true, pc("who was prime minister of Canada during World War II")?.startsWith("William Lyon Mackenzie King"))
+    @Test fun genericWordsStayOpen() = assertEquals(null, pc("what is hong kong"))
 }

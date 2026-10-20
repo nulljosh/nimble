@@ -307,6 +307,22 @@ A regression caught here: the Anatomy and Physiology 12 commit put its solver ah
 
 This time form B was kept honest: the solver was built from A and the curriculum, and B's first run after that was 32/40. Its eight misses were all "why" and "example" questions (why food chains are short, why biodiversity matters, examples of keystone and invasive species in BC). Form C, 11/40 first run, missed the same shapes plus BC specifics: the mountain pine beetle, the Great Bear Rainforest, clearcutting, COSEWIC, old growth. The 10 percent rule, population density, mark and recapture (Lincoln-Petersen), growth rate and doubling time (rule of 70, populations only, so Foundations' rule of 72 for money still answers) are computed. Every course was re-run before this commit: all at their old scores. **A+ offline on all three forms after fixes; the honest held-out numbers are B 80% and C 28% first run, so this course waits for an online held-out grade.**
 
+## BC curriculum: Social Studies 10
+
+`test/courses/ss10.js`: Canada and the World, 1914 to the present. Government and elections, the Constitution and the Charter, Canadian autonomy, discriminatory policies (the head tax, the Komagata Maru, internment), Indigenous peoples and reconciliation, the world wars, the Depression, the Cold War, Quebec and the political spectrum. Forms A and B were written before any run, the solver was built from form A only, with form B's topics kept out on purpose, and form C was written after A and B passed and run once. Run `COURSE=ss10 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 4/40 (10%) | 5/40 (13%) | 6/40 (15%) |
+| Web offline, after A only | 40/40 | 5/40 (13%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 (106/120 before 14 pack-only topics got local text) |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (106/120 before the same 14) |
+
+The 14 topics (the Great Depression, the Cold War, NATO, the Holocaust, the United Nations, Louis Riel and others) answered on the web from the Wikipedia pack, which the apps do not carry. Local text now answers them first everywhere, so online they show a short paragraph instead of the Wikipedia card, the same cost logged for the science courses. The probe over the general exams also caught "who was british prime minister during world war 2" getting Mackenzie King; the country-specific facts (head of state, seats, electoral system, voting age, wartime prime ministers, women's vote) now need Canada or BC in the question.
+
+The first social studies course shows the limit of an offline table plainly. Every question is recall, so what A taught did not carry to B at all (5/40 before and after), and C was 6/40, with its passes all from the Wikipedia pack (the Battle of the Atlantic, Louis Riel, the Iron Curtain). After fixes the course holds 112 entries of Canadian history and civics, each a short paragraph. Generic words stay open: "what is hong kong", "what is a white paper", "what is conscription" and "who is the prime minister of canada" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 13% and C 15%, so this course depends on its online grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
