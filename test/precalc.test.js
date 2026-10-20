@@ -90,6 +90,19 @@ test("form D shapes: division, holes, repeating decimals, identities, general so
   assert.equal(body("y = f(x) is shifted 3 left and 2 down, write the new equation"), "y = f(x + 3) - 2");
 });
 
+test("form E shapes: any base function, domains, cubic factors, half-life from two amounts", () => {
+  assert.equal(body("what happens to y = sqrt(x) when it becomes y = sqrt(x - 3) + 2"), "It shifts it 3 units right, then shifts it 2 units up.");
+  assert.equal(body("y = |x| reflected in the x-axis"), "y = -(|x|)");
+  assert.equal(body("domain of y = sqrt(x - 4)"), "x ≥ 4.");
+  assert.equal(body("domain of y = log(x + 2)"), "x > -2.");
+  assert.equal(body("factor x^3 - 8"), "(x - 2)(x^2 + 2x + 4)");
+  assert.equal(body("a radioactive substance decays from 80 g to 10 g in 12 days, what is its half-life"), "4 days");
+  assert.equal(body("how much is $5000 worth after 8 years at 6% compounded semi-annually"), "$8023.53");
+  assert.equal(body("period of y = sin(pi x)"), "2");
+  assert.match(body("how many roots does a degree 4 polynomial have"), /^4,/);
+  assert.equal(E.tryMath("3 log(10)"), 3);
+});
+
 test("not precalc: prose and plain facts fall through", () => {
   assert.equal(E.precalc("who wrote hamlet"), null);
   assert.equal(E.precalc("capital of france"), null);

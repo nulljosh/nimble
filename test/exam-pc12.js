@@ -178,10 +178,51 @@ const Q = [
   ["exact value of sin(pi/12)", /√6\s*[-−]\s*√2|0\.2588/],
   ["cos(a + b) identity", /cos\s*a\s*cos\s*b\s*[-−]\s*sin\s*a\s*sin\s*b/i],
   ["double angle formula for sine", /2\s*sin\s*x\s*cos\s*x|2\s*sin\s*θ\s*cos\s*θ|2\s*sin\s*\(?[a-z]\)?\s*cos/i],
+  // Form E: written 2026-10-20 after form D was fixed, before any run.
+  ["what happens to y = sqrt(x) when it becomes y = sqrt(x - 3) + 2", /right.*up|up.*right/i],
+  ["y = |x| reflected in the x-axis", /-\s*\|x\||y\s*=\s*-/],
+  ["domain of y = sqrt(x - 4)", /x\s*(≥|>=)\s*4/],
+  ["inverse of f(x) = 3x", /x\s*\/\s*3|1\/3\s*x/],
+  ["log base 10 of 0.1", /-1\b/],
+  ["log7(49)", /^2$|\s2\.?$/],
+  ["solve 2^(x-1) = 8", /x\s*=\s*4\b|\s4\.?$/],
+  ["solve 9^x = 27", /1\.5|3\/2/],
+  ["solve ln(x) = 0", /x\s*=\s*1\b|\s1\.?$/],
+  ["log(2) + log(50)", /^2$|\s2\.?$/],
+  ["3 log(10)", /^3$|\s3\.?$/],
+  ["how much is $5000 worth after 8 years at 6% compounded semi-annually", /8,?023\.5/],
+  ["a radioactive substance decays from 80 g to 10 g in 12 days, what is its half-life", /\b4\b/],
+  ["how many years for $1000 to triple at 5% compounded annually", /22\.5|22\.52/],
+  ["what is e", /2\.718/],
+  ["5th term of 81, 27, 9", /1\b|^1$/],
+  ["sum of the first 5 terms of 2, -4, 8", /\b22\b/],
+  ["infinite sum of 1 + 1/2 + 1/4 + ...", /^2$|\s2\.?$/],
+  ["what is the common ratio of 5, -10, 20", /-2\b/],
+  ["is 2, 5, 8, 11 geometric", /\bno\b|not/i],
+  ["solve x^2 + 6x + 9 = 0", /x\s*=\s*-3\b/],
+  ["factor x^3 - 8", /\(x\s*-\s*2\)/],
+  ["remainder of 2x^3 - x + 4 divided by x - 1", /\b5\b/],
+  ["roots of x^4 - 5x^2 + 4", /-2[^\d]+-1[^\d]+1[^\d]+2/],
+  ["vertical asymptote of y = 2/(x + 5)", /x\s*=\s*-5/],
+  ["horizontal asymptote of y = 5x/(x + 1)", /y\s*=\s*5\b/],
+  ["solve x/(x - 2) = 3", /x\s*=\s*3\b|\s3\.?$/],
+  ["how many roots does a degree 4 polynomial have", /\b4\b|four/i],
+  ["sin(7pi/6)", /-0\.5\b|-1\/2/],
+  ["cos(315°)", /√2\s*\/\s*2|0\.707/],
+  ["tan(-pi/4)", /-1\b/],
+  ["csc(pi/2)", /^1$|\s1\.?$|\b1\b/],
+  ["convert 2pi to degrees", /\b360\b/],
+  ["convert 300 degrees to radians", /5π\s*\/\s*3|5\.23/],
+  ["period of y = sin(pi x)", /\b2\b/],
+  ["solve cos x = 1/2 for 0 ≤ x < 2π", /π\s*\/\s*3.*5π\s*\/\s*3/],
+  ["solve tan x = -1 for 0 ≤ x < 2π", /3π\s*\/\s*4.*7π\s*\/\s*4/],
+  ["reference angle of 5pi/4", /π\s*\/\s*4/],
+  ["simplify 1 - cos^2 x", /sin\s*(\^\s*2|²)\s*x|sin²/i],
+  ["arc length of a circle with radius 3 and central angle 60 degrees", /π|3\.14/],
 ];
 
 (async () => {
-  let pass = 0, passB = 0, passC = 0, passD = 0; const fail = [];
+  let pass = 0, passB = 0, passC = 0, passD = 0, passE = 0; const fail = [];
   // FROM=121 runs only form D onward, to spare the free AI quota.
   for (const [i, [q, re]] of Q.entries()) {
     if (i < +(process.env.FROM || 0)) continue;
@@ -189,8 +230,8 @@ const Q = [
     let r; try { r = await E.answer(q, offline ? { privateMode: true, pack } : { ifUnset: "yes" }); } catch (e) { r = { kind: "throw", body: String(e) }; }
     // Typographic minus signs and hyphens read as "-": the AI writes "−2" and "[‑2, 4]" for the same answer.
     const text = [r.title, r.body, r.value, r.to, r.toUnit, r.big, r.unit, r.sub, r.text].filter((x) => x != null).join(" ").replace(/[−‑–]/g, "-");
-    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81 && i < 121) passC++; if (ok && i >= 121) passD++;
+    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81 && i < 121) passC++; if (ok && i >= 121 && i < 161) passD++; if (ok && i >= 161) passE++;
     console.log((ok ? "PASS" : "FAIL") + " | " + q + " => " + r.kind + " | " + text.slice(0, 110).replace(/\n/g, " "));
   }
-  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC - passD}/40, form B ${passB}/41, form C ${passC}/40, form D ${passD}/${Q.length - 121}). FAIL: ${fail.join(" ; ")}`);
+  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC - passD - passE}/40, form B ${passB}/41, form C ${passC}/40, form D ${passD}/40, form E ${passE}/${Q.length - 161}). FAIL: ${fail.join(" ; ")}`);
 })();

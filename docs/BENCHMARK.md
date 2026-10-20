@@ -65,6 +65,14 @@ The same 154 questions with no network at all: math, units, constants, the devic
 | 2026-10-20 | Web, online, first run | 32/40 (35 with dash-tolerant grading) |
 | 2026-10-20 | Web, offline, fixed | 40/40 |
 
+| Date | Engine | Form E (fresh) |
+|---|---|---|
+| 2026-10-20 | Web, offline, first run | 30/40 (one key was wrong: $5,000 at 6% semi-annually for 8 years is $8,023.53) |
+| 2026-10-20 | Web, online, first run | 36/40 |
+| 2026-10-20 | Web, offline, fixed | 40/40 |
+
+Fresh online grades so far: form D 80%, form E 90%. The A+ bar is 95% on a fresh form, so form F is next. Form E's online misses: the AI read 3 log(10) as a natural log (6.9), sent the $5,000 question to the Wikipedia page on copper, called x³ - 8 unfactorable, and gave "how many roots does a degree 4 polynomial have" a definition.
+
 Form D was the first fresh form graded online. The AI's own misses were real: it said a magnitude 7 earthquake is 1,000 times a magnitude 5 (it is 100), and it sent "which term of 2, 4, 8 is 256" and "solve sin²x = 1/4" to unrelated Wikipedia pages. The solver now computes all of them on the device: polynomial division, oblique asymptotes, holes, multiplicity, repeating decimals, log and exponential forms, pH and magnitude, phase shift and range, sum and double-angle identities, an identity checker, and a general solve for equations whose roots are small fractions.
 
 The first online run lost "10th term of 2, 6, 18" to a Wikipedia article on a trillion, and `log(1000)` came back as the natural log. The fix is `precalc()` in docs/engine.js: log bases, exponential equations, geometric sequences, degrees and radians, half-life, quadratics, remainders, asymptotes, exact trig values, trig equations, amplitude and period, inverses and transformations, all computed on the device.
