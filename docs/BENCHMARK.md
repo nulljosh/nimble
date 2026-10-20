@@ -365,6 +365,20 @@ A pure recall course, like Social Studies 10: what A taught did not move B at al
 
 Recall again: A's terms did not reach B (4/40 before and after). After fixes it holds 125 entries, written for BC (age of majority 19, the Family Law Act's two-year rule for common-law spouses, Small Claims up to $35,000, the Residential Tenancy Act). Words with other meanings stay open: "what is a battery", "what is a treaty", "what is intoxication", "what is free will" and "what is a minor" still go to the live sources; the legal sense needs a legal word in the question. **A+ offline after fixes; the honest held-out numbers are B 10% and C 18%, so this course depends on its online grade.**
 
+## BC curriculum: Economic Theory 12
+
+`test/courses/econ12.js`: scarcity and choice, economic systems, supply and demand, elasticity, market structures, costs of production, market failure, GDP, inflation and unemployment, fiscal and monetary policy, money and banking, and international trade. Forms A and B were written before any run, the solver was built from form A and the curriculum with B's topics kept out, and form C was written after A and B passed and run once. Run `COURSE=econ12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 2/40 (5%) | 5/40 (13%) | 7/40 (18%) |
+| Web offline, after A only | 40/40 | 6/40 (15%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 (116/120 before sales tax, profit, market failure and the WTO got local text) |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (115/120 before the same 4, and "hyperinflation" went to the German 1923 entry until World History's term was narrowed) |
+
+The lowest first run yet: the Wikipedia pack carries almost no economics, so A scored 2/40. The calculators carried a little: price elasticity from A also answered B's elasticity question, and C added income elasticity and total revenue. CPI inflation, the unemployment rate and real GDP from the deflator are computed too. Words with other meanings stay open: "what is a complement", "what is a multiplier", "what is a deficit" and "what is atc" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 15% and C 18%, so this course depends on its online grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

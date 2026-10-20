@@ -328,6 +328,7 @@ internal object Precalc {
         PhysicalGeography12.answer(q)?.let { return it }
         WorldHistory12.answer(q)?.let { return it }
         LawStudies12.answer(q)?.let { return it }
+        Economics12.answer(q)?.let { return it }
         Calculus12.answer(q)?.let { return it }
         Statistics12.answer(q)?.let { return it }
         Apprenticeship12.answer(q)?.let { return it }
