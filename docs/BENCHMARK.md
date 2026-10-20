@@ -200,6 +200,19 @@ Form A's first offline run had one wrong answer: "probability of drawing a red m
 
 The solver is `sci10()` in docs/engine.js and `Science10.kt` on Kotlin. The computed half is real chemistry and physics: a periodic table to krypton plus common heavy elements, compound names both ways (ionic with Roman numerals and polyatomic ions, covalent with prefixes), equations balanced by searching small coefficients, reaction types, molar mass, energy, work, power and Punnett squares for one or two genes. The other half is a table of curriculum facts. That half is weaker evidence than the math courses: the same author wrote the facts and the held-out form, so form B mostly checks that the facts cover the course. The online run is the stronger test, and it waits for the neuron reset. One first-run answer was incomplete rather than missing: "the charge of an electron" gave 1.602 × 10⁻¹⁹ C with no sign, from the constants table. The general offline exam rose to 75 of 154 on the web and Kotlin and 76 on Apple. **A+ offline on every platform.**
 
+## BC curriculum: Chemistry 11
+
+`test/courses/chem11.js`, two 40-question forms written before any run: significant figures and scientific notation, density, the mole, percent composition and empirical formulas, molarity and dilution, gases at STP, stoichiometry, limiting reactants and yield, electron configurations, periodic trends, bonding, VSEPR shape and polarity, and alkane names. Run `COURSE=chem11 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 6/40 (15%) | 39/40 (97.5%) |
+| Web offline, after fixes | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+Form A's first offline run had one wrong answer: "what is a mole" returned the Wikipedia article on the animal. Form B's one first-run miss was a real bug: "how many grams of CO2 from 16 g of methane burning" lowercased the formula before reading it. The question is now read as typed, as the other formula branches are. The key also only took 43.9 g, and the answer, 43.89 g, is right, so the key now takes both. Writing the Kotlin port turned up a logic slip on the web too: "the lowest ionization energy in period 3" would have named the wrong end of the period. Both are fixed and tested. Stoichiometry balances the equation with the Science 10 search before it converts, and shapes come from VSEPR on the formula. The solver is `chem11()` in docs/engine.js and `Chemistry11.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

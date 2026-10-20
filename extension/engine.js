@@ -2497,11 +2497,176 @@ function sci10(q, raw){
   }
   return null;
 }
+// --- Chemistry 11, offline ---
+// Significant figures, scientific notation, density, the mole, percent composition, empirical formulas, solutions,
+// gases at STP, stoichiometry from a balanced equation, limiting reactants and yield, electron configurations,
+// periodic trends, bonding, VSEPR shape and polarity, and simple organic names. Uses the sci10 tables.
+// precalc() asks it after sci10(); null means "not mine". Graded by COURSE=chem11 node test/exam-course.js.
+// Mirrored in kmp/shared/.../Chemistry11.kt.
+const CH_NA = 6.02214076e23;
+const CH_ORDER = ["1s", "2s", "2p", "3s", "3p", "4s", "3d", "4p", "5s", "4d", "5p", "6s", "4f", "5d", "6p", "7s", "5f", "6d", "7p"];
+const CH_SUP = n => String(n).replace(/\d/g, d => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]);
+// Pauling electronegativity for the main groups and the first transition row.
+const CH_EN = {H:2.20, Li:0.98, Be:1.57, B:2.04, C:2.55, N:3.04, O:3.44, F:3.98, Na:0.93, Mg:1.31, Al:1.61, Si:1.90, P:2.19, S:2.58, Cl:3.16, K:0.82, Ca:1.00, Sc:1.36, Ti:1.54, V:1.63, Cr:1.66, Mn:1.55, Fe:1.83, Co:1.88, Ni:1.91, Cu:1.90, Zn:1.65, Ga:1.81, Ge:2.01, As:2.18, Se:2.55, Br:2.96, Kr:3.00, Rb:0.82, Sr:0.95, Ag:1.93, Sn:1.96, I:2.66, Xe:2.60, Cs:0.79, Ba:0.89, Au:2.54, Pb:2.33};
+const CH_ALK = ["", "meth", "eth", "prop", "but", "pent", "hex", "hept", "oct", "non", "dec"];
+const CH_SHAPE = {"2,0":"linear", "3,0":"trigonal planar", "3,1":"bent", "4,0":"tetrahedral", "4,1":"trigonal pyramidal", "4,2":"bent", "5,0":"trigonal bipyramidal", "5,1":"seesaw", "5,2":"T-shaped", "5,3":"linear", "6,0":"octahedral", "6,1":"square pyramidal", "6,2":"square planar"};
+const CH_SYM = new Set(["2,0", "3,0", "4,0", "5,0", "6,0", "6,2", "5,3"]);
+// Orbital filling in Aufbau order, with chromium and copper taking a half-filled or full d.
+function chConfig(z){
+  const cells = []; let left = z;
+  for(const o of CH_ORDER){ if(left <= 0) break; const cap = {s:2, p:6, d:10, f:14}[o[1]], k = Math.min(cap, left); cells.push([o, k]); left -= k; }
+  if(z === 24 || z === 29){ const s = cells.find(([o]) => o === "4s"), d = cells.find(([o]) => o === "3d"); s[1] = 1; d[1] += 1; }
+  return cells;
+}
+const chValence = z => { const c = chConfig(z), n = Math.max(...c.map(([o]) => +o[0])); return c.filter(([o]) => +o[0] === n).reduce((s, [, k]) => s + k, 0); };
+const chPeriod = z => Math.max(...chConfig(z).map(([o]) => +o[0]));
+// Species named in a sentence, as formulas: "hydrogen gas" is H2, "methane" is CH4, "CO2" stays.
+function chSpecies(s){ const t = s.trim().replace(/^(?:the |a |an )/i, "").replace(/\s+(?:gas|molecules?)$/i, ""); if(sciParse(t)) return t; const el = sciBy(t); if(el) return /^(H|N|O|F|Cl|Br|I)$/.test(el.s) ? el.s + "2" : el.s; return sciFormula(t); }
+// Coefficients of a balanced equation, by the same small search as sciBalance.
+function chCoef(left, right){
+  const all = [...left, ...right].map(sciParse); if(all.some(c => !c)) return null;
+  const els = [...new Set(all.flatMap(c => Object.keys(c)))], n = all.length, k = new Array(n).fill(1);
+  const ok = () => els.every(e => all.reduce((s, c, i) => s + (i < left.length ? 1 : -1) * (c[e] || 0) * k[i], 0) === 0);
+  const rec = i => { if(i === n) return ok(); for(let v = 1; v <= 12; v++){ k[i] = v; if(rec(i + 1)) return true; } return false; };
+  return n <= 6 && rec(0) ? k : null;
+}
+function chem11(q, raw){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"}), r = String(raw || q).trim().replace(/[?!]+$/, "");
+  const supE = e => (e < 0 ? "⁻" : "") + CH_SUP(Math.abs(e));
+  const sciStr = v => { const e = Math.floor(Math.log10(Math.abs(v))), m = +(v / 10 ** e).toPrecision(4); return pcNum(m) + " × 10" + supE(e); };
+  // Formulas are case-sensitive (Co is cobalt, CO is carbon monoxide), so those branches read the question as typed.
+  const typed = r.replace(/^(?:what(?:'s|’s| is)\s+)?(?:the\s+)?/i, "");
+  let m;
+  const facts = [
+    [/^(?:what is )?avogadro'?s (?:number|constant)$|^how many (?:particles|atoms|molecules) (?:are )?in (?:one|1|a) mole$/, "6.022 × 10²³ particles per mole."],
+    [/^(?:what is )?(?:a )?mole(?: in chemistry)?$/, "An amount of substance: 6.022 × 10²³ particles (Avogadro's number), just as a dozen is 12."],
+    [/^(?:what is )?(?:the )?molar mass$/, "The mass of one mole of a substance, in grams per mole (g/mol). Water's is 18.02 g/mol."],
+    [/^(?:what is )?(?:the )?molar volume(?: of (?:a |an ideal )?gas)?(?: at stp)?$/, "22.4 L per mole at STP."],
+    [/^(?:what is )?stp$|^(?:what is )?standard temperature and pressure$/, "Standard temperature and pressure: 0 °C (273.15 K) and 101.3 kPa (1 atm)."],
+    [/^(?:what is )?(?:an? )?ionic bond$/, "Electrons transfer from a metal to a nonmetal; the ions that form attract each other."],
+    [/^(?:what is )?(?:a )?polar covalent bond$/, "A covalent bond with unequal sharing: the more electronegative atom pulls the electrons closer and carries a partial negative charge."],
+    [/^(?:what is )?(?:a )?(?:nonpolar )?covalent bond$/, "Two nonmetal atoms share a pair of electrons."],
+    [/^(?:what is )?(?:a )?metallic bond$/, "Metal cations held in a sea of delocalized electrons, which is why metals conduct."],
+    [/\bmost electronegative element\b/, "Fluorine (3.98 on the Pauling scale)."], [/\bleast electronegative element\b/, "Francium, with cesium close behind (about 0.7 to 0.8)."],
+    [/\bwhat group (?:are|is) (?:the )?noble gases\b|\bnoble gases (?:are )?in (?:which|what) group\b/, "Group 18."], [/\bwhat group (?:are|is) (?:the )?halogens\b/, "Group 17."],
+    [/\bwhat group (?:are|is) (?:the )?alkali metals\b/, "Group 1."], [/\bwhat group (?:are|is) (?:the )?alkaline earth metals\b/, "Group 2."],
+    [/\belements in group 1 called\b|\bgroup 1 elements\b/, "The alkali metals (hydrogen sits above them but is not one)."], [/\belements in group 2 called\b|\bgroup 2 elements\b/, "The alkaline earth metals."],
+    [/\belements in group 17 called\b|\bgroup 17 elements\b/, "The halogens."], [/\belements in group 18 called\b|\bgroup 18 elements\b/, "The noble gases."],
+  ];
+  for(const [re, body] of facts) if(re.test(q)) return out(body);
+  // significant figures and scientific notation
+  if((m = /\bhow many sig(?:nificant)? (?:figures|figs|digits) (?:are )?(?:in|does) ([\d.,]+)/.exec(q))){
+    const s = m[1].replace(/,/g, ""), digits = s.replace(".", "").replace(/^0+/, ""), dot = s.includes(".");
+    const n = dot ? digits.length : digits.replace(/0+$/, "").length;
+    return out(String(n) + (!dot && /0$/.test(s) ? " (trailing zeros with no decimal point are not counted; write " + s + ". to count them)" : ""));
+  }
+  if((m = /\b(?:write|express|convert|put) ([\d.,]+) (?:in|into|to|as) scientific notation\b/.exec(q))){
+    const s = m[1].replace(/,/g, ""), v = +s; if(!v) return null;
+    const sigs = s.replace(".", "").replace(/^0+/, "").replace(s.includes(".") ? /$^/ : /0+$/, "").length, e = Math.floor(Math.log10(v)), mant = (v / 10 ** e).toPrecision(Math.max(1, sigs));
+    return out(mant + " × 10" + supE(e));
+  }
+  // density
+  if(/\bdensity\b/.test(q) && (m = /\bmass (?:of )?([\d.]+)\s*(kg|g)\b.*?\bvolume (?:of )?([\d.]+)\s*(ml|cm3|cm³|l|m3)\b/.exec(q))) return out(pcNum(+(+m[1] / +m[3]).toFixed(4)) + " " + m[2] + "/" + m[4].replace("ml", "mL").replace("cm3", "cm³").replace(/^l$/, "L"));
+  // the mole
+  const mm = s => { const f = chSpecies(s), c = f && sciParse(f); return c ? [f, sciMass(c)] : null; };
+  // Moles to three significant figures, the way a chemistry answer is written: 2.00 mol.
+  if((m = /^how many moles (?:are )?(?:in|of) ([\d.]+)\s*(?:g|grams) (?:of )?(.+)$/i.exec(typed))){ const x = mm(m[2]); if(x) return out((+m[1] / x[1]).toPrecision(3) + " mol (" + sciSub(x[0]) + " is " + pcNum(+x[1].toFixed(2)) + " g/mol)"); }
+  if((m = /^mass of ([\d.]+)\s*(?:mol|moles) (?:of )?(.+)$/i.exec(typed))){ const x = mm(m[2]); if(x) return out(pcNum(+(+m[1] * x[1]).toFixed(2)) + " g"); }
+  if((m = /\bhow many (molecules|atoms|particles|ions|formula units) (?:are )?in ([\d.]+) (?:mol|moles)\b/.exec(q))) return out(sciStr(+m[2] * CH_NA) + " " + m[1]);
+  if((m = /\b(?:percent|percentage|%) (?:composition |by mass )?of ([a-z]+) in ([A-Za-z0-9()]+)/i.exec(typed))){
+    const e = sciBy(m[1]), f = chSpecies(m[2]), c = f && sciParse(f); if(e && c && c[e.s]) return out(pcNum(+(c[e.s] * e.m / sciMass(c) * 100).toFixed(2)) + "%");
+  }
+  if(/\bempirical formula\b/.test(q)){
+    const parts = [...q.matchAll(/([\d.]+)\s*%\s*([a-z]+)/g)].map(t => [sciBy(t[2]), +t[1]]); if(parts.length >= 2 && parts.every(([e]) => e)){
+      const mol = parts.map(([e, p]) => [e.s, p / e.m]), low = Math.min(...mol.map(([, v]) => v));
+      for(let k = 1; k <= 6; k++){ const n = mol.map(([s, v]) => [s, v / low * k]); if(n.every(([, v]) => Math.abs(v - Math.round(v)) < 0.1)){
+        const order = ["C", "H", ...n.map(([s]) => s).filter(s => s !== "C" && s !== "H").sort()];
+        return out(sciSub(order.filter(s => n.some(([t]) => t === s)).map(s => { const v = Math.round(n.find(([t]) => t === s)[1]); return s + (v > 1 ? v : ""); }).join(""))); } }
+    }
+  }
+  // solutions and gases
+  if((m = /\bmolarity\b.*?([\d.]+)\s*(?:mol|moles)\b.*?\bin ([\d.]+)\s*(l|ml)\b/.exec(q))) return out(pcNum(+(+m[1] / (+m[2] / (m[3] === "ml" ? 1000 : 1))).toFixed(4)) + " M (mol/L)");
+  if((m = /\bhow many grams of ([A-Za-z0-9()]+)\b.*?\bmake ([\d.]+)\s*(ml|l)\b.*?\b([\d.]+)\s*m\b/i.exec(typed))){ const x = mm(m[1]); if(x){ const n = +m[4] * +m[2] / (/^ml$/i.test(m[3]) ? 1000 : 1); return out(pcNum(+(n * x[1]).toFixed(2)) + " g (" + pcNum(+n.toFixed(4)) + " mol)"); } }
+  if((m = /\bdilut\w*\b.*?([\d.]+)\s*(ml|l)\b.*?([\d.]+)\s*m\b.*?\bto ([\d.]+)\s*m\b/.exec(q))) return out(pcNum(+(+m[1] * +m[3] / +m[4]).toFixed(3)) + " " + (m[2] === "ml" ? "mL" : "L") + " (C₁V₁ = C₂V₂)");
+  if(/\bstp\b/.test(q)){
+    if((m = /\bvolume of ([\d.]+) (?:mol|moles)\b/.exec(q))) return out(pcNum(+(+m[1] * 22.4).toFixed(3)) + " L");
+    if((m = /\b(?:moles|mol) (?:are )?in ([\d.]+)\s*l\b/.exec(q))) return out(pcNum(+(+m[1] / 22.4).toFixed(4)) + " mol");
+  }
+  // stoichiometry and the limiting reactant
+  if((m = /\bhow many grams of (.+?) (?:are |is )?(?:made |produced |formed )?from ([\d.]+)\s*g (?:of )?(.+?)(?: (?:reacting|that reacts|reacts|burning|burns|burned|combusting) ?(?:with (.+?))?)?$/i.exec(typed))){
+    const P = chSpecies(m[1]), R = chSpecies(m[3]), W = m[4] ? chSpecies(m[4]) : null, burn = /\b(burning|burns|burned|combusting)\b/.test(q);
+    if(P && R){
+      const left = [R, ...(W ? [W] : burn ? ["O2"] : [])], right = burn ? ["CO2", "H2O"] : [P];
+      const k = chCoef(left, right.includes(P) ? right : [...right, P]); if(k){
+        const all = [...left, ...(right.includes(P) ? right : [...right, P])], kr = k[0], kp = k[all.indexOf(P)], mol = +m[2] / sciMass(sciParse(R)) * kp / kr;
+        return out(pcNum(+(mol * sciMass(sciParse(P))).toFixed(2)) + " g of " + sciSub(P) + " (" + pcNum(+mol.toFixed(3)) + " mol)");
+      }
+    }
+  }
+  if((m = /\blimiting (?:reactant|reagent)\b.*?([\d.]+)\s*mol(?:es)? (?:of )?([A-Za-z0-9]+)\b.*?([\d.]+)\s*mol(?:es)? (?:of )?([A-Za-z0-9]+)\b.*?\b(?:make|form|produce)s? (.+)$/i.exec(typed))){
+    const A = chSpecies(m[2]), B = chSpecies(m[4]), P = chSpecies(m[5].toLowerCase()), k = A && B && P && chCoef([A, B], [P]);
+    if(k){ const ra = +m[1] / k[0], rb = +m[3] / k[1], lim = ra <= rb ? A : B, other = ra <= rb ? B : A; return out(sciSub(lim) + " is the limiting reactant; " + sciSub(other) + " is in excess (the equation is " + [k[0] > 1 ? k[0] : "", sciSub(A), " + ", k[1] > 1 ? k[1] : "", sciSub(B), " → ", k[2] > 1 ? k[2] : "", sciSub(P)].join("") + ")."); }
+  }
+  if((m = /\bpercent yield\b.*?\btheoretical yield (?:is |of )?([\d.]+)\s*g\b.*?\bactual yield (?:is |of )?([\d.]+)/.exec(q)) || (m = /\bpercent yield\b.*?\bactual yield (?:is |of )?([\d.]+)\s*g\b.*?\btheoretical yield (?:is |of )?([\d.]+)/.exec(q)) && (m = [m[0], m[2], m[1]])) return out(pcNum(+(+m[2] / +m[1] * 100).toFixed(2)) + "%");
+  // atoms: configurations, valence, trends, ion charges
+  if((m = /^(?:the )?(?:electron )?configuration (?:of|for) ([a-z]+)$/.exec(q)) && sciBy(m[1])) return out(chConfig(sciBy(m[1]).z).map(([o, k]) => o + CH_SUP(k)).join(" "));
+  if((m = /^how many valence electrons (?:does|do|are in|in) (?:an? )?(?:atom of )?([a-z]+)(?: atom)?(?: have)?$/.exec(q)) && sciBy(m[1])) return out(String(chValence(sciBy(m[1]).z)));
+  if((m = /^which (?:has|is) (?:a )?(larger|bigger|smaller|more electronegative|less electronegative|higher ionization energy|lower ionization energy)(?: atomic radius| radius)?,? ([a-z]+) or ([a-z]+)$/.exec(q)) && sciBy(m[2]) && sciBy(m[3])){
+    const a = sciBy(m[2]), b = sciBy(m[3]), size = e => chPeriod(e.z) * 100 - e.z, en = e => CH_EN[e.s] ?? 0;
+    const pick = /larger|bigger|lower ionization/.test(m[1]) ? (size(a) >= size(b) ? a : b) : /smaller|higher ionization/.test(m[1]) ? (size(a) >= size(b) ? b : a) : /more/.test(m[1]) ? (en(a) >= en(b) ? a : b) : (en(a) >= en(b) ? b : a);
+    return out(pick.n[0].toUpperCase() + pick.n.slice(1) + ".");
+  }
+  if((m = /\bwhich element has the (largest|smallest|highest|lowest) (atomic radius|electronegativity|ionization energy) in period (\d)\b/.exec(q))){
+    const row = SCI_EL.filter(e => chPeriod(e.z) === +m[3] && e.z <= 36 && !/^(He|Ne|Ar|Kr)$/.test(e.s) || (chPeriod(e.z) === +m[3] && /radius|ionization/.test(m[2]) && /^(He|Ne|Ar|Kr)$/.test(e.s))).sort((x, y) => x.z - y.z);
+    // Radius is largest at the start of a period; electronegativity and ionization energy are lowest there.
+    const first = /radius/.test(m[2]) ? /largest|highest/.test(m[1]) : /smallest|lowest/.test(m[1]);
+    const e = first ? row[0] : row[row.length - 1]; return out(e.n[0].toUpperCase() + e.n.slice(1) + " (" + e.s + ").");
+  }
+  if((m = /\bcharge (?:of|on) (?:an? |the )?([a-z]+) ion\b/.exec(q))){
+    const word = m[1], e = sciBy(word) || sciBy(Object.entries(SCI_IDE).find(([, v]) => v === word)?.[0] || ""), c = e && SCI_CHARGE[e.s];
+    if(c){ const ion = sciBy(word) ? e.n + " ion" : word + " ion"; return out((c > 0 ? "+" : "-") + Math.abs(c) + " (" + e.s + (Math.abs(c) > 1 ? CH_SUP(Math.abs(c)) : "") + (c > 0 ? "⁺" : "⁻") + "), for the " + ion + "."); }
+  }
+  // bonds, shape and polarity
+  if((m = /^is ([A-Za-z0-9()]+) (ionic or covalent|covalent or ionic|polar or nonpolar|nonpolar or polar|polar or non-polar)$/i.exec(typed))){
+    const f = chSpecies(m[1]), c = f && sciParse(f); if(!c) return null; const els = Object.keys(c);
+    if(/ionic/.test(m[2])) return out(els.some(e => !SCI_NONMETAL.has(e)) && els.some(e => SCI_NONMETAL.has(e)) ? "Ionic: a metal and a nonmetal." : els.every(e => SCI_NONMETAL.has(e)) ? "Covalent: nonmetals share electrons." : "Metallic.");
+    const shape = chShape(c); if(!shape) return null;
+    return out(shape.polar ? "Polar: " + shape.why : "Nonpolar: " + shape.why);
+  }
+  if((m = /^(?:molecular )?(?:shape|geometry) of (?:an? )?(.+?)(?: molecule)?$/i.exec(typed))){
+    const d = /(\d+) bonding (?:pairs|domains)\b.*?\b(no|\d+) lone pairs?/i.exec(m[1]);
+    if(d){ const bp = +d[1], lp = d[2].toLowerCase() === "no" ? 0 : +d[2], s = CH_SHAPE[(bp + lp) + "," + lp]; return s ? out(s[0].toUpperCase() + s.slice(1) + ".") : null; }
+    const f = sciParse(m[1]) ? m[1] : chSpecies(m[1].toLowerCase()), c = f && sciParse(f), shape = c && chShape(c);
+    if(shape) return out(shape.name[0].toUpperCase() + shape.name.slice(1) + " (" + shape.why.replace(/\.$/, "") + ").");
+  }
+  // simple organic names
+  if((m = /^name (?:the )?(?:alkane|alkene|alkyne|hydrocarbon|compound) (C\d*H\d+)$/i.exec(typed))){
+    const c = sciParse(m[1]); if(c && c.C && c.H && Object.keys(c).length === 2 && c.C <= 10){ const n = c.C, h = c.H, end = h === 2 * n + 2 ? "ane" : h === 2 * n && n >= 2 ? "ene" : h === 2 * n - 2 && n >= 2 ? "yne" : null; if(end) return out(CH_ALK[n][0].toUpperCase() + CH_ALK[n].slice(1) + end + "."); }
+  }
+  if((m = /^(?:the )?(?:chemical |molecular )?formula (?:for|of) (meth|eth|prop|but|pent|hex|hept|oct|non|dec)(ane|ene|yne)$/.exec(q))){ const n = CH_ALK.indexOf(m[1]), h = m[2] === "ane" ? 2 * n + 2 : m[2] === "ene" ? 2 * n : 2 * n - 2; if(n && h > 0) return out(sciSub("C" + (n > 1 ? n : "") + "H" + h)); }
+  return null;
+}
+// VSEPR from a formula: one central atom, single bonds to H and halogens, double bonds to O and S, then the shape and
+// whether the bond dipoles cancel.
+function chShape(c){
+  const els = Object.keys(c), total = Object.values(c).reduce((s, v) => s + v, 0);
+  if(total === 2){ const polar = els.length === 2 && Math.abs((CH_EN[els[0]] ?? 0) - (CH_EN[els[1]] ?? 0)) > 0.4; return {name:"linear", polar, why: polar ? "a diatomic molecule of two different atoms has one polar bond." : "two identical atoms share electrons equally."}; }
+  const center = els.find(e => c[e] === 1 && e !== "H") || els.find(e => c[e] === 1); if(!center) return null;
+  const ligands = els.filter(e => e !== center), n = ligands.reduce((s, e) => s + c[e], 0);
+  const order = e => /^(O|S)$/.test(e) ? 2 : /^N$/.test(e) && ligands.length === 1 && n === 1 ? 3 : 1;
+  let used = ligands.reduce((s, e) => s + order(e) * c[e], 0), v = chValence(sciBy(center).z);
+  if(used > v) used = n; // ponytail: an oxygen that cannot take a double bond here takes a single one
+  const lone = Math.max(0, Math.floor((v - used) / 2)), key = (n + lone) + "," + lone, name = CH_SHAPE[key]; if(!name) return null;
+  const same = ligands.length === 1, dipole = ligands.some(e => Math.abs((CH_EN[e] ?? 0) - (CH_EN[center] ?? 0)) > 0.4);
+  const polar = dipole && !(CH_SYM.has(key) && same);
+  return {name, polar, why: n + " bonded atoms and " + lone + " lone pair" + (lone === 1 ? "" : "s") + " on " + center + (polar ? ", so the bond dipoles do not cancel." : dipole ? ", and the symmetric shape cancels the bond dipoles." : ", and the bonds are not polar.")};
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const sc10 = sci10(q, query); if(sc10) return sc10;
+  const ch11 = chem11(q, query); if(ch11) return ch11;
   const c12 = calc12(q); if(c12) return c12;
   const s12 = stats12(q); if(s12) return s12;
   const a12 = aw12(q); if(a12) return a12;

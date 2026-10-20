@@ -83,4 +83,12 @@ class Precalc11Test {
     @Test fun tetroxide() = assertEquals("N₂O₄", pc("formula for dinitrogen tetroxide"))
     @Test fun molarMass() = assertEquals("44.01 g/mol (CO₂)", pc("What is the molar mass of CO2"))
     @Test fun dihybrid() = assertEquals("1/16 ≈ 0.0625 (6.25%) of the offspring are aabb.", pc("punnett square AaBb x AaBb, what fraction are aabb"))
+
+    // Chemistry 11 (Chemistry11.kt)
+    @Test fun moles() = assertEquals("2.00 mol (H₂O is 18.02 g/mol)", pc("how many moles in 36 g of water"))
+    @Test fun stoichiometry() = assertEquals("43.89 g of CO₂ (0.997 mol)", pc("how many grams of CO2 from 16 g of methane burning"))
+    @Test fun limiting() = assertEquals("H₂ is the limiting reactant; N₂ is in excess (the equation is N₂ + 3H₂ → 2NH₃).", pc("limiting reactant when 3 mol N2 reacts with 6 mol H2 to make ammonia"))
+    @Test fun lowestIonization() = assertEquals("Sodium (Na).", pc("which element has the lowest ionization energy in period 3"))
+    @Test fun polarity() = assertEquals("Nonpolar: 4 bonded atoms and 0 lone pairs on C, and the symmetric shape cancels the bond dipoles.", pc("is CCl4 polar or nonpolar"))
+    @Test fun scientificNotation() = assertEquals("3.45 × 10⁻⁴", pc("write 0.000345 in scientific notation"))
 }
