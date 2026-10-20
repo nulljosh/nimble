@@ -35,6 +35,10 @@ Rules that bite:
 
 ## Next, in order
 
+0. Curriculum and public exams (Joshua, 2026-10-20). A+ means 95%, judged on a held-out form written before tuning, offline and online, on web then Swift then Kotlin, with every score in docs/BENCHMARK.md:
+   - BC Pre-Calculus 12 (test/exam-pc12.js). Form B offline is 25/41. Then port precalc() to Swift and Kotlin.
+   - Every other BC grade 10 to 12 math, science and socials course, 40 questions plus a held-out form each. English, arts and PE are skipped.
+   - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.
 3. Cut 10.0.0 as soon as Mac 9.4.3 clears review (iPhone is out): `scripts/bump-version.sh 10.0.0`, `npm test`, the Xcode test run, this handoff edit, push, CI green, `git tag v10.0.0`, `gh release create`, then `scripts/bump-tap.sh 10.0.0`. Then Joshua posts the rest of docs/launch/nimble.md.
