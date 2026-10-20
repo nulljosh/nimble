@@ -4,7 +4,7 @@
 
 Nimble ships one small slice per tick, from v10 up the roadmap to v100. Each slice is built on the web first, then Swift (iPhone and Mac), then Kotlin (Android and desktop). A slice ends the same way every time: tests green, push, CI green, tag, release, Homebrew tap bumped, docs and screenshots checked by eye. The bar is A+ on every surface and a free AI that lasts the whole day.
 
-10.0.0 closes v10 and is cut the day both store builds clear review. After that, ROADMAP.md runs v11 (native type) to v100 (the answer bar of a computer), one major at a time. Each major has an exit test, and its X.0.0 tag is cut the day that test passes.
+10.0.0 closed v10. Joshua called it on 2026-10-20 without waiting for Mac 9.4.3 to clear review. After that, ROADMAP.md runs v11 (native type) to v100 (the answer bar of a computer), one major at a time. Each major has an exit test, and its X.0.0 tag is cut the day that test passes.
 
 Each tick, in order: `asc versions list --app 6807858746` (a rejection jumps the queue), `gh run list --limit 3` (a red run on main jumps the queue), read `/stats` on the Worker, `df -h /System/Volumes/Data` (under 10 GB free means clean up before any build), then the next item below.
 
@@ -24,9 +24,9 @@ Rules that bite:
 
 ## Where things stand
 
-- Repo: main at 346f7d8 (2026-10-19 afternoon). The Kotlin offline exam at 72 of 154 is in (13d6976); the roadmap was pruned of checked items (346f7d8). Latest tag v9.10.0, Homebrew tap at 9.10.0. The handoff commit's Tests and Deploy site runs were still queued when this was written, so check CI first.
+- Repo: main at 346f7d8 (2026-10-19 afternoon). The Kotlin offline exam at 72 of 154 is in (13d6976); the roadmap was pruned of checked items (346f7d8). Latest tag v10.0.0, Homebrew tap at 10.0.0. The handoff commit's Tests and Deploy site runs were still queued when this was written, so check CI first.
 - Exam: 154 of 154 online on the web. Offline, the 14,000-article pack passes 72 of 154 with 3 wrong on the web, Kotlin and the Apple apps (Tests/OfflineExamTests.swift, run with TEST_RUNNER_NIMBLE_EXAM=1). Method and numbers are in docs/BENCHMARK.md.
-- Store, checked with asc 2026-10-20 00:00: iPhone 9.4.4 is READY_FOR_SALE. Mac 9.4.3 is WAITING_FOR_REVIEW and is the last gate on 10.0.0.
+- Store, checked with asc 2026-10-20 00:00: iPhone 9.4.4 is READY_FOR_SALE. Mac 9.4.3 is WAITING_FOR_REVIEW. 10.0.0 is tagged; the next store build carries it.
 - Price: $0.99 on the App Store since 2026-10-18. License Apache 2.0. Web stays free. MONEY.md says what the dollar buys.
 - Worker (nimble-answers.trommatic.workers.dev): Groq answers first, then Workers AI, then Wikipedia. The Samantha tier stays off until SAMANTHA_URL is set. API keys are issued through the API_KEYS secret. The live status page is at nimble.jaybulb.com/status.
 - Shipped on the web this round, and on the next store build: the status page, minimum wage by province from the Government of Canada table, the compare card with two rows, one-file JavaScript and Python API clients in sdk/, CI size budgets (Mac 11.9 MB of 20, iPhone 12.9 MB of 15), the review key moved into an Authorization header and rotated, and offline Kotlin unit conversion and time.
@@ -41,7 +41,7 @@ Rules that bite:
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.
-3. Cut 10.0.0 as soon as Mac 9.4.3 clears review (iPhone is out): `scripts/bump-version.sh 10.0.0`, `npm test`, the Xcode test run, this handoff edit, push, CI green, `git tag v10.0.0`, `gh release create`, then `scripts/bump-tap.sh 10.0.0`. Then Joshua posts the rest of docs/launch/nimble.md.
+3. 10.0.0 is out (2026-10-20). Joshua posts the rest of docs/launch/nimble.md when he wants.
 
 Until a build clears, do the next item each tick. If a build is rejected, read the reason with `asc web review show --app 6807858746`, fix it and resubmit. Do not resubmit unchanged.
 

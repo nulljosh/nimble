@@ -1,5 +1,5 @@
 # Nimble
-v9.10.0
+v10.0.0
 
 Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query classification (math/factual/definition). Offline math. Groq's free models first (gpt-oss 120B, Qwen 27B, gpt-oss 20B), then Qwen3 + Gemma on Cloudflare Workers AI, falling back to DDG + Wikipedia.
 
@@ -25,7 +25,7 @@ Instant-answer search: macOS HUD + menu bar app, iOS app, and a web app. Query c
 
 ## The loop
 
-See `docs/LOOP-HANDOFF.md` (current state at 9.10.0, 2026-10-19). v9 is closed. iPhone 9.4.4 and Mac 9.4.3 are WAITING_FOR_REVIEW. Next: when both clear, cut 10.0.0 (closes v10), then Joshua posts the launch drafts. Joshua owns the store submissions, the real-device walk and the native-speaker check.
+See `docs/LOOP-HANDOFF.md`. v10 is closed (10.0.0 tagged 2026-10-20). iPhone 9.4.4 is live, Mac 9.4.3 is WAITING_FOR_REVIEW. Next: v11 on ROADMAP.md, and Joshua posts the launch drafts. Joshua owns the store submissions, the real-device walk and the native-speaker check.
 
 ## QA
 QA hooks always sandbox storage: any `-shot*` or `-qaSandbox` launch arg moves history, prefs, the shared answer suite and iCloud sync to a fresh temp root (`Sources/Models/QASandbox.swift`). Never launch the real app bundle for QA against real data.
