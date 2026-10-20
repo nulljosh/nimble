@@ -130,3 +130,12 @@ test("Life Sciences 11: microscope, growth and names, and Pre-Calc growth still 
   assert.equal(body("a population of 200 doubles every 3 hours, how many after 12 hours"), "3200");
   assert.equal(body("conjugation of spanish verbs"), undefined);
 });
+
+test("Anatomy and Physiology 12: sequences, codons, cardiac output and the which-organelle lookup", () => {
+  assert.equal(body("what is the complementary strand of ATGCCA"), "TACGGT");
+  assert.equal(body("translate the mRNA AUGUUUGGCUAA"), "Met-Phe-Gly-Stop (methionine, phenylalanine, glycine, then stop)");
+  assert.equal(body("what amino acid does the codon AUG code for"), "Methionine (Met), also the start codon.");
+  assert.equal(body("cardiac output if heart rate is 70 bpm and stroke volume is 70 mL"), "4900 mL/min (4.9 L/min; cardiac output = heart rate × stroke volume)");
+  assert.match(body("what organelle makes ATP"), /^Mitochondria\./);
+  assert.match(body("what part of the brain controls balance"), /^Cerebellum\./);
+});

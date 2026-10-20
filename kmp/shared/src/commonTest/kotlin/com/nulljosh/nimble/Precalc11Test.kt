@@ -121,4 +121,13 @@ class Precalc11Test {
     @Test fun scientificName() = assertEquals("Felis catus.", pc("what is the scientific name for cats"))
     @Test fun lyticVsLysogenic() = assertEquals(true, pc("what is the difference between the lytic and lysogenic cycle")?.contains("prophage"))
     @Test fun populationGrowthStaysPrecalc() = assertEquals("3200", pc("a population of 200 doubles every 3 hours, how many after 12 hours"))
+
+    // Anatomy and Physiology 12 (AnatomyPhysiology12.kt)
+    @Test fun complementStrand() = assertEquals("TACGGT", pc("what is the complementary strand of ATGCCA"))
+    @Test fun transcribe() = assertEquals("AUGCCA (read as the template strand: A pairs with U, T with A, C with G)", pc("transcribe the DNA template strand TACGGT into mRNA"))
+    @Test fun translate() = assertEquals("Met-Phe-Gly-Stop (methionine, phenylalanine, glycine, then stop)", pc("translate the mRNA AUGUUUGGCUAA"))
+    @Test fun codonLookup() = assertEquals("Methionine (Met), also the start codon.", pc("what amino acid does the codon AUG code for"))
+    @Test fun cardiacOutput() = assertEquals("4900 mL/min (4.9 L/min; cardiac output = heart rate × stroke volume)", pc("cardiac output if heart rate is 70 bpm and stroke volume is 70 mL"))
+    @Test fun whichOrganelle() = assertEquals(true, pc("what organelle makes ATP")?.startsWith("Mitochondria."))
+    @Test fun whichBrainPart() = assertEquals(true, pc("what part of the brain controls balance")?.startsWith("Cerebellum."))
 }

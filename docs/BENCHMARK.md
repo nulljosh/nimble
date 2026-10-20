@@ -263,6 +263,20 @@ No form B answer was checked by hand before the run. Two side effects were caugh
 
 The honest held-out number is form C's first run, 15/40. A facts table only knows what it was written for, and a fresh set of questions on the same course found the gaps at once: kingdoms and phyla of common organisms, diseases by cause, pili and peptidoglycan, niches, punctuated equilibrium, the functions of plant parts. Those are now covered, and C reads 39/40 after the fixes, but that is tuned, not held out. The one miss is "what is photosynthesis": a local fact would hide the Wikipedia card and its diagram, which the web tests protect, so the pack answers it and its opening line has no "light" or "glucose". The math half (total magnification, field of view, actual size, doubling growth) is real arithmetic and generalizes. The solver is `ls11()` in docs/engine.js and `LifeSciences11.kt` on Kotlin, whose tables are copied from engine.js by script. A known cost: a local definition answers before Wikipedia even online, so bare terms like virus, fossil, fern or species now get one textbook line instead of their Wikipedia card, as Science 10 already does for evolution and galaxy. Narrowing those is on the list. The bacteria growth rule only fires when the question says bacteria, after it first took a Pre-Calc 12 population question. **A+ offline on A and B; held-out form C is 38% first run, so fact courses need an online held-out grade before they count.**
 
+## BC curriculum: Anatomy and Physiology 12
+
+`test/courses/ap12.js`: organelles, membrane transport and tonicity, biological molecules, enzymes, DNA replication, transcription and translation, homeostasis, and the digestive, circulatory, respiratory, urinary and nervous systems. Forms A and B were written before any run, and the solver was built from the curriculum and form A's misses only. Form C was written after A and B passed and run once. Run `COURSE=ap12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 3/40 (8%) | 2/40 (5%) | 20/40 (50%) |
+| Web offline, after A only | 40/40 | 40/40 | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 | 40/40 |
+
+Form B scored 40/40 on its first run after the solver was built from form A, but the same person wrote form B and the solver, so its topics were in mind; that makes it weaker evidence than it looks. Form C is the honest held-out number: 20/40 first run. That is better than Life Sciences 11's 15/40 because this solver matches whole terms ("function of X", "what does X do", "what is X") against one table of structures and ideas, rather than one pattern per question. C's misses were reverse questions ("which organelle makes ATP", "what part of the brain controls balance"), now answered by scoring each term of the asked kind on shared words, with a word weighted down the more terms use it, plus facts it simply lacked (base pairing, enzyme substrates, the body's response to heat, where bile is made). The sequence work (complements, transcription, the genetic code, translation, codon counts) and cardiac output are real computation. The solver is `ap12()` in docs/engine.js and `AnatomyPhysiology12.kt` on Kotlin, whose tables are copied from engine.js by script. **A+ offline on A and B; held-out form C is 50% first run, so this course also waits for an online held-out grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
