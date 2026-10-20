@@ -137,16 +137,60 @@ const Q = [
   ["exact value of tan(pi/3)", /√3|1\.73/],
   ["simplify sin x / cos x", /tan/i],
   ["sector area with radius 4 and angle pi/2", /4π|12\.56/],
+  // Form D: written 2026-10-20 after form C was fixed, before any run.
+  ["y = f(x) is shifted 3 left and 2 down, write the new equation", /f\s*\(\s*x\s*\+\s*3\s*\)\s*[-−]\s*2/],
+  ["what transformation maps y = x^2 to y = (x - 5)^2", /right|5 units/i],
+  ["find the inverse of f(x) = (x - 4)/2", /2x\s*\+\s*4|2\s*\(?x\s*\+\s*2\)?/],
+  ["is the inverse of y = x^2 a function", /\bno\b|not/i],
+  ["evaluate log3(1/9)", /-2\b/],
+  ["what is log 8 base 2", /\b3\b/],
+  ["solve 4^x = 32", /2\.5|5\/2/],
+  ["solve 3^(2x) = 81", /x\s*=\s*2\b|\s2\.?$/],
+  ["simplify log(100) - log(10)", /^1$|\s1\.?$/],
+  ["write 2^5 = 32 in log form", /log\s*_?\s*2\s*\(?32\)?\s*=\s*5|log₂/i],
+  ["write log3(9) = 2 in exponential form", /3\s*\^\s*2\s*=\s*9|3²\s*=\s*9/],
+  ["an investment of $800 grows at 3% per year compounded monthly, value after 6 years", /9[56]\d\.\d\d/],
+  ["carbon-14 has a half-life of 5730 years, what fraction is left after 11460 years", /1\/4|0\.25|25\s*%/],
+  ["the pH of a solution with hydrogen ion concentration 0.001", /\b3\b/],
+  ["an earthquake of magnitude 7 is how many times stronger than magnitude 5", /\b100\b/],
+  ["general term of 3, 6, 12, 24", /3\s*[·*(]?\s*\(?2\)?\s*\^\s*\(?n\s*[-−]\s*1\)?|3·2/],
+  ["which term of 2, 4, 8 is 256", /\b8(th)?\b/],
+  ["sum of a geometric series with a = 5, r = 3, n = 4", /\b200\b/],
+  ["infinite sum of 12 - 6 + 3 - ...", /\b8\b/],
+  ["write 0.333... as a fraction", /1\/3/],
+  ["divide x^3 - 1 by x - 1", /x\s*\^?\s*2\s*\+\s*x\s*\+\s*1|x²\s*\+\s*x\s*\+\s*1/i],
+  ["find k if x - 2 is a factor of x^2 + kx - 6", /k\s*=\s*1\b|\s1\.?$/],
+  ["zeros of (x - 1)(x + 2)(x - 3)", /-2[^\d]+1[^\d]+3|1[^\d]+-2[^\d]+3/],
+  ["multiplicity of the root x = 2 in (x - 2)^3", /\b3\b/],
+  ["y-intercept of y = x^3 - 2x + 5", /\b5\b/],
+  ["oblique asymptote of y = (x^2 + 1)/x", /y\s*=\s*x\b/],
+  ["where is the hole in y = (x^2 - 1)/(x - 1)", /x\s*=\s*1\b|\(1,\s*2\)/],
+  ["solve 1/x = 4", /0\.25|1\/4/],
+  ["sin(-pi/2)", /-1\b/],
+  ["cos 0", /^1$|\s1\.?$/],
+  ["sec 60 degrees", /\b2\b/],
+  ["what is 1 radian in degrees", /57\.29|57\.3/],
+  ["phase shift of y = sin(x - pi/4)", /π\s*\/\s*4|right/i],
+  ["vertical displacement of y = 2cos(x) + 3", /\b3\b|up 3/i],
+  ["range of y = 3sin(x) + 1", /-2.*4|\[-2,\s*4\]/],
+  ["solve sin^2 x = 1/4 for 0 ≤ x < 2π", /π\s*\/\s*6.*5π\s*\/\s*6.*7π\s*\/\s*6.*11π\s*\/\s*6/],
+  ["prove tan x cos x = sin x", /sin\s*x\s*\/\s*cos\s*x|sin/i],
+  ["exact value of sin(pi/12)", /√6\s*[-−]\s*√2|0\.2588/],
+  ["cos(a + b) identity", /cos\s*a\s*cos\s*b\s*[-−]\s*sin\s*a\s*sin\s*b/i],
+  ["double angle formula for sine", /2\s*sin\s*x\s*cos\s*x|2\s*sin\s*θ\s*cos\s*θ|2\s*sin\s*\(?[a-z]\)?\s*cos/i],
 ];
 
 (async () => {
-  let pass = 0, passB = 0, passC = 0; const fail = [];
+  let pass = 0, passB = 0, passC = 0, passD = 0; const fail = [];
+  // FROM=121 runs only form D onward, to spare the free AI quota.
   for (const [i, [q, re]] of Q.entries()) {
+    if (i < +(process.env.FROM || 0)) continue;
     if (!offline && !E.tryMath(q) && !E.tryConvert(q)) await new Promise((ok) => setTimeout(ok, 3200));
     let r; try { r = await E.answer(q, offline ? { privateMode: true, pack } : { ifUnset: "yes" }); } catch (e) { r = { kind: "throw", body: String(e) }; }
-    const text = [r.title, r.body, r.value, r.to, r.toUnit, r.big, r.unit, r.sub, r.text].filter((x) => x != null).join(" ");
-    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81) passC++;
+    // Typographic minus signs and hyphens read as "-": the AI writes "−2" and "[‑2, 4]" for the same answer.
+    const text = [r.title, r.body, r.value, r.to, r.toUnit, r.big, r.unit, r.sub, r.text].filter((x) => x != null).join(" ").replace(/[−‑–]/g, "-");
+    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81 && i < 121) passC++; if (ok && i >= 121) passD++;
     console.log((ok ? "PASS" : "FAIL") + " | " + q + " => " + r.kind + " | " + text.slice(0, 110).replace(/\n/g, " "));
   }
-  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC}/40, form B ${passB}/41, form C ${passC}/${Q.length - 81}). FAIL: ${fail.join(" ; ")}`);
+  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC - passD}/40, form B ${passB}/41, form C ${passC}/40, form D ${passD}/${Q.length - 121}). FAIL: ${fail.join(" ; ")}`);
 })();

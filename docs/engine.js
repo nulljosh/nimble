@@ -1093,7 +1093,7 @@ function pcPi(v){
 }
 // The exact form of a trig value at a standard angle ("-√3/2"), or null.
 function pcExact(v){
-  const table = [[0,"0"],[0.5,"1/2"],[Math.SQRT2/2,"√2/2"],[Math.sqrt(3)/2,"√3/2"],[1,"1"],[Math.sqrt(3)/3,"√3/3"],[Math.sqrt(3),"√3"],[2,"2"],[2/Math.sqrt(3),"2√3/3"],[Math.SQRT2,"√2"]];
+  const table = [[0,"0"],[0.5,"1/2"],[Math.SQRT2/2,"√2/2"],[Math.sqrt(3)/2,"√3/2"],[1,"1"],[Math.sqrt(3)/3,"√3/3"],[Math.sqrt(3),"√3"],[2,"2"],[2/Math.sqrt(3),"2√3/3"],[Math.SQRT2,"√2"],[(Math.sqrt(6)-Math.SQRT2)/4,"(√6 - √2)/4"],[(Math.sqrt(6)+Math.SQRT2)/4,"(√6 + √2)/4"],[2-Math.sqrt(3),"2 - √3"],[2+Math.sqrt(3),"2 + √3"]];
   const hit = table.find(([x]) => Math.abs(Math.abs(v) - x) < 1e-9);
   return hit ? (v < 0 && hit[1] !== "0" ? "-" : "") + hit[1] : null;
 }
@@ -1105,7 +1105,8 @@ function pcVal(s){
 // An expression in x at one value of x, with "2x" and "3(x+1)" read as products.
 function pcAt(expr, x){
   const s = expr.replace(/[−–]/g, "-").replace(/\s+/g, "").replace(/x/g, "(" + x + ")").replace(/(?<=[\d)])(?=\()/g, "*");
-  return tryMath(s);
+  // "0+" keeps a bare value ("x" at 5) a calculation, which tryMath requires.
+  return tryMath("0+(" + s + ")");
 }
 // A polynomial of degree two or less as [a, b, c], read by evaluating it; null when it is not one.
 function pcQuad(expr){
@@ -1129,6 +1130,49 @@ function pcPolyRoots(expr){
 }
 // The highest power of x typed, the polynomial's degree as written.
 const pcDegree = expr => Math.max(/x/.test(expr) ? 1 : 0, ...[...expr.matchAll(/x\s*\^\s*(\d+)/g)].map(m => +m[1]));
+// A polynomial's degree read from how fast it grows, so "(x - 1)(x + 2)(x - 3)" counts as 3.
+function pcDeg(expr){
+  const a = pcAt(expr, 1e4), b = pcAt(expr, 2e4); if(a === null || b === null || a === 0) return null;
+  const d = Math.log2(Math.abs(b / a)); return Math.abs(d - Math.round(d)) < 0.01 && d > -0.01 && d < 8.5 ? Math.round(d) : null;
+}
+// A polynomial's coefficients, highest power first, solved from its values at 0..n. Null when it is not one.
+function pcCoeffs(expr){
+  const n = pcDeg(expr); if(n === null) return null;
+  const A = [], ys = [];
+  for(let i = 0; i <= n; i++){ const y = pcAt(expr, i); if(y === null) return null; A.push([...Array(n + 1)].map((_, j) => i ** (n - j))); ys.push(y); }
+  for(let c = 0; c <= n; c++){
+    const p = A.findIndex((r, i) => i >= c && Math.abs(r[c]) > 1e-12); if(p < 0) return null;
+    [A[c], A[p]] = [A[p], A[c]]; [ys[c], ys[p]] = [ys[p], ys[c]];
+    for(let r = 0; r <= n; r++) if(r !== c){ const f = A[r][c] / A[c][c]; for(let k = c; k <= n; k++) A[r][k] -= f * A[c][k]; ys[r] -= f * ys[c]; }
+  }
+  const co = ys.map((y, i) => +(y / A[i][i]).toFixed(9));
+  const check = pcAt(expr, n + 1.5); if(check === null || Math.abs(co.reduce((s, c) => s * (n + 1.5) + c, 0) - check) > 1e-6 * Math.max(1, Math.abs(check))) return null;
+  return co;
+}
+// Coefficients back to text: [1, 0, -1] is "x^2 - 1".
+function pcPoly(co){
+  const n = co.length - 1, parts = [];
+  co.forEach((c, i) => {
+    if(Math.abs(c) < 1e-12) return;
+    const p = n - i, mag = Math.abs(c), num = pcFrac(mag), body = p === 0 ? num : (mag === 1 ? "" : num) + "x" + (p > 1 ? "^" + p : "");
+    parts.push(parts.length ? (c < 0 ? "- " : "+ ") + body : (c < 0 ? "-" : "") + body);
+  });
+  return parts.join(" ") || "0";
+}
+// Long division of coefficient lists: [quotient, remainder].
+function pcDivide(num, den){
+  const q = [], r = [...num];
+  while(r.length >= den.length){ const f = r[0] / den[0]; q.push(f); den.forEach((d, i) => { r[i] -= f * d; }); r.shift(); }
+  return [q.length ? q : [0], r.length ? r : [0]];
+}
+// The roots of any expression in x that are small fractions p/q, found by trying them. Exact zeros only.
+function pcScanRoots(expr){
+  const found = new Set();
+  for(let d = 1; d <= 6; d++) for(let n = -60 * d; n <= 60 * d; n++){ const x = n / d, v = pcAt(expr, x); if(v !== null && Math.abs(v) < 1e-9) found.add(+x.toPrecision(12)); }
+  return [...found].sort((a, b) => a - b);
+}
+// "(x + 3) - 2" from shifts: the transformed function written out.
+const pcShift = (h, k) => "f(x" + (h ? (h > 0 ? " - " + pcNum(h) : " + " + pcNum(-h)) : "") + ")" + (k ? (k > 0 ? " + " + pcNum(k) : " - " + pcNum(-k)) : "");
 const pcSign = r => r < 0 ? "+ " + pcFrac(-r) : "- " + pcFrac(r);
 const PC_FACTS = [
   [/^(?:what is )?(?:the )?reciprocal of sine$/, "Cosecant: csc x = 1/sin x."],
@@ -1148,6 +1192,13 @@ const PC_FACTS = [
   [/^simplify 1\s*-\s*sin\s*\^?\s*2\s*\(?x\)?$/, "cos²x."],
   [/^simplify 1\s*-\s*cos\s*\^?\s*2\s*\(?x\)?$/, "sin²x."],
   [/^simplify 1\s*\+\s*tan\s*\^?\s*2\s*\(?x\)?$/, "sec²x."],
+  [/^(?:the )?(?:cos\s*\(?a\s*\+\s*b\)?|cosine sum)\s*(?:identity|formula)?$|^(?:the )?(?:sum|addition) (?:identity|formula) for cos(?:ine)?$/, "cos(a + b) = cos a cos b - sin a sin b."],
+  [/^(?:the )?(?:cos\s*\(?a\s*-\s*b\)?)\s*(?:identity|formula)?$|^(?:the )?difference (?:identity|formula) for cos(?:ine)?$/, "cos(a - b) = cos a cos b + sin a sin b."],
+  [/^(?:the )?(?:sin\s*\(?a\s*\+\s*b\)?)\s*(?:identity|formula)?$|^(?:the )?(?:sum|addition) (?:identity|formula) for sin(?:e)?$/, "sin(a + b) = sin a cos b + cos a sin b."],
+  [/^(?:the )?(?:sin\s*\(?a\s*-\s*b\)?)\s*(?:identity|formula)?$|^(?:the )?difference (?:identity|formula) for sin(?:e)?$/, "sin(a - b) = sin a cos b - cos a sin b."],
+  [/^(?:the )?double[- ]angle (?:identity|formula) for sin(?:e)?$|^sin\s*\(?2x\)?\s*(?:identity|formula)$/, "sin 2x = 2 sin x cos x."],
+  [/^(?:the )?double[- ]angle (?:identity|formula|identities|formulas) for cos(?:ine)?$|^cos\s*\(?2x\)?\s*(?:identity|formula)$/, "cos 2x = cos²x - sin²x = 2cos²x - 1 = 1 - 2sin²x."],
+  [/^(?:the )?double[- ]angle (?:identity|formula) for tan(?:gent)?$|^tan\s*\(?2x\)?\s*(?:identity|formula)$/, "tan 2x = 2 tan x/(1 - tan²x)."],
   [/^(?:what is )?(?:the )?remainder theorem$/, "When a polynomial P(x) is divided by x - a, the remainder is P(a)."],
   [/^(?:what is )?(?:the )?factor theorem$/, "x - a is a factor of P(x) exactly when P(a) = 0."],
   [/^(?:what is )?(?:the )?domain of (?:y\s*=\s*|f\(x\)\s*=\s*)?(?:log|ln)(?:_?\d+)?\s*\(?x\)?$/, "x > 0. A logarithm is defined only for positive numbers."],
@@ -1158,10 +1209,134 @@ const PC_FACTS = [
   [/^(?:what is )?(?:the )?formula for (?:the )?(?:sum of )?(?:an |the )?infinite geometric series$/, "S = a/(1 - r), when |r| < 1."],
 ];
 function precalc(query){
-  const q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
+  let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   let m;
+  // evaluate log3(1/9), simplify log(100) - log(10): the rest is plain arithmetic
+  if((m = /^(?:evaluate|simplify|compute)\s+(.+)$/.exec(q))){
+    const v = tryMath(m[1]); if(v !== null) return {kind:"math", value:v};
+    q = m[1];
+  }
+  // log 8 base 2
+  if((m = /^log\s*(?:of\s*)?([\d.]+(?:\s*\/\s*[\d.]+)?)\s*(?:to the |in )?base\s*(\d+(?:\.\d+)?)$/.exec(q))){
+    const x = pcVal(m[1]), v = x === null ? NaN : Math.log(x) / Math.log(+m[2]); return isFinite(v) ? out(pcFrac(+v.toPrecision(12))) : null;
+  }
+  // write 2^5 = 32 in log form; write log3(9) = 2 in exponential form
+  if((m = /^(?:write|express|convert|rewrite)\s+(\d+(?:\.\d+)?)\s*\^\s*\(?(-?[\d./]+)\)?\s*=\s*([\d./]+)\s+(?:in|as|to)\s+(?:log|logarithmic)(?: form)?$/.exec(q))) return out("log" + m[1] + "(" + m[3] + ") = " + m[2] + ", read as log base " + m[1] + " of " + m[3] + ".");
+  if((m = /^(?:write|express|convert|rewrite)\s+log\s*(?:_\s*)?(\d+(?:\.\d+)?)\s*\(\s*([\d./]+)\s*\)\s*=\s*(-?[\d./]+)\s+(?:in|as|to)\s+exponential(?: form)?$/.exec(q))) return out(m[1] + "^" + m[3] + " = " + m[2]);
+  // pH and the Richter scale: base-10 logs with a name
+  if((m = /\bph\b.*?(?:concentration|\[h\+?\])\s*(?:of |is |=\s*)?([\d.e-]+(?:\s*[x×]\s*10\s*\^\s*-?\d+)?)/.exec(q))){
+    const c = pcVal(m[1].replace(/\s*[x×]\s*10\s*\^\s*/, "*10^")); return c > 0 ? out("pH = " + pcNum(-Math.log10(c))) : null;
+  }
+  if((m = /magnitude\s*([\d.]+).*?(?:times|stronger|more powerful|more intense).*?magnitude\s*([\d.]+)/.exec(q)) || (m = /magnitude\s*([\d.]+).*?magnitude\s*([\d.]+).*?(?:times|stronger)/.exec(q))){
+    const r = 10 ** Math.abs(+m[1] - +m[2]); return out(pcNum(r) + " times");
+  }
+  // the transformation y = f(x) shifted 3 left and 2 down
+  if(/\bshift(?:ed|s)?\b|\btranslated\b|\bmoved\b/.test(q) && /\bf\(x\)/.test(q) && /\b(left|right|up|down)\b/.test(q)){
+    let h = 0, k = 0;
+    for(const [, n, dir] of q.matchAll(/(\d+(?:\.\d+)?)\s*(?:units?\s*)?(left|right|up|down)\b/g)) ({left:() => h -= +n, right:() => h += +n, up:() => k += +n, down:() => k -= +n})[dir]();
+    if(h || k) return out("y = " + pcShift(h, k));
+  }
+  // what transformation maps y = x^2 to y = 3(x - 5)^2 + 1
+  if((m = /maps? y\s*=\s*(.+?)\s+(?:to|onto)\s+y\s*=\s*(-?)\s*([\d.\/]*)\s*\(\s*x\s*([+-])\s*([\d.]+)\s*\)\s*(\^\s*\d+)?\s*(?:([+-])\s*([\d.]+))?$/.exec(q))){
+    const say = [], a = m[3] ? pcVal(m[3]) : 1;
+    if(m[2]) say.push("reflects it across the x-axis");
+    if(a !== 1) say.push((a > 1 ? "stretches it vertically by a factor of " : "compresses it vertically by a factor of ") + pcNum(a));
+    say.push("shifts it " + pcNum(m[5]) + " units " + (m[4] === "-" ? "right" : "left"));
+    if(m[7]) say.push("shifts it " + pcNum(m[8]) + " units " + (m[7] === "+" ? "up" : "down"));
+    return out("It " + say.join(", then ") + ".");
+  }
+  // is the inverse of y = x^2 a function
+  if(/^is the inverse of (?:y|f\(x\))\s*=\s*x\s*\^\s*2 a function$/.test(q)) return out("No. y = x² fails the horizontal line test, so its inverse is a function only if the domain is restricted, such as x ≥ 0.");
+  // write 0.333... as a fraction
+  if((m = /^0\.(\d+)(?:\.\.\.|…)(?: as a fraction| to a fraction| in fraction form)?$/.exec(String(query).trim().toLowerCase().replace(/\?$/, "").replace(/^(?:what is |write |convert |express )/, "")))){
+    // The shortest lead-in, then the shortest block that repeats at least twice to the end ("0.1666..." is 1, then 6).
+    const D = m[1]; let pre = null, rep = null;
+    for(let L = 0; L < D.length && pre === null; L++) for(let k = 1; 2 * k <= D.length - L; k++){
+      const t = D.slice(L), b = t.slice(0, k); if([...t].every((c, i) => c === b[i % k])){ pre = D.slice(0, L); rep = b; break; }
+    }
+    if(pre === null) return null;
+    const num = +(pre + rep) - (pre ? +pre : 0), den = (10 ** rep.length - 1) * 10 ** pre.length;
+    const g = (a, b) => b ? g(b, a % b) : a, d = g(num, den); return out(num / d + "/" + den / d);
+  }
+  // general term and which term, from a geometric list
+  const gl = /(-?\d+(?:\.\d+)?(?:\s*,\s*-?\d+(?:\.\d+)?){2,})/.exec(q);
+  if(gl && (m = /^(?:the )?(general term|nth term|explicit formula|which term)\b/.exec(q))){
+    const n = gl[1].split(/\s*,\s*/).map(Number), r = n[1] / n[0];
+    if(!n.every((v, i) => i === 0 || Math.abs(v - n[i - 1] * r) < 1e-9)) return null;
+    if(m[1] === "which term"){
+      const t = (/\bis\s+(-?[\d.]+)$/.exec(q) || [])[1]; if(t === undefined) return null;
+      const k = Math.log(+t / n[0]) / Math.log(r) + 1; return Number.isInteger(+k.toPrecision(9)) ? out("Term " + +k.toPrecision(9) + ".") : out("None. It falls between terms.");
+    }
+    return out("tₙ = " + pcNum(n[0]) + "·" + (r < 0 ? "(" + pcFrac(r) + ")" : pcFrac(r)) + "^(n - 1)");
+  }
+  // sum of a geometric series with a = 5, r = 3, n = 4
+  if(/\bgeometric\b/.test(q) && (m = /\ba\s*=\s*(-?[\d./]+).*?\br\s*=\s*(-?[\d./]+)(?:.*?\bn\s*=\s*(\d+))?/.exec(q))){
+    const a = pcVal(m[1]), r = pcVal(m[2]); if(a === null || r === null) return null;
+    if(m[3]) return out(pcNum(r === 1 ? a * +m[3] : a * (1 - r ** +m[3]) / (1 - r)));
+    if(/infinite/.test(q)) return out(Math.abs(r) < 1 ? pcNum(a / (1 - r)) : "It diverges: an infinite geometric sum needs |r| < 1.");
+  }
+  // infinite sum of 12 - 6 + 3 - ...
+  if((m = /^(?:the )?(?:infinite )?sum of\s+(-?\s*\d+(?:\.\d+)?(?:\/\d+)?(?:\s*[+-]\s*\d+(?:\.\d+)?(?:\/\d+)?){2,})\s*[+-]?\s*(?:\.\.\.|…)?$/.exec(String(query).trim().toLowerCase().replace(/[−–]/g, "-").replace(/^(?:what is |find )(?:the )?/, "").replace(/\?$/, ""))) && /(\.\.\.|…|infinite)/.test(String(query))){
+    const n = [...m[1].matchAll(/([+-]?)\s*(\d+(?:\.\d+)?(?:\/\d+)?)/g)].map(([, sg, v]) => (sg === "-" ? -1 : 1) * pcVal(v)), r = n[1] / n[0];
+    if(n.every((v, i) => i === 0 || Math.abs(v - n[i - 1] * r) < 1e-9)) return out(Math.abs(r) < 1 ? pcNum(n[0] / (1 - r)) : "It diverges: the ratio is " + pcFrac(r) + ", and an infinite sum needs |r| < 1.");
+  }
+  // divide x^3 - 1 by x - 1
+  if((m = /^divide\s+(.+?)\s+by\s+(.+)$/.exec(q)) || (m = /^\(?(.+?)\)?\s*(?:÷|divided by)\s*\(?(.+?)\)?$/.exec(q))){
+    const a = pcCoeffs(m[1]), b = pcCoeffs(m[2]);
+    if(a && b && a.length >= b.length && /x/.test(m[1]) && /x/.test(m[2])){
+      const [qt, rm] = pcDivide(a, b), rest = rm.every(c => Math.abs(c) < 1e-9) ? "" : ", remainder " + pcPoly(rm.map(c => +c.toFixed(9)));
+      return out(pcPoly(qt.map(c => +c.toFixed(9))) + rest);
+    }
+  }
+  // find k if x - 2 is a factor of x^2 + kx - 6
+  if((m = /^(?:the value of )?k\b.*?\bif\s+\(?\s*x\s*([+-])\s*([\d.]+)\s*\)?\s+is a factor of\s+(.+)$/.exec(q.replace(/^find\s+/, ""))) || (m = /^(?:find )?k\b.*?\bif\s+\(?\s*x\s*([+-])\s*([\d.]+)\s*\)?\s+is a factor of\s+(.+)$/.exec(q))){
+    const a = (m[1] === "-" ? 1 : -1) * +m[2], at = k => pcAt(m[3].replace(/\bk\b|(?<=\d)k|k(?=x)/g, "(" + k + ")"), a);
+    const p0 = at(0), p1 = at(1); if(p0 === null || p1 === null || p1 === p0) return null;
+    return out("k = " + pcFrac(+(-p0 / (p1 - p0)).toPrecision(12)));
+  }
+  // multiplicity of the root x = 2 in (x - 2)^3
+  if((m = /multiplicity of (?:the )?(?:root|zero)\s*(?:x\s*=\s*)?(-?[\d.]+)\s+in\s+(.+)$/.exec(q))){
+    const a = +m[1], co = pcCoeffs(m[2]); if(!co) return null;
+    let c = co, k = 0; while(c.length > 1){ const [qt, rm] = pcDivide(c, [1, -a]); if(Math.abs(rm[0]) > 1e-9) break; c = qt; k++; }
+    return out(k ? String(k) : "0. It is not a root.");
+  }
+  // y-intercept
+  if((m = /^(?:the )?y-?intercept of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$/.exec(q))){ const v = pcAt(m[1], 0); return v === null ? null : out("y = " + pcNum(v)); }
+  // oblique asymptote and holes of a rational function
+  if((m = /^(?:the )?(oblique|slant) asymptote of (?:y\s*=\s*|f\(x\)\s*=\s*)?\(?(.+?)\)?\s*\/\s*\(?([^()]+)\)?$/.exec(q))){
+    const a = pcCoeffs(m[2]), b = pcCoeffs(m[3]); if(!a || !b) return null;
+    if(a.length !== b.length + 1) return out("None. An oblique asymptote needs the top to be one degree higher than the bottom.");
+    return out("y = " + pcPoly(pcDivide(a, b)[0].map(c => +c.toFixed(9))));
+  }
+  if((m = /\bholes?\b.*?(?:y\s*=\s*|f\(x\)\s*=\s*)\(?(.+?)\)?\s*\/\s*\(([^()]+)\)$/.exec(q))){
+    const holes = pcScanRoots(m[2]).filter(r => Math.abs(pcAt(m[1], r) ?? 1) < 1e-9);
+    const y = r => { const f = x => pcAt(m[1], x) / pcAt(m[2], x); return pcFrac(+((f(r + 1e-7) + f(r - 1e-7)) / 2).toFixed(6)); };
+    return out(holes.length ? holes.map(r => "x = " + pcFrac(r) + ", at the point (" + pcFrac(r) + ", " + y(r) + ")").join("; ") : "None.");
+  }
+  // phase shift, vertical displacement and range of y = a sin(b(x - c)) + d
+  if((m = /^(phase shift|horizontal shift|vertical (?:displacement|shift|translation)|midline|range|max(?:imum)?|min(?:imum)?) of (?:y\s*=\s*|f\(x\)\s*=\s*)?(-?[\d.]*)\s*(sin|cos)\s*\(\s*(?:([\d.]*)\s*\(\s*)?(?:([\d.]*)\s*)?x\s*(?:([+-])\s*([\dπpi./ ]+?))?\s*\)?\s*\)\s*(?:([+-])\s*([\d.]+))?$/.exec(q))){
+    const a = m[2] === "" ? 1 : m[2] === "-" ? -1 : +m[2], d = m[8] ? (m[8] === "-" ? -1 : 1) * +m[9] : 0;
+    const b = (m[4] ? +m[4] : 1) * (m[5] ? +m[5] : 1), c0 = m[6] ? pcVal(m[7]) : 0; if(c0 === null) return null;
+    const c = (m[6] === "-" ? 1 : -1) * c0 / (m[4] ? 1 : b);
+    if(/^(phase|horizontal)/.test(m[1])) return out(c === 0 ? "None." : (pcPi(Math.abs(c)) || pcNum(Math.abs(c))) + " to the " + (c > 0 ? "right" : "left") + ".");
+    if(/^(vertical|midline)/.test(m[1])) return out(/^midline/.test(m[1]) ? "y = " + pcNum(d) : d === 0 ? "None." : pcNum(Math.abs(d)) + " " + (d > 0 ? "up" : "down") + ".");
+    if(/^max/.test(m[1])) return out(pcNum(d + Math.abs(a)));
+    if(/^min/.test(m[1])) return out(pcNum(d - Math.abs(a)));
+    return out(pcNum(d - Math.abs(a)) + " ≤ y ≤ " + pcNum(d + Math.abs(a)));
+  }
+  // solve sin^2 x = 1/4: sin x = ±1/2
+  if((m = /^solve\s+(sin|cos|tan)\s*\^\s*2\s*\(?x\)?\s*=\s*([\d./]+)(.*)$/.exec(q))){
+    const k = pcVal(m[2]); if(k === null || k < 0) return null;
+    const two = 2 * Math.PI, norm = v => +(((v % two) + two) % two).toPrecision(12), xs = new Set();
+    for(const s of [Math.sqrt(k), -Math.sqrt(k)]){
+      const base = m[1] === "sin" ? Math.asin(s) : m[1] === "cos" ? Math.acos(s) : Math.atan(s); if(isNaN(base)) continue;
+      (m[1] === "sin" ? [base, Math.PI - base] : m[1] === "cos" ? [base, two - base] : [base, base + Math.PI]).forEach(v => xs.add(norm(v)));
+    }
+    const deg = /deg|°|360/.test(m[3]);
+    return xs.size ? out([...xs].sort((a, b) => a - b).map(v => "x = " + (deg ? pcNum(v * 180 / Math.PI) + "°" : pcPi(v) || pcNum(v))).join(" or ")) : out("No solution.");
+  }
   // log base 3 of 81, log 5 of 125, log_2(32)
   if((m = /^log(?:arithm)?\s*(?:base\s*|_\s*)?(\d+(?:\.\d+)?)\s*(?:of\s*|\(\s*)([\d.]+(?:\s*\/\s*[\d.]+)?)\s*\)?$/.exec(q))){
     const x = pcVal(m[2]), v = x === null ? NaN : Math.log(x) / Math.log(+m[1]); return isFinite(v) ? out(pcFrac(+v.toPrecision(12))) : null;
@@ -1207,8 +1382,11 @@ function precalc(query){
   }
   // 100 g with a half life of 5 years, how much is left after 15 years
   // 100 g with a half life of 5 years; a population of 200 doubles every 3 hours. How much after T?
-  if((m = /([\d.]+)\s*([a-zµ]+)?\b.*?(half[- ]life (?:of |is )?|doubles every |triples every )([\d.]+)\s*([a-z]+).*?after ([\d.]+)/.exec(q))){
-    const k = /^half/.test(m[3]) ? 0.5 : /^doubles/.test(m[3]) ? 2 : 3, left = +m[1] * k ** (+m[6] / +m[4]);
+  // "What fraction is left" needs no amount; a number glued to a name ("carbon-14") is never the amount.
+  if((m = /(?:.*?(?<![-\w.])([\d.]+)\s*([a-zµ]+)?\b|^).*?(half[- ]life (?:of |is )?|doubles every |triples every )([\d.]+)\s*([a-z]+).*?after ([\d.]+)/.exec(q)) && (m[1] || /\b(fraction|percent|proportion)\b/.test(q))){
+    const k = /^half/.test(m[3]) ? 0.5 : /^doubles/.test(m[3]) ? 2 : 3, f = k ** (+m[6] / +m[4]);
+    if(!m[1] || /\b(fraction|percent|proportion)\b/.test(q)) return out(pcFrac(f) + " (" + pcNum(f * 100) + "%)");
+    const left = +m[1] * f;
     return out(pcNum(left) + (m[2] && !/^(with|has|of|doubles|triples|grows|is)$/.test(m[2]) ? " " + m[2] : ""));
   }
   // $500 invested at 4% compounded monthly for 3 years
@@ -1218,7 +1396,7 @@ function precalc(query){
     const n = comp(m[3]), k = /^d/.test(m[1]) ? 2 : 3, t = Math.log(k) / (n * Math.log(1 + +m[2] / 100 / n));
     return out(pcNum(+t.toFixed(2)) + " years");
   }
-  if((m = /(?:\$\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*dollars)\s*(?:is |are )?(?:invested |deposited |saved |borrowed |put in )?at ([\d.]+)\s*%(.*?)\b(?:for|after|over) ([\d.]+) years?/.exec(q))){
+  if((m = /(?:\$\s*([\d,]+(?:\.\d+)?)|([\d,]+(?:\.\d+)?)\s*dollars)\s*(?:[a-z]+ ){0,4}?at ([\d.]+)\s*%(.*?)\b(?:for|after|over) ([\d.]+) years?/.exec(q))){
     m = [m[0], m[1] || m[2], m[3], m[4], m[5]];
     const n = {daily:365, weekly:52, monthly:12, quarterly:4, "semi-annually":2, semiannually:2}[(/compounded (daily|weekly|monthly|quarterly|semi-?annually|annually|yearly)/.exec(m[3]) || [])[1]] || 1;
     const amt = +m[1].replace(/,/g, "") * (1 + +m[2] / 100 / n) ** (n * +m[4]);
@@ -1252,16 +1430,16 @@ function precalc(query){
     return out("As x → ∞, y → " + to(hi) + ". As x → -∞, y → " + to(lo) + ".");
   }
   // roots, zeros, solving and factoring a quadratic
-  if((m = /^(?:roots?|zeros?|solve|factor|x-intercepts?)\s+(?:of\s+)?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?$/.exec(q)) && /x\s*\^\s*[3-6]/.test(m[1])){
+  if((m = /^(?:roots?|zeros?|solve|factor|x-intercepts?)\s+(?:of\s+)?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?$/.exec(q)) && (m[1] = m[1].replace(/^([^=]+)=([^=]+)$/, "($1)-($2)")) && (/x\s*\^\s*[3-6]/.test(m[1]) || (pcDeg(m[1]) || 0) > 2)){
     const roots = pcPolyRoots(m[1]); if(!roots) return null;
-    const deg = pcDegree(m[1]), lead = Math.round(pcAt(m[1], 1e4) / 1e4 ** deg);
+    const deg = pcDeg(m[1]) ?? pcDegree(m[1]), lead = Math.round(pcAt(m[1], 1e4) / 1e4 ** deg);
     if(/^factor/.test(q)){
       if(roots.length !== deg || roots.some(r => !Number.isInteger(r))) return out(roots.length ? "Its rational roots are " + roots.map(pcFrac).join(", ") + ", but it does not split into integer factors." : "It has no rational roots.");
       return out((lead === 1 ? "" : lead === -1 ? "-" : lead) + [...roots].sort((x, y) => (x !== 0) - (y !== 0)).map(r => r === 0 ? "x" : "(x " + pcSign(r) + ")").join(""));
     }
     return out(roots.length ? roots.map(r => "x = " + pcFrac(r)).join(", ") : "No rational roots.");
   }
-  if((m = /^(?:roots?|zeros?|solve|factor|x-intercepts?)\s+(?:of\s+)?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?$/.exec(q)) && /x\s*\^\s*2|x²/.test(m[1])){
+  if((m = /^(?:roots?|zeros?|solve|factor|x-intercepts?)\s+(?:of\s+)?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?$/.exec(q)) && (m[1] = m[1].replace(/^([^=]+)=([^=]+)$/, "($1)-($2)")) && /x\s*\^\s*2|x²/.test(m[1])){
     const co = pcQuad(m[1].replace(/x²/g, "x^2")); if(!co) return null;
     const roots = pcRoots(co);
     if(/^factor/.test(q)){
@@ -1322,6 +1500,19 @@ function precalc(query){
     if(/^coterminal/.test(m[1])) return out(show(Math.abs(d - deg) < 1e-9 ? deg - 360 : d) + " and " + show(deg + 360) + " (any multiple of " + (rad ? "2π" : "360°") + " away).");
     const ref = d <= 90 ? d : d <= 180 ? 180 - d : d <= 270 ? d - 180 : 360 - d;
     return out(show(ref));
+  }
+  // prove tan x cos x = sin x: checked at many points, then the method
+  if((m = /^(?:prove|verify|show)(?: that)?\s+(.+?)\s*=\s*(.+)$/.exec(q)) && /\b(sin|cos|tan|sec|csc|cot)\b/.test(m[0])){
+    const T = e => e.replace(/\b(sin|cos|tan|sec|csc|cot)\s*\^\s*(\d)\s*\(?\s*x\s*\)?/g, "($1(x))^$2").replace(/\b(sin|cos|tan|sec|csc|cot)\s*\(?\s*x\s*\)?/g, "$1(x)")
+      .replace(/sec\(x\)/g, "(1/cos(x))").replace(/csc\(x\)/g, "(1/sin(x))").replace(/cot\(x\)/g, "(cos(x)/sin(x))").replace(/\)\s*(?=[a-z(\d])/g, ")*").replace(/(\d)\s*(?=[a-z(])/g, "$1*");
+    const at = (e, x) => tryMath("0+(" + T(e).replace(/\bx\b/g, "(" + x + ")") + ")");
+    const xs = [0.3, 0.7, 1.1, 2.0, 2.9, 4.2, 5.5], ok = xs.every(x => { const a = at(m[1], x), b = at(m[2], x); return a !== null && b !== null && Math.abs(a - b) < 1e-9; });
+    return out(ok ? "True wherever both sides are defined. To prove it, write everything in sin and cos (tan x = sin x/cos x, sec x = 1/cos x, csc x = 1/sin x, cot x = cos x/sin x) and simplify one side until it matches the other." : "Not an identity: the two sides differ, for example at x = " + xs.find(x => { const a = at(m[1], x), b = at(m[2], x); return a === null || b === null || Math.abs(a - b) >= 1e-9; }) + ".");
+  }
+  // solve 1/x = 4, or any equation in x whose roots are small fractions
+  if((m = /^solve\s+(?:for x:?\s*)?([^=]*x[^=]*)=\s*([^=]+)$/.exec(q)) && !/\b(sin|cos|tan|log|ln)\b/.test(q)){
+    const roots = pcScanRoots("(" + m[1] + ")-(" + m[2] + ")");
+    if(roots.length && roots.length <= 6) return out(roots.map(r => "x = " + pcFrac(r)).join(" or "));
   }
   // sector area with radius 4 and angle pi/2
   if((m = /^(?:the )?(?:area of (?:a |the )?sector|sector area)\b.*?radius (?:of |is )?([\d.]+).*?angle (?:of |is )?([\d.π\/pi ]+?)\s*(radians?|rad|degrees?|°)?$/.exec(q))){

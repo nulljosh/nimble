@@ -73,6 +73,23 @@ test("form C shapes: rational factors, x/2 periods, log equations, doubling time
   assert.equal(body("sector area with radius 4 and angle pi/2"), "4π ≈ 12.56637061");
 });
 
+test("form D shapes: division, holes, repeating decimals, identities, general solve", () => {
+  assert.equal(body("carbon-14 has a half-life of 5730 years, what fraction is left after 11460 years"), "1/4 (25%)");
+  assert.equal(body("divide x^3 - 1 by x - 1"), "x^2 + x + 1");
+  assert.equal(body("oblique asymptote of y = (x^2 + 1)/x"), "y = x");
+  assert.equal(body("where is the hole in y = (x^2 - 1)/(x - 1)"), "x = 1, at the point (1, 2)");
+  assert.equal(body("write 0.142857142857... as a fraction"), "1/7");
+  assert.equal(body("find k if x - 2 is a factor of x^2 + kx - 6"), "k = 1");
+  assert.equal(body("zeros of (x - 1)(x + 2)(x - 3)"), "x = -2, x = 1, x = 3");
+  assert.equal(body("solve x^2 = 9"), "x = -3 and x = 3");
+  assert.equal(body("solve 1/x = 4"), "x = 1/4");
+  assert.equal(body("range of y = 3sin(x) + 1"), "-2 ≤ y ≤ 4");
+  assert.equal(body("phase shift of y = sin(x - pi/4)"), "π/4 to the right.");
+  assert.match(body("prove tan x cos x = sin x"), /^True/);
+  assert.match(body("prove sin x = cos x"), /^Not an identity/);
+  assert.equal(body("y = f(x) is shifted 3 left and 2 down, write the new equation"), "y = f(x + 3) - 2");
+});
+
 test("not precalc: prose and plain facts fall through", () => {
   assert.equal(E.precalc("who wrote hamlet"), null);
   assert.equal(E.precalc("capital of france"), null);

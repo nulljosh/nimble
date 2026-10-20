@@ -59,6 +59,14 @@ The same 154 questions with no network at all: math, units, constants, the devic
 | 2026-10-20 | Web, offline, first run | 24/40 |
 | 2026-10-20 | Web, offline, fixed | 40/40 |
 
+| Date | Engine | Form D (fresh) |
+|---|---|---|
+| 2026-10-20 | Web, offline, first run | 8/40 |
+| 2026-10-20 | Web, online, first run | 32/40 (35 with dash-tolerant grading) |
+| 2026-10-20 | Web, offline, fixed | 40/40 |
+
+Form D was the first fresh form graded online. The AI's own misses were real: it said a magnitude 7 earthquake is 1,000 times a magnitude 5 (it is 100), and it sent "which term of 2, 4, 8 is 256" and "solve sin²x = 1/4" to unrelated Wikipedia pages. The solver now computes all of them on the device: polynomial division, oblique asymptotes, holes, multiplicity, repeating decimals, log and exponential forms, pH and magnitude, phase shift and range, sum and double-angle identities, an identity checker, and a general solve for equations whose roots are small fractions.
+
 The first online run lost "10th term of 2, 6, 18" to a Wikipedia article on a trillion, and `log(1000)` came back as the natural log. The fix is `precalc()` in docs/engine.js: log bases, exponential equations, geometric sequences, degrees and radians, half-life, quadratics, remainders, asymptotes, exact trig values, trig equations, amplitude and period, inverses and transformations, all computed on the device.
 
 ## The 1,000-question exam
