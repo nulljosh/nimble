@@ -213,6 +213,19 @@ The solver is `sci10()` in docs/engine.js and `Science10.kt` on Kotlin. The comp
 
 Form A's first offline run had one wrong answer: "what is a mole" returned the Wikipedia article on the animal. Form B's one first-run miss was a real bug: "how many grams of CO2 from 16 g of methane burning" lowercased the formula before reading it. The question is now read as typed, as the other formula branches are. The key also only took 43.9 g, and the answer, 43.89 g, is right, so the key now takes both. Writing the Kotlin port turned up a logic slip on the web too: "the lowest ionization energy in period 3" would have named the wrong end of the period. Both are fixed and tested. Stoichiometry balances the equation with the Science 10 search before it converts, and shapes come from VSEPR on the formula. The solver is `chem11()` in docs/engine.js and `Chemistry11.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform.**
 
+## BC curriculum: Chemistry 12
+
+`test/courses/chem12.js`, two 40-question forms written before any run: rates and collision theory, equilibrium expressions, Keq and Le Chatelier, Ksp and molar solubility, pH and pOH, strong and weak acids, conjugate pairs, Ka, titration and indicators, oxidation numbers, redox agents, cell potentials and half-reactions. Run `COURSE=chem12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 2/40 (5%) | 39/40 (97.5%, see below) |
+| Web offline, after fixes | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+Form B scored 40/40 on its run, but the honest grade is 39/40. Before the run I spot-checked a few answers by hand, and one of them, "conjugate acid of OH-", is a form B question. It printed OH₂ and was fixed to H₂O first, so that item does not count as a first-run pass. The spot checks also caught a real parsing bug: "HCO3-" was read as HCO with a 3- charge, and "NH4+" as NH with a 4+ charge. A number before the sign is now a charge only on a one-element ion (Cu2+) or after a space or ^ (CO3 2-). Form A's first fixes: weak-acid pH uses the square-root shortcut when it passes the 5% rule, as a textbook does, and the quadratic when it does not; the equation pattern reads only formula terms. The solver is `chem12()` in docs/engine.js and `Chemistry12.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

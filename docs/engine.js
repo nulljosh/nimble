@@ -2661,11 +2661,213 @@ function chShape(c){
   const polar = dipole && !(CH_SYM.has(key) && same);
   return {name, polar, why: n + " bonded atoms and " + lone + " lone pair" + (lone === 1 ? "" : "s") + " on " + center + (polar ? ", so the bond dipoles do not cancel." : dipole ? ", and the symmetric shape cancels the bond dipoles." : ", and the bonds are not polar.")};
 }
+// --- Chemistry 12, offline ---
+// pH and pOH, strong and weak acids, conjugate pairs, Ka, titration, equilibrium expressions and Keq, Le Chatelier,
+// Ksp and solubility, oxidation numbers, redox agents, cell potentials and half-reactions. Uses the sci10 tables.
+// precalc() asks it after chem11(); null means "not mine". Graded by COURSE=chem12 node test/exam-course.js.
+// Mirrored in kmp/shared/.../Chemistry12.kt.
+const C12_STRONG_ACID = {HCl:1, HBr:1, HI:1, HNO3:1, HClO4:1, H2SO4:2}, C12_STRONG_BASE = {LiOH:1, NaOH:1, KOH:1, RbOH:1, CsOH:1, "Ca(OH)2":2, "Sr(OH)2":2, "Ba(OH)2":2};
+const C12_ACID_NAMES = {"hydrochloric acid":"HCl", "hydrobromic acid":"HBr", "hydroiodic acid":"HI", "nitric acid":"HNO3", "perchloric acid":"HClO4", "sulfuric acid":"H2SO4", "acetic acid":"HC2H3O2", "ethanoic acid":"HC2H3O2", "hydrofluoric acid":"HF", "carbonic acid":"H2CO3", "phosphoric acid":"H3PO4", "hydrocyanic acid":"HCN", "formic acid":"HCOOH", "sodium hydroxide":"NaOH", "potassium hydroxide":"KOH", "lithium hydroxide":"LiOH", "calcium hydroxide":"Ca(OH)2", "barium hydroxide":"Ba(OH)2", "ammonia":"NH3"};
+// Standard reduction potentials (V) at 25 °C, by the oxidized form.
+const C12_E = {"Li+":-3.04, "K+":-2.93, "Ca2+":-2.87, "Na+":-2.71, "Mg2+":-2.37, "Al3+":-1.66, "Zn2+":-0.76, "Fe2+":-0.44, "Ni2+":-0.25, "Sn2+":-0.14, "Pb2+":-0.13, "H+":0, "Cu2+":0.34, "I2":0.54, "Ag+":0.80, "Br2":1.07, "Cl2":1.36, "Au3+":1.50, "F2":2.87};
+const C12_SUP = s => String(s).replace(/[0-9+-]/g, c => "⁰¹²³⁴⁵⁶⁷⁸⁹⁺⁻"["0123456789+-".indexOf(c)]);
+// "Cu2+" as [formula, charge]: ["Cu", 2]; "SO4 2-" or "SO4^2-" as ["SO4", -2]; "Cl-" as ["Cl", -1].
+// A number before the sign is the charge on a one-element ion (Cu2+) or after a space or ^ (CO3 2-, SO4^2-);
+// otherwise it belongs to the formula (HCO3-, NH4+).
+function c12Ion(s){
+  const t = String(s).trim(), m = /^(.+?)(\s+|\^)?(\d*)([+-])$/.exec(t); if(!m || !/[A-Za-z]/.test(m[1])) return [t, 0];
+  const sign = m[4] === "+" ? 1 : -1, one = /^[A-Z][a-z]?$/.test(m[1]);
+  if(m[3] && !m[2] && !one) return [m[1] + m[3], sign];
+  return [m[1], sign * +(m[3] || 1)];
+}
+const c12Show = (f, c) => sciSub(f) + (c ? C12_SUP((Math.abs(c) > 1 ? Math.abs(c) : "") + (c > 0 ? "+" : "-")) : "");
+// Sci notation with a clean mantissa: 1 × 10⁻⁵, 1.34 × 10⁻⁵.
+const c12Sci = v => { const e = Math.floor(Math.log10(Math.abs(v)) + 1e-12), m = +(v / 10 ** e).toPrecision(3); return pcNum(m) + " × 10" + C12_SUP(e); };
+// A typed number: "1 x 10^-3", "1.8 × 10^-5", "1e-3", "0.001".
+function c12Num(s){ const m = /^([\d.]+)\s*(?:[x×*]\s*10\s*\^\s*(-?\d+)|e(-?\d+))?$/i.exec(String(s).trim()); return m ? +m[1] * 10 ** +(m[2] || m[3] || 0) : null; }
+const C12_N = "([\\d.]+(?:\\s*[x×*]\\s*10\\s*\\^\\s*-?\\d+|e-?\\d+)?)";
+// Oxidation number of one element in a formula with a charge, by the usual rules for everything else.
+function c12Ox(target, f, charge){
+  const c = sciParse(f); if(!c || !c[target]) return null; if(Object.keys(c).length === 1) return charge / c[target];
+  const peroxide = /^(H2O2|Na2O2|K2O2|BaO2|Li2O2)$/.test(f), metalHydride = c.H && Object.keys(c).some(e => /^(Li|Na|K|Rb|Cs|Mg|Ca|Sr|Ba)$/.test(e)) && !c.O;
+  const rule = e => e === "F" ? -1 : /^(Li|Na|K|Rb|Cs)$/.test(e) ? 1 : /^(Be|Mg|Ca|Sr|Ba)$/.test(e) ? 2 : e === "Al" ? 3 : e === "H" ? (metalHydride ? -1 : 1) : e === "O" ? (peroxide ? -1 : c.F ? 2 : -2) : /^(Cl|Br|I)$/.test(e) && !c.O ? -1 : null;
+  let sum = 0; for(const [e, k] of Object.entries(c)){ if(e === target) continue; const r = rule(e); if(r === null) return null; sum += r * k; }
+  return (charge - sum) / c[target];
+}
+const c12Sign = v => (v > 0 ? "+" : v < 0 ? "-" : "") + pcNum(Math.abs(+v.toFixed(3)));
+// One side of an equation as [[coefficient, formula, charge, state]].
+function c12Side(s){ return s.split(/\s+\+\s+/).map(t => { const m = /^(\d*)\s*(.+?)(?:\s*\((s|l|g|aq)\))?$/.exec(t.trim()); const [f, ch] = c12Ion(m[2]); return [+(m[1] || 1), f, ch, m[3] || ""]; }); }
+const C12_ARROW = /\s*(?:<->|<=>|⇌|↔|->|→|=)\s*/;
+function chem12(q, raw){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"}), r = String(raw || q).trim().replace(/[?!]+$/, "");
+  const typed = r.replace(/^(?:what(?:'s|’s| is)\s+)?(?:the\s+)?/i, "");
+  const facts = [
+    [/\bkw\b(?: at 25 ?°? ?c)?$|\bion product of water\b/, "Kw = [H⁺][OH⁻] = 1.0 × 10⁻¹⁴ at 25 °C."],
+    [/^(?:what is )?(?:the )?ph of pure water/, "7.00 at 25 °C: [H⁺] = [OH⁻] = 1.0 × 10⁻⁷ M."],
+    [/^(?:what is )?(?:a )?br[øo]nsted[- ]lowry acid$/, "A proton (H⁺) donor."], [/^(?:what is )?(?:a )?br[øo]nsted[- ]lowry base$/, "A proton (H⁺) acceptor."],
+    [/^(?:what is )?(?:an? )?arrhenius acid$/, "A substance that makes H⁺ (H₃O⁺) in water."], [/^(?:what is )?(?:an? )?arrhenius base$/, "A substance that makes OH⁻ in water."],
+    [/^(?:what is )?(?:an? )?amphoteric(?: substance)?$|^(?:what is )?amphiprotic$/, "A substance that can act as an acid or a base, such as water or HCO₃⁻."],
+    [/^(?:what is )?(?:a )?buffer(?: solution)?$/, "A mix of a weak acid and its conjugate base (or a weak base and its conjugate acid) that resists changes in pH when small amounts of acid or base are added."],
+    [/^(?:what is )?(?:the )?equivalence point$/, "The point in a titration where the moles of acid equal the moles of base added, so it is exactly neutralized."],
+    [/^(?:what is )?(?:the )?end ?point(?: of a titration)?$/, "The point where the indicator changes colour; a good indicator puts it at the equivalence point."],
+    [/\bindicator\b.*\bstrong acid\b.*\bstrong base\b|\bindicator\b.*\bstrong base\b.*\bstrong acid\b/, "Bromothymol blue (or phenolphthalein): the equivalence point is at pH 7."],
+    [/\bindicator\b.*\bweak acid\b.*\bstrong base\b/, "Phenolphthalein: the equivalence point is above pH 7."], [/\bindicator\b.*\bstrong acid\b.*\bweak base\b/, "Methyl orange (or methyl red): the equivalence point is below pH 7."],
+    [/^(?:what is )?activation energy$/, "The minimum energy colliding particles need to react."],
+    [/\bhow does a catalyst\b|\bwhat does a catalyst do\b|^(?:what is )?a catalyst$/, "It speeds up a reaction by giving it a pathway with a lower activation energy, and it is not used up."],
+    [/\bdoes a catalyst change (?:the )?(?:equilibrium|position|value of k|k\b|keq)/, "No. A catalyst speeds up the forward and reverse reactions equally, so equilibrium comes sooner but its position and K do not change."],
+    [/\bfactors (?:that )?affect (?:the )?(?:reaction )?rate\b|\bwhat affects (?:the )?rate\b/, "Temperature, concentration (or pressure for gases), surface area, the nature of the reactants, and a catalyst."],
+    [/^(?:what is )?collision theory$/, "Particles react only when they collide with enough energy (the activation energy) and the right orientation."],
+    [/^(?:what is )?(?:the )?rate of (?:a )?reaction$|^(?:what is )?reaction rate$/, "The change in the amount or concentration of a reactant or product per unit of time."],
+    [/\bwhy does (?:increasing |raising )?temperature increase (?:the )?(?:reaction )?rate\b/, "Particles move faster, so they collide more often and more of the collisions have enough energy to react."],
+    [/\bhow does surface area affect (?:the )?(?:reaction )?rate\b/, "More surface area exposes more particles, so there are more collisions and the reaction goes faster."],
+    [/^(?:what is )?(?:a )?reaction mechanism$/, "The series of elementary steps that make up the overall reaction. The slowest step sets the rate."],
+    [/^(?:what is )?(?:the )?rate[- ]determining step$/, "The slowest step in a mechanism, which sets the overall rate."],
+    [/\bprecipitate\b.*\bq\b.*\b(?:greater|more|larger|bigger) than ksp\b|\bq\s*>\s*ksp\b/, "Yes. When the trial ion product Q is greater than Ksp, the solution is supersaturated and a precipitate forms."],
+    [/\bprecipitate\b.*\bq\b.*\b(?:less|smaller|lower) than ksp\b|\bq\s*<\s*ksp\b/, "No. When Q is less than Ksp, the solution is unsaturated and more can dissolve."],
+    [/^(?:what is )?oxidation$/, "Loss of electrons (the oxidation number goes up). LEO the lion says GER."], [/^(?:what is )?reduction$/, "Gain of electrons (the oxidation number goes down)."],
+    [/^(?:what is )?(?:an? )?oxidizing agent$/, "The substance that is reduced: it takes electrons from something else."], [/^(?:what is )?(?:a )?reducing agent$/, "The substance that is oxidized: it gives electrons to something else."],
+    [/\b(?:happens )?at the anode\b|^(?:what is )?(?:the )?anode$/, "Oxidation. In a galvanic cell the anode is negative; in an electrolytic cell it is positive."],
+    [/\b(?:happens )?at the cathode\b|^(?:what is )?(?:the )?cathode$/, "Reduction. In a galvanic cell the cathode is positive; in an electrolytic cell it is negative."],
+    [/^(?:what is )?electrolysis$/, "Using electricity to drive a non-spontaneous redox reaction, such as splitting water or plating a metal."],
+    [/^(?:what is )?(?:a )?(?:galvanic|voltaic) cell$/, "A cell where a spontaneous redox reaction turns chemical energy into electrical energy."],
+    [/^(?:what is )?(?:an? )?electrolytic cell$/, "A cell where an outside power source drives a non-spontaneous redox reaction."],
+    [/^(?:what is )?(?:a |the )?salt bridge$/, "It connects the two half-cells and lets ions move to keep each side neutral, so current keeps flowing."],
+    [/\bexothermic\b.*\btemperature (?:increases|is increased|rises|goes up)|\bincrease (?:the )?temperature\b.*\bexothermic\b/, "It shifts left, toward the reactants: heat is a product, so adding heat favours the reverse reaction, and K gets smaller."],
+    [/\bexothermic\b.*\btemperature (?:decreases|is decreased|falls|drops|goes down)/, "It shifts right, toward the products, and K gets larger."],
+    [/\bendothermic\b.*\btemperature (?:increases|is increased|rises|goes up)|\bincrease (?:the )?temperature\b.*\bendothermic\b/, "It shifts right, toward the products: heat is a reactant, so adding heat favours the forward reaction, and K gets larger."],
+    [/\bendothermic\b.*\btemperature (?:decreases|is decreased|falls|drops|goes down)/, "It shifts left, toward the reactants, and K gets smaller."],
+  ];
+  for(const [re, body] of facts) if(re.test(q)) return out(body);
+  let m;
+  // pH, pOH, [H+] and [OH-]
+  if((m = new RegExp("\\bph\\b.*?\\[h\\+?\\]\\s*(?:=|of|is)?\\s*" + C12_N).exec(q))){ const h = c12Num(m[1]); if(h) return out("pH = " + pcNum(+(-Math.log10(h)).toFixed(2))); }
+  if((m = new RegExp("\\bph\\b.*?\\[oh-?\\]\\s*(?:=|of|is)?\\s*" + C12_N).exec(q))){ const oh = c12Num(m[1]); if(oh) return out("pH = " + pcNum(+(14 + Math.log10(oh)).toFixed(2))); }
+  if((m = /\bpoh\b.*?\bph (?:of |=\s*|is )?([\d.]+)/.exec(q))) return out("pOH = " + pcNum(+(14 - +m[1]).toFixed(2)));
+  if((m = /^(?:the )?ph\b.*?\bpoh (?:of |=\s*|is )?([\d.]+)/.exec(q))) return out("pH = " + pcNum(+(14 - +m[1]).toFixed(2)));
+  if((m = /^\[(h\+|h3o\+|oh-)\]\s*(?:of|in|for) (?:a )?(?:solution )?(?:with )?(?:a )?ph (?:of |=\s*)?([\d.]+)/.exec(q))){ const ph = +m[2], v = /oh/.test(m[1]) ? 10 ** -(14 - ph) : 10 ** -ph; return out("[" + (/oh/.test(m[1]) ? "OH⁻" : "H⁺") + "] = " + c12Sci(v) + " M"); }
+  if((m = new RegExp("^(?:the )?ph of (?:a )?" + C12_N + "\\s*m\\s+(?:solution of )?(.+?)(?: solution)?(?:\\s+with ka\\s*=\\s*" + C12_N + ")?$", "i").exec(typed.replace(/^ph/i, "pH")))){
+    const C = c12Num(m[1]), name = m[2].trim(), f = C12_ACID_NAMES[name.toLowerCase()] || (sciParse(name) ? name : null); if(!C || !f) return null;
+    if(C12_STRONG_ACID[f] !== undefined) return out("pH = " + pcNum(+(-Math.log10(C)).toFixed(2)) + " (" + sciSub(f) + " is a strong acid, so [H⁺] = " + c12Sci(C) + " M)");
+    if(C12_STRONG_BASE[f] !== undefined){ const oh = C * C12_STRONG_BASE[f]; return out("pH = " + pcNum(+(14 + Math.log10(oh)).toFixed(2)) + " ([OH⁻] = " + c12Sci(oh) + " M, pOH = " + pcNum(+(-Math.log10(oh)).toFixed(2)) + ")"); }
+    // The square-root shortcut when it passes the 5% rule, as a textbook does; the quadratic when it does not.
+    if(m[3]){ const Ka = c12Num(m[3]), approx = Math.sqrt(Ka * C), x = approx / C < 0.05 ? approx : (-Ka + Math.sqrt(Ka * Ka + 4 * Ka * C)) / 2; return out("pH = " + pcNum(+(-Math.log10(x)).toFixed(2)) + " ([H⁺] = " + c12Sci(x) + " M" + (x === approx ? ", from x = √(Ka·C)" : ", from the quadratic, since x is more than 5% of C") + ")"); }
+  }
+  // strong or weak, conjugate pairs, Ka
+  if((m = /^is (.+?) (?:a )?(strong or weak|weak or strong) (acid|base)$/i.exec(typed))){
+    const n = m[1].trim(), f = C12_ACID_NAMES[n.toLowerCase()] || (sciParse(n) ? n : null); if(!f) return null;
+    const strong = m[3].toLowerCase() === "acid" ? C12_STRONG_ACID[f] !== undefined : C12_STRONG_BASE[f] !== undefined;
+    return out((strong ? "Strong: it ionizes completely in water." : "Weak: it only partly ionizes in water, so it sets up an equilibrium."));
+  }
+  if((m = /^conjugate (base|acid) (?:of|for) (.+)$/i.exec(typed))){
+    let [f, c] = c12Ion(m[2].trim()); if(!sciParse(f)) return null;
+    if(m[1].toLowerCase() === "base"){
+      const lead = /^H(\d*)/.exec(f);
+      if(lead) f = (+(lead[1] || 1) > 2 ? "H" + (+lead[1] - 1) : +(lead[1] || 1) === 2 ? "H" : "") + f.slice(lead[0].length);
+      else { const t = /H(\d*)$/.exec(f); if(!t) return null; const k = +(t[1] || 1) - 1; f = f.slice(0, t.index) + (k ? "H" + (k > 1 ? k : "") : ""); }
+      c -= 1;
+    } else {
+      const t = /H(\d*)(?=[^a-z]|$)/.exec(f.slice(1)) && /^[A-Z][a-z]?H/.test(f) ? /H(\d*)/.exec(f.slice(1)) : null;
+      if(/^H/.test(f)){ const lead = /^H(\d*)/.exec(f); f = "H" + (+(lead[1] || 1) + 1) + f.slice(lead[0].length); }
+      else if(t){ const k = +(t[1] || 1) + 1; f = f[0] + (f[1] && /[a-z]/.test(f[1]) ? f[1] : "") + "H" + k + f.slice(t.index + 1 + t[0].length); }
+      else f = "H" + f;
+      c += 1;
+    }
+    f = f.replace(/^H1(?=[A-Z])/, "H"); if(f === "OH2") f = "H2O"; // ponytail: OH⁻ gains H⁺ to make water, written H₂O
+    return out(c12Show(f, c));
+  }
+  if((m = /^ka expression for (.+)$/i.exec(typed))){
+    const f = m[1].trim(); if(!/^H/.test(f) || !sciParse(f)) return null;
+    const lead = /^H(\d*)/.exec(f), base = (+(lead[1] || 1) > 2 ? "H" + (+lead[1] - 1) : +(lead[1] || 1) === 2 ? "H" : "") + f.slice(lead[0].length);
+    return out("Ka = [H⁺][" + c12Show(base, -1) + "]/[" + sciSub(f) + "]");
+  }
+  // titration
+  if((m = /\bhow many (ml|l) of ([\d.]+)\s*m (.+?) (?:to|will|are needed to|is needed to) neutrali[sz]e ([\d.]+)\s*(ml|l) of ([\d.]+)\s*m (.+)$/i.exec(typed))){
+    const eq = f => C12_STRONG_ACID[f] ?? C12_STRONG_BASE[f] ?? 1, fa = m[3].trim(), fb = m[7].trim();
+    const moles = +m[6] * +m[4] / (/^ml$/i.test(m[5]) ? 1000 : 1) * eq(fb), v = moles / (+m[2] * eq(fa)) * (/^ml$/i.test(m[1]) ? 1000 : 1);
+    return out(pcNum(+v.toFixed(3)) + " " + (/^ml$/i.test(m[1]) ? "mL" : "L"));
+  }
+  // equilibrium: expressions, Keq, Le Chatelier
+  const T = "\\d*[A-Z][A-Za-z0-9()]*(?:\\s*\\((?:s|l|g|aq)\\))?", S = T + "(?:\\s*\\+\\s*" + T + ")*";
+  const eqm = new RegExp("(" + S + "\\s*(?:<->|<=>|⇌|↔)\\s*" + S + ")").exec(typed);
+  const sides = eqm ? eqm[1].split(C12_ARROW).map(c12Side) : null;
+  const term = ([k, f]) => "[" + sciSub(f) + "]" + (k > 1 ? C12_SUP(k).replace(/[⁺⁻]/g, "") : "");
+  const gas = t => t[3] !== "s" && t[3] !== "l";
+  if(sides && sides.length === 2 && /\b(?:equilibrium constant expression|keq expression|k expression|expression for k|expression for keq)\b/i.test(typed)){
+    const top = sides[1].filter(gas).map(term).join(""), bot = sides[0].filter(gas).map(term);
+    return out("Keq = " + top + "/" + (bot.length > 1 ? "(" + bot.join("") + ")" : bot.join("")));
+  }
+  if(sides && sides.length === 2 && /\bkeq\b|\bk\s*=|\bequilibrium constant\b/i.test(typed) && /\[[A-Za-z0-9]+\]\s*=/.test(typed)){
+    const conc = {}; for(const t of typed.matchAll(/\[([A-Za-z0-9]+)\]\s*=\s*([\d.]+(?:\s*[x×*]\s*10\s*\^\s*-?\d+)?)/g)) conc[t[1]] = c12Num(t[2]);
+    const prod = side => side.filter(gas).reduce((s, [k, f]) => s * (conc[f] ?? NaN) ** k, 1), K = prod(sides[1]) / prod(sides[0]);
+    if(isFinite(K)) return out("Keq = " + (K >= 1e4 || K < 1e-3 ? c12Sci(K) : pcNum(+K.toPrecision(4))));
+  }
+  if(sides && sides.length === 2 && /\bwhat happens\b|\bwhich way\b|\bshift\b/i.test(typed)){
+    const where = f => sides[0].some(t => t[1].toLowerCase() === f.toLowerCase()) ? "left" : sides[1].some(t => t[1].toLowerCase() === f.toLowerCase()) ? "right" : null;
+    const say = (dir, why) => out("It shifts " + dir + ", toward the " + (dir === "right" ? "products" : "reactants") + ", " + why + ".");
+    if((m = /\b(?:more |extra )?([A-Z][A-Za-z0-9]*) is (added|increased|removed|decreased)\b|\b(add(?:ing)?|remov(?:e|ing)) (?:more |some )?([A-Z][A-Za-z0-9]*)\b|\bmore ([A-Z][A-Za-z0-9]*) is added\b/.exec(typed))){
+      const f = m[1] || m[4] || m[5], add = /add|increas/.test(m[2] || m[3] || "added"), w = where(f); if(!w) return null;
+      const dir = add ? (w === "left" ? "right" : "left") : w;
+      return say(dir, (add ? "to use up the added " : "to replace the removed ") + sciSub(f));
+    }
+    if((m = /\b(pressure|volume) (increases|is increased|rises|goes up|decreases|is decreased|drops|goes down)\b/i.exec(typed))){
+      const up = /increas|rises|up/.test(m[2]) === (m[1].toLowerCase() === "pressure"), count = side => side.filter(t => t[3] === "g" || !t[3] && !/aq|s|l/.test(t[3])).reduce((s, [k]) => s + k, 0), L = count(sides[0]), R = count(sides[1]);
+      if(L === R) return out("No shift: both sides have " + L + " moles of gas, so pressure changes do not move the equilibrium.");
+      const dir = up ? (L > R ? "right" : "left") : (L > R ? "left" : "right");
+      return say(dir, (up ? "the side with fewer" : "the side with more") + " moles of gas (" + L + " on the left, " + R + " on the right)");
+    }
+    if(/\bcatalyst\b/i.test(typed)) return out("No shift: a catalyst speeds up both directions equally.");
+  }
+  // solubility: Ksp expressions, molar solubility, Ksp from solubility
+  const salt = f => {
+    const polys = [...SCI_POLY, ["CrO4", "chromate", -2], ["Cr2O7", "dichromate", -2]];
+    const m2 = /^([A-Z][a-z]?)(\d*)(.+)$/.exec(f); if(!m2) return null; const cat = m2[1], x = +(m2[2] || 1), rest = m2[3];
+    const cc = SCI_CHARGE[cat] > 0 ? SCI_CHARGE[cat] : {Pb:2, Fe:3, Cu:2, Ni:2, Co:2, Mn:2, Sn:2, Hg:2, Cr:3}[cat]; if(!cc) return null;
+    let p = /^\((.+)\)(\d+)$/.exec(rest), an, y;
+    if(p){ an = p[1]; y = +p[2]; } else { const s2 = /^([A-Z][a-z]?(?:\d*[A-Z][a-z]?\d*)*?)(\d*)$/.exec(rest); const poly = polys.find(([pp]) => pp === rest); if(poly){ an = rest; y = 1; } else if(/^[A-Z][a-z]?\d*$/.test(rest)){ const t = /^([A-Z][a-z]?)(\d*)$/.exec(rest); an = t[1]; y = +(t[2] || 1); } else if(s2){ an = rest; y = 1; } else return null; }
+    const poly = polys.find(([pp]) => pp === an), ac = poly ? poly[2] : SCI_CHARGE[an]; if(!ac || ac >= 0) return null;
+    if(cc * x + ac * y !== 0) return null;
+    return {cat, x, cc, an, y, ac};
+  };
+  if((m = /^ksp expression for ([A-Za-z0-9()]+)$/i.exec(typed))){ const s = salt(m[1]); if(s) return out("Ksp = [" + c12Show(s.cat, s.cc) + "]" + (s.x > 1 ? C12_SUP(s.x).replace(/[⁺⁻]/g, "") : "") + "[" + c12Show(s.an, s.ac) + "]" + (s.y > 1 ? C12_SUP(s.y).replace(/[⁺⁻]/g, "") : "")); }
+  if((m = new RegExp("\\bmolar solubility of ([A-Za-z0-9()]+)\\b.*?\\bksp\\s*(?:=|is|of)\\s*" + C12_N, "i").exec(typed))){
+    const s = salt(m[1]), K = c12Num(m[2]); if(s && K){ const n = s.x + s.y, v = (K / (s.x ** s.x * s.y ** s.y)) ** (1 / n); return out(c12Sci(v) + " M (Ksp = " + (s.x ** s.x * s.y ** s.y > 1 ? s.x ** s.x * s.y ** s.y : "") + "s" + (n > 1 ? C12_SUP(n).replace(/[⁺⁻]/g, "") : "") + ")"); }
+  }
+  if((m = new RegExp("\\bksp of ([A-Za-z0-9()]+)\\b.*?\\bmolar solubility (?:is|of|=)\\s*" + C12_N, "i").exec(typed))){
+    const s = salt(m[1]), v = c12Num(m[2]); if(s && v){ const K = s.x ** s.x * s.y ** s.y * v ** (s.x + s.y); return out("Ksp = " + c12Sci(K)); }
+  }
+  // redox: oxidation numbers, what is oxidized, agents, cells, half-reactions
+  if((m = /^oxidation (?:number|state) of ([A-Z][a-z]?) in (.+)$/i.exec(typed))){ const [f, c] = c12Ion(m[2]); const v = c12Ox(m[1], f, c); if(v !== null && isFinite(v)) return out(c12Sign(v)); }
+  if((m = /^(?:in )?(.+?(?:->|→).+?),?\s+(?:what|which) (?:is|species is|substance is|element is) (oxidized|reduced|the oxidizing agent|the reducing agent)$/i.exec(typed)) || (m = /^(?:(?:what|which) is )?(?:the )?(oxidized|reduced|oxidizing agent|reducing agent)(?: species)? in (.+?(?:->|→).+)$/i.exec(typed)) && (m = [m[0], m[2], m[1]])){
+    const [L, R] = m[1].split(/\s*(?:->|→)\s*/).map(c12Side), want = m[2].toLowerCase().replace(/^the /, "");
+    const ox = t => { const c = sciParse(t[1]); if(!c) return {}; const o = {}; for(const e of Object.keys(c)){ const v = c12Ox(e, t[1], t[2]); if(v !== null) o[e] = v; } return o; };
+    for(const a of L){ const oa = ox(a); for(const [e, v] of Object.entries(oa)){ const b = R.find(t => ox(t)[e] !== undefined); if(!b) continue; const w = ox(b)[e]; if(w === v) continue;
+      const up = w > v, name = sciBy(e).n, label = c12Show(a[1], a[2]);
+      if((want === "oxidized" && up) || (want === "reduced" && !up)) return out(label + " (" + name + ") is " + (up ? "oxidized" : "reduced") + ": its oxidation number goes from " + c12Sign(v) + " to " + c12Sign(w) + ".");
+      if((want === "reducing agent" && up) || (want === "oxidizing agent" && !up)) return out(label + " is the " + want + ": it is " + (up ? "oxidized" : "reduced") + " (" + c12Sign(v) + " to " + c12Sign(w) + ").");
+    } }
+  }
+  if(/\b(?:standard )?(?:cell )?potential\b|\be°?\s*cell\b/i.test(typed)){
+    const given = [...typed.matchAll(/\((-?[\d.]+)\s*v\)/gi)].map(t => +t[1]);
+    if(given.length === 2) return out("E°cell = " + pcNum(+(Math.max(...given) - Math.min(...given)).toFixed(2)) + " V (cathode minus anode)");
+    const named = Object.keys(C12_E).map(k => [k, sciBy(c12Ion(k)[0].replace(/2$/, ""))]).filter(([, e]) => e && new RegExp("\\b(" + e.n + "|" + e.s + ")\\b", "i").test(typed));
+    if(named.length === 2){ const [a, b] = named.map(([k]) => C12_E[k]); return out("E°cell = " + pcNum(+(Math.max(a, b) - Math.min(a, b)).toFixed(2)) + " V (" + pcNum(Math.max(a, b)) + " V minus " + pcNum(Math.min(a, b)) + " V)"); }
+  }
+  if((m = /\bhalf[- ]reaction for the (oxidation|reduction) of (?:an? )?([a-z]+)(?:\s*\((i{1,3}|iv)\))?(?: ion| metal| atom| gas)?$/i.exec(typed))){
+    const e = sciBy(m[2]); if(!e) return null;
+    const ch = m[3] ? {i:1, ii:2, iii:3, iv:4}[m[3].toLowerCase()] : SCI_CHARGE[e.s] ?? Object.entries(C12_E).map(([k]) => c12Ion(k)).find(([f]) => f === e.s)?.[1];
+    if(!ch) return null; const diatomic = /^(F|Cl|Br|I|O|N|H)$/.test(e.s) && ch < 0, n = Math.abs(ch) * (diatomic ? 2 : 1);
+    const atom = diatomic ? sciSub(e.s + "2") : e.s, ion = (diatomic ? "2" : "") + c12Show(e.s, ch), el = n + "e⁻";
+    if(ch > 0) return out(m[1].toLowerCase() === "oxidation" ? atom + " → " + ion + " + " + el : ion + " + " + el + " → " + atom);
+    return out(m[1].toLowerCase() === "reduction" ? atom + " + " + el + " → " + ion : ion + " → " + atom + " + " + el);
+  }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const sc10 = sci10(q, query); if(sc10) return sc10;
+  const ch12 = chem12(q, query); if(ch12) return ch12;
   const ch11 = chem11(q, query); if(ch11) return ch11;
   const c12 = calc12(q); if(c12) return c12;
   const s12 = stats12(q); if(s12) return s12;

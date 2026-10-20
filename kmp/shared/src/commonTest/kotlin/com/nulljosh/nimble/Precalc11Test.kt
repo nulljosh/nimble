@@ -91,4 +91,12 @@ class Precalc11Test {
     @Test fun lowestIonization() = assertEquals("Sodium (Na).", pc("which element has the lowest ionization energy in period 3"))
     @Test fun polarity() = assertEquals("Nonpolar: 4 bonded atoms and 0 lone pairs on C, and the symmetric shape cancels the bond dipoles.", pc("is CCl4 polar or nonpolar"))
     @Test fun scientificNotation() = assertEquals("3.45 × 10⁻⁴", pc("write 0.000345 in scientific notation"))
+
+    // Chemistry 12 (Chemistry12.kt)
+    @Test fun conjugateOfBicarbonate() = assertEquals("CO₃²⁻", pc("conjugate base of HCO3-"))
+    @Test fun conjugateOfHydroxide() = assertEquals("H₂O", pc("conjugate acid of OH-"))
+    @Test fun weakAcidShortcut() = assertEquals("pH = 2.87 ([H⁺] = 1.34 × 10⁻³ M, from x = √(Ka·C))", pc("pH of 0.1 M acetic acid with Ka = 1.8 x 10^-5"))
+    @Test fun kspExpression() = assertEquals("Ksp = [Ca²⁺]³[PO₄³⁻]²", pc("Ksp expression for Ca3(PO4)2"))
+    @Test fun leChatelierPressure() = assertEquals("It shifts right, toward the products, the side with fewer moles of gas (4 on the left, 2 on the right).", pc("what happens to N2 + 3H2 <-> 2NH3 if pressure increases"))
+    @Test fun reducingAgent() = assertEquals("Zn is the reducing agent: it is oxidized (0 to +2).", pc("what is the reducing agent in Zn + Cu2+ -> Zn2+ + Cu"))
 }
