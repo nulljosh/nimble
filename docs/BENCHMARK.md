@@ -434,6 +434,20 @@ Multi-step word problems need a model; the offline engine is a calculator, so 1/
 
 The real test passes at 15 of 20 (75%); offline Nimble scored 18 to 28 percent cold. Surprising misses on the first run were plain ones: "who was Canada's first prime minister" and "what is the capital of British Columbia" were not answered offline at all. Every provincial and territorial capital now comes from one table, which also lifted the general offline exam from 75/154 to 79/154. Names with other meanings need the full name: "Cartier" the jeweller, "Cabot", "CPR" (resuscitation) and "a cabinet" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 28% and C 25%, so this test depends on its online grade.**
 
+## BC driver's knowledge test
+
+`test/courses/driver.js`: questions in the style of ICBC's Class 7 knowledge test, from its guide Learn to Drive Smart: graduated licensing, speed limits, signs and signals, right of way, impairment, sharing the road, parking and emergencies. Forms A and B were written before any run, the solver was built from form A and the guide with B's topics kept out, and form C was written after A and B passed and run once. Run `COURSE=driver node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 0/40 | 0/40 | 0/40 |
+| Web offline, after A only | 40/40 | 2/40 (5%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 | 40/40 |
+
+Zero on all three forms cold: BC's driving rules are not in a Wikipedia pack. The real test is 50 questions with 40 needed to pass (80 percent). After fixes it holds 118 rules, every one a phrase match with no generic term: the BC numbers (30 km/h school zones 8 a.m. to 5 p.m. on school days, 5 m from a hydrant, 15 m from a railway crossing, 150 m behind a fire truck, Slow Down Move Over at 70 and 40 km/h), the graduated licence rules and the emergency drills. Driving words are required, so "what is fog", "what is a motorcycle", "what is a pentagon", "what is an ambulance" and "what is a red light district" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 5% and C 0%, so this test depends on its online grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
