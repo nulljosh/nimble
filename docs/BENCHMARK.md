@@ -138,6 +138,18 @@ One key in form A was too strict: the pack's "Deductive reasoning is the process
 
 Two of form A's first offline answers were confidently wrong: the Pre-Calc 12 compound-interest branch read "$200 deposited monthly for 5 years" as one deposit ($269.77, the right answer is $13,954.01) and a $20,000 loan payment as an investment ($26,764.51 for $386.66 a month). Annuities and loan payments now run first. A mortgage answer gives both the monthly-compounded payment and the semi-annual compounding Canadian mortgages use by law. The solver is `fom12()` in docs/engine.js and `Foundations12.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform.**
 
+## BC curriculum: Calculus 12
+
+`test/courses/calc12.js`, two 40-question forms written before any run: the power, product, quotient and chain rules, trig, exponential and log derivatives, tangent lines, critical points, extrema, concavity and inflection, limits (including at infinity and ones that do not exist), differentiability, antiderivatives, definite integrals, area, average value, motion and related rates. Run `COURSE=calc12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 0/40 (0%) | 40/40 (100%) |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+The engine had no calculus at all, so form A started at zero. The fix is a small symbolic engine (`calc12()` and the `c*` helpers in docs/engine.js, `Calculus12.kt` on Kotlin): it parses an expression in x, differentiates it, simplifies (like terms, powers of x, numbers across a fraction bar) and prints the way a textbook does, "8x(x^2 + 1)^3", "1/(2√x)", "1/(x + 1)^2". Integrals of the standard forms are symbolic; definite integrals use Simpson's rule; limits approach from both sides. Online waits for the neuron reset. **A+ offline on every platform.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

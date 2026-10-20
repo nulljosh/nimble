@@ -1744,10 +1744,301 @@ function fom12(q){
   }
   return null;
 }
+// --- Calculus 12, offline ---
+// A small symbolic engine for expressions in x: parse, differentiate, simplify and print the way a textbook does.
+// Integrals of the standard forms, definite integrals by Simpson's rule, limits from both sides, critical points,
+// concavity, motion and related rates. precalc() asks it first; null means "not mine". Graded by
+// COURSE=calc12 node test/exam-course.js. Mirrored in kmp/shared/.../Calculus12.kt.
+const CN = v => ({t:"n", v}), CX = {t:"x"};
+const C_NAMES = ["sqrt", "sin", "cos", "tan", "sec", "csc", "cot", "ln", "log", "exp", "abs", "pi", "e", "x"];
+// Parse into nodes: n (number), x, + (ts), * (fs), / (a, b), ^ (a, b), f (f, a). Null when it is not an expression in x.
+function cParse(src){
+  const s = String(src).toLowerCase().replace(/\|([^|]+)\|/g, "abs($1)").replace(/π/g, "pi").replace(/√\s*\(/g, "sqrt(").replace(/√\s*([a-z0-9.]+)/g, "sqrt($1)").replace(/\s+/g, "");
+  let i = 0;
+  const atom = () => {
+    const c = s[i]; if(c === undefined) throw 0;
+    if(c === "("){ i++; const v = sum(); if(s[i++] !== ")") throw 0; return v; }
+    const num = /^(?:\d+\.?\d*|\.\d+)/.exec(s.slice(i)); if(num){ i += num[0].length; return CN(+num[0]); }
+    const name = C_NAMES.find(n => s.startsWith(n, i)); if(!name) throw 0; i += name.length;
+    if(name === "x") return CX;
+    if(name === "pi") return CN(Math.PI);
+    if(name === "e") return {t:"e"};
+    let pw = null; if(s[i] === "^"){ i++; pw = atom(); }
+    const f = {t:"f", f:name, a: s[i] === "(" ? atom() : power()};
+    return pw ? {t:"^", a:f, b:pw} : f;
+  };
+  const power = () => { const b = atom(); if(s[i] === "^"){ i++; const e = unary(); return b.t === "e" ? {t:"f", f:"exp", a:e} : {t:"^", a:b, b:e}; } return b.t === "e" ? CN(Math.E) : b; };
+  const unary = () => s[i] === "-" ? (i++, {t:"*", fs:[CN(-1), unary()]}) : s[i] === "+" ? (i++, unary()) : power();
+  const prod = () => { let a = unary(); for(;;){ const c = s[i];
+    if(c === "*"){ i++; a = {t:"*", fs:[a, unary()]}; } else if(c === "/"){ i++; a = {t:"/", a, b:unary()}; }
+    else if(c !== undefined && /[\dx(a-z.]/.test(c)) a = {t:"*", fs:[a, power()]}; else return a; } };
+  const sum = () => { const ts = [prod()]; while(s[i] === "+" || s[i] === "-"){ const neg = s[i++] === "-", b = prod(); ts.push(neg ? {t:"*", fs:[CN(-1), b]} : b); } return ts.length === 1 ? ts[0] : {t:"+", ts}; };
+  try{ const v = sum(); return i === s.length ? v : null; } catch { return null; }
+}
+const cHasX = n => n.t === "x" || (n.ts || n.fs || []).some(cHasX) || (n.a && typeof n.a === "object" && cHasX(n.a)) || (n.b && cHasX(n.b));
+const C_FN = {sin:Math.sin, cos:Math.cos, tan:Math.tan, sec:v => 1 / Math.cos(v), csc:v => 1 / Math.sin(v), cot:v => 1 / Math.tan(v), ln:Math.log, log:Math.log10, exp:Math.exp, sqrt:Math.sqrt, abs:Math.abs};
+function cEval(n, x){
+  switch(n.t){
+    case "n": return n.v; case "x": return x;
+    case "+": return n.ts.reduce((s, t) => s + cEval(t, x), 0);
+    case "*": return n.fs.reduce((s, f) => s * cEval(f, x), 1);
+    case "/": return cEval(n.a, x) / cEval(n.b, x);
+    case "^": return cEval(n.a, x) ** cEval(n.b, x);
+    default: return C_FN[n.f](cEval(n.a, x));
+  }
+}
+const cPow = (a, b) => ({t:"^", a, b}), cMul = (...fs) => ({t:"*", fs}), cAdd = (...ts) => ({t:"+", ts}), cF = (f, a) => ({t:"f", f, a});
+function cD(n){
+  switch(n.t){
+    case "n": return CN(0); case "x": return CN(1);
+    case "+": return cAdd(...n.ts.map(cD));
+    case "*": return cAdd(...n.fs.map((f, i) => cMul(...n.fs.map((g, j) => i === j ? cD(g) : g))));
+    case "/": return {t:"/", a: cAdd(cMul(cD(n.a), n.b), cMul(CN(-1), n.a, cD(n.b))), b: cPow(n.b, CN(2))};
+    case "^":
+      if(!cHasX(n.b)) return cMul(n.b, cPow(n.a, cAdd(n.b, CN(-1))), cD(n.a));
+      if(!cHasX(n.a)) return cMul(n, cF("ln", n.a), cD(n.b));
+      return cMul(n, cD(cMul(n.b, cF("ln", n.a))));
+    default: {
+      const a = n.a, da = cD(a);
+      switch(n.f){
+        case "sin": return cMul(cF("cos", a), da); case "cos": return cMul(CN(-1), cF("sin", a), da);
+        case "tan": return cMul(cPow(cF("sec", a), CN(2)), da); case "sec": return cMul(cF("sec", a), cF("tan", a), da);
+        case "csc": return cMul(CN(-1), cF("csc", a), cF("cot", a), da); case "cot": return cMul(CN(-1), cPow(cF("csc", a), CN(2)), da);
+        case "exp": return cMul(n, da); case "ln": return {t:"/", a: da, b: a}; case "log": return {t:"/", a: da, b: cMul(a, CN(Math.LN10))};
+        case "sqrt": return {t:"/", a: da, b: cMul(CN(2), n)}; default: return cMul({t:"/", a, b: n}, da);
+      }
+    }
+  }
+}
+// A term as [coefficient, factors]; like terms combine by their printed factors.
+const cKey = n => JSON.stringify(n);
+function cSplit(n){ if(n.t === "n") return [n.v, []]; if(n.t === "*"){ let c = 1; const fs = []; for(const f of n.fs) f.t === "n" ? c *= f.v : fs.push(f); return [c, fs]; } return [1, [n]]; }
+const cBuild = (c, fs) => fs.length === 0 ? CN(c) : c === 1 && fs.length === 1 ? fs[0] : {t:"*", fs: c === 1 ? fs : [CN(c), ...fs]};
+function cSimp(n){
+  if(n.t === "n" || n.t === "x") return n;
+  if(n.t === "f"){ const a = cSimp(n.a); if(a.t === "n") return CN(C_FN[n.f](a.v)); if(n.f === "exp" && a.t === "f" && a.f === "ln") return a.a; return cF(n.f, a); }
+  if(n.t === "^"){
+    const a = cSimp(n.a), b = cSimp(n.b);
+    if(b.t === "n" && b.v === 0) return CN(1); if(b.t === "n" && b.v === 1) return a;
+    if(a.t === "n" && b.t === "n") return CN(a.v ** b.v);
+    if(a.t === "^" && a.b.t === "n" && b.t === "n") return cSimp(cPow(a.a, CN(a.b.v * b.v)));
+    if(a.t === "*" && b.t === "n" && Number.isInteger(b.v)) return cSimp(cMul(...a.fs.map(f => cPow(f, b))));
+    return cPow(a, b);
+  }
+  if(n.t === "/"){
+    const a = cSimp(n.a), b = cSimp(n.b);
+    if(b.t === "n") return cSimp(cMul(CN(1 / b.v), a));
+    if(a.t === "n" && a.v === 0) return CN(0);
+    // Cancel numbers and powers of x shared by top and bottom: 2/(2x) is 1/x.
+    let [ca, fa] = cSplit(a), [cb, fb] = cSplit(b); const c = ca / cb;
+    const xp = fs => fs.reduce((s, f) => s + (f.t === "x" ? 1 : f.t === "^" && f.a.t === "x" && f.b.t === "n" ? f.b.v : 0), 0), rest = fs => fs.filter(f => !(f.t === "x" || (f.t === "^" && f.a.t === "x" && f.b.t === "n")));
+    const k = xp(fa) - xp(fb); fa = rest(fa); fb = rest(fb);
+    if(k > 0) fa.push(k === 1 ? CX : cPow(CX, CN(k))); if(k < 0) fb.push(k === -1 ? CX : cPow(CX, CN(-k)));
+    if(fb.length === 0) return cSimp(cBuild(c, fa));
+    // A fractional number splits across the bar: 1/(2√x), not 1/2/√x.
+    const [p, d = "1"] = pcFrac(c).split("/");
+    return {t:"/", a: cBuild(+p, fa), b: cBuild(+d, fb)};
+  }
+  if(n.t === "*"){
+    let c = 1; const pw = new Map(), order = [];
+    const add = f => {
+      if(f.t === "n"){ c *= f.v; return; }
+      if(f.t === "*"){ f.fs.forEach(add); return; }
+      // a/b inside a product is a times b^-1, so x · (1/x) cancels.
+      if(f.t === "/"){ add(f.a); add(cSimp(cPow(f.b, CN(-1)))); return; }
+      const [base, e] = f.t === "^" && f.b.t === "n" ? [f.a, f.b.v] : [f, 1], key = cKey(base);
+      if(!pw.has(key)){ pw.set(key, [base, 0]); order.push(key); } pw.get(key)[1] += e;
+    };
+    n.fs.map(cSimp).forEach(add);
+    if(c === 0) return CN(0);
+    const fs = order.map(k => pw.get(k)).filter(([, e]) => e !== 0).map(([b, e]) => e === 1 ? b : cSimp(cPow(b, CN(e))));
+    // A number times a sum spreads over the sum, so like terms can meet.
+    if(fs.length === 1 && fs[0].t === "+" && c !== 1) return cSimp(cAdd(...fs[0].ts.map(t => cMul(CN(c), t))));
+    // So does a power of x: 2x(x + 1) is 2x^2 + 2x.
+    const mono = f => f.t === "x" || (f.t === "^" && f.a.t === "x" && f.b.t === "n"), sums = fs.filter(f => f.t === "+");
+    if(sums.length === 1 && fs.length > 1 && fs.every(f => f.t === "+" || mono(f))) return cSimp(cAdd(...sums[0].ts.map(t => cMul(CN(c), ...fs.filter(mono), t))));
+    // x powers first, then the rest: "2x sin(x)", "8x(x^2 + 1)^3".
+    const isX = f => f.t === "x" || (f.t === "^" && f.a.t === "x");
+    return cBuild(+c.toPrecision(12), [...fs.filter(isX), ...fs.filter(f => !isX(f))]);
+  }
+  // + : flatten, combine like terms, keep first-seen order
+  const terms = new Map(), order = [];
+  const add = t => { if(t.t === "+"){ t.ts.forEach(add); return; } const [c, fs] = cSplit(t), key = cKey(fs); if(!terms.has(key)){ terms.set(key, [0, fs]); order.push(key); } terms.get(key)[0] += c; };
+  n.ts.map(cSimp).forEach(add);
+  const ts = order.map(k => terms.get(k)).filter(([c]) => Math.abs(c) > 1e-12).map(([c, fs]) => cBuild(+c.toPrecision(12), fs));
+  // Constants go last: "3x^2 + 4x - 5".
+  const sorted = [...ts.filter(t => t.t !== "n"), ...ts.filter(t => t.t === "n")];
+  return sorted.length === 0 ? CN(0) : sorted.length === 1 ? sorted[0] : {t:"+", ts: sorted};
+}
+const C_SUP = {2:"²", 3:"³"};
+function cNum(v){ return Number.isInteger(+v.toFixed(9)) ? String(Math.round(v)) : Math.abs(v - Math.E) < 1e-12 ? "e" : Math.abs(v - Math.PI) < 1e-12 ? "π" : Math.abs(v - Math.LN10) < 1e-12 ? "ln 10" : pcFrac(v); }
+function cStr(n){
+  switch(n.t){
+    case "n": return cNum(n.v);
+    case "x": return "x";
+    case "+": return n.ts.map((t, i) => { const [c, fs] = cSplit(t), s = cStr(c < 0 ? cBuild(-c, fs) : t); return i === 0 ? (c < 0 ? "-" : "") + s : (c < 0 ? " - " : " + ") + s; }).join("");
+    case "/": { const top = cStr(n.a), bot = cStr(n.b); return (n.a.t === "+" ? "(" + top + ")" : top) + "/" + (n.b.t === "+" || (n.b.t === "*" && !(n.b.fs.length === 1)) ? "(" + bot + ")" : bot); }
+    case "^": {
+      const e = n.b.t === "n" ? n.b.v : null;
+      if(n.a.t === "f" && C_SUP[e] && n.a.f !== "exp" && n.a.f !== "sqrt" && n.a.f !== "abs") return n.a.f + C_SUP[e] + "(" + cStr(n.a.a) + ")";
+      const base = n.a.t === "x" || (n.a.t === "n" && n.a.v >= 0) || n.a.t === "f" ? cStr(n.a) : "(" + cStr(n.a) + ")";
+      return base + "^" + (e !== null && Number.isInteger(e) && e >= 0 ? e : n.b.t === "x" ? "x" : "(" + cStr(n.b) + ")");
+    }
+    case "*": {
+      const [c, fs] = cSplit(n), top = [], bot = [];
+      for(const f of fs) f.t === "^" && f.b.t === "n" && f.b.v < 0 && Number.isInteger(f.b.v) ? bot.push(f.b.v === -1 ? f.a : cPow(f.a, CN(-f.b.v))) : top.push(f);
+      const part = f => f.t === "+" ? "(" + cStr(f) + ")" : cStr(f);
+      const body = top.map(part).reduce((s, p, i) => s + (i === 0 || p[0] === "(" ? "" : " ") + p, "");
+      const coef = c === 1 ? "" : c === -1 ? "-" : Number.isInteger(+c.toFixed(9)) || !body ? cNum(c) : "(" + cNum(c) + ")";
+      const num = body ? coef + body : (c === -1 ? "-1" : cNum(c));
+      if(!bot.length) return num;
+      const den = bot.map(part).join(" ");
+      return (body ? num : (c === -1 ? "-1" : cNum(c))) + "/" + (bot.length > 1 ? "(" + den + ")" : den);
+    }
+    default:
+      if(n.f === "exp") return "e^" + (n.a.t === "x" ? "x" : "(" + cStr(n.a) + ")");
+      if(n.f === "sqrt") return "√" + (n.a.t === "x" ? "x" : "(" + cStr(n.a) + ")");
+      if(n.f === "abs") return "|" + cStr(n.a) + "|";
+      if(n.f === "ln" && n.a.t === "f" && n.a.f === "abs") return "ln" + cStr(n.a);
+      return n.f + "(" + cStr(n.a) + ")";
+  }
+}
+// An antiderivative of the standard forms, term by term, or null.
+function cInt(n){
+  const ts = n.t === "+" ? n.ts : [n], out = [];
+  for(const t of ts){
+    const [c, fs] = cSplit(t);
+    if(fs.length === 0){ out.push(cMul(CN(c), CX)); continue; }
+    if(fs.length !== 1) return null;
+    const f = fs[0], k = f.t === "x" ? 1 : f.t === "^" && f.a.t === "x" && f.b.t === "n" ? f.b.v : null;
+    if(k !== null){ out.push(k === -1 ? cMul(CN(c), cF("ln", cF("abs", CX))) : cMul(CN(c / (k + 1)), cPow(CX, CN(k + 1)))); continue; }
+    const lin = a => { if(a.t === "x") return 1; const [ca, fa] = cSplit(a); return fa.length === 1 && fa[0].t === "x" ? ca : null; };
+    if(f.t === "f" && ["sin", "cos", "exp"].includes(f.f) && lin(f.a) !== null){ const a = lin(f.a); out.push(cMul(CN((f.f === "sin" ? -c : c) / a), cF(f.f === "sin" ? "cos" : f.f === "cos" ? "sin" : "exp", f.a))); continue; }
+    if(f.t === "^" && f.a.t === "f" && f.a.f === "sec" && f.b.t === "n" && f.b.v === 2 && lin(f.a.a) !== null){ out.push(cMul(CN(c / lin(f.a.a)), cF("tan", f.a.a))); continue; }
+    if(f.t === "/" && f.a.t === "n" && f.b.t === "x"){ out.push(cMul(CN(c * f.a.v), cF("ln", cF("abs", CX)))); continue; }
+    return null;
+  }
+  return cSimp(cAdd(...out));
+}
+// A value as a small fraction when it is one, else to four places.
+const cSnap = v => { for(let d = 1; d <= 12; d++){ const k = Math.round(v * d); if(Math.abs(v * d - k) < 1e-7) return d === 1 ? String(k) : k + "/" + d; } return pcNum(+v.toFixed(4)); };
+function cSimpson(f, a, b){ const n = 2000, h = (b - a) / n; let s = f(a) + f(b); for(let i = 1; i < n; i++) s += (i % 2 ? 4 : 2) * f(a + i * h); return s * h / 3; }
+// The zeros of a function on [-50, 50]: sign changes found on a grid, then bisected.
+function cZeros(f){
+  const zs = [], push = z => { if(!zs.some(w => Math.abs(w - z) < 1e-6)) zs.push(z); };
+  let px = -50, pv = f(px);
+  for(let k = 1; k <= 2000; k++){
+    const x = -50 + k * 0.05, v = f(x);
+    if(Math.abs(pv) < 1e-12) push(px);
+    if(isFinite(v) && isFinite(pv) && pv * v < 0){ let lo = px, hi = x; for(let j = 0; j < 80; j++){ const mid = (lo + hi) / 2; (f(lo) * f(mid) <= 0) ? hi = mid : lo = mid; } if(Math.abs(f((lo + hi) / 2)) < 1e-6) push((lo + hi) / 2); }
+    px = x; pv = v;
+  }
+  return zs.map(z => { for(let d = 1; d <= 12; d++){ const k = Math.round(z * d); if(Math.abs(z * d - k) < 1e-6) return k / d; } return z; }).sort((a, b) => a - b);
+}
+// Where a function is positive (sign 1) or negative (-1), as inequalities between its zeros.
+function cWhere(f, sign){
+  const zs = cZeros(f), cuts = [-Infinity, ...zs, Infinity], parts = [];
+  for(let i = 0; i < cuts.length - 1; i++){
+    const lo = cuts[i], hi = cuts[i + 1], mid = lo === -Infinity ? (hi === Infinity ? 0 : hi - 1) : hi === Infinity ? lo + 1 : (lo + hi) / 2;
+    if(Math.sign(f(mid)) === sign) parts.push(lo === -Infinity && hi === Infinity ? "all real x" : lo === -Infinity ? "x < " + cSnap(hi) : hi === Infinity ? "x > " + cSnap(lo) : cSnap(lo) + " < x < " + cSnap(hi));
+  }
+  return parts.length ? parts.join(" or ") : "nowhere";
+}
+function calc12(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
+  const fx = s => { const t = cParse(s); return t && cHasX(t) ? t : null; }, at = (t, v) => cEval(t, v);
+  let m;
+  // derivatives
+  if((m = /^(?:the )?(second |2nd )?derivative of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$|^(?:differentiate|d\/dx)\s+(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$|^dy\/dx (?:if|for|of) y\s*=\s*(.+)$/.exec(q))){
+    const t = fx(m[2] || m[3] || m[4]); if(!t) return null;
+    let d = cSimp(cD(t)); if(m[1]) d = cSimp(cD(d));
+    return out(cStr(d));
+  }
+  // f'(a), tangent slopes and tangent lines
+  if((m = /\bf\(x\)\s*=\s*(.+?),?\s+(?:find|what is|evaluate)\s+f'\s*\(\s*(-?[\d./]+)\s*\)$/.exec(q)) || (m = /^f'\s*\(\s*(-?[\d./]+)\s*\) (?:if|for|when) f\(x\)\s*=\s*(.+)$/.exec(q)) && (m = [m[0], m[2], m[1]])){
+    const t = fx(m[1]), a = pcVal(m[2]); if(!t || a === null) return null; return out(cSnap(at(cSimp(cD(t)), a)));
+  }
+  if((m = /\b(slope|equation)\b.*?\btangent(?: line)? (?:to|of|at)\s+(?:the curve |the graph of )?(?:y\s*=\s*|f\(x\)\s*=\s*)(.+?)\s+(?:at|where|when)\s+x\s*=\s*(-?[\d./]+)$/.exec(q))){
+    const t = fx(m[2]), a = pcVal(m[3]); if(!t || a === null) return null;
+    const k = at(cSimp(cD(t)), a), b = at(t, a) - k * a, ks = cSnap(k);
+    if(m[1] === "slope") return out(ks);
+    return out("y = " + (Math.abs(k) < 1e-12 ? cSnap(b) : (ks === "1" ? "" : ks === "-1" ? "-" : ks) + "x" + (Math.abs(b) < 1e-12 ? "" : b > 0 ? " + " + cSnap(b) : " - " + cSnap(-b))));
+  }
+  // critical points, extrema, concavity, inflection, increasing and decreasing
+  if((m = /^(?:the )?(critical points?|critical numbers?|local (?:maximum|minimum|max|min|extrema)|relative (?:maximum|minimum)|inflection points?|points? of inflection) (?:of|for) (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$/.exec(q))){
+    const t = fx(m[2]); if(!t) return null;
+    const d1 = cSimp(cD(t)), d2 = cSimp(cD(d1)), f1 = v => at(d1, v), f2 = v => at(d2, v), pt = v => "(" + cSnap(v) + ", " + cSnap(at(t, v)) + ")";
+    if(/inflection/.test(m[1])){ const zs = cZeros(f2).filter(z => Math.sign(f2(z - 1e-3)) !== Math.sign(f2(z + 1e-3))); return out(zs.length ? zs.map(pt).join(", ") : "None."); }
+    const cs = cZeros(f1);
+    if(/^critical/.test(m[1])) return out(cs.length ? cs.map(z => "x = " + cSnap(z)).join(", ") : "None.");
+    const kind = z => { const s = f2(z); return s < -1e-9 ? "max" : s > 1e-9 ? "min" : Math.sign(f1(z - 1e-3)) > Math.sign(f1(z + 1e-3)) ? "max" : Math.sign(f1(z - 1e-3)) < Math.sign(f1(z + 1e-3)) ? "min" : "neither"; };
+    const want = /max/.test(m[1]) ? ["max"] : /min/.test(m[1]) ? ["min"] : ["max", "min"], hits = cs.filter(z => want.includes(kind(z)));
+    return out(hits.length ? hits.map(z => (want.length > 1 ? "local " + kind(z) + " at " : "") + pt(z) + (want.length === 1 ? ", at x = " + cSnap(z) : "")).join("; ") : "None.");
+  }
+  if((m = /^(?:where|on what interval|for what (?:values of )?x) (?:is|are|does) (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?) (concave up|concave down|increasing|decreasing)$/.exec(q))){
+    const t = fx(m[1]); if(!t) return null;
+    const d1 = cSimp(cD(t)), g = /concave/.test(m[2]) ? cSimp(cD(d1)) : d1;
+    return out(cWhere(v => at(g, v), /up|increasing/.test(m[2]) ? 1 : -1));
+  }
+  // limits
+  if((m = /^(?:the )?(?:limit|lim) (?:of )?(.+?) as x (?:approaches|goes to|tends to|->|→)\s*(-?∞|-?infinity|[-\d./π\spi]+)$/.exec(q))){
+    const t = fx(m[1]); if(!t) return null; const f = v => at(t, v), A = m[2].trim();
+    if(/∞|infinity/.test(A)){ const s = A[0] === "-" ? -1 : 1, v1 = f(s * 1e6), v2 = f(s * 1e7);
+      if(Math.abs(v2) > 1e5 && Math.abs(v2) > Math.abs(v1)) return out((v2 > 0 ? "∞" : "-∞") + ": it grows without bound, so the limit does not exist as a number.");
+      return isFinite(v2) ? out(cSnap(+v2.toFixed(5))) : null; }
+    const a = pcVal(A); if(a === null) return null; const L = f(a - 1e-7), R = f(a + 1e-7);
+    if(Math.abs(L) > 1e5 || Math.abs(R) > 1e5) return out("Does not exist: it heads to " + (L > 0 ? "∞" : "-∞") + " from the left and " + (R > 0 ? "∞" : "-∞") + " from the right.");
+    if(Math.abs(L - R) > 1e-4) return out("Does not exist: the left limit is " + cSnap(+L.toFixed(4)) + " and the right limit is " + cSnap(+R.toFixed(4)) + ".");
+    return out(cSnap(+((L + R) / 2).toFixed(5)));
+  }
+  if((m = /^is (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?) (differentiable|continuous) at x\s*=\s*(-?[\d./]+)$/.exec(q))){
+    const t = fx(m[1]), a = pcVal(m[3]); if(!t || a === null) return null; const f = v => at(t, v), h = 1e-6, fa = f(a), L = f(a - h), R = f(a + h);
+    const cont = isFinite(fa) && Math.abs(L - fa) < 1e-4 && Math.abs(R - fa) < 1e-4;
+    if(m[2] === "continuous") return out(cont ? "Yes: the limit as x approaches " + cSnap(a) + " equals f(" + cSnap(a) + ") = " + cSnap(fa) + "." : "No: the function breaks at x = " + cSnap(a) + ".");
+    if(!cont) return out("No: it is not even continuous there.");
+    const sl = (fa - L) / h, sr = (R - fa) / h;
+    return out(Math.abs(sl - sr) < 1e-3 ? "Yes: the slope is " + cSnap(+((sl + sr) / 2).toFixed(4)) + " from both sides." : "No: the slope is " + cSnap(+sl.toFixed(3)) + " from the left and " + cSnap(+sr.toFixed(3)) + " from the right (a corner).");
+  }
+  // integrals and area
+  const range = s => { const r = /\bfrom\s+(-?[\d./π\spi]+?)\s+to\s+(-?[\d./π\spi]+)$/.exec(s) || /\bon\s*\[\s*(-?[^,\]]+?)\s*,\s*(-?[^\]]+?)\s*\]$/.exec(s); return r ? [pcVal(r[1].trim()), pcVal(r[2].trim())] : null; };
+  if((m = /^(?:the )?(?:definite )?(?:integral|antiderivative|anti-derivative) of (.+?)(?:\s+dx)?(\s+(?:from|on)\s+.+)?$/.exec(q))){
+    const t = fx(m[1].replace(/\s+dx$/, "")) || (/^[\d.]+$/.test(m[1]) ? CN(+m[1]) : null); if(!t) return null;
+    if(m[2]){ const r = range(m[2].trim()); if(!r || r.includes(null)) return null; return out(cSnap(cSimpson(v => at(t, v), r[0], r[1]))); }
+    const F = cInt(cSimp(t)); return F ? out(cStr(F) + " + C") : null;
+  }
+  if((m = /^(?:the )?area (?:under|below|beneath) (?:the curve )?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)\s+((?:from|on)\s+.+)$/.exec(q))){
+    const t = fx(m[1]), r = range(m[2]); if(!t || !r || r.includes(null)) return null; return out(cSnap(cSimpson(v => Math.abs(at(t, v)), r[0], r[1])));
+  }
+  if((m = /^(?:the )?area between (?:y\s*=\s*)?(.+?) and (?:y\s*=\s*)?(.+?)\s+((?:from|on)\s+.+)$/.exec(q))){
+    const a = fx(m[1]), b = fx(m[2]), r = range(m[3]); if(!a || !b || !r || r.includes(null)) return null; return out(cSnap(cSimpson(v => Math.abs(at(a, v) - at(b, v)), r[0], r[1])));
+  }
+  if((m = /^(?:the )?average value of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)\s+((?:from|on)\s+.+)$/.exec(q))){
+    const t = fx(m[1]), r = range(m[2]); if(!t || !r || r.includes(null) || r[0] === r[1]) return null; return out(cSnap(cSimpson(v => at(t, v), r[0], r[1]) / (r[1] - r[0])));
+  }
+  // motion: s(t) to velocity and acceleration
+  if((m = /\b(?:position|height|displacement)\b.*?\b[sh]\(t\)\s*=\s*(.+?),?\s+(?:what is |find )?(?:its |the )?(velocity|speed|acceleration)\b.*?\bt\s*=\s*([\d./]+)/.exec(q))){
+    const t = fx(m[1].replace(/t/g, "x")); if(!t) return null; let d = cSimp(cD(t)); if(m[2] === "acceleration") d = cSimp(cD(d));
+    const v = at(d, +m[3]); return out(cSnap(m[2] === "speed" ? Math.abs(v) : v));
+  }
+  // related rates for circles, squares, spheres and cubes
+  if(/\bhow fast\b|\brate\b/.test(q) && (m = /\b(radius|side|edge)\b.*?\b(?:grows|increases|expands|is increasing|changes)\s+(?:at|by)\s+([\d.]+)\s*([a-z]+)?(?:\/|\s+per\s+)([a-z]+)/.exec(q))){
+    const rate = +m[2], unit = m[3] || "units", tu = m[4], val = +((/\b(?:r|s)\s*=\s*([\d.]+)|\b(?:radius|side|edge) is ([\d.]+)/.exec(q) || []).slice(1).find(Boolean));
+    if(!isFinite(val)) return null;
+    const circle = /\bcircle\b/.test(q), sphere = /\bsphere\b|\bballoon\b/.test(q), cube = /\bcube\b/.test(q), square = /\bsquare\b/.test(q);
+    if(circle && /\barea\b/.test(q)) return out(pcFrac(2 * val * rate) + "π ≈ " + pcNum(+(2 * Math.PI * val * rate).toFixed(2)) + " " + unit + "²/" + tu);
+    if(circle && /\bcircumference\b/.test(q)) return out(pcFrac(2 * rate) + "π ≈ " + pcNum(+(2 * Math.PI * rate).toFixed(2)) + " " + unit + "/" + tu);
+    if(sphere && /\bvolume\b/.test(q)) return out(pcFrac(4 * val * val * rate) + "π ≈ " + pcNum(+(4 * Math.PI * val * val * rate).toFixed(2)) + " " + unit + "³/" + tu);
+    if(cube && /\bvolume\b/.test(q)) return out(pcNum(3 * val * val * rate) + " " + unit + "³/" + tu);
+    if(square && /\barea\b/.test(q)) return out(pcNum(2 * val * rate) + " " + unit + "²/" + tu);
+    if(square && /\bperimeter\b/.test(q)) return out(pcNum(4 * rate) + " " + unit + "/" + tu);
+  }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
+  const c12 = calc12(q); if(c12) return c12;
   const p11 = pc11(q); if(p11) return p11;
   const p10 = fm10(q); if(p10) return p10;
   const f11 = fom11(q); if(f11) return f11;

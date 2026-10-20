@@ -45,4 +45,13 @@ class Precalc11Test {
     @Test fun contrapositive() = assertEquals("If a shape does not have four sides, then it is not a square.", pc("contrapositive of if a shape is a square then it has four sides"))
     @Test fun annuity() = assertEquals("$13954.01", pc("future value of $200 deposited monthly for 5 years at 6% compounded monthly"))
     @Test fun koch() = assertEquals("log 4/log 3 ≈ 1.2619", pc("what is the fractal dimension of the koch curve"))
+
+    // Calculus 12 (Calculus12.kt)
+    @Test fun productRule() = assertEquals("2x sin(x) + x^2 cos(x)", pc("derivative of x^2 sin(x)"))
+    @Test fun quotientRule() = assertEquals("1/(x + 1)^2", pc("derivative of x/(x + 1)"))
+    @Test fun chainRule() = assertEquals("8x(x^2 + 1)^3", pc("derivative of (x^2 + 1)^4"))
+    @Test fun rootRule() = assertEquals("1/(2√x)", pc("derivative of sqrt(x)"))
+    @Test fun integralOfReciprocal() = assertEquals("2ln|x| + C", pc("integral of 2/x"))
+    @Test fun areaBetween() = assertEquals("1/6", pc("area between y = x and y = x^2 from 0 to 1"))
+    @Test fun corner() = assertEquals("No: the slope is -1 from the left and 1 from the right (a corner).", pc("is f(x) = |x| differentiable at x = 0"))
 }

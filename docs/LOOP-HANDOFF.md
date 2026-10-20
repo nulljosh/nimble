@@ -41,7 +41,8 @@ Rules that bite:
    - Foundations of Mathematics and Pre-Calculus 10 (test/courses/fmpc10.js): A+ offline on every platform (2026-10-20), held-out form B 40/40. The online run waits for a day under 6,000 neurons.
    - Foundations of Mathematics 11 (test/courses/fom11.js): A+ offline on every platform (2026-10-20), held-out form B 40/40. Online waits, like FMPC10.
    - Foundations of Mathematics 12 (test/courses/fom12.js): A+ offline on every platform (2026-10-20), held-out form B 40/40. Online waits.
-   - Next courses, in order: Calculus 12, Statistics 12, Workplace 10, Apprenticeship 12; then Science 10, Chemistry 11 and 12, Physics 11 and 12, Life Sciences 11, Anatomy and Physiology 12, Earth Sciences 11, Environmental Science 11; then Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
+   - Calculus 12 (test/courses/calc12.js): A+ offline on every platform (2026-10-20), held-out form B 40/40. Online waits.
+   - Next courses, in order: Statistics 12, Workplace 10, Apprenticeship 12; then Science 10, Chemistry 11 and 12, Physics 11 and 12, Life Sciences 11, Anatomy and Physiology 12, Earth Sciences 11, Environmental Science 11; then Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.
