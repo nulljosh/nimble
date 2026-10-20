@@ -238,6 +238,18 @@ Form B scored 40/40 on its run, but the honest grade is 39/40. Before the run I 
 
 Form A's first offline run had wrong pack answers, not just misses: "what is the speed of sound in air" gave 331 m/s at 0 °C from Wikipedia's first sentence, and three kinematics questions got the article on velocity. The kinematics solver picks the constant-acceleration equation that fits the three values given and reads acceleration by its unit (m/s²) wherever it sits. Results are given to three significant figures. No form B answer was checked by hand before the run. The solver is `phys11()` in docs/engine.js and `Physics11.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform.**
 
+## BC curriculum: Physics 12
+
+`test/courses/phys12.js`, two 40-question forms written before any run: vector resultants and components, relative motion, horizontal and angled projectiles, circular motion, gravitation, field strength and orbits, momentum, impulse and collisions, torque and balance, inclines, Coulomb's law, electric fields and work, magnetic force and induction. Run `COURSE=phys12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 2/40 (5%) | 40/40 (100%) |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 (79/80 on the first Kotlin run) | 40/40 |
+
+No form B answer was checked by hand before the run. Two side effects were caught before the commit. The new "gravitational constant" fact shadowed the constants table, so the web test that wants NIST's exact 6.67430 × 10⁻¹¹ failed; the fact now covers only the wordings the table does not take. And Kotlin had no answer for "the speed of light in m/s", which the web took from elsewhere; it now answers on every platform. The solver is `phys12()` in docs/engine.js and `Physics12.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform. Every BC science course in physics and chemistry is now at A+ offline.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

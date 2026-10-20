@@ -106,4 +106,11 @@ class Precalc11Test {
     @Test fun freeFall() = assertEquals("9.9 m/s (v = √(2gh))", pc("speed of a 2 kg object dropped from 5 m just before it hits the ground"))
     @Test fun parallel() = assertEquals("5 Ω (1/R = 1/R₁ + 1/R₂ + ...)", pc("total resistance of two 10 ohm resistors in parallel"))
     @Test fun electricEnergy() = assertEquals("1080000 J (0.3 kWh)", pc("how much energy does a 60 W bulb use in 5 hours"))
+
+    // Physics 12 (Physics12.kt)
+    @Test fun resultant() = assertEquals("5 N at 53.1° north of east", pc("resultant of 3 N east and 4 N north"))
+    @Test fun projectileRange() = assertEquals("40.8 m (R = v² sin 2θ / g)", pc("range of a projectile launched at 20 m/s at 45 degrees"))
+    @Test fun coulomb() = assertEquals("0.899 N (F = kq₁q₂/r²)", pc("electric force between two 1 microcoulomb charges 0.1 m apart"))
+    @Test fun orbit() = assertEquals("7.55 km/s (7546 m/s, v = √(GM/r))", pc("orbital speed of a satellite 7000 km from the center of Earth"))
+    @Test fun inverseSquare() = assertEquals("It becomes 1/4 as large (a quarter).", pc("what happens to gravitational force if the distance doubles"))
 }

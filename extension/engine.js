@@ -2956,11 +2956,125 @@ function phys11(q){
   if((m = /^(?:convert )?([\d.]+)\s*(km\/h|kph|m\/s)\s+(?:to|in|into)\s+(km\/h|kph|m\/s)$/.exec(q)) && m[2] !== m[3]) return out(n(/^m\/s$/.test(m[2]) ? +m[1] * 3.6 : +m[1] / 3.6) + " " + m[3]);
   return null;
 }
+// --- Physics 12, offline ---
+// Vectors and relative motion, projectiles, circular motion, gravitation and orbits, momentum and collisions, torque
+// and balance, inclines, electrostatics, and magnetic force. g = 9.8 m/s², G = 6.674 × 10⁻¹¹, k = 8.99 × 10⁹.
+// precalc() asks it after sci10(), before phys11(); null means "not mine". Graded by COURSE=phys12 node
+// test/exam-course.js. Mirrored in kmp/shared/.../Physics12.kt.
+const P12_G = 6.674e-11, P12_K = 8.99e9, P12_ME = 5.972e24, P12_RE = 6371e3;
+const P12_DIR = {east:[1, 0], west:[-1, 0], north:[0, 1], south:[0, -1], right:[1, 0], left:[-1, 0], up:[0, 1], down:[0, -1]};
+const P12_FIELD = {earth:9.8, moon:1.62, mars:3.71, jupiter:24.8, venus:8.87, mercury:3.7, saturn:10.4, sun:274};
+const P12_PREFIX = {micro:1e-6, μ:1e-6, u:1e-6, nano:1e-9, n:1e-9, milli:1e-3, m:1e-3, pico:1e-12, p:1e-12};
+function phys12(q, raw){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"});
+  const s3 = v => Math.abs(v) >= 1e5 || (Math.abs(v) < 1e-3 && v !== 0) ? c12Sci(v) : pcNum(+(+v).toPrecision(3)), rad = Math.PI / 180, g = 9.8;
+  const N = "([\\d.]+(?:\\s*[x×*]\\s*10\\s*\\^\\s*-?\\d+)?)", num = s => c12Num(s);
+  const charge = (v, p) => num(v) * (p ? P12_PREFIX[p.replace(/coulombs?|c$/, "").trim()] ?? 1 : 1);
+  const facts = [
+    // The constants table answers "the gravitational constant" with NIST's value; these are the wordings it does not take.
+    [/^(?:what is )?(?:the )?(?:universal )?gravitational constant,? g$|^(?:the )?value of (?:big )?g$/, "G = 6.674 × 10⁻¹¹ N·m²/kg² (6.67430 × 10⁻¹¹ exactly, from NIST)."],
+    [/\bspeed of light in (?:m\/s|metres per second|meters per second|km\/s)$/, "3.00 × 10⁸ m/s (299,792,458 m/s exactly)."],
+    [/\bcoulomb'?s constant\b/, "k = 8.99 × 10⁹ N·m²/C²."],
+    [/\bconserved in an elastic collision\b/, "Both momentum and kinetic energy."],
+    [/\bconserved in an? (?:perfectly )?inelastic collision\b/, "Momentum. Some kinetic energy turns into heat, sound or deformation, so kinetic energy is not conserved."],
+    [/\bconditions? for (?:static )?equilibrium\b/, "The net force is zero and the net torque is zero."],
+    [/^(?:what is )?torque$/, "The turning effect of a force: τ = F·r·sinθ, the force times its perpendicular distance (lever arm) from the pivot."],
+    [/^(?:what is )?(?:an? )?electric field$/, "The region around a charge where another charge feels a force; its strength is the force per unit charge, E = F/q."],
+    [/^(?:what is )?electric potential$/, "The electric potential energy per unit charge at a point, V = E_p/q, measured in volts."],
+    [/^(?:what is )?(?:electromagnetic )?induction$/, "A changing magnetic field through a conductor induces a voltage (emf), which drives a current if the circuit is closed."],
+    [/\blenz'?s law\b/, "The induced current flows in the direction that opposes the change in magnetic flux that caused it."],
+    [/^(?:what is )?(?:a )?transformer$/, "Two coils on an iron core. A changing current in one induces a voltage in the other, stepping the voltage up or down by the ratio of turns."],
+    [/\bright[- ]hand rule\b/, "The direction of the magnetic field around a current, or of the magnetic force on a moving positive charge or a current in a field."],
+  ];
+  for(const [re, body] of facts) if(re.test(q)) return out(body);
+  let m;
+  // inverse-square scaling for gravity and electricity
+  if((m = /\bwhat happens to (?:the )?(gravitational|electric|electrostatic|coulomb) force if (the distance|the separation|both (?:masses|charges)|one (?:mass|charge)|the mass|the charge) (doubles?|triples?|quadruples?|(?:is|are) (?:doubled|tripled|quadrupled|halved)|halves|halve)\b/.exec(q))){
+    const k = /doubl/.test(m[3]) ? 2 : /tripl/.test(m[3]) ? 3 : /quadrupl/.test(m[3]) ? 4 : 0.5, f = /distance|separation/.test(m[2]) ? 1 / (k * k) : /both/.test(m[2]) ? k * k : k;
+    return out(f >= 1 ? "It becomes " + pcNum(f) + " times larger." : "It becomes 1/" + pcNum(1 / f) + " as large" + (f === 0.25 ? " (a quarter)" : f === 1 / 9 ? " (a ninth)" : "") + ".");
+  }
+  // vectors
+  if((m = /\bresultant\b.*?([\d.]+)\s*([a-z/]+)?\s*(east|west|north|south)\b.*?([\d.]+)\s*[a-z/]*\s*(east|west|north|south)\b/.exec(q))){
+    const [ax, ay] = P12_DIR[m[3]].map(v => v * +m[1]), [bx, by] = P12_DIR[m[5]].map(v => v * +m[4]), x = ax + bx, y = ay + by, mag = Math.hypot(x, y), unit = m[2] && !/^(east|west|north|south)$/.test(m[2]) ? " " + m[2].replace(/^n$/, "N") : "";
+    if(y === 0 || x === 0) return out(s3(mag) + unit + " " + (x > 0 ? "east" : x < 0 ? "west" : y > 0 ? "north" : "south"));
+    const ang = Math.atan(Math.abs(y) / Math.abs(x)) / rad; return out(s3(mag) + unit + " at " + pcNum(+ang.toFixed(1)) + "° " + (y > 0 ? "north" : "south") + " of " + (x > 0 ? "east" : "west"));
+  }
+  if((m = /\b(horizontal|vertical|x|y)[- ]component of (?:a |an )?([\d.]+)\s*([a-z/]+)\b.*?\bat ([\d.]+)\s*(?:°|degrees?)/.exec(q))){
+    const v = +m[2] * (/^(horizontal|x)$/.test(m[1]) ? Math.cos(+m[4] * rad) : Math.sin(+m[4] * rad)); return out(s3(v) + " " + m[3].replace(/^n$/, "N"));
+  }
+  if((m = /\b(?:flies|flying|travels|swims|moves|rows|paddles)\b.*?([\d.]+)\s*(km\/h|m\/s)\b.*?([\d.]+)\s*(?:km\/h|m\/s)\b/.exec(q)) && /\b(ground speed|resultant|actual speed|speed relative)\b/.test(q)){
+    const a = +m[1], b = +m[3];
+    if(/\bacross\b/.test(q)) return out(s3(Math.hypot(a, b)) + " " + m[2] + " (at " + pcNum(+(Math.atan(b / a) / rad).toFixed(1)) + "° downstream from straight across)");
+    const head = /\bheadwind\b|\binto\b|\bagainst\b/.test(q) || ((m = /\b(north|south|east|west)\b.*\bwind from the (north|south|east|west)\b/.exec(q)) && m[1] === m[2]);
+    return out(s3(head ? a - b : a + b) + " " + (/km\/h/.test(q) ? "km/h" : "m/s"));
+  }
+  // projectiles
+  if((m = /\b(?:thrown|kicked|launched|rolls|fired|shot|driven)\b.*?\bhorizontally at ([\d.]+)\s*m\/s\b.*?\b([\d.]+)\s*m\b(?!\/)/.exec(q))){
+    const v = +m[1], h = +m[2], t = Math.sqrt(2 * h / g);
+    if(/\bhow long\b|\btime\b/.test(q)) return out(s3(t) + " s");
+    if(/\b(speed|velocity|how fast)\b.*\b(land|ground|hit)/.test(q)) return out(s3(Math.hypot(v, g * t)) + " m/s");
+    return out(s3(v * t) + " m from the base (it falls for " + s3(t) + " s)");
+  }
+  if((m = /\b(range|maximum height|max height|time of flight|how high|how far|how long)\b.*?\blaunched at ([\d.]+)\s*m\/s at ([\d.]+)\s*(?:°|degrees?)/.exec(q)) || (m = /\blaunched at ([\d.]+)\s*m\/s at ([\d.]+)\s*(?:°|degrees?)\b.*?\b(range|maximum height|max height|time of flight|how high|how far|how long)\b/.exec(q)) && (m = [m[0], m[3], m[1], m[2]])){
+    const v = +m[2], th = +m[3] * rad, w = m[1];
+    if(/range|how far/.test(w)) return out(s3(v * v * Math.sin(2 * th) / g) + " m (R = v² sin 2θ / g)");
+    if(/height|how high/.test(w)) return out(s3((v * Math.sin(th)) ** 2 / (2 * g)) + " m");
+    return out(s3(2 * v * Math.sin(th) / g) + " s");
+  }
+  // circular motion
+  if((m = /\bcentripetal (acceleration|force)\b.*?(?:([\d.]+)\s*kg\b.*?)?\b([\d.]+)\s*m\/s\b.*?\bradius (?:of )?([\d.]+)\s*m\b/.exec(q))){
+    const a = (+m[3]) ** 2 / +m[4]; if(m[1] === "force"){ if(!m[2]) return null; return out(s3(+m[2] * a) + " N (F = mv²/r)"); } return out(s3(a) + " m/s² (a = v²/r)");
+  }
+  if((m = /\bperiod\b.*?\bcircle of radius ([\d.]+)\s*m\b.*?\bat ([\d.]+)\s*m\/s\b/.exec(q)) || (m = /\bperiod\b.*?([\d.]+)\s*m\/s\b.*?\bradius (?:of )?([\d.]+)\s*m\b/.exec(q)) && (m = [m[0], m[2], m[1]])) return out(s3(2 * Math.PI * +m[1] / +m[2]) + " s (T = 2πr/v)");
+  // gravitation
+  if((m = /\bgravitational force between\b(.*)$/.exec(q))){
+    const ms = [...m[1].matchAll(/([\d.]+(?:\s*[x×*]\s*10\s*\^\s*-?\d+)?)\s*kg\b/g)].map(t => num(t[1])), two = /\btwo ([\d.]+)\s*kg\b/.exec(m[1]), r = (/([\d.]+)\s*(m|km)\s*apart\b/.exec(m[1]) || []);
+    const [a, b] = two ? [+two[1], +two[1]] : ms; if(a == null || b == null || !r[1]) return null; const d = +r[1] * (r[2] === "km" ? 1000 : 1);
+    return out(c12Sci(P12_G * a * b / (d * d)) + " N (F = Gm₁m₂/r²)");
+  }
+  if((m = /\bgravitational field strength\b.*?\b(?:surface of|on) (?:the )?(earth|moon|mars|jupiter|venus|mercury|saturn|sun)\b/.exec(q))) return out(P12_FIELD[m[1]] + " N/kg (the same as " + P12_FIELD[m[1]] + " m/s²)");
+  if((m = /\bgravitational field strength\b.*?\b([\d.]+) earth radii\b/.exec(q))) return out(s3(9.8 / (+m[1]) ** 2) + " N/kg (g falls with 1/r²)");
+  if((m = /\borbital (?:speed|velocity)\b.*?([\d.,]+)\s*(km|m)\b\s*(from the cent(?:er|re)|above the surface|above earth|altitude)/.exec(q))){
+    const r = +m[1].replace(/,/g, "") * (m[2] === "km" ? 1000 : 1) + (/above|altitude/.test(m[3]) ? P12_RE : 0), v = Math.sqrt(P12_G * P12_ME / r);
+    return out(s3(v / 1000) + " km/s (" + Math.round(v) + " m/s, v = √(GM/r))");
+  }
+  // momentum, impulse, collisions
+  if((m = /^(?:the )?momentum of (?:a |an )?([\d.]+)\s*kg\b.*?\b([\d.]+)\s*m\/s\b/.exec(q))) return out(s3(+m[1] * +m[2]) + " kg·m/s (p = mv)");
+  if((m = /\bimpulse\b.*?\b([\d.]+)\s*n force acts? for ([\d.]+)\s*s\b/.exec(q))) return out(s3(+m[1] * +m[2]) + " N·s (J = FΔt)");
+  if((m = /([\d.]+)\s*kg\b.*?\bchanges? (?:its )?velocity from (-?[\d.]+)\s*m\/s to (-?[\d.]+)\s*m\/s\b/.exec(q)) && /\bmomentum|impulse\b/.test(q)){ const dp = +m[1] * (+m[3] - +m[2]); return out(s3(dp) + " kg·m/s (a change of " + s3(Math.abs(dp)) + " in size)"); }
+  if((m = /\b([\d.]+)\s*kg\b[^,]*?\bat ([\d.]+)\s*m\/s\b.*?\b([\d.]+)\s*kg\b[^,]*?\b(?:at rest|at ([\d.]+)\s*m\/s)\b/.exec(q))){
+    const m1 = +m[1], v1 = +m[2], m2 = +m[3], v2 = m[4] ? +m[4] : 0;
+    if(/\bstick\b|\binelastic\b|\bcouple\b|\btogether\b/.test(q)) return out(s3((m1 * v1 + m2 * v2) / (m1 + m2)) + " m/s (momentum is conserved)");
+    if(/\belastic/.test(q)){ const u1 = ((m1 - m2) * v1 + 2 * m2 * v2) / (m1 + m2), u2 = ((m2 - m1) * v2 + 2 * m1 * v1) / (m1 + m2); return out((/\bsecond\b/.test(q) ? s3(u2) : s3(u1)) + " m/s (the " + (/\bsecond\b/.test(q) ? "second" : "first") + " ball; the other moves at " + s3(/\bsecond\b/.test(q) ? u1 : u2) + " m/s)"); }
+  }
+  // torque, balance, inclines
+  if((m = /\btorque\b.*?([\d.]+)\s*n\b(?: force)?.*?([\d.]+)\s*m\b(?: from (?:the|a) pivot)?(?:.*?([\d.]+)\s*(?:°|degrees?))?/.exec(q))){ const th = m[3] ? +m[3] * rad : Math.PI / 2; return out(s3(+m[1] * +m[2] * Math.sin(th)) + " N·m (τ = Fr sinθ)"); }
+  if((m = /\b([\d.]+)\s*kg\b.*?\b([\d.]+)\s*m from (?:the )?pivot\b.*?\b([\d.]+)\s*kg\b/.exec(q)) && /\bbalance\b/.test(q)) return out(s3(+m[1] * +m[2] / +m[3]) + " m from the pivot (m₁r₁ = m₂r₂)");
+  if((m = /\b([\d.]+)\s*(?:degree|°)\s*(?:incline|ramp|slope|hill)\b/.exec(q)) || (m = /\b(?:incline|ramp|slope) (?:of |at )?([\d.]+)\s*(?:°|degrees?)/.exec(q))){
+    const th = +m[1] * rad, kg = (/([\d.]+)\s*kg\b/.exec(q) || [])[1], mu = (/\bcoefficient (?:of (?:kinetic )?friction )?(?:is |of )?([\d.]+)/.exec(q) || [])[1];
+    if(/\bnormal force\b/.test(q) && kg) return out(s3(+kg * g * Math.cos(th)) + " N (mg cos θ)");
+    if(/\baccelerat/.test(q)) return out(s3(g * (Math.sin(th) - (mu ? +mu * Math.cos(th) : 0))) + " m/s² (g sin θ" + (mu ? " - μg cos θ" : "") + ")");
+    if(/\b(force|push|pull)\b/.test(q) && kg) return out(s3(+kg * g * (Math.sin(th) + (mu ? +mu * Math.cos(th) : 0))) + " N (mg sin θ" + (mu ? " + μmg cos θ" : "") + ")");
+  }
+  // electrostatics and magnetism, read as typed so μC stays μC
+  const r2 = String(raw || q).toLowerCase();
+  if((m = new RegExp("\\belectric (?:force|attraction|repulsion) between\\b.*?\\btwo " + N + "\\s*(micro|nano|milli|pico|μ|n|m|p|u)?\\s*(?:coulombs?|c)\\b.*?\\b([\\d.]+)\\s*(m|cm)\\s*apart\\b").exec(r2))){
+    const qv = charge(m[1], m[2]), d = +m[3] / (m[4] === "cm" ? 100 : 1); return out(s3(P12_K * qv * qv / (d * d)) + " N (F = kq₁q₂/r²)");
+  }
+  if((m = new RegExp("\\belectric field\\b.*?\\b([\\d.]+)\\s*(m|cm)\\s*from (?:a |an )?" + N + "\\s*(micro|nano|milli|pico|μ|n|m|p|u)?\\s*(?:coulombs?|c)\\b").exec(r2))){
+    const d = +m[1] / (m[2] === "cm" ? 100 : 1), qv = charge(m[3], m[4]); return out(s3(P12_K * qv / (d * d)) + " N/C (E = kq/r²)");
+  }
+  if((m = /\bwork\b.*?\b([\d.]+)\s*c charge\b.*?\b([\d.]+)\s*v\b/.exec(q))) return out(s3(+m[1] * +m[2]) + " J (W = qV)");
+  if((m = /\bmagnetic force on a wire ([\d.]+)\s*m long carrying ([\d.]+)\s*a in a ([\d.]+)\s*t field\b/.exec(q))) return out(s3(+m[1] * +m[2] * +m[3]) + " N (F = BIL)");
+  if((m = new RegExp("\\bmagnetic force on (?:a |an )?" + N + "\\s*c charge moving at " + N + "\\s*m\\/s in a ([\\d.]+)\\s*t field\\b").exec(q))) return out(c12Sci(num(m[1]) * num(m[2]) * +m[3]) + " N (F = qvB)");
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const sc10 = sci10(q, query); if(sc10) return sc10;
+  const ph12 = phys12(q, query); if(ph12) return ph12;
   const ph11 = phys11(q); if(ph11) return ph11;
   const ch12 = chem12(q, query); if(ch12) return ch12;
   const ch11 = chem11(q, query); if(ch11) return ch11;
