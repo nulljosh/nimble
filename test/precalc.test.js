@@ -149,3 +149,12 @@ test("Earth Sciences 11: dating, magnitude and rocks, and Chemistry 12 still ans
   assert.match(body("what is activation energy"), /^The minimum energy colliding particles/);
   assert.match(body("what is oxidation"), /electrons/i);
 });
+test("Environmental Science 11: energy, density, mark and recapture, growth, and kinds", () => {
+  assert.equal(body("if producers have 10000 kJ of energy how much energy reaches the secondary consumers"), "100 kJ: about 10 percent of the energy passes up each trophic level, so 10000 × 0.1^2.");
+  assert.equal(body("a population of 500 deer lives in 25 square kilometres, what is the population density"), "20 per square kilometre (500 ÷ 25).");
+  assert.equal(body("in a mark recapture study 40 fish are marked, later 50 are caught and 10 of them are marked, estimate the population"), "About 200 (marked × caught ÷ marked recaptures = 40 × 50 ÷ 10).");
+  assert.equal(body("a population grows from 200 to 260 in one year, what is the growth rate"), "30% (0.3): (260 - 200) ÷ 200.");
+  assert.equal(body("a population with a 2% growth rate doubles in how many years"), "About 35 years (rule of 70: 70 ÷ 2).");
+  assert.match(body("which relationship benefits both species"), /^Mutualism\./);
+  assert.match(body("how long to double money at 6% using the rule of 72"), /\b12\b/);
+});

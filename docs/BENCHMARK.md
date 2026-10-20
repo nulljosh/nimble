@@ -293,6 +293,20 @@ Form C is the honest held-out number, 18/40. Most misses were facts the table la
 
 A regression caught here: the Anatomy and Physiology 12 commit put its solver ahead of Chemistry 12, so "what is activation energy" got the enzyme answer and Chemistry 12 form A fell to 39/40 (38/40 once Earth Sciences took "oxidation" too). The three fact courses now run after the chemistry and physics solvers, the chemistry line for activation energy also says it is the energy needed to start a reaction, and every course was re-run before this commit: all at their old scores. **A+ offline on A and B; held-out form C is 45% first run, so this course also waits for an online held-out grade.**
 
+## BC curriculum: Environmental Science 11
+
+`test/courses/envsci11.js`: ecosystems and energy flow, the carbon, nitrogen and phosphorus cycles, biodiversity, succession, population dynamics, species interactions, ecosystem services, human impacts, sustainability, conservation and First Peoples knowledge. Forms A and B were written before any run and the solver was built from form A's misses only; form C was written after A and B passed and run once. Run `COURSE=envsci11 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 5/40 (13%) | 9/40 (23%) | 11/40 (28%) |
+| Web offline, after A only | 40/40 | 32/40 (80%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (115/120 before ecosystem, biome, invasive species, endangered species and extinction got local text; the web had them from the pack) |
+
+This time form B was kept honest: the solver was built from A and the curriculum, and B's first run after that was 32/40. Its eight misses were all "why" and "example" questions (why food chains are short, why biodiversity matters, examples of keystone and invasive species in BC). Form C, 11/40 first run, missed the same shapes plus BC specifics: the mountain pine beetle, the Great Bear Rainforest, clearcutting, COSEWIC, old growth. The 10 percent rule, population density, mark and recapture (Lincoln-Petersen), growth rate and doubling time (rule of 70, populations only, so Foundations' rule of 72 for money still answers) are computed. Every course was re-run before this commit: all at their old scores. **A+ offline on all three forms after fixes; the honest held-out numbers are B 80% and C 28% first run, so this course waits for an online held-out grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

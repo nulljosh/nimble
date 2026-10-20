@@ -138,4 +138,12 @@ class Precalc11Test {
     @Test fun rockType() = assertEquals("Metamorphic: from limestone.", pc("what type of rock is marble"))
     @Test fun whichAtmosphereLayer() = assertEquals(true, pc("in which layer of the atmosphere does weather occur")?.startsWith("Troposphere."))
     @Test fun chemistryKeepsActivationEnergy() = assertEquals(true, pc("what is activation energy")?.startsWith("The minimum energy colliding particles"))
+
+    // Environmental Science 11 (EnvironmentalScience11.kt)
+    @Test fun tenPercentRule() = assertEquals("100 kJ: about 10 percent of the energy passes up each trophic level, so 10000 × 0.1^2.", pc("if producers have 10000 kJ of energy how much energy reaches the secondary consumers"))
+    @Test fun populationDensity() = assertEquals("20 per square kilometre (500 ÷ 25).", pc("a population of 500 deer lives in 25 square kilometres, what is the population density"))
+    @Test fun markRecapture() = assertEquals("About 200 (marked × caught ÷ marked recaptures = 40 × 50 ÷ 10).", pc("in a mark recapture study 40 fish are marked, later 50 are caught and 10 of them are marked, estimate the population"))
+    @Test fun growthRate() = assertEquals("30% (0.3): (260 - 200) ÷ 200.", pc("a population grows from 200 to 260 in one year, what is the growth rate"))
+    @Test fun doublingTime() = assertEquals("About 35 years (rule of 70: 70 ÷ 2).", pc("a population with a 2% growth rate doubles in how many years"))
+    @Test fun whichRelationship() = assertEquals(true, pc("which relationship benefits both species")?.startsWith("Mutualism."))
 }

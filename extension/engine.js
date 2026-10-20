@@ -3774,6 +3774,211 @@ function es11(q){
   }
   return null;
 }
+// BC Environmental Science 11: ecosystems and energy flow, biogeochemical cycles, biodiversity, succession, population
+// dynamics, species interactions, ecosystem services, human impacts, sustainability and conservation, plus the 10 percent
+// rule, population density, mark and recapture, growth rate and doubling time. ENV_FACTS are phrase questions;
+// ENV_TERMS go through termAsk.
+const ENV_FACTS = [
+  ["\\bbiotic\\b.*\\babiotic\\b|\\babiotic\\b.*\\bbiotic\\b", "Biotic factors are the living parts of an ecosystem: plants, animals, fungi and bacteria. Abiotic factors are the non-living parts: sunlight, temperature, water, soil, air and nutrients."],
+  ["\\b(?:10|ten) ?(?:percent|%) (?:rule|law)\\b|\\brule of (?:10|ten)\\b", "Only about 10 percent of the energy at one trophic level passes on to the next; the other 90 percent is used for life processes or lost as heat. That is why food chains rarely have more than four or five links."],
+  ["\\b(?:three |3 |main )?(?:levels|types|kinds|components) of biodiversity\\b", "Genetic diversity (the variety of genes within a species), species diversity (the variety of species in an area) and ecosystem diversity (the variety of habitats and ecosystems)."],
+  ["\\bdensity[- ]dependent\\b.*\\bdensity[- ]independent\\b|\\bdensity[- ]independent\\b.*\\bdensity[- ]dependent\\b", "Density-dependent factors grow stronger as a population gets more crowded: competition, disease, predation and parasites. Density-independent factors hit a population the same way whatever its size: weather, fire, floods, drought and other natural disasters."],
+  ["\\brenewable\\b.*\\bnon-?renewable\\b|\\bnon-?renewable\\b.*\\brenewable\\b", "Renewable resources are replaced (replenished) naturally within a human lifetime, like sunlight, wind, water, and forests and fish if harvested sustainably. Non-renewable resources take millions of years to form, so their supply is finite and they can run out: coal, oil, natural gas and minerals."],
+  ["\\bwhy (?:are|do) food chains\\b|\\bfood chains?\\b.*\\b(?:short|few links|so few)\\b", "Only about 10 percent of the energy passes from one trophic level to the next; the rest is used or lost as heat, so after four or five levels too little energy is left to support another."],
+  ["\\bphotosynthesis\\b.*\\bcarbon cycle\\b|\\bcarbon cycle\\b.*\\bphotosynthesis\\b", "Photosynthesis removes carbon dioxide from the air and stores the carbon in sugars and plant tissue. Respiration, decomposition and burning return it to the air."],
+  ["\\bhumans?\\b.*\\bcarbon cycle\\b|\\bhuman (?:impacts?|activit(?:y|ies))\\b.*\\bcarbon\\b", "Burning fossil fuels and deforestation release carbon dioxide faster than plants and the oceans can absorb it, so CO₂ builds up in the atmosphere and warms the climate."],
+  ["\\bwhy do (?:plants|organisms|living things|animals) need nitrogen\\b|\\bnitrogen\\b.*\\b(?:needed|important) (?:for|to)\\b", "To build proteins (from amino acids), DNA and RNA, and the chlorophyll in plants."],
+  ["\\bwhy is biodiversity important\\b|\\bimportance of biodiversity\\b|\\bwhy (?:does|should) biodiversity matter\\b", "More diverse ecosystems are more stable and resilient: they recover better from disturbance. Biodiversity also gives us ecosystem services and resources such as food, medicine, clean water, pollination and timber."],
+  ["\\bkeystone species\\b.*\\b(?:bc|british columbia|examples?)\\b|\\bexamples? of (?:a )?keystone species\\b", "Pacific salmon (their bodies feed bears, eagles and the forest itself), sea otters (they keep sea urchins from wiping out kelp forests), beavers and grey wolves."],
+  ["\\binvasive species\\b.*\\b(?:bc|british columbia|examples?)\\b|\\bexamples? of (?:an )?invasive species\\b", "Scotch broom, Himalayan blackberry, Japanese knotweed, purple loosestrife, European green crab, American bullfrog and European starling. Zebra and quagga mussels are kept out so far by boat inspections."],
+  ["\\b(?:after|following) a (?:forest |wild)?fire\\b|\\b(?:forest |wild)fire\\b.*\\b(?:after|happens|recover)", "Secondary succession: the soil survives, so fireweed, grasses and shrubs regrow within months, then fast-growing trees like lodgepole pine and aspen, and over decades a mature forest again. The ash also returns nutrients to the soil."],
+  ["\\bsource of (?:all )?(?:the )?energy\\b.*\\b(?:ecosystems?|food chains?|food webs?|life|living things|earth)\\b", "The Sun. Producers capture its light energy by photosynthesis and pass it up the food chain. A few deep-sea vent ecosystems run on chemical energy instead (chemosynthesis)."],
+  ["\\b(?:percent(?:age)?|%|fraction|how much)\\b.*\\benergy\\b.*\\blost\\b|\\benergy\\b.*\\blost\\b.*\\btrophic\\b", "About 90 percent, used for life processes or given off as heat. Only about 10 percent passes to the next trophic level."],
+  ["\\beggshells?\\b|\\bpesticide\\b.*\\b(?:eagles?|birds?|falcons?|ospreys?)\\b", "DDT. It biomagnified up the food chain and made the eggshells of bald eagles, peregrine falcons and ospreys too thin to survive, until Canada banned it in the 1970s."],
+  ["\\b(?:top|apex) predators?\\b.*\\b(?:mercury|toxins?|pcbs?|ddt|pesticides?|chemicals?|pollutants?)\\b|\\b(?:mercury|toxins?|pcbs?|pollutants?)\\b.*\\b(?:top|apex) predators?\\b", "Biomagnification: a persistent toxin like mercury is stored in the body and not broken down, and each predator eats many contaminated prey, so the concentration rises at every step up the food chain and is highest in top predators."],
+  ["\\b(?:returns?|releases?|adds?|puts?|gives? off)\\b.*\\b(?:carbon dioxide|co2|co₂|carbon)\\b.*\\b(?:atmosphere|air)\\b", "Cellular respiration by nearly every living thing, plus decomposition and combustion (burning fossil fuels and wood). Volcanoes add a little."],
+  ["\\b(?:removes?|takes?|absorbs?)\\b.*\\b(?:carbon dioxide|co2|co₂|carbon)\\b.*\\b(?:atmosphere|air)\\b", "Photosynthesis by plants, algae and phytoplankton. The oceans also dissolve carbon dioxide directly."],
+  ["\\bbacteria\\b.*\\b(?:nitrogen gas|n2|atmospheric nitrogen|nitrogen from the air)\\b.*\\b(?:ammonia|usable|nitrates?)\\b|\\bwhat (?:bacteria|organisms?)\\b.*\\bfix(?:es)? nitrogen\\b", "Nitrogen-fixing bacteria, such as Rhizobium in the root nodules of legumes, plus some free-living soil bacteria and cyanobacteria."],
+  ["\\bbacteria\\b.*\\bammonia\\b.*\\bnitr(?:ates?|ites?)\\b", "Nitrifying bacteria: Nitrosomonas turns ammonia into nitrites, then Nitrobacter turns nitrites into nitrates."],
+  ["\\bbacteria\\b.*\\bnitrates?\\b.*\\bnitrogen gas\\b", "Denitrifying bacteria, in waterlogged, low-oxygen soil."],
+  ["\\bsalmon\\b.*\\b(?:forests?|trees|ecosystems?|important|bears?)\\b", "Bears and eagles carry spawned-out salmon into the forest, and the bodies fertilize it with ocean nitrogen and other nutrients, so trees near salmon streams grow faster. Salmon are a keystone species and central to First Peoples' food and culture."],
+  ["\\bcosewic\\b", "The Committee on the Status of Endangered Wildlife in Canada, the expert panel that assesses which species are at risk. The government then lists them under the Species at Risk Act (SARA)."],
+  ["\\b(?:first|earliest)\\b.*\\b(?:organisms?|species|plants|life|to (?:arrive|grow|colonize))\\b.*\\bsuccession\\b|\\bsuccession\\b.*\\b(?:first|earliest)\\b", "Pioneer species: lichens and mosses on bare rock in primary succession, or fast-growing grasses, weeds and fireweed on disturbed soil in secondary succession."],
+  ["\\bj[- ]shaped?\\b", "Exponential growth, while resources are unlimited."],
+  ["\\bs[- ]shaped?\\b", "Logistic growth, which levels off at the carrying capacity."],
+  ["\\b(?:shape|curve|graph)\\b.*\\blogistic\\b|\\blogistic\\b.*\\b(?:shape|curve|graph)\\b", "An S-shaped (sigmoid) curve: slow, then fast, then levelling off at the carrying capacity."],
+  ["\\b(?:shape|curve|graph)\\b.*\\bexponential\\b|\\bexponential\\b.*\\b(?:shape|curve|graph)\\b", "A J-shaped curve that climbs faster and faster."],
+  ["\\b(?:exceeds?|overshoots?|goes (?:above|over|past)|above|beyond|passes)\\b.*\\bcarrying capacity\\b", "It overshoots: food and other resources run short, so deaths rise and births fall, and the population declines (sometimes crashes) back below the carrying capacity, then often swings around it."],
+  ["\\b(?:bees?|pollinators?|hummingbirds?)\\b.*\\b(?:flowers?|plants)\\b.*\\b(?:relationship|symbiosis|interaction)\\b|\\b(?:relationship|symbiosis|interaction)\\b.*\\b(?:bees?|pollinators?)\\b.*\\b(?:flowers?|plants)\\b", "Mutualism: the bee gets nectar and pollen as food, and the flower gets pollinated."],
+  ["\\bexamples? of commensalism\\b", "Barnacles riding on a whale, an epiphyte such as a moss or fern growing on a tree branch, or a remora riding on a shark."],
+  ["\\bexamples? of mutualism\\b", "Bees and flowers, mycorrhizal fungi on tree roots, clownfish and sea anemones, or a lichen (a fungus and an alga living together)."],
+  ["\\bexamples? of parasitism\\b", "Ticks or fleas on a deer, a tapeworm in a gut, or mistletoe on a tree."],
+  ["\\bexamples? of predation\\b", "A wolf hunting deer, an orca eating seals, or an owl catching mice. The lynx and the snowshoe hare are the classic predator and prey cycle."],
+  ["\\b(?:four |4 |main )?(?:types|kinds|categories) of ecosystem services\\b", "Provisioning (food, water, timber), regulating (climate, floods, water purification, pollination), supporting (nutrient cycling, soil formation) and cultural (recreation, spiritual and educational value)."],
+  ["\\b(?:main|biggest|greatest|leading|number one|top) (?:cause|threat|reason)s?\\b.*\\b(?:biodiversity|extinctions?|species)\\b|\\b(?:causes?|threats?) (?:of|to) (?:biodiversity|extinction)\\b", "Habitat loss and change, followed by invasive species, pollution, human population growth and overharvesting (HIPPO), with climate change growing fast."],
+  ["\\bconservation\\b.*\\bpreservation\\b|\\bpreservation\\b.*\\bconservation\\b", "Conservation means managing and using a resource wisely so it lasts, such as logging a forest sustainably. Preservation means protecting nature from use altogether and leaving it untouched, such as an ecological reserve."],
+];
+const ENV_TERMS = [
+  ["producers?", "An organism, such as a plant, alga or some bacteria, that makes its own food from sunlight by photosynthesis (an autotroph). Producers form the first trophic level of every food chain."],
+  ["consumers?", "An organism that cannot make its own food and gets energy by eating other organisms (a heterotroph): herbivores, carnivores and omnivores."],
+  ["primary consumers?", "A herbivore that eats producers (plants or algae), the second trophic level, like a deer, a rabbit or zooplankton."],
+  ["secondary consumers?", "An animal that eats primary consumers (herbivores), the third trophic level, like a fox that eats rabbits."],
+  ["tertiary consumers?", "An animal that eats secondary consumers, the fourth trophic level, often a top carnivore like an orca, an eagle or a wolf."],
+  ["quaternary consumers?", "An animal that eats tertiary consumers, a fifth trophic level found only in a few long food chains."],
+  ["herbivores?", "An animal that eats only plants or algae, a primary consumer."],
+  ["carnivores?", "An animal that eats other animals, a secondary or higher consumer."],
+  ["omnivores?", "An animal that eats both plants and animals, like a bear or a human."],
+  ["detritivores?", "An organism that eats dead matter (detritus), like earthworms, millipedes and woodlice, helping decomposers recycle nutrients."],
+  ["scavengers?", "An animal that feeds on the bodies of dead animals, like a vulture or a raven."],
+  ["trophic levels?", "An organism's feeding level, its position in a food chain: producers first, then primary, secondary and tertiary consumers. About 10 percent of the energy passes from one level to the next."],
+  ["food chains?", "A single path showing who eats whom and how energy moves from a producer through a series of consumers, like grass to rabbit to fox."],
+  ["food webs?", "All the interconnected food chains in an ecosystem, showing the many feeding links between organisms. It is more realistic, and a web with many links is more stable than a single chain."],
+  ["(?:energy|ecological) pyramids?|pyramids? of energy", "A diagram of the energy at each trophic level, widest at the producers and narrowing upward because only about 10 percent passes to the next level."],
+  ["pyramids? of numbers", "A diagram of how many organisms are at each trophic level. It can be upside down, as when many insects feed on one tree."],
+  ["pyramids? of biomass", "A diagram of the total mass of living matter at each trophic level."],
+  ["biomass", "The total mass of living (or recently living) matter in an area or at a trophic level."],
+  ["biomagnification|biological magnification", "The increase in concentration of a persistent toxin, such as mercury, DDT or PCBs, at each higher trophic level up the food chain, because each predator eats many contaminated prey. Top predators like orcas and eagles carry the most."],
+  ["bioaccumulation", "The build-up of a toxin, such as mercury or a pesticide, in an organism's tissues over its lifetime, because it takes the toxin in faster than it can break it down or get rid of it."],
+  ["(?:the )?carbon cycle", "The movement of carbon through living things, the air, oceans and rock. Photosynthesis takes carbon dioxide from the air; respiration, decomposition and combustion (burning fossil fuels) return it. Oceans, forests and rock store it."],
+  ["(?:the )?nitrogen cycle", "The movement of nitrogen between the air, soil and living things. Bacteria fix nitrogen gas into ammonia, other bacteria turn that into nitrates for plants (nitrification), animals eat the plants, decomposers return ammonia, and denitrifying bacteria release nitrogen gas back to the air."],
+  ["nitrogen fixation", "Turning nitrogen gas (N₂) from the air into ammonia or nitrates that plants can use. Bacteria in the soil and in the root nodules of legumes do it, and so does lightning."],
+  ["nitrification", "Soil bacteria turning ammonia into nitrites and then nitrates, the form most plants absorb."],
+  ["denitrification", "Bacteria in waterlogged, low-oxygen soil turning nitrates back into nitrogen gas (N₂), which returns to the atmosphere."],
+  ["ammonification", "Decomposers breaking down dead organisms and wastes and releasing their nitrogen as ammonia."],
+  ["(?:the )?phosphorus cycle", "The slow movement of phosphorus from rock into soil and water by weathering, into plants and animals, and back into sediment. It has no gas stage in the atmosphere. Runoff of phosphate fertilizer causes eutrophication."],
+  ["carbon sinks?", "Something that absorbs and stores more carbon than it releases, like the oceans, forests, soil and peat bogs."],
+  ["carbon sources?", "Something that releases more carbon than it absorbs, like burning fossil fuels, a volcano or a forest fire."],
+  ["biogeochemical cycles?|nutrient cycles?|matter cycles?", "The paths that matter such as carbon, nitrogen, phosphorus and water follows through living things and the air, water and rock. Matter is recycled, while energy flows through and is lost as heat."],
+  ["biodiversity|biological diversity", "The variety of life in an area, at three levels: genetic diversity, species diversity and ecosystem diversity. More diverse ecosystems are more stable."],
+  ["genetic diversity", "The variety of genes (genetic variation) within a species or population. It helps a species adapt to disease and change."],
+  ["species diversity", "The number of different species in an area (richness) and how evenly their numbers are spread (evenness)."],
+  ["ecosystem diversity", "The variety of habitats and ecosystems in a region, such as forests, wetlands, grasslands and estuaries."],
+  ["species richness", "The number of different species in an area."],
+  ["keystone species", "A species that has a large effect on its ecosystem compared with its numbers; without it the ecosystem changes drastically or collapses. Sea otters are one: they eat the sea urchins that would otherwise wipe out kelp forests."],
+  ["indicator species", "A species whose presence, absence or health shows the condition of an environment, such as pollution or water quality, like lichens for air quality or frogs and mayfly larvae for water."],
+  ["endemic species", "A species found naturally in only one place in the world."],
+  ["native species", "A species that lives naturally in an area, without people bringing it there."],
+  ["introduced species|non-?native species|exotic species|alien species", "A species brought by people into an area where it did not live before."],
+  ["extirpated species|extirpation|extirpated", "A species no longer found in one area (in the wild in Canada, for example) but still alive elsewhere."],
+  ["threatened species", "A species likely to become endangered if nothing is done about the threats to it."],
+  ["species at risk", "In Canada, a species listed as extirpated, endangered, threatened or of special concern under the Species at Risk Act (SARA)."],
+  ["(?:ecological )?succession", "The gradual change in the species of a community over time, from pioneer species to a stable climax community. Primary succession starts on bare rock; secondary succession starts after a disturbance that leaves the soil."],
+  ["primary succession", "Succession on bare rock or new land with no soil, such as after a lava flow or a retreating glacier. Pioneer species such as lichens and mosses arrive first and slowly build soil."],
+  ["secondary succession", "Succession after a disturbance such as a fire, flood or logging removes a community but leaves the soil, so grasses and shrubs regrow quickly, then trees. It is faster than primary succession."],
+  ["pioneer species", "The first species to colonize bare or disturbed land, such as lichens and mosses on rock or fireweed after a fire. They break down rock and build soil for those that follow."],
+  ["climax communit(?:y|ies)", "The stable, mature community at the final stage of succession, which lasts until a disturbance, like an old-growth forest."],
+  ["carrying capacity", "The maximum population of a species that an environment can support over the long term with its food, water, space and other resources."],
+  ["limiting factors?", "Anything that limits or restricts a population's growth, such as food, water, space, predators, disease or temperature."],
+  ["density[- ]dependent factors?", "A limiting factor whose effect grows as a population gets more crowded: competition, predation, disease and parasites."],
+  ["density[- ]independent factors?", "A limiting factor that affects a population the same way whatever its size: weather, fire, floods and drought."],
+  ["exponential growth", "Growth by a constant percentage, so the population doubles again and again, faster and faster, making a J-shaped curve. It happens while resources are unlimited."],
+  ["logistic growth", "Growth that is fast at first, then slows and levels off at the carrying capacity, making an S-shaped curve."],
+  ["r-?selected species|r-?strategists?|r-?selection", "A species that has many offspring, matures fast and gives little or no parental care, so few survive, like insects, mice and dandelions. It does well in unstable environments."],
+  ["k-?selected species|k-?strategists?|k-?selection", "A species that has few offspring, matures slowly and gives them a lot of parental care, with a population near the carrying capacity, like elephants, whales and humans."],
+  ["populations?", "All the members of one species living in the same area at the same time."],
+  ["(?:ecological )?communit(?:y|ies)", "All the populations of different species living and interacting together in the same area."],
+  ["habitats?", "The place where an organism lives and finds what it needs: its natural home or environment."],
+  ["(?:ecological )?niches?", "The role a species plays in its ecosystem: what it eats, where it lives and how it interacts with others, its whole way of life."],
+  ["predation", "One organism (the predator) hunting, killing and eating another (the prey)."],
+  ["competition", "Organisms struggling for the same limited resources, like food, water, light or space, within a species or between species."],
+  ["symbiosis|symbiotic relationships?", "A close, long-term relationship between two species: mutualism, commensalism or parasitism."],
+  ["mutualism", "A symbiosis where both species benefit, like bees pollinating flowers or fungi living on tree roots (mycorrhizae)."],
+  ["commensalism", "A symbiosis where one species benefits and the other is neither helped nor harmed, like barnacles riding on a whale."],
+  ["parasitism", "A symbiosis where one species (the parasite) benefits by living on or in another (the host) and harming it, like ticks on a deer."],
+  ["ecosystem services", "The benefits that ecosystems give humans for free: clean water and air, pollination of crops, food, timber, flood control, climate regulation, soil formation, and cultural and spiritual value."],
+  ["sustainability|sustainable development", "Meeting the needs of people today without compromising the ability of future generations to meet their own needs, keeping ecosystems and resources healthy for the long term."],
+  ["renewable resources?", "A natural resource that is replaced (replenished) naturally within a human lifetime, like sunlight, wind, water, and forests and fish if harvested sustainably."],
+  ["non-?renewable resources?", "A resource that takes millions of years to form, so its supply is finite and it can run out, like coal, oil, natural gas and minerals."],
+  ["habitat fragmentation", "Breaking a large habitat into smaller, isolated pieces, divided by roads, farms, logging or cities, which cuts populations apart."],
+  ["habitat loss|habitat destruction", "The destruction or change of a habitat so it can no longer support its species, the biggest cause of species loss."],
+  ["deforestation", "Clearing or cutting down forests for farming, logging or building without replanting. It destroys habitat and releases carbon."],
+  ["eutrophication", "Excess nutrients, mostly nitrogen and phosphorus from fertilizer runoff and sewage, make algae bloom in a lake; when the algae die, decomposers use up the oxygen in the water, and fish die."],
+  ["acid rain|acid precipitation|acid deposition", "Rain made acidic when sulfur dioxide and nitrogen oxides from burning fossil fuels, smelters and vehicles react with water in the air to form sulfuric and nitric acid. It harms lakes, forests and buildings."],
+  ["ocean acidification", "The ocean's pH dropping as it absorbs extra carbon dioxide (CO₂) from the air, forming carbonic acid that makes it harder for shellfish and coral to build their shells."],
+  ["overexploitation|overharvesting|overfishing", "Taking a resource, such as fish or trees, faster than it can replace itself, so its population crashes."],
+  ["traditional ecological knowledge|traditional knowledge|tek|indigenous knowledge", "The knowledge, practices and beliefs about the land and living things that Indigenous (First Peoples) communities have built up and passed down over many generations of living on and observing the land."],
+  ["ecological restoration|restoration ecology|habitat restoration", "Helping a damaged, degraded or destroyed ecosystem recover, by replanting native species, removing invasive species, or restoring streams and wetlands."],
+  ["conservation", "Protecting and managing natural resources and species so they are used wisely and last."],
+  ["protected areas?", "Land or water set aside to conserve nature, such as national and provincial parks, ecological reserves and marine protected areas."],
+  ["(?:environmental )?stewardship", "Taking responsibility for caring for and managing the environment so it stays healthy for future generations."],
+  ["(?:the )?precautionary principle", "When an action might cause serious harm to people or the environment, take caution and act to prevent it before the science is certain."],
+  ["ecological footprints?", "The area of land and water needed to supply the resources a person or population uses and absorb its wastes. The average Canadian's is about 8 hectares."],
+  ["(?:the )?tragedy of the commons", "When a shared resource that everyone can use, like a fishery or the air, is overused and ruined because each individual acts in their own interest. Garrett Hardin described it in 1968."],
+  ["watersheds?|drainage basins?", "An area of land where all the water drains to the same river, lake or ocean, like the Fraser River watershed."],
+  ["riparian (?:zones?|areas?)", "The strip of land and plants along a stream, river or lake. It filters runoff, shades the water and holds the banks together."],
+  ["wetlands?", "Land soaked with water for much of the year, such as marshes, swamps and bogs. Wetlands filter water, control floods and hold many species."],
+  ["estuar(?:y|ies)", "Where a river meets the sea and fresh water mixes with salt water, one of the most productive ecosystems, like the Fraser River estuary."],
+  ["(?:the )?biosphere", "All the parts of Earth where life exists: land, water and air."],
+  ["ecology", "The study of how organisms interact with each other and with their environment."],
+  ["abiotic(?: factors?)?", "A non-living part of an ecosystem, such as sunlight, temperature, water, soil, air and nutrients."],
+  ["biotic(?: factors?)?", "A living part of an ecosystem, such as plants, animals, fungi and bacteria, or their remains."],
+  ["decomposers?", "An organism, mostly bacteria and fungi, that breaks down dead organisms and wastes and recycles their nutrients back into the soil, water and air for producers to use again."],
+  ["legumes?", "Plants of the pea family, like peas, beans, clover, alfalfa and lupines, whose root nodules hold nitrogen-fixing bacteria, so they enrich the soil with nitrogen."],
+  ["old[- ]growth(?: forests?)?", "A forest that has grown for centuries without major disturbance, with huge old trees (some over 500 years in BC), standing dead snags and fallen logs: a climax community. Coastal BC old growth includes western red cedar and Douglas fir."],
+  ["interspecific competition", "Competition between different species for the same limited resource, like wolves and cougars hunting the same deer."],
+  ["intraspecific competition", "Competition among members of the same species for food, space or mates. It grows as the population gets more crowded."],
+  ["predator[- ]prey (?:relationships?|cycles?|interactions?)", "One species (the predator) hunts and eats the other (the prey), so their numbers rise and fall in linked cycles: more prey feeds more predators, which then eat the prey down, like the lynx and the snowshoe hare."],
+  ["provisioning (?:ecosystem )?services?", "The products people take from ecosystems: food, fresh water, timber, fibre, fuel and medicines."],
+  ["regulating (?:ecosystem )?services?", "The ways ecosystems keep conditions in check: climate regulation, flood control, water purification, pollination and pest control."],
+  ["supporting (?:ecosystem )?services?", "The basic processes the other services depend on: nutrient cycling, soil formation, photosynthesis and habitat."],
+  ["cultural (?:ecosystem )?services?", "The non-material benefits of nature: recreation, tourism, spiritual and cultural value, and education."],
+  ["clear-?cutting|clear-?cuts?", "Logging that cuts down all (or nearly all) the trees in an area at once. It is cheap but removes habitat, causes erosion and can silt up streams."],
+  ["selective (?:logging|cutting|harvesting)", "Logging that cuts only some trees, chosen by size, species or health, and leaves the rest of the forest standing."],
+  ["(?:the )?(?:mountain )?pine beetles?", "A native bark beetle, the size of a grain of rice, that kills pine trees by boring under the bark. Warm winters let it explode in BC from the late 1990s, killing over half the province's lodgepole pine."],
+  ["(?:the )?great bear rainforest", "A huge temperate rainforest on the central and north coast of British Columbia, about 6.4 million hectares, home to the white Spirit (Kermode) bear. Most of it was protected in 2016 in an agreement with First Nations."],
+  ["reforestation", "Planting trees (replanting) on land where a forest was cut or burned, to grow it back."],
+  ["afforestation", "Planting trees on land that has not been forest for a long time."],
+  ["ecosystems?", "All the living things (biotic factors) in an area interacting with each other and with their non-living environment (abiotic factors), such as a forest, a lake or an estuary."],
+  ["invasive species", "An introduced, non-native species that spreads quickly and harms its new ecosystem, often outcompeting native species because its natural predators and diseases were left behind."],
+  ["biomes?", "A large region of the world with a similar climate and similar plants and animals, such as tundra, boreal forest, temperate rainforest, grassland or desert."],
+  ["endangered species", "A species at risk of becoming extinct (or extirpated) soon if nothing changes."],
+  ["extinction", "The permanent loss of a species when its last member dies, so it no longer exists anywhere."],
+  ["(?:maximum )?sustainable yield","The largest amount of a renewable resource, such as fish or timber, that can be harvested year after year without shrinking the population, because it is no more than what grows back."],
+];
+const ENV_TERMS_RE = ENV_TERMS.map(([s, b]) => [new RegExp("^(?:" + s + ")$"), b, s]);
+const ENV_KINDS = [
+  ["(?:type of |kind of )?succession", "succession"],
+  ["(?:type of |kind of )?(?:symbiotic )?(?:relationship|symbiosis|interaction)s?", "^(?:mutualism|commensalism|parasitism|predation|competition)$"],
+  ["(?:type of |kind of )?(?:organisms?|consumers?)", "producer|consumer|herbivore|carnivore|omnivore|detritivore|scavenger"],
+  ["(?:type of |kind of )?(?:population )?growth", "growth"],
+  ["(?:type of |kind of )?species", "species"],
+  ["(?:type of |kind of )?(?:nutrient )?cycles?", "cycle"],
+];
+// Trophic level of each word: producers are level 0.
+const ENV_LEVEL = {producer:0, producers:0, first:0, primary:1, second:1, secondary:2, third:2, tertiary:3, fourth:3, quaternary:4, fifth:4};
+const ENV_TROPHIC = {producer:"The first trophic level: producers make their own food.", plant:"The first trophic level: plants are producers.", herbivore:"The second trophic level: herbivores are primary consumers that eat producers.", carnivore:"The third trophic level or higher: carnivores are secondary or tertiary consumers.", omnivore:"The second, third or higher trophic level, since omnivores eat both producers and consumers.", decomposer:"Decomposers feed on dead matter from every trophic level, so they sit outside the chain and recycle its nutrients."};
+function env11(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"});
+  for(const [s, body] of ENV_FACTS) if(new RegExp(s).test(q)) return out(body);
+  let t = /\btrophic level\b.*\b(producer|plant|herbivore|carnivore|omnivore|decomposer)s?\b|\b(producer|plant|herbivore|carnivore|omnivore|decomposer)s?\b.*\btrophic level\b/.exec(q);
+  if(t) return out(ENV_TROPHIC[t[1] || t[2]]);
+  const tb = termAsk(q.replace(/ in (?:ecology|an ecosystem|environmental science)$/, ""), ENV_TERMS_RE, ENV_KINDS); if(tb) return out(tb);
+  let m;
+  // 10 percent rule: energy × 0.1 for each trophic level climbed
+  const lv = [...q.matchAll(/\b(producers?|first|primary|second|secondary|third|tertiary|fourth|quaternary|fifth)\b/g)].map(x => ENV_LEVEL[x[1]]);
+  if(lv.length >= 2 && /\b(?:consumers?|producers?|trophic)\b/.test(q) && /\bhow much\b|\bavailable\b|\breach/.test(q) && (m = /(\d[\d,]*(?:\.\d+)?)\s*(kj|j|kcal|calories|cal|units?)?\b/.exec(q))){
+    const e = +m[1].replace(/,/g, ""), n = lv[lv.length - 1] - lv[0], u = m[2] ? " " + m[2].replace(/^kj$/, "kJ").replace(/^j$/, "J") : "";
+    if(n > 0) return out(pcNum(+(e * 0.1 ** n).toPrecision(6)) + u + ": about 10 percent of the energy passes up each trophic level, so " + pcNum(e) + " × 0.1" + (n > 1 ? "^" + n : "") + ".");
+  }
+  // population density = individuals ÷ area
+  if(/\bdensity\b/.test(q) && (m = /(\d[\d,]*)\b.*?\b(\d+(?:\.\d+)?)\s*(square kilomet(?:re|er)s?|km2|km²|square met(?:re|er)s?|m2|m²|hectares?|ha|square miles?)\b/.exec(q))){
+    const n = +m[1].replace(/,/g, ""), a = +m[2];
+    return out(pcNum(+(n / a).toPrecision(6)) + " per " + m[3].replace(/s$/, "") + " (" + pcNum(n) + " ÷ " + pcNum(a) + ").");
+  }
+  // mark and recapture (Lincoln-Petersen): population = marked × caught ÷ marked in the catch
+  if(/\b(?:mark|tag|band)(?:ed|s|ing)?\b/.test(q) && /\b(?:recapture\w*|caught|captured|later|second)\b/.test(q) && /\b(?:estimate|population|how many)\b/.test(q)){
+    const n = (q.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+    if(n.length === 3 && n[2] > 0) return out("About " + pcNum(Math.round(n[0] * n[1] / n[2])) + " (marked × caught ÷ marked recaptures = " + n[0] + " × " + n[1] + " ÷ " + n[2] + ").");
+  }
+  // growth rate from one population size to the next
+  if(/\bgrowth rate\b|\brate of growth\b|\bpercent(?:age)? (?:growth|increase|change)\b/.test(q) && (m = /\bfrom (\d[\d,]*) to (\d[\d,]*)\b/.exec(q))){
+    const a = +m[1].replace(/,/g, ""), b = +m[2].replace(/,/g, ""), r = (b - a) / a, t = /\bin (\d+) years\b/.exec(q);
+    return out(pcNum(+(r * 100).toPrecision(6)) + "% (" + pcNum(+r.toPrecision(6)) + ")" + (t && +t[1] > 1 ? " over " + t[1] + " years" : "") + ": (" + pcNum(b) + " - " + pcNum(a) + ") ÷ " + pcNum(a) + ".");
+  }
+  // doubling time of a population by the rule of 70
+  if(/\bdoubl/.test(q) && /\bpopulation\b/.test(q) && (m = /(\d+(?:\.\d+)?)\s*(?:%|percent)/.exec(q))) return out("About " + pcNum(+(70 / +m[1]).toPrecision(4)) + " years (rule of 70: 70 ÷ " + m[1] + ").");
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
@@ -3786,6 +3991,7 @@ function precalc(query){
   const l11 = ls11(q); if(l11) return l11;
   const a12p = ap12(q); if(a12p) return a12p;
   const e11 = es11(q); if(e11) return e11;
+  const v11 = env11(q); if(v11) return v11;
   const c12 = calc12(q); if(c12) return c12;
   const s12 = stats12(q); if(s12) return s12;
   const a12 = aw12(q); if(a12) return a12;

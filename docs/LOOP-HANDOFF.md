@@ -54,7 +54,8 @@ Rules that bite:
    - Anatomy and Physiology 12 (test/courses/ap12.js): A+ offline on A and B (2026-10-20); fresh form C 20/40 first run, 40/40 after fixes. Method from here: build from form A only, run B once, then write and run a fresh C.
    - Earth Sciences 11 (test/courses/es11.js): A+ offline on A and B (2026-10-20); fresh form C 18/40 first run, 40/40 after fixes. Re-run every course after adding one: a new solver ahead of Chemistry 12 once stole its terms.
    - 2026-10-20 07:45: an unplanned live run. `test/exam.js` ignores OFFLINE and was started by mistake, then stopped part way through; estNeurons went from 6240 to 7200 with no score posted. Nothing runs online before the 17:00 reset. `test/exam-offline.js` is the offline general exam, and `test/exam-pc12.js` needs OFFLINE=1 to stay off the network.
-   - Next courses, in order: Environmental Science 11; then Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
+   - Environmental Science 11 (test/courses/envsci11.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 32/40 after building from A only, fresh C 11/40. Bare terms the web answers from the pack (ecosystem, biome, extinction) got local text so Kotlin passes without a pack.
+   - Next courses, in order: Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.
