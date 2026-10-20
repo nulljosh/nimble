@@ -250,6 +250,19 @@ Form A's first offline run had wrong pack answers, not just misses: "what is the
 
 No form B answer was checked by hand before the run. Two side effects were caught before the commit. The new "gravitational constant" fact shadowed the constants table, so the web test that wants NIST's exact 6.67430 × 10⁻¹¹ failed; the fact now covers only the wordings the table does not take. And Kotlin had no answer for "the speed of light in m/s", which the web took from elsewhere; it now answers on every platform. The solver is `phys12()` in docs/engine.js and `Physics12.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform. Every BC science course in physics and chemistry is now at A+ offline.**
 
+## BC curriculum: Life Sciences 11
+
+`test/courses/lifesci11.js`: characteristics of life, taxonomy and scientific names, viruses and their cycles, bacteria and archaea, protists, fungi, plants, evolution and its mechanisms, animal body plans, and microscope and bacterial growth arithmetic. Forms A and B were written before any run. Form C was written after the solver passed A and B, because this course is mostly facts and those facts were written with B's misses in view, so B stopped being a fair held-out test. Run `COURSE=lifesci11 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 4/40 (10%) | 7/40 (18%) | 15/40 (38%) |
+| Web offline, after fixes | 40/40 | 40/40 | 39/40 |
+| Apple offline | 40/40 | 40/40 | 39/40 |
+| Kotlin offline | 40/40 | 40/40 | 39/40 (118/120 before algae and seed got facts; the web had them from the pack) |
+
+The honest held-out number is form C's first run, 15/40. A facts table only knows what it was written for, and a fresh set of questions on the same course found the gaps at once: kingdoms and phyla of common organisms, diseases by cause, pili and peptidoglycan, niches, punctuated equilibrium, the functions of plant parts. Those are now covered, and C reads 39/40 after the fixes, but that is tuned, not held out. The one miss is "what is photosynthesis": a local fact would hide the Wikipedia card and its diagram, which the web tests protect, so the pack answers it and its opening line has no "light" or "glucose". The math half (total magnification, field of view, actual size, doubling growth) is real arithmetic and generalizes. The solver is `ls11()` in docs/engine.js and `LifeSciences11.kt` on Kotlin, whose tables are copied from engine.js by script. A known cost: a local definition answers before Wikipedia even online, so bare terms like virus, fossil, fern or species now get one textbook line instead of their Wikipedia card, as Science 10 already does for evolution and galaxy. Narrowing those is on the list. The bacteria growth rule only fires when the question says bacteria, after it first took a Pre-Calc 12 population question. **A+ offline on A and B; held-out form C is 38% first run, so fact courses need an online held-out grade before they count.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

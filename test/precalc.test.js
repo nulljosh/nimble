@@ -121,3 +121,12 @@ test("not precalc: prose and plain facts fall through", () => {
   assert.equal(E.precalc("capital of france"), null);
   assert.equal(E.precalc("2+2"), null);
 });
+
+test("Life Sciences 11: microscope, growth and names, and Pre-Calc growth still wins outside bacteria", () => {
+  assert.equal(body("total magnification with a 10x eyepiece and a 40x objective lens"), "400× (10× eyepiece times 40× objective)");
+  assert.equal(body("field of view at 400x if it is 4 mm at 40x"), "0.4 mm (field of view × magnification stays the same)");
+  assert.equal(body("a bacterium divides every 30 minutes, how many bacteria after 3 hours starting with 10"), "640 bacteria (6 doublings: 10 × 2^6)");
+  assert.equal(body("what is the scientific name for cats"), "Felis catus.");
+  assert.equal(body("a population of 200 doubles every 3 hours, how many after 12 hours"), "3200");
+  assert.equal(body("conjugation of spanish verbs"), undefined);
+});

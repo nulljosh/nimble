@@ -3069,11 +3069,204 @@ function phys12(q, raw){
   if((m = new RegExp("\\bmagnetic force on (?:a |an )?" + N + "\\s*c charge moving at " + N + "\\s*m\\/s in a ([\\d.]+)\\s*t field\\b").exec(q))) return out(c12Sci(num(m[1]) * num(m[2]) * +m[3]) + " N (F = qvB)");
   return null;
 }
+// BC Life Sciences 11: characteristics of life, taxonomy, viruses, bacteria and archaea, protists, fungi, plants,
+// evolution and animal body plans as plain facts, plus microscope and bacterial growth arithmetic. Phrase questions
+// come first (LS_FACTS, unanchored), then single terms (LS_DEFS, matched as the whole question).
+const LS_FACTS = [
+  ["\\bcharacteristics of (?:all )?(?:living things|life|organisms)\\b", "Living things are made of cells, use energy (metabolism), grow and develop, reproduce, respond to their environment, keep a stable internal state (homeostasis), and adapt over generations."],
+  ["\\b(?:levels|ranks|order|hierarchy) of (?:classification|taxonomy)\\b|\\btaxonomic (?:levels|ranks|hierarchy)\\b", "Domain, kingdom, phylum, class, order, family, genus, species, from broadest to most specific. A memory aid: Dear King Philip Came Over For Good Soup."],
+  ["\\b(?:three |3 )?domains of life\\b|\\bthree domains\\b", "Bacteria, Archaea and Eukarya."],
+  ["\\b(?:six|6|the) kingdoms\\b|\\bkingdoms of life\\b", "Animalia (animals), Plantae (plants), Fungi, Protista (protists), Archaebacteria (archaea) and Eubacteria (bacteria)."],
+  ["\\bwho (?:developed|invented|created|came up with) (?:binomial nomenclature|the classification system)\\b|\\bfather of taxonomy\\b", "Carl Linnaeus, a Swedish botanist, in the 1750s."],
+  ["\\b(?:levels|parts|ranks|names)\\b[a-z ]*\\b(?:scientific name|binomial name)\\b|\\bscientific name (?:is )?made (?:up )?of\\b", "The genus and the species, as in Homo sapiens."],
+  ["\\bviruse?s? made (?:up )?of\\b|\\bstructure of a virus\\b|\\bparts of a virus\\b", "Genetic material (DNA or RNA) inside a protein coat called a capsid. Some also have a lipid envelope. No cytoplasm, ribosomes or metabolism."],
+  ["\\b(?:are|is) (?:a )?virus(?:es)? (?:alive|living)\\b", "No. Most biologists class viruses as non-living: they have no cells, no metabolism, and cannot reproduce outside a host cell."],
+  ["\\blytic\\b.*\\blysogenic\\b|\\blysogenic\\b.*\\blytic\\b", "In the lytic cycle a virus takes over the cell at once, makes copies and bursts (lyses) the cell. In the lysogenic cycle its DNA inserts into the host DNA as a prophage and lies dormant, copied with every cell division, until a trigger switches it to the lytic cycle."],
+  ["\\bantibiotics?\\b.*\\bviru", "Antibiotics target parts of bacterial cells, such as the cell wall and ribosomes. Viruses have neither and are not living cells: they copy themselves inside host cells, so antibiotics cannot touch them. Vaccines and antivirals are used instead."],
+  ["\\bhow (?:do|does) (?:bacteria|a bacterium|prokaryotes) reproduce\\b", "Asexually, by binary fission: the cell copies its DNA and splits into two identical cells. Bacteria can also swap DNA by conjugation."],
+  ["\\bshapes? of bacteri", "Cocci (spheres), bacilli (rods) and spirilla (spirals)."],
+  ["\\bconjugation (?:in|of|between) bacteri|\\bbacterial conjugation\\b", "Two bacteria join by a pilus and one passes a copy of DNA, usually a plasmid, to the other. It mixes genes but makes no new cells."],
+  ["\\bprokaryot.*\\beukaryot|\\beukaryot.*\\bprokaryot", "Eukaryotic cells have a nucleus and membrane-bound organelles. Prokaryotic cells (bacteria and archaea) have no nucleus, their DNA sits in the cytoplasm, and they are much smaller."],
+  ["\\bbacteria\\b.*\\barchaea|\\barchaea.*\\bbacteria\\b", "Both are prokaryotes. Bacterial cell walls contain peptidoglycan; archaea have none, have different membrane lipids, and many live in extreme places like hot springs and salt lakes."],
+  ["\\bhow (?:do|does) (?:an? )?amoeba(?:s|e)? move\\b", "With pseudopods, extensions of cytoplasm (\"false feet\") that also engulf food."],
+  ["\\bhow (?:do|does) (?:a )?parameci(?:a|um|ums) move\\b", "With cilia, short hairlike structures that beat together."],
+  ["\\beuglena\\b.*\\b(?:energy|food|eat|nutrition|nutrients)\\b", "Both ways: in light it photosynthesizes with chloroplasts (an autotroph), and in the dark it absorbs food from its surroundings (a heterotroph). It swims with a flagellum."],
+  ["\\bcauses? malaria\\b|\\bmalaria (?:is )?caused by\\b", "Plasmodium, a protist parasite spread by the bite of Anopheles mosquitoes."],
+  ["\\bfung(?:al|i|us)\\b.*\\bcell walls?\\b", "Chitin, the same tough material in insect exoskeletons."],
+  ["\\bhow (?:do|does) fung(?:i|us) (?:get|obtain) (?:food|nutrients|energy|nutrition)\\b|\\bhow (?:do|does) fung(?:i|us) (?:eat|feed)\\b", "They are heterotrophs that absorb nutrients: they release digestive enzymes onto food outside their bodies and absorb what breaks down, often as decomposers of dead matter."],
+  ["\\bhow (?:do|does) fung(?:i|us) reproduce\\b", "By spores, made asexually or sexually. Yeasts also reproduce by budding, and hyphae can grow from broken pieces."],
+  ["\\bwhat does (?:the )?xylem (?:transport|carry|do|move)\\b", "Water and dissolved minerals, up from the roots to the leaves."],
+  ["\\bwhat does (?:the )?phloem (?:transport|carry|do|move)\\b", "Sugars (food) made in the leaves, to the rest of the plant."],
+  ["\\b(?:four|4|main|major) (?:main |major )?(?:groups|types) of plants\\b|\\bplant groups\\b", "Mosses and other bryophytes (no vascular tissue, no seeds), ferns (vascular, spores), gymnosperms such as conifers (seeds in cones) and angiosperms (flowering plants, seeds in fruit)."],
+  ["\\bmonocots?\\b.*\\bdicots?\\b|\\bdicots?\\b.*\\bmonocots?\\b", "Monocots have one cotyledon (seed leaf), parallel leaf veins, flower parts in threes and scattered vascular bundles, like grasses and lilies. Dicots have two cotyledons, net-like veins, flower parts in fours or fives and vascular bundles in a ring, like roses and oaks."],
+  ["\\b(?:do|are) (?:mosses|bryophytes)\\b.*\\bvascular\\b", "No. Mosses are non-vascular: they lack xylem and phloem, so they stay small and live in damp places."],
+  ["\\bwho (?:proposed|came up with|developed|discovered)\\b[a-z ]*\\b(?:evolution|natural selection)\\b|\\bfather of evolution\\b", "Charles Darwin, in On the Origin of Species (1859). Alfred Russel Wallace reached the same idea on his own."],
+  ["\\bevidence (?:for|of) evolution\\b", "Fossils, homologous and vestigial structures, similar embryos, DNA and protein similarities, where species live, and evolution seen directly, such as antibiotic-resistant bacteria."],
+  ["\\bfitness (?:in (?:evolution|biology)|evolution)\\b|^(?:biological|darwinian|evolutionary) fitness$", "An organism's ability to survive and reproduce in its environment, measured by how many offspring it leaves."],
+  ["\\b(?:characteristics|traits|features) of (?:a )?mammals?\\b", "Hair or fur, mammary glands that make milk, warm-blooded (endothermic), a four-chambered heart, three middle-ear bones, and most give live birth."],
+  ["\\b(?:characteristics|traits|features) of (?:a )?birds?\\b", "Feathers, a beak with no teeth, hollow bones, warm-blooded, a four-chambered heart, and hard-shelled eggs."],
+  ["\\b(?:characteristics|traits|features) of (?:a )?reptiles?\\b", "Dry scaly skin, lungs, cold-blooded (ectothermic), and leathery eggs laid on land (amniotic eggs)."],
+  ["\\b(?:characteristics|traits|features) of (?:an? )?amphibians?\\b", "Moist skin with no scales, cold-blooded, eggs laid in water, and a life cycle that starts in water with gills and moves to land with lungs."],
+  ["\\b(?:characteristics|traits|features) of (?:a )?fish(?:es)?\\b", "Gills, fins, scales, cold-blooded, and they live in water."],
+  ["\\bhow (?:is|are) (?:a )?scientific names? written\\b|\\brules? for (?:writing )?scientific names\\b", "In italics (underlined when handwritten), genus first with a capital letter, then the species in lowercase: Homo sapiens."],
+  ["\\b(?:smallest|most specific|narrowest|lowest) (?:unit|level|rank|group|category) (?:of|in) (?:classification|taxonomy)\\b", "Species."],
+  ["\\b(?:largest|broadest|biggest|highest) (?:unit|level|rank|group|category) (?:of|in) (?:classification|taxonomy)\\b", "Domain."],
+  ["\\bviruse?s? need to (?:reproduce|replicate|multiply)\\b|\\bhow (?:do|does) (?:a )?viruse?s? (?:reproduce|replicate|multiply)\\b", "A host cell. A virus injects its genetic material and uses the host's ribosomes, enzymes and energy to copy itself, by the lytic or lysogenic cycle."],
+  ["\\b(?:diseases?|illness(?:es)?|infections?) caused by (?:a |an )?viruse?s?\\b|\\bviral (?:diseases?|infections?)\\b", "Influenza (the flu), the common cold, COVID-19, measles, chickenpox, HIV/AIDS and rabies."],
+  ["\\b(?:diseases?|illness(?:es)?|infections?) caused by (?:a )?bacteri(?:a|um)\\b|\\bbacterial (?:diseases?|infections?)\\b", "Strep throat, tuberculosis, cholera, tetanus, Lyme disease, salmonella food poisoning and bacterial pneumonia."],
+  ["\\b(?:diseases?|illness(?:es)?|infections?) caused by (?:a )?protists?\\b", "Malaria (Plasmodium), sleeping sickness (Trypanosoma), giardiasis (Giardia) and amoebic dysentery."],
+  ["\\b(?:diseases?|illness(?:es)?|infections?) caused by (?:a )?fung(?:i|us)\\b|\\bfungal (?:diseases?|infections?)\\b", "Athlete's foot, ringworm, yeast infections (Candida) and Dutch elm disease in trees."],
+  ["\\bfunctions? of (?:the |a )?roots?\\b|\\bwhat do roots do\\b", "Roots anchor the plant, absorb water and minerals from the soil, and often store food."],
+  ["\\bfunctions? of (?:the |a )?stems?\\b|\\bwhat do stems do\\b", "Stems hold the plant up and carry water (xylem) and food (phloem) between the roots and leaves."],
+  ["\\bfunctions? of (?:the |a )?leaf\\b|\\bfunctions? of (?:the )?leaves\\b|\\bwhat do leaves do\\b", "Leaves make food by photosynthesis and exchange gases through their stomata."],
+  ["\\bfunctions? of (?:the |a )?flowers?\\b|\\bwhat do flowers do\\b", "Flowers are for sexual reproduction: they attract pollinators, make pollen and eggs, and become fruit with seeds."],
+];
+const LS_DEFS = [
+  ["binomial nomenclature", "A two-part scientific name: the genus (capitalized) then the species (lowercase), written in italics, such as Homo sapiens. Carl Linnaeus introduced it."],
+  ["taxonomy", "The science of naming, describing and classifying organisms into groups."],
+  ["(?:a )?dichotomous key", "A tool for identifying an organism through a series of steps, each offering two choices (a pair of opposite statements), until one name is left."],
+  ["cladograms?", "A branching diagram that shows evolutionary relationships: groups that share a more recent common ancestor sit on closer branches, and each branch point marks a shared derived trait."],
+  ["phylogenetic trees?|phylogeny", "A branching diagram of evolutionary relationships among species, tracing them back to common ancestors, often drawn against time."],
+  ["viruse?s?", "A tiny non-living particle of DNA or RNA in a protein coat (capsid) that can only reproduce inside a host cell."],
+  ["capsids?", "The protein coat (shell) that surrounds a virus's DNA or RNA."],
+  ["lytic cycle", "The virus attaches, injects its genetic material, takes over the cell to make new viruses, then bursts (lyses) the cell to release them, killing it."],
+  ["lysogenic cycle", "The virus's DNA inserts into the host cell's DNA as a prophage and lies dormant, copied each time the cell divides. A trigger such as stress can switch it to the lytic cycle."],
+  ["(?:bacterio)?phages?", "A virus that infects bacteria."],
+  ["prophages?", "Viral DNA inserted into a bacterium's DNA during the lysogenic cycle."],
+  ["vaccines?", "A weakened, killed or partial form of a pathogen (or instructions to make one of its proteins) that trains the immune system to recognize it, so a later infection is fought off quickly."],
+  ["binary fission", "Asexual reproduction in which a prokaryote copies its single circular chromosome and divides into two identical cells."],
+  ["cocc(?:i|us)", "Spherical (round) bacteria. In clusters they are staphylococci, in chains streptococci."],
+  ["bacill(?:i|us)", "Rod-shaped bacteria."],
+  ["spirill(?:a|um)", "Spiral-shaped bacteria."],
+  ["plasmids?", "A small ring (circular loop) of DNA separate from the main chromosome in bacteria. Plasmids often carry genes such as antibiotic resistance and can be passed between cells."],
+  ["endospores?", "A tough, dormant structure some bacteria form around their DNA to survive harsh conditions like heat, drying or chemicals, then grow again when conditions improve."],
+  ["prokaryotes?", "A single-celled organism with no nucleus or membrane-bound organelles: bacteria and archaea."],
+  ["eukaryotes?", "An organism whose cells have a nucleus and membrane-bound organelles: protists, fungi, plants and animals."],
+  ["archaea|archaebacteria", "Prokaryotes with no peptidoglycan in their cell walls and unusual membranes, many living in extreme environments (extremophiles) such as hot springs and salt lakes."],
+  ["protists?|protista", "Eukaryotes that are not plants, animals or fungi, mostly single-celled: animal-like (amoebas, paramecia), plant-like (algae, euglena) and fungus-like (slime molds)."],
+  ["pseudopod(?:s|ia|ium)?", "A temporary extension of cytoplasm, a \"false foot\", that amoebas use to move and engulf food."],
+  ["cilia|cilium", "Short hairlike structures that beat to move a cell or move fluid past it."],
+  ["flagell(?:a|um)", "A long whiplike tail that spins or lashes to move a cell."],
+  ["hyph(?:ae|a)", "The long, thin threads (filaments) that make up the body of a fungus."],
+  ["mycelium|mycelia", "A network of hyphae, the main body of a fungus, usually hidden in soil or wood."],
+  ["lichens?", "A partnership (mutualism) between a fungus and an alga or cyanobacterium: the alga makes food by photosynthesis and the fungus gives shelter and water."],
+  ["decomposers?", "An organism, such as a fungus or bacterium, that breaks down dead matter and waste and returns nutrients to the soil."],
+  ["autotrophs?", "An organism that makes its own food, usually by photosynthesis, like plants and algae."],
+  ["heterotrophs?", "An organism that gets its food by eating or absorbing other organisms, like animals and fungi."],
+  ["alternation of generations", "A plant life cycle that switches between a haploid gametophyte, which makes gametes, and a diploid sporophyte, which makes spores."],
+  ["sporophytes?", "The diploid (2n) stage of a plant's life cycle that makes spores by meiosis. It is the main plant in ferns and seed plants."],
+  ["gametophytes?", "The haploid (n) stage of a plant's life cycle that makes gametes (eggs and sperm). It is the main plant in mosses."],
+  ["xylem", "Plant tissue that carries water and dissolved minerals up from the roots to the leaves."],
+  ["phloem", "Plant tissue that carries sugars (food) made in the leaves to the rest of the plant."],
+  ["gymnosperms?", "A seed plant whose seeds are not enclosed in fruit (\"naked seeds\"), usually borne on cones, like pines, firs and cedars."],
+  ["angiosperms?", "A flowering plant: its seeds form inside an ovary that becomes a fruit."],
+  ["stomat(?:a|e)|stomas?", "Tiny pores (openings) on a leaf, mostly underneath, opened and closed by guard cells to let carbon dioxide in and oxygen and water vapour out."],
+  ["vascular plants?", "A plant with vascular tissue, xylem for water and phloem for food, so it can grow tall: ferns, gymnosperms and angiosperms."],
+  ["bryophytes?", "A non-vascular plant such as a moss, liverwort or hornwort, which reproduces by spores and needs water for fertilization."],
+  ["pollination", "The transfer of pollen from the male part of a flower (anther) to the female part (stigma), by wind, insects, birds or other animals."],
+  ["genetic drift", "Random changes in allele frequencies from one generation to the next, by chance alone. Its effect is strongest in small populations."],
+  ["gene flow", "The movement of alleles between populations when individuals migrate and breed. It makes populations more alike."],
+  ["(?:the )?bottleneck effect", "Genetic drift after a disaster or event sharply reduces a population's size: the few survivors carry only some of the original alleles, so genetic variation drops."],
+  ["(?:the )?founder effect", "Genetic drift when a small group leaves to start a new population in a new area: its allele frequencies reflect the few founders, not the original population."],
+  ["speciation", "The formation of new species, usually when populations are separated (by geography or behaviour) and can no longer interbreed."],
+  ["allopatric speciation", "Speciation after a population is split by a physical barrier such as a river or mountain range."],
+  ["sympatric speciation", "Speciation without a physical barrier, for example through behaviour or a change in chromosome number."],
+  ["homologous structures?", "A body part shared by different species because they inherited it from a common ancestor. The structure is similar but the function may differ, like a human arm, a bat wing and a whale flipper."],
+  ["analogous structures?", "A body part with a similar function in species that did not get it from a common ancestor; it evolved separately, like bird wings and insect wings."],
+  ["vestigial structures?|vestigial organs?", "A body part that is reduced and has little or no function now but was useful in ancestors, like the human tailbone or whale hip bones."],
+  ["convergent evolution", "Unrelated species evolve similar traits independently because they live in similar environments, like sharks and dolphins."],
+  ["divergent evolution", "Related species become more different over time as they adapt to different environments."],
+  ["adaptive radiation", "One ancestral species rapidly diversifies into many new species, each adapted to a different niche, like Darwin's finches on the Galapagos."],
+  ["coevolution", "Two species evolve in response to each other, like flowers and their pollinators."],
+  ["(?:an )?adaptation", "An inherited trait that helps an organism survive and reproduce in its environment."],
+  ["radial symmetry", "Body parts arranged around a central point or axis, like a sea star or jellyfish: any cut through the centre gives similar halves."],
+  ["bilateral symmetry", "A body with left and right sides that are mirror images; only one cut down the middle gives two matching halves. Most animals, including humans."],
+  ["asymmetry|asymmetrical", "No symmetry at all, like most sponges."],
+  ["invertebrates?", "An animal without a backbone (spine), like insects, worms, molluscs and sea stars. About 95 percent of animal species."],
+  ["vertebrates?", "An animal with a backbone: fish, amphibians, reptiles, birds and mammals."],
+  ["species", "A group of organisms that can interbreed in nature and produce fertile offspring."],
+  ["retroviruse?s?", "An RNA virus, such as HIV, that uses the enzyme reverse transcriptase to copy its RNA into DNA, which then inserts into the host's DNA."],
+  ["pathogens?", "Anything that causes disease, such as a virus, bacterium, protist or fungus."],
+  ["pil(?:i|us)", "A short hairlike thread on a bacterium's surface, used to attach to surfaces or to another cell during conjugation."],
+  ["peptidoglycan", "The sugar and protein mesh that makes up bacterial cell walls. Archaea lack it, and penicillin attacks it."],
+  ["extremophiles?", "An organism that lives in extreme conditions, such as heat, salt, acid or cold, like many archaea."],
+  ["slime (?:molds?|moulds?)", "Fungus-like protists that live on decaying matter and, when food runs short, gather into a mass that makes spores."],
+  ["yeasts?", "A single-celled fungus that reproduces by budding. It ferments sugar into alcohol and carbon dioxide, which raises bread."],
+  ["budding", "Asexual reproduction in which a new organism grows as an outgrowth (bud) from the parent and breaks off, as in yeast and hydra."],
+  ["spores?", "A single reproductive cell that can grow into a new organism without fertilization. Fungi, ferns and mosses make them."],
+  ["cotyledons?", "A seed leaf: the first leaf or leaves of a plant embryo, often storing food. Monocots have one, dicots two."],
+  ["algae|alga", "Simple plant-like protists (and the cyanobacteria) that photosynthesize, from single cells to giant kelp. They have no true roots, stems or leaves."],
+  ["seeds?", "A plant embryo with a food supply inside a protective coat, made by gymnosperms and angiosperms."],
+  ["(?:cellular )?respiration", "Cells break down glucose with oxygen to release energy (ATP), giving off carbon dioxide and water: C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O. It happens in mitochondria."],
+  ["transpiration", "Water moving up through a plant and evaporating from its leaves as water vapour, mostly through the stomata."],
+  ["conifers?", "A cone-bearing gymnosperm, usually an evergreen tree with needles, like pine, fir, spruce and cedar."],
+  ["ferns?", "A seedless vascular plant that reproduces by spores, found on the undersides of its fronds."],
+  ["fossils?", "The preserved remains or traces (such as bones, shells, footprints or imprints) of organisms from the distant past, usually in rock."],
+  ["artificial selection|selective breeding", "Humans choose which plants or animals breed, to bring out traits they want, as in dog breeds and crops."],
+  ["(?:an? )?(?:ecological )?niche", "An organism's role in its ecosystem: what it eats, where it lives, and how it interacts with other species."],
+  ["reproductive isolation", "Barriers that stop two populations from interbreeding, such as different mating seasons, behaviours or body parts, or sterile offspring. It leads to speciation."],
+  ["punctuated equilibrium", "The idea that species stay much the same for long periods, then change rapidly in short bursts, often after an environmental change."],
+  ["gradualism", "The idea that species change slowly and steadily through many small changes over long periods."],
+  ["(?:a )?coelom", "A fluid-filled body cavity lined with tissue from the mesoderm that holds the organs. Animals with one are coelomates."],
+  ["germ layers?", "The three tissue layers of an early animal embryo: ectoderm (skin and nerves), mesoderm (muscle, bone, blood) and endoderm (gut lining)."],
+];
+const LS_FACTS_RE = LS_FACTS.map(([s, b]) => [new RegExp(s), b]);
+const LS_DEFS_RE = LS_DEFS.map(([s, b]) => [new RegExp("^(?:what (?:is|are) |define |definition of )?(?:an? |the )?(?:" + s + ")$"), b]);
+// Common name to genus and species, for "scientific name of the domestic dog".
+const LS_NAMES = {"human":"Homo sapiens", "people":"Homo sapiens", "dog":"Canis familiaris (also written Canis lupus familiaris)", "cat":"Felis catus", "house cat":"Felis catus", "wolf":"Canis lupus", "gray wolf":"Canis lupus", "grey wolf":"Canis lupus", "lion":"Panthera leo", "tiger":"Panthera tigris", "house mouse":"Mus musculus", "mouse":"Mus musculus", "fruit fly":"Drosophila melanogaster", "e coli":"Escherichia coli", "corn":"Zea mays", "rice":"Oryza sativa", "chimpanzee":"Pan troglodytes", "horse":"Equus caballus", "cow":"Bos taurus", "honey bee":"Apis mellifera", "honeybee":"Apis mellifera", "grizzly bear":"Ursus arctos horribilis", "brown bear":"Ursus arctos", "black bear":"Ursus americanus", "bald eagle":"Haliaeetus leucocephalus", "orca":"Orcinus orca", "killer whale":"Orcinus orca", "western red cedar":"Thuja plicata", "douglas fir":"Pseudotsuga menziesii", "sockeye salmon":"Oncorhynchus nerka", "chicken":"Gallus gallus domesticus"};
+// Kingdom and phylum of common organisms: [name pattern, kingdom, phylum or ""].
+const LS_GROUPS = [
+  ["mushrooms?|yeasts?|molds?|moulds?|fung(?:i|us)", "Fungi", ""],
+  ["trees?|flowers?|grass(?:es)?|moss(?:es)?|ferns?|plants?|algae", "Plantae (algae are usually placed with the protists)", ""],
+  ["amoebas?|amoebae|parameci(?:a|um)|euglenas?|protists?|slime molds?|diatoms?", "Protista", ""],
+  ["e\\.? coli|bacteri(?:a|um)|streptococcus|salmonella", "Eubacteria (domain Bacteria)", ""],
+  ["insects?|spiders?|crabs?|lobsters?|shrimps?|centipedes?|millipedes?|ants?|bees?|butterfl(?:y|ies)|beetles?", "Animalia", "Arthropoda"],
+  ["snails?|slugs?|clams?|oysters?|mussels?|octop(?:us|i|uses)|squids?", "Animalia", "Mollusca"],
+  ["earthworms?|leeches?|segmented worms?", "Animalia", "Annelida"],
+  ["flatworms?|tapeworms?|planarians?", "Animalia", "Platyhelminthes"],
+  ["roundworms?|nematodes?", "Animalia", "Nematoda"],
+  ["sea stars?|starfish|sea urchins?|sand dollars?", "Animalia", "Echinodermata"],
+  ["jellyfish|corals?|sea anemones?|hydras?", "Animalia", "Cnidaria"],
+  ["sponges?", "Animalia", "Porifera"],
+  ["humans?|people|dogs?|cats?|fish(?:es)?|birds?|frogs?|snakes?|mammals?|reptiles?|amphibians?|vertebrates?|whales?|sharks?|salmon", "Animalia", "Chordata"],
+];
+const LS_GROUPS_RE = LS_GROUPS.map(([s, k, p]) => [new RegExp("^(?:the |an? )?(?:" + s + ")$"), k, p]);
+function ls11(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"});
+  for(const [re, body] of LS_FACTS_RE) if(re.test(q)) return out(body);
+  for(const [re, body] of LS_DEFS_RE) if(re.test(q)) return out(body);
+  let m;
+  if((m = /\b(scientific name|binomial name|genus|species name) (?:of|for) (?:an? |the )?(?:domestic |common )?([a-z. ]+?)s?$/.exec(q))){
+    const n = LS_NAMES[m[2].replace(/\./g, "")]; if(n) return out(m[1] === "genus" ? n.split(" ")[0] + " (" + n.replace(/ \(.*/, "") + ")." : n + ".");
+  }
+  // what kingdom do mushrooms belong to, what phylum are insects in
+  if((m = /\b(kingdom|phylum)\b (?:do|does|is|are) (?:an? |the )?([a-z. ]+?) (?:belong to|in|part of|classified (?:in|as|under))$/.exec(q)) || (m = /^(kingdom|phylum) (?:of|for) (?:an? |the )?([a-z. ]+)$/.exec(q))){
+    const g = LS_GROUPS_RE.find(([re]) => re.test(m[2]));
+    if(g) return out(m[1] === "kingdom" || !g[2] ? (m[1] === "phylum" ? "Kingdom " + g[1] + "." : g[1] + ".") : g[2] + " (kingdom Animalia).");
+  }
+  // microscopes: total magnification is eyepiece times objective
+  if(/\bmagnification\b/.test(q) && (m = /(\d+(?:\.\d+)?)\s*[x×]\b.*?(\d+(?:\.\d+)?)\s*[x×]\b/.exec(q))) return out(pcNum(+m[1] * +m[2]) + "× (" + m[1] + "× eyepiece times " + m[2] + "× objective)");
+  // field of view shrinks as magnification grows: fov2 = fov1 * mag1 / mag2
+  if(/\bfield of view\b/.test(q) && (m = /(\d+(?:\.\d+)?)\s*(mm|µm|um|μm)\b(?: at| under| with)? (?:a |the )?(\d+)\s*[x×]/.exec(q))){
+    const other = [...q.matchAll(/(\d+)\s*[x×]/g)].map(x => x[1]).find(x => x !== m[3]);
+    if(other) return out(pcNum(+m[1] * +m[3] / +other) + " " + m[2].replace(/^u/, "µ") + " (field of view × magnification stays the same)");
+  }
+  // actual size = image size / magnification
+  if(/\bactual (?:size|length)\b/.test(q) && (m = /(\d+(?:\.\d+)?)\s*(mm|µm|um|μm|cm)\b.*?(\d+(?:\.\d+)?)\s*[x×]/.exec(q))) return out(pcNum(+m[1] / +m[3]) + " " + m[2].replace(/^u/, "µ") + " (image size ÷ magnification)");
+  // bacterial growth by doubling: N = N0 · 2^(t/d)
+  if(/\bbacteri/.test(q) && (m = /\b(?:divides?|doubles?|splits?) every (\d+(?:\.\d+)?) (minute|hour|min|hr)s?\b/.exec(q))){
+    const t = /\bafter (\d+(?:\.\d+)?) (minute|hour|min|hr)s?\b/.exec(q), n0 = /\bstarting (?:with|from) (\d+)\b/.exec(q);
+    if(t){ const unit = u => /^h/.test(u) ? 60 : 1, n = (+t[1] * unit(t[2])) / (+m[1] * unit(m[2])), start = n0 ? +n0[1] : 1;
+      if(Number.isInteger(n)) return out(pcNum(start * 2 ** n) + " bacteria (" + n + " doublings: " + start + " × 2^" + n + ")"); }
+  }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const sc10 = sci10(q, query); if(sc10) return sc10;
+  const l11 = ls11(q); if(l11) return l11;
   const ph12 = phys12(q, query); if(ph12) return ph12;
   const ph11 = phys11(q); if(ph11) return ph11;
   const ch12 = chem12(q, query); if(ch12) return ch12;

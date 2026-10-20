@@ -1,6 +1,6 @@
 // The question exam: ~150 live questions across math, units, science, history, politics, definitions,
 // sites, geography, people, tech and live cards, graded by regex. Hits the real sources, so it is
-// not part of `npm test`.  Run:  npm run exam   (ENGINE=samantha npm run exam grades Samantha on :8000)
+// not part of `npm test`. Online only: it ignores OFFLINE, and test/exam-offline.js is the offline one.  Run:  npm run exam   (ENGINE=samantha npm run exam grades Samantha on :8000)
 // Free-engine questions are paced 3.2s apart: the proxy allows 20 AI calls a minute per IP.
 // LAST=45 runs only the newest 45, to fit what is left of a day's quota.
 // Exit code 1 on any miss, so CI can open an issue.

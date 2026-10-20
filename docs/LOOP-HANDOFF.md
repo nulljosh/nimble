@@ -50,7 +50,9 @@ Rules that bite:
    - Chemistry 12 (test/courses/chem12.js): A+ offline on every platform (2026-10-20), held-out form B 39/40 honest first run.
    - Physics 11 (test/courses/phys11.js): A+ offline on every platform (2026-10-20), held-out form B 40/40 first run.
    - Physics 12 (test/courses/phys12.js): A+ offline on every platform (2026-10-20), held-out form B 40/40 first run.
-   - Next courses, in order: Life Sciences 11, Anatomy and Physiology 12, Earth Sciences 11, Environmental Science 11; then Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
+   - Life Sciences 11 (test/courses/lifesci11.js): A+ offline on A and B (2026-10-20), but the fresh form C was 15/40 first run; it now has three forms. Fact-heavy courses get a fresh form C after tuning and need an online held-out grade.
+   - 2026-10-20 07:45: an unplanned live run. `test/exam.js` ignores OFFLINE and was started by mistake, then stopped part way through; estNeurons went from 6240 to 7200 with no score posted. Nothing runs online before the 17:00 reset. `test/exam-offline.js` is the offline general exam.
+   - Next courses, in order: Anatomy and Physiology 12, Earth Sciences 11, Environmental Science 11; then Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.

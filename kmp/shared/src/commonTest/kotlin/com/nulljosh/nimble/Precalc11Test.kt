@@ -113,4 +113,12 @@ class Precalc11Test {
     @Test fun coulomb() = assertEquals("0.899 N (F = kq₁q₂/r²)", pc("electric force between two 1 microcoulomb charges 0.1 m apart"))
     @Test fun orbit() = assertEquals("7.55 km/s (7546 m/s, v = √(GM/r))", pc("orbital speed of a satellite 7000 km from the center of Earth"))
     @Test fun inverseSquare() = assertEquals("It becomes 1/4 as large (a quarter).", pc("what happens to gravitational force if the distance doubles"))
+
+    // Life Sciences 11 (LifeSciences11.kt)
+    @Test fun magnification() = assertEquals("400× (10× eyepiece times 40× objective)", pc("total magnification with a 10x eyepiece and a 40x objective lens"))
+    @Test fun fieldOfView() = assertEquals("0.4 mm (field of view × magnification stays the same)", pc("field of view at 400x if it is 4 mm at 40x"))
+    @Test fun bacterialGrowth() = assertEquals("640 bacteria (6 doublings: 10 × 2^6)", pc("a bacterium divides every 30 minutes, how many bacteria after 3 hours starting with 10"))
+    @Test fun scientificName() = assertEquals("Felis catus.", pc("what is the scientific name for cats"))
+    @Test fun lyticVsLysogenic() = assertEquals(true, pc("what is the difference between the lytic and lysogenic cycle")?.contains("prophage"))
+    @Test fun populationGrowthStaysPrecalc() = assertEquals("3200", pc("a population of 200 doubles every 3 hours, how many after 12 hours"))
 }
