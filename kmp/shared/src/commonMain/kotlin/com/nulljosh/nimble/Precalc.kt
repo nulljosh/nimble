@@ -325,6 +325,7 @@ internal object Precalc {
         EarthSciences11.answer(q)?.let { return it }
         EnvironmentalScience11.answer(q)?.let { return it }
         SocialStudies10.answer(q)?.let { return it }
+        PhysicalGeography12.answer(q)?.let { return it }
         Calculus12.answer(q)?.let { return it }
         Statistics12.answer(q)?.let { return it }
         Apprenticeship12.answer(q)?.let { return it }

@@ -323,6 +323,20 @@ The 14 topics (the Great Depression, the Cold War, NATO, the Holocaust, the Unit
 
 The first social studies course shows the limit of an offline table plainly. Every question is recall, so what A taught did not carry to B at all (5/40 before and after), and C was 6/40, with its passes all from the Wikipedia pack (the Battle of the Atlantic, Louis Riel, the Iron Curtain). After fixes the course holds 112 entries of Canadian history and civics, each a short paragraph. Generic words stay open: "what is hong kong", "what is a white paper", "what is conscription" and "who is the prime minister of canada" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 13% and C 15%, so this course depends on its online grade.**
 
+## BC curriculum: Physical Geography 12
+
+`test/courses/geo12.js`: maps, latitude and longitude, time zones, Earth-sun relations, the atmosphere, weather and climate, the water cycle and groundwater, rivers, glaciers, coasts, weathering and mass movement, plate boundaries, soils, biomes and natural hazards. Forms A and B were written before any run, the solver was built from form A and the curriculum with B's topics kept out, and form C was written after A and B passed and run once. Run `COURSE=geo12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 22/40 (55%) | 19/40 (48%) | 18/40 (45%) |
+| Web offline, after A only | 40/40 | 21/40 (53%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 (98/120 before 22 pack-only topics got local text) |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (98/120 before the same 22) |
+
+The first run was high for a fact course because Earth Sciences 11 and the Wikipedia pack already cover plate tectonics, volcanoes and much of the atmosphere. What A taught carried to B only through the two calculators: map scale (1:N, map distance to ground distance) and river discharge (area × velocity). B added time at another longitude (15 degrees an hour, later to the east). The 22 pack-only topics (latitude, the equator, the Mercator projection, moraines, karst and others) now answer from local text on every platform, so online they show a short paragraph instead of the Wikipedia card. Generic words stay open: "what is a stack", "what is a depression", "what is a cyclone" and "what is an arch" still go to the live sources, and "a map scale is 1:N" questions stay with Foundations 12. **A+ offline after fixes; the honest held-out numbers are B 53% and C 45%, so this course waits for an online held-out grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

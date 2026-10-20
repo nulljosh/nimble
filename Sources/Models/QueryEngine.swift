@@ -844,9 +844,9 @@ final class QueryEngine: Sendable {
     /// "Who made you" is about Nimble, not the Wikipedia article the words happen to match.
     /// Mirrors `identity()` in docs/engine.js.
     func identityAnswer(_ input: String) -> QueryResult? {
-        let pattern = "^(who (made|created|built|invented|wrote|developed|designed) (you|nimble)|who are you|what are you|who is (nimble|your (creator|maker)))\\s*\\??$"
+        let pattern = "^(who (made|created|built|invented|wrote|developed|designed|programmed|owns|runs) (you|nimble|this app)|who are you|what are you|who is (nimble|your (creator|maker|developer|owner))|what('s| is) your name|what('s| is) nimble|tell me about (yourself|nimble)|are you (an? )?(ai|bot|robot|human|person|real person|chatgpt|gpt|claude|siri|alexa|gemini|google|llm|language model|chat ?bot)|what (ai |language )?models? (are you|is this|do you use|powers? you|runs? you)|what (ai|llm) (are you|is this|do you use)|how do you work|where do (you get your answers|your answers come from))\\s*\\??$"
         guard input.trimmingCharacters(in: .whitespaces).range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil else { return nil }
-        return .text(heading: nil, body: "Nimble is an instant-answer app made by Joshua Trommel. More of his work is at jaybulb.com.", source: "Nimble", sourceURL: nil, imageURL: nil)
+        return .text(heading: nil, body: "Nimble is an instant-answer app made by Joshua Trommel. Math, units and school courses are worked out on your device. Other questions go to free open models (gpt-oss and Qwen on Groq, Qwen3 and Gemma on Cloudflare), or to Claude, OpenAI or Ollama if you add your own key, with Wikipedia and DuckDuckGo as backup. More of his work is at jaybulb.com.", source: "Nimble", sourceURL: nil, imageURL: nil)
     }
 
     /// Physical constants from a table, no network: the models gave "the gravitational constant" as a definition

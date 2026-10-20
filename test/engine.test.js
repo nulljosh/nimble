@@ -40,6 +40,14 @@ test("spoken math and identity", async () => {
   assert.match(String(E.tryMath("sqrt 2")), /^1\.414/);
   assert.match((await E.identity("Who created you")).body, /Joshua Trommel/);
   assert.equal(await E.identity("who created the telephone"), null);
+  for(const q of ["what's your name", "Are you ChatGPT?", "what model are you", "who made this app", "how do you work"]) assert.match((await E.identity(q)).body, /Joshua Trommel/, q);
+  for(const q of ["what is your name in french", "are you open"]) assert.equal(await E.identity(q), null, q);
+});
+
+test("geography terms leave everyday words alone", () => {
+  for(const q of ["what is a stack", "what is a depression", "what is a cyclone", "what is an arch"]) assert.equal(E.precalc(q), null, q);
+  assert.match(E.precalc("if it is 9 am at 75 degrees west what time is it at 0 degrees").body, /^2 pm/);
+  assert.match(E.precalc("on a 1:50000 map, 4 cm represents how many kilometres").body, /^2 km/);
 });
 
 test("units", () => {

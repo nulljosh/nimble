@@ -56,7 +56,9 @@ Rules that bite:
    - 2026-10-20 07:45: an unplanned live run. `test/exam.js` ignores OFFLINE and was started by mistake, then stopped part way through; estNeurons went from 6240 to 7200 with no score posted. Nothing runs online before the 17:00 reset. `test/exam-offline.js` is the offline general exam, and `test/exam-pc12.js` needs OFFLINE=1 to stay off the network.
    - Environmental Science 11 (test/courses/envsci11.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 32/40 after building from A only, fresh C 11/40. Bare terms the web answers from the pack (ecosystem, biome, extinction) got local text so Kotlin passes without a pack.
    - Social Studies 10 (test/courses/ss10.js): 120/120 offline after fixes (2026-10-20). Honest first runs: B 5/40 with B's topics kept out of the build, fresh C 6/40. Recall courses do not transfer between forms; they need the online grade. Keep bare terms narrow ("hong kong", "white paper", "charter", "cpp" stay open).
-   - Next courses, in order: Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
+   - Physical Geography 12 (test/courses/geo12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 21/40 after building from A only, fresh C 18/40. "scale is 1:N" stays with Foundations 12; geo's scale solver takes the other phrasings.
+   - Identity (2026-10-20): "what's your name", "are you ChatGPT", "what model are you", "how do you work" now get the Nimble answer on web, Apple and Kotlin (Kotlin had none before).
+   - Next courses, in order: 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.

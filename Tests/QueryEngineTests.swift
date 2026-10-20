@@ -8,6 +8,8 @@ final class QueryEngineTests: XCTestCase {
         guard case .text(_, let body, _, _, _, _, _, _, _)? = engine.identityAnswer("Who created you") else { return XCTFail("no answer") }
         XCTAssertTrue(body.contains("Joshua Trommel"))
         XCTAssertNil(engine.identityAnswer("who created the telephone"))
+        for q in ["what's your name", "Are you ChatGPT?", "what model are you", "how do you work"] { XCTAssertNotNil(engine.identityAnswer(q), q) }
+        for q in ["what is your name in french", "are you open"] { XCTAssertNil(engine.identityAnswer(q), q) }
     }
 
     /// Mirrors test/constants.test.js.

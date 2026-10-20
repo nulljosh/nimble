@@ -136,6 +136,7 @@ class AnswerClient(
     suspend fun imageBytes(url: String): ByteArray? = runCatchingNull { http.get(url).readRawBytes() }
 
     suspend fun query(input: String): Answer {
+        identityAnswer(input)?.let { return it }
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
         Units.convert(input)?.let { return Answer.Math(it) }
         Precalc.answer(input)?.let { return it }
@@ -420,6 +421,13 @@ internal fun constantAnswer(input: String): Answer.Text? {
     val nist = "https://physics.nist.gov/cuu/Constants/"
     return Answer.Text(heading = title, body = value, source = "NIST", sourceUrl = nist, sources = listOf(DisputeSource("NIST", nist)))
 }
+
+/** "Who made you" is about Nimble, not the Wikipedia article the words happen to match.
+ *  Mirrors `identity()` in docs/engine.js. */
+private val IDENTITY = Regex("^(who (made|created|built|invented|wrote|developed|designed|programmed|owns|runs) (you|nimble|this app)|who are you|what are you|who is (nimble|your (creator|maker|developer|owner))|what('s| is) your name|what('s| is) nimble|tell me about (yourself|nimble)|are you (an? )?(ai|bot|robot|human|person|real person|chatgpt|gpt|claude|siri|alexa|gemini|google|llm|language model|chat ?bot)|what (ai |language )?models? (are you|is this|do you use|powers? you|runs? you)|what (ai|llm) (are you|is this|do you use)|how do you work|where do (you get your answers|your answers come from))\\s*\\??$", RegexOption.IGNORE_CASE)
+
+internal fun identityAnswer(input: String): Answer.Text? =
+    if (IDENTITY.containsMatchIn(input.trim().replace('’', '\''))) Answer.Text(null, "Nimble is an instant-answer app made by Joshua Trommel. Math, units and school courses are worked out on your device. Other questions go to free open models (gpt-oss and Qwen on Groq, Qwen3 and Gemma on Cloudflare), or to Claude, OpenAI or Ollama if you add your own key, with Wikipedia and DuckDuckGo as backup. More of his work is at jaybulb.com.", "Nimble") else null
 
 /** The quiet note under a Wikipedia fallback when the AI's call failed (quota or outage). Null for any other source. */
 const val RESTING_NOTE = "The free AI is out of answers for today, so this is from Wikipedia. It resets in the evening."
