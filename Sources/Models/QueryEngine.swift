@@ -507,13 +507,16 @@ final class QueryEngine: Sendable {
             }
         }
 
+        private static func snap(_ v: Double) -> Double { abs(v) < 1e-12 ? 0 : v }
+
         private static func apply(_ name: String, _ x: Double) -> Double? {
             switch name {
             case "sqrt": return x < 0 ? nil : sqrt(x)
             case "cbrt": return cbrt(x)
-            case "sin": return sin(x)
-            case "cos": return cos(x)
-            case "tan": return tan(x)
+            // Floating point leaves tan(pi) at -1.2e-16; a trig value that small is 0, as on the web.
+            case "sin": return snap(sin(x))
+            case "cos": return snap(cos(x))
+            case "tan": return snap(tan(x))
             case "log", "log10": return x <= 0 ? nil : log10(x)
             case "log2": return x <= 0 ? nil : log2(x)
             case "ln": return x <= 0 ? nil : log(x)

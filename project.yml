@@ -30,6 +30,9 @@ targets:
       # The bulb on the share card, read from the web's own copy so there is one file
       - path: docs/icon-512.png
         buildPhase: resources
+      # The web engine, for the Pre-Calculus solver run in JavaScriptCore (QueryEngine+Compute.swift)
+      - path: docs/engine.js
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.ios
@@ -65,6 +68,8 @@ targets:
         buildPhase: resources
       - path: Nimble.icon
       - path: docs/icon-512.png
+        buildPhase: resources
+      - path: docs/engine.js
         buildPhase: resources
       # Nimble Sans, the app's own typeface (fonts/README.md). UIAppFonts lists them in the plist.
       - path: fonts

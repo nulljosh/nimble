@@ -1,5 +1,8 @@
 import Foundation
 import CoreGraphics
+#if canImport(JavaScriptCore)
+import JavaScriptCore
+#endif
 
 // Wolfram-shaped queries the LLM answers badly: unit conversion and graphing.
 // Both run before the answer engine, fully offline.
@@ -10,8 +13,22 @@ extension QueryEngine {
     func localAnswer(_ text: String, math: Bool = true) -> QueryResult? {
         if let converted = convert(text) { return converted }
         if math, let value = evaluateMath(text) { return .math(value, steps: mathSteps(text) ?? []) }
+        if let pc = Self.precalc(text) { return pc }
         if let expr = graphExpression(text), let graph = sampleGraph(expr) { return graph }
         return Self.deviceTime(text) ?? constantAnswer(text) ?? identityAnswer(text)
+    }
+
+    // MARK: - Pre-Calculus
+
+    /// Pre-Calculus answers from `precalc()` in docs/engine.js, run in JavaScriptCore so the web and the apps share
+    /// one solver (log bases, series, quadratics, trig equations, identities). engine.js is bundled as a resource.
+    /// Its `tryMath` covers what the Swift calculator does not ("3 log(10)"). Nil on watchOS, which has no JavaScriptCore.
+    static func precalc(_ text: String) -> QueryResult? {
+        #if canImport(JavaScriptCore)
+        return PrecalcJS.shared.answer(text)
+        #else
+        return nil
+        #endif
     }
 
     // MARK: - Units
@@ -113,3 +130,38 @@ extension QueryEngine {
         return .graph(expr: expr, points: pts)
     }
 }
+
+#if canImport(JavaScriptCore)
+/// One JSContext with engine.js loaded, behind a lock: a JSContext is not safe to share across threads.
+final class PrecalcJS: @unchecked Sendable {
+    static let shared = PrecalcJS()
+    private let lock = NSLock()
+    private let context: JSContext?
+
+    private init() {
+        guard let url = Bundle.main.url(forResource: "engine", withExtension: "js"),
+              let source = try? String(contentsOf: url, encoding: .utf8), let ctx = JSContext() else { context = nil; return }
+        // engine.js reads saved settings at load; nothing here is saved, so every read is empty.
+        ctx.evaluateScript("var localStorage = {getItem(){return null}, setItem(){}, removeItem(){}};")
+        ctx.evaluateScript(source)
+        context = ctx
+    }
+
+    func answer(_ text: String) -> QueryResult? {
+        lock.lock(); defer { lock.unlock() }
+        guard let ctx = context else { return nil }
+        if let pc = ctx.objectForKeyedSubscript("precalc")?.call(withArguments: [text]), pc.isObject,
+           let body = pc.objectForKeyedSubscript("body")?.toString(), !body.isEmpty, body != "undefined" {
+            return .text(heading: nil, body: body, source: "Nimble math", sourceURL: nil, imageURL: nil)
+        }
+        if let pc = ctx.objectForKeyedSubscript("precalc")?.call(withArguments: [text]), pc.isObject,
+           let v = pc.objectForKeyedSubscript("value"), v.isNumber {
+            return .math(QueryEngine.trim(v.toDouble()), steps: [])
+        }
+        if let v = ctx.objectForKeyedSubscript("tryMath")?.call(withArguments: [text]), v.isNumber {
+            return .math(QueryEngine.trim(v.toDouble()), steps: [])
+        }
+        return nil
+    }
+}
+#endif

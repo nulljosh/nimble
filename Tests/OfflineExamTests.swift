@@ -13,13 +13,7 @@ final class OfflineExamTests: XCTestCase {
         let gz = try Data(contentsOf: XCTUnwrap(bundle.url(forResource: "wikipedia-top-v1.json", withExtension: "gz")))
         let pack = OfflinePack(file: try JSONDecoder().decode(OfflinePack.File.self, from: XCTUnwrap(OfflinePack.gunzip(gz))))
 
-        // Each question is ["text",/regex/flags] in test/exam.js; JS and ICU regexes agree on everything the exam uses.
-        let re = try NSRegularExpression(pattern: #"\["((?:[^"\\]|\\.)*)",/((?:[^/\\\n]|\\.)+)/([a-z]*)\]"#)
-        let questions = re.matches(in: src, range: NSRange(src.startIndex..., in: src)).compactMap { m -> (String, NSRegularExpression)? in
-            let g = (1...3).map { Range(m.range(at: $0), in: src).map { String(src[$0]) } ?? "" }
-            guard let grade = try? NSRegularExpression(pattern: g[1], options: g[2].contains("i") ? .caseInsensitive : []) else { return nil }
-            return (g[0].replacingOccurrences(of: "\\\"", with: "\""), grade)
-        }
+        let questions = try Self.questions(src)
         XCTAssertGreaterThan(questions.count, 100)
 
         let engine = QueryEngine()
@@ -43,5 +37,38 @@ final class OfflineExamTests: XCTestCase {
         print("offline exam: \(pass)/\(questions.count) pass (Apple, pack: \(pack.entries.count) entries)")
         print("pack answered wrong: \(wrong.count)\n" + wrong.joined(separator: "\n"))
         print("missed:\n" + missed.joined(separator: "\n"))
+    }
+
+    /// BC Pre-Calculus 12 (test/exam-pc12.js) on the Apple engine: the same chain, with the shared JavaScriptCore solver.
+    func testPreCalc12Exam() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["NIMBLE_EXAM"] == "1", "Set TEST_RUNNER_NIMBLE_EXAM=1")
+        let bundle = Bundle(for: Self.self)
+        let src = try String(contentsOf: XCTUnwrap(bundle.url(forResource: "exam-pc12", withExtension: "js")), encoding: .utf8)
+        let engine = QueryEngine()
+        var pass = 0, missed: [String] = []
+        let questions = try Self.questions(src)
+        for (question, grade) in questions {
+            let shown: String
+            switch engine.localAnswer(question) {
+            case .math(let v, _): shown = v
+            case .convert(_, let to, _, let toUnit): shown = "\(to) \(toUnit)"
+            case .text(let heading, let body, _, _, _, _, _, _, _): shown = [heading, body].compactMap { $0 }.joined(separator: " ")
+            default: shown = ""
+            }
+            let text = shown.replacingOccurrences(of: "[−‑–]", with: "-", options: .regularExpression)
+            if grade.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) != nil { pass += 1 } else { missed.append("\(question) => \(text.prefix(60))") }
+        }
+        print("pc12 exam: \(pass)/\(questions.count) pass (Apple, offline)")
+        print("missed:\n" + missed.joined(separator: "\n"))
+    }
+
+    /// Each question is ["text",/regex/flags] in the exam files; JS and ICU regexes agree on everything the exams use.
+    static func questions(_ src: String) throws -> [(String, NSRegularExpression)] {
+        let re = try NSRegularExpression(pattern: #"\["((?:[^"\\]|\\.)*)",\s*/((?:[^/\\\n]|\\.)+)/([a-z]*)\]"#)
+        return re.matches(in: src, range: NSRange(src.startIndex..., in: src)).compactMap { m -> (String, NSRegularExpression)? in
+            let g = (1...3).map { Range(m.range(at: $0), in: src).map { String(src[$0]) } ?? "" }
+            guard let grade = try? NSRegularExpression(pattern: g[1], options: g[2].contains("i") ? .caseInsensitive : []) else { return nil }
+            return (g[0].replacingOccurrences(of: "\\\"", with: "\""), grade)
+        }
     }
 }
