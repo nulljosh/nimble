@@ -54,4 +54,11 @@ class Precalc11Test {
     @Test fun integralOfReciprocal() = assertEquals("2ln|x| + C", pc("integral of 2/x"))
     @Test fun areaBetween() = assertEquals("1/6", pc("area between y = x and y = x^2 from 0 to 1"))
     @Test fun corner() = assertEquals("No: the slope is -1 from the left and 1 from the right (a corner).", pc("is f(x) = |x| differentiable at x = 0"))
+
+    // Statistics 12 (Statistics12.kt)
+    @Test fun fiveNumberSummary() = assertEquals("Minimum 2, Q1 4.5, median 7.5, Q3 11, maximum 15.", pc("five number summary of 2, 4, 5, 7, 8, 10, 12, 15"))
+    @Test fun normalTail() = assertEquals("6.68% (z = 1.5)", pc("if heights are normal with mean 170 and standard deviation 10, what percent are taller than 185"))
+    @Test fun binomial() = assertEquals("0.3241", pc("binomial probability of exactly 2 successes in 6 trials with p = 0.3"))
+    @Test fun leastSquares() = assertEquals("y = 2x + 1", pc("line of best fit for x = 0, 1, 2, 3 and y = 1, 3, 5, 7"))
+    @Test fun independence() = assertEquals("No: P(A)·P(B) = 0.18, but P(A and B) = 0.25.", pc("are A and B independent if P(A) = 0.3, P(B) = 0.6 and P(A and B) = 0.25"))
 }

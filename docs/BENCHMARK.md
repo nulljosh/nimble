@@ -150,6 +150,19 @@ Two of form A's first offline answers were confidently wrong: the Pre-Calc 12 co
 
 The engine had no calculus at all, so form A started at zero. The fix is a small symbolic engine (`calc12()` and the `c*` helpers in docs/engine.js, `Calculus12.kt` on Kotlin): it parses an expression in x, differentiates it, simplifies (like terms, powers of x, numbers across a fraction bar) and prints the way a textbook does, "8x(x^2 + 1)^3", "1/(2√x)", "1/(x + 1)^2". Integrals of the standard forms are symbolic; definite integrals use Simpson's rule; limits approach from both sides. Online waits for the neuron reset. **A+ offline on every platform.**
 
+## BC curriculum: Statistics 12
+
+`test/courses/stats12.js`, two 40-question forms written before any run: five-number summaries, quartiles and outliers, sample and population spread, z tables both ways, the binomial model, expected value, correlation and least squares, confidence intervals, margin of error and sample size, hypothesis-test words, sampling methods and bias, and conditional probability. Run `COURSE=stats12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 6/40 (15%) | 38/40 (95%) |
+| Web offline, after fixes | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+Form B's honest first grade is 38/40, an A+ on its own. Its two misses were wording the solver had not seen: "what percent score below 58" (no "than") and "3 coin flips" (a word between the number and "flips"). Both now answer. One form A key was too strict about word order ("Rejecting the null hypothesis when it is actually true" is right) and now takes it. Form A's first offline run also gave one wrong answer, not a miss: "are A and B independent if P(A) = 0.5 ..." printed 0.2 from the Foundations 12 branch. The statistics solver now runs first (`stats12()` in docs/engine.js, `Statistics12.kt` on Kotlin). The normal CDF is Abramowitz and Stegun 7.1.26, good to about 1e-7. Online waits for the neuron reset. **A+ offline on every platform.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

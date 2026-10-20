@@ -2034,11 +2034,122 @@ function calc12(q){
   }
   return null;
 }
+// --- Statistics 12, offline ---
+// Quartiles and outliers, the normal model (z tables both ways), binomial probability, expected value, correlation
+// and least squares, confidence intervals and sample size, conditional probability, and the words of inference and
+// sampling. precalc() asks it after calc12(); null means "not mine". Graded by COURSE=stats12 node test/exam-course.js.
+// Mirrored in kmp/shared/.../Statistics12.kt.
+// The standard normal CDF (Abramowitz and Stegun 7.1.26, good to about 1e-7) and its inverse by bisection.
+function sPhi(z){ const t = 1 / (1 + 0.3275911 * Math.abs(z) / Math.SQRT2), y = 1 - ((((1.061405429 * t - 1.453152027) * t + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-z * z / 2); return z >= 0 ? (1 + y) / 2 : (1 - y) / 2; }
+function sInv(p){ let lo = -10, hi = 10; for(let i = 0; i < 100; i++){ const mid = (lo + hi) / 2; sPhi(mid) < p ? lo = mid : hi = mid; } return (lo + hi) / 2; }
+const sMedian = s => s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+// Q1 and Q3 as the medians of the lower and upper halves, leaving out the middle value when there is one.
+const sQuart = s => { const h = Math.floor(s.length / 2); return [sMedian(s.slice(0, h)), sMedian(s.slice(s.length - h))]; };
+const S_Z = {80:1.282, 90:1.645, 95:1.96, 98:2.326, 99:2.576};
+const S_FACTS = [
+  [/^(?:what is )?(?:a )?type (?:i|1) error$/, "Rejecting the null hypothesis when it is actually true (a false positive). Its chance is the significance level α."],
+  [/^(?:what is )?(?:a )?type (?:ii|2) error$/, "Failing to reject the null hypothesis when it is actually false (a false negative). Its chance is β."],
+  [/^(?:what is )?(?:a |the )?p-?value$/, "The probability, if the null hypothesis were true, of getting a result at least as extreme as the one observed. Small p-values are evidence against the null."],
+  [/^(?:what is )?(?:the )?null hypothesis$/, "H₀, the claim of no effect or no difference (for example, the two means are equal). A test looks for evidence against it."],
+  [/^(?:what is )?(?:the )?alternative hypothesis$/, "H₁ or Hₐ, the claim that there is an effect or a difference (not equal, greater or less). It is what the test hopes to support."],
+  [/^(?:what is )?(?:a )?simple random sample$|^(?:what is )?simple random sampling$/, "Every group of n people in the population has the same chance of being the sample, as if names were drawn from a hat."],
+  [/^(?:what is )?(?:a )?stratified (?:random )?sampl(?:e|ing)$/, "The population is split into groups (strata) that share a trait, and a random sample is taken from each group."],
+  [/^(?:what is )?(?:a )?cluster sampl(?:e|ing)$/, "The population is split into groups (clusters), some clusters are chosen at random, and everyone in the chosen clusters is sampled."],
+  [/^(?:what is )?(?:a )?systematic sampl(?:e|ing)$/, "Choose a random start, then take every kth member of the list (for example every 10th name)."],
+  [/^(?:what is )?(?:a )?convenience sampl(?:e|ing)$/, "Sampling whoever is easiest to reach, such as people nearby. It is quick but rarely represents the population."],
+  [/^(?:what is )?(?:a )?voluntary response (?:sample|bias)$/, "People choose themselves to respond, so those with strong opinions are overrepresented."],
+  [/^(?:what is )?(?:sampling |selection )?bias$|^(?:what is )?sampling bias$/, "A sampling method that systematically favours some outcomes, so the sample does not represent the population."],
+];
+function stats12(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"}), d4 = v => pcNum(+v.toFixed(4));
+  const nums = s => (s.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+  for(const [re, body] of S_FACTS) if(re.test(q)) return out(body);
+  let m;
+  // summaries and outliers
+  if((m = /^(?:the )?(five[- ]number summary|interquartile range|iqr|quartiles|first quartile|third quartile|q1|q3) (?:of|for) (?:the data )?(-?[\d.]+(?:\s*,\s*-?[\d.]+)+)$/.exec(q))){
+    const s = nums(m[2]).sort((a, b) => a - b), [q1, q3] = sQuart(s);
+    if(/^five/.test(m[1])) return out("Minimum " + pcNum(s[0]) + ", Q1 " + pcNum(q1) + ", median " + pcNum(sMedian(s)) + ", Q3 " + pcNum(q3) + ", maximum " + pcNum(s[s.length - 1]) + ".");
+    if(/^(interquartile|iqr)/.test(m[1])) return out(pcNum(q3 - q1));
+    if(m[1] === "quartiles") return out("Q1 = " + pcNum(q1) + ", Q3 = " + pcNum(q3));
+    return out(pcNum(/^(first|q1)/.test(m[1]) ? q1 : q3));
+  }
+  if((m = /^is (-?[\d.]+) an outlier in (?:the data )?(-?[\d.]+(?:\s*,\s*-?[\d.]+)+)$/.exec(q))){
+    const v = +m[1], s = nums(m[2]).sort((a, b) => a - b), [q1, q3] = sQuart(s), k = 1.5 * (q3 - q1), lo = q1 - k, hi = q3 + k;
+    return out((v < lo || v > hi ? "Yes. " : "No. ") + "The fences are Q1 - 1.5·IQR = " + pcNum(lo) + " and Q3 + 1.5·IQR = " + pcNum(hi) + ".");
+  }
+  if((m = /^(?:the )?(sample|population) (standard deviation|variance) of (?:the data )?(-?[\d.]+(?:\s*,\s*-?[\d.]+)+)$/.exec(q))){
+    const n = nums(m[3]), mean = n.reduce((s, v) => s + v, 0) / n.length, ss = n.reduce((s, v) => s + (v - mean) ** 2, 0), v = ss / (n.length - (m[1] === "sample" ? 1 : 0));
+    return out(d4(m[2] === "variance" ? v : Math.sqrt(v)));
+  }
+  // the normal model
+  const zv = s => +s;
+  if((m = /\bprobability (?:that )?z (?:is )?(less than|below|under|<|greater than|more than|above|over|>)\s*(-?[\d.]+)$/.exec(q))){ const p = sPhi(zv(m[2])); return out(d4(/less|below|under|</.test(m[1]) ? p : 1 - p)); }
+  if((m = /\bprobability (?:that )?z (?:is )?between (-?[\d.]+) and (-?[\d.]+)$/.exec(q)) || (m = /\bprobability (?:that )?(-?[\d.]+)\s*<\s*z\s*<\s*(-?[\d.]+)$/.exec(q))) return out(d4(sPhi(+m[2]) - sPhi(+m[1])));
+  if((m = /\bnormal\b.*?\bmean (?:of |is |=\s*)?(-?[\d.]+).*?\bstandard deviation (?:of |is |=\s*)?([\d.]+).*?\b(taller|greater|more|above|over|higher|heavier|longer|below|less|under|shorter|lower|lighter)(?: than)? ([\d.]+)/.exec(q))){
+    const z = (+m[4] - +m[1]) / +m[2], p = /below|less|under|shorter|lower|lighter/.test(m[3]) ? sPhi(z) : 1 - sPhi(z);
+    return out(pcNum(+(p * 100).toFixed(2)) + "% (z = " + pcNum(+z.toFixed(2)) + ")");
+  }
+  if((m = /\bz-?score\b.*?\b(\d+(?:\.\d+)?)(?:st|nd|rd|th) percentile\b|\b(\d+(?:\.\d+)?)(?:st|nd|rd|th) percentile\b.*?\bz-?score\b/.exec(q))) return out("z = " + d4(sInv(+(m[1] || m[2]) / 100)));
+  if((m = /\bpercentile (?:rank )?(?:of |for )?(?:a score |a value )?(?:with )?z\s*=\s*(-?[\d.]+)/.exec(q))) return out(pcNum(+(sPhi(+m[1]) * 100).toFixed(2)) + "th percentile");
+  // binomial, at least one, expected value
+  if((m = /\bexactly (\d+) (successes|heads|tails|sixes|[a-z]+s?) in (\d+) (?:trials|(?:coin )?flips|tosses|rolls|tries)\b/.exec(q))){
+    const k = +m[1], n = +m[3], coin = /heads|tails/.test(m[2]) || /\bcoin|flips?\b/.test(q), die = /sixes|\brolls?\b|\bdie\b/.test(q) && !coin;
+    const p = (/\bp\s*=\s*([\d.]+)/.exec(q) || [])[1] !== undefined ? +/\bp\s*=\s*([\d.]+)/.exec(q)[1] : coin ? 0.5 : die ? 1 / 6 : null; if(p === null) return null;
+    if(coin) return out(pcRatio(pcChoose(n, k), 2 ** n) + (2 ** n / pcGcd(pcChoose(n, k), 2 ** n) <= 12 ? " = " + d4(pcChoose(n, k) / 2 ** n) : ""));
+    return out(d4(pcChoose(n, k) * p ** k * (1 - p) ** (n - k)));
+  }
+  if((m = /\bprobability of at least one (six|head|tail|[a-z]+) in (\d+) (?:coin |die )?(rolls|flips|tosses|tries|trials)\b/.exec(q))){
+    const n = +m[2], coin = /head|tail/.test(m[1]) || /flips|tosses/.test(m[3]);
+    return out(coin ? pcRatio(2 ** n - 1, 2 ** n) + " = " + d4(1 - 0.5 ** n) : d4(1 - (5 / 6) ** n));
+  }
+  if((m = /\b(mean|expected value|standard deviation|variance) of (?:a |the )?binomial(?: distribution| random variable)? with n\s*=\s*(\d+) and p\s*=\s*([\d.]+)/.exec(q))){
+    const n = +m[2], p = +m[3]; return out(d4(m[1] === "standard deviation" ? Math.sqrt(n * p * (1 - p)) : m[1] === "variance" ? n * p * (1 - p) : n * p));
+  }
+  if((m = /\bexpected value\b.*?\bwin \$?([\d.]+) with (?:a )?probability (?:of )?([\d./]+)\b.*?\blose \$?([\d.]+) with (?:a )?probability (?:of )?([\d./]+)/.exec(q))){
+    const v = +m[1] * pcVal(m[2]) - +m[3] * pcVal(m[4]); return out((v < 0 ? "-$" : "$") + Math.abs(v).toFixed(2) + " per game");
+  }
+  // correlation and least squares
+  if((m = /\bx\s*=\s*(-?[\d.]+(?:\s*,\s*-?[\d.]+)+)\s*,?\s*and\s*y\s*=\s*(-?[\d.]+(?:\s*,\s*-?[\d.]+)+)/.exec(q))){
+    const x = nums(m[1]), y = nums(m[2]); if(x.length !== y.length || x.length < 2) return null;
+    const n = x.length, mx = x.reduce((s, v) => s + v, 0) / n, my = y.reduce((s, v) => s + v, 0) / n;
+    const sxy = x.reduce((s, v, i) => s + (v - mx) * (y[i] - my), 0), sxx = x.reduce((s, v) => s + (v - mx) ** 2, 0), syy = y.reduce((s, v) => s + (v - my) ** 2, 0);
+    if(/\bcorrelation\b|\br\b/.test(q)) return out("r = " + d4(sxy / Math.sqrt(sxx * syy)));
+    if(/\b(best fit|regression|least squares|trend line)\b/.test(q)){ const k = sxy / sxx, b = my - k * mx, ks = d4(k);
+      return out("y = " + (ks === "0" ? d4(b) : (ks === "1" ? "" : ks === "-1" ? "-" : ks) + "x" + (Math.abs(b) < 1e-9 ? "" : b > 0 ? " + " + d4(b) : " - " + d4(-b)))); }
+  }
+  if((m = /^what does (?:an? )?r(?: value)?(?: of)?\s*=?\s*(-?[\d.]+) (?:mean|tell you|show)$/.exec(q))){
+    const r = +m[1], a = Math.abs(r), str = a >= 0.7 ? "strong" : a >= 0.3 ? "moderate" : a > 0 ? "weak" : null;
+    return out(!str ? "No linear relationship." : "A " + str + " " + (r > 0 ? "positive" : "negative") + " linear relationship: as x increases, y tends to " + (r > 0 ? "increase" : "decrease") + ".");
+  }
+  if((m = /\bcoefficient of determination\b.*?\br\s*=\s*(-?[\d.]+)/.exec(q))) return out("r² = " + d4((+m[1]) ** 2));
+  // intervals, margins and sample size
+  const conf = +((/\b(80|90|95|98|99)\s*%/.exec(q) || [])[1] || 95), zs = S_Z[conf];
+  if((m = /\bconfidence interval for (?:a |the )?proportion (?:of |p\s*=\s*)?([\d.]+)\b.*?\bn\s*=\s*(\d+)/.exec(q))){
+    const p = +m[1], e = zs * Math.sqrt(p * (1 - p) / +m[2]); return out(pcNum(+(p - e).toFixed(3)) + " to " + pcNum(+(p + e).toFixed(3)) + " (" + pcNum(p) + " ± " + pcNum(+e.toFixed(3)) + ")");
+  }
+  if((m = /\bsample size\b.*?\bmargin of error (?:of )?([\d.]+)\b/.exec(q))){ const p = +((/\bp\s*=\s*([\d.]+)/.exec(q) || [])[1] || 0.5); return out(String(Math.ceil(+((zs / +m[1]) ** 2 * p * (1 - p)).toFixed(6)))); }
+  if((m = /\bmargin of error\b.*?\bp\s*=\s*([\d.]+)\b.*?\bn\s*=\s*(\d+)/.exec(q))) return out(pcNum(+(zs * Math.sqrt(+m[1] * (1 - +m[1]) / +m[2])).toFixed(4)));
+  if((m = /\bmean of (?:a |the )?sample is (-?[\d.]+) with (?:a )?standard error (?:of )?([\d.]+)/.exec(q)) && /\bconfidence interval\b/.test(q)){ const e = zs * +m[2]; return out(pcNum(+(+m[1] - e).toFixed(2)) + " to " + pcNum(+(+m[1] + e).toFixed(2))); }
+  if((m = /\bstandard error\b.*?\bs\s*=\s*([\d.]+)\b.*?\bn\s*=\s*(\d+)/.exec(q))) return out(d4(+m[1] / Math.sqrt(+m[2])));
+  // conditional probability and independence
+  const P = re => { const t = re.exec(q); return t ? pcVal(t[1]) : null; };
+  if(/\bgiven\b/.test(q) && /p\(a and b\)|p\(a ∩ b\)/.test(q)){ const ab = P(/p\(a (?:and|∩) b\)\s*=\s*([\d./]+)/), b = P(/p\(b\)\s*=\s*([\d./]+)/); if(ab !== null && b) return out(d4(ab / b)); }
+  if(/^(?:are|is) (?:events )?a and b independent\b/.test(q)){
+    const a = P(/p\(a\)\s*=\s*([\d./]+)/), b = P(/p\(b\)\s*=\s*([\d./]+)/), ab = P(/p\(a (?:and|∩) b\)\s*=\s*([\d./]+)/);
+    if(a !== null && b !== null && ab !== null) return out((Math.abs(a * b - ab) < 1e-9 ? "Yes: " : "No: ") + "P(A)·P(B) = " + d4(a * b) + (Math.abs(a * b - ab) < 1e-9 ? ", which equals" : ", but") + " P(A and B) = " + d4(ab) + ".");
+  }
+  if((m = /^how many ways (?:are there )?to (?:choose|select|pick) (\d+) (?:\w+ )?(?:from|out of) (\d+)/.exec(q))) return out(String(pcChoose(+m[2], +m[1])));
+  if(/\bmean is (greater|more|larger|bigger|less|smaller) than the median\b/.test(q)) return out(/greater|more|larger|bigger/.test(q) ? "Skewed right (positively skewed): a long tail of high values pulls the mean up." : "Skewed left (negatively skewed): a long tail of low values pulls the mean down.");
+  if(/\bbias\b/.test(q) && /\bonly (?:the )?(?:people|those)\b.*\b(care|choose|want|volunteer)\b/.test(q)) return out("Voluntary response bias: people who choose to respond tend to hold strong opinions.");
+  if((m = /^what does a p-?value of ([\d.]+) mean$/.exec(q))){ const p = +m[1]; return out("If the null hypothesis were true, there would be a " + pcNum(+(p * 100).toFixed(2)) + "% chance of a result at least this extreme. " + (p <= 0.01 ? "That is strong evidence against the null." : p <= 0.05 ? "That is evidence against the null at the 5% level." : "That is not strong evidence against the null.")); }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const c12 = calc12(q); if(c12) return c12;
+  const s12 = stats12(q); if(s12) return s12;
   const p11 = pc11(q); if(p11) return p11;
   const p10 = fm10(q); if(p10) return p10;
   const f11 = fom11(q); if(f11) return f11;
