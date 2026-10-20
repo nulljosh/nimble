@@ -2144,12 +2144,83 @@ function stats12(q){
   if((m = /^what does a p-?value of ([\d.]+) mean$/.exec(q))){ const p = +m[1]; return out("If the null hypothesis were true, there would be a " + pcNum(+(p * 100).toFixed(2)) + "% chance of a result at least this extreme. " + (p <= 0.01 ? "That is strong evidence against the null." : p <= 0.05 ? "That is evidence against the null at the 5% level." : "That is not strong evidence against the null.")); }
   return null;
 }
+// --- Workplace Mathematics 10, offline ---
+// Perimeter, area and volume with units in the question, mixed units, sales tax, discounts and tips, unit price and
+// the better buy, exchange rates, overtime and percent deductions, ratios, rates, and the rise over a run.
+// precalc() asks it after stats12(); null means "not mine". Graded by COURSE=work10 node test/exam-course.js.
+// Mirrored in kmp/shared/.../Workplace10.kt.
+const W_U = "\\s*(?:mm|cm|m|km|in|inches|ft|feet|foot|yd|yards?)?\\s*";
+// Two units that are often said together, and how many of the small one make the big one.
+const W_MIXED = [["(?:feet|foot|ft)", "(?:inches|inch|in)", 12, "inches"], ["(?:yards?|yd)", "(?:feet|foot|ft)", 3, "feet"], ["(?:hours?|hrs?|h)", "(?:minutes?|mins?)", 60, "minutes"], ["(?:minutes?|mins?)", "(?:seconds?|secs?|s)", 60, "seconds"], ["(?:pounds?|lbs?)", "(?:ounces?|oz)", 16, "ounces"], ["(?:metres?|meters?|m)", "(?:centimetres?|centimeters?|cm)", 100, "cm"]];
+function work10(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"}), money = v => "$" + v.toFixed(2), n = s => +String(s).replace(/,/g, "");
+  let m;
+  // shapes, with or without units after each number
+  const two = new RegExp("([\\d.]+)" + W_U + "(?:by|x|×)\\s*([\\d.]+)" + W_U), three = new RegExp("([\\d.]+)" + W_U + "(?:by|x|×)\\s*([\\d.]+)" + W_U + "(?:by|x|×)\\s*([\\d.]+)");
+  if((m = /^(?:the )?(perimeter|area) of (?:a |the )?(rectangle|rectangular [a-z]+|room|yard|garden|field|lot|square)\b(.*)$/.exec(q))){
+    const d = two.exec(m[3]), side = /\bside (?:of |length )?([\d.]+)/.exec(m[3]) || (m[2] === "square" ? /([\d.]+)/.exec(m[3]) : null);
+    const [l, w] = d ? [+d[1], +d[2]] : side ? [+side[1], +side[1]] : [null, null]; if(l === null) return null;
+    return out(pcNum(m[1] === "area" ? l * w : 2 * (l + w)));
+  }
+  if((m = /^(?:the )?area of (?:a |the )?triangle\b.*?\bbase (?:of |is )?([\d.]+).*?\bheight (?:of |is )?([\d.]+)/.exec(q))) return out(pcNum(+m[1] * +m[2] / 2));
+  if((m = /^(?:the )?area of (?:a |the )?trapezoid\b.*?\bbases? (?:of )?([\d.]+)\s*(?:and|,)\s*([\d.]+).*?\bheight (?:of |is )?([\d.]+)/.exec(q))) return out(pcNum((+m[1] + +m[2]) * +m[3] / 2));
+  if((m = /^(?:the )?(circumference|perimeter|area) of (?:a |the )?circle\b.*?\b(radius|diameter) (?:of |is )?([\d.]+)/.exec(q))){
+    const r = m[2] === "radius" ? +m[3] : +m[3] / 2, k = m[1] === "area" ? r * r : 2 * r;
+    return out(pcFrac(k) + "π ≈ " + pcNum(+(k * Math.PI).toFixed(2)));
+  }
+  if((m = /^(?:the )?volume of (?:a |the )?(?:rectangular prism|box|room|tank|container)\b(.*)$/.exec(q)) && (m = three.exec(m[1]))) return out(pcNum(+m[1] * +m[2] * +m[3]));
+  if((m = /^how many square (feet|metres|meters|yards|inches|cm|m|ft)\b.*?\b(?:in|is|for) (?:a |the )?[a-z ]*?([\d.]+)\s*[a-z]*\s*(?:by|x|×)\s*([\d.]+)/.exec(q))) return out(pcNum(+m[2] * +m[3]) + " square " + m[1]);
+  if((m = /^how many ([a-z]+)\b.*?\b([\d.]+) square [a-z]+ (?:per|each|a|for each) [a-z]+\b.*?\bcover ([\d.]+)/.exec(q))) return out(Math.ceil(+(+m[3] / +m[2]).toFixed(6)) + " " + m[1] + " (" + pcNum(+(+m[3] / +m[2]).toFixed(2)) + ", rounded up)");
+  if((m = /\bcost to fence\b.*?([\d.]+)\s*[a-z]*\s*(?:by|x|×)\s*([\d.]+)\s*[a-z]*\b.*?\$\s*([\d.]+) (?:per|a|for each) ([a-z]+)/.exec(q))){ const p = 2 * (+m[1] + +m[2]); return out(money(p * +m[3]) + " for " + pcNum(p) + " " + m[4] + "s of fence"); }
+  // mixed units: 3 feet 6 inches, 2 hours 45 minutes
+  for(const [big, small, k, name] of W_MIXED){
+    if((m = new RegExp("^(?:convert )?([\\d.]+)\\s*" + big + "\\s*(?:and\\s*)?([\\d.]+)\\s*" + small + "\\s+(?:to|in|into)\\s+" + small + "$").exec(q))) return out(pcNum(+m[1] * k + +m[2]) + " " + name);
+  }
+  // money: taxes, discounts, tips, unit prices, exchange
+  if((m = /\$\s*([\d,.]+)\b.*?\bwith\b(.*)$/.exec(q)) && /\b(gst|pst|hst|tax)\b/.test(q) && /\b(total|cost|price|pay)\b/.test(q)){
+    const rates = [...m[2].matchAll(/([\d.]+)\s*%/g)].map(t => +t[1]); if(!rates.length) return null;
+    const p = n(m[1]), tax = p * rates.reduce((s, r) => s + r, 0) / 100; return out(money(p + tax) + " (" + money(tax) + " in tax)");
+  }
+  if((m = /\b(?:price|cost)\b.*?\b([\d.]+)\s*% (?:discount|off)\b.*?\$\s*([\d,.]+)/.exec(q)) || (m = /\$\s*([\d,.]+)\b.*?\b([\d.]+)\s*% (?:discount|off)\b/.exec(q)) && (m = [m[0], m[2], m[1]])){
+    const d = +m[1], p = n(m[2]); return out(money(p * (1 - d / 100)) + " (" + money(p * d / 100) + " off)");
+  }
+  if((m = /\b([\d.]+)\s*% tip (?:on|for) (?:a |the )?\$\s*([\d,.]+)/.exec(q))){ const t = n(m[2]) * +m[1] / 100; return out(money(t) + " tip, " + money(n(m[2]) + t) + " in all"); }
+  if((m = /\bunit (?:price|cost|rate) (?:of|for) (\d+(?:\.\d+)?)\s*([a-z]+)? (?:for|at|cost(?:s|ing)?) \$\s*([\d,.]+)/.exec(q))){ const u = n(m[3]) / +m[1]; return out(money(u) + " per " + (m[2] ? m[2].replace(/(es|s)$/, "").replace(/^egg$/, "egg") : "item")); }
+  if((m = /\bbetter (?:buy|deal|value)\b.*?([\d.]+)\s*([a-z]+) for \$\s*([\d.]+)\s*(?:,|or)\s*(?:or\s*)?([\d.]+)\s*([a-z]+) for \$\s*([\d.]+)/.exec(q))){
+    const scale = u => ({kg:1000, g:1, l:1000, ml:1}[u] || 1), a = +m[3] / (+m[1] * scale(m[2])), b = +m[6] / (+m[4] * scale(m[5]));
+    const pick = a <= b ? [m[1], m[2], m[3]] : [m[4], m[5], m[6]], unit = /^(kg|g)$/.test(m[2]) ? "g" : /^(l|ml)$/.test(m[2]) ? "mL" : m[2];
+    return out(pick[0] + " " + (pick[1] === "l" ? "L" : pick[1]) + " for $" + pick[2] + " is the better buy: $" + (Math.min(a, b)).toFixed(4) + " per " + unit + " against $" + (Math.max(a, b)).toFixed(4) + ".");
+  }
+  if((m = /^(?:convert )?\$?\s*([\d,.]+) ([a-z]+(?: [a-z]+)?) (?:dollars? )?(?:to|into) ([a-z]+(?: [a-z]+)?) (?:at|with a rate of|at a rate of) ([\d.]+)$/.exec(q))) return out((n(m[1]) * +m[4]).toFixed(2) + " " + m[3]);
+  // pay: overtime said after the hours, deductions as a percent
+  if((m = /\b([\d.]+)\s*hours?\b.*?\b(time and a half|double time)\b.*?\$\s*([\d.]+)/.exec(q))) return out(money(+m[1] * +m[3] * (/half/.test(m[2]) ? 1.5 : 2)));
+  if((m = /\bnet pay\b.*?\bgross(?: pay)? (?:is |of |=\s*)?\$?\s*([\d,.]+)\b.*?\bdeductions? (?:are |is |of |total )?([\d.]+)\s*%/.exec(q))){ const g = n(m[1]); return out(money(g * (1 - +m[2] / 100)) + " (" + money(g * +m[2] / 100) + " deducted)"); }
+  // ratios and rates
+  if((m = /^(?:simplify|reduce) (?:the )?ratio ([\d.]+(?:\s*:\s*[\d.]+)+)$/.exec(q))){
+    const p = m[1].split(/\s*:\s*/), k = 10 ** Math.max(...p.map(v => (v.split(".")[1] || "").length)), v = p.map(x => Math.round(+x * k)), g = v.reduce(pcGcd);
+    return out(v.map(x => x / g).join(":"));
+  }
+  if((m = /\bif (\d+(?:\.\d+)?) [a-z ]+? cost(?:s)? \$\s*([\d,.]+),? (?:how much|what) (?:do|does|would|will) (\d+(?:\.\d+)?)\b/.exec(q))) return out(money(n(m[2]) / +m[1] * +m[3]));
+  if((m = /\btravels? ([\d.]+)\s*(km|miles|m)\b.*?\bin ([\d.]+)\s*(hours?|h|minutes?|min)\b/.exec(q)) && /\b(speed|fast|rate|average)\b/.test(q)){ const t = /^min/.test(m[4]) ? +m[3] / 60 : +m[3]; return out(pcNum(+(+m[1] / t).toFixed(2)) + " " + (m[2] === "miles" ? "mph" : m[2] + "/h")); }
+  if((m = /^how long (?:does it take )?to (?:drive|travel|go|ride|walk|fly|cycle) ([\d.]+)\s*(km|miles|m)\b.*?\bat ([\d.]+)\s*(?:km\/h|kph|mph|km per hour|miles per hour)/.exec(q))){
+    const t = +m[1] / +m[3], h = Math.floor(t + 1e-9), min = Math.round((t - h) * 60);
+    return out(pcNum(+t.toFixed(2)) + " hours" + (min ? " (" + h + " h " + min + " min)" : ""));
+  }
+  if((m = /\brises? ([\d.]+)\s*[a-z]*\s*(?:over|for|in) (?:a (?:run|horizontal distance|distance) of )?([\d.]+)/.exec(q))){
+    const r = +m[1] / +m[2];
+    if(/\bangle\b/.test(q)) return out(pcNum(+(Math.atan(r) * 180 / Math.PI).toFixed(2)) + "°");
+    if(/\bgrade\b/.test(q)) return out(pcNum(+(r * 100).toFixed(2)) + "%");
+    if(/\b(slope|pitch)\b/.test(q)) return out(pcFrac(r) + (pcFrac(r).includes("/") ? " ≈ " + pcNum(+r.toFixed(4)) : ""));
+  }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const c12 = calc12(q); if(c12) return c12;
   const s12 = stats12(q); if(s12) return s12;
+  const w10 = work10(q); if(w10) return w10;
   const p11 = pc11(q); if(p11) return p11;
   const p10 = fm10(q); if(p10) return p10;
   const f11 = fom11(q); if(f11) return f11;

@@ -61,4 +61,11 @@ class Precalc11Test {
     @Test fun binomial() = assertEquals("0.3241", pc("binomial probability of exactly 2 successes in 6 trials with p = 0.3"))
     @Test fun leastSquares() = assertEquals("y = 2x + 1", pc("line of best fit for x = 0, 1, 2, 3 and y = 1, 3, 5, 7"))
     @Test fun independence() = assertEquals("No: P(A)·P(B) = 0.18, but P(A and B) = 0.25.", pc("are A and B independent if P(A) = 0.3, P(B) = 0.6 and P(A and B) = 0.25"))
+
+    // Workplace Mathematics 10 (Workplace10.kt)
+    @Test fun salesTax() = assertEquals("$44.80 ($4.80 in tax)", pc("total cost of a $40 item with 5% GST and 7% PST"))
+    @Test fun betterBuy() = assertEquals("750 g for $4.80 is the better buy: $0.0064 per g against $0.0070.", pc("which is the better buy, 500 g for $3.50 or 750 g for $4.80"))
+    @Test fun percentDeductions() = assertEquals("$936.00 ($264.00 deducted)", pc("net pay if gross is $1200 and deductions are 22%"))
+    @Test fun mixedUnits() = assertEquals("42 inches", pc("convert 3 feet 6 inches to inches"))
+    @Test fun ratio() = assertEquals("2:3", pc("simplify the ratio 12:18"))
 }

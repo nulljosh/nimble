@@ -163,6 +163,18 @@ The engine had no calculus at all, so form A started at zero. The fix is a small
 
 Form B's honest first grade is 38/40, an A+ on its own. Its two misses were wording the solver had not seen: "what percent score below 58" (no "than") and "3 coin flips" (a word between the number and "flips"). Both now answer. One form A key was too strict about word order ("Rejecting the null hypothesis when it is actually true" is right) and now takes it. Form A's first offline run also gave one wrong answer, not a miss: "are A and B independent if P(A) = 0.5 ..." printed 0.2 from the Foundations 12 branch. The statistics solver now runs first (`stats12()` in docs/engine.js, `Statistics12.kt` on Kotlin). The normal CDF is Abramowitz and Stegun 7.1.26, good to about 1e-7. Online waits for the neuron reset. **A+ offline on every platform.**
 
+## BC curriculum: Workplace Mathematics 10
+
+`test/courses/work10.js`, two 40-question forms written before any run: perimeter, area and volume with units in the question, mixed units ("3 feet 6 inches"), temperature, GST and PST, discounts and tips, unit price and the better buy, exchange rates, overtime and percent deductions, ratios, speed and travel time, and the rise over a run. Run `COURSE=work10 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 14/40 (35%) | 40/40 (100%) |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+Form A's first offline run had one wrong answer: "net pay if gross is $1200 and deductions are 22%" printed $1,178.00, reading 22% as $22. The solver is `work10()` in docs/engine.js and `Workplace10.kt` on Kotlin; it runs before the Foundations 10 pay branch. Online waits for the neuron reset. **A+ offline on every platform.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
