@@ -66,7 +66,7 @@ final class OfflineExamTests: XCTestCase {
     func testCourseExams() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["NIMBLE_EXAM"] == "1", "Set TEST_RUNNER_NIMBLE_EXAM=1")
         let engine = QueryEngine()
-        for course in ["pc11", "fmpc10"] {
+        for course in ["pc11", "fmpc10", "fom11"] {
             let url = try XCTUnwrap(Bundle(for: Self.self).url(forResource: course, withExtension: "js"), course)
             let questions = try Self.questions(String(contentsOf: url, encoding: .utf8))
             var missed: [String] = []

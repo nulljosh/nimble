@@ -317,6 +317,7 @@ internal object Precalc {
         for ((re, body) in FACTS) if (re.containsMatchIn(q)) return out(body)
         Precalc11.answer(q)?.let { return it }
         Precalc10.answer(q)?.let { return it }
+        Foundations11.answer(q)?.let { return it }
         var m: List<String>?
         // how many roots does a degree 4 (or quartic) polynomial have
         m = find("""^how many (?:roots|zeros|solutions) (?:does|can) (?:a |an )?(?:degree[- ](\d+)|(linear|quadratic|cubic|quartic|quintic)) polynomial have$""", q)

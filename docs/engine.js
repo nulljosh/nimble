@@ -1494,12 +1494,122 @@ function fm10(q){
   if((m = /\bcommission\b.*?([\d.]+)\s*%.*?\$\s*([\d,.]+)/.exec(q))) return out(money(+m[1] / 100 * +m[2].replace(/,/g, "")));
   return null;
 }
+// --- Foundations of Mathematics 11, offline ---
+// Statistics and the normal curve, polygons and angles, reasoning (counterexamples, next terms), scale, the rule of
+// 72 and card interest, projectiles, and test points for inequalities. precalc() asks it after fm10(); null means
+// "not mine". Graded by COURSE=fom11 node test/exam-course.js. Mirrored in kmp/shared/.../Foundations11.kt.
+const POLYGON = {triangle:3, quadrilateral:4, pentagon:5, hexagon:6, heptagon:7, octagon:8, nonagon:9, decagon:10, hendecagon:11, dodecagon:12};
+const SPELLED = {one:1, two:2, three:3, "1":1, "2":2, "3":3};
+// The next term of a list: arithmetic, geometric, Fibonacci-like, then a polynomial by finite differences.
+function pcNext(n){
+  const d = n.slice(1).map((v, i) => v - n[i]);
+  if(d.every(v => Math.abs(v - d[0]) < 1e-9)) return n[n.length - 1] + d[0];
+  const r = n[1] / n[0];
+  if(n[0] !== 0 && n.every((v, i) => i === 0 || Math.abs(v - n[i - 1] * r) < 1e-9)) return n[n.length - 1] * r;
+  if(n.length >= 4 && n.every((v, i) => i < 2 || Math.abs(v - n[i - 1] - n[i - 2]) < 1e-9)) return n[n.length - 1] + n[n.length - 2];
+  const rows = [n];
+  while(rows[rows.length - 1].length > 2){
+    const last = rows[rows.length - 1], next = last.slice(1).map((v, i) => v - last[i]); rows.push(next);
+    if(next.length >= 2 && next.every(v => Math.abs(v - next[0]) < 1e-9)) return rows.reduce((s, row) => s + row[row.length - 1], 0);
+  }
+  return null;
+}
+function fom11(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
+  const list = s => (s.match(/-?\d+(?:\.\d+)?/g) || []).map(Number);
+  let m;
+  // statistics
+  if((m = /^(?:the )?(median|mode|range|standard deviation|variance|mean|average) of (?:the )?(?:data |numbers |values |set )?(-?[\d.]+(?:\s*(?:,|and)\s*-?[\d.]+)+)$/.exec(q))){
+    const n = list(m[2]), N = n.length, mean = n.reduce((s, v) => s + v, 0) / N, s = [...n].sort((a, b) => a - b);
+    if(/^(mean|average)/.test(m[1])) return out(pcNum(mean));
+    if(m[1] === "median") return out(pcNum(N % 2 ? s[(N - 1) / 2] : (s[N / 2 - 1] + s[N / 2]) / 2));
+    if(m[1] === "range") return out(pcNum(s[N - 1] - s[0]));
+    if(m[1] === "mode"){
+      const c = new Map(); n.forEach(v => c.set(v, (c.get(v) || 0) + 1)); const top = Math.max(...c.values());
+      return out(top === 1 ? "None: every value appears once." : [...c].filter(([, k]) => k === top).map(([v]) => pcNum(v)).join(" and "));
+    }
+    const ss = n.reduce((t, v) => t + (v - mean) ** 2, 0);
+    if(m[1] === "variance") return out("σ² = " + pcNum(+(ss / N).toFixed(4)) + " (population), s² = " + pcNum(+(ss / (N - 1)).toFixed(4)) + " (sample)");
+    return out("σ = " + pcNum(+Math.sqrt(ss / N).toFixed(4)) + " (population), s = " + pcNum(+Math.sqrt(ss / (N - 1)).toFixed(4)) + " (sample)");
+  }
+  if((m = /\bz-?score\b.*?(-?[\d.]+)\b.*?\bmean (?:of |is |=\s*)?(-?[\d.]+).*?(?:standard deviation|sd|σ) (?:of |is |=\s*)?([\d.]+)/.exec(q))) return out("z = " + pcNum(+((+m[1] - +m[2]) / +m[3]).toFixed(4)));
+  if(/\bnormal (?:distribution|curve)\b/.test(q) && (m = /\b(one|two|three|1|2|3) standard deviations?\b/.exec(q))){
+    const k = SPELLED[m[1]];
+    if(/\bwithin\b/.test(q)) return out(["68%", "95%", "99.7%"][k - 1] + " of the data.");
+    if(/\b(above|more than|greater than|higher than|below|less than|lower than)\b/.test(q)) return out(["16%", "2.5%", "0.15%"][k - 1] + " of the data.");
+  }
+  if((m = /(\d+(?:\.\d+)?)\s*%.*?margin of error (?:of )?(?:±\s*)?(\d+(?:\.\d+)?)\s*(%|percent|percentage points?)?/.exec(q)) && /\b(confidence interval|interval|range)\b/.test(q)) return out(pcNum(+m[1] - +m[2]) + "% to " + pcNum(+m[1] + +m[2]) + "%");
+  // polygons and angles
+  const poly = (/\b(triangle|quadrilateral|pentagon|hexagon|heptagon|octagon|nonagon|decagon|hendecagon|dodecagon|(\d+)-(?:gon|sided polygon))\b/.exec(q) || []), sides = poly[2] ? +poly[2] : POLYGON[poly[1]];
+  if(sides && /\b(?:sum of (?:the )?interior angles|interior angle sum|angle sum)\b/.test(q)) return out(pcNum((sides - 2) * 180) + "°");
+  if(sides && /\b(?:each|one|an?) interior angle\b/.test(q)) return out(pcNum(+((sides - 2) * 180 / sides).toFixed(2)) + "°");
+  if(sides && /\b(?:each|one|an?) exterior angle\b/.test(q)) return out(pcNum(+(360 / sides).toFixed(2)) + "°");
+  if(/\bhow many sides\b/.test(q)){
+    if((m = /\binterior angles? (?:summing to|sum(?:s| of)?|add(?:ing)? (?:up )?to|total(?:ling)?) (?:of )?([\d.]+)/.exec(q))) return out(pcNum(+m[1] / 180 + 2));
+    if((m = /\binterior angles? (?:of |measuring |is |are )?([\d.]+)/.exec(q))) return out(pcNum(+(360 / (180 - +m[1])).toFixed(4)));
+    if((m = /\bexterior angles? (?:of |measuring |is |are )?([\d.]+)/.exec(q))) return out(pcNum(+(360 / +m[1]).toFixed(4)));
+  }
+  if((m = /^(?:the )?(supplement|complement)(?: angle)? (?:of|to) (?:an angle of )?([\d.]+)\s*(?:°|degrees?)?$/.exec(q))) return out(pcNum((m[1] === "supplement" ? 180 : 90) - +m[2]) + "°");
+  if((m = /\btwo angles of a triangle (?:are|measure) ([\d.]+)\s*(?:°|degrees?)? and ([\d.]+)/.exec(q))) return out(pcNum(180 - +m[1] - +m[2]) + "°");
+  // reasoning
+  if(/^(?:what is )?(?:a )?counter-?example$/.test(q)) return out("An example that shows a statement is false. One counterexample is enough to disprove a general claim.");
+  if(/^(?:what is )?(?:a )?conjecture$/.test(q)) return out("A statement believed to be true, based on a pattern or evidence, but not yet proven.");
+  if(/^(?:what is )?inductive reasoning$/.test(q)) return out("Reasoning from specific examples or observed patterns to a general conclusion (a conjecture), which may be false.");
+  if(/^(?:what is )?deductive reasoning$/.test(q)) return out("Reasoning from general statements that are known to be true (premises) to a specific conclusion that must be true.");
+  if((m = /\bcounter-?example (?:to|for) (?:the (?:statement|claim|conjecture) )?(?:that )?all ([a-z ]+?) (?:are|is) ([a-z0-9 ]+)$/.exec(q))){
+    const subj = m[1].trim(), claim = m[2].trim(), isPrime = n => n > 1 && Number.isInteger(n) && [...Array(Math.floor(Math.sqrt(n)) + 1).keys()].slice(2).every(k => n % k);
+    const square = /^squares? of (?:numbers|integers)|^square numbers|^numbers squared/.test(subj);
+    const domain = (/^prime/.test(subj) ? [...Array(100).keys()].filter(isPrime) : /^odd/.test(subj) ? [...Array(50).keys()].map(k => 2 * k + 1) : /^even/.test(subj) ? [...Array(50).keys()].map(k => 2 * k) : /^(whole|natural|counting)/.test(subj) ? [...Array(101).keys()] : [-3, -2, -1, 0, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    const f = x => square ? x * x : x, k = (/(\d+)/.exec(claim) || [])[1];
+    const test = /^odd/.test(claim) ? v => Math.abs(v % 2) === 1 : /^even/.test(claim) ? v => v % 2 === 0 : /^prime/.test(claim) ? isPrime : /^positive/.test(claim) ? v => v > 0
+      : /^(?:greater|bigger|larger) than (?:the )?(?:number|original)/.test(claim) ? (v, x) => v > x : /^(?:less|smaller) than (?:the )?(?:number|original)/.test(claim) ? (v, x) => v < x
+      : /^divisible by/.test(claim) && k ? v => v % +k === 0 : /^(?:greater|bigger|more) than/.test(claim) && k ? v => v > +k : null;
+    if(test){ const x = domain.find(x => !test(f(x), x)); if(x !== undefined) return out(pcNum(x) + (square ? ": " + pcNum(x) + "² = " + pcNum(x * x) + "." : " is a counterexample.")); }
+  }
+  if((m = /^(?:what (?:is|comes) )?(?:the )?next (?:term|number) (?:in|of|for) (?:the (?:sequence|pattern) )?(-?[\d.]+(?:\s*,\s*-?[\d.]+){2,})/.exec(q)) || (m = /^(-?[\d.]+(?:\s*,\s*-?[\d.]+){2,}),?\s*(?:\.\.\.|…)?,?\s*what comes next$/.exec(q))){
+    const v = pcNext(list(m[1])); return v === null ? null : out(pcNum(v));
+  }
+  // scale
+  const toCm = {mm:0.1, cm:1, m:100, km:100000};
+  if((m = /\bscale factor\b.*?\b([\d.]+)\s*(mm|cm|m|km)\b.*?\b(?:represents?|is|stands for|equals?)\s*([\d.]+)\s*(mm|cm|m|km)\b/.exec(q))){
+    const a = +m[1] * toCm[m[2]], b = +m[3] * toCm[m[4]], k = b / a;
+    return out(k >= 1 ? "1:" + pcNum(+k.toFixed(4)) : pcNum(+(1 / k).toFixed(4)) + ":1");
+  }
+  if((m = /\bscale factor (?:is |of )?([\d./]+)\b.*?\b(area|volume|perimeter|length)\b/.exec(q)) || (m = /\b(area|volume|perimeter)\b.*?\bscale factor (?:is |of )?([\d./]+)/.exec(q)) && (m = [m[0], m[2], m[1]])){
+    const k = pcVal(m[1]); if(k === null) return null; const p = m[2] === "area" ? 2 : m[2] === "volume" ? 3 : 1;
+    return out("It is multiplied by " + pcFrac(+(k ** p).toPrecision(12)) + (p > 1 ? " (" + pcFrac(k) + (p === 2 ? "²" : "³") + ")." : "."));
+  }
+  if((m = /\bscale (?:is |of )?1\s*:\s*([\d,]+)\b.*?\b([\d.]+)\s*(mm|cm)\b/.exec(q))){
+    const real = +m[2] * toCm[m[3]] * +m[1].replace(/,/g, ""), unit = (/\b(km|m|cm)\b(?=[^\d]*$)/.exec(q.replace(/\b[\d.]+\s*(mm|cm)\b/, "")) || [])[1] || (real >= 100000 ? "km" : "m");
+    return out(pcNum(+(real / toCm[unit]).toFixed(4)) + " " + unit);
+  }
+  // money: the rule of 72, a month of card interest
+  if(/\brule of 72\b/.test(q) && (m = /([\d.]+)\s*%/.exec(q))) return out(pcNum(+(72 / +m[1]).toFixed(2)) + " years");
+  if((m = /\bbalance of \$?\s*([\d,.]+)\b.*?\b([\d.]+)\s*%.*?\b(?:one|1|a) month\b/.exec(q))) return out("$" + (+m[1].replace(/,/g, "") * +m[2] / 100 / 12).toFixed(2));
+  // projectiles: h = -5t^2 + 20t + 2
+  if((m = /\bh\s*(?:\(t\))?\s*=\s*([-+.\d\st^*()]+?t[-+.\d\st^*()]*?)(?:,|\s+(?:what|when|find|how|at|reach)\b|$)/.exec(q))){
+    const co = pcQuad(m[1].replace(/t/g, "x")); if(co && co[0] < 0){
+      const [a, b, c] = co, t = -b / (2 * a), top = c - b * b / (4 * a), unit = /\bm\b|\bmetres?\b|\bmeters?\b/.test(q) ? " m" : "";
+      if(/\bwhen\b|\bwhat time\b|\bhow long\b.*\bmaximum\b/.test(q)) return out("t = " + pcNum(+t.toFixed(4)) + (unit ? " s" : ""));
+      if(/\bmax(?:imum)?\b|\bhighest\b|\bhow high\b/.test(q)) return out(pcNum(+top.toFixed(4)) + unit);
+    }
+  }
+  // test points and boundary lines for inequalities
+  if((m = /^is \(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\) (?:a solution (?:of|to)|in the solution (?:set|region) of|on) (.+?)\s*(<=|>=|≤|≥|<|>)\s*(.+)$/.exec(q))){
+    const [x, y] = [+m[1], +m[2]], val = e => pcAt(e.replace(/y/g, "(" + y + ")"), x), L = val(m[3]), R = val(m[5]); if(L === null || R === null) return null;
+    const op = {"<=":"≤", ">=":"≥"}[m[4]] || m[4], ok = {"<":L < R, ">":L > R, "≤":L <= R + 1e-12, "≥":L >= R - 1e-12}[op];
+    return out((ok ? "Yes: " : "No: ") + pcNum(L) + (ok ? " " + op + " " : " is not " + op + " ") + pcNum(R) + ".");
+  }
+  if(/\bsolid or (?:dashed|broken|dotted)\b|\b(?:dashed|broken|dotted) or solid\b/.test(q) && (m = /(<=|>=|≤|≥|<|>)/.exec(q))) return out(/[=≤≥]/.test(m[1]) ? "Solid: the points on the line are part of the solution." : "Dashed: the points on the line are not part of the solution.");
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const p11 = pc11(q); if(p11) return p11;
   const p10 = fm10(q); if(p10) return p10;
+  const f11 = fom11(q); if(f11) return f11;
   let m;
   // how many roots does a degree 4 (or quartic) polynomial have
   if((m = /^how many (?:roots|zeros|solutions) (?:does|can) (?:a |an )?(?:degree[- ](\d+)|(linear|quadratic|cubic|quartic|quintic)) polynomial have$/.exec(q))){

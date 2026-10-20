@@ -31,4 +31,11 @@ class Precalc11Test {
     @Test fun sphereVolume() = assertEquals("288π ≈ 904.78", pc("volume of a sphere with radius 6"))
     @Test fun lineThroughTwoPoints() = assertEquals("y = 3x - 1", pc("equation of the line through (1, 2) and (3, 8)"))
     @Test fun overtime() = assertEquals("$180.00", pc("time and a half for 6 hours at $20 per hour"))
+
+    // Foundations of Mathematics 11 (Foundations11.kt)
+    @Test fun nextSquare() = assertEquals("36", pc("next number in 1, 4, 9, 16, 25"))
+    @Test fun standardDeviation() = assertEquals("σ = 2 (population), s = 2.1381 (sample)", pc("standard deviation of 2, 4, 4, 4, 5, 5, 7, 9"))
+    @Test fun counterexample() = assertEquals("2 is a counterexample.", pc("find a counterexample to all prime numbers are odd"))
+    @Test fun mapScale() = assertEquals("3 km", pc("a map scale is 1:50000, how many km is 6 cm"))
+    @Test fun testPoint() = assertEquals("No: 5 is not < 4.", pc("is (1, 5) a solution of y < x + 3"))
 }
