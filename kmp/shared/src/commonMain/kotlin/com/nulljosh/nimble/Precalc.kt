@@ -315,6 +315,7 @@ internal object Precalc {
         var q = query.trim().lowercase().replace(Regex("[?.!]+$"), "").replace(Regex("[−–]"), "-")
             .replaceFirst(Regex("^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?"), "")
         for ((re, body) in FACTS) if (re.containsMatchIn(q)) return out(body)
+        Science10.answer(q, query)?.let { return it }
         Calculus12.answer(q)?.let { return it }
         Statistics12.answer(q)?.let { return it }
         Apprenticeship12.answer(q)?.let { return it }

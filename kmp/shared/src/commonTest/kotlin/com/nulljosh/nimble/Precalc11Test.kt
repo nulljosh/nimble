@@ -75,4 +75,12 @@ class Precalc11Test {
     @Test fun ohm() = assertEquals("3 A (I = V/R)", pc("current if voltage is 120 V and resistance is 40 ohms"))
     @Test fun marbles() = assertEquals("3/8 = 0.375", pc("probability of drawing a red marble from 3 red and 5 blue"))
     @Test fun repeatingDecimalStaysPrecalc() = assertEquals("1/3", pc("write 0.333... as a fraction"))
+
+    // Science 10 (Science10.kt)
+    @Test fun balancePropane() = assertEquals("C₃H₈ + 5O₂ → 3CO₂ + 4H₂O", pc("balance C3H8 + O2 -> CO2 + H2O"))
+    @Test fun ironThreeOxide() = assertEquals("Iron(III) oxide.", pc("name the compound Fe2O3"))
+    @Test fun hydroxideParens() = assertEquals("Ca(OH)₂", pc("formula for calcium hydroxide"))
+    @Test fun tetroxide() = assertEquals("N₂O₄", pc("formula for dinitrogen tetroxide"))
+    @Test fun molarMass() = assertEquals("44.01 g/mol (CO₂)", pc("What is the molar mass of CO2"))
+    @Test fun dihybrid() = assertEquals("1/16 ≈ 0.0625 (6.25%) of the offspring are aabb.", pc("punnett square AaBb x AaBb, what fraction are aabb"))
 }

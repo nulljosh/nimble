@@ -188,6 +188,18 @@ Form A's first offline run had one wrong answer: "net pay if gross is $1200 and 
 
 Form A's first offline run had one wrong answer: "probability of drawing a red marble from 3 red and 5 blue" printed 1/2, treating it as a red card. Form B's one first-run miss was the key's fault: "Accuracy is how close a measurement is to the true value" is right, and the key now allows words between "close" and "to". Adding this solver briefly broke one Pre-Calc 12 question ("write 0.333... as a fraction" printed NaN), caught by the regression run and fixed before the commit. The solver is `aw12()` in docs/engine.js and `Apprenticeship12.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform. Every BC grade 10 to 12 math course is now at A+ offline.**
 
+## BC curriculum: Science 10
+
+`test/courses/sci10.js`, two 40-question forms written before any run: atoms, isotopes and ions, compound names and formulas, balancing and reaction types, acids and bases, energy, work and power, radioactivity, DNA and Punnett squares, and the universe. Run `COURSE=sci10 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 9/40 (23%) | 40/40 (100%) |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+The solver is `sci10()` in docs/engine.js and `Science10.kt` on Kotlin. The computed half is real chemistry and physics: a periodic table to krypton plus common heavy elements, compound names both ways (ionic with Roman numerals and polyatomic ions, covalent with prefixes), equations balanced by searching small coefficients, reaction types, molar mass, energy, work, power and Punnett squares for one or two genes. The other half is a table of curriculum facts. That half is weaker evidence than the math courses: the same author wrote the facts and the held-out form, so form B mostly checks that the facts cover the course. The online run is the stronger test, and it waits for the neuron reset. One first-run answer was incomplete rather than missing: "the charge of an electron" gave 1.602 × 10⁻¹⁹ C with no sign, from the constants table. The general offline exam rose to 75 of 154 on the web and Kotlin and 76 on Apple. **A+ offline on every platform.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

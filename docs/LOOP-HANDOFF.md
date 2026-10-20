@@ -45,7 +45,8 @@ Rules that bite:
    - Statistics 12 (test/courses/stats12.js): A+ offline on every platform (2026-10-20), held-out form B 38/40 on its first run. Online waits.
    - Workplace Mathematics 10 (test/courses/work10.js): A+ offline on every platform (2026-10-20), held-out form B 40/40. Online waits.
    - Apprenticeship and Workplace Mathematics 12 (test/courses/aw12.js): A+ offline on every platform (2026-10-20), held-out form B 39/40 first run. Every BC grade 10 to 12 math course is done offline; the online grades wait for a day under 6,000 neurons.
-   - Next courses, in order: Science 10, Chemistry 11 and 12, Physics 11 and 12, Life Sciences 11, Anatomy and Physiology 12, Earth Sciences 11, Environmental Science 11; then Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
+   - Science 10 (test/courses/sci10.js): A+ offline on every platform (2026-10-20), held-out form B 40/40. The facts half is weak evidence until the online run.
+   - Next courses, in order: Chemistry 11 and 12, Physics 11 and 12, Life Sciences 11, Anatomy and Physiology 12, Earth Sciences 11, Environmental Science 11; then Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.

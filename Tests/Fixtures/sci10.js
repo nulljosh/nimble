@@ -1,0 +1,1 @@
+../../test/courses/sci10.js

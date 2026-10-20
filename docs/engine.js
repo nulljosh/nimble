@@ -2313,10 +2313,195 @@ function aw12(q){
   if((m = /\bunit (?:price|cost) (?:of|for) ([\d.]+)\s*([a-z]+) of [a-z ]+? (?:for|at|costing) \$\s*([\d,.]+)/.exec(q))) return out(money(num(m[3]) / +m[1]) + " per " + (m[2] === "l" ? "L" : m[2]));
   return null;
 }
+// --- Science 10, offline ---
+// The periodic table (protons, neutrons, electrons, ions, molar mass), compound names both ways, balancing equations
+// by search, reaction types, pH, energy, work and power, radiation, DNA and Punnett squares, and the universe.
+// precalc() asks it first; null means "not mine". Graded by COURSE=sci10 node test/exam-course.js.
+// Mirrored in kmp/shared/.../Science10.kt.
+// Symbol, name, atomic mass; the atomic number is the position (H is 1). Then a few heavy elements with their own.
+const SCI_EL = ("H,hydrogen,1.008;He,helium,4.003;Li,lithium,6.94;Be,beryllium,9.012;B,boron,10.81;C,carbon,12.011;N,nitrogen,14.007;O,oxygen,15.999;F,fluorine,18.998;Ne,neon,20.180;" +
+  "Na,sodium,22.990;Mg,magnesium,24.305;Al,aluminum,26.982;Si,silicon,28.085;P,phosphorus,30.974;S,sulfur,32.06;Cl,chlorine,35.45;Ar,argon,39.948;K,potassium,39.098;Ca,calcium,40.078;" +
+  "Sc,scandium,44.956;Ti,titanium,47.867;V,vanadium,50.942;Cr,chromium,51.996;Mn,manganese,54.938;Fe,iron,55.845;Co,cobalt,58.933;Ni,nickel,58.693;Cu,copper,63.546;Zn,zinc,65.38;" +
+  "Ga,gallium,69.723;Ge,germanium,72.630;As,arsenic,74.922;Se,selenium,78.971;Br,bromine,79.904;Kr,krypton,83.798").split(";").map((r, i) => { const [s, n, m] = r.split(","); return {s, n, m:+m, z:i + 1}; })
+  .concat([[37,"Rb","rubidium",85.468],[38,"Sr","strontium",87.62],[47,"Ag","silver",107.87],[50,"Sn","tin",118.71],[53,"I","iodine",126.90],[54,"Xe","xenon",131.29],[55,"Cs","cesium",132.91],[56,"Ba","barium",137.33],[78,"Pt","platinum",195.08],[79,"Au","gold",196.97],[80,"Hg","mercury",200.59],[82,"Pb","lead",207.2],[86,"Rn","radon",222],[88,"Ra","radium",226],[92,"U","uranium",238.03],[94,"Pu","plutonium",244]].map(([z, s, n, m]) => ({s, n, m, z})));
+const sciBy = k => SCI_EL.find(e => e.s.toLowerCase() === String(k).toLowerCase() || e.n === String(k).toLowerCase() || (e.n === "aluminum" && /^aluminium$/i.test(k)) || (e.n === "sulfur" && /^sulphur$/i.test(k)) || (e.n === "cesium" && /^caesium$/i.test(k)));
+const SCI_NONMETAL = new Set("H He C N O F Ne P S Cl Ar Se Br Kr I Xe Rn".split(" "));
+// Ions: symbol or group to charge, and the -ide names of simple anions.
+const SCI_CHARGE = {Li:1, Na:1, K:1, Rb:1, Cs:1, Ag:1, Be:2, Mg:2, Ca:2, Sr:2, Ba:2, Zn:2, Al:3, F:-1, Cl:-1, Br:-1, I:-1, O:-2, S:-2, Se:-2, N:-3, P:-3, H:1};
+const SCI_IDE = {F:"fluoride", Cl:"chloride", Br:"bromide", I:"iodide", O:"oxide", S:"sulfide", Se:"selenide", N:"nitride", P:"phosphide", H:"hydride", C:"carbide"};
+const SCI_POLY = [["NH4", "ammonium", 1], ["OH", "hydroxide", -1], ["NO3", "nitrate", -1], ["NO2", "nitrite", -1], ["SO4", "sulfate", -2], ["SO3", "sulfite", -2], ["CO3", "carbonate", -2], ["HCO3", "hydrogen carbonate", -1], ["PO4", "phosphate", -3], ["ClO3", "chlorate", -1], ["C2H3O2", "acetate", -1], ["MnO4", "permanganate", -1]];
+const SCI_COMMON = [["water", "H2O"], ["table salt", "NaCl"], ["salt", "NaCl"], ["carbon dioxide", "CO2"], ["carbon monoxide", "CO"], ["ammonia", "NH3"], ["methane", "CH4"], ["ethane", "C2H6"], ["propane", "C3H8"], ["butane", "C4H10"], ["glucose", "C6H12O6"], ["sucrose", "C12H22O11"], ["table sugar", "C12H22O11"], ["ethanol", "C2H5OH"], ["hydrogen peroxide", "H2O2"], ["ozone", "O3"], ["oxygen gas", "O2"], ["hydrogen gas", "H2"], ["nitrogen gas", "N2"], ["sulfuric acid", "H2SO4"], ["hydrochloric acid", "HCl"], ["nitric acid", "HNO3"], ["acetic acid", "HC2H3O2"], ["vinegar", "HC2H3O2"], ["baking soda", "NaHCO3"], ["sodium hydroxide", "NaOH"], ["lye", "NaOH"], ["calcium carbonate", "CaCO3"], ["limestone", "CaCO3"], ["rust", "Fe2O3"]];
+const SCI_PREFIX = ["", "mono", "di", "tri", "tetra", "penta", "hexa", "hepta", "octa", "nona", "deca"];
+const sciSub = f => f.replace(/\d/g, d => "₀₁₂₃₄₅₆₇₈₉"[d]);
+// A formula as element counts: Ca(OH)2 is {Ca:1, O:2, H:2}. Null when a symbol is not an element.
+function sciParse(f){
+  const s = String(f).replace(/[₀-₉]/g, c => "₀₁₂₃₄₅₆₇₈₉".indexOf(c)); let i = 0;
+  const group = () => { const c = {};
+    while(i < s.length && s[i] !== ")"){
+      let part; if(s[i] === "("){ i++; part = group(); i++; } else { const m = /^[A-Z][a-z]?/.exec(s.slice(i)); if(!m || !sciBy(m[0])) throw 0; i += m[0].length; part = {[m[0]]: 1}; }
+      const n = /^\d+/.exec(s.slice(i)); const k = n ? +n[0] : 1; if(n) i += n[0].length;
+      for(const [e, v] of Object.entries(part)) c[e] = (c[e] || 0) + v * k;
+    } return c; };
+  try{ const c = group(); return i === s.length && Object.keys(c).length ? c : null; } catch { return null; }
+}
+const sciMass = c => Object.entries(c).reduce((s, [e, k]) => s + sciBy(e).m * k, 0);
+// The name of a formula: polyatomic ions, metal plus nonmetal, or two nonmetals with prefixes.
+function sciName(f){
+  const common = SCI_COMMON.find(([, g]) => g === f); if(common && !/^(table salt|salt|vinegar|lye|limestone|rust|table sugar)$/.test(common[0])) return common[0];
+  for(const [p, pn] of SCI_POLY){ const m = new RegExp("^([A-Z][a-z]?)(\\d*)\\(?" + p + "\\)?(\\d*)$").exec(f); if(m && sciBy(m[1])) return sciBy(m[1]).n + " " + pn; if(p === "NH4"){ const n = /^\(?NH4\)?(\d*)([A-Z][a-z]?)(\d*)$/.exec(f); if(n && SCI_IDE[n[2]]) return "ammonium " + SCI_IDE[n[2]]; } }
+  const m = /^([A-Z][a-z]?)(\d*)([A-Z][a-z]?)(\d*)$/.exec(f); if(!m || !sciBy(m[1]) || !sciBy(m[3]) || !SCI_IDE[m[3]]) return null;
+  const a = m[1], na = +(m[2] || 1), b = m[3], nb = +(m[4] || 1);
+  if(!SCI_NONMETAL.has(a)){
+    if(SCI_CHARGE[a] !== undefined) return sciBy(a).n + " " + SCI_IDE[b];
+    const charge = nb * -SCI_CHARGE[b] / na; return sciBy(a).n + "(" + ["", "I", "II", "III", "IV", "V", "VI", "VII"][charge] + ") " + SCI_IDE[b];
+  }
+  return (na > 1 ? SCI_PREFIX[na] : "") + sciBy(a).n + " " + (SCI_PREFIX[nb] + SCI_IDE[b]).replace(/ao/, "o").replace(/oo/, "o");
+}
+// The formula of a name: common names, ionic names by charges, covalent names by prefixes.
+function sciFormula(name){
+  const n = name.trim().toLowerCase(), common = SCI_COMMON.find(([k]) => k === n); if(common) return common[1];
+  const words = n.split(/\s+/); if(words.length !== 2 && !(words.length === 3 && /^hydrogen$/.test(words[1]))) return null;
+  const [first, ...rest] = words, last = rest.join(" ");
+  // A prefix may drop its last vowel before "oxide": tetroxide, monoxide.
+  const pre = w => { for(const p of SCI_PREFIX.slice(1).sort((x, y) => y.length - x.length)){ if(w.startsWith(p) && w.length > p.length) return [SCI_PREFIX.indexOf(p), w.slice(p.length)]; if(/[ao]$/.test(p) && w.startsWith(p.slice(0, -1) + "o") && !w.startsWith(p)) return [SCI_PREFIX.indexOf(p), w.slice(p.length - 1)]; } return [1, w]; };
+  const poly = SCI_POLY.find(([, pn]) => pn === last), ide = Object.entries(SCI_IDE).find(([, v]) => v === last.replace(/^(mono|di|tri|tetra|penta|hexa)/, "").replace(/^xide/, "oxide"));
+  const cat = first === "ammonium" ? ["NH4", 1] : (() => { const m = /^([a-z]+)(?:\((i{1,3}|iv|v|vi)\))?$/.exec(first); const e = m && sciBy(m[1]); if(!e) return null; const r = m[2] ? {i:1, ii:2, iii:3, iv:4, v:5, vi:6}[m[2]] : SCI_CHARGE[e.s]; return r ? [e.s, r] : null; })();
+  if(cat && !SCI_NONMETAL.has(cat[0]) && (poly || ide)){
+    const [an, ac] = poly ? [poly[0], -poly[2]] : [ide[0], -SCI_CHARGE[ide[0]]], g = pcGcd(cat[1], ac), x = ac / g, y = cat[1] / g;
+    const part = (s, k, multi) => k === 1 ? s : (multi ? "(" + s + ")" : s) + k;
+    return part(cat[0], x, cat[0].length > 2) + part(an, y, !!poly);
+  }
+  // covalent: dinitrogen tetroxide is N2O4
+  const [k1, w1] = pre(first), [k2, w2] = pre(last), e1 = sciBy(w1), an2 = Object.entries(SCI_IDE).find(([, v]) => v === w2 || v === "o" + w2 || v.replace(/^o/, "") === w2);
+  if(e1 && an2 && SCI_NONMETAL.has(e1.s)) return e1.s + (k1 > 1 ? k1 : "") + an2[0] + (k2 > 1 ? k2 : "");
+  return null;
+}
+// Balance by searching small whole-number coefficients; the first set that conserves every element wins.
+function sciBalance(eq){
+  const sides = eq.split(/\s*(?:->|→|=>|=)\s*/); if(sides.length !== 2) return null;
+  const terms = sides.map(s => s.split(/\s*\+\s*/).map(t => t.trim().replace(/^\d+(?=[A-Z(])/, "")));
+  const parsed = terms.map(side => side.map(sciParse)); if(parsed.flat().some(c => !c)) return null;
+  const all = parsed.flat(), els = [...new Set(all.flatMap(c => Object.keys(c)))], n = all.length, k = new Array(n).fill(1);
+  const ok = () => els.every(e => { let s = 0; all.forEach((c, i) => s += (i < parsed[0].length ? 1 : -1) * (c[e] || 0) * k[i]); return s === 0; });
+  const rec = i => { if(i === n) return ok(); for(let v = 1; v <= 12; v++){ k[i] = v; if(rec(i + 1)) return true; } return false; };
+  if(n > 6 || !rec(0)) return null;
+  let j = 0; const show = side => side.map(t => (k[j] > 1 ? k[j] : "") + sciSub(t) + (j++, "")).join(" + ");
+  return show(terms[0]) + " → " + show(terms[1]);
+}
+function sciType(eq){
+  const sides = eq.split(/\s*(?:->|→|=>|=)\s*/); if(sides.length !== 2) return null;
+  const [l, r] = sides.map(s => s.split(/\s*\+\s*/).map(t => t.trim().replace(/^\d+/, "")));
+  const element = t => /^[A-Z][a-z]?\d*$/.test(t) && (sciBy(t.replace(/\d+$/, "")) || t.length === 1);
+  if(l.includes("O2") && r.includes("CO2") && r.includes("H2O")) return "Combustion: a fuel burns in oxygen to make carbon dioxide and water.";
+  if(/^(H[A-Z]|H\d)/.test(l[0] || "") && /OH$/.test(l[1] || "") || /OH$/.test(l[0] || "") && /^H/.test(l[1] || "")) return "Neutralization: an acid and a base make a salt and water.";
+  if(l.length >= 2 && r.length === 1) return "Synthesis (combination): two or more reactants join into one product.";
+  if(l.length === 1 && r.length >= 2) return "Decomposition: one compound breaks into simpler substances.";
+  if(l.length === 2 && r.length === 2 && l.some(element) && r.some(element)) return "Single replacement (displacement): one element takes another's place in a compound.";
+  if(l.length === 2 && r.length === 2) return "Double replacement (displacement): two compounds swap partners.";
+  return null;
+}
+const SCI_FACTS = [
+  [/\bcharge (?:of|on) (?:an? |the )?electron\b/, "-1 (−1.602 × 10⁻¹⁹ C). Electrons are negative."],
+  [/\bcharge (?:of|on) (?:an? |the )?proton\b/, "+1 (+1.602 × 10⁻¹⁹ C). Protons are positive."],
+  [/\bcharge (?:of|on) (?:an? |the )?neutron\b/, "0. Neutrons have no charge."],
+  [/^(?:what is )?(?:an? )?isotope$/, "Atoms of the same element with different numbers of neutrons, such as carbon-12 and carbon-14."],
+  [/^(?:what is )?(?:an? )?ion$/, "An atom or group of atoms with a charge, from gaining or losing electrons."],
+  [/^(?:what is )?(?:the )?(?:law of )?conservation of energy$|^(?:what is )?the law of conservation of energy$/, "Energy cannot be created or destroyed, only changed from one form to another."],
+  [/^(?:what is )?(?:the )?(?:law of )?conservation of mass$|^(?:what is )?the law of conservation of mass$/, "Mass is neither created nor destroyed in a chemical reaction: the products weigh the same as the reactants."],
+  [/\b(?:si )?units? (?:of|for) energy\b/, "The joule (J)."], [/\b(?:si )?units? (?:of|for) power\b/, "The watt (W), one joule per second."],
+  [/\b(?:si )?units? (?:of|for) force\b/, "The newton (N)."], [/\b(?:si )?units? (?:of|for) work\b/, "The joule (J)."],
+  [/\bformula for kinetic energy\b/, "KE = ½mv² (half the mass times the speed squared)."],
+  [/\bformula for (?:gravitational )?potential energy\b/, "PE = mgh (mass times g, 9.8 m/s², times height)."],
+  [/\bformula for (?:work)\b/, "W = F·d (force times distance)."], [/\bformula for power\b/, "P = W/t (work divided by time)."],
+  [/^(?:what is )?(?:the )?ph of (?:a |pure )?(?:neutral solution|pure water|water)$/, "7, which is neutral."],
+  [/^(?:what is )?(?:the )?ph of (?:a )?strong acid$/, "Low, about 0 to 2: well below 7."], [/^(?:what is )?(?:the )?ph of (?:a )?strong base$/, "High, about 12 to 14: well above 7."],
+  [/\bacid and (?:a )?base (?:produce|make|form)|\bproducts? of (?:a )?neutralization\b/, "A salt and water. That is a neutralization reaction."],
+  [/^(?:what is )?(?:a )?neutralization(?: reaction)?$/, "An acid and a base react to make a salt and water, and the pH moves toward 7."],
+  [/\bproducts? of (?:the )?combustion of (?:methane|propane|a hydrocarbon|gasoline|wood|natural gas)\b|\bcombustion of methane\b/, "Carbon dioxide and water (CO₂ and H₂O)."],
+  [/\bproducts? of photosynthesis\b/, "Glucose and oxygen, from carbon dioxide, water and light energy."],
+  [/\bproducts? of (?:cellular )?respiration\b/, "Carbon dioxide, water and energy (ATP), from glucose and oxygen."],
+  [/^(?:what is )?(?:an? )?alpha (?:particle|radiation|decay)$/, "A helium nucleus: 2 protons and 2 neutrons. It is stopped by paper or skin."],
+  [/^(?:what is )?(?:an? )?beta (?:particle|radiation|decay)$/, "A fast electron (or positron) given off by a nucleus. It is stopped by a few millimetres of aluminum."],
+  [/^(?:what is )?(?:an? )?gamma (?:ray|rays|radiation)$/, "High-energy electromagnetic radiation from a nucleus. It is the most penetrating and needs thick lead or concrete to stop."],
+  [/\b(?:most|strongest|highest) penetrat/, "Gamma radiation."], [/\b(?:least|weakest|lowest) penetrat/, "Alpha radiation."],
+  [/^(?:what is )?(?:nuclear )?fission$/, "A heavy nucleus such as uranium-235 splits into smaller nuclei, releasing energy and neutrons. Nuclear power plants use it."],
+  [/^(?:what is )?(?:nuclear )?fusion$/, "Light nuclei such as hydrogen join into a heavier one, releasing energy. It powers the Sun."],
+  [/\bwhat powers (?:the sun|stars)\b|\benergy (?:source )?of the sun\b/, "Nuclear fusion of hydrogen into helium in the core."],
+  [/^(?:what is )?radioactive decay$|^(?:what is )?radioactivity$/, "An unstable nucleus breaks down and gives off radiation (alpha, beta or gamma) to become more stable."],
+  [/^(?:what is )?(?:a )?half-?life$/, "The time it takes for half of the nuclei in a radioactive sample to decay."],
+  [/\bwhat does dna stand for\b/, "Deoxyribonucleic acid."], [/\bwhat does rna stand for\b/, "Ribonucleic acid."],
+  [/\b(?:four |4 )?(?:dna )?(?:bases|nitrogen bases|nucleotides) (?:in|of) dna\b|\bfour dna bases\b/, "Adenine, thymine, cytosine and guanine (A, T, C, G)."],
+  [/\bpairs? with adenine\b/, "Thymine in DNA (uracil in RNA)."], [/\bpairs? with thymine\b/, "Adenine."], [/\bpairs? with guanine\b/, "Cytosine."], [/\bpairs? with cytosine\b/, "Guanine."],
+  [/^(?:what is )?(?:the )?shape of dna$/, "A double helix."], [/\bhow many chromosomes (?:do )?humans have\b|\bhuman chromosomes\b/, "46, in 23 pairs."],
+  [/^(?:what is )?(?:a )?gene$/, "A section of DNA that codes for a protein, which shapes a trait."],
+  [/^(?:what is )?(?:a )?chromosome$/, "A long, coiled molecule of DNA with many genes, packed with proteins."],
+  [/^(?:what is )?(?:an? )?allele$/, "One version of a gene, such as the allele for brown eyes or for blue."],
+  [/^(?:what is )?(?:a )?dominant (?:allele|trait|gene)$/, "An allele that shows in the trait even with one copy; it masks the recessive allele."],
+  [/^(?:what is )?(?:a )?recessive (?:allele|trait|gene)$/, "An allele that is masked by a dominant one; it only shows when there are two copies."],
+  [/^(?:what is )?(?:a )?genotype$/, "The alleles an organism carries, such as Aa."], [/^(?:what is )?(?:a )?phenotype$/, "The trait you can observe, such as eye colour."],
+  [/^(?:what is )?homozygous$/, "Two identical alleles for a gene (AA or aa)."], [/^(?:what is )?heterozygous$/, "Two different alleles for a gene (Aa)."],
+  [/^(?:what is )?(?:a )?mutation$/, "A change in the DNA sequence. It can be harmful, helpful or have no effect."],
+  [/^(?:what is )?natural selection$/, "Organisms with traits that suit their environment survive and reproduce more, so those traits become more common over generations."],
+  [/^(?:what is )?evolution$/, "The change in the inherited traits of a population over many generations."],
+  [/\bhow old is the universe\b|\bage of the universe\b/, "About 13.8 billion years."], [/\bhow old is (?:the )?earth\b|\bage of (?:the )?earth\b/, "About 4.54 billion years."],
+  [/^(?:what is )?(?:a )?light[- ]year$/, "The distance light travels in one year, about 9.46 trillion km."],
+  [/\bevidence (?:for|supports?|of) (?:the )?big bang\b|\bbig bang evidence\b/, "Redshift of distant galaxies (the universe is expanding), the cosmic microwave background radiation, and the amounts of hydrogen and helium."],
+  [/^(?:what is )?(?:the )?big bang(?: theory)?$/, "The universe began about 13.8 billion years ago from an extremely hot, dense state and has been expanding ever since."],
+  [/^(?:what is )?(?:a )?red ?shift$/, "Light from an object moving away is stretched to longer, redder wavelengths. Distant galaxies are redshifted, so the universe is expanding."],
+  [/^(?:what is )?(?:a )?galaxy$/, "A huge system of billions of stars, gas and dust held together by gravity, like the Milky Way."],
+  [/^(?:what is )?(?:a )?nebula$/, "A cloud of gas and dust in space where stars form."],
+  [/\bclosest star to (?:the )?earth\b|\bnearest star to (?:the )?earth\b/, "The Sun. After it, Proxima Centauri, about 4.2 light-years away."],
+  [/\blargest planet\b/, "Jupiter."], [/\bsmallest planet\b/, "Mercury."], [/\bclosest planet to the sun\b/, "Mercury."], [/\bhottest planet\b/, "Venus."],
+  [/\blife cycle of (?:a )?(?:star|sun-like star)\b/, "Nebula, main-sequence star, red giant, then a white dwarf. A massive star ends as a supernova, then a neutron star or black hole."],
+  [/^(?:what is )?(?:a )?black hole$/, "A region where gravity is so strong that nothing, not even light, can escape."],
+];
+function sci10(q, raw){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"}), r = String(raw || q).trim().replace(/[?.!]+$/, "");
+  for(const [re, body] of SCI_FACTS) if(re.test(q)) return out(body);
+  let m;
+  // atoms and ions
+  if((m = /^(?:the )?atomic (number|mass) (?:of|for) ([a-z]+)$/.exec(q)) && sciBy(m[2])){ const e = sciBy(m[2]); return out(m[1] === "number" ? String(e.z) : pcNum(e.m) + " u (g/mol)"); }
+  if((m = /^how many (protons|electrons|neutrons) (?:does|do|are in|in) (?:an? |the )?(?:atom of )?([a-z]+)(?:-(\d+))?(?: atom)?(?: have)?$/.exec(q)) && sciBy(m[2])){
+    const e = sciBy(m[2]); if(m[1] === "neutrons"){ const a = m[3] ? +m[3] : Math.round(e.m); return out(String(a - e.z) + (m[3] ? "" : " (in the most common isotope, mass number " + a + ")")); } return out(String(e.z));
+  }
+  if((m = /\bhow many neutrons (?:does|do|are in|in) (?:an? |the )?([a-z]+)-(\d+)/.exec(q)) && sciBy(m[1])) return out(String(+m[2] - sciBy(m[1]).z));
+  if((m = /\bhow many electrons (?:does|do|are in|in) (?:an? |the )?(?:[a-z]+ )?ion ([A-Z][a-z]?)(\d*)([+-])/.exec(r)) || (m = /\bhow many electrons (?:does|do|are in|in) (?:an? |the )?([A-Z][a-z]?)(\d*)([+-])/.exec(r))){
+    const e = sciBy(m[1]); if(!e) return null; const c = (m[3] === "+" ? 1 : -1) * +(m[2] || 1); return out(String(e.z - c));
+  }
+  // compounds
+  if((m = /^(?:the )?(?:chemical )?formula (?:for|of) ([a-z() ]+)$/.exec(q))){ const f = sciFormula(m[1].replace(/^the /, "")); if(f) return out(sciSub(f)); }
+  // Case matters for formulas (Co is cobalt, CO is carbon monoxide), so these read the question as typed.
+  const typed = r.replace(/^(?:what(?:'s|’s| is)\s+)?(?:the\s+)?/i, "");
+  if((m = /^(?:name|name of) (?:the )?(?:compound |molecule )?([A-Z][A-Za-z0-9()]*)$/i.exec(typed))){ const n = sciName(m[1]); if(n) return out(n[0].toUpperCase() + n.slice(1) + "."); }
+  if((m = /^(?:molar|molecular|formula) mass (?:of|for) (.+)$/i.exec(typed))){
+    const name = m[1].trim(), f = sciParse(name) ? name : sciFormula(name.toLowerCase()), c = f && sciParse(f); if(c) return out(pcNum(+sciMass(c).toFixed(2)) + " g/mol (" + sciSub(f) + ")");
+  }
+  // reactions
+  if((m = /^balance (?:the equation )?(.+)$/i.exec(r))){ const b = sciBalance(m[1]); if(b) return out(b); }
+  if((m = /^what (?:type|kind) of reaction is (.+)$/i.exec(r))){ const t = sciType(m[1]); if(t) return out(t); }
+  if((m = /^is (?:a )?ph (?:of )?([\d.]+) (?:an? )?(?:acidic|basic|acid|base|neutral)/.exec(q))){ const p = +m[1]; return out(p < 7 ? "Acidic (below 7)." : p > 7 ? "Basic, or alkaline (above 7)." : "Neutral (exactly 7)."); }
+  // energy, work and power
+  const val = (re, s = q) => { const t = re.exec(s); return t ? +t[1] : null; };
+  if(/\bkinetic energy\b/.test(q)){ const kg = val(/([\d.]+)\s*kg\b/), v = val(/([\d.]+)\s*m\/s\b/); if(kg !== null && v !== null) return out(pcNum(+(0.5 * kg * v * v).toFixed(3)) + " J (KE = ½mv²)"); }
+  if(/\bpotential energy\b/.test(q)){ const kg = val(/([\d.]+)\s*kg\b/), h = val(/([\d.]+)\s*m\b(?!\/)/); if(kg !== null && h !== null) return out(pcNum(+(kg * 9.8 * h).toFixed(3)) + " J (PE = mgh, with g = 9.8 m/s²)"); }
+  if(/\bwork\b/.test(q) && !/\bpower\b/.test(q)){ const F = val(/([\d.]+)\s*n\b/), d = val(/([\d.]+)\s*m\b(?!\/)/); if(F !== null && d !== null) return out(pcNum(+(F * d).toFixed(3)) + " J (W = Fd)"); }
+  if(/\bpower\b/.test(q)){ const W = val(/([\d.]+)\s*(?:j|joules)\b/), t = val(/([\d.]+)\s*(?:s|seconds?)\b/); if(W !== null && t) return out(pcNum(+(W / t).toFixed(3)) + " W (P = W/t)"); }
+  if((m = /\b(?:speed|velocity)\b.*?\btravels? ([\d.]+)\s*(m|km)\b.*?\bin ([\d.]+)\s*(s|seconds?|h|hours?|min|minutes?)\b/.exec(q))){ const t = +m[3], u = m[2] + "/" + (/^s/.test(m[4]) ? "s" : /^h/.test(m[4]) ? "h" : "min"); return out(pcNum(+(+m[1] / t).toFixed(3)) + " " + u); }
+  // genetics: Punnett squares for one or two genes
+  if((m = /\b([A-Za-z]{2}(?:[A-Za-z]{2})?)\s*(?:x|×|by|and)\s*([A-Za-z]{2}(?:[A-Za-z]{2})?)\b.*?\b(?:fraction|percent|probability|chance|proportion|ratio)\b.*?\b(?:are|is|be|of)\s+([A-Za-z]{2}(?:[A-Za-z]{2})?)\b/.exec(r)) && m[1].length === m[2].length && m[1].length === m[3].length){
+    const gam = g => g.length === 2 ? [g[0], g[1]] : [g[0] + g[2], g[0] + g[3], g[1] + g[2], g[1] + g[3]];
+    const norm = g => g.length === 2 ? [...g].sort().join("") : [...g.slice(0, 2)].sort().join("") + [...g.slice(2)].sort().join("");
+    const kids = []; for(const a of gam(m[1])) for(const b of gam(m[2])) kids.push(m[1].length === 2 ? a + b : a[0] + b[0] + a[1] + b[1]);
+    const want = norm(m[3]), hit = kids.filter(k => norm(k) === want).length;
+    return out(pcRatio(hit, kids.length) + " (" + pcNum(+(hit / kids.length * 100).toFixed(2)) + "%) of the offspring are " + m[3] + ".");
+  }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
+  const sc10 = sci10(q, query); if(sc10) return sc10;
   const c12 = calc12(q); if(c12) return c12;
   const s12 = stats12(q); if(s12) return s12;
   const a12 = aw12(q); if(a12) return a12;
