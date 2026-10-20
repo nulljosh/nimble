@@ -144,6 +144,9 @@ final class PrecalcJS: @unchecked Sendable {
         // engine.js reads saved settings at load; nothing here is saved, so every read is empty.
         ctx.evaluateScript("var localStorage = {getItem(){return null}, setItem(){}, removeItem(){}};")
         ctx.evaluateScript(source)
+        // The text courses (socials, citizenship, driving) live in their own file so the web can load them late.
+        if let courses = Bundle.main.url(forResource: "courses", withExtension: "js"),
+           let text = try? String(contentsOf: courses, encoding: .utf8) { ctx.evaluateScript(text) }
         context = ctx
     }
 
