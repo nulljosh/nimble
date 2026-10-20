@@ -45,6 +45,22 @@ test("transformations and inverses", () => {
   assert.equal(body("inverse of y = 2x + 3"), "f⁻¹(x) = (x - 3)/2");
 });
 
+test("form B shapes: growth, interest, cubics, factor theorem, asymptotes, angles", () => {
+  assert.equal(body("a population of 200 doubles every 3 hours, how many after 12 hours"), "3200");
+  assert.equal(body("$500 invested at 4% compounded annually for 3 years"), "$562.43");
+  assert.equal(body("$1000 invested at 6% compounded monthly for 5 years"), "$1348.85");
+  assert.equal(body("factor x^3 - x"), "x(x + 1)(x - 1)");
+  assert.equal(body("zeros of x^3 - 6x^2 + 11x - 6"), "x = 1, x = 2, x = 3");
+  assert.equal(body("is x - 1 a factor of x^3 - 1"), "Yes. P(1) = 0.");
+  assert.equal(body("horizontal asymptote of y = (2x + 1)/(x - 3)"), "y = 2");
+  assert.match(body("is 1, 4, 9, 16 a geometric sequence"), /^No\./);
+  assert.equal(body("sum of the infinite series 8 + 4 + 2 + 1"), "16");
+  assert.equal(body("solve 2sin x - 1 = 0"), "x = π/6 or x = 5π/6");
+  assert.equal(body("coterminal angles of 3pi/4"), "-5π/4 and 11π/4 (any multiple of 2π away).");
+  assert.equal(body("what quadrant is 200 degrees in"), "Quadrant III.");
+  assert.equal(body("cot 45 degrees"), "1", "coterminal must not read as cot");
+});
+
 test("not precalc: prose and plain facts fall through", () => {
   assert.equal(E.precalc("who wrote hamlet"), null);
   assert.equal(E.precalc("capital of france"), null);

@@ -96,16 +96,57 @@ const Q = [
   ["what quadrant is 200 degrees in", /\bIII\b|third|3rd/i],
   ["coterminal angle of 400 degrees", /\b40\b/],
   ["reference angle for 150 degrees", /\b30\b/],
+  // Form C: written 2026-10-20 after form B was fixed, before any run. The honest grade now.
+  ["if f(x) = x^2, describe y = f(x + 4) - 1", /left/i],
+  ["what does y = 1/2 f(x) do", /vertical.*(compress|1\/2|half)|(compress|half).*vertical/i],
+  ["inverse of y = x/3 + 1", /3\s*\(?x\s*[-−]\s*1\)?|3x\s*[-−]\s*3/],
+  ["log base 4 of 64", /\b3\b/],
+  ["log_5(1/25)", /-2\b/],
+  ["solve 10^x = 1000", /x\s*=\s*3\b|\s3\.?$/],
+  ["solve 2^x = 10", /3\.32/],
+  ["solve log(x) = 2", /\b100\b/],
+  ["solve log2(x) = 5", /\b32\b/],
+  ["log(5) + log(2)", /^1$/],
+  ["ln(e^3)", /^3$/],
+  ["$2000 at 5% interest compounded quarterly for 10 years", /3,?2(86|87)\./],
+  ["a 50 mg sample has a half-life of 8 days, how much is left after 24 days", /6\.25/],
+  ["how long until $1000 doubles at 7% compounded annually", /10\.2|10\.24/],
+  ["domain of y = 2^x", /all real|ℝ|-∞/i],
+  ["first term of a geometric sequence with r = 2 and 5th term 48", /\b3\b/],
+  ["6th term of 1, -3, 9", /-243/],
+  ["sum of the first 10 terms of 1, 2, 4", /\b1,?023\b/],
+  ["does the series 1 + 2 + 4 + 8 converge", /\bno\b|diverge/i],
+  ["sum of 3 + 1 + 1/3 + ...", /4\.5|9\/2/],
+  ["solve x^2 - 4x - 5 = 0", /-1[^\d]+5\b|\b5[^\d]+-1/],
+  ["factor 2x^2 + 7x + 3", /\(2x\s*\+\s*1\)|\(x\s*\+\s*3\)/],
+  ["remainder when x^3 + 4x^2 - 3 is divided by x + 2", /\b5\b/],
+  ["roots of x^3 - 4x", /-2[^\d]+0[^\d]+2|0[^\d]+-?2/],
+  ["vertical asymptotes of y = 3/(x^2 - 9)", /-3[^\d]+3|3[^\d]+-3/],
+  ["horizontal asymptote of y = (3x^2 + 1)/(x^2 - 4)", /y\s*=\s*3\b/],
+  ["x-intercepts of y = x^2 - 16", /-4[^\d]+4|4[^\d]+-4/],
+  ["what is a polynomial of degree 3 called", /cubic/i],
+  ["cos(2pi/3)", /-0\.5\b|-1\/2/],
+  ["sin 150°", /0\.5|1\/2/],
+  ["tan 135 degrees", /-1\b/],
+  ["convert 5pi/6 to degrees", /\b150\b/],
+  ["convert 45 degrees to radians", /π\s*\/\s*4|0\.785/],
+  ["period of y = cos(x/2)", /4π|12\.56/],
+  ["amplitude and period of y = 4sin(3x)", /4.*2π\s*\/\s*3|2π\s*\/\s*3.*4/],
+  ["solve tan x = 1 for 0 ≤ x < 2π", /π\s*\/\s*4.*5π\s*\/\s*4/],
+  ["solve 2cos x + 1 = 0", /2π\s*\/\s*3.*4π\s*\/\s*3/],
+  ["exact value of tan(pi/3)", /√3|1\.73/],
+  ["simplify sin x / cos x", /tan/i],
+  ["sector area with radius 4 and angle pi/2", /2π|6\.28/],
 ];
 
 (async () => {
-  let pass = 0, passB = 0; const fail = [];
+  let pass = 0, passB = 0, passC = 0; const fail = [];
   for (const [i, [q, re]] of Q.entries()) {
     if (!offline && !E.tryMath(q) && !E.tryConvert(q)) await new Promise((ok) => setTimeout(ok, 3200));
     let r; try { r = await E.answer(q, offline ? { privateMode: true, pack } : { ifUnset: "yes" }); } catch (e) { r = { kind: "throw", body: String(e) }; }
     const text = [r.title, r.body, r.value, r.to, r.toUnit, r.big, r.unit, r.sub, r.text].filter((x) => x != null).join(" ");
-    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40) passB++;
+    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81) passC++;
     console.log((ok ? "PASS" : "FAIL") + " | " + q + " => " + r.kind + " | " + text.slice(0, 110).replace(/\n/g, " "));
   }
-  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB}/40, form B ${passB}/${Q.length - 40}). FAIL: ${fail.join(" ; ")}`);
+  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC}/40, form B ${passB}/41, form C ${passC}/${Q.length - 81}). FAIL: ${fail.join(" ; ")}`);
 })();

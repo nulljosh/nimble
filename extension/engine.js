@@ -1119,12 +1119,24 @@ function pcRoots([a, b, c]){
   const d = b*b - 4*a*c; if(d < -1e-12) return [];
   const s = Math.sqrt(Math.max(d, 0)); return [...new Set([(-b - s) / (2*a), (-b + s) / (2*a)].map(v => +v.toPrecision(12)))];
 }
+// The real roots of a polynomial: the quadratic formula up to degree two, rational candidates p/q above it.
+function pcPolyRoots(expr){
+  const co = pcQuad(expr); if(co) return pcRoots(co);
+  if(pcAt(expr, 0.5) === null) return null;
+  const found = new Set();
+  for(let d = 1; d <= 6; d++) for(let n = -60 * d; n <= 60 * d; n++){ const x = n / d, v = pcAt(expr, x); if(v !== null && Math.abs(v) < 1e-9) found.add(+x.toPrecision(12)); }
+  return [...found].sort((a, b) => a - b);
+}
+// The highest power of x typed, the polynomial's degree as written.
+const pcDegree = expr => Math.max(/x/.test(expr) ? 1 : 0, ...[...expr.matchAll(/x\s*\^\s*(\d+)/g)].map(m => +m[1]));
 const pcSign = r => r < 0 ? "+ " + pcFrac(-r) : "- " + pcFrac(r);
 const PC_FACTS = [
   [/^(?:what is )?(?:the )?reciprocal of sine$/, "Cosecant: csc x = 1/sin x."],
   [/^(?:what is )?(?:the )?reciprocal of cosine$/, "Secant: sec x = 1/cos x."],
   [/^(?:what is )?(?:the )?reciprocal of tangent$/, "Cotangent: cot x = 1/tan x."],
   [/^sin\s*\^?\s*2\s*\(?x\)?\s*\+\s*cos\s*\^?\s*2\s*\(?x\)?$/, "1 (the Pythagorean identity)."],
+  [/^(?:what is )?(?:the )?change of base (?:formula|rule)(?: for logarithms| for logs)?$/, "logᵦ(x) = log(x)/log(b), using any base for the logs on the right."],
+  [/^(?:what are )?(?:the )?(?:laws|rules) of (?:logarithms|logs)$/, "log(ab) = log(a) + log(b), log(a/b) = log(a) - log(b), log(aⁿ) = n·log(a)."],
   [/^(?:what is )?(?:the )?remainder theorem$/, "When a polynomial P(x) is divided by x - a, the remainder is P(a)."],
   [/^(?:what is )?(?:the )?factor theorem$/, "x - a is a factor of P(x) exactly when P(a) = 0."],
   [/^(?:what is )?(?:the )?domain of (?:y\s*=\s*|f\(x\)\s*=\s*)?(?:log|ln)(?:_?\d+)?\s*\(?x\)?$/, "x > 0. A logarithm is defined only for positive numbers."],
@@ -1140,8 +1152,13 @@ function precalc(query){
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   let m;
   // log base 3 of 81, log 5 of 125, log_2(32)
-  if((m = /^log(?:arithm)?\s*(?:base\s*|_\s*)?(\d+(?:\.\d+)?)\s*(?:of\s*|\(\s*)(\d+(?:\.\d+)?)\s*\)?$/.exec(q))){
-    const v = Math.log(+m[2]) / Math.log(+m[1]); return isFinite(v) ? out(pcNum(v)) : null;
+  if((m = /^log(?:arithm)?\s*(?:base\s*|_\s*)?(\d+(?:\.\d+)?)\s*(?:of\s*|\(\s*)([\d.]+(?:\s*\/\s*[\d.]+)?)\s*\)?$/.exec(q))){
+    const x = pcVal(m[2]), v = x === null ? NaN : Math.log(x) / Math.log(+m[1]); return isFinite(v) ? out(pcFrac(+v.toPrecision(12))) : null;
+  }
+  // expand log(ab), log(a/b), log(a^3)
+  if((m = /^expand (log|ln)\s*\(\s*([a-z])\s*(\*|\/|\^)?\s*([a-z0-9])\s*\)$/.exec(q))){
+    const [, f, a, op, b] = m;
+    return out(op === "/" ? `${f}(${a}) - ${f}(${b})` : op === "^" ? `${b}·${f}(${a})` : `${f}(${a}) + ${f}(${b})`);
   }
   // solve 3^(x+1) = 27, 2^x = 16, 5^(2x-1) = 125
   if((m = /^(?:solve\s+(?:for x:?\s*)?)?(\d+(?:\.\d+)?)\s*\^\s*\(?\s*(-?\d*(?:\.\d+)?)\s*x\s*(?:([+-])\s*(\d+(?:\.\d+)?))?\s*\)?\s*=\s*(\d+(?:\.\d+)?)$/.exec(q))){
@@ -1149,10 +1166,12 @@ function precalc(query){
     const x = (Math.log(+m[5]) / Math.log(+m[1]) - shift) / k; return isFinite(x) ? out("x = " + pcFrac(x)) : null;
   }
   // geometric sequences: a list of numbers, then what to do with it
-  const list = /(-?\d+(?:\.\d+)?(?:\s*,\s*-?\d+(?:\.\d+)?)+)/.exec(q);
-  if(list && /\b(?:geometric|common ratio|terms? of|term in)\b/.test(q)){
-    const n = list[1].split(/\s*,\s*/).map(Number), r = n[1] / n[0];
-    if(!n.every((v, i) => i === 0 || Math.abs(v - n[i - 1] * r) < 1e-9) || !isFinite(r)) return null;
+  const list = /(-?\d+(?:\.\d+)?(?:\s*[,+]\s*-?\d+(?:\.\d+)?){2,})/.exec(q) || (/\b(?:common ratio|terms? of|term in)\b/.test(q) && /(-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?)/.exec(q));
+  if(list && /\b(?:geometric|common ratio|terms? of|term in|series)\b/.test(q)){
+    const n = list[1].split(/\s*[,+]\s*/).map(Number), r = n[1] / n[0];
+    const geometric = isFinite(r) && n.every((v, i) => i === 0 || Math.abs(v - n[i - 1] * r) < 1e-9);
+    if(/^is\b/.test(q)) return out(geometric ? "Yes. Each term is " + pcFrac(r) + " times the one before." : "No. The ratios between terms are not equal (" + n.slice(1).map((v, i) => pcNum(v / n[i])).join(", ") + ").");
+    if(!geometric) return null;
     if(/common ratio/.test(q)) return out(pcFrac(r));
     if((m = /\b(\d+)(?:st|nd|rd|th) term\b/.exec(q))) return out(pcNum(n[0] * r ** (+m[1] - 1)));
     if((m = /\bsum of (?:the )?first (\d+) terms\b/.exec(q))) return out(pcNum(r === 1 ? n[0] * +m[1] : n[0] * (1 - r ** +m[1]) / (1 - r)));
@@ -1163,8 +1182,16 @@ function precalc(query){
     if(r !== null) return out(Math.abs(r) < 1 ? pcNum(a / (1 - r)) : "It diverges: an infinite geometric sum needs |r| < 1.");
   }
   // 100 g with a half life of 5 years, how much is left after 15 years
-  if((m = /([\d.]+)\s*([a-zµ]+)?\b.*half[- ]life (?:of |is )?([\d.]+)\s*([a-z]+).*?after ([\d.]+)/.exec(q))){
-    const left = +m[1] * 0.5 ** (+m[5] / +m[3]); return out(pcNum(left) + (m[2] && !/^(with|has|of)$/.test(m[2]) ? " " + m[2] : ""));
+  // 100 g with a half life of 5 years; a population of 200 doubles every 3 hours. How much after T?
+  if((m = /([\d.]+)\s*([a-zµ]+)?\b.*?(half[- ]life (?:of |is )?|doubles every |triples every )([\d.]+)\s*([a-z]+).*?after ([\d.]+)/.exec(q))){
+    const k = /^half/.test(m[3]) ? 0.5 : /^doubles/.test(m[3]) ? 2 : 3, left = +m[1] * k ** (+m[6] / +m[4]);
+    return out(pcNum(left) + (m[2] && !/^(with|has|of|doubles|triples|grows|is)$/.test(m[2]) ? " " + m[2] : ""));
+  }
+  // $500 invested at 4% compounded monthly for 3 years
+  if((m = /\$?\s*([\d,]+(?:\.\d+)?)\s*(?:dollars )?(?:is |are )?(?:invested|deposited|saved|borrowed) at ([\d.]+)\s*%(.*?)\b(?:for|after|over) ([\d.]+) years?/.exec(q))){
+    const n = {daily:365, weekly:52, monthly:12, quarterly:4, "semi-annually":2, semiannually:2}[(/compounded (daily|weekly|monthly|quarterly|semi-?annually|annually|yearly)/.exec(m[3]) || [])[1]] || 1;
+    const amt = +m[1].replace(/,/g, "") * (1 + +m[2] / 100 / n) ** (n * +m[4]);
+    return out("$" + amt.toFixed(2));
   }
   // degrees and radians
   if((m = /^(?:convert )?(.+?)\s*(?:degrees?|deg|°)\s+(?:to|in|into)\s+radians?$/.exec(q))){
@@ -1178,7 +1205,31 @@ function precalc(query){
   if((m = /^(?:the )?remainder (?:when |of )?(.+?) (?:is )?divided by \(?\s*x\s*([+-])\s*([\d.]+)\s*\)?$/.exec(q))){
     const v = pcAt(m[1], (m[2] === "-" ? 1 : -1) * +m[3]); return v === null ? null : out(pcNum(v));
   }
+  // is x - 1 a factor of x^3 - 1
+  if((m = /^is \(?\s*x\s*([+-])\s*([\d.]+)\s*\)? a factor of (.+)$/.exec(q))){
+    const a = (m[1] === "-" ? 1 : -1) * +m[2], v = pcAt(m[3], a); if(v === null) return null;
+    return out(Math.abs(v) < 1e-9 ? "Yes. P(" + pcNum(a) + ") = 0." : "No. P(" + pcNum(a) + ") = " + pcNum(v) + ", so that is the remainder.");
+  }
+  // horizontal asymptote and end behaviour, read from far out along x
+  if((m = /^horizontal asymptotes? of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$/.exec(q))){
+    const a = pcAt(m[1], 1e6), b = pcAt(m[1], 1e7); if(a === null || b === null) return null;
+    return out(Math.abs(a - b) < 1e-3 * Math.max(1, Math.abs(b)) ? "y = " + pcFrac(+b.toFixed(4)) : "None. It grows without bound.");
+  }
+  if((m = /^end behaviou?r of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$/.exec(q))){
+    const hi = pcAt(m[1], 1e6), lo = pcAt(m[1], -1e6); if(hi === null || lo === null) return null;
+    const to = v => Math.abs(v) < 1e3 ? pcNum(+v.toFixed(4)) : v > 0 ? "∞" : "-∞";
+    return out("As x → ∞, y → " + to(hi) + ". As x → -∞, y → " + to(lo) + ".");
+  }
   // roots, zeros, solving and factoring a quadratic
+  if((m = /^(?:roots?|zeros?|solve|factor|x-intercepts?)\s+(?:of\s+)?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?$/.exec(q)) && /x\s*\^\s*[3-6]/.test(m[1])){
+    const roots = pcPolyRoots(m[1]); if(!roots) return null;
+    const deg = pcDegree(m[1]), lead = Math.round(pcAt(m[1], 1e4) / 1e4 ** deg);
+    if(/^factor/.test(q)){
+      if(roots.length !== deg || roots.some(r => !Number.isInteger(r))) return out(roots.length ? "Its rational roots are " + roots.map(pcFrac).join(", ") + ", but it does not split into integer factors." : "It has no rational roots.");
+      return out((lead === 1 ? "" : lead === -1 ? "-" : lead) + [...roots].sort((x, y) => (x !== 0) - (y !== 0)).map(r => r === 0 ? "x" : "(x " + pcSign(r) + ")").join(""));
+    }
+    return out(roots.length ? roots.map(r => "x = " + pcFrac(r)).join(", ") : "No rational roots.");
+  }
   if((m = /^(?:roots?|zeros?|solve|factor|x-intercepts?)\s+(?:of\s+)?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?$/.exec(q)) && /x\s*\^\s*2|x²/.test(m[1])){
     const co = pcQuad(m[1].replace(/x²/g, "x^2")); if(!co) return null;
     const roots = pcRoots(co);
@@ -1202,8 +1253,11 @@ function precalc(query){
     const p = (m[3] === "tan" ? Math.PI : 2 * Math.PI) / b; return out((pcPi(p) || pcNum(p)) + (pcPi(p) ? " ≈ " + pcNum(p) : ""));
   }
   // solve sin x = 1/2 for 0 ≤ x < 2π
-  if((m = /^solve\s+(sin|cos|tan)\s*\(?x\)?\s*=\s*(-?[^\s,]+)(.*)$/.exec(q))){
-    const k = pcVal(m[2].replace(/√(\d)/g, "sqrt($1)")); if(k === null) return null;
+  if((m = /^solve\s+(-?[\d.]*)\s*(sin|cos|tan)\s*\(?x\)?\s*(?:([+-])\s*([\d.]+))?\s*=\s*(-?[^\s,]+)(.*)$/.exec(q))){
+    const coef = m[1] === "" ? 1 : m[1] === "-" ? -1 : +m[1], shift = m[3] ? (m[3] === "-" ? -1 : 1) * +m[4] : 0;
+    const rhs = pcVal(m[5].replace(/√(\d)/g, "sqrt($1)")); if(rhs === null) return null;
+    const k = (rhs - shift) / coef;
+    m = [m[0], m[2], m[5], m[6]];
     const f = m[1], base = f === "sin" ? Math.asin(k) : f === "cos" ? Math.acos(k) : Math.atan(k);
     if(isNaN(base)) return out("No solution: sine and cosine stay between -1 and 1.");
     const two = 2 * Math.PI, norm = v => ((v % two) + two) % two;
@@ -1212,7 +1266,7 @@ function precalc(query){
     return out(xs.map(v => "x = " + (deg ? pcNum(v * 180 / Math.PI) + "°" : pcPi(v) || pcNum(v))).join(" or "));
   }
   // sin 30 degrees, exact value of cos(5pi/6), tan(45°)
-  if((m = /^(?:the )?(exact value of )?(sin|cos|tan|csc|sec|cot)\s*\(?\s*([^)°]+?)\s*(°|degrees?|deg)?\s*\)?\s*(°|degrees?|deg)?$/.exec(q))){
+  if((m = /^(?:the )?(exact value of )?(sin|cos|tan|csc|sec|cot)(?![a-z])\s*\(?\s*([^)°]+?)\s*(°|degrees?|deg)?\s*\)?\s*(°|degrees?|deg)?$/.exec(q))){
     const a = pcVal(m[3]); if(a === null) return null;
     const rad = m[4] || m[5] ? a * Math.PI / 180 : a;
     const s = Math.sin(rad), c = Math.cos(rad);
@@ -1220,6 +1274,16 @@ function precalc(query){
     if(!isFinite(v) || Math.abs(v) > 1e12) return out("Undefined at that angle.");
     const exact = pcExact(v);
     return out(exact && exact !== pcNum(v) ? exact + " ≈ " + pcNum(v) : pcNum(v));
+  }
+  // quadrant, coterminal and reference angles, in degrees (or radians when the angle names pi)
+  if((m = /^(?:what |which )?(quadrant|coterminal angles?|reference angle)\s+(?:is |of |for |does )?(?:the angle )?(-?[\d.]+\s*(?:π|pi)?(?:\s*\/\s*\d+)?)\s*(°|degrees?|deg|radians?)?(?: in| lie in| fall in)?$/.exec(q)) || (m = /^(?:what |which )?(quadrant) (?:is |does )?(-?[\d.]+)\s*(°|degrees?|deg)? (?:in|lie in)$/.exec(q))){
+    const rad = /π|pi/.test(m[2]) || /^rad/.test(m[3] || ""), a = pcVal(m[2]); if(a === null) return null;
+    const deg = rad ? a * 180 / Math.PI : a, d = ((deg % 360) + 360) % 360;
+    const show = v => rad ? (pcPi(v * Math.PI / 180) || pcNum(v * Math.PI / 180)) : pcNum(v) + "°";
+    if(/^quadrant/.test(m[1])) return out(d % 90 === 0 ? "None. It lies on an axis." : "Quadrant " + ["I", "II", "III", "IV"][Math.floor(d / 90)] + ".");
+    if(/^coterminal/.test(m[1])) return out(show(Math.abs(d - deg) < 1e-9 ? deg - 360 : d) + " and " + show(deg + 360) + " (any multiple of " + (rad ? "2π" : "360°") + " away).");
+    const ref = d <= 90 ? d : d <= 180 ? 180 - d : d <= 270 ? d - 180 : 360 - d;
+    return out(show(ref));
   }
   // arc length with radius 5 and angle 2 radians
   if((m = /^arc length\b.*?radius (?:of |is )?([\d.]+).*?angle (?:of |is )?([\d.π\/pi ]+?)\s*(radians?|rad|degrees?|°)?$/.exec(q))){
