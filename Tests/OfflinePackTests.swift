@@ -81,7 +81,8 @@ final class OfflinePackTests: XCTestCase {
 
         try await store.install(gz: gz)
         XCTAssertEqual(store.phase, .ready)
-        XCTAssertEqual(store.pack?.entries.count, 9000)
+        // The fixture is a symlink to docs/pack, which CI rebuilds monthly, so the count only has a floor.
+        XCTAssertGreaterThanOrEqual(store.pack?.entries.count ?? 0, 9000)
 
         let paris = try XCTUnwrap(store.answer("capital of france"))
         XCTAssertTrue(paris.text.contains("Paris"), paris.text)

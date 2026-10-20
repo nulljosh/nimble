@@ -335,7 +335,7 @@ final class QueryEngine: Sendable {
     }
 
     enum MathLexer {
-        static let functions = ["sqrt", "cbrt", "sin", "cos", "tan", "log", "ln", "abs"]
+        static let functions = ["sqrt", "cbrt", "sin", "cos", "tan", "log", "log2", "log10", "ln", "abs"]
 
         /// Returns nil on the first character that is not part of a math
         /// expression -- this is what makes trailing junk a hard failure.
@@ -365,6 +365,10 @@ final class QueryEngine: Sendable {
                 if c.isLetter {
                     var j = i
                     while j < chars.count, chars[j].isLetter { j += 1 }
+                    // "log2" and "log10" carry their base in the name, as on the web.
+                    if String(chars[i..<j]) == "log" {
+                        for base in ["10", "2"] where String(chars[j..<min(j + base.count, chars.count)]) == base { j += base.count; break }
+                    }
                     let word = String(chars[i..<j])
                     if functions.contains(word) {
                         tokens.append(.function(word))
@@ -510,7 +514,8 @@ final class QueryEngine: Sendable {
             case "sin": return sin(x)
             case "cos": return cos(x)
             case "tan": return tan(x)
-            case "log": return x <= 0 ? nil : log10(x)
+            case "log", "log10": return x <= 0 ? nil : log10(x)
+            case "log2": return x <= 0 ? nil : log2(x)
             case "ln": return x <= 0 ? nil : log(x)
             case "abs": return abs(x)
             default: return nil

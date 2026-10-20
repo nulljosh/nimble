@@ -232,29 +232,9 @@ final class AppState {
         let encoded = text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? text
         searchURL = "https://duckduckgo.com/?q=\(encoded)"
 
-        // Units, then math, both offline
-        if let converted = queryEngine.convert(text) {
-            result = converted
-            remember(text)
-            return
-        }
-        if mathEnabled {
-            if let mathResult = queryEngine.evaluateMath(text) {
-                result = .math(mathResult, steps: queryEngine.mathSteps(text) ?? [])
-                remember(text)
-                return
-            }
-        }
-
-        if let graphExpr = queryEngine.graphExpression(text), let graph = queryEngine.sampleGraph(graphExpr) {
-            result = graph
-            remember(text)
-            return
-        }
-
-        // A city the device's own time zone list names answers with no network, even in Private mode.
-        if let time = QueryEngine.deviceTime(text) {
-            result = time
+        // Units, math, graphs, the device's time zones and constants: no network, even in Private mode.
+        if let local = queryEngine.localAnswer(text, math: mathEnabled) {
+            result = local
             remember(text)
             return
         }

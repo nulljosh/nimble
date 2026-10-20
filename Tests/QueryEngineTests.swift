@@ -164,6 +164,12 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertEqual(engine.evaluateMath("what's 9+10"), "19")
     }
 
+    func testLogWithBaseInTheName() {
+        XCTAssertEqual(engine.evaluateMath("log10(1000)"), "3")
+        XCTAssertEqual(engine.evaluateMath("log2(8)"), "3")
+        XCTAssertEqual(engine.evaluateMath("log(100)"), "2")
+    }
+
     func testNonMathReturnsNil() {
         XCTAssertNil(engine.evaluateMath("hello world"))
     }

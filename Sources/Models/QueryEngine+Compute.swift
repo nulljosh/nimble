@@ -5,6 +5,15 @@ import CoreGraphics
 // Both run before the answer engine, fully offline.
 extension QueryEngine {
 
+    /// Everything that answers with no network: units, math, graphs, the device's time zones, constants and who made
+    /// Nimble. AppState asks this first; the offline exam (Tests/OfflineExamTests.swift) runs the same chain.
+    func localAnswer(_ text: String, math: Bool = true) -> QueryResult? {
+        if let converted = convert(text) { return converted }
+        if math, let value = evaluateMath(text) { return .math(value, steps: mathSteps(text) ?? []) }
+        if let expr = graphExpression(text), let graph = sampleGraph(expr) { return graph }
+        return Self.deviceTime(text) ?? constantAnswer(text) ?? identityAnswer(text)
+    }
+
     // MARK: - Units
 
     /// ponytail: flat table in base units (m, kg, L, m/s, B, s); add rows, not code.
