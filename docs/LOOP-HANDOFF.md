@@ -24,9 +24,9 @@ Rules that bite:
 
 ## Where things stand
 
-- Repo: main at 346f7d8 (2026-10-19 afternoon). The Kotlin offline exam at 72 of 154 is in (13d6976); the roadmap was pruned of checked items (346f7d8). Latest tag v10.0.0, Homebrew tap at 10.0.0. The handoff commit's Tests and Deploy site runs were still queued when this was written, so check CI first.
+- Repo: main at b64aaab (2026-10-20 10:29). University Calculus I is in: 120 of 120 offline on every platform, honest fresh first runs 21 and 32 of 40. The socials, citizenship and driving answer tables moved to docs/courses.js, about 80 KB off the first web load. Latest tag v10.0.0, Homebrew tap at 10.0.0. Check CI on main first.
 - Exam: 154 of 154 online on the web. Offline, the 14,000-article pack passes 72 of 154 with 3 wrong on the web, Kotlin and the Apple apps (Tests/OfflineExamTests.swift, run with TEST_RUNNER_NIMBLE_EXAM=1). Method and numbers are in docs/BENCHMARK.md.
-- Store, checked with asc 2026-10-20 00:00: iPhone 9.4.4 is READY_FOR_SALE. Mac 9.4.3 is WAITING_FOR_REVIEW. 10.0.0 is tagged; the next store build carries it.
+- Store, checked with asc 2026-10-20 afternoon: iPhone 9.4.4 is READY_FOR_SALE. Mac 9.4.3 is IN_REVIEW. 10.0.0 is tagged; the next store build carries it.
 - Price: $0.99 on the App Store since 2026-10-18. License Apache 2.0. Web stays free. MONEY.md says what the dollar buys.
 - Worker (nimble-answers.trommatic.workers.dev): Groq answers first, then Workers AI, then Wikipedia. The Samantha tier stays off until SAMANTHA_URL is set. API keys are issued through the API_KEYS secret. The live status page is at nimble.jaybulb.com/status.
 - Shipped on the web this round, and on the next store build: the status page, minimum wage by province from the Government of Canada table, the compare card with two rows, one-file JavaScript and Python API clients in sdk/, CI size budgets (Mac 11.9 MB of 20, iPhone 12.9 MB of 15), the review key moved into an Authorization header and rotated, and offline Kotlin unit conversion and time.
