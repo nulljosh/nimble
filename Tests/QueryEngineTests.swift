@@ -159,6 +159,11 @@ final class QueryEngineTests: XCTestCase {
 
     // MARK: - Non-math rejection
 
+    func testWhatsPrefixWithSymbolsAndCurlyApostrophe() {
+        XCTAssertEqual(engine.evaluateMath("What’s 9+10"), "19")
+        XCTAssertEqual(engine.evaluateMath("what's 9+10"), "19")
+    }
+
     func testNonMathReturnsNil() {
         XCTAssertNil(engine.evaluateMath("hello world"))
     }

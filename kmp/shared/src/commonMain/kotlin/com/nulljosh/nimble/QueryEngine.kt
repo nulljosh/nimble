@@ -136,7 +136,7 @@ object QueryEngine {
 
     /** "whats nine plus ten" -> "9 + 10". Null when it is not word-math. */
     fun parseNaturalLanguageMath(input: String): String? {
-        var text = input.lowercase().trim()
+        var text = input.lowercase().replace("’", "'").trim()
 
         for (filler in fillerPatterns) {
             if (text.startsWith(filler)) text = text.removePrefix(filler)
@@ -147,7 +147,7 @@ object QueryEngine {
         if (everyday == text) {
             // "what is 9 times 3" has digits, not number words: either kind counts.
             if (!wordNumbers.keys.any { text.contains(it) } && text.none { it.isDigit() }) return null
-            if (!wordOperators.keys.any { text.contains(it) }) return null
+            if (!wordOperators.keys.any { text.contains(it) } && !Regex("""\d\s*[+*/^%-]\s*[\d(]""").containsMatchIn(text)) return null
         }
         text = everyday
 

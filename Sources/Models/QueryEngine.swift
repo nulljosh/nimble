@@ -1331,7 +1331,8 @@ final class QueryEngine: Sendable {
     }
 
     func parseNaturalLanguageMath(_ input: String) -> String? {
-        var text = input.lowercased().trimmingCharacters(in: .whitespaces)
+        // The iPhone keyboard types a curly apostrophe: "What’s 9+10".
+        var text = input.lowercased().replacingOccurrences(of: "’", with: "'").trimmingCharacters(in: .whitespaces)
 
         // Strip filler ("what is the ...")
         for filler in Self.fillerPatterns where text.hasPrefix(filler) {
@@ -1345,7 +1346,7 @@ final class QueryEngine: Sendable {
             // Must contain a number (digit or word) and an operator word or a root ("12 squared", "cube root of 27").
             let rootPattern = "\\b(square root|sqrt|cube root|cbrt)(?: of)?\\s+"
             let hasNumber = text.range(of: "\\d", options: .regularExpression) != nil || Self.wordNumbers.keys.contains(where: { text.contains($0) })
-            let hasOperator = Self.wordOperators.keys.contains(where: { text.contains($0) }) || text.range(of: rootPattern, options: .regularExpression) != nil
+            let hasOperator = Self.wordOperators.keys.contains(where: { text.contains($0) }) || text.range(of: "\\d\\s*[+*/^%-]\\s*[\\d(]", options: .regularExpression) != nil || text.range(of: rootPattern, options: .regularExpression) != nil
             guard hasNumber && hasOperator else { return nil }
         }
         text = everyday
