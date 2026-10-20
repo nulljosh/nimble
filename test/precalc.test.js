@@ -67,7 +67,12 @@ test("form C shapes: rational factors, x/2 periods, log equations, doubling time
   assert.equal(body("amplitude and period of y = 4sin(3x)"), "Amplitude 4, period 2π/3 ≈ 2.094395102.");
   assert.equal(body("solve log2(x) = 5"), "x = 32");
   assert.equal(body("how long until $1000 doubles at 7% compounded annually"), "10.24 years");
-  assert.equal(body("inverse of y = x/3 + 1"), "f⁻¹(x) = 3(x - 1)");
+  assert.equal(body("inverse of y = x/3 + 1"), "f⁻¹(x) = 3x - 3");
+  assert.equal(body("inverse of y = (2x + 1)/3"), "f⁻¹(x) = (3x - 1)/2");
+  assert.equal(body("if f(x) = 2x - 1, find f^-1(5)"), "3");
+  assert.equal(body("a car worth $30000 depreciates 15% per year, value after 5 years"), "$13311.16");
+  assert.equal(body("how many terms are in 3, 6, 12, ..., 384"), "8 terms");
+  assert.equal(body("solve 2cos^2 x - 1 = 0"), "x = π/4 or x = 3π/4 or x = 5π/4 or x = 7π/4");
   assert.equal(body("sum of 3 + 1 + 1/3 + ..."), "4.5");
   assert.match(body("does the series 1 + 2 + 4 + 8 converge"), /^No\./);
   assert.equal(body("sector area with radius 4 and angle pi/2"), "4π ≈ 12.56637061");

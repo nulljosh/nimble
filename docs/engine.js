@@ -1275,6 +1275,12 @@ function precalc(query){
     if(/^\d/.test(m[1])) return out("x ≠ " + x0 + ".");
     return out("x " + (/sqrt|√/.test(m[1]) ? (up ? "≥ " : "≤ ") : (up ? "> " : "< ")) + x0 + ".");
   }
+  // if f(x) = 2x - 1, find f^-1(5) (or f(5))
+  if((m = /f\(x\)\s*=\s*(.+?),?\s+(?:find|what is|evaluate|calculate)\s+(?:the value of )?f\s*(\^\s*\(?-1\)?|⁻¹|inverse)?\s*\(\s*(-?[\d./]+)\s*\)$/.exec(q))){
+    const a = pcVal(m[3]); if(a === null) return null;
+    if(!m[2]){ const v = pcAt(m[1], a); return v === null ? null : out(pcFrac(+v.toPrecision(12))); }
+    const xs = pcScanRoots("(" + m[1] + ")-(" + a + ")"); return xs.length === 1 ? out(pcFrac(xs[0])) : null;
+  }
   // is the inverse of y = x^2 a function
   if(/^is the inverse of (?:y|f\(x\))\s*=\s*x\s*\^\s*2 a function$/.test(q)) return out("No. y = x² fails the horizontal line test, so its inverse is a function only if the domain is restricted, such as x ≥ 0.");
   // write 0.333... as a fraction
@@ -1355,8 +1361,10 @@ function precalc(query){
     return out(pcNum(d - Math.abs(a)) + " ≤ y ≤ " + pcNum(d + Math.abs(a)));
   }
   // solve sin^2 x = 1/4: sin x = ±1/2
-  if((m = /^solve\s+(sin|cos|tan)\s*\^\s*2\s*\(?x\)?\s*=\s*([\d./]+)(.*)$/.exec(q))){
-    const k = pcVal(m[2]); if(k === null || k < 0) return null;
+  if((m = /^solve\s+([\d.]*)\s*(sin|cos|tan)\s*\^\s*2\s*\(?x\)?\s*(?:([+-])\s*([\d.]+))?\s*=\s*(-?[\d./]+)(.*)$/.exec(q))){
+    const rhs = pcVal(m[5]); if(rhs === null) return null;
+    const k = (rhs - (m[3] ? (m[3] === "-" ? -1 : 1) * +m[4] : 0)) / (m[1] ? +m[1] : 1); if(k < 0) return out("No solution: a square is never negative.");
+    m = [m[0], m[2], m[5], m[6]];
     const two = 2 * Math.PI, norm = v => +(((v % two) + two) % two).toPrecision(12), xs = new Set();
     for(const s of [Math.sqrt(k), -Math.sqrt(k)]){
       const base = m[1] === "sin" ? Math.asin(s) : m[1] === "cos" ? Math.acos(s) : Math.atan(s); if(isNaN(base)) continue;
@@ -1370,9 +1378,9 @@ function precalc(query){
     const x = pcVal(m[2]), v = x === null ? NaN : Math.log(x) / Math.log(+m[1]); return isFinite(v) ? out(pcFrac(+v.toPrecision(12))) : null;
   }
   // solve log(x) = 2, log2(x) = 5, ln(x) = 1
-  if((m = /^solve\s+(log|ln)\s*(?:_\s*)?(\d*)\s*\(?\s*x\s*\)?\s*=\s*(-?[\d.]+)$/.exec(q))){
-    const b = m[1] === "ln" ? Math.E : m[2] ? +m[2] : 10, x = b ** +m[3];
-    return out("x = " + (m[1] === "ln" ? "e^" + m[3] + " ≈ " + pcNum(x) : pcNum(x)));
+  if((m = /^solve\s+([\d.]*)\s*(log|ln)\s*(?:_\s*)?(\d*)\s*\(?\s*x\s*\)?\s*=\s*(-?[\d.]+)$/.exec(q))){
+    const c = +m[4] / (m[1] ? +m[1] : 1), b = m[2] === "ln" ? Math.E : m[3] ? +m[3] : 10, x = b ** c;
+    return out("x = " + (m[2] === "ln" ? "e^" + pcNum(c) + " ≈ " + pcNum(x) : pcNum(x)));
   }
   // expand log(ab), log(a/b), log(a^3)
   if((m = /^expand (log|ln)\s*\(\s*([a-z])\s*(\*|\/|\^)?\s*([a-z0-9])\s*\)$/.exec(q))){
@@ -1385,6 +1393,27 @@ function precalc(query){
     const x = (Math.log(+m[5]) / Math.log(+m[1]) - shift) / k; return isFinite(x) ? out("x = " + pcFrac(x)) : null;
   }
   // geometric sequences: a list of numbers, then what to do with it
+  // the first term is 4 and the common ratio is 1/2: the 6th term, or the sum of the first n
+  if((m = /first term (?:is |of |=\s*)?(-?[\d./]+)\b.*?(?:common )?ratio (?:is |of |=\s*)?(-?[\d./]+)/.exec(q))){
+    const a = pcVal(m[1]), r = pcVal(m[2]), t = /\b(\d+)(?:st|nd|rd|th) term\b/.exec(q), sn = /\bsum of (?:the )?first (\d+)/.exec(q);
+    if(a !== null && r !== null && t) return out(pcFrac(+(a * r ** (+t[1] - 1)).toPrecision(12)));
+    if(a !== null && r !== null && sn) return out(pcNum(r === 1 ? a * +sn[1] : a * (1 - r ** +sn[1]) / (1 - r)));
+  }
+  // how many terms are in 3, 6, 12, ..., 384 (geometric or arithmetic)
+  if((m = /how many terms\b.*?(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*,\s*(?:\.\.\.|…)\s*,\s*(-?[\d.]+)/.exec(String(query).toLowerCase()))){
+    const [a, b, c, z] = m.slice(1, 5).map(Number);
+    const n = b - a === c - b ? (z - a) / (b - a) + 1 : Math.abs(c / b - b / a) < 1e-9 ? Math.log(z / a) / Math.log(b / a) + 1 : NaN;
+    return Number.isInteger(+n.toPrecision(9)) && n > 0 ? out(+n.toPrecision(9) + " terms") : null;
+  }
+  // a town of 15000 grows 2% per year; a car worth $30000 depreciates 15% per year. Value after n.
+  if((m = /([\d,]+(?:\.\d+)?)\b.*?\b(grows?|increases?|appreciates?|rises?|decays?|decreases?|depreciates?|loses?|declines?|drops?|falls?)\b(?: by| at)?\s*([\d.]+)\s*%\s*(?:per|a|each|every)\s*([a-z]+).*?after ([\d.]+)/.exec(q))){
+    const down = /^(decay|decreas|depreciat|los|declin|drop|fall)/.test(m[2]), v = +m[1].replace(/,/g, "") * (1 + (down ? -1 : 1) * +m[3] / 100) ** +m[5];
+    return out(/\$/.test(q) ? "$" + v.toFixed(2) : pcNum(+v.toFixed(1)));
+  }
+  // how long for 100 g to decay to 25 g with a half-life of 6 hours
+  if((m = /how long\b.*?([\d.]+)\s*[a-zµ]*\s*to (?:decay |drop |fall |reduce |shrink )?to ([\d.]+).*?half[- ]life (?:of |is )?([\d.]+)\s*([a-z]+)/.exec(q))){
+    const t = +m[3] * Math.log(+m[2] / +m[1]) / Math.log(0.5); return isFinite(t) && t > 0 ? out(pcNum(+t.toFixed(4)) + " " + m[4]) : null;
+  }
   // first term of a geometric sequence with r = 2 and 5th term 48
   if((m = /\bfirst term\b.*?\br\s*(?:=|is)\s*(-?[\d./]+).*?\b(\d+)(?:st|nd|rd|th) term (?:is |of |=\s*)?(-?[\d.]+)/.exec(q))){
     const r = pcVal(m[1]); return r === null ? null : out(pcFrac(+(+m[3] / r ** (+m[2] - 1)).toPrecision(12)));
@@ -1495,6 +1524,10 @@ function precalc(query){
     }
     return out(roots.length ? roots.map(r => "x = " + pcFrac(r)).join(" and ") : "No real roots.");
   }
+  if((m = /^(?:roots?|zeros?|solve|x-intercepts?)\s+(?:of\s+)?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?$/.exec(q)) && /x/.test(m[1]) && !/\b(sin|cos|tan|log|ln)\b/.test(m[1])){
+    const roots = pcScanRoots(m[1].replace(/^([^=]+)=([^=]+)$/, "($1)-($2)"));
+    if(roots.length && roots.length <= 6) return out(roots.map(r => "x = " + pcFrac(r)).join(", "));
+  }
   // vertical asymptote of y = 1/(x - 3)
   if((m = /^vertical asymptotes? of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)\s*\/\s*\((.+)\)$/.exec(q))){
     const co = pcQuad(m[2]); if(!co) return null;
@@ -1571,15 +1604,18 @@ function precalc(query){
   if((m = /^(?:the )?inverse (?:function )?of (?:y|f\(x\))\s*=\s*([-+*\/.\d x()]+)$/.exec(q)) && /x/.test(m[1])){
     const b = pcAt(m[1], 0), k0 = pcAt(m[1], 1), k2 = pcAt(m[1], 2);
     if(b === null || k0 === null || k2 === null || Math.abs((k2 - b) - 2 * (k0 - b)) > 1e-9 || k0 === b) return null;
-    const k = +(k0 - b).toPrecision(12);
-    if(Number.isInteger(+(1 / k).toPrecision(9)) && Math.abs(k) < 1){
-      const inv = +(1 / k).toPrecision(9);
-      return out("f⁻¹(x) = " + (inv === -1 ? "-" : inv) + (b === 0 ? "x" : "(x " + (b > 0 ? "- " + pcNum(b) : "+ " + pcNum(-b)) + ")"));
-    }
-    const top = b === 0 ? "x" : "(x " + (b > 0 ? "- " + pcNum(b) : "+ " + pcNum(-b)) + ")";
-    return out("f⁻¹(x) = " + (k === 1 ? top.replace(/^\((.*)\)$/, "$1") : top + "/" + pcNum(k)));
+    // f⁻¹(x) = (x - b)/k, written over one whole-number denominator: (3x - 1)/2, not decimals.
+    const k = k0 - b, slope = 1 / k, cut = -b / k;
+    const den = v => +(pcFrac(+v.toPrecision(9)).split("/")[1] || 1), L = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].find(d => d % den(slope) === 0 && d % den(cut) === 0);
+    if(!L) return out("f⁻¹(x) = (x - " + pcNum(b) + ")/" + pcNum(k));
+    const A = Math.round(slope * L), B = Math.round(cut * L);
+    const top = (A === 1 ? "" : A === -1 ? "-" : A) + "x" + (B ? (B > 0 ? " + " + B : " - " + -B) : "");
+    return out("f⁻¹(x) = " + (L === 1 ? top : (B ? "(" + top + ")" : top) + "/" + L));
   }
   // what does y = -2f(3(x - 1)) + 4 do to the graph
+  if((m = /y\s*=\s*(-?)\s*([\d.\/]*)\s*f\s*\(\s*x\s*\/\s*(\d+(?:\.\d+)?)\s*\)/.exec(q)) && /\b(do|does|graph|describe|change|changes|effect)\b/.test(q)){
+    const d = +m[3]; return out("It stretches it horizontally by a factor of " + pcNum(d) + ".");
+  }
   if((m = /y\s*=\s*(-?)\s*([\d.\/]*)\s*f\s*\(\s*(-?)\s*([\d.\/]*)\s*(?:\(\s*)?x\s*(?:([+-])\s*([\d.]+))?\s*\)?\s*\)\s*(?:([+-])\s*([\d.]+))?/.exec(q)) && /\b(do|does|graph|transform|transformation|effect|describe|change|changes)\b/.test(q)){
     if(m[2]) m[2] = String(pcVal(m[2])); if(m[4]) m[4] = String(pcVal(m[4]));
     const say = [];

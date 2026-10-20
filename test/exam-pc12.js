@@ -219,10 +219,51 @@ const Q = [
   ["reference angle of 5pi/4", /π\s*\/\s*4/],
   ["simplify 1 - cos^2 x", /sin\s*(\^\s*2|²)\s*x|sin²/i],
   ["arc length of a circle with radius 3 and central angle 60 degrees", /π|3\.14/],
+  // Form F: written 2026-10-20 after form E was fixed, before any run. Keys checked with node.
+  ["describe y = -f(x) + 3", /reflect.*x.axis.*up|up.*reflect/i],
+  ["what does y = f(x/2) do", /horizontal.*stretch|stretch.*horizontal|factor of 2/i],
+  ["inverse of y = (2x + 1)/3", /\(3x\s*-\s*1\)\s*\/\s*2|1\.5x\s*-\s*0\.5/],
+  ["if f(x) = 2x - 1, find f^-1(5)", /\b3\b/],
+  ["log base 2 of 128", /\b7\b/],
+  ["log(10^5)", /^5$|\s5\.?$/],
+  ["solve 3^x = 1/9", /-2\b/],
+  ["solve 5^(x+2) = 25", /x\s*=\s*0\b|\s0\.?$/],
+  ["solve log3(x) = 4", /\b81\b/],
+  ["solve 2 log(x) = 4", /\b100\b/],
+  ["ln(e^5)", /^5$|\s5\.?$/],
+  ["log2(16) - log2(2)", /^3$|\s3\.?$/],
+  ["$1200 at 2.5% compounded monthly for 4 years", /1,?326\.07/],
+  ["a town of 15000 grows 2% per year, population after 10 years", /18,?28[45]/],
+  ["a car worth $30000 depreciates 15% per year, value after 5 years", /13,?311/],
+  ["how long for 100 g to decay to 25 g with a half-life of 6 hours", /\b12\b/],
+  ["4th term of 7, 14, 28", /\b56\b/],
+  ["sum of the first 7 terms of 1, 3, 9", /1,?093/],
+  ["sum of the infinite series 9 + 3 + 1 + ...", /13\.5|27\/2/],
+  ["how many terms are in 3, 6, 12, ..., 384", /\b8\b/],
+  ["the first term is 4 and the common ratio is 1/2, find the 6th term", /0\.125|1\/8/],
+  ["solve x^2 - 7x + 10 = 0", /\b2\b[^\d]+\b5\b/],
+  ["factor x^2 + 5x + 6", /\(x\s*\+\s*2\)|\(x\s*\+\s*3\)/],
+  ["factor 3x^2 - 12", /3\s*\(x\s*[-+]\s*2\)/],
+  ["remainder when x^3 - 3x^2 + 4 is divided by x - 3", /\b4\b/],
+  ["zeros of x^3 + x^2 - 6x", /-3[^\d]+0[^\d]+2/],
+  ["vertical asymptotes of y = 1/(x^2 - x - 6)", /-2[^\d]+3/],
+  ["horizontal asymptote of y = (4x - 1)/(2x + 3)", /y\s*=\s*2\b/],
+  ["x-intercept of y = 2x - 8", /\b4\b/],
+  ["end behaviour of y = 2x^4", /y\s*→\s*∞[\s\S]*y\s*→\s*∞|both.*up|rises? on both/i],
+  ["sin(2pi/3)", /0\.866|√3\s*\/\s*2/],
+  ["cos 120 degrees", /-0\.5|-1\/2/],
+  ["tan 60°", /1\.73|√3/],
+  ["sec(pi/3)", /\b2\b/],
+  ["convert 7pi/4 radians to degrees", /\b315\b/],
+  ["convert -90 degrees to radians", /-π\s*\/\s*2|-1\.57/],
+  ["period of y = 3tan(2x)", /π\s*\/\s*2|1\.57/],
+  ["solve sin x = -1 for 0 ≤ x < 2π", /3π\s*\/\s*2/],
+  ["solve 2cos^2 x - 1 = 0", /π\s*\/\s*4.*3π\s*\/\s*4.*5π\s*\/\s*4.*7π\s*\/\s*4/],
+  ["what is the exact value of tan(5pi/6)", /-√3\s*\/\s*3|-0\.577|-1\/√3/],
 ];
 
 (async () => {
-  let pass = 0, passB = 0, passC = 0, passD = 0, passE = 0; const fail = [];
+  let pass = 0, passB = 0, passC = 0, passD = 0, passE = 0, passF = 0; const fail = [];
   // FROM=121 runs only form D onward, to spare the free AI quota.
   for (const [i, [q, re]] of Q.entries()) {
     if (i < +(process.env.FROM || 0)) continue;
@@ -230,8 +271,8 @@ const Q = [
     let r; try { r = await E.answer(q, offline ? { privateMode: true, pack } : { ifUnset: "yes" }); } catch (e) { r = { kind: "throw", body: String(e) }; }
     // Typographic minus signs and hyphens read as "-": the AI writes "−2" and "[‑2, 4]" for the same answer.
     const text = [r.title, r.body, r.value, r.to, r.toUnit, r.big, r.unit, r.sub, r.text].filter((x) => x != null).join(" ").replace(/[−‑–]/g, "-");
-    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81 && i < 121) passC++; if (ok && i >= 121 && i < 161) passD++; if (ok && i >= 161) passE++;
+    const ok = re.test(text); ok ? pass++ : fail.push(q); if (ok && i >= 40 && i < 81) passB++; if (ok && i >= 81 && i < 121) passC++; if (ok && i >= 121 && i < 161) passD++; if (ok && i >= 161 && i < 201) passE++; if (ok && i >= 201) passF++;
     console.log((ok ? "PASS" : "FAIL") + " | " + q + " => " + r.kind + " | " + text.slice(0, 110).replace(/\n/g, " "));
   }
-  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC - passD - passE}/40, form B ${passB}/41, form C ${passC}/40, form D ${passD}/40, form E ${passE}/${Q.length - 161}). FAIL: ${fail.join(" ; ")}`);
+  console.log(`\n${pass}/${Q.length} pass${offline ? " offline" : ""} (form A ${pass - passB - passC - passD - passE - passF}/40, form B ${passB}/41, form C ${passC}/40, form D ${passD}/40, form E ${passE}/40, form F ${passF}/${Q.length - 201}). FAIL: ${fail.join(" ; ")}`);
 })();
