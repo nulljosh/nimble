@@ -1,0 +1,1 @@
+../../test/courses/law12.js

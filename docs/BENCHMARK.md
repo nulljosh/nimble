@@ -351,6 +351,20 @@ The first run was high for a fact course because Earth Sciences 11 and the Wikip
 
 A pure recall course, like Social Studies 10: what A taught did not move B at all (14/40 before and after), and C's 11 passes were all from the Wikipedia pack or Social Studies 10. After fixes it holds 128 short entries, from the July Crisis to the revolutions of 1989. The 34 pack-only topics (the Treaty of Versailles, Stalin, Mao, apartheid, the Berlin Wall and others) now answer from local text on every platform, so online they show a short paragraph instead of the Wikipedia card. Generic words stay open: "what is containment" and "what is solidarity" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 35% and C 28%, so this course depends on its online grade.**
 
+## BC curriculum: Law Studies 12
+
+`test/courses/law12.js`: foundations of law (the rule of law, common and statute law, precedent), the Constitution and the Charter, criminal law and procedure, defences, youth justice, torts, contracts, family law, human rights and Indigenous law. Forms A and B were written before any run, the solver was built from form A and the curriculum with B's topics kept out, and form C was written after A and B passed and run once. Run `COURSE=law12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 11/40 (28%) | 4/40 (10%) | 7/40 (18%) |
+| Web offline, after A only | 40/40 | 4/40 (10%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 (116/120 before theft, robbery, assault and sexual assault got local text) |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (116/120 before the same 4) |
+
+Recall again: A's terms did not reach B (4/40 before and after). After fixes it holds 125 entries, written for BC (age of majority 19, the Family Law Act's two-year rule for common-law spouses, Small Claims up to $35,000, the Residential Tenancy Act). Words with other meanings stay open: "what is a battery", "what is a treaty", "what is intoxication", "what is free will" and "what is a minor" still go to the live sources; the legal sense needs a legal word in the question. **A+ offline after fixes; the honest held-out numbers are B 10% and C 18%, so this course depends on its online grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

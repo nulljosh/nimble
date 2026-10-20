@@ -59,7 +59,8 @@ Rules that bite:
    - Physical Geography 12 (test/courses/geo12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 21/40 after building from A only, fresh C 18/40. "scale is 1:N" stays with Foundations 12; geo's scale solver takes the other phrasings.
    - Identity (2026-10-20): "what's your name", "are you ChatGPT", "what model are you", "how do you work" now get the Nimble answer on web, Apple and Kotlin (Kotlin had none before).
    - 20th Century World History 12 (test/courses/hist12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 14/40 after building from A only, fresh C 11/40. Recall, like Social Studies 10; needs the online grade.
-   - Next courses, in order: Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
+   - Law Studies 12 (test/courses/law12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 4/40 after building from A only, fresh C 7/40. Legal senses of everyday words (battery, treaty, will, minor) need a legal word in the question.
+   - Next courses, in order: Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.
