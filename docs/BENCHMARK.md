@@ -337,6 +337,20 @@ The first social studies course shows the limit of an offline table plainly. Eve
 
 The first run was high for a fact course because Earth Sciences 11 and the Wikipedia pack already cover plate tectonics, volcanoes and much of the atmosphere. What A taught carried to B only through the two calculators: map scale (1:N, map distance to ground distance) and river discharge (area × velocity). B added time at another longitude (15 degrees an hour, later to the east). The 22 pack-only topics (latitude, the equator, the Mercator projection, moraines, karst and others) now answer from local text on every platform, so online they show a short paragraph instead of the Wikipedia card. Generic words stay open: "what is a stack", "what is a depression", "what is a cyclone" and "what is an arch" still go to the live sources, and "a map scale is 1:N" questions stay with Foundations 12. **A+ offline after fixes; the honest held-out numbers are B 53% and C 45%, so this course waits for an online held-out grade.**
 
+## BC curriculum: 20th Century World History 12
+
+`test/courses/hist12.js`: the First World War and the peace, the Russian Revolution, the interwar years and the rise of authoritarian states, the Second World War and the Holocaust, the Cold War, decolonization and independence movements, the Chinese Revolution, human rights and civil rights, genocide, and the end of the Soviet Union. Forms A and B were written before any run, the solver was built from form A and the curriculum with B's topics kept out, and form C was written after A and B passed and run once. Run `COURSE=hist12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 22/40 (55%) | 14/40 (35%) | 11/40 (28%) |
+| Web offline, after A only | 40/40 | 14/40 (35%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 (86/120 before 34 pack-only topics got local text) |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (86/120 before the same 34) |
+
+A pure recall course, like Social Studies 10: what A taught did not move B at all (14/40 before and after), and C's 11 passes were all from the Wikipedia pack or Social Studies 10. After fixes it holds 128 short entries, from the July Crisis to the revolutions of 1989. The 34 pack-only topics (the Treaty of Versailles, Stalin, Mao, apartheid, the Berlin Wall and others) now answer from local text on every platform, so online they show a short paragraph instead of the Wikipedia card. Generic words stay open: "what is containment" and "what is solidarity" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 35% and C 28%, so this course depends on its online grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
