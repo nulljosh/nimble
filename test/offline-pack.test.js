@@ -181,3 +181,15 @@ test("a title with a word the question did not ask for is not the answer", () =>
   assert.equal(E.packAnswer("largest ocean", TITLES)?.title, "Pacific Ocean");
   assert.equal(E.packAnswer("who directed jaws", TITLES)?.title, "Jaws (film)");
 });
+
+// SimpleQA and GSM8K: a date or number question is not answered by sentences without one, and a word problem never
+// gets an article ("Number" for "Griffin had 24 fries...", "Month" for "what day, month and year...").
+test("the pack does not answer word problems or date questions with the wrong kind of sentence", () => {
+  const pack = { entries: [
+    { t: "Number", d: "mathematical object", e: "A number is a mathematical object used to count. The most basic examples are the natural numbers: 1, 2, 3, 4, 5." },
+    { t: "Month", d: "unit of time", e: "A month is a unit of time used with calendars. Synodic months are based on the Moon's orbital period." },
+  ] };
+  assert.equal(E.packAnswer("Griffin had 24 french fries, but Kyle took 5 of them. How many number of fries did Griffin have left", pack), null);
+  assert.equal(E.packAnswer("what day, month, and year did dali's mother pass away", pack), null);
+  assert.equal(E.packAnswer("what is a month", pack)?.title, "Month");
+});

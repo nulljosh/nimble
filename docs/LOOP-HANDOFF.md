@@ -64,7 +64,8 @@ Rules that bite:
    - BC First Peoples 12 (test/courses/fp12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 5/40 after building from A only, fresh C 2/40. The last course on the list: every grade 10-12 math, science and socials course now has an exam at A+ offline.
    - Size: docs/engine.js is about 222 KB gzipped and the web first load about 263 KB of the 300 KB budget (test/size-budget.test.js). If it trips again, lazy-load the course tables rather than raising the budget.
    - SimpleQA harness (test/exam-simpleqa.js, 200 fixed questions): offline 0/200 with 10 wrong-but-attempted after the pack's date/number guard (2026-10-20). The online run costs about 200 Worker calls: do it after 17:00 Pacific only if /stats has room, and write MISSES for turing.
-   - Next: online held-out grades for the fact courses after 17:00 Pacific (read /stats first), then the SimpleQA online run, then GSM8K. English, arts and PE are skipped.
+   - GSM8K harness (test/exam-gsm8k.js, 200 fixed problems): offline 1/200 with 2 wrong-but-attempted after the word-problem guards (2026-10-20).
+   - Next: after 17:00 Pacific with /stats room, the online runs (course held-out forms, SimpleQA, GSM8K, about 200 calls each, so spread over days), writing MISSES for turing. Then the Canadian citizenship and BC driver's knowledge tests. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.

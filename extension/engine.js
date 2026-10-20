@@ -1060,10 +1060,14 @@ const PACK_WANTS_YEAR = /\b(?:what|which) (?:day|month|year|date)\b|\bin what ye
 const PACK_WANTS_NUMBER = /\bhow (?:many|much|old|long|far|tall|high|deep)\b|\b(?:at )?what age\b|\bwhat (?:number|percentage)\b/;
 function packAnswer(query, pack){
   const rel = relationOf(query, [...RELATIONS, ...PACK_ONLY_RELATIONS]), q = String(query).toLowerCase();
+  // A long question with three or more numbers is a word problem, whatever it asks: no article answers it.
+  if((q.match(/\d+(?:\.\d+)?/g) || []).length >= 3 && q.split(/\s+/).length > 20) return null;
   for(const hit of packHits(rel ? rel.subject : query, pack)){
     const e = hit.entry, text = packText(e, query, rel);
     if(text && PACK_WANTS_YEAR.test(q) && !/\b\d{3,4}\b/.test(text)) continue;
     if(text && PACK_WANTS_NUMBER.test(q) && !/\d/.test(text)) continue;
+    // A word problem ("Griffin had 24 fries, Kyle took 5...") needs arithmetic, never an article: "Number" is not its answer.
+    if(PACK_WANTS_NUMBER.test(q) && (q.match(/\d+(?:\.\d+)?/g) || []).length >= 2) return null;
     if(text) return {kind:"pack", title:e.t, text, url:e.u, asOf:pack.builtAt||"", src:"Offline pack · Wikipedia (CC BY-SA)"};
   }
   return null;
@@ -2182,12 +2186,14 @@ function work10(q){
   for(const [big, small, k, name] of W_MIXED){
     if((m = new RegExp("^(?:convert )?([\\d.]+)\\s*" + big + "\\s*(?:and\\s*)?([\\d.]+)\\s*" + small + "\\s+(?:to|in|into)\\s+" + small + "$").exec(q))) return out(pcNum(+m[1] * k + +m[2]) + " " + name);
   }
-  // money: taxes, discounts, tips, unit prices, exchange
-  if((m = /\$\s*([\d,.]+)\b.*?\bwith\b(.*)$/.exec(q)) && /\b(gst|pst|hst|tax)\b/.test(q) && /\b(total|cost|price|pay)\b/.test(q)){
+  // money: taxes, discounts, tips, unit prices, exchange. Tax and discount are one step: a word problem with more
+  // numbers than that ("Job A pays $15 an hour for 2000 hours...") is not theirs to answer.
+  const oneStep = (q.match(/\d+(?:\.\d+)?/g) || []).length <= 3;
+  if(oneStep && (m = /\$\s*([\d,.]+)\b.*?\bwith\b(.*)$/.exec(q)) && /\b(gst|pst|hst|tax)\b/.test(q) && /\b(total|cost|price|pay)\b/.test(q)){
     const rates = [...m[2].matchAll(/([\d.]+)\s*%/g)].map(t => +t[1]); if(!rates.length) return null;
     const p = n(m[1]), tax = p * rates.reduce((s, r) => s + r, 0) / 100; return out(money(p + tax) + " (" + money(tax) + " in tax)");
   }
-  if((m = /\b(?:price|cost)\b.*?\b([\d.]+)\s*% (?:discount|off)\b.*?\$\s*([\d,.]+)/.exec(q)) || (m = /\$\s*([\d,.]+)\b.*?\b([\d.]+)\s*% (?:discount|off)\b/.exec(q)) && (m = [m[0], m[2], m[1]])){
+  if(oneStep && ((m = /\b(?:price|cost)\b.*?\b([\d.]+)\s*% (?:discount|off)\b.*?\$\s*([\d,.]+)/.exec(q)) || (m = /\$\s*([\d,.]+)\b.*?\b([\d.]+)\s*% (?:discount|off)\b/.exec(q)) && (m = [m[0], m[2], m[1]]))){
     const d = +m[1], p = n(m[2]); return out(money(p * (1 - d / 100)) + " (" + money(p * d / 100) + " off)");
   }
   if((m = /\b([\d.]+)\s*% tip (?:on|for) (?:a |the )?\$\s*([\d,.]+)/.exec(q))){ const t = n(m[2]) * +m[1] / 100; return out(money(t) + " tip, " + money(n(m[2]) + t) + " in all"); }

@@ -403,9 +403,22 @@ The engine passed the web app's 300 KB first-load budget with this course (308 K
 |---|---|---|---|
 | Web offline, first run | 0/200 | 17 | 17 |
 | Web offline, after the pack guard | 0/200 | 10 | 10 |
+| Web offline, after the GSM8K guards | 0/200 | 8 | 8 |
 | Web online | not run yet (after 17:00, with the neuron budget) | | |
 
 Offline, 0 is the honest number: these questions live in the long tail the 14,000-entry pack does not carry. What mattered was the 17 confident wrong cards, every one a pack article on the wrong topic, like "Month" for "what day, month and year did Dalí's mother die". The pack now skips any article whose answer sentences have no year when the question asks for a date, or no digit when it asks how many, how old or what age. That cut wrong answers to 10 with no change to any other exam (the general offline exam holds at 75/154, every course at its old score). The remaining 10 are subject cards ("Patna" for a question about Patna's planetarium) that a match cannot tell from an answer.
+
+## GSM8K
+
+`test/exam-gsm8k.js` over `test/fixtures/gsm8k-200.json`: 200 grade-school word problems sampled (seed 20261020) from OpenAI's public GSM8K test set of 1,319. Correct when the gold final number is the first or last number in Nimble's answer. Run `OFFLINE=1 node test/exam-gsm8k.js`; `MISSES=file.jsonl` writes the misses for Samantha.
+
+| Run (2026-10-20) | Correct | Attempted | Wrong but attempted |
+|---|---|---|---|
+| Web offline, first run | 1/200 | 47 | 46 |
+| Web offline, after the guards | 1/200 | 3 | 2 |
+| Web online | not run yet (after 17:00, with the neuron budget) | | |
+
+Multi-step word problems need a model; the offline engine is a calculator, so 1/200 is expected. The 46 wrong answers were the real finding. 42 were pack articles ("Number", "Week", "Second") picked because a word problem mentions them, and 4 were the Workplace Math 10 tax and discount solvers taking the first "$400 ... 20% off" in a five-step problem. Three guards fixed them, each with a test: the pack skips a long question with three or more numbers, and a how-many question with two or more; the one-step tax and discount solvers (web and Kotlin) skip questions with more than three numbers. SimpleQA's wrong cards fell from 10 to 8 as a side effect, and every other exam held (general offline 75/154, Pre-Calculus 12 281/281, every course at its old score).
 
 ## The 1,000-question exam
 

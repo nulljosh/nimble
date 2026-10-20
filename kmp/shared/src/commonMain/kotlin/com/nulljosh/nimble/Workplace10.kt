@@ -80,9 +80,11 @@ internal object Workplace10 {
                 return out(pcNum(it[1].toDouble() * k.toDouble() + it[2].toDouble()) + " " + name)
             }
         }
-        // money: taxes, discounts, tips, unit prices, exchange
+        // money: taxes, discounts, tips, unit prices, exchange. Tax and discount are one step: a word problem with more
+        // numbers than that ("Job A pays $15 an hour for 2000 hours...") is not theirs to answer.
+        val oneStep = Regex("""\d+(?:\.\d+)?""").findAll(q).count() <= 3
         m = find("""\$\s*([\d,.]+)\b.*?\bwith\b(.*)$""", q)
-        if (m != null && has("""\b(gst|pst|hst|tax)\b""", q) && has("""\b(total|cost|price|pay)\b""", q)) {
+        if (oneStep && m != null && has("""\b(gst|pst|hst|tax)\b""", q) && has("""\b(total|cost|price|pay)\b""", q)) {
             val rates = Regex("""([\d.]+)\s*%""").findAll(m[2]).map { it.groupValues[1].toDouble() }.toList()
             if (rates.isEmpty()) return null
             val p = n(m[1])
@@ -91,7 +93,7 @@ internal object Workplace10 {
         }
         m = find("""\b(?:price|cost)\b.*?\b([\d.]+)\s*% (?:discount|off)\b.*?\$\s*([\d,.]+)""", q)
             ?: find("""\$\s*([\d,.]+)\b.*?\b([\d.]+)\s*% (?:discount|off)\b""", q)?.let { listOf(it[0], it[2], it[1]) }
-        if (m != null) {
+        if (oneStep && m != null) {
             val d = m[1].toDouble()
             val p = n(m[2])
             return out(dollars(p * (1 - d / 100)) + " (" + dollars(p * d / 100) + " off)")
