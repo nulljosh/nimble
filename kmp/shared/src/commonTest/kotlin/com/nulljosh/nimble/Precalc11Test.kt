@@ -68,4 +68,11 @@ class Precalc11Test {
     @Test fun percentDeductions() = assertEquals("$936.00 ($264.00 deducted)", pc("net pay if gross is $1200 and deductions are 22%"))
     @Test fun mixedUnits() = assertEquals("42 inches", pc("convert 3 feet 6 inches to inches"))
     @Test fun ratio() = assertEquals("2:3", pc("simplify the ratio 12:18"))
+
+    // Apprenticeship and Workplace Mathematics 12 (Apprenticeship12.kt)
+    @Test fun mixedNumbers() = assertEquals("3 7/8 (31/8) = 3.875", pc("2 1/4 + 1 5/8"))
+    @Test fun squareCorner() = assertEquals("No: the diagonal should be 10, not 10.2.", pc("check if a corner is square with sides 6 ft and 8 ft and diagonal 10.2 ft"))
+    @Test fun ohm() = assertEquals("3 A (I = V/R)", pc("current if voltage is 120 V and resistance is 40 ohms"))
+    @Test fun marbles() = assertEquals("3/8 = 0.375", pc("probability of drawing a red marble from 3 red and 5 blue"))
+    @Test fun repeatingDecimalStaysPrecalc() = assertEquals("1/3", pc("write 0.333... as a fraction"))
 }

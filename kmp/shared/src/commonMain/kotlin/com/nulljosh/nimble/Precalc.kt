@@ -317,6 +317,7 @@ internal object Precalc {
         for ((re, body) in FACTS) if (re.containsMatchIn(q)) return out(body)
         Calculus12.answer(q)?.let { return it }
         Statistics12.answer(q)?.let { return it }
+        Apprenticeship12.answer(q)?.let { return it }
         Workplace10.answer(q)?.let { return it }
         Precalc11.answer(q)?.let { return it }
         Precalc10.answer(q)?.let { return it }

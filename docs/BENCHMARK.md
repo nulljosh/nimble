@@ -175,6 +175,19 @@ Form B's honest first grade is 38/40, an A+ on its own. Its two misses were word
 
 Form A's first offline run had one wrong answer: "net pay if gross is $1200 and deductions are 22%" printed $1,178.00, reading 22% as $22. The solver is `work10()` in docs/engine.js and `Workplace10.kt` on Kotlin; it runs before the Foundations 10 pay branch. Online waits for the neuron reset. **A+ offline on every platform.**
 
+## BC curriculum: Apprenticeship and Workplace Mathematics 12
+
+`test/courses/aw12.js`, two 40-question forms written before any run: mixed numbers and inch fractions, tolerance and precision, board feet and concrete, squaring a corner, gears and Ohm's law, rates of change and linear cost models, composite areas, conversions, budgets, depreciation, studs and roof pitch, paint coverage, marbles and odds, and the cosine law. Run `COURSE=aw12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 10/40 (25%) | 39/40 (97.5%) |
+| Web offline, after fixes | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+Form A's first offline run had one wrong answer: "probability of drawing a red marble from 3 red and 5 blue" printed 1/2, treating it as a red card. Form B's one first-run miss was the key's fault: "Accuracy is how close a measurement is to the true value" is right, and the key now allows words between "close" and "to". Adding this solver briefly broke one Pre-Calc 12 question ("write 0.333... as a fraction" printed NaN), caught by the regression run and fixed before the commit. The solver is `aw12()` in docs/engine.js and `Apprenticeship12.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform. Every BC grade 10 to 12 math course is now at A+ offline.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

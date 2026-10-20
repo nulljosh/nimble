@@ -2214,12 +2214,112 @@ function work10(q){
   }
   return null;
 }
+// --- Apprenticeship and Workplace Mathematics 12, offline ---
+// Mixed numbers and inch fractions, tolerance and precision, board feet and concrete, squaring a corner, gears,
+// Ohm's law, rates of change and linear cost models, composite areas, budgets, studs, roof pitch, paint, and marbles.
+// precalc() asks it after stats12(); null means "not mine". Graded by COURSE=aw12 node test/exam-course.js.
+// Mirrored in kmp/shared/.../Apprenticeship12.kt.
+// A number as [numerator, denominator]: "2 1/4" is [9, 4], "5/16" is [5, 16], "3" is [3, 1].
+function awFrac(s){
+  let m = /^(-?)(\d+)\s+(\d+)\/(\d+)$/.exec(s.trim()); if(m) return [(m[1] ? -1 : 1) * (+m[2] * +m[4] + +m[3]), +m[4]];
+  m = /^(-?\d+)\/(\d+)$/.exec(s.trim()); if(m) return [+m[1], +m[2]];
+  m = /^-?\d+$/.exec(s.trim()); return m ? [+m[0], 1] : null;
+}
+// [n, d] as "3 7/8", or "7/8", or "3".
+function awMixed([n, d]){
+  const g = pcGcd(n, d) || 1; n /= g; d /= g; if(d < 0){ n = -n; d = -d; }
+  if(d === 1) return String(n); const w = Math.trunc(n / d), r = Math.abs(n % d);
+  return w === 0 ? n + "/" + d : w + " " + r + "/" + d;
+}
+function aw12(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"}), money = v => "$" + v.toFixed(2), num = s => +String(s).replace(/,/g, "");
+  const F = "(-?\\d+\\s+\\d+\\/\\d+|-?\\d+\\/\\d+|-?\\d+)";
+  let m;
+  // mixed numbers: 2 1/4 + 1 5/8
+  if((m = new RegExp("^(?:what is |evaluate |simplify |add |subtract )?" + F + "\\s*([+\\-×*÷]|plus|minus|times|divided by)\\s*" + F + "$").exec(q)) && / \d+\/\d+|\d\/\d/.test(q) && !/^-?\d+\/\d+\s*[+\-*×÷]\s*-?\d+\/\d+$/.test(q.replace(/^(?:what is |evaluate |simplify )/, ""))){
+    const a = awFrac(m[1]), b = awFrac(m[3]); if(!a || !b) return null; const op = m[2];
+    const r = /^(\+|plus)$/.test(op) ? [a[0] * b[1] + b[0] * a[1], a[1] * b[1]] : /^(-|minus)$/.test(op) ? [a[0] * b[1] - b[0] * a[1], a[1] * b[1]] : /^(\*|×|times)$/.test(op) ? [a[0] * b[0], a[1] * b[1]] : [a[0] * b[1], a[1] * b[0]];
+    const g = pcGcd(r[0], r[1]) || 1, n = r[0] / g, d = r[1] / g;
+    return out(awMixed(r) + (Math.abs(n) > Math.abs(d) && d !== 1 ? " (" + n + "/" + d + ")" : "") + (d !== 1 ? " = " + pcNum(n / d) : ""));
+  }
+  if((m = /^(?:convert |write )?(\d*\.?\d+)\s*(?:inches|inch|in|")?\s+(?:to|as) a fraction(?: of an inch)?$/.exec(q))){
+    const v = +m[1]; for(const d of [2, 4, 8, 16, 32, 64]){ const k = Math.round(v * d); if(Math.abs(k / d - v) < 1e-9) return out(awMixed([k, d])); }
+    return out(pcFrac(v));
+  }
+  if((m = new RegExp("^(?:convert )?" + F + "\\s*(?:inches|inch|in|\")\\s+(?:to|in|into)\\s+(mm|millimetres?|millimeters?|cm|centimetres?|centimeters?)$").exec(q))){
+    const f = awFrac(m[1]); if(!f) return null; const mm = f[0] / f[1] * 25.4; return out(/^c/.test(m[2]) ? pcNum(+(mm / 10).toFixed(4)) + " cm" : pcNum(+mm.toFixed(4)) + " mm");
+  }
+  // tolerance and precision
+  if((m = /\btolerance\b.*?([\d.]+)\s*([a-z"]*)\s*(?:±|\+\/-|plus or minus)\s*([\d.]+)/.exec(q))){ const v = +m[1], t = +m[3], u = m[2] ? " " + m[2] : ""; return out(pcNum(+(v - t).toFixed(6)) + u + " to " + pcNum(+(v + t).toFixed(6)) + u); }
+  if((m = /\bprecision of (?:a |the )?(?:measurement|reading|value) (?:of )?([\d.]+)\s*([a-z]*)/.exec(q))){ const d = (m[1].split(".")[1] || "").length; return out("±" + (d ? (10 ** -d).toFixed(d) : "1") + (m[2] ? " " + m[2] : "") + ": the smallest unit it was measured to."); }
+  if(/^(?:what is )?(?:the difference between )?accuracy (?:vs\.?|versus|and) precision$|^(?:what is )?accuracy in measurement$|^(?:what is )?accuracy$/.test(q)) return out("Accuracy is how close a measurement is to the true value. Precision is how fine the measurement is, and how closely repeated measurements agree.");
+  // lumber, concrete, corners, studs, roofs, paint
+  if((m = /\bboard feet\b.*?([\d.]+)\s*(?:inches|inch|in|")?\s*(?:by|x|×)\s*([\d.]+)\s*(?:inches|inch|in|")?\s*(?:by|x|×)\s*([\d.]+)\s*(?:feet|foot|ft|')/.exec(q))) return out(pcNum(+(+m[1] * +m[2] * +m[3] / 12).toFixed(3)) + " board feet");
+  if((m = /\bcubic yards\b.*?([\d.]+)\s*(?:ft|feet|')\s*(?:by|x|×)\s*([\d.]+)\s*(?:ft|feet|')\s*(?:by|x|×)\s*([\d.]+)\s*(inches|inch|in|"|ft|feet)/.exec(q))){
+    const depth = /^(in|")/.test(m[4]) ? +m[3] / 12 : +m[3], v = +m[1] * +m[2] * depth / 27; return out(pcNum(+v.toFixed(2)) + " cubic yards");
+  }
+  if((m = /\bsquare\b.*?\bsides? (?:of )?([\d.]+)\s*[a-z']*\s*and\s*([\d.]+)\s*[a-z']*\s*and (?:a )?diagonal (?:of )?([\d.]+)/.exec(q))){
+    const a = +m[1], b = +m[2], c = +m[3], want = Math.hypot(a, b);
+    return out(Math.abs(want - c) < 0.005 * want ? "Yes: " + pcNum(a) + "² + " + pcNum(b) + "² = " + pcNum(c) + "²." : "No: the diagonal should be " + pcNum(+want.toFixed(3)) + ", not " + pcNum(c) + ".");
+  }
+  if((m = /^(?:the )?diagonal of (?:a |the )?([\d.]+)\s*[a-z']*\s*(?:by|x|×)\s*([\d.]+)/.exec(q))) return out(pcNum(+Math.hypot(+m[1], +m[2]).toFixed(3)));
+  if((m = /\bstuds?\b.*?\b([\d.]+)\s*(?:ft|feet|foot|')\s*wall\b.*?\b([\d.]+)\s*(?:inch|in|")\s*(?:spacing|on cent(?:er|re)|apart|o\.?c\.?)/.exec(q))) return out(String(Math.floor(+m[1] * 12 / +m[2] + 1e-9) + 1) + " studs");
+  if((m = /\b([\d.]+)\s*(?:in|:)\s*12 pitch\b/.exec(q)) && /\bangle\b/.test(q)) return out(pcNum(+(Math.atan(+m[1] / 12) * 180 / Math.PI).toFixed(2)) + "°");
+  if((m = /\bhow many (litres|liters|gallons|cans)\b.*?\bfor ([\d.]+) square [a-z]+\b.*?\bcovers? ([\d.]+) square/.exec(q))){ const k = +m[2] / +m[3]; return out(Math.ceil(+k.toFixed(6)) + " " + m[1] + (Number.isInteger(+k.toFixed(6)) ? "" : " (" + pcNum(+k.toFixed(2)) + ", rounded up)")); }
+  // gears and Ohm's law
+  if((m = /\bgear ratio\b.*?\bdriv(?:er|ing gear) has (\d+) teeth\b.*?\bdriven gear has (\d+) teeth/.exec(q))){ const a = +m[1], b = +m[2], g = pcGcd(a, b); return out(b / g + ":" + a / g + " (the driver turns " + pcNum(b / a) + " times for each turn of the driven gear)"); }
+  if((m = /\b(\d+)[- ]tooth gear turns at ([\d.]+)\s*rpm\b.*?\b(\d+)[- ]tooth gear\b/.exec(q))) return out(pcNum(+(+m[2] * +m[1] / +m[3]).toFixed(3)) + " rpm");
+  if(/\b(ohm|ohms|Ω|volts?|amps?|current|resistance|voltage)\b/.test(q) && (/\bohm'?s law\b/.test(q) || /\b(voltage|current|resistance)\b.*\b(if|with|when)\b/.test(q))){
+    const val = re => { const t = re.exec(q); return t ? +t[1] : null; };
+    const V = val(/\b(?:voltage (?:is |of )?)?([\d.]+)\s*(?:v|volts?)\b/), I = val(/\b(?:current (?:is |of )?)?([\d.]+)\s*(?:a|amps?|amperes?)\b/), R = val(/\b(?:resistance (?:is |of )?)?([\d.]+)\s*(?:ohms?|Ω)/);
+    const ask = (/^(?:ohm'?s law )?(?:the )?(voltage|current|resistance)\b/.exec(q) || [])[1] || (V === null ? "voltage" : I === null ? "current" : "resistance");
+    if(ask === "voltage" && I !== null && R !== null) return out(pcNum(+(I * R).toFixed(4)) + " V (V = IR)");
+    if(ask === "current" && V !== null && R !== null) return out(pcNum(+(V / R).toFixed(4)) + " A (I = V/R)");
+    if(ask === "resistance" && V !== null && I !== null) return out(pcNum(+(V / I).toFixed(4)) + " Ω (R = V/I)");
+  }
+  // rates of change and linear cost models
+  if(/\brate of change\b/.test(q)){
+    const pts = [...q.matchAll(/\$?([\d.]+)\s*([a-z]*)\s+at\s+([\d.]+)\s*([a-z]+)/g)];
+    if(pts.length === 2){ const [a, b] = pts, r = (+b[1] - +a[1]) / (+b[3] - +a[3]), unit = /\$/.test(q) ? "$" : "", per = b[4].replace(/s$/, "");
+      return out((r < 0 ? "-" : "") + unit + pcNum(+Math.abs(r).toFixed(4)) + (a[2] && !unit ? " " + (a[2] === "l" ? "L" : a[2]) : "") + " per " + per); }
+  }
+  if((m = /\bcharges? \$\s*([\d.]+)\s*(?:plus|and|\+)\s*\$\s*([\d.]+) (?:per|an|a|each) ([a-z]+)\b.*?\bfor ([\d.]+) ([a-z]+)/.exec(q))) return out(money(+m[1] + +m[2] * +m[4]));
+  if((m = /\bequation\b.*?\$\s*([\d.]+)\b[^$]*?\bplus \$\s*([\d.]+) (?:per|an|a|each) ([a-z]+)/.exec(q))){ const v = {hour:"h", hr:"h", km:"d", kilometre:"d", kilometer:"d", mile:"d", day:"t", item:"n", person:"n"}[m[3]] || m[3][0]; return out("C = " + pcNum(+m[2]) + v + " + " + pcNum(+m[1]) + ", where " + v + " is the number of " + m[3] + "s"); }
+  // composite areas and semicircles
+  if((m = /\bsemicircle\b.*?\b(radius|diameter) (?:of |is )?([\d.]+)/.exec(q)) && /\barea\b/.test(q)){
+    const r = m[1] === "radius" ? +m[2] : +m[2] / 2, half = Math.PI * r * r / 2, rect = /\brectangle\b/.test(q) ? /([\d.]+)\s*[a-z]*\s*(?:by|x|×)\s*([\d.]+)/.exec(q) : null;
+    if(rect){ const base = +rect[1] * +rect[2], minus = /\b(minus|remove|cut out|without)\b/.test(q); return out(pcNum(+(minus ? base - half : base + half).toFixed(2))); }
+    return out(pcNum(r * r / 2) + "π ≈ " + pcNum(+half.toFixed(2)));
+  }
+  // budgets
+  if((m = /\bincome (?:of |is )?\$\s*([\d,.]+)/.exec(q)) && /\b(left|remaining|remains|leftover|left over)\b/.test(q)){
+    const spent = [...q.slice(m.index + m[0].length).matchAll(/\$\s*([\d,.]+)/g)].reduce((s, t) => s + num(t[1]), 0); return out(money(num(m[1]) - spent) + " left");
+  }
+  if((m = /^what percent(?:age)? of (?:a |the )?\$\s*([\d,.]+)\s*[a-z ]*? is \$\s*([\d,.]+)/.exec(q))) return out(pcNum(+(num(m[2]) / num(m[1]) * 100).toFixed(2)) + "%");
+  if((m = /\bscale\b.*?\b1\s*(inch|in|cm|mm)\s*=\s*([\d.]+)\s*(feet|ft|m|metres?|meters?|km|yards?)\b.*?\b([\d.]+)\s*(?:inch|in|cm|mm)\b/.exec(q))) return out(pcNum(+(+m[4] * +m[2]).toFixed(4)) + " " + m[3]);
+  // marbles, polygons, right triangles, unit prices with "of"
+  if((m = /\b(probability|odds(?: in favou?r)?|odds against|chance) (?:of )?(?:drawing|picking|choosing|pulling) (?:a |an )?([a-z]+) (?:marble|ball|candy|card|chip|token|sock)s? (?:from|out of) (.+)$/.exec(q))){
+    const groups = [...m[3].matchAll(/(\d+) ([a-z]+)/g)].map(t => [t[2], +t[1]]), total = groups.reduce((s, [, k]) => s + k, 0), hit = (groups.find(([c]) => c === m[2]) || [, null])[1];
+    if(hit === null) return null; const g = pcGcd(hit, total - hit) || 1;
+    if(/^odds against/.test(m[1])) return out((total - hit) / g + ":" + hit / g);
+    if(/^odds/.test(m[1])) return out(hit / g + ":" + (total - hit) / g);
+    return out(pcRatio(hit, total) + " = " + pcNum(+(hit / total).toFixed(4)));
+  }
+  if((m = /\bsum of (?:the )?(?:interior )?angles (?:in|of) (?:a |an )?(triangle|quadrilateral|pentagon|hexagon|heptagon|octagon|nonagon|decagon|dodecagon)\b/.exec(q))) return out(pcNum((POLYGON[m[1]] - 2) * 180) + "°");
+  if((m = /^is (?:a )?triangle with sides ([\d.]+),\s*([\d.]+),?\s*and\s*([\d.]+) a right triangle$/.exec(q))){
+    const s = [+m[1], +m[2], +m[3]].sort((a, b) => a - b), ok = Math.abs(s[0] ** 2 + s[1] ** 2 - s[2] ** 2) < 1e-9;
+    return out((ok ? "Yes: " : "No: ") + pcNum(s[0]) + "² + " + pcNum(s[1]) + "² = " + pcNum(s[0] ** 2 + s[1] ** 2) + (ok ? " = " : ", not ") + pcNum(s[2]) + "² = " + pcNum(s[2] ** 2) + ".");
+  }
+  if((m = /\bunit (?:price|cost) (?:of|for) ([\d.]+)\s*([a-z]+) of [a-z ]+? (?:for|at|costing) \$\s*([\d,.]+)/.exec(q))) return out(money(num(m[3]) / +m[1]) + " per " + (m[2] === "l" ? "L" : m[2]));
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const c12 = calc12(q); if(c12) return c12;
   const s12 = stats12(q); if(s12) return s12;
+  const a12 = aw12(q); if(a12) return a12;
   const w10 = work10(q); if(w10) return w10;
   const p11 = pc11(q); if(p11) return p11;
   const p10 = fm10(q); if(p10) return p10;
