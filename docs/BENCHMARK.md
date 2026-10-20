@@ -126,6 +126,18 @@ Online is not graded yet: the Worker passed 6,000 estimated neurons for the day,
 
 One key in form A was too strict: the pack's "Deductive reasoning is the process of drawing valid inferences" is right, and the key now takes it. Two of form A's first offline answers were wrong, not just missing: the pack answered "next number in 1, 4, 9, 16, 25" with the article on numbers, and the Pre-Calc 12 solver worked the rule of 72 out exactly (11.9 years) when the question asked for the rule (12). The solver is `fom11()` in docs/engine.js and `Foundations11.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform.**
 
+## BC curriculum: Foundations of Mathematics 12
+
+`test/courses/fom12.js`, two 40-question forms written before any run: permutations and combinations, Pascal's triangle, probability with dice, cards and coins, odds, sets and Venn counts, converse and contrapositive, annuities and loan payments, growth and decay, circles, and fractals. Run `COURSE=fom12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 8/40 (20%) | 40/40 (100%) |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+Two of form A's first offline answers were confidently wrong: the Pre-Calc 12 compound-interest branch read "$200 deposited monthly for 5 years" as one deposit ($269.77, the right answer is $13,954.01) and a $20,000 loan payment as an investment ($26,764.51 for $386.66 a month). Annuities and loan payments now run first. A mortgage answer gives both the monthly-compounded payment and the semi-annual compounding Canadian mortgages use by law. The solver is `fom12()` in docs/engine.js and `Foundations12.kt` on Kotlin. Online waits for the neuron reset. **A+ offline on every platform.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

@@ -38,4 +38,11 @@ class Precalc11Test {
     @Test fun counterexample() = assertEquals("2 is a counterexample.", pc("find a counterexample to all prime numbers are odd"))
     @Test fun mapScale() = assertEquals("3 km", pc("a map scale is 1:50000, how many km is 6 cm"))
     @Test fun testPoint() = assertEquals("No: 5 is not < 4.", pc("is (1, 5) a solution of y < x + 3"))
+
+    // Foundations of Mathematics 12 (Foundations12.kt)
+    @Test fun lettersWithRepeats() = assertEquals("12", pc("how many arrangements of the letters in BOOK"))
+    @Test fun twoRedCards() = assertEquals("25/102 ≈ 0.2451", pc("probability of drawing two red cards without replacement"))
+    @Test fun contrapositive() = assertEquals("If a shape does not have four sides, then it is not a square.", pc("contrapositive of if a shape is a square then it has four sides"))
+    @Test fun annuity() = assertEquals("$13954.01", pc("future value of $200 deposited monthly for 5 years at 6% compounded monthly"))
+    @Test fun koch() = assertEquals("log 4/log 3 ≈ 1.2619", pc("what is the fractal dimension of the koch curve"))
 }

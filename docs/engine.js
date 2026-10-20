@@ -1603,6 +1603,147 @@ function fom11(q){
   if(/\bsolid or (?:dashed|broken|dotted)\b|\b(?:dashed|broken|dotted) or solid\b/.test(q) && (m = /(<=|>=|≤|≥|<|>)/.exec(q))) return out(/[=≤≥]/.test(m[1]) ? "Solid: the points on the line are part of the solution." : "Dashed: the points on the line are not part of the solution.");
   return null;
 }
+// --- Foundations of Mathematics 12, offline ---
+// Counting, probability with dice, cards and coins, sets, if-then logic, annuities and loan payments, growth or
+// decay, circles, and fractals. precalc() asks it after fom11(); null means "not mine". Graded by
+// COURSE=fom12 node test/exam-course.js. Mirrored in kmp/shared/.../Foundations12.kt.
+const pcFact = n => n <= 1 ? 1 : n * pcFact(n - 1);
+const pcPerm = (n, r) => r > n ? 0 : pcFact(n) / pcFact(n - r);
+const pcChoose = (n, r) => r > n ? 0 : Math.round(pcFact(n) / (pcFact(r) * pcFact(n - r)));
+// An exact fraction, reduced, with its decimal when it is not a simple one: "25/102 ≈ 0.2451".
+const pcRatio = (n, d) => { const g = pcGcd(n, d) || 1, a = n / g, b = d / g; return b === 1 ? String(a) : a + "/" + b + (b > 12 ? " ≈ " + pcNum(+(a / b).toFixed(4)) : ""); };
+const CARD_RANK = {ace:[1], king:[13], queen:[12], jack:[11], face:[11, 12, 13]}, CARD_SUIT = {heart:[0], diamond:[1], club:[2], spade:[3], red:[0, 1], black:[2, 3]};
+// One event as the set of outcomes it covers: a die (1 to 6) or a card (0 to 51, rank 1 to 13 times suit).
+function pcEvent(s){
+  let m;
+  if(/\b(?:die|dice)\b|\broll/.test(s) && !/\btwo dice\b|\bsum\b|\bdoubles\b/.test(s)){
+    const all = [1, 2, 3, 4, 5, 6];
+    if((m = /\b(?:a|an) ([1-6])\b/.exec(s))) return {all, hit: [+m[1]]};
+    if(/\beven\b/.test(s)) return {all, hit: [2, 4, 6]};
+    if(/\bodd\b/.test(s)) return {all, hit: [1, 3, 5]};
+    if(/\bprime\b/.test(s)) return {all, hit: [2, 3, 5]};
+    if((m = /\b(?:greater|more|higher) than ([0-6])\b/.exec(s))) return {all, hit: all.filter(v => v > +m[1])};
+    if((m = /\b(?:less|lower|fewer) than ([1-7])\b/.exec(s))) return {all, hit: all.filter(v => v < +m[1])};
+  }
+  if(/\bcard|\bdeck\b|\bdraw/.test(s)){
+    const all = [...Array(52).keys()], rank = c => c % 13 + 1, suit = c => Math.floor(c / 13);
+    const r = (/\b(ace|king|queen|jack|face)s?\b/.exec(s) || [])[1], u = (/\b(heart|diamond|club|spade|red|black)s?\b/.exec(s) || [])[1];
+    if(r || u) return {all, hit: all.filter(c => (!r || CARD_RANK[r].includes(rank(c))) && (!u || CARD_SUIT[u].includes(suit(c))))};
+  }
+  return null;
+}
+// Negate a simple clause: "it rains" is "it does not rain", "a shape is a square" is "a shape is not a square".
+function pcNot(c){
+  if(/\b(?:is|are|was|were|can|will)\b/.test(c)) return c.replace(/\b(is|are|was|were|can|will)\b/, "$1 not");
+  if(/\bhas\b/.test(c)) return c.replace(/\bhas\b/, "does not have");
+  if(/\bhave\b/.test(c)) return c.replace(/\bhave\b/, "do not have");
+  const w = c.split(" "); if(w.length < 2) return "not " + c;
+  const i = /^(a|an|the)$/.test(w[0]) ? 2 : 1, v = w[i]; if(!v) return "not " + c;
+  w[i] = (/^(it|he|she)$/.test(w[0]) || i === 2 ? "does not " : "do not ") + v.replace(/ies$/, "y").replace(/(?<=[^s])s$/, "");
+  return w.join(" ");
+}
+function fom12(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"}), money = v => "$" + v.toFixed(2);
+  let m;
+  // counting
+  if((m = /^(\d+)\s*p\s*(\d+)$|^(?:the number of )?permutations of (\d+) (?:things|items|objects|people)?\s*taken (\d+) at a time$|^p\((\d+),\s*(\d+)\)$/.exec(q))){ const [n, r] = (m[1] ? [m[1], m[2]] : m[3] ? [m[3], m[4]] : [m[5], m[6]]).map(Number); return out(String(pcPerm(n, r))); }
+  if((m = /^(\d+)\s*c\s*(\d+)$|^(?:the number of )?combinations of (\d+) (?:things|items|objects|people)?\s*taken (\d+) at a time$|^(\d+) choose (\d+)$|^c\((\d+),\s*(\d+)\)$/.exec(q))){ const [n, r] = (m[1] ? [m[1], m[2]] : m[3] ? [m[3], m[4]] : m[5] ? [m[5], m[6]] : [m[7], m[8]]).map(Number); return out(String(pcChoose(n, r))); }
+  if((m = /^how many ways can (?:a |an )?(?:committee|team|group|set|hand|panel|selection) of (\d+) be (?:chosen|selected|formed|picked|made) from (\d+)/.exec(q))) return out(String(pcChoose(+m[2], +m[1])));
+  if((m = /^how many ways can (\d+) [a-z]+ (?:line up|be arranged|be ordered|sit in a row|stand in a line|finish a race)/.exec(q))) return out(String(pcFact(+m[1])));
+  if((m = /\barrangements? of (?:all )?the letters (?:in|of) (?:the word )?([a-z]+)$/.exec(q))){
+    const c = {}; for(const ch of m[1]) c[ch] = (c[ch] || 0) + 1;
+    return out(String(Math.round(Object.values(c).reduce((s, k) => s / pcFact(k), pcFact(m[1].length)))));
+  }
+  if((m = /\b(\d+) letters?\b.*?\b(\d+) (?:digits?|numbers?)\b/.exec(q)) && /\bplates?\b|\bcodes?\b|\bpasswords?\b/.test(q)) return out(String(26 ** +m[1] * 10 ** +m[2]));
+  if(/^how many (?:different )?(?:outfits|meals|combos|choices|options|sandwiches|combinations)\b/.test(q) && !/\btaken\b/.test(q)){ const n = (q.match(/\d+/g) || []).map(Number); if(n.length >= 2) return out(String(n.reduce((a, b) => a * b, 1))); }
+  if((m = /^(?:the )?row (\d+) of pascal'?s triangle$/.exec(q)) && +m[1] <= 30) return out([...Array(+m[1] + 1).keys()].map(k => pcChoose(+m[1], k)).join(", "));
+  // probability
+  if((m = /\bp\(a\)\s*=\s*([\d.]+)\b.*?\bp\(b\)\s*=\s*([\d.]+)/.exec(q))){
+    const a = +m[1], b = +m[2], both = (/\bp\(a (?:and|∩) b\)\s*=\s*([\d.]+)/.exec(q) || [])[1];
+    if(/\bindependent\b/.test(q) && /\band b\b|\bboth\b/.test(q.replace(/p\(b\)/g, ""))) return out(pcNum(+(a * b).toFixed(6)));
+    if(/\bmutually exclusive\b/.test(q) && /\bor\b/.test(q)) return out(pcNum(+(a + b).toFixed(6)));
+    if(/\bor\b/.test(q) && both !== undefined) return out(pcNum(+(a + b - +both).toFixed(6)));
+    if(/\bor\b/.test(q) && /\bindependent\b/.test(q)) return out(pcNum(+(a + b - a * b).toFixed(6)));
+  }
+  if((m = /^(?:if )?the probability (?:is|of an event is) ([\d.\/]+)\b.*\bodds (in favou?r|against)/.exec(q))){
+    const p = pcVal(m[1]); if(p === null || p <= 0 || p >= 1) return null; const f = pcFrac(p).split("/").map(Number), [a, b] = f.length === 2 ? f : [p * 100, 100];
+    return out(/^in/.test(m[2]) ? a + ":" + (b - a) : (b - a) + ":" + a);
+  }
+  if((m = /\bodds (in favou?r|against)(?: of an event)? (?:are|is) (\d+)\s*:\s*(\d+)\b.*\bprobability\b/.exec(q))){ const a = +m[2], b = +m[3]; return out(pcRatio(/^in/.test(m[1]) ? a : b, a + b)); }
+  if((m = /^(?:are|is) (.+?) and (.+?) mutually exclusive$/.exec(q))){
+    const a = pcEvent(m[1]) || pcEvent(m[1] + " " + q), b = pcEvent(m[2]) || pcEvent(m[2] + " " + q); if(!a || !b) return null;
+    const shared = a.hit.filter(v => b.hit.includes(v));
+    return out(shared.length ? "No. They can happen together (" + shared.length + " shared outcome" + (shared.length > 1 ? "s" : "") + ")." : "Yes. They cannot happen at the same time.");
+  }
+  if((m = /\bodds (in favou?r of|against) (.+)$/.exec(q))){ const e = pcEvent(m[2]); if(e){ const h = e.hit.length, n = e.all.length - h, g = pcGcd(h, n) || 1; return out(/^in/.test(m[1]) ? h / g + ":" + n / g : n / g + ":" + h / g); } }
+  if(/^(?:the )?probability\b/.test(q)){
+    if((m = /\bflipping (\d+|two|three|four) (heads|tails)(?: in a row)?\b/.exec(q))){ const k = {two:2, three:3, four:4}[m[1]] || +m[1]; return out(pcRatio(1, 2 ** k)); }
+    if(/\btwo dice\b|\bpair of dice\b/.test(q)){
+      if((m = /\bsum of (\d+)\b/.exec(q))){ let c = 0; for(let a = 1; a <= 6; a++) for(let b = 1; b <= 6; b++) if(a + b === +m[1]) c++; return out(pcRatio(c, 36)); }
+      if(/\bdoubles\b/.test(q)) return out(pcRatio(6, 36));
+    }
+    const e = pcEvent(q); if(e){
+      const h = e.hit.length, N = e.all.length;
+      if((m = /\b(two|2|three|3) .*?\b(without|with) replacement\b/.exec(q))){ const k = /^(two|2)$/.test(m[1]) ? 2 : 3; let num = 1, den = 1; for(let i = 0; i < k; i++){ num *= m[2] === "with" ? h : h - i; den *= m[2] === "with" ? N : N - i; } return out(pcRatio(num, den)); }
+      return out(pcRatio(h, N));
+    }
+  }
+  // sets and logic
+  if((m = /\bn\(a (∪|∩|union|intersection|or|and) b\) (?:if|when|given)\b/.exec(q))){
+    const val = re => { const t = re.exec(q); return t ? +t[1] : null; }, a = val(/\bn\(a\)\s*=\s*(\d+)/), b = val(/\bn\(b\)\s*=\s*(\d+)/), u = val(/\bn\(a (?:∪|union|or) b\)\s*=\s*(\d+)/), i = val(/\bn\(a (?:∩|intersection|and) b\)\s*=\s*(\d+)/);
+    const r = a === null || b === null ? null : /∪|union|or/.test(m[1]) ? (i === null ? null : a + b - i) : (u === null ? null : a + b - u);
+    if(r !== null) return out(String(r));
+  }
+  if((m = /\b(\d+)\b\D*?\b(\d+)\b\D*?\b(\d+)\b\D*?\b(\d+)\b[^\d]*?\bboth\b.*\bneither\b/.exec(q)) && +m[1] >= +m[2]) return out(String(+m[1] - (+m[2] + +m[3] - +m[4])));
+  const sets = [...q.matchAll(/\{([^{}]*)\}/g)].map(t => t[1].split(",").map(x => x.trim()).filter(Boolean));
+  if(sets.length === 2 && (m = /^(?:the )?(union|intersection) of\b/.exec(q))){
+    const [a, b] = sets, r = m[1] === "union" ? [...new Set([...a, ...b])] : a.filter(x => b.includes(x)); return out("{" + r.join(", ") + "}");
+  }
+  if(/^(?:what is )?(?:the )?complement of a set$/.test(q)) return out("Everything in the universal set that is not in the set. The complement of A is written A′.");
+  if(/^(?:what is )?(?:the |an )?empty set$/.test(q)) return out("The set with no elements, written ∅ or { }.");
+  if((m = /^(?:the |what is the )?(converse|inverse|contrapositive) of (?:the statement )?"?if (.+?),? then (.+?)"?$/.exec(q))){
+    let p = m[2].trim(), c = m[3].trim();
+    // A pronoun in the "then" part points back at the "if" part's noun; when the order flips, the noun goes first.
+    const pn = /^(it|they)\b/.exec(c), noun = (/^((?:a|an|the) [a-z]+|[a-z]+)\b/.exec(p) || [])[1];
+    const swap = s => pn && noun && /^(a|an|the) /.test(noun) ? s : null;
+    const cFirst = swap(1) ? c.replace(/^(it|they)\b/, noun) : c, pLast = swap(1) ? p.replace(noun, pn[1]) : p;
+    const cap = s => s[0].toUpperCase() + s.slice(1);
+    if(m[1] === "converse") return out(cap("if " + cFirst + ", then " + pLast + "."));
+    if(m[1] === "inverse") return out(cap("if " + pcNot(p) + ", then " + pcNot(c) + "."));
+    return out(cap("if " + pcNot(cFirst) + ", then " + pcNot(pLast) + "."));
+  }
+  // annuities and loan payments, before the one-deposit compound-interest branch
+  const per = {monthly:12, "each month":12, "every month":12, "per month":12, "a month":12, weekly:52, quarterly:4, annually:1, yearly:1, "each year":1, "per year":1, "every year":1};
+  if((m = /\$\s*([\d,.]+) (?:is )?(?:deposited|invested|saved|contributed|put away|paid in) (monthly|weekly|quarterly|annually|yearly|each month|every month|per month|a month|each year|per year|every year) for (\d+) years? at ([\d.]+)\s*%/.exec(q))){
+    const k = per[m[2]], i = +m[4] / 100 / k, N = k * +m[3], fv = +m[1].replace(/,/g, "") * ((1 + i) ** N - 1) / i; return out(money(fv));
+  }
+  if((m = /\bpayments?\b.*?\$\s*([\d,.]+)\s*(loan|mortgage|car loan)?\b.*?\bat ([\d.]+)\s*%.*?\b(?:for|over) (\d+) years?/.exec(q))){
+    const pv = +m[1].replace(/,/g, ""), N = 12 * +m[4], pay = i => i * pv / (1 - (1 + i) ** -N), monthly = pay(+m[3] / 1200);
+    if(/mortgage/.test(q)) return out(money(monthly) + " a month compounded monthly; " + money(pay((1 + +m[3] / 200) ** (1 / 6) - 1)) + " with the semi-annual compounding Canadian mortgages use.");
+    return out(money(monthly) + " a month (" + money(monthly * N - pv) + " in interest over the loan).");
+  }
+  // functions, circles, fractals
+  if((m = /\by\s*=\s*(-?[\d.]*)\s*\(?\s*([\d.]+)\s*\)?\s*\^\s*\(?\s*-?x\s*\)?/.exec(q)) && /\bgrowth or decay\b|\bdecay or growth\b/.test(q)){
+    const b = +m[2], neg = /\^\s*\(?\s*-x/.test(q); if(b <= 0 || b === 1) return null;
+    return out((b > 1) !== neg ? "Growth: the base " + pcNum(b) + " is greater than 1." : "Decay: the base " + pcNum(b) + " is between 0 and 1.");
+  }
+  if((m = /\bcircle\b.*?\bcent(?:er|re) (?:at |of )?\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\).*?\bradius (?:of |is )?([\d.]+)/.exec(q)) && /\bequation\b/.test(q)){
+    const t = (v, n) => +n === 0 ? v + "²" : "(" + v + (+n > 0 ? " - " + n : " + " + -n) + ")²"; return out(t("x", m[1]) + " + " + t("y", m[2]) + " = " + pcNum(m[3] ** 2));
+  }
+  if((m = /^(?:the )?cent(?:er|re) and radius of (.+?)=\s*([\d.]+)$/.exec(q))){
+    const term = v => { const t = new RegExp("\\(\\s*" + v + "\\s*([+-])\\s*([\\d.]+)\\s*\\)\\s*(?:\\^\\s*2|²)").exec(m[1]); return t ? (t[1] === "-" ? 1 : -1) * +t[2] : new RegExp("\\b" + v + "\\s*(?:\\^\\s*2|²)").test(m[1]) ? 0 : null; };
+    const h = term("x"), k = term("y"); if(h === null || k === null) return null;
+    return out("Center (" + pcNum(h) + ", " + pcNum(k) + "), radius " + (Number.isInteger(Math.sqrt(+m[2])) ? pcNum(Math.sqrt(+m[2])) : "√" + m[2] + " ≈ " + pcNum(+Math.sqrt(+m[2]).toFixed(4))) + ".");
+  }
+  const FRACTAL = {"koch curve":[4, 3, "segments"], "koch snowflake":[4, 3, "segments"], "sierpinski triangle":[3, 2, "triangles"], "sierpinski gasket":[3, 2, "triangles"], "sierpinski carpet":[8, 3, "squares"], "cantor set":[2, 3, "segments"]};
+  const fr = Object.keys(FRACTAL).find(k => q.includes(k));
+  if(fr){
+    const [n, s, unit] = FRACTAL[fr];
+    if(/\bdimension\b/.test(q)) return out("log " + n + "/log " + s + " ≈ " + pcNum(+(Math.log(n) / Math.log(s)).toFixed(4)));
+    if((m = /\bstage (\d+)\b/.exec(q)) && /\bhow many\b/.test(q)) return out(String(n ** +m[1]) + " " + unit);
+  }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
@@ -1610,6 +1751,7 @@ function precalc(query){
   const p11 = pc11(q); if(p11) return p11;
   const p10 = fm10(q); if(p10) return p10;
   const f11 = fom11(q); if(f11) return f11;
+  const f12 = fom12(q); if(f12) return f12;
   let m;
   // how many roots does a degree 4 (or quartic) polynomial have
   if((m = /^how many (?:roots|zeros|solutions) (?:does|can) (?:a |an )?(?:degree[- ](\d+)|(linear|quadratic|cubic|quartic|quintic)) polynomial have$/.exec(q))){
