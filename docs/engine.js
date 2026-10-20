@@ -2862,11 +2862,106 @@ function chem12(q, raw){
   }
   return null;
 }
+// --- Physics 11, offline ---
+// Kinematics by the four constant-acceleration equations, free fall, Newton's laws, weight, friction, net force,
+// efficiency, waves, series and parallel resistors, electric power and energy, and km/h to m/s. g = 9.8 m/s².
+// precalc() asks it after sci10(); null means "not mine". Graded by COURSE=phys11 node test/exam-course.js.
+// Mirrored in kmp/shared/.../Physics11.kt.
+const P11_G = 9.8;
+const P11_VEC = {velocity:1, displacement:1, acceleration:1, force:1, momentum:1, weight:1, impulse:1, speed:0, distance:0, mass:0, time:0, energy:0, work:0, power:0, temperature:0, volume:0, density:0};
+const P11_COUNT = {one:1, two:2, three:3, four:4, five:5};
+function phys11(q){
+  // Three significant figures, the way a physics answer is written.
+  const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"}), n = v => pcNum(+(+v).toPrecision(3)), g = P11_G;
+  const val = re => { const t = re.exec(q); return t ? +t[1] : null; };
+  const facts = [
+    [/\bdifference between distance and displacement\b/, "Distance is how far something travels along its path, a scalar. Displacement is the straight-line change in position with a direction, a vector."],
+    [/\bdifference between speed and velocity\b/, "Speed is how fast, a scalar. Velocity is speed with a direction, a vector."],
+    [/\bnewton'?s first law\b/, "An object stays at rest or keeps moving at a constant velocity unless a net force acts on it (the law of inertia)."],
+    [/\bnewton'?s second law\b/, "F = ma: the net force equals mass times acceleration."],
+    [/\bnewton'?s third law\b/, "For every action force there is an equal and opposite reaction force on the other object."],
+    [/^(?:what is )?inertia$/, "An object's tendency to resist a change in its motion. More mass means more inertia."],
+    [/\bspeed of sound(?: in air)?$/, "About 343 m/s in air at 20 °C (331 m/s at 0 °C)."],
+    [/^(?:what is )?constructive interference$/, "Two waves meet in phase and add, making a larger wave."],
+    [/^(?:what is )?destructive interference$/, "Two waves meet out of phase and cancel, making a smaller wave or none."],
+    [/^(?:what is )?(?:a )?transverse wave$/, "A wave where the medium moves perpendicular to the direction the wave travels, like a wave on a rope or light."],
+    [/^(?:what is )?(?:a )?longitudinal wave$/, "A wave where the medium moves parallel to the direction the wave travels, in compressions and rarefactions, like sound."],
+    [/\bacceleration (?:due to|of) gravity\b|^(?:what is )?(?:the value of )?g on earth$/, "9.8 m/s² near Earth's surface."],
+    [/\bwavelength\b.*\bfrequency (?:doubles|is doubled)\b|\bfrequency (?:doubles|is doubled)\b.*\bwavelength\b/, "The wavelength halves, since v = fλ and v stays the same."],
+    [/\bwavelength\b.*\bfrequency (?:halves|is halved)\b|\bfrequency (?:halves|is halved)\b.*\bwavelength\b/, "The wavelength doubles, since v = fλ and v stays the same."],
+  ];
+  for(const [re, body] of facts) if(re.test(q)) return out(body);
+  let m;
+  if((m = /^is (?:a |an )?([a-z]+) (?:a )?(?:vector or (?:a )?scalar|scalar or (?:a )?vector)(?: quantity)?$/.exec(q)) && P11_VEC[m[1]] !== undefined) return out(P11_VEC[m[1]] ? "A vector: it has a size and a direction." : "A scalar: it has a size but no direction.");
+  // free fall, then the four constant-acceleration equations
+  if((m = /\bdropped from ([\d.]+)\s*m\b/.exec(q))){
+    const h = +m[1];
+    if(/\bhow long\b|\btime\b/.test(q)) return out(n(Math.sqrt(2 * h / g)) + " s (t = √(2h/g))");
+    if(/\b(speed|velocity|how fast)\b/.test(q)) return out(n(Math.sqrt(2 * g * h)) + " m/s (v = √(2gh))");
+  }
+  if((m = /\bafter falling for ([\d.]+)\s*s\b/.exec(q)) && /\b(velocity|speed|how fast)\b/.test(q)) return out(n(g * +m[1]) + " m/s (v = gt)");
+  if((m = /\bfalls? for ([\d.]+)\s*s\b/.exec(q)) && /\b(distance|how far)\b/.test(q)) return out(n(g * m[1] ** 2 / 2) + " m (d = ½gt²)");
+  if((m = /\bthrown (?:straight )?up(?:ward)? at ([\d.]+)\s*m\/s\b/.exec(q))){
+    const v = +m[1]; if(/\bhow high\b|\bmax(?:imum)? height\b/.test(q)) return out(n(v * v / (2 * g)) + " m (h = v²/2g)"); if(/\bhow long\b/.test(q)) return out(n(2 * v / g) + " s to come back down (" + n(v / g) + " s to the top)");
+  }
+  const ask = (/\b(acceleration|final velocity|final speed|initial velocity|displacement|distance|time|how long|how far)\b/.exec(q) || [])[1];
+  if(ask && /\b(m\/s|accelerat|from rest)\b/.test(q) && !/\bkg\b|\bnet force\b/.test(q)){
+    let vi = /\bfrom rest\b|\bstarts? at rest\b/.test(q) ? 0 : val(/\binitial (?:velocity|speed) (?:is |of )?(-?[\d.]+)/) ?? val(/\bfrom (-?[\d.]+)\s*m\/s\b/) ?? val(/\bgoes from (-?[\d.]+)\b/);
+    let vf = val(/\bfinal (?:velocity|speed) (?:is |of )?(-?[\d.]+)/) ?? val(/\bto (-?[\d.]+)\s*m\/s\b/);
+    // Acceleration is the number in m/s² wherever it sits; the others go by their words.
+    let a = val(/(-?[\d.]+)\s*m\/s(?:2|²|\^2|\/s)/), t = val(/\b(?:in|for|time is|after|over)\s+([\d.]+)\s*(?:s|seconds?)\b/), d = val(/\b(?:over|for|displacement(?: is| of)?|distance(?: is| of)?)\s+([\d.]+)\s*m\b(?!\/)/);
+    const want = /^accel/.test(ask) ? "a" : /^final/.test(ask) ? "vf" : /^initial/.test(ask) ? "vi" : /^(time|how long)/.test(ask) ? "t" : "d";
+    const known = {vi, vf, a, t, d}; delete known[want];
+    if(Object.values(known).filter(v => v !== null).length >= 3){
+      let r = null;
+      if(want === "a") r = vi !== null && vf !== null && t ? (vf - vi) / t : vi !== null && vf !== null && d ? (vf * vf - vi * vi) / (2 * d) : vi !== null && t && d !== null ? 2 * (d - vi * t) / (t * t) : null;
+      if(want === "vf") r = vi !== null && a !== null && t !== null ? vi + a * t : vi !== null && a !== null && d !== null ? Math.sqrt(vi * vi + 2 * a * d) : null;
+      if(want === "vi") r = vf !== null && a !== null && t !== null ? vf - a * t : null;
+      if(want === "d") r = vi !== null && a !== null && t !== null ? vi * t + a * t * t / 2 : vi !== null && vf !== null && t !== null ? (vi + vf) / 2 * t : vi !== null && vf !== null && a ? (vf * vf - vi * vi) / (2 * a) : null;
+      if(want === "t") r = vi !== null && vf !== null && a ? (vf - vi) / a : null;
+      if(r !== null && isFinite(r)) return out(n(r) + " " + {a:"m/s²", vf:"m/s", vi:"m/s", d:"m", t:"s"}[want]);
+    }
+  }
+  if((m = /\b(?:average )?speed\b.*?\b(?:goes|travels|runs|moves|covers) ([\d.]+)\s*(m|km)\b.*?\bin ([\d.]+)\s*(s|seconds?|h|hours?)\b/.exec(q))) return out(n(+m[1] / +m[3]) + " " + m[2] + "/" + (/^s/.test(m[4]) ? "s" : "h"));
+  // forces
+  if((m = /\bnet force\b.*?([\d.]+)\s*kg\b.*?\baccelerat\w* (?:at )?([\d.]+)\s*m\/s/.exec(q))) return out(n(+m[1] * +m[2]) + " N (F = ma)");
+  if((m = /\baccelerat\w*\b.*?([\d.]+)\s*kg\b.*?\b(?:net )?force (?:of )?([\d.]+)\s*n\b/.exec(q))) return out(n(+m[2] / +m[1]) + " m/s² (a = F/m)");
+  if((m = /\bweight of (?:a |an )?([\d.]+)\s*kg\b/.exec(q))) return out(n(+m[1] * g) + " N (W = mg)");
+  if((m = /\bnormal force (?:on|of) (?:a |an )?([\d.]+)\s*kg\b.*?\b(?:flat|level|horizontal)\b/.exec(q))) return out(n(+m[1] * g) + " N (it balances the weight, mg)");
+  if((m = /\bmass of (?:an? )?(?:object|thing|box|person)? ?that weighs ([\d.]+)\s*n\b/.exec(q))) return out(n(+m[1] / g) + " kg (m = W/g)");
+  if((m = /\bfriction\b.*?\bcoefficient (?:of (?:kinetic |static )?friction )?(?:is |of )?([\d.]+)\b.*?\bnormal force (?:is |of )?([\d.]+)\s*n\b/.exec(q))) return out(n(+m[1] * +m[2]) + " N (F = μN)");
+  if((m = /\bnet force\b.*?([\d.]+)\s*n (?:of [a-z]+ )?acts? (right|left|forward|backward|up|down|east|west|north|south)\b.*?([\d.]+)\s*n (?:of [a-z]+ )?acts? (right|left|forward|backward|up|down|east|west|north|south)\b/.exec(q))){
+    const opp = {right:"left", left:"right", forward:"backward", backward:"forward", up:"down", down:"up", east:"west", west:"east", north:"south", south:"north"};
+    const a = +m[1], b = +m[3]; if(opp[m[2]] !== m[4]) return out(n(a + b) + " N " + m[2]);
+    return out(a === b ? "0 N: the forces balance." : n(Math.abs(a - b)) + " N " + (a > b ? m[2] : m[4]));
+  }
+  // energy, efficiency, waves
+  if((m = /\befficiency\b.*?([\d.]+)\s*j\b.*?\binput\b.*?([\d.]+)\s*j\b|\befficiency\b.*?\binput (?:energy )?(?:of |is )?([\d.]+)\s*j\b.*?([\d.]+)\s*j\b/.exec(q))){ const inp = +(m[1] || m[3]), use = +(m[2] || m[4]); return out(n(use / inp * 100) + "% (useful output over input)"); }
+  if((m = /\bwave ?speed\b.*?\bfrequency (?:is |of )?([\d.]+)\s*hz\b.*?\bwavelength (?:is |of )?([\d.]+)\s*m\b/.exec(q)) || (m = /\bwave ?speed\b.*?\bwavelength (?:is |of )?([\d.]+)\s*m\b.*?\bfrequency (?:is |of )?([\d.]+)\s*hz\b/.exec(q))) return out(n(+m[1] * +m[2]) + " m/s (v = fλ)");
+  if((m = /\bwavelength\b.*?([\d.]+)\s*hz\b.*?\b(?:speed|velocity)[a-z ]*? (?:is |of )?([\d.]+)\s*m\/s\b/.exec(q))) return out(n(+m[2] / +m[1]) + " m (λ = v/f)");
+  if((m = /\bfrequency\b.*?\b(?:speed|velocity)[a-z ]*? (?:is |of )?([\d.]+)\s*m\/s\b.*?\bwavelength (?:is |of )?([\d.]+)\s*m\b/.exec(q))) return out(n(+m[1] / +m[2]) + " Hz (f = v/λ)");
+  if((m = /\bperiod\b.*?\bfrequency (?:is |of )?([\d.]+)\s*hz\b/.exec(q))) return out(n(1 / +m[1]) + " s (T = 1/f)");
+  if((m = /\bfrequency\b.*?\bperiod (?:is |of )?([\d.]+)\s*s\b/.exec(q))) return out(n(1 / +m[1]) + " Hz (f = 1/T)");
+  // circuits: series, parallel, power, energy
+  if(/\btotal resistance\b|\bequivalent resistance\b/.test(q)){
+    const rs = [...q.matchAll(/\b(one|two|three|four|five)?\s*([\d.]+)\s*(?:ohm|ω|Ω)s?\b/gi)].flatMap(t => Array(P11_COUNT[t[1]] || 1).fill(+t[2]));
+    if(rs.length >= 2){ const par = /\bparallel\b/.test(q), r = par ? 1 / rs.reduce((s, v) => s + 1 / v, 0) : rs.reduce((s, v) => s + v, 0); return out(n(r) + " Ω" + (par ? " (1/R = 1/R₁ + 1/R₂ + ...)" : " (R = R₁ + R₂ + ...)")); }
+  }
+  if((m = /\bpower\b.*?([\d.]+)\s*v\b.*?([\d.]+)\s*a\b/.exec(q)) || (m = /\bpower\b.*?([\d.]+)\s*a\b.*?([\d.]+)\s*v\b/.exec(q)) && (m = [m[0], m[2], m[1]])) return out(n(+m[1] * +m[2]) + " W (P = VI)");
+  if((m = /\b(?:energy|how much energy)\b.*?([\d.]+)\s*w\b.*?\bin ([\d.]+)\s*(hours?|h|minutes?|min|seconds?|s)\b/.exec(q))){
+    const sec = +m[2] * (/^h/.test(m[3]) ? 3600 : /^m/.test(m[3]) ? 60 : 1), J = +m[1] * sec;
+    return out(n(J) + " J (" + n(J / 3.6e6) + " kWh)");
+  }
+  // km/h and m/s
+  if((m = /^(?:convert )?([\d.]+)\s*(km\/h|kph|m\/s)\s+(?:to|in|into)\s+(km\/h|kph|m\/s)$/.exec(q)) && m[2] !== m[3]) return out(n(/^m\/s$/.test(m[2]) ? +m[1] * 3.6 : +m[1] / 3.6) + " " + m[3]);
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const sc10 = sci10(q, query); if(sc10) return sc10;
+  const ph11 = phys11(q); if(ph11) return ph11;
   const ch12 = chem12(q, query); if(ch12) return ch12;
   const ch11 = chem11(q, query); if(ch11) return ch11;
   const c12 = calc12(q); if(c12) return c12;

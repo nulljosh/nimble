@@ -99,4 +99,11 @@ class Precalc11Test {
     @Test fun kspExpression() = assertEquals("Ksp = [Ca²⁺]³[PO₄³⁻]²", pc("Ksp expression for Ca3(PO4)2"))
     @Test fun leChatelierPressure() = assertEquals("It shifts right, toward the products, the side with fewer moles of gas (4 on the left, 2 on the right).", pc("what happens to N2 + 3H2 <-> 2NH3 if pressure increases"))
     @Test fun reducingAgent() = assertEquals("Zn is the reducing agent: it is oxidized (0 to +2).", pc("what is the reducing agent in Zn + Cu2+ -> Zn2+ + Cu"))
+
+    // Physics 11 (Physics11.kt)
+    @Test fun kinematicsFromRest() = assertEquals("24 m", pc("distance traveled by a car accelerating from rest at 3 m/s2 for 4 s"))
+    @Test fun kinematicsOverDistance() = assertEquals("8.72 m/s", pc("final velocity if initial velocity is 4 m/s, acceleration is 3 m/s2 over 10 m"))
+    @Test fun freeFall() = assertEquals("9.9 m/s (v = √(2gh))", pc("speed of a 2 kg object dropped from 5 m just before it hits the ground"))
+    @Test fun parallel() = assertEquals("5 Ω (1/R = 1/R₁ + 1/R₂ + ...)", pc("total resistance of two 10 ohm resistors in parallel"))
+    @Test fun electricEnergy() = assertEquals("1080000 J (0.3 kWh)", pc("how much energy does a 60 W bulb use in 5 hours"))
 }
