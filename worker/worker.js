@@ -688,7 +688,9 @@ async function handle(req, env, ctx) {
       const clean = text.trim().replace(/^as of (today,? )?(\w+ \d{1,2},? \d{4}|\d{4}-\d{2}-\d{2}|\d{4})?,?\s*/i, "")
         .replace(/^(.{3,}?[.!?])\s*\1$/s, "$1");
       // A reply with no letter or digit (a stray "*" from a reasoning trace) is no answer.
-      return /[a-z0-9]/i.test(clean) ? clean[0].toUpperCase() + clean.slice(1) : "UNKNOWN";
+      // Math keeps its case: "x = 3", "x^2 + x + 1", "sin x", "log(2)", "f⁻¹(x)" are not sentences to capitalize.
+      const math = /^(?:[a-z](?=\s*[=^<>≤≥+\-*/²³]|\d|$)|(?:sin|cos|tan|csc|sec|cot|log|ln)\b|f\s*[(⁻])/.test(clean);
+      return /[a-z0-9]/i.test(clean) ? (math ? clean : clean[0].toUpperCase() + clean.slice(1)) : "UNKNOWN";
     };
 
     // Every model call goes through askCounted so the day's estimate sees it, failures included.
