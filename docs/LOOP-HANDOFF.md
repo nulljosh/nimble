@@ -37,7 +37,8 @@ Rules that bite:
 
 0. Curriculum and public exams (Joshua, 2026-10-20). A+ means 95%, judged on a held-out form written before tuning, offline and online, on web then Swift then Kotlin, with every score in docs/BENCHMARK.md:
    - BC Pre-Calculus 12 (test/exam-pc12.js): A+ everywhere (2026-10-20). Web 95% online on fresh form G, 281/281 offline; Apple 279/281 offline (engine.js in JavaScriptCore); Kotlin 279/281 offline (Precalc.kt, a line-for-line port). A change to precalc() in docs/engine.js must be mirrored in Precalc.kt.
-   - Every other BC grade 10 to 12 math, science and socials course, 40 questions plus a held-out form each. English, arts and PE are skipped.
+   - BC Pre-Calculus 11 (test/courses/pc11.js): A+ (2026-10-20), held-out form B 40/40 online and offline on the web, 80/80 Kotlin offline. Runner: `COURSE=<name> node test/exam-course.js`. Each new course is one file in test/courses, symlinked into Tests/Fixtures and listed in testCourseExams; Kotlin's courseExams reads the folder.
+   - Next courses, in order: Foundations of Math and Pre-Calculus 10, Foundations 11, Foundations 12, Calculus 12, Statistics 12, Workplace 10, Apprenticeship 12; then Science 10, Chemistry 11 and 12, Physics 11 and 12, Life Sciences 11, Anatomy and Physiology 12, Earth Sciences 11, Environmental Science 11; then Social Studies 10, Physical Geography 12, 20th Century World History 12, Law 12, Economic Theory 12, BC First Peoples 12. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.

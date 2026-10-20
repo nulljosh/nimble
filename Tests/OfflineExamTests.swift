@@ -62,6 +62,28 @@ final class OfflineExamTests: XCTestCase {
         print("missed:\n" + missed.joined(separator: "\n"))
     }
 
+    /// Every BC course exam (test/courses, each symlinked into Tests/Fixtures) on the Apple engine, offline.
+    func testCourseExams() throws {
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["NIMBLE_EXAM"] == "1", "Set TEST_RUNNER_NIMBLE_EXAM=1")
+        let engine = QueryEngine()
+        for course in ["pc11"] {
+            let url = try XCTUnwrap(Bundle(for: Self.self).url(forResource: course, withExtension: "js"), course)
+            let questions = try Self.questions(String(contentsOf: url, encoding: .utf8))
+            var missed: [String] = []
+            for (question, grade) in questions {
+                let shown: String
+                switch engine.localAnswer(question) {
+                case .math(let v, _): shown = v
+                case .text(let heading, let body, _, _, _, _, _, _, _): shown = [heading, body].compactMap { $0 }.joined(separator: " ")
+                default: shown = ""
+                }
+                let text = shown.replacingOccurrences(of: "[−‑–]", with: "-", options: .regularExpression)
+                if grade.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) == nil { missed.append("\(question) => \(text.prefix(60))") }
+            }
+            print("\(course): \(questions.count - missed.count)/\(questions.count) pass (Apple, offline)\n" + missed.joined(separator: "\n"))
+        }
+    }
+
     /// Each question is ["text",/regex/flags] in the exam files; JS and ICU regexes agree on everything the exams use.
     static func questions(_ src: String) throws -> [(String, NSRegularExpression)] {
         let re = try NSRegularExpression(pattern: #"\["((?:[^"\\]|\\.)*)",\s*/((?:[^/\\\n]|\\.)+)/([a-z]*)\]"#)

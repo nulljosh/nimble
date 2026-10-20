@@ -167,6 +167,18 @@ const DATE = /\b(1\d{3}|20\d{2})s?\b|\b(January|February|March|April|May|June|Ju
 const YEAR_G = /\b(1\d{3}|20\d{2})s?\b/g;
 const GLUE = new Set("that this with from which were have they their also been into about after there these those when where while would could should will".split(" "));
 
+// Models write math in LaTeX ("\(\frac{\sqrt{2}}{2}\)"); the apps show plain text, so it becomes "√2/2".
+const TEX = { sin: "sin", cos: "cos", tan: "tan", log: "log", ln: "ln", cdot: "·", times: "×", pm: "±", alpha: "α", beta: "β", gamma: "γ", theta: "θ", pi: "π", le: "≤", leq: "≤", ge: "≥", geq: "≥", neq: "≠", ne: "≠", approx: "≈", infty: "∞", circ: "°", degree: "°" };
+const unwrap = (s) => /[+\-*/=\s]/.test(s.trim()) ? "(" + s.trim() + ")" : s.trim();
+export function delatex(text) {
+  if (!/\\[a-z(\[]/i.test(text)) return text;
+  let t = text.replace(/\\[()[\]]/g, "").replace(/\\(?:displaystyle|left|right|,|;|!)\s*/g, "").replace(/\\(?:text|mathrm)\{([^{}]*)\}/g, "$1");
+  for (let i = 0; i < 3; i++) t = t.replace(/\\sqrt\{([^{}]*)\}/g, (_, x) => "√" + unwrap(x)).replace(/\\[dt]?frac\{([^{}]*)\}\{([^{}]*)\}/g, (_, a, b) => unwrap(a) + "/" + unwrap(b));
+  t = t.replace(/\^\{?2\}?/g, "²").replace(/\^\{?3\}?/g, "³").replace(/\^\{([^{}]*)\}/g, "^$1")
+    .replace(/\\([a-z]+)/gi, (w, n) => (n in TEX ? (/^[a-z]+$/.test(TEX[n]) ? " " + TEX[n] + " " : TEX[n]) : w)).replace(/[{}]/g, "");
+  return t.replace(/ +([,.)²³])/g, "$1").replace(/([(/^]) +/g, "$1").replace(/ {2,}/g, " ").trim();
+}
+
 // Follow-up context from the client: at most 3 {q, a} string pairs, each side cut to 300 chars.
 // Anything else is dropped. Never logged.
 // The last AI call failure (a thrown error, not a model's UNKNOWN), kept in module memory for debugging.
@@ -680,6 +692,8 @@ async function handle(req, env, ctx) {
       // "Reference" alone is a normal word: a haiku's "seasonal reference" turned a good answer into UNKNOWN.
       // A good answer that ends "..., according to the reference" keeps its figure; only the attribution goes.
       text = text.replace(/,?\s+(according to|per|based on|as (stated|given|noted) in|from) the (provided |given )?reference( text)?(?=[.,;!]|$)/i, "");
+      // A model sometimes glues UNKNOWN to a good answer ("5UNKNOWN"): the answer stays.
+      text = delatex(text.replace(/(?<=\S)\s*UNKNOWN\s*$/, ""));
       if (/\b(the|provided|this|given) reference\b(?! (daily|intake|value|range|dose|amount))|\breference text\b|\bprovided (text|context)\b|reply exactly|\bthe instructions?\b|\bUNKNOWN\b|\bconstraints?\b|^\s*[*-]\s|\btoday is \d{4}-\d{2}-\d{2}/i.test(text)) { console.log("cleanReply rejected:", text.slice(0, 200)); return "UNKNOWN"; }
       // Telling the models today's date makes them echo it: "As of today, October 11, 2026, the CEO is X."
       // The date is ours, not the answer's; drop the preamble and recapitalize.

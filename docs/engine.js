@@ -1210,10 +1210,166 @@ const PC_FACTS = [
   [/^(?:what is )?(?:the )?formula for the sum of (?:a |the first n terms of a )?geometric (?:series|sequence)$/, "Sₙ = a(1 - rⁿ)/(1 - r), for r ≠ 1."],
   [/^(?:what is )?(?:the )?formula for (?:the )?(?:sum of )?(?:an |the )?infinite geometric series$/, "S = a/(1 - r), when |r| < 1."],
 ];
+// --- Pre-Calculus 11, offline ---
+// Radicals, absolute value, quadratics in vertex form, inequalities, systems, rational expressions, the sine and
+// cosine laws and simple interest. precalc() asks it first; null means "not mine". Graded by
+// COURSE=pc11 node test/exam-course.js. Mirrored in kmp/shared/.../Precalc11.kt.
+// √n as [k, m] with k√m and m square-free: √50 is [5, 2].
+function pcRad(n){ let k = 1, m = n; for(let f = 2; f * f <= m; f++) while(m % (f * f) === 0){ m /= f * f; k *= f; } return [k, m]; }
+const pcRadText = (k, m) => m === 1 ? String(k) : (k === 1 ? "" : k) + "√" + m;
+const pcGcd = (a, b) => b ? pcGcd(b, a % b) : Math.abs(a);
+// The real zeros of an expression in x: exact for a quadratic, small fractions otherwise.
+const pcZeros = e => { const co = pcQuad(e); return co ? pcRoots(co).sort((a, b) => a - b) : pcScanRoots(e); };
+// a(x - h)² + k, written the way a textbook does.
+const pcVertexForm = (a, h, k) => (a === 1 ? "" : a === -1 ? "-" : pcFrac(a)) + (h === 0 ? "x²" : "(x " + (h < 0 ? "+ " + pcFrac(-h) : "- " + pcFrac(h)) + ")²") + (k === 0 ? "" : k < 0 ? " - " + pcFrac(-k) : " + " + pcFrac(k));
+function pc11(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
+  let m;
+  if(/^(?:the )?quadratic formula$/.test(q)) return out("x = (-b ± √(b² - 4ac))/2a, the roots of ax² + bx + c = 0.");
+  if(/^(?:the )?(?:law|rule) of sines?$|^(?:the )?sine law$/.test(q)) return out("a/sin A = b/sin B = c/sin C: each side over the sine of the angle across from it.");
+  if(/^(?:the )?(?:law|rule) of cosines?$|^(?:the )?cosine law$/.test(q)) return out("c² = a² + b² - 2ab cos C, where C is the angle between sides a and b.");
+  // Radicals: √50, √12 + √27, 3√2 · 4√6, 1/√2
+  const T = "(\\d*)\\s*(?:√|sqrt)\\s*\\(?\\s*(\\d+)\\s*\\)?", r = q.replace(/^(?:simplify|rationalize|evaluate)\s+/, "");
+  const rad = (c, n) => { const [k, s] = pcRad(+n); return [(c === "" ? 1 : +c) * k, s]; };
+  const approx = (k, s) => pcRadText(k, s) + (s === 1 ? "" : " ≈ " + pcNum(k * Math.sqrt(s)));
+  if((m = new RegExp("^" + T + "$").exec(r))) return out(approx(...rad(m[1], m[2])));
+  if((m = new RegExp("^" + T + "\\s*([+-])\\s*" + T + "$").exec(r))){
+    const [k1, s1] = rad(m[1], m[2]), [k2, s2] = rad(m[4], m[5]), sg = m[3] === "-" ? -1 : 1;
+    if(s1 === s2){ const k = k1 + sg * k2; return out(k === 0 ? "0" : approx(k, s1)); }
+    return out(pcRadText(k1, s1) + (sg < 0 ? " - " : " + ") + pcRadText(k2, s2) + " ≈ " + pcNum(k1 * Math.sqrt(s1) + sg * k2 * Math.sqrt(s2)));
+  }
+  if((m = new RegExp("^" + T + "\\s*[*×·]\\s*" + T + "$").exec(r))){
+    const c = (m[1] === "" ? 1 : +m[1]) * (m[3] === "" ? 1 : +m[3]), [k, s] = pcRad(+m[2] * +m[4]); return out(approx(c * k, s));
+  }
+  if((m = new RegExp("^(\\d+)\\s*\\/\\s*" + T + "$").exec(r))){
+    const [k, s] = rad(m[2], m[3]), top = +m[1], g = pcGcd(top, k * s), n = top / g, d = k * s / g;
+    return out(s === 1 ? pcFrac(top / k) : (n === 1 ? "" : n) + "√" + s + (d === 1 ? "" : "/" + d) + " ≈ " + pcNum(top / (k * Math.sqrt(s))));
+  }
+  // |-7| + |3|, then solve |2x + 1| = 7
+  if(/\|/.test(q) && !/x/.test(q)){ const v = tryMath(r.replace(/\|([^|]+)\|/g, "abs($1)")); if(v !== null) return {kind:"math", value:v}; }
+  if((m = /^solve\s+\|\s*([^|]*x[^|]*)\|\s*=\s*(-?[\d.]+)$/.exec(q))){
+    const c = +m[2]; if(c < 0) return out("No solution: an absolute value is never negative.");
+    const xs = [...new Set([...pcScanRoots("(" + m[1] + ")-(" + c + ")"), ...pcScanRoots("(" + m[1] + ")+(" + c + ")")])].sort((a, b) => a - b);
+    return xs.length ? out(xs.map(x => "x = " + pcFrac(x)).join(" or ")) : null;
+  }
+  // vertex, axis of symmetry, maximum or minimum, discriminant, vertex form, number of real roots
+  const F = "(?:y\\s*=\\s*|f\\(x\\)\\s*=\\s*)?(.+?)(?:\\s*=\\s*0)?";
+  if((m = new RegExp("^(vertex form|vertex|axis of symmetry|maximum value|minimum value|maximum|minimum|discriminant) of " + F + "$").exec(q)) || ((m = new RegExp("^complete the square (?:for|of|on) " + F + "$").exec(q)) && (m = [m[0], "vertex form", m[1]])) || ((m = new RegExp("^how many (?:real )?(?:roots|solutions|zeros|x-intercepts) (?:does|do|has) " + F + " have$").exec(q)) && (m = [m[0], "count", m[1]]))){
+    const co = pcQuad(m[2].replace(/x²/g, "x^2")); if(!co || Math.abs(co[0]) < 1e-12) return null;
+    const [a, b, c] = co, h = +(-b / (2 * a)).toPrecision(12), k = +(c - b * b / (4 * a)).toPrecision(12), d = +(b * b - 4 * a * c).toPrecision(12), f = m[1];
+    if(f === "vertex") return out("(" + pcFrac(h) + ", " + pcFrac(k) + ")");
+    if(f === "axis of symmetry") return out("x = " + pcFrac(h));
+    if(f === "discriminant") return out("b² - 4ac = " + pcNum(d) + (d > 0 ? ", so two real roots." : d === 0 ? ", so one real root." : ", so no real roots."));
+    if(f === "count") return out(d > 0 ? "2 real roots (the discriminant is " + pcNum(d) + ")." : d === 0 ? "1, a double root (the discriminant is 0)." : "None. The discriminant is " + pcNum(d) + ", so it has no real roots.");
+    if(/^max/.test(f)) return out(a < 0 ? pcFrac(k) + ", at x = " + pcFrac(h) + "." : "None: it opens upward. Its minimum is " + pcFrac(k) + ".");
+    if(/^min/.test(f)) return out(a > 0 ? pcFrac(k) + ", at x = " + pcFrac(h) + "." : "None: it opens downward. Its maximum is " + pcFrac(k) + ".");
+    return out("y = " + pcVertexForm(a, h, k));
+  }
+  // linear and quadratic inequalities
+  if((m = /^solve\s+([^<>≤≥=]*x[^<>≤≥=]*?)\s*(<=|>=|=<|=>|≤|≥|<|>)\s*([^<>≤≥=]+)$/.exec(q))){
+    const op = {"<=":"≤", "=<":"≤", ">=":"≥", "=>":"≥"}[m[2]] || m[2], co = pcQuad(("(" + m[1] + ")-(" + m[3] + ")").replace(/x²/g, "x^2")); if(!co) return null;
+    const [a, b, c] = co, strict = op === "<" || op === ">", want = op === "<" || op === "≤" ? -1 : 1, le = strict ? "<" : "≤", ge = strict ? ">" : "≥";
+    if(Math.abs(a) < 1e-12){
+      if(Math.abs(b) < 1e-12) return null;
+      return out("x " + ((want > 0) === (b > 0) ? ge : le) + " " + pcFrac(+(-c / b).toPrecision(12)));
+    }
+    // s > 0: the answer lies outside the roots, where the parabola has the sign of a.
+    const rs = pcRoots(co).sort((p, t) => p - t), s = Math.sign(a) * want;
+    if(rs.length < 2){
+      if(s > 0) return out(rs.length && strict ? "x ≠ " + pcFrac(rs[0]) : "All real numbers.");
+      return out(rs.length && !strict ? "x = " + pcFrac(rs[0]) : "No solution.");
+    }
+    const [r1, r2] = rs.map(pcFrac);
+    return out(s > 0 ? "x " + le + " " + r1 + " or x " + ge + " " + r2 : r1 + " " + le + " x " + le + " " + r2);
+  }
+  // systems: y = x^2 and y = x + 2, or x + y = 10 and x - y = 4
+  if((m = /^solve\s+(?:the system\s+)?([^=]+=[^=]+?)\s*(?:\band\b|,|;)\s*([^=]+=[^=]+)$/.exec(q)) && /x/.test(q)){
+    const ys = [m[1], m[2]].map(e => (/^y\s*=\s*(.+)$/.exec(e.trim()) || [])[1]);
+    if(ys[0] && ys[1] && !/y/.test(ys[0] + ys[1])){
+      const xs = pcZeros("(" + ys[0] + ")-(" + ys[1] + ")");
+      const pts = xs.map(x => [x, pcAt(ys[0], x)]); if(pts.some(([, y]) => y === null)) return null;
+      return out(pts.length ? pts.map(([x, y]) => "(" + pcFrac(x) + ", " + pcFrac(+y.toPrecision(12)) + ")").join(" and ") : "No solution: the graphs never meet.");
+    }
+    // Each equation as Ax + By = C, read by evaluating it at three points and checked at a fourth.
+    const line = e => {
+      const [lhs, rhs] = e.split("="), f = (x, y) => pcAt(("(" + lhs + ")-(" + rhs + ")").replace(/y/g, "(" + y + ")"), x);
+      const c = f(0, 0), a = f(1, 0), b = f(0, 1), t = f(1, 1);
+      return [c, a, b, t].some(v => v === null) || Math.abs(t - (a + b - c)) > 1e-9 ? null : [a - c, b - c, -c];
+    };
+    const p = line(m[1]), u = line(m[2]); if(!p || !u) return null;
+    const det = p[0] * u[1] - p[1] * u[0]; if(Math.abs(det) < 1e-12) return out("No single solution: the lines are parallel or the same line.");
+    return out("x = " + pcFrac(+((p[2] * u[1] - p[1] * u[2]) / det).toPrecision(12)) + ", y = " + pcFrac(+((p[0] * u[2] - p[2] * u[0]) / det).toPrecision(12)));
+  }
+  // rational expressions: add over x, cancel common factors, name the values x cannot take
+  if((m = /^simplify\s+((?:\s*[+-]?\s*\d+\s*\/\s*\(?\s*\d*\s*x\s*\)?\s*)+)$/.exec(q))){
+    let s = 0; for(const [, sg, a, b] of m[1].matchAll(/([+-]?)\s*(\d+)\s*\/\s*\(?\s*(\d*)\s*x\s*\)?/g)) s += (sg === "-" ? -1 : 1) * +a / (b === "" ? 1 : +b);
+    const f = pcFrac(+s.toPrecision(12)).split("/"); return out(s === 0 ? "0" : f[0] + "/" + (f[1] ? "(" + f[1] + "x)" : "x") + ", x ≠ 0");
+  }
+  if((m = /^simplify\s+\(?([^()]*x[^()]*)\)?\s*\/\s*\(([^()]*x[^()]*)\)$/.exec(q)) || (m = /^simplify\s+\(?([^()]*x[^()]*)\)?\s*\/\s*([^()\/]*x[^()\/]*)$/.exec(q))){
+    let top = pcCoeffs(m[1]), bot = pcCoeffs(m[2]); if(!top || !bot) return null;
+    const bad = pcZeros(m[2]);
+    for(const z of bad) while(top.length > 1 && bot.length > 1){
+      const [qt, rt] = pcDivide(top, [1, -z]), [qb, rb] = pcDivide(bot, [1, -z]); if(Math.abs(rt[0]) > 1e-9 || Math.abs(rb[0]) > 1e-9) break; top = qt; bot = qb;
+    }
+    const poly = co => pcPoly(co.map(c => +c.toFixed(9))), wrap = s => /\s[+-]\s/.test(s) ? "(" + s + ")" : s;
+    const body = bot.length === 1 ? (Math.abs(bot[0] - 1) < 1e-12 ? poly(top) : wrap(poly(top)) + "/" + pcFrac(bot[0])) : wrap(poly(top)) + "/" + wrap(poly(bot));
+    return out(body + (bad.length ? ", x ≠ " + bad.map(pcFrac).join(", ") : ""));
+  }
+  if((m = /^(?:the )?(?:non-?permissible values|restrictions?|excluded values)(?: on| of| for)?\s+(.+)$/.exec(q))){
+    const d = /\/\s*\(([^()]+)\)\s*$/.exec(m[1]) || /\/\s*([^()\/]+)$/.exec(m[1]); if(!d) return null;
+    const xs = pcZeros(d[1]); return out(xs.length ? xs.map(x => "x ≠ " + pcFrac(x)).join(", ") : "None: the denominator is never zero.");
+  }
+  // triangles: the cosine law for a side or an angle, the sine law (with its ambiguous case), the third angle
+  if((m = /angle opposite (?:the )?(?:side )?(?:of (?:length )?)?([\d.]+)\b.*?\bsides? (?:of )?([\d.]+)\s*,\s*([\d.]+)\s*,?\s*and\s*([\d.]+)/.exec(q))){
+    const s = +m[1], all = [+m[2], +m[3], +m[4]], i = all.indexOf(s); if(i < 0) return null; all.splice(i, 1);
+    const [p, t] = all, c = (p * p + t * t - s * s) / (2 * p * t);
+    return out(Math.abs(c) > 1 ? "No triangle has those sides." : pcNum(+(Math.acos(c) * 180 / Math.PI).toFixed(2)) + "°");
+  }
+  if(/\btriangle\b|\bangle [abc]\b/.test(q) && /\b[abc]\s*=\s*[\d.]+/.test(q)){
+    const ang = {}, side = {}, deg = Math.PI / 180, L = "abc".split("");
+    const rest = q.replace(/\bangle\s*([abc])\s*=\s*([\d.]+)\s*(?:°|degrees?|deg)?/g, (_, k, v) => { ang[k] = +v; return " "; });
+    for(const [, k, v] of rest.matchAll(/\b([abc])\s*=\s*([\d.]+)/g)) side[k] = +v;
+    const want = (/\b(?:find|what is)\s+(?:side\s+)?([abc])$/.exec(rest.trim()) || [])[1], wantAng = (/\bangle\s*([abc])\b(?!\s*=)/.exec(q) || [])[1];
+    if(Object.keys(ang).length === 2) ang[L.find(k => !(k in ang))] = 180 - Object.values(ang).reduce((s, v) => s + v, 0);
+    const pair = L.find(k => k in side && k in ang);
+    if(want && !(want in side) && want in ang){
+      const [p, t] = L.filter(k => k !== want);
+      if(p in side && t in side) return out(want + " ≈ " + pcNum(+Math.sqrt(side[p] ** 2 + side[t] ** 2 - 2 * side[p] * side[t] * Math.cos(ang[want] * deg)).toFixed(3)));
+      if(pair) return out(want + " ≈ " + pcNum(+(side[pair] * Math.sin(ang[want] * deg) / Math.sin(ang[pair] * deg)).toFixed(3)));
+    }
+    if(wantAng){
+      const A = wantAng.toUpperCase();
+      if(wantAng in ang) return out(A + " = " + pcNum(ang[wantAng]) + "°");
+      if(L.every(k => k in side)){
+        const [p, t] = L.filter(k => k !== wantAng), c = (side[p] ** 2 + side[t] ** 2 - side[wantAng] ** 2) / (2 * side[p] * side[t]);
+        return out(Math.abs(c) > 1 ? "No triangle has those sides." : A + " ≈ " + pcNum(+(Math.acos(c) / deg).toFixed(2)) + "°");
+      }
+      if(pair && wantAng in side){
+        const s = side[wantAng] * Math.sin(ang[pair] * deg) / side[pair]; if(s > 1) return out("No triangle: that side is too short to reach.");
+        const a1 = Math.asin(s) / deg, a2 = 180 - a1;
+        return out(A + " ≈ " + pcNum(+a1.toFixed(2)) + "°" + (a2 + ang[pair] < 180 && Math.abs(a2 - a1) > 1e-9 ? " (or " + pcNum(+a2.toFixed(2)) + "°, the ambiguous case)" : ""));
+      }
+    }
+  }
+  // the angle in a quadrant with a given sine, cosine or tangent
+  if((m = /\b(sin|cos|tan)\s*\(?\s*(?:theta|θ|x|a|t)\s*\)?\s*=\s*(-?√\d\s*\/\s*\d|-?[\d./]+)\b.*?\bquadrant\s+(iv|i{1,3}|[1-4])\b/.exec(q))){
+    const v = pcVal(m[2].replace(/√(\d)/, "sqrt($1)")); if(v === null) return null;
+    const ref = {sin:Math.asin, cos:Math.acos, tan:Math.atan}[m[1]](Math.abs(v)) * 180 / Math.PI, n = {i:1, ii:2, iii:3, iv:4}[m[3]] || +m[3];
+    if(!isFinite(ref)) return out("No angle: sine and cosine stay between -1 and 1.");
+    return out(pcNum(+[ref, 180 - ref, 180 + ref, 360 - ref][n - 1].toFixed(2)) + "°");
+  }
+  // simple interest, I = Prt
+  if((m = /simple interest\b.*?\$?\s*([\d,]+(?:\.\d+)?)\D*?([\d.]+)\s*%.*?([\d.]+)\s*(years?|months?)/.exec(q))){
+    const p = +m[1].replace(/,/g, ""), i = p * +m[2] / 100 * +m[3] / (/^m/.test(m[4]) ? 12 : 1);
+    return out("$" + i.toFixed(2) + " in interest, for $" + (p + i).toFixed(2) + " in all (I = Prt).");
+  }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
+  const p11 = pc11(q); if(p11) return p11;
   let m;
   // how many roots does a degree 4 (or quartic) polynomial have
   if((m = /^how many (?:roots|zeros|solutions) (?:does|can) (?:a |an )?(?:degree[- ](\d+)|(linear|quadratic|cubic|quartic|quintic)) polynomial have$/.exec(q))){

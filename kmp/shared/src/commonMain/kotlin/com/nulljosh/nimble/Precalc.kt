@@ -51,21 +51,21 @@ internal object Precalc {
     fun js(v: Double): String = if (v == floor(v) && abs(v) < 1e15) v.toLong().toString() else sig(v, 15)
 
     /** `+v.toFixed(n)`. */
-    private fun fixed(v: Double, n: Int): Double = (if (v < 0) -1 else 1) * floor(abs(v) * 10.0.pow(n) + 0.5) / 10.0.pow(n)
+    fun fixed(v: Double, n: Int): Double = (if (v < 0) -1 else 1) * floor(abs(v) * 10.0.pow(n) + 0.5) / 10.0.pow(n)
 
     /** `v.toFixed(2)` as text, for money. */
-    private fun money(v: Double): String {
+    fun money(v: Double): String {
         val cents = floor(abs(v) * 100 + 0.5).toLong()
         return (if (v < 0) "-" else "") + (cents / 100) + "." + (cents % 100).toString().padStart(2, '0')
     }
 
     /** JavaScript's Math.round rounds halves up; kotlin.math.round rounds them to even. */
-    private fun jsRound(v: Double) = floor(v + 0.5)
+    fun jsRound(v: Double) = floor(v + 0.5)
 
-    private fun isInt(v: Double) = v.isFinite() && v == floor(v)
+    fun isInt(v: Double) = v.isFinite() && v == floor(v)
 
     /** `+s` for a regex group: "" is 0, junk is NaN. */
-    private fun n(s: String): Double = if (s.isBlank()) 0.0 else s.trim().toDoubleOrNull() ?: Double.NaN
+    fun n(s: String): Double = if (s.isBlank()) 0.0 else s.trim().toDoubleOrNull() ?: Double.NaN
 
     // --- tryMath ---
 
@@ -87,7 +87,7 @@ internal object Precalc {
 
     // --- Helpers, as in engine.js ---
 
-    private fun pcNum(v: Double) = sig(v, 10)
+    fun pcNum(v: Double) = sig(v, 10)
 
     /** A number as a small fraction when it is one ("1/2", "-3"), else its decimal. */
     fun pcFrac(v: Double): String {
@@ -139,7 +139,7 @@ internal object Precalc {
     }
 
     /** A polynomial of degree two or less as [a, b, c], read by evaluating it; null when it is not one. */
-    private fun pcQuad(expr: String): List<Double>? {
+    fun pcQuad(expr: String): List<Double>? {
         if ('x' !in expr || Regex("""x\s*\^\s*(?:[3-9]|\d{2})""").containsMatchIn(expr)) return null
         val p = listOf(0.0, 1.0, -1.0, 2.0, 3.0).map { pcAt(expr, it) ?: return null }
         val c = p[0]
@@ -148,7 +148,7 @@ internal object Precalc {
         return if (listOf(2.0, 3.0).withIndex().all { (i, x) -> abs(a * x * x + b * x + c - p[i + 3]) < 1e-9 }) listOf(a, b, c) else null
     }
 
-    private fun pcRoots(co: List<Double>): List<Double> {
+    fun pcRoots(co: List<Double>): List<Double> {
         val (a, b, c) = co
         if (abs(a) < 1e-12) return if (abs(b) < 1e-12) emptyList() else listOf(-c / b)
         val d = b * b - 4 * a * c
@@ -178,7 +178,7 @@ internal object Precalc {
     }
 
     /** A polynomial's coefficients, highest power first, solved from its values at 0..n. Null when it is not one. */
-    private fun pcCoeffs(expr: String): List<Double>? {
+    fun pcCoeffs(expr: String): List<Double>? {
         val n = pcDeg(expr) ?: return null
         val a = MutableList(n + 1) { i -> MutableList(n + 1) { j -> i.toDouble().pow(n - j) } }
         val ys = MutableList(n + 1) { i -> pcAt(expr, i.toDouble()) ?: return null }
@@ -200,7 +200,7 @@ internal object Precalc {
     }
 
     /** Coefficients back to text: [1, 0, -1] is "x^2 - 1". */
-    private fun pcPoly(co: List<Double>): String {
+    fun pcPoly(co: List<Double>): String {
         val n = co.size - 1
         val parts = mutableListOf<String>()
         co.forEachIndexed { i, c ->
@@ -215,7 +215,7 @@ internal object Precalc {
     }
 
     /** Long division of coefficient lists: quotient and remainder. */
-    private fun pcDivide(num: List<Double>, den: List<Double>): Pair<List<Double>, List<Double>> {
+    fun pcDivide(num: List<Double>, den: List<Double>): Pair<List<Double>, List<Double>> {
         val q = mutableListOf<Double>()
         val r = num.toMutableList()
         while (r.size >= den.size) {
@@ -228,7 +228,7 @@ internal object Precalc {
     }
 
     /** The roots of any expression in x that are small fractions p/q, found by trying them. Exact zeros only. */
-    private fun pcScanRoots(expr: String): List<Double> {
+    fun pcScanRoots(expr: String): List<Double> {
         val found = LinkedHashSet<Double>()
         for (d in 1..6) for (k in -60 * d..60 * d) {
             val x = k.toDouble() / d
@@ -315,6 +315,7 @@ internal object Precalc {
         var q = query.trim().lowercase().replace(Regex("[?.!]+$"), "").replace(Regex("[−–]"), "-")
             .replaceFirst(Regex("^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?"), "")
         for ((re, body) in FACTS) if (re.containsMatchIn(q)) return out(body)
+        Precalc11.answer(q)?.let { return it }
         var m: List<String>?
         // how many roots does a degree 4 (or quartic) polynomial have
         m = find("""^how many (?:roots|zeros|solutions) (?:does|can) (?:a |an )?(?:degree[- ](\d+)|(linear|quadratic|cubic|quartic|quintic)) polynomial have$""", q)

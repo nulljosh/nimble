@@ -64,4 +64,30 @@ class OfflineExamJvmTest {
         File("build/pc12-exam.txt").writeText(report)
         println(report)
     }
+
+    /** Every BC course exam in test/courses (one file per course, forms A and B), private mode, no pack. */
+    @Test
+    fun courseExams() = runBlockingTest {
+        if (System.getenv("NIMBLE_EXAM") == null) return@runBlockingTest
+        val client = AnswerClient(privateMode = { true })
+        val report = StringBuilder()
+        for (file in File("../../test/courses").listFiles { f -> f.name.endsWith(".js") }!!.sorted()) {
+            val q = Regex("""\["((?:[^"\\]|\\.)*)",\s*/((?:[^/\\\n]|\\.)+)/([a-z]*)\]""").findAll(file.readText()).map { m ->
+                val opts = if ('i' in m.groupValues[3]) setOf(RegexOption.IGNORE_CASE) else emptySet()
+                m.groupValues[1].replace("\\\"", "\"") to Regex(m.groupValues[2], opts)
+            }.toList()
+            val missed = mutableListOf<String>()
+            for ((question, re) in q) {
+                val shown = when (val a = client.query(question)) {
+                    is Answer.Math -> a.value
+                    is Answer.Text -> listOfNotNull(a.heading, a.body).joinToString(" ")
+                    else -> ""
+                }.replace(Regex("[−‑–]"), "-")
+                if (!re.containsMatchIn(shown)) missed += "$question => ${shown.take(60)}"
+            }
+            report.append("${file.nameWithoutExtension}: ${q.size - missed.size}/${q.size} pass (Kotlin, offline)\n" + missed.joinToString("\n") + "\n")
+        }
+        File("build/course-exams.txt").writeText(report.toString())
+        println(report)
+    }
 }

@@ -89,6 +89,19 @@ Form D was the first fresh form graded online. The AI's own misses were real: it
 
 The first online run lost "10th term of 2, 6, 18" to a Wikipedia article on a trillion, and `log(1000)` came back as the natural log. The fix is `precalc()` in docs/engine.js: log bases, exponential equations, geometric sequences, degrees and radians, half-life, quadratics, remainders, asymptotes, exact trig values, trig equations, amplitude and period, inverses and transformations, all computed on the device.
 
+## BC curriculum: Pre-Calculus 11
+
+`test/courses/pc11.js` holds two 40-question forms across the course: radicals and rational exponents, absolute value, quadratics (vertex, discriminant, completing the square), linear and quadratic inequalities, systems, rational expressions, the sine and cosine laws, and interest. Both forms were written before any run, and form B was held out until form A was fixed. Run `COURSE=pc11 node test/exam-course.js` (`OFFLINE=1` for no network, `FORM=B` for one form). Every later course uses the same runner and one file in test/courses.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web online, first run | 32/40 (80%) | 40/40 (100%) |
+| Web offline, first run | 14/40 (35%) | 40/40 (100%) |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+Form A's first online misses: the AI answered in raw LaTeX (`\(\frac{\sqrt{2}}{2}\)`), called simple interest compound ($1,687.30 for $180), glued UNKNOWN to a right answer ("5UNKNOWN"), and rounded a sine-law angle to 27.4° (27.33°). One key was too strict (it wanted -2 before 2). The fix was a Pre-Calc 11 solver that runs before the AI (`pc11()` in docs/engine.js, `Precalc11.kt` on Kotlin; the Apple apps run engine.js), and the Worker now turns LaTeX into plain text and keeps an answer with UNKNOWN glued on. **A+ on the web, iPhone, Mac and Android, both forms, online and offline.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
