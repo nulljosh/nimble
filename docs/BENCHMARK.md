@@ -42,6 +42,18 @@ Apple's bigger Private Cloud Compute model needs a managed entitlement, so it is
 
 The same 154 questions with no network at all: math, units, constants, the device's time zones and the offline pack. 49 pass (45, then factorials and base conversion moved offline). The pack used to answer 75 of them and get 49 wrong, mostly by matching one word of a title ("how many bones in the human body" gave the article on the penis). It now answers only when its sentence shares the question's own words: 33 answers, 12 wrong, and the rest say "not in the offline pack". Honest misses beat confident wrong answers. On 2026-10-19 the pack grew to 14,000 articles (3.2 MB), the 10,000 vital articles first: 73 of 154 passed offline, with 14 wrong. A title that holds a word the question never asked for ("Alexander the Great" for "who wrote the great gatsby") stopped counting the same day: 72 pass and only 3 are wrong. Kotlin takes the same exam (`NIMBLE_EXAM=1 ./gradlew :shared:jvmTest --tests "*OfflineExamJvmTest"` in kmp/) and scores the same 72 with the same 3 wrong, after it gained offline units, offline time and four math phrasings it was missing. The Apple apps take it too (`TEST_RUNNER_NIMBLE_EXAM=1 xcodebuild test -scheme Nimble -destination platform=macOS -only-testing:NimbleTests/OfflineExamTests`), through the same offline chain the app runs, and score the same 72 with the same 3 wrong, on 2026-10-20 after `log10` and `log2` joined the Swift calculator. Rerun with `npm run exam:offline`. The next step is the on-device model reading the pack (roadmap v31-40).
 
+## BC curriculum: Pre-Calculus 12
+
+`test/exam-pc12.js` asks Pre-Calculus 12 the way a student types it, across the course's five units: transformations, exponents and logs, geometric sequences and series, polynomials and rational functions, and trigonometry. Form A is 40 questions. Form B is 41 more, written after the solver and never tuned against, so it is the honest grade. Run `node test/exam-pc12.js`, or `OFFLINE=1` for no network. The bar is A+, 95%.
+
+| Date | Engine | Form A | Form B |
+|---|---|---|---|
+| 2026-10-20 | Web, offline, before | 5/40 | |
+| 2026-10-20 | Web, online, before | 30/40 | |
+| 2026-10-20 | Web, offline, with the precalc solver | 40/40 | 25/41 |
+
+The first online run lost "10th term of 2, 6, 18" to a Wikipedia article on a trillion, and `log(1000)` came back as the natural log. The fix is `precalc()` in docs/engine.js: log bases, exponential equations, geometric sequences, degrees and radians, half-life, quadratics, remainders, asymptotes, exact trig values, trig equations, amplitude and period, inverses and transformations, all computed on the device.
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

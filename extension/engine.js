@@ -87,10 +87,12 @@ function spokenMath(s){
 // and a product, so "20% of 50" evaluates as 20/100*50.
 function mathSource(s){
   const t = spokenMath(s).trim().replace(/([\d.]+)\s*%\s*of\s*/g,"$1/100*").replace(/\^/g,"**").replace(/\bpi\b/g,"Math.PI").replace(/\be\b/g,"Math.E")
-    .replace(/\b(sqrt|sin|cos|tan|log|log2|log10|abs|round|floor|ceil|cbrt)\b/g,"Math.$1")
-    .replace(/\bln\b/g,"Math.log");
-  if(!/^[0-9+\-*/(). ,]*(Math\.[a-z0-9]+|[0-9+\-*/(). ,])*$/.test(t)) return null;
-  if(!/[0-9]/.test(t) || !/[+\-*/]|Math\./.test(t)) return null;
+    .replace(/\b(sqrt|sin|cos|tan|log2|log10|abs|round|floor|ceil|cbrt)\b/g,"Math.$1")
+    // "log" is base 10, as in school and in the apps; "ln" is the natural log.
+    .replace(/\blog\b/g,"Math.log10").replace(/\bln\b/g,"Math.log");
+  if(!/^[0-9+\-*/(). ,]*(Math\.[A-Za-z0-9]+|[0-9+\-*/(). ,])*$/.test(t)) return null;
+  // "cos(pi)" and "ln(e)" have no digit but are still a calculation; a bare "pi" or "e" is not.
+  if(!/[0-9]|Math\.(PI|E)\b/.test(t) || !/[+\-*/]|Math\.[a-z]/.test(t)) return null;
   return t;
 }
 function tryMath(s){
@@ -1072,6 +1074,177 @@ const CONSTANTS = [
   [/^(?:ideal |universal |molar )?gas constant$/, "Gas constant", "8.314462618 J/(mol⋅K)"],
   [/^(?:standard gravity|acceleration (?:due to|of) gravity(?: on earth)?|gravitational acceleration(?: on earth)?)$/, "Standard gravity", "9.80665 m/s²"],
 ];
+// --- Pre-Calculus, offline ---
+// The BC Pre-Calculus 12 shapes a calculator cannot read on its own: log bases, exponential equations,
+// geometric sequences, degrees and radians, half-life, quadratics, remainders, asymptotes, exact trig
+// values, trig equations, amplitude and period, inverses and transformations. Every answer is computed,
+// never looked up, and it needs no network. Null for anything else. Graded by test/exam-pc12.js.
+const pcNum = v => String(+(+v).toPrecision(10));
+// A number as a small fraction when it is one ("1/2", "-3"), else its decimal.
+function pcFrac(v){
+  for(let d = 1; d <= 12; d++){ const n = Math.round(v * d); if(Math.abs(n / d - v) < 1e-9) return d === 1 ? String(n) : n + "/" + d; }
+  return pcNum(v);
+}
+// A multiple of pi as "5π/6", "π", "2π", or null when it is not a twelfth of pi.
+function pcPi(v){
+  const f = pcFrac(v / Math.PI); if(!/^-?\d+(\/\d+)?$/.test(f)) return null;
+  const [n, d] = f.split("/"); const k = n === "1" ? "" : n === "-1" ? "-" : n;
+  return n === "0" ? "0" : k + "π" + (d ? "/" + d : "");
+}
+// The exact form of a trig value at a standard angle ("-√3/2"), or null.
+function pcExact(v){
+  const table = [[0,"0"],[0.5,"1/2"],[Math.SQRT2/2,"√2/2"],[Math.sqrt(3)/2,"√3/2"],[1,"1"],[Math.sqrt(3)/3,"√3/3"],[Math.sqrt(3),"√3"],[2,"2"],[2/Math.sqrt(3),"2√3/3"],[Math.SQRT2,"√2"]];
+  const hit = table.find(([x]) => Math.abs(Math.abs(v) - x) < 1e-9);
+  return hit ? (v < 0 && hit[1] !== "0" ? "-" : "") + hit[1] : null;
+}
+// A typed number or expression: "5pi/6", "π/3", "0.5", "1/2".
+function pcVal(s){
+  const t = String(s).trim().replace(/π/g, "pi").replace(/(\d)\s*(?=pi\b)/g, "$1*").replace(/^pi$/, "1*pi");
+  const n = Number(t); return Number.isFinite(n) && t !== "" ? n : tryMath(t);
+}
+// An expression in x at one value of x, with "2x" and "3(x+1)" read as products.
+function pcAt(expr, x){
+  const s = expr.replace(/[−–]/g, "-").replace(/\s+/g, "").replace(/x/g, "(" + x + ")").replace(/(?<=[\d)])(?=\()/g, "*");
+  return tryMath(s);
+}
+// A polynomial of degree two or less as [a, b, c], read by evaluating it; null when it is not one.
+function pcQuad(expr){
+  if(!/x/.test(expr) || /x\s*\^\s*(?:[3-9]|\d{2})/.test(expr)) return null;
+  const p = [0, 1, -1, 2, 3].map(x => pcAt(expr, x)); if(p.some(v => v === null)) return null;
+  const c = p[0], a = (p[1] + p[2]) / 2 - c, b = (p[1] - p[2]) / 2;
+  return [2, 3].every((x, i) => Math.abs(a*x*x + b*x + c - p[i + 3]) < 1e-9) ? [a, b, c] : null;
+}
+function pcRoots([a, b, c]){
+  if(Math.abs(a) < 1e-12) return Math.abs(b) < 1e-12 ? [] : [-c / b];
+  const d = b*b - 4*a*c; if(d < -1e-12) return [];
+  const s = Math.sqrt(Math.max(d, 0)); return [...new Set([(-b - s) / (2*a), (-b + s) / (2*a)].map(v => +v.toPrecision(12)))];
+}
+const pcSign = r => r < 0 ? "+ " + pcFrac(-r) : "- " + pcFrac(r);
+const PC_FACTS = [
+  [/^(?:what is )?(?:the )?reciprocal of sine$/, "Cosecant: csc x = 1/sin x."],
+  [/^(?:what is )?(?:the )?reciprocal of cosine$/, "Secant: sec x = 1/cos x."],
+  [/^(?:what is )?(?:the )?reciprocal of tangent$/, "Cotangent: cot x = 1/tan x."],
+  [/^sin\s*\^?\s*2\s*\(?x\)?\s*\+\s*cos\s*\^?\s*2\s*\(?x\)?$/, "1 (the Pythagorean identity)."],
+  [/^(?:what is )?(?:the )?remainder theorem$/, "When a polynomial P(x) is divided by x - a, the remainder is P(a)."],
+  [/^(?:what is )?(?:the )?factor theorem$/, "x - a is a factor of P(x) exactly when P(a) = 0."],
+  [/^(?:what is )?(?:the )?domain of (?:y\s*=\s*|f\(x\)\s*=\s*)?(?:log|ln)(?:_?\d+)?\s*\(?x\)?$/, "x > 0. A logarithm is defined only for positive numbers."],
+  [/^(?:what is )?(?:the )?range of (?:y\s*=\s*|f\(x\)\s*=\s*)?(?:log|ln)(?:_?\d+)?\s*\(?x\)?$/, "All real numbers."],
+  [/^(?:what is )?(?:the )?domain of (?:y\s*=\s*|f\(x\)\s*=\s*)?\d+\s*\^\s*x$/, "All real numbers."],
+  [/^(?:what is )?(?:the )?range of (?:y\s*=\s*|f\(x\)\s*=\s*)?\d+\s*\^\s*x$/, "y > 0."],
+  [/^(?:what is )?(?:the )?formula for the sum of (?:a |the first n terms of a )?geometric (?:series|sequence)$/, "Sₙ = a(1 - rⁿ)/(1 - r), for r ≠ 1."],
+  [/^(?:what is )?(?:the )?formula for (?:the )?(?:sum of )?(?:an |the )?infinite geometric series$/, "S = a/(1 - r), when |r| < 1."],
+];
+function precalc(query){
+  const q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
+  for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
+  let m;
+  // log base 3 of 81, log 5 of 125, log_2(32)
+  if((m = /^log(?:arithm)?\s*(?:base\s*|_\s*)?(\d+(?:\.\d+)?)\s*(?:of\s*|\(\s*)(\d+(?:\.\d+)?)\s*\)?$/.exec(q))){
+    const v = Math.log(+m[2]) / Math.log(+m[1]); return isFinite(v) ? out(pcNum(v)) : null;
+  }
+  // solve 3^(x+1) = 27, 2^x = 16, 5^(2x-1) = 125
+  if((m = /^(?:solve\s+(?:for x:?\s*)?)?(\d+(?:\.\d+)?)\s*\^\s*\(?\s*(-?\d*(?:\.\d+)?)\s*x\s*(?:([+-])\s*(\d+(?:\.\d+)?))?\s*\)?\s*=\s*(\d+(?:\.\d+)?)$/.exec(q))){
+    const k = m[2] === "" ? 1 : m[2] === "-" ? -1 : +m[2], shift = m[3] ? (m[3] === "-" ? -1 : 1) * +m[4] : 0;
+    const x = (Math.log(+m[5]) / Math.log(+m[1]) - shift) / k; return isFinite(x) ? out("x = " + pcFrac(x)) : null;
+  }
+  // geometric sequences: a list of numbers, then what to do with it
+  const list = /(-?\d+(?:\.\d+)?(?:\s*,\s*-?\d+(?:\.\d+)?)+)/.exec(q);
+  if(list && /\b(?:geometric|common ratio|terms? of|term in)\b/.test(q)){
+    const n = list[1].split(/\s*,\s*/).map(Number), r = n[1] / n[0];
+    if(!n.every((v, i) => i === 0 || Math.abs(v - n[i - 1] * r) < 1e-9) || !isFinite(r)) return null;
+    if(/common ratio/.test(q)) return out(pcFrac(r));
+    if((m = /\b(\d+)(?:st|nd|rd|th) term\b/.exec(q))) return out(pcNum(n[0] * r ** (+m[1] - 1)));
+    if((m = /\bsum of (?:the )?first (\d+) terms\b/.exec(q))) return out(pcNum(r === 1 ? n[0] * +m[1] : n[0] * (1 - r ** +m[1]) / (1 - r)));
+    if(/\binfinite\b/.test(q)) return out(Math.abs(r) < 1 ? pcNum(n[0] / (1 - r)) : "It diverges: the ratio is " + pcFrac(r) + ", and an infinite sum needs |r| < 1.");
+  }
+  if(/\binfinite geometric\b/.test(q) && (m = /first term (?:of |is )?(-?[\d.]+).*?ratio (?:of |is )?(-?[\d./]+)/.exec(q))){
+    const a = +m[1], r = pcVal(m[2]);
+    if(r !== null) return out(Math.abs(r) < 1 ? pcNum(a / (1 - r)) : "It diverges: an infinite geometric sum needs |r| < 1.");
+  }
+  // 100 g with a half life of 5 years, how much is left after 15 years
+  if((m = /([\d.]+)\s*([a-zµ]+)?\b.*half[- ]life (?:of |is )?([\d.]+)\s*([a-z]+).*?after ([\d.]+)/.exec(q))){
+    const left = +m[1] * 0.5 ** (+m[5] / +m[3]); return out(pcNum(left) + (m[2] && !/^(with|has|of)$/.test(m[2]) ? " " + m[2] : ""));
+  }
+  // degrees and radians
+  if((m = /^(?:convert )?(.+?)\s*(?:degrees?|deg|°)\s+(?:to|in|into)\s+radians?$/.exec(q))){
+    const d = pcVal(m[1]); if(d === null) return null;
+    const pi = pcPi(d * Math.PI / 180); return out((pi ? pi + " ≈ " : "") + pcNum(d * Math.PI / 180) + " radians");
+  }
+  if((m = /^(?:convert )?(.+?)\s*(?:radians?|rad)\s+(?:to|in|into)\s+degrees?$/.exec(q))){
+    const r = pcVal(m[1]); return r === null ? null : out(pcNum(r * 180 / Math.PI) + "°");
+  }
+  // remainder when x^3 - 2x + 1 is divided by x - 2
+  if((m = /^(?:the )?remainder (?:when |of )?(.+?) (?:is )?divided by \(?\s*x\s*([+-])\s*([\d.]+)\s*\)?$/.exec(q))){
+    const v = pcAt(m[1], (m[2] === "-" ? 1 : -1) * +m[3]); return v === null ? null : out(pcNum(v));
+  }
+  // roots, zeros, solving and factoring a quadratic
+  if((m = /^(?:roots?|zeros?|solve|factor|x-intercepts?)\s+(?:of\s+)?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?$/.exec(q)) && /x\s*\^\s*2|x²/.test(m[1])){
+    const co = pcQuad(m[1].replace(/x²/g, "x^2")); if(!co) return null;
+    const roots = pcRoots(co);
+    if(/^factor/.test(q)){
+      if(roots.length === 0 || roots.some(r => !/^-?\d+$/.test(pcFrac(r)))) return out("It does not factor over the integers.");
+      const [r1, r2 = r1] = roots, lead = co[0] === 1 ? "" : co[0] === -1 ? "-" : pcFrac(co[0]);
+      return out(lead + "(x " + pcSign(r1) + ")(x " + pcSign(r2) + ")");
+    }
+    return out(roots.length ? roots.map(r => "x = " + pcFrac(r)).join(" and ") : "No real roots.");
+  }
+  // vertical asymptote of y = 1/(x - 3)
+  if((m = /^vertical asymptotes? of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)\s*\/\s*\((.+)\)$/.exec(q))){
+    const co = pcQuad(m[2]); if(!co) return null;
+    const xs = pcRoots(co).filter(r => Math.abs(pcAt(m[1], r) ?? 1) > 1e-9);
+    return out(xs.length ? xs.map(r => "x = " + pcFrac(r)).join(" and ") : "None.");
+  }
+  // amplitude and period of y = 3sin(2x)
+  if((m = /^(amplitude|period) of (?:y\s*=\s*|f\(x\)\s*=\s*)?(-?[\d.]*)\s*(sin|cos|tan)\s*\(?\s*(-?[\d.]*)\s*x/.exec(q))){
+    const a = m[2] === "" || m[2] === "-" ? 1 : Math.abs(+m[2]), b = m[4] === "" || m[4] === "-" ? 1 : Math.abs(+m[4]);
+    if(m[1] === "amplitude") return out(m[3] === "tan" ? "None: tangent has no amplitude." : pcNum(a));
+    const p = (m[3] === "tan" ? Math.PI : 2 * Math.PI) / b; return out((pcPi(p) || pcNum(p)) + (pcPi(p) ? " ≈ " + pcNum(p) : ""));
+  }
+  // solve sin x = 1/2 for 0 ≤ x < 2π
+  if((m = /^solve\s+(sin|cos|tan)\s*\(?x\)?\s*=\s*(-?[^\s,]+)(.*)$/.exec(q))){
+    const k = pcVal(m[2].replace(/√(\d)/g, "sqrt($1)")); if(k === null) return null;
+    const f = m[1], base = f === "sin" ? Math.asin(k) : f === "cos" ? Math.acos(k) : Math.atan(k);
+    if(isNaN(base)) return out("No solution: sine and cosine stay between -1 and 1.");
+    const two = 2 * Math.PI, norm = v => ((v % two) + two) % two;
+    const xs = [...new Set((f === "sin" ? [base, Math.PI - base] : f === "cos" ? [base, two - base] : [base, base + Math.PI]).map(v => +norm(v).toPrecision(12)))].sort((a, b) => a - b);
+    const deg = /deg|°|360/.test(m[3]);
+    return out(xs.map(v => "x = " + (deg ? pcNum(v * 180 / Math.PI) + "°" : pcPi(v) || pcNum(v))).join(" or "));
+  }
+  // sin 30 degrees, exact value of cos(5pi/6), tan(45°)
+  if((m = /^(?:the )?(exact value of )?(sin|cos|tan|csc|sec|cot)\s*\(?\s*([^)°]+?)\s*(°|degrees?|deg)?\s*\)?\s*(°|degrees?|deg)?$/.exec(q))){
+    const a = pcVal(m[3]); if(a === null) return null;
+    const rad = m[4] || m[5] ? a * Math.PI / 180 : a;
+    const s = Math.sin(rad), c = Math.cos(rad);
+    const v = {sin:s, cos:c, tan:s / c, csc:1 / s, sec:1 / c, cot:c / s}[m[2]];
+    if(!isFinite(v) || Math.abs(v) > 1e12) return out("Undefined at that angle.");
+    const exact = pcExact(v);
+    return out(exact && exact !== pcNum(v) ? exact + " ≈ " + pcNum(v) : pcNum(v));
+  }
+  // arc length with radius 5 and angle 2 radians
+  if((m = /^arc length\b.*?radius (?:of |is )?([\d.]+).*?angle (?:of |is )?([\d.π\/pi ]+?)\s*(radians?|rad|degrees?|°)?$/.exec(q))){
+    const t = pcVal(m[2]); if(t === null) return null;
+    return out(pcNum(+m[1] * (/^d|°/.test(m[3] || "") ? t * Math.PI / 180 : t)));
+  }
+  // inverse of y = 2x + 3
+  if((m = /^(?:the )?inverse (?:function )?of (?:y|f\(x\))\s*=\s*(-?[\d.]*)\s*x\s*(?:([+-])\s*([\d.]+))?$/.exec(q))){
+    const k = m[1] === "" ? 1 : m[1] === "-" ? -1 : +m[1], b = m[2] ? (m[2] === "-" ? -1 : 1) * +m[3] : 0;
+    const top = b === 0 ? "x" : "(x " + (b > 0 ? "- " + pcNum(b) : "+ " + pcNum(-b)) + ")";
+    return out("f⁻¹(x) = " + (k === 1 ? top.replace(/^\((.*)\)$/, "$1") : top + "/" + pcNum(k)));
+  }
+  // what does y = -2f(3(x - 1)) + 4 do to the graph
+  if((m = /y\s*=\s*(-?)\s*([\d.]*)\s*f\s*\(\s*(-?)\s*([\d.]*)\s*(?:\(\s*)?x\s*(?:([+-])\s*([\d.]+))?\s*\)?\s*\)\s*(?:([+-])\s*([\d.]+))?/.exec(q)) && /\b(do|does|graph|transform|transformation|effect)\b/.test(q)){
+    const say = [];
+    if(m[1]) say.push("reflects it across the x-axis");
+    if(m[3]) say.push("reflects it across the y-axis");
+    if(m[2] && +m[2] !== 1) say.push(+m[2] > 1 ? "stretches it vertically by a factor of " + pcNum(m[2]) : "compresses it vertically by a factor of " + pcNum(m[2]));
+    if(m[4] && +m[4] !== 1) say.push("compresses it horizontally by a factor of 1/" + pcNum(m[4]) + (+m[4] < 1 ? " (a stretch)" : ""));
+    if(m[5]) say.push("shifts it " + pcNum(m[6]) + " units " + (m[5] === "-" ? "right" : "left"));
+    if(m[7]) say.push("shifts it " + pcNum(m[8]) + " units " + (m[7] === "+" ? "up" : "down"));
+    if(say.length) return out("It " + say.join(", then ") + ".");
+  }
+  return null;
+}
 function constant(query){
   const q = query.trim().toLowerCase().replace(/[?.!]+$/, "").replace(/^(?:what(?:'s|’s| is) |value of |tell me )?(?:the )?(?:value of (?:the )?)?/, "").replace(/’/g, "'").trim();
   const hit = CONSTANTS.find(([re]) => re.test(q));
@@ -1093,6 +1266,8 @@ async function answer(query, opts={}){
   if(nf !== null) return {kind:"math", value:nf};
   const m = tryMath(query);
   if(m !== null) return {kind:"math", value:m};
+  const pc = precalc(query);
+  if(pc) return pc;
   const ge = graphExpr(query), svg = ge && graph(ge);
   if(svg) return {kind:"graph", expr:ge, svg};
   const k = constant(query);
@@ -1415,4 +1590,4 @@ function appLink(query){
   return "/app?q="+encodeURIComponent(query);
 }
 
-if(typeof module!=="undefined") module.exports={numberFact,constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={numberFact,precalc,constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
