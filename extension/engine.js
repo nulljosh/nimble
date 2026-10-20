@@ -1760,7 +1760,7 @@ function fom12(q){
 // concavity, motion and related rates. precalc() asks it first; null means "not mine". Graded by
 // COURSE=calc12 node test/exam-course.js. Mirrored in kmp/shared/.../Calculus12.kt.
 const CN = v => ({t:"n", v}), CX = {t:"x"};
-const C_NAMES = ["sqrt", "sin", "cos", "tan", "sec", "csc", "cot", "ln", "log", "exp", "abs", "pi", "e", "x"];
+const C_NAMES = ["sqrt", "arcsin", "arccos", "arctan", "sinh", "cosh", "tanh", "sin", "cos", "tan", "sec", "csc", "cot", "ln", "log", "exp", "abs", "pi", "e", "x"];
 // Parse into nodes: n (number), x, + (ts), * (fs), / (a, b), ^ (a, b), f (f, a). Null when it is not an expression in x.
 function cParse(src){
   const s = String(src).toLowerCase().replace(/\|([^|]+)\|/g, "abs($1)").replace(/π/g, "pi").replace(/√\s*\(/g, "sqrt(").replace(/√\s*([a-z0-9.]+)/g, "sqrt($1)").replace(/\s+/g, "");
@@ -1786,7 +1786,7 @@ function cParse(src){
   try{ const v = sum(); return i === s.length ? v : null; } catch { return null; }
 }
 const cHasX = n => n.t === "x" || (n.ts || n.fs || []).some(cHasX) || (n.a && typeof n.a === "object" && cHasX(n.a)) || (n.b && cHasX(n.b));
-const C_FN = {sin:Math.sin, cos:Math.cos, tan:Math.tan, sec:v => 1 / Math.cos(v), csc:v => 1 / Math.sin(v), cot:v => 1 / Math.tan(v), ln:Math.log, log:Math.log10, exp:Math.exp, sqrt:Math.sqrt, abs:Math.abs};
+const C_FN = {sin:Math.sin, cos:Math.cos, tan:Math.tan, sec:v => 1 / Math.cos(v), csc:v => 1 / Math.sin(v), cot:v => 1 / Math.tan(v), ln:Math.log, log:Math.log10, exp:Math.exp, sqrt:Math.sqrt, abs:Math.abs, arcsin:Math.asin, arccos:Math.acos, arctan:Math.atan, sinh:Math.sinh, cosh:Math.cosh, tanh:Math.tanh};
 function cEval(n, x){
   switch(n.t){
     case "n": return n.v; case "x": return x;
@@ -1800,7 +1800,7 @@ function cEval(n, x){
 const cPow = (a, b) => ({t:"^", a, b}), cMul = (...fs) => ({t:"*", fs}), cAdd = (...ts) => ({t:"+", ts}), cF = (f, a) => ({t:"f", f, a});
 function cD(n){
   switch(n.t){
-    case "n": return CN(0); case "x": return CN(1);
+    case "n": case "y": return CN(0); case "x": return CN(1);
     case "+": return cAdd(...n.ts.map(cD));
     case "*": return cAdd(...n.fs.map((f, i) => cMul(...n.fs.map((g, j) => i === j ? cD(g) : g))));
     case "/": return {t:"/", a: cAdd(cMul(cD(n.a), n.b), cMul(CN(-1), n.a, cD(n.b))), b: cPow(n.b, CN(2))};
@@ -1815,7 +1815,13 @@ function cD(n){
         case "tan": return cMul(cPow(cF("sec", a), CN(2)), da); case "sec": return cMul(cF("sec", a), cF("tan", a), da);
         case "csc": return cMul(CN(-1), cF("csc", a), cF("cot", a), da); case "cot": return cMul(CN(-1), cPow(cF("csc", a), CN(2)), da);
         case "exp": return cMul(n, da); case "ln": return {t:"/", a: da, b: a}; case "log": return {t:"/", a: da, b: cMul(a, CN(Math.LN10))};
-        case "sqrt": return {t:"/", a: da, b: cMul(CN(2), n)}; default: return cMul({t:"/", a, b: n}, da);
+        case "sqrt": return {t:"/", a: da, b: cMul(CN(2), n)};
+        case "arcsin": return {t:"/", a: da, b: cF("sqrt", cAdd(CN(1), cMul(CN(-1), cPow(a, CN(2)))))};
+        case "arctan": return {t:"/", a: da, b: cAdd(CN(1), cPow(a, CN(2)))};
+        case "arccos": return {t:"/", a: cMul(CN(-1), da), b: cF("sqrt", cAdd(CN(1), cMul(CN(-1), cPow(a, CN(2)))))};
+        case "sinh": return cMul(cF("cosh", a), da); case "cosh": return cMul(cF("sinh", a), da);
+        case "tanh": return {t:"/", a: da, b: cPow(cF("cosh", a), CN(2))};
+        default: return cMul({t:"/", a, b: n}, da);
       }
     }
   }
@@ -1825,7 +1831,7 @@ const cKey = n => JSON.stringify(n);
 function cSplit(n){ if(n.t === "n") return [n.v, []]; if(n.t === "*"){ let c = 1; const fs = []; for(const f of n.fs) f.t === "n" ? c *= f.v : fs.push(f); return [c, fs]; } return [1, [n]]; }
 const cBuild = (c, fs) => fs.length === 0 ? CN(c) : c === 1 && fs.length === 1 ? fs[0] : {t:"*", fs: c === 1 ? fs : [CN(c), ...fs]};
 function cSimp(n){
-  if(n.t === "n" || n.t === "x") return n;
+  if(n.t === "n" || n.t === "x" || n.t === "y") return n;
   if(n.t === "f"){ const a = cSimp(n.a); if(a.t === "n") return CN(C_FN[n.f](a.v)); if(n.f === "exp" && a.t === "f" && a.f === "ln") return a.a; return cF(n.f, a); }
   if(n.t === "^"){
     const a = cSimp(n.a), b = cSimp(n.b);
@@ -1881,17 +1887,18 @@ function cSimp(n){
   return sorted.length === 0 ? CN(0) : sorted.length === 1 ? sorted[0] : {t:"+", ts: sorted};
 }
 const C_SUP = {2:"²", 3:"³"};
-function cNum(v){ return Number.isInteger(+v.toFixed(9)) ? String(Math.round(v)) : Math.abs(v - Math.E) < 1e-12 ? "e" : Math.abs(v - Math.PI) < 1e-12 ? "π" : Math.abs(v - Math.LN10) < 1e-12 ? "ln 10" : pcFrac(v); }
+function cNum(v){ return Number.isInteger(+v.toFixed(9)) ? String(Math.round(v)) : Math.abs(v - Math.E) < 1e-12 ? "e" : Math.abs(v - Math.PI) < 1e-12 ? "π" : Math.abs(v - Math.LN10) < 1e-12 ? "ln 10" : (() => { for(let k = 2; k <= 9; k++) if(Math.abs(v - Math.log(k)) < 1e-9) return "ln " + k; for(let d = 2; d <= 120; d++){ const k = Math.round(v * d); if(Math.abs(k / d - v) < 1e-9) return k + "/" + d; } return pcFrac(v); })(); }
 function cStr(n){
   switch(n.t){
     case "n": return cNum(n.v);
     case "x": return "x";
+    case "y": return "y";
     case "+": return n.ts.map((t, i) => { const [c, fs] = cSplit(t), s = cStr(c < 0 ? cBuild(-c, fs) : t); return i === 0 ? (c < 0 ? "-" : "") + s : (c < 0 ? " - " : " + ") + s; }).join("");
     case "/": { const top = cStr(n.a), bot = cStr(n.b); return (n.a.t === "+" ? "(" + top + ")" : top) + "/" + (n.b.t === "+" || (n.b.t === "*" && !(n.b.fs.length === 1)) ? "(" + bot + ")" : bot); }
     case "^": {
       const e = n.b.t === "n" ? n.b.v : null;
       if(n.a.t === "f" && C_SUP[e] && n.a.f !== "exp" && n.a.f !== "sqrt" && n.a.f !== "abs") return n.a.f + C_SUP[e] + "(" + cStr(n.a.a) + ")";
-      const base = n.a.t === "x" || (n.a.t === "n" && n.a.v >= 0) || n.a.t === "f" ? cStr(n.a) : "(" + cStr(n.a) + ")";
+      const base = n.a.t === "x" || n.a.t === "y" || (n.a.t === "n" && n.a.v >= 0) || n.a.t === "f" ? cStr(n.a) : "(" + cStr(n.a) + ")";
       return base + "^" + (e !== null && Number.isInteger(e) && e >= 0 ? e : n.b.t === "x" ? "x" : "(" + cStr(n.b) + ")");
     }
     case "*": {
@@ -1907,6 +1914,7 @@ function cStr(n){
     }
     default:
       if(n.f === "exp") return "e^" + (n.a.t === "x" ? "x" : "(" + cStr(n.a) + ")");
+      if(n.f === "sqrt" && n.a.t === "+" && n.a.ts.length === 2 && n.a.ts[1].t === "n" && n.a.ts[1].v > 0 && cSplit(n.a.ts[0])[0] < 0) return "√(" + cNum(n.a.ts[1].v) + " - " + cStr(cSimp(cMul(CN(-1), n.a.ts[0]))).replace(/^1(?=[a-z(√])/, "") + ")";
       if(n.f === "sqrt") return "√" + (n.a.t === "x" ? "x" : "(" + cStr(n.a) + ")");
       if(n.f === "abs") return "|" + cStr(n.a) + "|";
       if(n.f === "ln" && n.a.t === "f" && n.a.f === "abs") return "ln" + cStr(n.a);
@@ -1919,6 +1927,8 @@ function cInt(n){
   for(const t of ts){
     const [c, fs] = cSplit(t);
     if(fs.length === 0){ out.push(cMul(CN(c), CX)); continue; }
+    if(fs.length === 2 && fs.every(f => f.t === "f" && cKey(f.a) === cKey(fs[0].a)) && fs.some(f => f.f === "sec") && fs.some(f => f.f === "tan") && fs[0].a.t === "x"){ out.push(cMul(CN(c), cF("sec", CX))); continue; }
+    if(fs.length === 2){ const p = cParts(c, fs); if(!p) return null; out.push(p); continue; }
     if(fs.length !== 1) return null;
     const f = fs[0], k = f.t === "x" ? 1 : f.t === "^" && f.a.t === "x" && f.b.t === "n" ? f.b.v : null;
     if(k !== null){ out.push(k === -1 ? cMul(CN(c), cF("ln", cF("abs", CX))) : cMul(CN(c / (k + 1)), cPow(CX, CN(k + 1)))); continue; }
@@ -1926,9 +1936,46 @@ function cInt(n){
     if(f.t === "f" && ["sin", "cos", "exp"].includes(f.f) && lin(f.a) !== null){ const a = lin(f.a); out.push(cMul(CN((f.f === "sin" ? -c : c) / a), cF(f.f === "sin" ? "cos" : f.f === "cos" ? "sin" : "exp", f.a))); continue; }
     if(f.t === "^" && f.a.t === "f" && f.a.f === "sec" && f.b.t === "n" && f.b.v === 2 && lin(f.a.a) !== null){ out.push(cMul(CN(c / lin(f.a.a)), cF("tan", f.a.a))); continue; }
     if(f.t === "/" && f.a.t === "n" && f.b.t === "x"){ out.push(cMul(CN(c * f.a.v), cF("ln", cF("abs", CX)))); continue; }
+    // 1/√(k - x^2) is arcsin(x/√k)
+    if(f.t === "/" && f.a.t === "n" && f.b.t === "f" && f.b.f === "sqrt" && f.b.a.t === "+" && f.b.a.ts.length === 2 && cKey(f.b.a.ts[0]) === cKey(cMul(CN(-1), cPow(CX, CN(2)))) && f.b.a.ts[1].t === "n" && f.b.a.ts[1].v > 0){
+      const k = Math.sqrt(f.b.a.ts[1].v); out.push(cMul(CN(c * f.a.v), cF("arcsin", k === 1 ? CX : cMul(CN(1 / k), CX)))); continue;
+    }
+    if(f.t === "f" && f.f === "ln" && f.a.t === "x"){ out.push(cMul(CN(c), CX, cF("ln", CX)), cMul(CN(-c), CX)); continue; }
+    // 1/(x^2 + k) is arctan(x/√k)/√k
+    if(f.t === "/" && f.a.t === "n" && f.b.t === "+" && f.b.ts.length === 2 && cKey(f.b.ts[0]) === cKey(cPow(CX, CN(2))) && f.b.ts[1].t === "n" && f.b.ts[1].v > 0){
+      const k = Math.sqrt(f.b.ts[1].v); out.push(cMul(CN(c * f.a.v / k), cF("arctan", k === 1 ? CX : cMul(CN(1 / k), CX)))); continue;
+    }
     return null;
   }
   return cSimp(cAdd(...out));
+}
+// By parts, tabular: x^n times sin, cos or exp of a linear argument, or x^n ln(x).
+function cParts(c, fs){
+  const pw = fs.find(f => f.t === "x" || (f.t === "^" && f.a.t === "x" && f.b.t === "n" && Number.isInteger(f.b.v) && f.b.v > 0)), g = fs.find(f => f !== pw);
+  if(!pw || !g || g.t !== "f") return null;
+  const n = pw.t === "x" ? 1 : pw.b.v;
+  if(g.f === "ln" && g.a.t === "x") return cAdd(cMul(CN(c / (n + 1)), cPow(CX, CN(n + 1)), g), cMul(CN(-c / (n + 1) ** 2), cPow(CX, CN(n + 1))));
+  if(!["sin", "cos", "exp"].includes(g.f) || n > 4) return null;
+  const terms = []; let d = pw, G = g;
+  for(let k = 0; k <= n; k++){ G = cInt(G); if(!G) return null; terms.push(cMul(CN(k % 2 ? -c : c), d, G)); d = cSimp(cD(d)); }
+  return cSimp(cAdd(...terms));
+}
+// u-substitution: c·g'(x)·h(g(x)) where h is a power, sin, cos or exp and the other factors are a constant times g'.
+// ponytail: checks the ratio at five sample points rather than proving it symbolically.
+function cSub(n){
+  if(n.t === "/" && !cHasX(n.a)) n = cMul(n.a, cPow(n.b, CN(-1)));
+  const fs = (n.t === "*" ? n.fs : [n]).map(f => f.t === "f" && f.f === "sqrt" ? cPow(f.a, CN(0.5)) : f.t === "/" && !cHasX(f.a) ? cMul(f.a, cPow(f.b, CN(-1))) : f).flatMap(f => f.t === "*" ? f.fs : [f]);
+  for(let i = 0; i < fs.length; i++){
+    const f = fs[i], inner = f.t === "^" && !cHasX(f.b) ? f.a : f.t === "f" && ["sin", "cos", "exp"].includes(f.f) ? f.a : null;
+    if(!inner || inner.t === "x" || !cHasX(inner)) continue;
+    const rest = fs.filter((_, j) => j !== i), dg = cSimp(cD(inner)), pts = [0.3, 0.7, 1.1, 1.9, 2.6];
+    const ks = pts.map(v => rest.reduce((s, g) => s * cEval(g, v), 1) / cEval(dg, v));
+    if(!ks.every(k => isFinite(k) && Math.abs(k - ks[0]) < 1e-9)) continue;
+    const k = +ks[0].toPrecision(12);
+    if(f.t === "^"){ const p = cEval(f.b, 0); if(p === -1) return cMul(CN(k), cF("ln", cF("abs", inner))); return cMul(CN(k / (p + 1)), cPow(inner, CN(p + 1))); }
+    return cMul(CN(f.f === "sin" ? -k : k), cF(f.f === "sin" ? "cos" : f.f === "cos" ? "sin" : "exp", inner));
+  }
+  return null;
 }
 // A value as a small fraction when it is one, else to four places.
 const cSnap = v => { for(let d = 1; d <= 12; d++){ const k = Math.round(v * d); if(Math.abs(v * d - k) < 1e-7) return d === 1 ? String(k) : k + "/" + d; } return pcNum(+v.toFixed(4)); };
@@ -2010,11 +2057,11 @@ function calc12(q){
     return out(Math.abs(sl - sr) < 1e-3 ? "Yes: the slope is " + cSnap(+((sl + sr) / 2).toFixed(4)) + " from both sides." : "No: the slope is " + cSnap(+sl.toFixed(3)) + " from the left and " + cSnap(+sr.toFixed(3)) + " from the right (a corner).");
   }
   // integrals and area
-  const range = s => { const r = /\bfrom\s+(-?[\d./π\spi]+?)\s+to\s+(-?[\d./π\spi]+)$/.exec(s) || /\bon\s*\[\s*(-?[^,\]]+?)\s*,\s*(-?[^\]]+?)\s*\]$/.exec(s); return r ? [pcVal(r[1].trim()), pcVal(r[2].trim())] : null; };
+  const range = s => { s = s.replace(/\be\b/g, String(Math.E)); const r = /\bfrom\s+(-?[\d./π\spi]+?)\s+to\s+(-?[\d./π\spi]+)$/.exec(s) || /\bon\s*\[\s*(-?[^,\]]+?)\s*,\s*(-?[^\]]+?)\s*\]$/.exec(s); return r ? [pcVal(r[1].trim()), pcVal(r[2].trim())] : null; };
   if((m = /^(?:the )?(?:definite )?(?:integral|antiderivative|anti-derivative) of (.+?)(?:\s+dx)?(\s+(?:from|on)\s+.+)?$/.exec(q))){
     const t = fx(m[1].replace(/\s+dx$/, "")) || (/^[\d.]+$/.test(m[1]) ? CN(+m[1]) : null); if(!t) return null;
     if(m[2]){ const r = range(m[2].trim()); if(!r || r.includes(null)) return null; return out(cSnap(cSimpson(v => at(t, v), r[0], r[1]))); }
-    const F = cInt(cSimp(t)); return F ? out(cStr(F) + " + C") : null;
+    const F = cInt(cSimp(t)) || cSub(t); return F ? out(cStr(F) + " + C") : null;
   }
   if((m = /^(?:the )?area (?:under|below|beneath) (?:the curve )?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)\s+((?:from|on)\s+.+)$/.exec(q))){
     const t = fx(m[1]), r = range(m[2]); if(!t || !r || r.includes(null)) return null; return out(cSnap(cSimpson(v => Math.abs(at(t, v)), r[0], r[1])));
@@ -2041,6 +2088,147 @@ function calc12(q){
     if(cube && /\bvolume\b/.test(q)) return out(pcNum(3 * val * val * rate) + " " + unit + "³/" + tu);
     if(square && /\barea\b/.test(q)) return out(pcNum(2 * val * rate) + " " + unit + "²/" + tu);
     if(square && /\bperimeter\b/.test(q)) return out(pcNum(4 * rate) + " " + unit + "/" + tu);
+  }
+  return null;
+}
+// --- University Calculus I, offline ---
+// What first-year calculus adds to Calculus 12: the theorems in words, log bases, implicit differentiation,
+// linearization, Newton's method, the mean value theorem, ladder rates, optimization, Riemann sums and the
+// fundamental theorem's derivative of an integral. Uses the calc12 engine. Graded by COURSE=calc1 node test/exam-course.js.
+const C1_FACTS = [
+  [/\bepsilon[- ]delta\b|\b(?:formal|precise|rigorous) definition of (?:a |the )?limit\b/, "The limit of f(x) as x approaches a is L when for every ε > 0 there is a δ > 0 such that 0 < |x - a| < δ implies |f(x) - L| < ε: f(x) can be kept as close to L as you like by taking x close enough to a."],
+  [/\bl'?\s?h[oô]pital'?s? rule\b/, "For an indeterminate form 0/0 or ∞/∞, the limit of f(x)/g(x) equals the limit of f'(x)/g'(x), when that limit exists. Differentiate top and bottom separately, not as a quotient."],
+  [/\bintermediate value theorem\b/, "If f is continuous on [a, b] and N is any number between f(a) and f(b), then f(c) = N for some c in (a, b). So a continuous function that changes sign has a root in between."],
+  [/\brolle'?s theorem\b/, "If f is continuous on [a, b], differentiable on (a, b), and f(a) = f(b), then f'(c) = 0 for some c in (a, b): somewhere the tangent is horizontal."],
+  [/^(?:what is |what does )?(?:the )?mean value theorem(?: say| state)?$/, "If f is continuous on [a, b] and differentiable on (a, b), then f'(c) = (f(b) - f(a))/(b - a) for some c in (a, b): somewhere the tangent is parallel to the secant."],
+  [/\bfundamental theorem of calculus\b/, "Part 1: if F(x) is the integral from a to x of f(t) dt, then F'(x) = f(x). Part 2: if F is any antiderivative of f, the integral from a to b of f(x) dx = F(b) - F(a). Differentiation and integration undo each other."],
+  [/^(?:the )?(?:limit )?definition of (?:the |a )?derivative$/, "f'(x) = the limit as h approaches 0 of (f(x + h) - f(x))/h, the slope of the secant as it becomes the tangent."],
+  [/^implicit differentiation$/, "Differentiating both sides of an equation in x and y with respect to x, treating y as a function of x (so y^2 becomes 2y·dy/dx), then solving for dy/dx."],
+  [/\bremovable discontinuity\b/, "A hole in the graph: the limit exists at x = a but f(a) is undefined or different, so redefining f(a) as the limit makes f continuous there. Example: (x^2 - 1)/(x - 1) at x = 1."],
+  [/\bsqueeze theorem\b|\bsandwich theorem\b/, "If g(x) ≤ f(x) ≤ h(x) near a and g and h have the same limit L at a, then f has limit L too. It shows the limit of x sin(1/x) at 0 is 0."],
+  [/\bextreme value theorem\b/, "A function continuous on a closed interval [a, b] has an absolute maximum and an absolute minimum there, at critical points or at the endpoints."],
+  [/^(?:a )?riemann sum$/, "An approximation of the area under a curve: split [a, b] into n pieces of width Δx, take f at a point in each (left, right or midpoint), and add up f(x)·Δx. As n grows it tends to the definite integral."],
+  [/^(?:a )?vertical asymptote$/, "A vertical line x = a that the graph approaches as f(x) grows without bound (to ∞ or -∞) near a, usually where a denominator is zero and the top is not. Example: x = 0 for 1/x."],
+  [/^(?:what does it mean )?(?:for )?(?:a )?function (?:to be )?continuous at a point$|^continuity at a point$/, "f is continuous at x = a when f(a) is defined, the limit of f(x) as x approaches a exists, and the limit equals f(a): no hole, jump or break there."],
+  [/^(?:a )?critical (?:point|number)(?: of a function| in calculus)?$/, "In calculus, a point x = c in the domain where f'(c) = 0 or the derivative is undefined: the candidates for local maxima and minima. (In thermodynamics, a critical point is where the liquid and gas phases stop being distinct.)"],
+  [/^(?:the )?second derivative test$/, "At a critical point c with f'(c) = 0: if f''(c) > 0 the graph is concave up there, a local minimum; if f''(c) < 0 it is concave down, a local maximum; if f''(c) = 0 the test says nothing."],
+  [/^(?:a |an )?antiderivative$/, "A function F whose derivative is f. Any two differ by a constant, which is why an indefinite integral ends in + C."],
+];
+// Parse an equation in x and y for implicit differentiation: y is a second variable, held constant by cD.
+function c1Implicit(src){
+  const [l, rt] = src.split("="); if(rt === undefined) return null;
+  const tag = s => cParse(s.replace(/y/g, "(arctan(1000))")); // ponytail: y rides through cParse as a marked constant
+  const L = tag(l), R = tag(rt); if(!L || !R) return null;
+  const Y = cKey(cF("arctan", CN(1000))), mark = n => n.t === "f" && n.f === "arctan" && cKey(n) === Y;
+  const sub = (n, f) => mark(n) ? f() : n.t === "+" ? {t:"+", ts:n.ts.map(t => sub(t, f))} : n.t === "*" ? {t:"*", fs:n.fs.map(t => sub(t, f))} : n.t === "/" || n.t === "^" ? {...n, a:sub(n.a, f), b:sub(n.b, f)} : n.t === "f" ? {...n, a:sub(n.a, f)} : n;
+  const F = cAdd(L, cMul(CN(-1), R)), swap = n => n.t === "x" ? {t:"y"} : n.t === "y" ? CX : n.t === "+" ? {t:"+", ts:n.ts.map(swap)} : n.t === "*" ? {t:"*", fs:n.fs.map(swap)} : n.t === "/" || n.t === "^" ? {...n, a:swap(n.a), b:swap(n.b)} : n.t === "f" ? {...n, a:swap(n.a)} : n;
+  const yv = sub(F, () => ({t:"y"})), Fx = cD(yv), Fy = swap(cD(swap(yv)));
+  const d = cSimp({t:"/", a:cMul(CN(-1), Fx), b:Fy});
+  if(d.t !== "/") return d;
+  // Divide out a shared whole-number factor, and lead each sum with a positive term: (2y - x^2)/(y^2 - 2x).
+  const terms = x => x.t === "+" ? x.ts : [x], cs = [...terms(d.a), ...terms(d.b)].map(t => Math.abs(cSplit(t)[0]));
+  const gcd = (a, b) => b ? gcd(b, a % b) : a, g = cs.every(Number.isInteger) ? cs.reduce(gcd) : 1;
+  const tidy = x => { const y = g > 1 ? cSimp(cMul(CN(1 / g), x)) : x; if(y.t !== "+") return y; const i = y.ts.findIndex(t => cSplit(t)[0] > 0); return i > 0 ? {t:"+", ts:[y.ts[i], ...y.ts.filter((_, j) => j !== i)]} : y; };
+  return {t:"/", a:tidy(d.a), b:tidy(d.b)};
+}
+function calc1(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
+  for(const [re, body] of C1_FACTS) if(re.test(q)) return out(body);
+  const fx = s => { const t = cParse(s); return t && cHasX(t) ? t : null; }, at = (t, v) => cEval(t, v), n4 = v => pcNum(+v.toFixed(6));
+  let m;
+  // one-sided limits, and limits in a variable other than x
+  if((m = /^(?:the )?(?:limit|lim) (?:of )?(.+?) as ([a-z]) (?:approaches|goes to|tends to|->|→)\s*(-?∞|-?infinity|[-\d./π\spi]+?)(?: from the (right|left|above|below)|([+-]))?$/.exec(q)) && (m[4] || m[5] || m[2] !== "x")){
+    const v = m[2], t = fx(v === "x" ? m[1] : m[1].replace(/x/g, "#").replace(new RegExp(v, "g"), "x")); if(!t || /#/.test(m[1].replace(/exp/g, ""))) return null;
+    const A = m[3].trim(), f = z => at(t, z), side = /right|above|\+/.test(m[4] || m[5] || "") ? 1 : /left|below|-/.test(m[4] || m[5] || "") ? -1 : 0;
+    let val;
+    if(/∞|infinity/.test(A)) val = f((A[0] === "-" ? -1 : 1) * 1e7);
+    else { const a = pcVal(A); if(a === null) return null; val = side ? f(a + side * 1e-9) : (f(a - 1e-9) + f(a + 1e-9)) / 2; }
+    if(!isFinite(val) || Math.abs(val) > 1e5) return out(val > 0 ? "∞: it grows without bound." : "-∞: it falls without bound.");
+    return out(Math.abs(val - Math.E) < 1e-5 ? "e ≈ 2.71828" : cSnap(+val.toFixed(5)));
+  }
+  // derivative of log base b of x
+  if((m = /^(?:the )?derivative of log(?:arithm)? (?:base |_)\s*(\d+(?:\.\d+)?) of (.+)$/.exec(q))){
+    const t = fx(m[2]); if(!t) return null; const d = cStr(cSimp(cD(cF("ln", t)))), b = m[1];
+    return out(/^1\/[^/]+$/.test(d) ? "1/(" + d.slice(2).replace(/^\((.*)\)$/, "$1") + " ln " + b + ")" : "(" + d + ")/ln " + b);
+  }
+  // implicit differentiation
+  if((m = /^(?:find )?dy\/dx (?:if|for|when|given) (.+=.+)$|^(?:implicitly differentiate|differentiate implicitly) (.+=.+)$/.exec(q))){
+    const d = c1Implicit(m[1] || m[2]); return d ? out("dy/dx = " + cStr(d).replace(/\barctan\(1000\)/g, "y")) : null;
+  }
+  // linearization at x = a, and estimating a value with it
+  if((m = /^(?:the )?(?:linear approximation|linearization|tangent line approximation) (?:of|to|for) (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?) (?:at|near|about) x\s*=\s*(-?[\d./]+)$/.exec(q))){
+    const t = fx(m[1]), a = pcVal(m[2]); if(!t || a === null) return null;
+    const fa = at(t, a), k = at(cSimp(cD(t)), a), b = fa - k * a;
+    return out("L(x) = " + cSnap(fa) + " + (" + cSnap(k) + ")(x - " + cSnap(a) + "), which is " + cSnap(k) + "x" + (Math.abs(b) < 1e-12 ? "" : b > 0 ? " + " + cSnap(b) : " - " + cSnap(-b)) + ".");
+  }
+  if(/\b(?:linear approximation|linearization|differentials?|tangent line)\b/.test(q) && (m = /\bestimate\s+(sqrt|√|ln|cbrt)\s*\(?\s*([\d.]+)\s*\)?/.exec(q))){
+    const v = +m[2], f = {sqrt:Math.sqrt, "√":Math.sqrt, ln:Math.log, cbrt:Math.cbrt}[m[1]], h = 1e-6;
+    // the nearest point where the function is a whole number
+    let a = null; for(let d = 0; d <= Math.max(2, v) && a === null; d += 0.5) for(const c of [Math.round(v) - d, Math.round(v) + d]) if(c > 0 && Math.abs(f(c) - Math.round(f(c))) < 1e-9){ a = c; break; }
+    if(a === null) return null;
+    const k = (f(a + h) - f(a - h)) / (2 * h), est = f(a) + k * (v - a);
+    return out("About " + n4(est) + ": " + m[1].replace("√", "sqrt") + "(" + v + ") ≈ f(" + a + ") + f'(" + a + ")(" + pcNum(+(v - a).toFixed(6)) + ") = " + n4(f(a)) + " + " + n4(k) + " × " + pcNum(+(v - a).toFixed(6)) + ".");
+  }
+  // Newton's method
+  if(/\bnewton'?s method\b/.test(q) && (m = /\b(?:for|on|to|of)\s+(?:f\(x\)\s*=\s*)?(.+?)(?:\s*=\s*0)?,?\s+(?:starting|start|beginning|with x0|from)\b.*?x\s*(?:_?0|₀)?\s*=\s*(-?[\d.]+)/.exec(q))){
+    const t = fx(m[1]); let x = +m[2]; if(!t) return null; const d = cSimp(cD(t));
+    const steps = (/\b(\d+) (?:steps|iterations)\b/.exec(q) || /\b(two|three) (?:steps|iterations)\b/.exec(q) || [, "1"])[1], n = {two:2, three:3}[steps] || +steps, xs = [];
+    for(let i = 0; i < n; i++){ const dv = at(d, x); if(!dv) return null; x = x - at(t, x) / dv; xs.push(x); }
+    return out(xs.map((v, i) => "x" + (i + 1) + " = " + n4(v)).join(", ") + ", from x(n+1) = x(n) - f(x(n))/f'(x(n)).");
+  }
+  // the c of the mean value theorem
+  if(/\bmean value theorem\b/.test(q) && (m = /\bf\(x\)\s*=\s*(.+?)\s+on\s*\[\s*(-?[\d./]+)\s*,\s*(-?[\d./]+)\s*\]/.exec(q))){
+    const t = fx(m[1]), a = pcVal(m[2]), b = pcVal(m[3]); if(!t || a === null || b === null) return null;
+    const s = (at(t, b) - at(t, a)) / (b - a), d = cSimp(cD(t)), cs = cZeros(v => at(d, v) - s).filter(c => c > a && c < b);
+    return cs.length ? out(cs.map(c => "c = " + (Number.isInteger(c) ? c : n4(c))).join(", ") + ", where f'(c) equals the secant slope " + cSnap(s) + ".") : null;
+  }
+  // a ladder sliding down a wall
+  if(/\bladder\b/.test(q) && (m = /\b(?:ladder (?:is )?(\d+(?:\.\d+)?)\s*(ft|feet|m|metres?|meters?)|(\d+(?:\.\d+)?)[- ]?(ft|feet|m|metres?|meters?)[- ]?(?:long )?ladder)\b/.exec(q))){
+    const L = +(m[1] || m[3]), u = (m[2] || m[4]).replace(/^feet$/, "ft").replace(/^met.*/, "m"), rate = /\bat\s+([\d.]+)\s*[a-z]*\s*(?:\/|per)\s*(s|sec|second|min|minute)/.exec(q), d = /\bbottom (?:of the ladder )?is\s+([\d.]+)/.exec(q);
+    if(!rate || !d || +d[1] >= L) return null;
+    const y = Math.sqrt(L * L - (+d[1]) ** 2), v = +d[1] * +rate[1] / y, tu = rate[2][0] === "m" ? "min" : "s";
+    return out("The top slides down at " + n4(v) + " " + u + "/" + tu + " (dy/dt = -" + n4(v) + "): from x² + y² = " + L + "², dy/dt = -(x/y)·dx/dt with x = " + d[1] + " and y = " + n4(y) + ".");
+  }
+  // optimization classics
+  if((m = /\btwo (?:positive )?numbers whose product is (\d+(?:\.\d+)?) and whose sum is (?:a |the )?min/.exec(q))){ const h = Math.sqrt(+m[1]); return out(pcNum(+h.toFixed(6)) + " and " + pcNum(+h.toFixed(6)) + ", sum " + pcNum(+(2 * h).toFixed(6)) + "."); }
+  // an open box from a sheet with squares cut from the corners
+  if(/\bbox\b/.test(q) && /\bcorners?\b/.test(q) && (m = /\b(\d+(?:\.\d+)?)\s*(?:by|x|×)\s*(\d+(?:\.\d+)?)/.exec(q))){
+    const W = +m[1], L = +m[2], x = (W + L - Math.sqrt((W + L) ** 2 - 3 * W * L)) / 6;
+    return out("Cut squares of side " + pcNum(+x.toFixed(4)) + ", for a volume of " + pcNum(+(x * (W - 2 * x) * (L - 2 * x)).toFixed(4)) + ": V = x(" + W + " - 2x)(" + L + " - 2x), V'(x) = 0.");
+  }
+  if((m = /\btwo (?:positive )?numbers whose sum is (\d+(?:\.\d+)?) and whose product is (?:a |the )?max/.exec(q))) return out(pcNum(+m[1] / 2) + " and " + pcNum(+m[1] / 2) + ", product " + pcNum((+m[1] / 2) ** 2) + ".");
+  if((m = /\b(?:max(?:imum)? area|largest area|greatest area)\b.*\brectangle\b.*\bperimeter (?:of |is )?(\d+(?:\.\d+)?)\b/.exec(q))) return out(pcNum((+m[1]) ** 2 / 16) + ": a square with side " + pcNum(+m[1] / 4) + ".");
+  if(/\bfenc/.test(q) && /\bmaxim/.test(q) && (m = /([\d.]+)\s*(m|ft|feet|metres?|meters?|yards?)\b/.exec(q))){
+    const P = +m[1], u = m[2].replace(/^feet$/, "ft").replace(/^met.*/, "m");
+    if(/\briver\b|\bthree sides\b|\bbarn\b|\bwall\b/.test(q)) return out(pcNum(P / 4) + " " + u + " by " + pcNum(P / 2) + " " + u + " (the long side parallel to the river), area " + pcNum(P * P / 8) + " " + u + "².");
+    return out("A square, " + pcNum(P / 4) + " " + u + " by " + pcNum(P / 4) + " " + u + ", area " + pcNum(P * P / 16) + " " + u + "².");
+  }
+  // left, right and midpoint Riemann sums
+  if((m = /^(left|right|midpoint)(?:[- ]endpoint)? riemann sum (?:of|for) (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?) (?:on|over) \[\s*(-?[\d./]+)\s*,\s*(-?[\d./]+)\s*\] (?:with|using) n\s*=\s*(\d+)(?: (?:rectangles|subintervals))?$/.exec(q))){
+    const t = fx(m[2]), a = pcVal(m[3]), b = pcVal(m[4]), n = +m[5]; if(!t || a === null || b === null || !n) return null;
+    const h = (b - a) / n, off = {left:0, right:1, midpoint:0.5}[m[1]], xs = Array.from({length:n}, (_, i) => a + (i + off) * h), s = xs.reduce((z, v) => z + at(t, v), 0) * h;
+    const v = +s.toFixed(10), f = cSnap(v);
+    return out(f + (f.includes("/") ? " = " + pcNum(v) : "") + ": Δx = " + cSnap(h) + ", sum of f at x = " + xs.map(v => cSnap(+v.toFixed(10))).join(", ") + ", times Δx.");
+  }
+  if((m = /^(?:the )?(trapezoidal|trapezoid|simpson'?s?) rule (?:for|of|on) (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?) (?:on|over|from) \[\s*(-?[\d./]+)\s*,\s*(-?[\d./]+)\s*\] (?:with|using) n\s*=\s*(\d+)(?: (?:subintervals|intervals))?$/.exec(q))){
+    const t = fx(m[2]), a = pcVal(m[3]), b = pcVal(m[4]), n = +m[5]; if(!t || a === null || b === null || !n) return null;
+    const h = (b - a) / n, ys = Array.from({length:n + 1}, (_, i) => at(t, a + i * h)), simp = /^simp/.test(m[1]);
+    if(simp && n % 2) return out("Simpson's rule needs an even n.");
+    const s = simp ? h / 3 * ys.reduce((z, y, i) => z + y * (i === 0 || i === n ? 1 : i % 2 ? 4 : 2), 0) : h / 2 * ys.reduce((z, y, i) => z + y * (i === 0 || i === n ? 1 : 2), 0);
+    const v = +s.toFixed(10), f = cSnap(v); return out(f + (f.includes("/") ? " = " + pcNum(v) : "") + ": Δx = " + cSnap(h) + ".");
+  }
+  // area between two curves, between where they cross
+  if((m = /^(?:the )?area (?:between|enclosed by|bounded by) (?:the curves )?(?:y\s*=\s*)?(.+?) and (?:y\s*=\s*)?(.+?)$/.exec(q)) && !/\b(?:from|on)\b/.test(q)){
+    const a = fx(m[1]), b = fx(m[2]); if(!a || !b) return null; const zs = cZeros(v => at(a, v) - at(b, v)); if(zs.length < 2) return null;
+    let s = 0; for(let i = 0; i < zs.length - 1; i++) s += cSimpson(v => Math.abs(at(a, v) - at(b, v)), zs[i], zs[i + 1]);
+    const f = cSnap(+s.toFixed(8)); return out(f + (f.includes("/") ? " ≈ " + pcNum(+s.toFixed(4)) : "") + ": the curves cross at x = " + zs.map(cSnap).join(" and ") + ".");
+  }
+  // d/dx of an integral with a variable upper limit
+  if((m = /^(?:the )?(?:d\/dx|derivative) (?:of )?(?:the )?integral from (-?[\d.]+) to (.+?) of (.+?) dt$/.exec(q))){
+    const g = fx(m[2]), f = cParse(m[3].replace(/t/g, "x")); if(!g || !f) return null;
+    const sub = (n) => n.t === "x" ? g : n.t === "+" ? {t:"+", ts:n.ts.map(sub)} : n.t === "*" ? {t:"*", fs:n.fs.map(sub)} : n.t === "/" || n.t === "^" ? {...n, a:sub(n.a), b:sub(n.b)} : n.t === "f" ? {...n, a:sub(n.a)} : n;
+    const r = g.t === "x" ? f : cMul(sub(f), cD(g));
+    return out(cStr(cSimp(r)) + ", by the fundamental theorem of calculus" + (g.t === "x" ? "." : " and the chain rule."));
   }
   return null;
 }
@@ -4007,6 +4195,7 @@ function precalc(query){
   const e11 = es11(q); if(e11) return e11;
   const v11 = env11(q); if(v11) return v11;
   for(const f of TEXT_COURSES){ const r = f(q); if(r) return r; }
+  const u1 = calc1(q); if(u1) return u1;
   const c12 = calc12(q); if(c12) return c12;
   const s12 = stats12(q); if(s12) return s12;
   const a12 = aw12(q); if(a12) return a12;

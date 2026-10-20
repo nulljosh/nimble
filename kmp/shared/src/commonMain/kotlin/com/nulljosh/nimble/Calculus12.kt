@@ -10,6 +10,12 @@ import com.nulljosh.nimble.Precalc.prec
 import kotlin.math.E
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.asin
+import kotlin.math.atan
+import kotlin.math.cosh
+import kotlin.math.sinh
+import kotlin.math.tanh
 import kotlin.math.cos
 import kotlin.math.exp
 import kotlin.math.ln
@@ -34,6 +40,8 @@ internal object Calculus12 {
         data class N(val v: Double) : C()
         object X : C() { override fun toString() = "X" }
         object Euler : C()
+        /** The second variable of an implicit equation; d() treats it as a constant. */
+        object Y : C() { override fun toString() = "Y" }
         data class Sum(val ts: List<C>) : C()
         data class Prod(val fs: List<C>) : C()
         data class Div(val a: C, val b: C) : C()
@@ -41,16 +49,16 @@ internal object Calculus12 {
         data class F(val f: String, val a: C) : C()
     }
 
-    private val names = listOf("sqrt", "sin", "cos", "tan", "sec", "csc", "cot", "ln", "log", "exp", "abs", "pi", "e", "x")
+    private val names = listOf("sqrt", "arcsin", "arccos", "arctan", "sinh", "cosh", "tanh", "sin", "cos", "tan", "sec", "csc", "cot", "ln", "log", "exp", "abs", "pi", "e", "x")
 
     /** Null when it is not an expression in x. */
-    fun parse(src: String): C? {
+    fun parse(src: String, allowY: Boolean = false): C? {
         val s = src.lowercase().replace(Regex("""\|([^|]+)\|"""), "abs($1)").replace("π", "pi").replace(Regex("""√\s*\("""), "sqrt(")
             .replace(Regex("""√\s*([a-z0-9.]+)"""), "sqrt($1)").replace(Regex("""\s+"""), "")
-        return try { Parser(s).run { val v = sum(); if (i == s.length) v else null } } catch (_: IllegalArgumentException) { null }
+        return try { Parser(s, allowY).run { val v = sum(); if (i == s.length) v else null } } catch (_: IllegalArgumentException) { null }
     }
 
-    private class Parser(val s: String) {
+    private class Parser(val s: String, val allowY: Boolean) {
         var i = 0
         private fun fail(): Nothing = throw IllegalArgumentException()
         private fun at() = s.getOrNull(i)
@@ -59,6 +67,7 @@ internal object Calculus12 {
             val c = at() ?: fail()
             if (c == '(') { i++; val v = sum(); if (s.getOrNull(i++) != ')') fail(); return v }
             Regex("""^(?:\d+\.?\d*|\.\d+)""").find(s.substring(i))?.let { i += it.value.length; return C.N(it.value.toDouble()) }
+            if (allowY && c == 'y') { i++; return C.Y }
             val name = names.firstOrNull { s.startsWith(it, i) } ?: fail()
             i += name.length
             return when (name) {
@@ -118,7 +127,8 @@ internal object Calculus12 {
 
     private fun fn(f: String, v: Double) = when (f) {
         "sin" -> sin(v); "cos" -> cos(v); "tan" -> tan(v); "sec" -> 1 / cos(v); "csc" -> 1 / sin(v); "cot" -> 1 / tan(v)
-        "ln" -> ln(v); "log" -> log10(v); "exp" -> exp(v); "sqrt" -> sqrt(v); else -> abs(v)
+        "ln" -> ln(v); "log" -> log10(v); "exp" -> exp(v); "sqrt" -> sqrt(v)
+        "arcsin" -> asin(v); "arccos" -> acos(v); "arctan" -> atan(v); "sinh" -> sinh(v); "cosh" -> cosh(v); "tanh" -> tanh(v); else -> abs(v)
     }
 
     fun eval(n: C, x: Double): Double = when (n) {
@@ -130,14 +140,15 @@ internal object Calculus12 {
         is C.Pow -> eval(n.a, x).pow(eval(n.b, x))
         is C.F -> fn(n.f, eval(n.a, x))
         C.Euler -> E
+        C.Y -> Double.NaN
     }
 
-    private fun mul(vararg fs: C) = C.Prod(fs.toList())
-    private fun add(vararg ts: C) = C.Sum(ts.toList())
-    private fun num(v: Double) = C.N(v)
+    fun mul(vararg fs: C) = C.Prod(fs.toList())
+    fun add(vararg ts: C) = C.Sum(ts.toList())
+    fun num(v: Double) = C.N(v)
 
     fun d(n: C): C = when (n) {
-        is C.N, C.Euler -> num(0.0)
+        is C.N, C.Euler, C.Y -> num(0.0)
         C.X -> num(1.0)
         is C.Sum -> C.Sum(n.ts.map(::d))
         is C.Prod -> C.Sum(n.fs.indices.map { i -> C.Prod(n.fs.mapIndexed { j, g -> if (i == j) d(g) else g }) })
@@ -161,27 +172,33 @@ internal object Calculus12 {
                 "ln" -> C.Div(da, a)
                 "log" -> C.Div(da, mul(a, num(LN10)))
                 "sqrt" -> C.Div(da, mul(num(2.0), n))
+                "arcsin" -> C.Div(da, C.F("sqrt", add(num(1.0), mul(num(-1.0), C.Pow(a, num(2.0))))))
+                "arctan" -> C.Div(da, add(num(1.0), C.Pow(a, num(2.0))))
+                "arccos" -> C.Div(mul(num(-1.0), da), C.F("sqrt", add(num(1.0), mul(num(-1.0), C.Pow(a, num(2.0))))))
+                "sinh" -> mul(C.F("cosh", a), da)
+                "cosh" -> mul(C.F("sinh", a), da)
+                "tanh" -> C.Div(da, C.Pow(C.F("cosh", a), num(2.0)))
                 else -> mul(C.Div(a, n), da)
             }
         }
     }
 
-    private fun key(n: C) = n.toString()
+    fun key(n: C) = n.toString()
 
     /** A term as a coefficient and its other factors; like terms combine by their factors. */
-    private fun split(n: C): Pair<Double, List<C>> = when (n) {
+    fun split(n: C): Pair<Double, List<C>> = when (n) {
         is C.N -> n.v to emptyList()
         is C.Prod -> { var c = 1.0; val fs = mutableListOf<C>(); for (f in n.fs) if (f is C.N) c *= f.v else fs += f; c to fs }
         else -> 1.0 to listOf(n)
     }
 
-    private fun build(c: Double, fs: List<C>): C = if (fs.isEmpty()) num(c) else if (c == 1.0 && fs.size == 1) fs[0] else C.Prod(if (c == 1.0) fs else listOf(num(c)) + fs)
+    fun build(c: Double, fs: List<C>): C = if (fs.isEmpty()) num(c) else if (c == 1.0 && fs.size == 1) fs[0] else C.Prod(if (c == 1.0) fs else listOf(num(c)) + fs)
 
     private fun isMono(f: C) = f == C.X || (f is C.Pow && f.a == C.X && f.b is C.N)
 
     fun simp(n: C): C {
         when (n) {
-            is C.N, C.X, C.Euler -> return n
+            is C.N, C.X, C.Euler, C.Y -> return n
             is C.F -> {
                 val a = simp(n.a)
                 if (a is C.N) return num(fn(n.f, a.v))
@@ -267,7 +284,10 @@ internal object Calculus12 {
         abs(v - E) < 1e-12 -> "e"
         abs(v - PI) < 1e-12 -> "π"
         abs(v - LN10) < 1e-12 -> "ln 10"
-        else -> pcFrac(v)
+        // ln 2 ... ln 9 by name, so the derivative of 2^x is (ln 2)2^x; then the smallest fraction up to /120
+        else -> (2..9).firstOrNull { abs(v - ln(it.toDouble())) < 1e-9 }?.let { "ln $it" }
+            ?: (2..120).firstNotNullOfOrNull { dd -> val k = jsRound(v * dd); if (abs(k / dd - v) < 1e-9) "${k.toLong()}/$dd" else null }
+            ?: pcFrac(v)
     }
 
     private val sup = mapOf(2.0 to "²", 3.0 to "³")
@@ -276,6 +296,7 @@ internal object Calculus12 {
         is C.N -> numStr(n.v)
         C.X -> "x"
         C.Euler -> "e"
+        C.Y -> "y"
         is C.Sum -> n.ts.mapIndexed { i, t ->
             val (c, fs) = split(t)
             val s = str(if (c < 0) build(-c, fs) else t)
@@ -291,7 +312,7 @@ internal object Calculus12 {
             val a = n.a
             if (a is C.F && e != null && sup[e] != null && a.f != "exp" && a.f != "sqrt" && a.f != "abs") a.f + sup.getValue(e) + "(" + str(a.a) + ")"
             else {
-                val base = if (a == C.X || (a is C.N && a.v >= 0) || a is C.F) str(a) else "(" + str(a) + ")"
+                val base = if (a == C.X || a == C.Y || (a is C.N && a.v >= 0) || a is C.F) str(a) else "(" + str(a) + ")"
                 base + "^" + if (e != null && isInt(e) && e >= 0) jsRound(e).toLong().toString() else if (n.b == C.X) "x" else "(" + str(n.b) + ")"
             }
         }
@@ -309,6 +330,9 @@ internal object Calculus12 {
         }
         is C.F -> when {
             n.f == "exp" -> "e^" + if (n.a == C.X) "x" else "(" + str(n.a) + ")"
+            // "1 - x^2" under a root reads better than "-x^2 + 1"
+            n.f == "sqrt" && n.a is C.Sum && n.a.ts.size == 2 && n.a.ts[1].let { it is C.N && it.v > 0 } && split(n.a.ts[0]).first < 0 ->
+                "√(" + numStr((n.a.ts[1] as C.N).v) + " - " + str(simp(mul(num(-1.0), n.a.ts[0]))).replace(Regex("^1(?=[a-z(√])"), "") + ")"
             n.f == "sqrt" -> "√" + if (n.a == C.X) "x" else "(" + str(n.a) + ")"
             n.f == "abs" -> "|" + str(n.a) + "|"
             n.f == "ln" && n.a is C.F && n.a.f == "abs" -> "ln" + str(n.a)
@@ -324,6 +348,8 @@ internal object Calculus12 {
         for (t in ts) {
             val (c, fs) = split(t)
             if (fs.isEmpty()) { out += mul(num(c), C.X); continue }
+            if (fs.size == 2 && fs.all { it is C.F && key(it.a) == key((fs[0] as C.F).a) } && fs.any { (it as C.F).f == "sec" } && fs.any { (it as C.F).f == "tan" } && (fs[0] as C.F).a == C.X) { out += mul(num(c), C.F("sec", C.X)); continue }
+            if (fs.size == 2) { out += parts(c, fs) ?: return null; continue }
             if (fs.size != 1) return null
             val f = fs[0]
             val k = if (f == C.X) 1.0 else if (f is C.Pow && f.a == C.X && f.b is C.N) f.b.v else null
@@ -337,9 +363,58 @@ internal object Calculus12 {
                 if (a != null) { out += mul(num(c / a), C.F("tan", f.a.a)); continue }
             }
             if (f is C.Div && f.a is C.N && f.b == C.X) { out += mul(num(c * f.a.v), C.F("ln", C.F("abs", C.X))); continue }
+            // 1/√(k - x^2) is arcsin(x/√k)
+            if (f is C.Div && f.a is C.N && f.b is C.F && f.b.f == "sqrt" && f.b.a is C.Sum && f.b.a.ts.size == 2 && key(f.b.a.ts[0]) == key(mul(num(-1.0), C.Pow(C.X, num(2.0)))) && f.b.a.ts[1].let { it is C.N && it.v > 0 }) {
+                val k = sqrt((f.b.a.ts[1] as C.N).v)
+                out += mul(num(c * f.a.v), C.F("arcsin", if (k == 1.0) C.X else mul(num(1 / k), C.X))); continue
+            }
+            if (f is C.F && f.f == "ln" && f.a == C.X) { out += mul(num(c), C.X, C.F("ln", C.X)); out += mul(num(-c), C.X); continue }
+            // 1/(x^2 + k) is arctan(x/√k)/√k
+            if (f is C.Div && f.a is C.N && f.b is C.Sum && f.b.ts.size == 2 && key(f.b.ts[0]) == key(C.Pow(C.X, num(2.0))) && f.b.ts[1].let { it is C.N && it.v > 0 }) {
+                val k = sqrt((f.b.ts[1] as C.N).v)
+                out += mul(num(c * f.a.v / k), C.F("arctan", if (k == 1.0) C.X else mul(num(1 / k), C.X))); continue
+            }
             return null
         }
         return simp(C.Sum(out))
+    }
+
+    /** By parts, tabular: x^n times sin, cos or exp of a linear argument, or x^n ln(x). */
+    private fun parts(c: Double, fs: List<C>): C? {
+        val pw = fs.firstOrNull { it == C.X || (it is C.Pow && it.a == C.X && it.b is C.N && isInt(it.b.v) && it.b.v > 0) } ?: return null
+        val g = fs.firstOrNull { it !== pw } as? C.F ?: return null
+        val n = if (pw == C.X) 1.0 else ((pw as C.Pow).b as C.N).v
+        if (g.f == "ln" && g.a == C.X) return add(mul(num(c / (n + 1)), C.Pow(C.X, num(n + 1)), g), mul(num(-c / (n + 1).pow(2)), C.Pow(C.X, num(n + 1))))
+        if (g.f !in setOf("sin", "cos", "exp") || n > 4) return null
+        val terms = mutableListOf<C>()
+        var dv: C = pw
+        var gi: C = g
+        for (k in 0..n.toInt()) { gi = integrate(gi) ?: return null; terms += mul(num(if (k % 2 == 1) -c else c), dv, gi); dv = simp(d(dv)) }
+        return simp(C.Sum(terms))
+    }
+
+    /**
+     * u-substitution: c·g'(x)·h(g(x)) where h is a power, sin, cos or exp and the other factors are a constant times g'.
+     * ponytail: checks the ratio at five sample points rather than proving it symbolically.
+     */
+    fun substitute(n0: C): C? {
+        val n = if (n0 is C.Div && !hasX(n0.a)) mul(n0.a, C.Pow(n0.b, num(-1.0))) else n0
+        val fs = (if (n is C.Prod) n.fs else listOf(n)).map { f -> if (f is C.F && f.f == "sqrt") C.Pow(f.a, num(0.5)) else if (f is C.Div && !hasX(f.a)) mul(f.a, C.Pow(f.b, num(-1.0))) else f }
+            .flatMap { if (it is C.Prod) it.fs else listOf(it) }
+        for (i in fs.indices) {
+            val f = fs[i]
+            val inner = if (f is C.Pow && !hasX(f.b)) f.a else if (f is C.F && f.f in setOf("sin", "cos", "exp")) f.a else null
+            if (inner == null || inner == C.X || !hasX(inner)) continue
+            val rest = fs.filterIndexed { j, _ -> j != i }
+            val dg = simp(d(inner))
+            val ks = listOf(0.3, 0.7, 1.1, 1.9, 2.6).map { v -> rest.fold(1.0) { s, g -> s * eval(g, v) } / eval(dg, v) }
+            if (!ks.all { it.isFinite() && abs(it - ks[0]) < 1e-9 }) continue
+            val k = prec(ks[0], 12)
+            if (f is C.Pow) { val p = eval(f.b, 0.0); return if (p == -1.0) mul(num(k), C.F("ln", C.F("abs", inner))) else mul(num(k / (p + 1)), C.Pow(inner, num(p + 1))) }
+            f as C.F
+            return mul(num(if (f.f == "sin") -k else k), C.F(if (f.f == "sin") "cos" else if (f.f == "cos") "sin" else "exp", inner))
+        }
+        return null
     }
 
     /** A value as a small fraction when it is one, else to four places. */
@@ -348,7 +423,7 @@ internal object Calculus12 {
         return pcNum(fixed(v, 4))
     }
 
-    private fun simpson(f: (Double) -> Double, a: Double, b: Double): Double {
+    fun simpson(f: (Double) -> Double, a: Double, b: Double): Double {
         val n = 2000
         val h = (b - a) / n
         var s = f(a) + f(b)
@@ -496,7 +571,8 @@ internal object Calculus12 {
             return out(if (abs(sl - sr) < 1e-3) "Yes: the slope is ${snap(fixed((sl + sr) / 2, 4))} from both sides." else "No: the slope is ${snap(fixed(sl, 3))} from the left and ${snap(fixed(sr, 3))} from the right (a corner).")
         }
         // integrals and area
-        fun range(s: String): Pair<Double, Double>? {
+        fun range(s0: String): Pair<Double, Double>? {
+            val s = s0.replace(Regex("""\be\b"""), E.toString())
             val r = find("""\bfrom\s+(-?[\d./π\spi]+?)\s+to\s+(-?[\d./π\spi]+)$""", s) ?: find("""\bon\s*\[\s*(-?[^,\]]+?)\s*,\s*(-?[^\]]+?)\s*\]$""", s) ?: return null
             return (pcVal(r[1].trim()) ?: return null) to (pcVal(r[2].trim()) ?: return null)
         }
@@ -505,7 +581,7 @@ internal object Calculus12 {
             val body = m[1].replace(Regex("""\s+dx$"""), "")
             val t = fx(body) ?: (if (Regex("""^[\d.]+$""").matches(m[1])) num(m[1].toDouble()) else null) ?: return null
             if (m[2].isNotEmpty()) { val (a, b) = range(m[2].trim()) ?: return null; return out(snap(simpson({ eval(t, it) }, a, b))) }
-            return integrate(simp(t))?.let { out(str(it) + " + C") }
+            return (integrate(simp(t)) ?: substitute(t))?.let { out(str(it) + " + C") }
         }
         m = find("""^(?:the )?area (?:under|below|beneath) (?:the curve )?(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+?)\s+((?:from|on)\s+.+)$""", q)
         if (m != null) {

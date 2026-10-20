@@ -448,6 +448,20 @@ The real test passes at 15 of 20 (75%); offline Nimble scored 18 to 28 percent c
 
 Zero on all three forms cold: BC's driving rules are not in a Wikipedia pack. The real test is 50 questions with 40 needed to pass (80 percent). After fixes it holds 118 rules, every one a phrase match with no generic term: the BC numbers (30 km/h school zones 8 a.m. to 5 p.m. on school days, 5 m from a hydrant, 15 m from a railway crossing, 150 m behind a fire truck, Slow Down Move Over at 70 and 40 km/h), the graduated licence rules and the emergency drills. Driving words are required, so "what is fog", "what is a motorcycle", "what is a pentagon", "what is an ambulance" and "what is a red light district" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 5% and C 0%, so this test depends on its online grade.**
 
+## University Calculus I
+
+`test/courses/calc1.js`: the first university term, beyond Calculus 12: limits with L'Hopital, one-sided and at infinity, the continuity theorems, inverse trig, hyperbolic, exponential and log-base derivatives, implicit differentiation, linearization, Newton's method, the mean value theorem, ladder and balloon rates, optimization, Riemann sums, the trapezoidal and Simpson's rules, the fundamental theorem, substitution and integration by parts. Forms A and B were written before any run, the solver was built from form A with B's topics kept out, and form C was written after A and B passed and run once. Run `COURSE=calc1 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 16/40 | 10/40 | |
+| Web offline, after A only | 40/40 | 21/40 (53%) | 32/40 (80%) |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 | 40/40 |
+
+Calculus 12's symbolic engine already did 16 of form A. The new solver is mostly method, not facts: the engine gained arcsin, arccos, arctan, sinh, cosh and tanh, a second variable for implicit equations, u-substitution (checked at five sample points), tabular integration by parts, and ln 2 and fractions up to /120 printed by name. Form C at 80% honest is the best held-out first run of any course so far, because the computed topics carry over to new numbers. **A+ offline after fixes; honest held-out B 53% and C 80%.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

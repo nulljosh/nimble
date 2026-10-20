@@ -332,6 +332,7 @@ internal object Precalc {
         FirstPeoples12.answer(q)?.let { return it }
         Citizenship.answer(q)?.let { return it }
         Driving.answer(q)?.let { return it }
+        Calculus1.answer(q)?.let { return it }
         Calculus12.answer(q)?.let { return it }
         Statistics12.answer(q)?.let { return it }
         Apprenticeship12.answer(q)?.let { return it }
