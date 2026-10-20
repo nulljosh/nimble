@@ -379,6 +379,22 @@ Recall again: A's terms did not reach B (4/40 before and after). After fixes it 
 
 The lowest first run yet: the Wikipedia pack carries almost no economics, so A scored 2/40. The calculators carried a little: price elasticity from A also answered B's elasticity question, and C added income elasticity and total revenue. CPI inflation, the unemployment rate and real GDP from the deflator are computed too. Words with other meanings stay open: "what is a complement", "what is a multiplier", "what is a deficit" and "what is atc" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 15% and C 18%, so this course depends on its online grade.**
 
+## BC curriculum: BC First Peoples 12
+
+`test/courses/fp12.js`: the diversity of First Peoples in BC, oral tradition and worldview, contact and colonization, the Indian Act and the potlatch ban, residential schools, land and title cases, treaties, resistance and self-determination, and reconciliation. Forms A and B were written before any run, the solver was built from form A and the curriculum with B's topics kept out, and form C was written after A and B passed and run once. Run `COURSE=fp12 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 13/40 (33%) | 5/40 (13%) | 2/40 (5%) |
+| Web offline, after A only | 40/40 | 5/40 (13%) | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 (116/120 before oral tradition, clan, the Inuit and the fur trade got local text) |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (116/120 before the same 4) |
+
+The hardest course for an offline table so far: C's first run was 2/40, because the pack holds little BC-specific Indigenous history (nations like the Secwépemc and Syilx, the Chilcotin War, the Gladue principle). After fixes it holds 108 entries, checked against public sources, with BC's own facts: about 204 First Nations and 34 languages, the potlatch ban (1885 to 1951), the 1927 ban on land claims, the 1949 provincial vote, the title and rights cases from Calder to Tsilhqot'in, and the modern treaties. Social Studies 10's federal-vote fact now steps aside for a BC question. Words with other meanings stay open: "what is a big house", "what is a smudge" and "what is calder" still go to the live sources. **A+ offline after fixes; the honest held-out numbers are B 13% and C 5%, so this course depends on its online grade.**
+
+The engine passed the web app's 300 KB first-load budget with this course (308 KB). The apple-touch-icon was the full 512 px PNG (68 KB); it is now a 180 px copy (22 KB), and the first load is back under budget. Each new course adds about 3 KB gzipped, so lazy-loading the course tables is the next fix if the budget is hit again.
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

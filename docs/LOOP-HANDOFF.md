@@ -61,7 +61,9 @@ Rules that bite:
    - 20th Century World History 12 (test/courses/hist12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 14/40 after building from A only, fresh C 11/40. Recall, like Social Studies 10; needs the online grade.
    - Law Studies 12 (test/courses/law12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 4/40 after building from A only, fresh C 7/40. Legal senses of everyday words (battery, treaty, will, minor) need a legal word in the question.
    - Economic Theory 12 (test/courses/econ12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 6/40 after building from A only, fresh C 7/40. The pack carries almost no economics.
-   - Next courses, in order: BC First Peoples 12. English, arts and PE are skipped.
+   - BC First Peoples 12 (test/courses/fp12.js): 120/120 offline on every platform (2026-10-20). Honest first runs: B 5/40 after building from A only, fresh C 2/40. The last course on the list: every grade 10-12 math, science and socials course now has an exam at A+ offline.
+   - Size: docs/engine.js is about 222 KB gzipped and the web first load about 263 KB of the 300 KB budget (test/size-budget.test.js). If it trips again, lazy-load the course tables rather than raising the budget.
+   - Next: online held-out grades for the fact courses after 17:00 Pacific (read /stats first), then SimpleQA. English, arts and PE are skipped.
    - SimpleQA (public short-answer facts), then GSM8K, then the Canadian citizenship and BC driver's knowledge tests. Every miss is training data for Samantha in turing.
 1. Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 2. Packs by topic (science, history, geography), so a phone can carry what it needs.
