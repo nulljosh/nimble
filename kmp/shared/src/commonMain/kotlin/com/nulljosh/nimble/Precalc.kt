@@ -316,12 +316,13 @@ internal object Precalc {
             .replaceFirst(Regex("^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?"), "")
         for ((re, body) in FACTS) if (re.containsMatchIn(q)) return out(body)
         Science10.answer(q, query)?.let { return it }
-        LifeSciences11.answer(q)?.let { return it }
-        AnatomyPhysiology12.answer(q)?.let { return it }
         Physics12.answer(q, query)?.let { return it }
         Physics11.answer(q)?.let { return it }
         Chemistry12.answer(q, query)?.let { return it }
         Chemistry11.answer(q, query)?.let { return it }
+        LifeSciences11.answer(q)?.let { return it }
+        AnatomyPhysiology12.answer(q)?.let { return it }
+        EarthSciences11.answer(q)?.let { return it }
         Calculus12.answer(q)?.let { return it }
         Statistics12.answer(q)?.let { return it }
         Apprenticeship12.answer(q)?.let { return it }

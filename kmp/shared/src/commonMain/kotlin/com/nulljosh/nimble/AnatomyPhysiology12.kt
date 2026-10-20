@@ -1,7 +1,6 @@
 package com.nulljosh.nimble
 
 import com.nulljosh.nimble.Precalc.pcNum
-import kotlin.math.abs
 
 /**
  * BC Anatomy and Physiology 12 with no network: cell structures, membrane transport, biological molecules, enzymes,
@@ -280,7 +279,6 @@ internal object AnatomyPhysiology12 {
         'G' to "Gly glycine",
     )
 
-    private val stop = "the a an of in is are does do which what that and to from for it its with by on into".split(" ").toSet()
 
     private fun out(body: String) = Answer.Text(heading = null, body = body, source = "Nimble science")
     private fun find(pattern: String, s: String): List<String>? = Regex(pattern).find(s)?.groupValues
@@ -288,40 +286,12 @@ internal object AnatomyPhysiology12 {
     private fun codon(c: String) = CODE["UCAG".indexOf(c[0]) * 16 + "UCAG".indexOf(c[1]) * 4 + "UCAG".indexOf(c[2])]
     private fun cap(s: String) = s.replaceFirstChar { it.uppercase() }
 
-    /** A term's plain name from its pattern: optional parts dropped, the first choice of each group kept. */
-    private fun name(s: String) = cap(s.replace(Regex("""\(\?:[^()]*\)\?"""), "").replace(Regex("""\(\?:([^|()]*)[^()]*\)"""), "$1").split("|")[0].replace(Regex(""".\?"""), ""))
-
     private fun pair(s: String, map: Map<Char, Char>) = s.uppercase().map { map[it] ?: it }.joinToString("")
 
     fun answer(q: String): Answer? {
         for ((re, body) in facts) if (re.containsMatchIn(q)) return out(body)
         var m: List<String>?
-        // "function of the X", "what does X do", "what is X"
-        m = find("""^(?:what (?:is|are) )?(?:the )?(?:main )?(?:functions?|roles?|jobs?|purposes?) of (?:the |a |an )?(.+)$""", q)
-            ?: find("""^what (?:does|do) (?:the |a |an )?(.+?) (?:do|carry|transport|make|produce|release|secrete|store|control|contain)$""", q)
-            ?: find("""^(?:what (?:is|are) |define )?(?:the |a |an )?(.+)$""", q)
-        if (m != null) {
-            val t = m[1].replace(Regex(""" (?:in|of) (?:the )?(?:body|cell|human body)$"""), "")
-            for ((re, body) in terms) if (re.containsMatchIn(t)) return out(body)
-        }
-        // "which organelle makes ATP": the term of that kind whose description shares the most words with the question,
-        // a word counting less the more of those descriptions use it
-        for ((kind, names) in kinds) {
-            val k = find("^(?:what|which) (?:$kind) (.+)$", q) ?: continue
-            val words = k[1].split(Regex("[^a-z0-9]+")).filter { it.length > 2 && it !in stop }.map { it.take(5) }
-            val nre = Regex(names)
-            val pool = terms.filter { nre.containsMatchIn(it.third) }.map { Triple(it.third, it.second, it.second.lowercase()) }
-            fun weight(w: String): Double { val n = pool.count { w in it.third }; return if (n > 0) 1.0 / n else 0.0 }
-            var best: Triple<String, String, String>? = null
-            var top = 0.0
-            var tie = false
-            for (t in pool) {
-                val n = words.sumOf { if (it in t.third) weight(it) else 0.0 }
-                if (n > top + 1e-9) { best = t; top = n; tie = false } else if (abs(n - top) < 1e-9 && n > 0) tie = true
-            }
-            if (best != null && !tie) return out(name(best.first) + ". " + best.second)
-            break
-        }
+        Terms.answer(q, terms, kinds)?.let { return out(it) }
         // complementary DNA strand
         m = find("""\bcomplement(?:ary)?\b.*?\b([acgt]{3,})$""", q)
         if (m != null && !has("""\b(?:rna|mrna)\b""", q)) return out(pair(m[1], mapOf('A' to 'T', 'T' to 'A', 'C' to 'G', 'G' to 'C')))

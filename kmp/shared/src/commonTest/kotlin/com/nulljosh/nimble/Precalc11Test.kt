@@ -130,4 +130,12 @@ class Precalc11Test {
     @Test fun cardiacOutput() = assertEquals("4900 mL/min (4.9 L/min; cardiac output = heart rate × stroke volume)", pc("cardiac output if heart rate is 70 bpm and stroke volume is 70 mL"))
     @Test fun whichOrganelle() = assertEquals(true, pc("what organelle makes ATP")?.startsWith("Mitochondria."))
     @Test fun whichBrainPart() = assertEquals(true, pc("what part of the brain controls balance")?.startsWith("Cerebellum."))
+
+    // Earth Sciences 11 (EarthSciences11.kt)
+    @Test fun radiometricAge() = assertEquals("17190 years (3 half-lives of 5730 years)", pc("carbon-14 has a half-life of 5730 years, how old is a sample with 12.5% of its carbon-14 left"))
+    @Test fun isotopeHalfLife() = assertEquals("1.3 billion years (1 half-life of 1.3 billion years)", pc("the half-life of potassium-40 is 1.3 billion years, how old is a rock with 50% of its potassium-40 left"))
+    @Test fun magnitudeEnergy() = assertEquals("Energy: about 1000 times (about 32 per step). Amplitude: 100 times (10 per magnitude step).", pc("how many times more energy does a magnitude 6 earthquake release than a magnitude 4"))
+    @Test fun rockType() = assertEquals("Metamorphic: from limestone.", pc("what type of rock is marble"))
+    @Test fun whichAtmosphereLayer() = assertEquals(true, pc("in which layer of the atmosphere does weather occur")?.startsWith("Troposphere."))
+    @Test fun chemistryKeepsActivationEnergy() = assertEquals(true, pc("what is activation energy")?.startsWith("The minimum energy colliding particles"))
 }

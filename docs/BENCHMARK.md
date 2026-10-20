@@ -277,6 +277,22 @@ The honest held-out number is form C's first run, 15/40. A facts table only know
 
 Form B scored 40/40 on its first run after the solver was built from form A, but the same person wrote form B and the solver, so its topics were in mind; that makes it weaker evidence than it looks. Form C is the honest held-out number: 20/40 first run. That is better than Life Sciences 11's 15/40 because this solver matches whole terms ("function of X", "what does X do", "what is X") against one table of structures and ideas, rather than one pattern per question. C's misses were reverse questions ("which organelle makes ATP", "what part of the brain controls balance"), now answered by scoring each term of the asked kind on shared words, with a word weighted down the more terms use it, plus facts it simply lacked (base pairing, enzyme substrates, the body's response to heat, where bile is made). The sequence work (complements, transcription, the genetic code, translation, codon counts) and cardiac output are real computation. The solver is `ap12()` in docs/engine.js and `AnatomyPhysiology12.kt` on Kotlin, whose tables are copied from engine.js by script. **A+ offline on A and B; held-out form C is 50% first run, so this course also waits for an online held-out grade.**
 
+## BC curriculum: Earth Sciences 11
+
+`test/courses/es11.js`: minerals and rocks, the rock cycle, Earth's layers, plate tectonics, earthquakes and volcanoes, geologic time and dating, weathering and erosion, the atmosphere, oceans and climate. Forms A and B were written before any run and the solver was built from form A's misses only; form C was written after A and B passed and run once. Run `COURSE=es11 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B | Form C (held out) |
+|---|---|---|---|
+| Web offline, first run | 7/40 (18%) | 7/40 (18%) | 18/40 (45%) |
+| Web offline, after A only | 40/40 | 40/40 | |
+| Web offline, after fixes | 40/40 | 40/40 | 40/40 |
+| Apple offline | 40/40 | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 | 40/40 (118/120 before soil and thermohaline circulation got facts; the web had them from the pack) |
+
+Form C is the honest held-out number, 18/40. Most misses were facts the table lacked (the thinnest and thickest layers, the Juan de Fuca Plate, calderas, uniformitarianism, the air's makeup), and one was a parser gap: "the half-life of potassium-40 is 1.3 billion years" did not read because an isotope name sat between "of" and the number. The term matcher from Anatomy and Physiology 12 is now shared (`termAsk()` in engine.js, `Terms.kt` on Kotlin) and also reads "how are X formed", "what happens at X", "what causes X" and "what is X made of". Radiometric dating, magnitude ratios and S minus P epicentre distance are computed.
+
+A regression caught here: the Anatomy and Physiology 12 commit put its solver ahead of Chemistry 12, so "what is activation energy" got the enzyme answer and Chemistry 12 form A fell to 39/40 (38/40 once Earth Sciences took "oxidation" too). The three fact courses now run after the chemistry and physics solvers, the chemistry line for activation energy also says it is the energy needed to start a reaction, and every course was re-run before this commit: all at their old scores. **A+ offline on A and B; held-out form C is 45% first run, so this course also waits for an online held-out grade.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.

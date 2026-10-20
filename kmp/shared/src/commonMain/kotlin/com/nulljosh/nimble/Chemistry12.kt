@@ -112,7 +112,7 @@ internal object Chemistry12 {
         """\bindicator\b.*\bstrong acid\b.*\bstrong base\b|\bindicator\b.*\bstrong base\b.*\bstrong acid\b""" to "Bromothymol blue (or phenolphthalein): the equivalence point is at pH 7.",
         """\bindicator\b.*\bweak acid\b.*\bstrong base\b""" to "Phenolphthalein: the equivalence point is above pH 7.",
         """\bindicator\b.*\bstrong acid\b.*\bweak base\b""" to "Methyl orange (or methyl red): the equivalence point is below pH 7.",
-        """^(?:what is )?activation energy$""" to "The minimum energy colliding particles need to react.",
+        """^(?:what is )?activation energy$""" to "The minimum energy colliding particles need to react: the energy needed to start a reaction. A catalyst (an enzyme in the body) lowers it.",
         """\bhow does a catalyst\b|\bwhat does a catalyst do\b|^(?:what is )?a catalyst$""" to "It speeds up a reaction by giving it a pathway with a lower activation energy, and it is not used up.",
         """\bdoes a catalyst change (?:the )?(?:equilibrium|position|value of k|k\b|keq)""" to "No. A catalyst speeds up the forward and reverse reactions equally, so equilibrium comes sooner but its position and K do not change.",
         """\bfactors (?:that )?affect (?:the )?(?:reaction )?rate\b|\bwhat affects (?:the )?rate\b""" to "Temperature, concentration (or pressure for gases), surface area, the nature of the reactants, and a catalyst.",

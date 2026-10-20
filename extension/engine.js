@@ -2712,7 +2712,7 @@ function chem12(q, raw){
     [/^(?:what is )?(?:the )?end ?point(?: of a titration)?$/, "The point where the indicator changes colour; a good indicator puts it at the equivalence point."],
     [/\bindicator\b.*\bstrong acid\b.*\bstrong base\b|\bindicator\b.*\bstrong base\b.*\bstrong acid\b/, "Bromothymol blue (or phenolphthalein): the equivalence point is at pH 7."],
     [/\bindicator\b.*\bweak acid\b.*\bstrong base\b/, "Phenolphthalein: the equivalence point is above pH 7."], [/\bindicator\b.*\bstrong acid\b.*\bweak base\b/, "Methyl orange (or methyl red): the equivalence point is below pH 7."],
-    [/^(?:what is )?activation energy$/, "The minimum energy colliding particles need to react."],
+    [/^(?:what is )?activation energy$/, "The minimum energy colliding particles need to react: the energy needed to start a reaction. A catalyst (an enzyme in the body) lowers it."],
     [/\bhow does a catalyst\b|\bwhat does a catalyst do\b|^(?:what is )?a catalyst$/, "It speeds up a reaction by giving it a pathway with a lower activation energy, and it is not used up."],
     [/\bdoes a catalyst change (?:the )?(?:equilibrium|position|value of k|k\b|keq)/, "No. A catalyst speeds up the forward and reverse reactions equally, so equilibrium comes sooner but its position and K do not change."],
     [/\bfactors (?:that )?affect (?:the )?(?:reaction )?rate\b|\bwhat affects (?:the )?rate\b/, "Temperature, concentration (or pressure for gases), surface area, the nature of the reactants, and a catalyst."],
@@ -3261,6 +3261,42 @@ function ls11(q){
   }
   return null;
 }
+// Course terms, shared by the fact-heavy BC courses. Each course has a table of [regex for the whole term,
+// description, pattern source] and a list of kinds [question noun, regex over pattern sources]. termAsk answers
+// "what is X", "function of X", "what does X do", "how are X formed", "what happens at X", "what causes X" and
+// "what is X made of" from the table, and "which organelle makes ATP" by the term of that kind whose description
+// shares the most words with the question, a word counting less the more of those descriptions use it.
+const TERM_ASKS = [
+  /^(?:what (?:is|are) )?(?:the )?(?:main )?(?:functions?|roles?|jobs?|purposes?) of (?:the |a |an )?(.+)$/,
+  /^what (?:does|do) (?:the |a |an )?(.+?) (?:do|carry|transport|make|produce|release|secrete|store|control|contain)$/,
+  /^how (?:are|is|do|does) (?:the |a |an )?(.+?) (?:formed|form|made|created|forms)$/,
+  /^what happens (?:at|in|during) (?:the |a |an )?(.+)$/,
+  /^what causes (?:the |a |an )?(.+)$/,
+  /^(?:what (?:is|are) )?(?:the |a |an )?(.+?) made (?:up )?of$/,
+  /^(?:what (?:is|are|was|were) |define )?(?:the |a |an )?(.+)$/,
+];
+const TERM_STOP = new Set("the a an of in is are does do which what that and to from for it its with by on into".split(" "));
+// A term's plain name from its pattern: optional parts dropped, the first choice of each group kept.
+const termName = s => { const n = s.replace(/\(\?:[^()]*\)\?/g, "").replace(/\(\?:([^|()]*)[^()]*\)/g, "$1").split("|")[0].replace(/.\?/g, ""); return n[0].toUpperCase() + n.slice(1); };
+function termAsk(q, terms, kinds){
+  let m;
+  for(const re of TERM_ASKS){
+    if(!(m = re.exec(q))) continue;
+    const t = m[1].replace(/ (?:in|of) (?:the )?(?:body|cell|human body)$/, "");
+    for(const [tre, body] of terms) if(tre.test(t)) return body;
+  }
+  for(const [kind, names] of kinds){
+    if(!(m = new RegExp("^(?:in |on |at )?(?:what|which) (?:" + kind + ") (.+)$").exec(q))) continue;
+    const words = m[1].split(/[^a-z0-9]+/).filter(w => w.length > 2 && !TERM_STOP.has(w)).map(w => w.slice(0, 5)), nre = new RegExp(names);
+    const pool = terms.filter(([, , src]) => nre.test(src)).map(([, body, src]) => [src, body, body.toLowerCase()]);
+    const weight = w => { const n = pool.filter(t => t[2].includes(w)).length; return n ? 1 / n : 0; };
+    let best = null, top = 0, tie = false;
+    for(const t of pool){ const n = words.reduce((a, w) => a + (t[2].includes(w) ? weight(w) : 0), 0); if(n > top + 1e-9){ best = t; top = n; tie = false; } else if(Math.abs(n - top) < 1e-9 && n) tie = true; }
+    if(best && !tie) return termName(best[0]) + ". " + best[1];
+    break;
+  }
+  return null;
+}
 // BC Anatomy and Physiology 12: cell structures, membrane transport, biological molecules, enzymes, DNA replication,
 // protein synthesis, homeostasis and the body systems, plus DNA and RNA sequence work and cardiac output. AP_FACTS are
 // phrase questions; AP_TERMS answer "function of X", "what does X do" and "what is X" for each structure and idea.
@@ -3516,9 +3552,6 @@ const AP_KINDS = [
   ["(?:blood )?cells?", "^(?:red blood|white blood|platelets|neurons)"],
   ["heart chambers?|chambers? of the heart", "^(?:right|left) (?:atrium|ventricle)"],
 ];
-// A term's plain name from its pattern: optional parts dropped, the first choice of each group kept.
-const apName = s => { const n = s.replace(/\(\?:[^()]*\)\?/g, "").replace(/\(\?:([^|()]*)[^()]*\)/g, "$1").split("|")[0].replace(/.\?/g, ""); return n[0].toUpperCase() + n.slice(1); };
-const AP_STOP = new Set("the a an of in is are does do which what that and to from for it its with by on into".split(" "));
 // The standard genetic code, mRNA bases in UCAG order: first base, then second, then third.
 const AP_CODE = "FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG";
 const AP_AA = {F:"Phe phenylalanine", L:"Leu leucine", S:"Ser serine", Y:"Tyr tyrosine", C:"Cys cysteine", W:"Trp tryptophan", P:"Pro proline", H:"His histidine", Q:"Gln glutamine", R:"Arg arginine", I:"Ile isoleucine", M:"Met methionine", T:"Thr threonine", N:"Asn asparagine", K:"Lys lysine", V:"Val valine", A:"Ala alanine", D:"Asp aspartic acid", E:"Glu glutamic acid", G:"Gly glycine"};
@@ -3527,21 +3560,7 @@ function ap12(q){
   const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"});
   for(const [s, body] of AP_FACTS) if(new RegExp(s).test(q)) return out(body);
   let m;
-  // "function of the X", "what does X do", "what is X"
-  const term = (m = /^(?:what (?:is|are) )?(?:the )?(?:main )?(?:functions?|roles?|jobs?|purposes?) of (?:the |a |an )?(.+)$/.exec(q)) || (m = /^what (?:does|do) (?:the |a |an )?(.+?) (?:do|carry|transport|make|produce|release|secrete|store|control|contain)$/.exec(q)) || (m = /^(?:what (?:is|are) |define )?(?:the |a |an )?(.+)$/.exec(q));
-  if(term){ const t = m[1].replace(/ (?:in|of) (?:the )?(?:body|cell|human body)$/, ""); for(const [re, body] of AP_TERMS_RE) if(re.test(t)) return out(body); }
-  // "which organelle makes ATP": the term of that kind whose description shares the most words with the question,
-  // a word counting less the more of those descriptions use it
-  for(const [kind, names] of AP_KINDS){
-    if(!(m = new RegExp("^(?:what|which) (?:" + kind + ") (.+)$").exec(q))) continue;
-    const words = m[1].split(/[^a-z0-9]+/).filter(w => w.length > 2 && !AP_STOP.has(w)).map(w => w.slice(0, 5)), nre = new RegExp(names);
-    const pool = AP_TERMS_RE.filter(([, , src]) => nre.test(src)).map(([, body, src]) => [src, body, body.toLowerCase()]);
-    const weight = w => { const n = pool.filter(t => t[2].includes(w)).length; return n ? 1 / n : 0; };
-    let best = null, top = 0, tie = false;
-    for(const t of pool){ const n = words.reduce((a, w) => a + (t[2].includes(w) ? weight(w) : 0), 0); if(n > top + 1e-9){ best = t; top = n; tie = false; } else if(Math.abs(n - top) < 1e-9 && n) tie = true; }
-    if(best && !tie) return out(apName(best[0]) + ". " + best[1]);
-    break;
-  }
+  const tb = termAsk(q, AP_TERMS_RE, AP_KINDS); if(tb) return out(tb);
   // complementary DNA strand
   if((m = /\bcomplement(?:ary)?\b.*?\b([acgt]{3,})$/.exec(q)) && !/\b(?:rna|mrna)\b/.test(q)) return out(m[1].toUpperCase().replace(/[ACGT]/g, b => ({A:"T", T:"A", C:"G", G:"C"})[b]));
   // transcription: a template strand pairs (A to U); a coding strand only swaps T for U
@@ -3572,17 +3591,201 @@ function ap12(q){
   }
   return null;
 }
+// BC Earth Sciences 11: minerals and rocks, Earth's layers, plate tectonics, earthquakes and volcanoes, geologic time,
+// weathering and erosion, the atmosphere, oceans and climate, plus radiometric dating, earthquake magnitude and
+// epicentre distance. ES_FACTS are phrase questions; ES_TERMS go through termAsk.
+const ES_FACTS = [
+  ["\\b(?:three |3 |main )?(?:types|kinds|classes) of rocks?\\b", "Igneous, sedimentary and metamorphic."],
+  ["\\bhardest (?:natural )?mineral\\b", "Diamond, 10 on the Mohs scale."],
+  ["\\bsoftest mineral\\b", "Talc, 1 on the Mohs scale."],
+  ["\\bmost (?:common|abundant) minerals?\\b.*\\bcrust\\b|\\bcrust'?s? most (?:common|abundant) mineral\\b", "Feldspar, about half of the crust. Quartz is next."],
+  ["\\bintrusive\\b.*\\bextrusive\\b|\\bextrusive\\b.*\\bintrusive\\b", "Intrusive (plutonic) igneous rock cools slowly inside the Earth, below the surface, so it has large crystals, like granite. Extrusive (volcanic) rock cools fast on the surface, so its crystals are small or absent, like basalt and obsidian."],
+  ["\\bmagma\\b.*\\blava\\b|\\blava\\b.*\\bmagma\\b", "Magma is molten rock underground, below the surface. Once it erupts onto the surface it is called lava."],
+  ["\\bweathering\\b.*\\berosion\\b|\\berosion\\b.*\\bweathering\\b", "Weathering breaks rock down into smaller pieces where it sits. Erosion then moves (transports) those pieces away by water, wind, ice or gravity."],
+  ["\\bweather\\b.*\\bclimate\\b|\\bclimate\\b.*\\bweather\\b", "Weather is the short-term state of the atmosphere, over hours or days. Climate is the long-term average weather of a region, usually over 30 years or more."],
+  ["\\blayers of (?:the )?earth\\b|\\bearth'?s (?:layers|structure|interior)\\b", "Crust, mantle, outer core and inner core, from the surface in. By strength, the rigid lithosphere sits on the soft asthenosphere."],
+  ["\\blayers of (?:the )?atmosphere\\b|\\batmospher(?:e|ic) layers\\b", "Troposphere, stratosphere, mesosphere, thermosphere and exosphere, from the ground up."],
+  ["\\bwho (?:proposed|came up with|developed|suggested)\\b.*\\bcontinental drift\\b|\\bfather of continental drift\\b", "Alfred Wegener, a German scientist, in 1912."],
+  ["\\bevidence (?:for|of|supporting) (?:continental drift|plate tectonics|pangaea)\\b", "The continents fit together like puzzle pieces, matching fossils (Mesosaurus, Glossopteris) and rock types and mountain ranges line up across oceans, and glacial scratches and coal sit in places now far too warm or cold for them. Later: sea floor spreading and magnetic stripes."],
+  ["\\bwhat (?:drives|causes|moves) (?:the )?(?:plates?|plate motion|plate movement|tectonic plates)\\b", "Convection currents in the mantle, along with slab pull (sinking plates dragging the rest) and ridge push at mid-ocean ridges."],
+  ["\\bs[- ]waves?\\b.*\\b(?:outer core|liquid)\\b", "S waves are shear waves and travel only through solids. The outer core is liquid, so they stop there, which is how we know it is liquid."],
+  ["\\bcontinental[- ]continental\\b|\\btwo continental plates\\b", "Huge folded mountain ranges, like the Himalayas: neither plate is dense enough to subduct, so the crust crumples."],
+  ["\\boceanic[- ]oceanic\\b|\\btwo oceanic plates\\b", "A deep ocean trench and a curved chain of volcanic islands (an island arc), like Japan or the Aleutians, as one plate subducts."],
+  ["\\boceanic[- ]continental\\b|\\bcontinental[- ]oceanic\\b", "The oceanic plate subducts, making a trench offshore and a range of volcanic mountains on land, like the Cascades and the Andes."],
+  ["\\bexamples? of (?:a )?transform (?:boundary|fault|plate boundary)\\b", "The San Andreas Fault in California. In BC, the Queen Charlotte Fault off Haida Gwaii."],
+  ["\\bexamples? of (?:a )?divergent (?:boundary|plate boundary)\\b", "The Mid-Atlantic Ridge, and the East African Rift on land."],
+  ["\\bexamples? of (?:a )?convergent (?:boundary|plate boundary)\\b", "The Cascadia subduction zone off BC, the Andes, and the Himalayas."],
+  ["\\bhow many (?:seismograph|seismic|recording) stations\\b|\\bstations\\b.*\\b(?:locate|find|needed)\\b.*\\bepicent", "Three. Each station's S minus P time gap gives its distance, and the three circles meet at the epicentre (triangulation)."],
+  ["\\bwhat (?:geologic(?:al)? )?era\\b.*\\b(?:we|now|today|current)\\b|\\bcurrent (?:geologic(?:al)? )?era\\b", "The Cenozoic Era, in the Quaternary Period and the Holocene Epoch."],
+  ["\\b(?:geologic(?:al)? )?eras\\b|\\bfour eras\\b", "Precambrian time, then the Paleozoic, Mesozoic (the age of dinosaurs) and Cenozoic eras."],
+  ["\\bthinnest layer of (?:the )?earth\\b", "The crust, about 7 km thick under the oceans and 35 km under the continents."],
+  ["\\bthickest layer of (?:the )?earth\\b", "The mantle, about 2900 km thick."],
+  ["\\bhow hot is (?:the )?(?:earth'?s )?(?:inner )?core\\b|\\btemperature of (?:the )?(?:earth'?s )?(?:inner )?core\\b", "About 5400 °C at the inner core, about as hot as the surface of the Sun."],
+  ["\\bwhy is (?:the )?inner core solid\\b", "The enormous pressure at the centre of the Earth keeps the iron solid even at about 5400 °C."],
+  ["\\bplate\\b.*\\b(?:off|near|under|beneath) (?:the )?(?:coast of )?(?:bc|british columbia|vancouver island)\\b", "The Juan de Fuca Plate, which subducts under the North American Plate at the Cascadia subduction zone."],
+  ["\\bolder\\b.*\\bfault\\b|\\bfault\\b.*\\bolder\\b|\\bcuts? (?:through|across)\\b.*\\b(?:older|younger)\\b", "The rock layer is older; the fault that cuts through it is younger (cross-cutting relationships)."],
+  ["\\bdinosaurs?\\b.*\\b(?:extinct|die|died|disappear)", "About 66 million years ago, at the end of the Cretaceous, most likely after an asteroid hit near Chicxulub, Mexico."],
+  ["\\bglaciers?\\b.*\\bvalleys?\\b|\\bvalleys?\\b.*\\bglaciers?\\b", "U-shaped valleys. Rivers carve V-shaped ones."],
+  ["\\b(?:gas(?:es)?|composition|percent(?:age)?)\\b.*\\batmosphere\\b|\\batmosphere\\b.*\\b(?:made of|composition|gases)\\b", "Nitrogen about 78 percent, oxygen about 21 percent, argon about 0.9 percent, and carbon dioxide about 0.04 percent, plus water vapour."],
+  ["\\bhigh[- ]pressure\\b.*\\blow[- ]pressure\\b|\\blow[- ]pressure\\b.*\\bhigh[- ]pressure\\b", "In a high pressure system air sinks and warms, so skies are clear and the weather fair. In a low pressure system air rises and cools, so clouds, rain and storms form."],
+];
+const ES_TERMS = [
+  ["igneous(?: rocks?)?", "Rock formed when magma or lava cools and hardens. Intrusive rock cools slowly underground and has large crystals, like granite; extrusive rock cools fast at the surface and has small or no crystals, like basalt and obsidian."],
+  ["sedimentary(?: rocks?)?", "Rock formed from sediments (bits of rock, shells or minerals) deposited in layers, then compacted and cemented together, like sandstone, shale and limestone. It is the only rock type with fossils."],
+  ["metamorphic(?: rocks?)?", "Rock changed by heat and pressure deep underground without melting, like marble (from limestone), slate (from shale) and gneiss (from granite)."],
+  ["metamorphism", "The change of existing rock into metamorphic rock by heat, pressure and hot fluids, without melting."],
+  ["(?:the )?rock cycle", "The slow cycle by which rocks change type: igneous, sedimentary and metamorphic rock are weathered, buried, heated, squeezed, melted and cooled into one another over millions of years."],
+  ["minerals?", "A naturally occurring, inorganic solid with a definite chemical composition and an orderly crystal structure, like quartz or feldspar."],
+  ["(?:the )?mohs(?: hardness)?(?: scale)?", "A 1 to 10 scale of mineral hardness by scratch test: talc 1, gypsum 2, calcite 3, fluorite 4, apatite 5, feldspar 6, quartz 7, topaz 8, corundum 9, diamond 10."],
+  ["streak", "The colour of a mineral's powder, seen by rubbing it on an unglazed porcelain streak plate. It is more reliable than surface colour."],
+  ["lust(?:er|re)", "How a mineral's surface shines in reflected light: metallic, like pyrite, or non-metallic, such as glassy, pearly, silky or dull."],
+  ["cleavage(?: in minerals)?", "The way a mineral breaks cleanly along flat planes of weakness, like mica splitting into sheets."],
+  ["fracture(?: in minerals)?", "Breaking along rough or curved surfaces instead of flat planes, like the shell-shaped (conchoidal) fracture of quartz."],
+  ["hardness(?: of a mineral)?", "A mineral's resistance to being scratched, measured on the Mohs scale."],
+  ["magma", "Molten (melted) rock below the Earth's surface. Once it erupts it is called lava."],
+  ["lava", "Molten rock that has reached the Earth's surface."],
+  ["(?:the )?crust", "Earth's thin, rocky outer layer: continental crust (mostly granite, about 35 km thick) and oceanic crust (basalt, about 7 km thick)."],
+  ["(?:the )?mantle", "The thick layer of hot rock between the crust and the core, about 2900 km deep. It is solid but flows slowly, and its convection currents move the plates."],
+  ["(?:the )?outer core", "A liquid layer of molten iron and nickel about 2300 km thick. Its flow makes Earth's magnetic field."],
+  ["(?:the )?inner core", "A solid ball of iron and nickel at the centre, about 5400 °C, kept solid by enormous pressure."],
+  ["(?:the )?core", "Earth's centre, mostly iron and nickel: a liquid outer core around a solid inner core."],
+  ["(?:the )?lithosphere", "The rigid outer shell of crust and uppermost mantle, broken into tectonic plates."],
+  ["(?:the )?asthenosphere", "The soft, partly molten (plastic) layer of upper mantle beneath the lithosphere, on which the plates slide."],
+  ["(?:the )?(?:theory of )?plate tectonics", "The theory that Earth's lithosphere is broken into plates that move slowly over the asthenosphere, driven by mantle convection, causing earthquakes, volcanoes and mountains at their boundaries."],
+  ["(?:tectonic )?plates?", "A large slab of lithosphere that moves a few centimetres a year."],
+  ["continental drift", "Alfred Wegener's 1912 idea that the continents were once joined in Pangaea and have slowly drifted apart."],
+  ["pangaea|pangea", "The supercontinent that held all the continents about 300 to 200 million years ago, before it broke apart."],
+  ["divergent (?:plate )?boundar(?:y|ies)", "Plates move apart. Magma rises to make new crust, forming mid-ocean ridges like the Mid-Atlantic Ridge, or rift valleys on land like the East African Rift."],
+  ["convergent (?:plate )?boundar(?:y|ies)", "Plates move together and collide. Oceanic crust subducts beneath the other plate, making trenches and volcanoes; two continents crumple into mountains like the Himalayas."],
+  ["transform (?:plate )?boundar(?:y|ies)|transform faults?", "Plates slide past each other sideways, causing earthquakes but making or destroying no crust, like the San Andreas Fault."],
+  ["subduction(?: zones?)?", "One plate, the denser oceanic one, sinks beneath another into the mantle, forming a deep trench and volcanoes."],
+  ["sea ?floor spreading|seafloor spreading", "New oceanic crust forms at mid-ocean ridges as magma rises and the plates move apart, so the sea floor is youngest at the ridge. Harry Hess proposed it in the 1960s."],
+  ["mid-?ocean ridges?", "An underwater mountain chain at a divergent boundary, where new oceanic crust forms."],
+  ["(?:ocean(?:ic)? )?trench(?:es)?", "A deep, narrow valley in the ocean floor where one plate subducts beneath another."],
+  ["hot ?spots?", "A plume of hot mantle rising under a plate, making a chain of volcanoes as the plate moves over it, like Hawaii."],
+  ["(?:mantle )?convection currents?", "Circulation in the mantle: hot rock rises, cools and sinks, dragging the plates along."],
+  ["earthquakes?", "Sudden shaking when rock breaks and slips along a fault, releasing stored energy as seismic waves."],
+  ["faults?", "A break in the crust where rocks move past each other."],
+  ["(?:the )?(?:focus|hypocent(?:er|re))(?: of an earthquake)?", "The point inside the Earth where an earthquake starts, where the rock first breaks."],
+  ["(?:the )?epicent(?:er|re)(?: of an earthquake)?", "The point on the surface directly above an earthquake's focus."],
+  ["p[- ]waves?|primary waves?", "Primary waves, the fastest seismic waves (about 6 km/s in the crust). They compress and stretch rock in the direction they travel and pass through solids, liquids and gases."],
+  ["s[- ]waves?|secondary waves?", "Secondary waves, slower than P waves (about 3.5 km/s). They shake rock side to side (shear) and travel only through solids, so they cannot cross the liquid outer core."],
+  ["surface waves?", "Seismic waves that travel along the surface, the slowest and most damaging."],
+  ["seismic waves?", "Waves of energy from an earthquake: P waves, S waves and surface waves."],
+  ["seismographs?|seismometers?", "An instrument that records ground shaking from seismic waves."],
+  ["(?:the )?(?:richter|moment magnitude) scale|magnitude", "A scale of earthquake size: each whole number up is 10 times the wave amplitude and about 32 times the energy."],
+  ["tsunamis?", "A series of huge ocean waves caused by an undersea earthquake, landslide or eruption that shoves a large volume of water."],
+  ["volcano(?:es)?", "An opening in the crust where magma, gas and ash erupt."],
+  ["shield volcano(?:es)?", "A broad volcano with gentle slopes built from runny, low-viscosity basalt lava, like Mauna Loa in Hawaii. Its eruptions are mostly quiet."],
+  ["(?:composite|strato) ?volcano(?:es)?|stratovolcano(?:es)?", "A tall, steep cone (a stratovolcano) built of layers of lava and ash, with thick, gassy magma that erupts explosively, like Mount St. Helens and Mount Fuji."],
+  ["cinder cones?(?: volcano(?:es)?)?", "A small, steep volcano built from loose cinders thrown out in one eruption."],
+  ["(?:the )?ring of fire", "The chain of volcanoes and earthquakes around the Pacific Ocean along its subduction zones. It holds about 75 percent of the world's volcanoes."],
+  ["(?:the )?(?:law |principle )?(?:of )?superposition", "In undisturbed layers of sedimentary rock, the bottom layers are the oldest and each layer above is younger."],
+  ["(?:the )?(?:law |principle )?(?:of )?cross-?cutting(?: relationships)?", "A rock body or fault that cuts across other layers is younger than the layers it cuts."],
+  ["(?:the )?(?:law |principle )?(?:of )?original horizontality", "Sediments are laid down in flat, horizontal layers, so tilted or folded layers were disturbed later."],
+  ["relative dating|relative age", "Putting rocks and events in order, older or younger, without exact ages, using superposition, cross-cutting and fossils."],
+  ["(?:absolute|radiometric|radioactive) dating|absolute age", "Finding a rock's age in years from the decay of radioactive isotopes, such as uranium-238 or carbon-14, at their known half-lives."],
+  ["index fossils?", "A fossil of an organism that lived for a short time but spread widely, so it dates the rock layers it is found in."],
+  ["(?:the )?geologic(?:al)? time(?: scale)?", "The calendar of Earth's 4.6 billion year history, divided into eons, eras, periods and epochs, marked by big changes in life and rock."],
+  ["unconformit(?:y|ies)", "A gap in the rock record where layers were eroded away or never laid down."],
+  ["weathering", "The breaking down of rock into smaller pieces where it sits, by physical (mechanical) or chemical processes."],
+  ["mechanical weathering|physical weathering", "Breaking rock into smaller pieces without changing what it is made of, by frost wedging, plant roots, abrasion or heating and cooling."],
+  ["chemical weathering", "Breaking down rock by chemical reactions that change its minerals: acid rain dissolving limestone, oxidation (rusting) of iron, feldspar turning to clay."],
+  ["(?:frost|ice) wedging", "Water seeps into cracks, freezes and expands by about 9 percent, prying the rock apart over many cycles."],
+  ["erosion", "The moving (transport) of weathered rock and soil by water, wind, ice or gravity."],
+  ["deposition", "Sediment being dropped (laid down) when the water, wind or ice carrying it slows down."],
+  ["glaciers?", "A huge, slow-moving mass of ice that erodes valleys into U shapes and leaves deposits of rock (till) when it melts."],
+  ["(?:the )?troposphere", "The lowest layer of the atmosphere, from the ground to about 12 km, where weather happens and temperature falls with height."],
+  ["(?:the )?stratosphere", "The layer from about 12 to 50 km up that holds the ozone layer; temperature rises with height."],
+  ["(?:the )?mesosphere", "The layer from about 50 to 85 km up, the coldest, where meteors burn up."],
+  ["(?:the )?thermosphere", "The layer from about 85 to 600 km up, very thin and very hot, where auroras happen and the space station orbits."],
+  ["(?:the )?exosphere", "The outermost layer of the atmosphere, fading into space."],
+  ["(?:the )?ozone(?: layer)?", "A layer of ozone (O₃) in the stratosphere, about 15 to 35 km up, that absorbs most of the Sun's harmful ultraviolet (UV) radiation."],
+  ["(?:the )?coriolis(?: effect| force)?", "Earth's rotation deflects moving air and water, to the right in the Northern Hemisphere and to the left in the Southern, curving winds and ocean currents."],
+  ["(?:the )?greenhouse effect", "Gases such as carbon dioxide, water vapour and methane let sunlight in but trap the heat Earth gives off, keeping the planet warm. Adding more of them causes global warming."],
+  ["greenhouse gas(?:es)?", "A gas that traps heat in the atmosphere: carbon dioxide, methane, water vapour and nitrous oxide."],
+  ["weather", "The state of the atmosphere at a place and time (temperature, wind, clouds, precipitation) over hours to days."],
+  ["climate", "The average weather of a region over a long time, usually 30 years or more."],
+  ["(?:weather )?fronts?(?: in weather)?", "The boundary between two air masses of different temperature and humidity, where clouds and storms often form. Cold fronts bring short, heavy rain; warm fronts bring longer, gentle rain."],
+  ["air mass(?:es)?", "A huge body of air with about the same temperature and humidity throughout."],
+  ["relative humidity", "How much water vapour the air holds compared with the most it could hold at that temperature, as a percent."],
+  ["(?:the )?water cycle|hydrologic cycle", "Water evaporates from oceans and lakes, transpires from plants, condenses into clouds, falls as precipitation, and flows back as runoff and groundwater, powered by the Sun."],
+  ["tides?", "The regular rise and fall of sea level, about twice a day, caused mainly by the Moon's gravity pulling on the oceans, with help from the Sun."],
+  ["ocean currents?|currents", "Large flows of ocean water driven by wind at the surface and by differences in temperature and salinity (density) in the deep ocean, and turned by the Coriolis effect."],
+  ["el ni(?:n|ñ)o", "A warming of the eastern tropical Pacific every few years that shifts weather worldwide; BC gets a milder, drier winter."],
+  ["groundwater", "Water held underground in the cracks and pores of soil and rock."],
+  ["aquifers?", "An underground layer of porous rock or sediment that holds and lets through groundwater."],
+  ["rift valleys?", "A long valley where the crust is pulling apart at a divergent boundary on land, like the East African Rift."],
+  ["(?:the )?cascadia subduction zone", "The boundary off the coast of BC, Washington and Oregon where the Juan de Fuca Plate subducts under the North American Plate. It can make magnitude 9 earthquakes; the last was in 1700."],
+  ["calderas?", "A large basin that forms when a volcano's summit collapses into the emptied magma chamber after an eruption, like Crater Lake."],
+  ["pyroclastic flows?", "A fast, ground-hugging avalanche of hot gas, ash and rock from an explosive eruption, hundreds of degrees hot and deadly."],
+  ["uniformitarianism", "The idea that the same slow processes we see today shaped Earth in the past: the present is the key to the past. James Hutton proposed it."],
+  ["oxidation(?: in weathering)?", "Chemical weathering where oxygen reacts with iron in minerals, making rust-coloured iron oxides that crumble."],
+  ["deltas?", "A fan of sediment deposited at the mouth of a river where it slows into a lake or ocean, like the Fraser River delta."],
+  ["hurricanes?|typhoons?|tropical cyclones?", "A huge rotating tropical storm with a low pressure centre (the eye) and winds over 119 km/h, powered by warm ocean water."],
+  ["global warming|climate change", "The rise in Earth's average temperature since the 1800s, mainly from greenhouse gases released by burning fossil fuels, which strengthen the greenhouse effect."],
+  ["(?:the )?jet streams?", "Fast, narrow bands of wind high in the troposphere, about 10 km up, that steer weather systems from west to east."],
+  ["soils?", "A mix of weathered rock particles (sand, silt, clay), organic matter (humus), water and air, built up in layers called horizons."],
+  ["thermohaline circulation|(?:the )?(?:global )?ocean conveyor belt", "The slow, deep circulation of the world's oceans driven by differences in temperature and salinity, which change water density: cold, salty water sinks near the poles and spreads along the ocean floor."],
+  ["fossil fuels?", "Coal, oil and natural gas, formed over millions of years from the buried remains of ancient plants and sea life."],
+  ["crystals?", "A solid whose atoms are arranged in an orderly, repeating pattern, giving it flat faces."],
+];
+const ES_TERMS_RE = ES_TERMS.map(([s, b]) => [new RegExp("^(?:" + s + ")$"), b, s]);
+const ES_KINDS = [
+  ["layers? of (?:the )?atmosphere|atmospher(?:e|ic) layers?|layers? in the atmosphere", "troposphere|stratosphere|mesosphere|thermosphere|exosphere"],
+  ["layers? of (?:the )?earth|layers? inside the earth", "crust|mantle|outer core|inner core|lithosphere|asthenosphere"],
+  ["(?:type of |kind of )?(?:plate )?boundar(?:y|ies)", "^(?:divergent|convergent|transform)"],
+  ["(?:type of |kind of )?(?:seismic |earthquake )?waves?", "p\\[- \\]waves|s\\[- \\]waves|surface waves"],
+  ["(?:type of |kind of )?volcano(?:es)?", "shield|composite|cinder"],
+  ["(?:type of |kind of )?rocks?", "^(?:igneous|sedimentary|metamorphic)\\("],
+  ["(?:type of |kind of )?weathering", "weathering"],
+];
+// Common rocks: type, then how it forms.
+const ES_ROCKS = {granite:"Igneous (intrusive): coarse crystals from magma that cooled slowly underground.", basalt:"Igneous (extrusive): fine-grained, from lava that cooled quickly. It makes up the ocean floor.", obsidian:"Igneous (extrusive): volcanic glass from lava that cooled almost instantly.", pumice:"Igneous (extrusive): frothy volcanic rock full of gas holes, light enough to float.", rhyolite:"Igneous (extrusive): fine-grained, the volcanic match of granite.", andesite:"Igneous (extrusive): from the volcanoes of subduction zones.", gabbro:"Igneous (intrusive): the coarse-grained match of basalt.", diorite:"Igneous (intrusive): coarse, speckled black and white.", sandstone:"Sedimentary: cemented sand grains.", shale:"Sedimentary: compacted mud and clay in thin layers.", limestone:"Sedimentary: calcite, often from shells and coral.", conglomerate:"Sedimentary: rounded pebbles cemented together.", breccia:"Sedimentary: sharp, angular pieces cemented together.", siltstone:"Sedimentary: cemented silt.", coal:"Sedimentary (organic): compressed plant remains.", chalk:"Sedimentary: tiny marine shells.", marble:"Metamorphic: from limestone.", slate:"Metamorphic: from shale, splitting into flat sheets.", schist:"Metamorphic: shiny and flaky with mica, from shale or slate under more heat.", gneiss:"Metamorphic: banded light and dark, from granite or schist.", quartzite:"Metamorphic: from sandstone.", phyllite:"Metamorphic: between slate and schist, with a silky sheen."};
+// Mohs hardness of common minerals and test objects.
+const ES_HARD = {talc:"1", gypsum:"2", calcite:"3", fluorite:"4", apatite:"5", feldspar:"6", orthoclase:"6", "orthoclase feldspar":"6", quartz:"7", topaz:"8", corundum:"9", diamond:"10", fingernail:"about 2.5", "a fingernail":"about 2.5", "copper penny":"about 3.5", "a copper penny":"about 3.5", glass:"about 5.5", "steel nail":"about 6.5", "a steel nail":"about 6.5"};
+function es11(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble science", source:"Nimble science"});
+  for(const [s, body] of ES_FACTS) if(new RegExp(s).test(q)) return out(body);
+  let m;
+  // what type of rock is granite
+  if((m = /\b(?:type|kind|class) of rock (?:is|are) (?:an? )?([a-z]+)$/.exec(q)) || (m = /^is ([a-z]+) (?:an? )?(?:igneous|sedimentary|metamorphic)\b/.exec(q)) || (m = /^(?:what (?:type|kind) of rock is )?([a-z]+) rock type$/.exec(q))){ const r = ES_ROCKS[m[1]]; if(r) return out(r); }
+  if((m = /\bhardness of (?:a |an )?([a-z ]+)$/.exec(q)) && ES_HARD[m[1]]) return out(ES_HARD[m[1]] + " on the Mohs scale.");
+  const tb = termAsk(q, ES_TERMS_RE, ES_KINDS); if(tb) return out(tb);
+  // radiometric dating: age = half-lives elapsed × half-life, half-lives = log2(original / left)
+  const hl = /\bhalf[- ]life (?:of (?:[a-z]+-\d+ )?)?(?:is |=)?\s*(\d+(?:\.\d+)?)\s*(billion years|million years|years?|days?|hours?|minutes?|seconds?)\b/.exec(q);
+  if(hl && /\b(?:old|age)\b/.test(q)){
+    const pct = /(\d+(?:\.\d+)?)\s*%/.exec(q), frac = /\b(\d+)\/(\d+)\b/.exec(q);
+    const left = pct ? +pct[1] / 100 : frac ? +frac[1] / +frac[2] : null;
+    if(left > 0 && left < 1){
+      const n = Math.log2(1 / left), age = n * +hl[1], u = hl[2].replace(/^(year|day|hour|minute|second)$/, "$1s");
+      return out(pcNum(+age.toPrecision(6)) + " " + u + " (" + pcNum(+n.toPrecision(4)) + (n === 1 ? " half-life of " : " half-lives of ") + hl[1] + " " + u + ")");
+    }
+  }
+  // earthquake magnitude: each step is 10 times the amplitude and 10^1.5 (about 32) times the energy
+  if((m = /\bmagnitude (\d+(?:\.\d+)?)\b.*?\b(?:magnitude |an? )(\d+(?:\.\d+)?)\b/.exec(q))){
+    const d = Math.abs(+m[1] - +m[2]), amp = 10 ** d, en = 10 ** (1.5 * d);
+    const a = "Amplitude: " + pcNum(+amp.toPrecision(3)) + " times (10 per magnitude step).", e = "Energy: about " + pcNum(+en.toPrecision(3)) + " times (about 32 per step).";
+    return out(/\benerg/.test(q) ? e + " " + a : a + " " + e);
+  }
+  // epicentre distance from the S minus P gap, with P at 6 km/s and S at 3.5 km/s in the crust
+  if(/\bepicent|\bhow far\b|\bdistance\b/.test(q) && /\b(?:s[- ]p|p[- ]s|s minus p|lag|gap|difference|arrive)\b/.test(q) && (m = /(\d+(?:\.\d+)?)\s*(?:s|sec|seconds)\b/.exec(q))){
+    return out("About " + pcNum(+(+m[1] * 8.4).toPrecision(3)) + " km (gap × 8.4 km/s, with P waves at 6 km/s and S waves at 3.5 km/s; a travel-time chart gives a closer value).");
+  }
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const sc10 = sci10(q, query); if(sc10) return sc10;
-  const l11 = ls11(q); if(l11) return l11;
-  const a12p = ap12(q); if(a12p) return a12p;
   const ph12 = phys12(q, query); if(ph12) return ph12;
   const ph11 = phys11(q); if(ph11) return ph11;
   const ch12 = chem12(q, query); if(ch12) return ch12;
   const ch11 = chem11(q, query); if(ch11) return ch11;
+  const l11 = ls11(q); if(l11) return l11;
+  const a12p = ap12(q); if(a12p) return a12p;
+  const e11 = es11(q); if(e11) return e11;
   const c12 = calc12(q); if(c12) return c12;
   const s12 = stats12(q); if(s12) return s12;
   const a12 = aw12(q); if(a12) return a12;

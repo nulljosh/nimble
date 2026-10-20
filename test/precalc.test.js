@@ -139,3 +139,13 @@ test("Anatomy and Physiology 12: sequences, codons, cardiac output and the which
   assert.match(body("what organelle makes ATP"), /^Mitochondria\./);
   assert.match(body("what part of the brain controls balance"), /^Cerebellum\./);
 });
+
+test("Earth Sciences 11: dating, magnitude and rocks, and Chemistry 12 still answers its own terms first", () => {
+  assert.equal(body("carbon-14 has a half-life of 5730 years, how old is a sample with 12.5% of its carbon-14 left"), "17190 years (3 half-lives of 5730 years)");
+  assert.equal(body("the half-life of potassium-40 is 1.3 billion years, how old is a rock with 50% of its potassium-40 left"), "1.3 billion years (1 half-life of 1.3 billion years)");
+  assert.equal(body("how many times more energy does a magnitude 6 earthquake release than a magnitude 4"), "Energy: about 1000 times (about 32 per step). Amplitude: 100 times (10 per magnitude step).");
+  assert.equal(body("what type of rock is marble"), "Metamorphic: from limestone.");
+  assert.match(body("in which layer of the atmosphere does weather occur"), /^Troposphere\./);
+  assert.match(body("what is activation energy"), /^The minimum energy colliding particles/);
+  assert.match(body("what is oxidation"), /electrons/i);
+});
