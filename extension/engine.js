@@ -1365,11 +1365,141 @@ function pc11(q){
   }
   return null;
 }
+// --- Foundations of Mathematics and Pre-Calculus 10, offline ---
+// Primes, factors and multiples, exponent laws, expanding and common factors, area and volume, right-triangle
+// trigonometry, lines, and pay. precalc() asks it after pc11(); null means "not mine". Graded by
+// COURSE=fmpc10 node test/exam-course.js. Mirrored in kmp/shared/.../Precalc10.kt.
+const SUP = n => String(n).replace(/[-0-9]/g, c => "⁻⁰¹²³⁴⁵⁶⁷⁸⁹"["-0123456789".indexOf(c)]);
+const pcPow = (v, n) => n === 0 ? "" : v + (n === 1 ? "" : SUP(n));
+// ax + by = c, read by evaluating both sides at three points and checked at a fourth; null when not a line.
+function pcLine(e){
+  const [lhs, rhs] = e.split("="); if(rhs === undefined) return null;
+  const f = (x, y) => pcAt(("(" + lhs + ")-(" + rhs + ")").replace(/y/g, "(" + y + ")"), x);
+  const c = f(0, 0), a = f(1, 0), b = f(0, 1), t = f(1, 1);
+  return [c, a, b, t].some(v => v === null) || Math.abs(t - (a + b - c)) > 1e-9 ? null : [a - c, b - c, -c];
+}
+const pcLineOf = s => pcLine(/=/.test(s) ? s : "y = " + s);
+function fm10(q){
+  const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"}), money = v => "$" + v.toFixed(2);
+  const nums = s => (s.match(/\d+/g) || []).map(Number);
+  let m;
+  // primes, factors and multiples
+  if((m = /^(?:the )?prime factori[sz]ation of (\d+)$/.exec(q)) && +m[1] > 1 && +m[1] < 1e12){
+    let n = +m[1]; const parts = [];
+    for(let p = 2; p * p <= n; p++){ let k = 0; while(n % p === 0){ n /= p; k++; } if(k) parts.push(pcPow(p, k)); }
+    if(n > 1) parts.push(String(n));
+    return out(parts.join(" × ") + (parts.length === 1 && !/[⁰-⁹]/.test(parts[0]) ? ", a prime" : ""));
+  }
+  if((m = /^(?:the )?(greatest common (?:factor|divisor)|gcf|gcd|highest common factor|hcf|least common multiple|lcm|lowest common multiple) of ([\d,\s]+(?:and\s+\d+)?)$/.exec(q))){
+    const n = nums(m[2]); if(n.length < 2) return null;
+    const lcm = (a, b) => a / pcGcd(a, b) * b;
+    return out(String(/^(g|h)/.test(m[1]) ? n.reduce(pcGcd) : n.reduce(lcm)));
+  }
+  if((m = /^is (\d+) a perfect (square|cube)$/.exec(q))){
+    const n = +m[1], k = m[2] === "square" ? 2 : 3, r = Math.round(n ** (1 / k)), mark = k === 2 ? "√" : "∛";
+    return out(r ** k === n ? "Yes. " + r + SUP(k) + " = " + n + "." : "No. " + mark + n + " ≈ " + pcNum(n ** (1 / k)) + ", not a whole number.");
+  }
+  if((m = /^(?:write|express|rewrite)\s+(\d+)\s*\^\s*\(?\s*-\s*(\d+)\s*\)?\s+(?:as a fraction|with a positive exponent)$/.exec(q))) return out("1/" + (+m[1]) ** +m[2]);
+  // exponent laws on one variable: x^3 * x^5, (2x^3)^2, x^7 / x^3
+  if((m = /^simplify\s+([\d\s()^*\/·×.a-z-]+)$/.exec(q)) && (m[1].match(/[a-z]/g) || []).every((v, i, a) => v === a[0]) && /[a-z]/.test(m[1]) && !/[+]|\s-\s/.test(m[1])){
+    const v = m[1].match(/[a-z]/)[0], e = m[1].replace(/[·×]/g, "*").replace(new RegExp(v, "g"), "x").replace(/(?<=[\dx)])\s*(?=x)/g, "*");
+    const c = pcAt(e, 1), t = pcAt(e, 2), u = pcAt(e, 3); if(c === null || t === null || u === null || c === 0) return null;
+    const n = Math.round(Math.log2(t / c)); if(Math.abs(c * 3 ** n - u) > 1e-9 * Math.max(1, Math.abs(u))) return null;
+    const k = c === 1 ? "" : c === -1 ? "-" : pcFrac(c);
+    return out(n === 0 ? pcFrac(c) : n > 0 ? k + pcPow(v, n) : (c < 0 ? "-" : "") + pcFrac(Math.abs(c)) + "/" + pcPow(v, -n));
+  }
+  // expand (x + 3)(x - 5), (2x - 1)^2
+  if((m = /^(?:expand|multiply|simplify)\s+(.*\(.*x.*)$/.exec(q)) && !/\//.test(m[1])){
+    const co = pcCoeffs(m[1].replace(/\)\s*\(/g, ")*(")); if(co) return out(pcPoly(co.map(c => +c.toFixed(9))));
+  }
+  // factor out the common factor first: 6x^2 + 9x is 3x(2x + 3), 2x^2 - 50 is 2(x - 5)(x + 5)
+  if((m = /^factor\s+(?:completely\s+)?(?:y\s*=\s*)?(.+)$/.exec(q)) && /x/.test(m[1])){
+    const co = pcCoeffs(m[1]);
+    if(co && co.length > 1 && co.every(c => Number.isInteger(c))){
+      let p = 0; while(p < co.length - 1 && co[co.length - 1 - p] === 0) p++;
+      const rest = co.slice(0, co.length - p), g = rest.reduce(pcGcd) * Math.sign(rest[0]);
+      if(Math.abs(g) > 1 || p > 0){
+        const r = rest.map(c => c / g), lead = (g === 1 ? "" : g === -1 ? "-" : String(g)) + pcPow("x", p);
+        if(r.length === 1) return out(lead || "1");
+        const inner = r.length === 3 ? precalc("factor " + pcPoly(r)) : null;
+        return out(lead + (inner && /^\(/.test(inner.body) ? inner.body : "(" + pcPoly(r) + ")"));
+      }
+    }
+  }
+  // area and volume
+  const shape = (/\b(hemisphere|sphere|cylinder|cone|cube|rectangular prism|square pyramid|square-based pyramid|box)\b/.exec(q) || [])[1], what = (/\b(surface area|volume)\b/.exec(q) || [])[1];
+  if(shape && what){
+    const num = re => { const t = re.exec(q); return t ? +t[1] : null; };
+    const d = num(/diameter (?:of |is |=\s*)?([\d.]+)/), r = num(/radius (?:of |is |=\s*)?([\d.]+)/) ?? (d === null ? null : d / 2), h = num(/height (?:of |is |=\s*)?([\d.]+)/);
+    const s = num(/(?:side|edge)(?: length)? (?:of |is |=\s*)?([\d.]+)/) ?? num(/base (?:side )?(?:of |is |=\s*)?([\d.]+)/), box = /([\d.]+)\s*(?:by|x|×)\s*([\d.]+)\s*(?:by|x|×)\s*([\d.]+)/.exec(q);
+    const vol = what === "volume", piAns = k => out((Number.isInteger(+k.toFixed(9)) || pcFrac(k).includes("/") ? pcFrac(+k.toFixed(9)) + "π ≈ " : "") + pcNum(+(k * Math.PI).toFixed(2)));
+    if(shape === "sphere" && r !== null) return piAns(vol ? 4 / 3 * r ** 3 : 4 * r * r);
+    if(shape === "hemisphere" && r !== null) return piAns(vol ? 2 / 3 * r ** 3 : 3 * r * r);
+    if(shape === "cylinder" && r !== null && h !== null) return piAns(vol ? r * r * h : 2 * r * r + 2 * r * h);
+    if(shape === "cone" && r !== null && h !== null) return vol ? piAns(r * r * h / 3) : out(pcNum(+(Math.PI * r * r + Math.PI * r * Math.hypot(r, h)).toFixed(2)));
+    if(shape === "cube" && s !== null) return out(pcNum(vol ? s ** 3 : 6 * s * s));
+    if(/pyramid/.test(shape) && s !== null && h !== null) return out(pcNum(+(vol ? s * s * h / 3 : s * s + 2 * s * Math.hypot(h, s / 2)).toFixed(2)));
+    if(/prism|box/.test(shape) && box){ const [l, w, t] = box.slice(1, 4).map(Number); return out(pcNum(vol ? l * w * t : 2 * (l * w + l * t + w * t))); }
+  }
+  // right triangles: SOH CAH TOA, Pythagoras, ladders, elevation and depression
+  if(/^soh ?cah ?toa$/.test(q)) return out("sin = opposite/hypotenuse, cos = adjacent/hypotenuse, tan = opposite/adjacent.");
+  if((m = /^what (?:does|is) (sine|cosine|tangent)(?: mean)?(?: in a right triangle)?$/.exec(q))) return out({sine:"sin θ = opposite/hypotenuse.", cosine:"cos θ = adjacent/hypotenuse.", tangent:"tan θ = opposite/adjacent."}[m[1]]);
+  if((m = /\bhypotenuse\b.*?\blegs? (?:of )?([\d.]+)\s*(?:and|,)\s*([\d.]+)/.exec(q))) return out(pcNum(+Math.hypot(+m[1], +m[2]).toFixed(4)));
+  if((m = /\b(?:missing |other |third )?(?:leg|side)\b.*?\bhypotenuse (?:of |is )?([\d.]+)\s*(?:and|,)\s*(?:a |one )?(?:leg|side) (?:of |is )?([\d.]+)/.exec(q)) && +m[1] > +m[2]) return out(pcNum(+Math.sqrt(m[1] ** 2 - m[2] ** 2).toFixed(4)));
+  if(/\bright triangle\b/.test(q) && /\bangle\b/.test(q)){
+    const side = k => { const t = new RegExp("\\b" + k + "(?: side)? (?:is |of |=\\s*)?([\\d.]+)").exec(q); return t ? +t[1] : null; };
+    const o = side("opposite"), a = side("adjacent"), h = side("hypotenuse"), deg = 180 / Math.PI;
+    const t = o !== null && h !== null ? Math.asin(o / h) : a !== null && h !== null ? Math.acos(a / h) : o !== null && a !== null ? Math.atan(o / a) : NaN;
+    if(isFinite(t)) return out(pcNum(+(t * deg).toFixed(2)) + "°");
+  }
+  if((m = /\bladder\s+([\d.]+)\s*[a-z]*\s*long\b.*?([\d.]+)\s*(?:degrees?|°)(?: angle)? with the (ground|floor|wall)/.exec(q))){
+    const L = +m[1], t = +m[2] * Math.PI / 180, high = /\bhigh|height|up the wall\b/.test(q), up = m[3] === "wall" ? Math.cos(t) : Math.sin(t), across = m[3] === "wall" ? Math.sin(t) : Math.cos(t);
+    return out(pcNum(+(L * (high ? up : across)).toFixed(2)) + " " + (/\b(\d+(?:\.\d+)?)\s*m\b/.test(q) ? "m" : "units"));
+  }
+  if(/\bangle of (elevation|depression)\b/.test(q) || /\b(rises|climbs)\b.*\bhorizontal\b/.test(q)){
+    const n = (q.match(/\d+(?:\.\d+)?/g) || []).map(Number); if(n.length === 2) return out(pcNum(+(Math.atan(n[0] / n[1]) * 180 / Math.PI).toFixed(2)) + "°");
+  }
+  // lines: slope, equation, intercepts, parallel and perpendicular, midpoint, distance
+  const pts = [...q.matchAll(/\(\s*(-?[\d.]+)\s*,\s*(-?[\d.]+)\s*\)/g)].map(t => [+t[1], +t[2]]);
+  if(pts.length === 2 && /^(?:the )?midpoint\b/.test(q)) return out("(" + pcFrac((pts[0][0] + pts[1][0]) / 2) + ", " + pcFrac((pts[0][1] + pts[1][1]) / 2) + ")");
+  if(pts.length === 2 && /^(?:the )?(?:distance|length)\b/.test(q)){ const d = Math.hypot(pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]); return out(Number.isInteger(+d.toFixed(9)) ? pcNum(d) : "√" + pcFrac((pts[1][0] - pts[0][0]) ** 2 + (pts[1][1] - pts[0][1]) ** 2) + " ≈ " + pcNum(+d.toFixed(4))); }
+  const yForm = (k, b) => "y = " + (k === 0 ? pcFrac(b) : (k === 1 ? "" : k === -1 ? "-" : pcFrac(k)) + "x" + (b === 0 ? "" : b > 0 ? " + " + pcFrac(b) : " - " + pcFrac(-b)));
+  if(pts.length === 2 && /\bslope\b/.test(q) && !/\bequation\b/.test(q)){ const dx = pts[1][0] - pts[0][0]; return out(dx === 0 ? "Undefined: the line is vertical." : pcFrac((pts[1][1] - pts[0][1]) / dx)); }
+  if(/\bequation of (?:the |a )?line\b/.test(q) && pts.length >= 1){
+    const s = (/\bslope (?:of |is |=\s*)?(-?[\d./]+)/.exec(q) || [])[1], k = s !== undefined ? pcVal(s) : pts.length === 2 && pts[1][0] !== pts[0][0] ? (pts[1][1] - pts[0][1]) / (pts[1][0] - pts[0][0]) : null;
+    if(k === null) return pts.length === 2 ? out("x = " + pcFrac(pts[0][0])) : null;
+    return out(yForm(+k.toPrecision(12), +(pts[0][1] - k * pts[0][0]).toPrecision(12)));
+  }
+  if((m = /^(?:the )?slope of (?:a |the )?line (perpendicular|parallel) to (.+)$/.exec(q))){
+    const L = pcLineOf(m[2]); if(!L || L[1] === 0) return null; const k = -L[0] / L[1];
+    return out(m[1] === "parallel" ? pcFrac(k) : k === 0 ? "Undefined: the line is vertical." : pcFrac(-1 / k));
+  }
+  if((m = /^(?:the )?(slope|y-?intercept|x-?intercept) of (.+)$/.exec(q)) && /y/.test(m[2]) && /=/.test(m[2])){
+    const L = pcLine(m[2]); if(!L) return null; const [a, b, c] = L;
+    if(/^slope/.test(m[1])) return out(b === 0 ? "Undefined: the line is vertical." : pcFrac(-a / b));
+    if(/^y/.test(m[1])) return out(b === 0 ? "None: the line is vertical." : "(0, " + pcFrac(c / b) + ")");
+    return out(a === 0 ? "None: the line is horizontal." : "(" + pcFrac(c / a) + ", 0)");
+  }
+  if((m = /^(?:the )?(domain|range) of (?:y\s*=\s*|f\(x\)\s*=\s*)(.+)$/.exec(q))){
+    const co = pcCoeffs(m[2]); if(!co) return null;
+    if(m[1] === "domain" || co.length % 2 === 0) return out("All real numbers.");
+    if(co.length === 3){ const [a, b, c] = co, k = +(c - b * b / (4 * a)).toPrecision(12); return out("y " + (a > 0 ? "≥ " : "≤ ") + pcFrac(k)); }
+    return out(co.length === 1 ? "y = " + pcFrac(co[0]) : null);
+  }
+  // pay: hourly with overtime, net, commission
+  if((m = /\b(?:pay|earn|earnings|wages?)\b.*?([\d.]+)\s*hours?\s*(?:at|of)\s*\$?\s*([\d.]+)/.exec(q)) || (m = /\b(time and a half|double time)\b.*?([\d.]+)\s*hours?\s*(?:at|of)\s*\$?\s*([\d.]+)/.exec(q)) && (m = [m[0], m[2], m[3]])){
+    const k = /time and a half/.test(q) ? 1.5 : /double time/.test(q) ? 2 : 1; return out(money(+m[1] * +m[2] * k));
+  }
+  if((m = /\bnet pay\b.*?gross(?: pay)? (?:is |of |=\s*)?\$?\s*([\d,.]+)\b.*?deductions? (?:are |is |of |total |=\s*)?\$?\s*([\d,.]+)/.exec(q))) return out(money(+m[1].replace(/,/g, "") - +m[2].replace(/,/g, "")));
+  if((m = /\bcommission\b.*?([\d.]+)\s*%.*?\$\s*([\d,.]+)/.exec(q))) return out(money(+m[1] / 100 * +m[2].replace(/,/g, "")));
+  return null;
+}
 function precalc(query){
   let q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
   const out = body => ({kind:"text", title:null, body, src:"Nimble math", source:"Nimble math"});
   for(const [re, body] of PC_FACTS) if(re.test(q)) return out(body);
   const p11 = pc11(q); if(p11) return p11;
+  const p10 = fm10(q); if(p10) return p10;
   let m;
   // how many roots does a degree 4 (or quartic) polynomial have
   if((m = /^how many (?:roots|zeros|solutions) (?:does|can) (?:a |an )?(?:degree[- ](\d+)|(linear|quadratic|cubic|quartic|quintic)) polynomial have$/.exec(q))){

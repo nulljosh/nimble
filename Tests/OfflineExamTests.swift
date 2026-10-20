@@ -66,7 +66,7 @@ final class OfflineExamTests: XCTestCase {
     func testCourseExams() throws {
         try XCTSkipUnless(ProcessInfo.processInfo.environment["NIMBLE_EXAM"] == "1", "Set TEST_RUNNER_NIMBLE_EXAM=1")
         let engine = QueryEngine()
-        for course in ["pc11"] {
+        for course in ["pc11", "fmpc10"] {
             let url = try XCTUnwrap(Bundle(for: Self.self).url(forResource: course, withExtension: "js"), course)
             let questions = try Self.questions(String(contentsOf: url, encoding: .utf8))
             var missed: [String] = []
@@ -74,6 +74,7 @@ final class OfflineExamTests: XCTestCase {
                 let shown: String
                 switch engine.localAnswer(question) {
                 case .math(let v, _): shown = v
+                case .convert(_, let to, _, let toUnit): shown = "\(to) \(toUnit)"
                 case .text(let heading, let body, _, _, _, _, _, _, _): shown = [heading, body].compactMap { $0 }.joined(separator: " ")
                 default: shown = ""
                 }

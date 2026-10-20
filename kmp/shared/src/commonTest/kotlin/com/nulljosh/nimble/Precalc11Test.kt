@@ -22,4 +22,13 @@ class Precalc11Test {
     @Test fun cosineLaw() = assertEquals("c ≈ 8.185", pc("triangle with a = 7, b = 9, angle C = 60 degrees, find c"))
     @Test fun ambiguousCase() = assertEquals("C ≈ 49.89° (or 130.11°, the ambiguous case)", pc("angle C if c = 8, a = 6, angle A = 35 degrees"))
     @Test fun simpleInterest() = assertEquals("$180.00 in interest, for $1680.00 in all (I = Prt).", pc("simple interest on $1500 at 4% for 3 years"))
+
+    // Foundations and Pre-Calculus 10 (Precalc10.kt)
+    @Test fun primeFactors() = assertEquals("2³ × 3² × 5", pc("prime factorization of 360"))
+    @Test fun commonFactorFirst() = assertEquals("3x(2x + 3)", pc("factor 6x^2 + 9x"))
+    @Test fun commonFactorThenDifferenceOfSquares() = assertEquals("2(x + 5)(x - 5)", pc("factor 2x^2 - 50"))
+    @Test fun exponentLaws() = assertEquals("4x⁶", pc("simplify (2x^3)^2"))
+    @Test fun sphereVolume() = assertEquals("288π ≈ 904.78", pc("volume of a sphere with radius 6"))
+    @Test fun lineThroughTwoPoints() = assertEquals("y = 3x - 1", pc("equation of the line through (1, 2) and (3, 8)"))
+    @Test fun overtime() = assertEquals("$180.00", pc("time and a half for 6 hours at $20 per hour"))
 }

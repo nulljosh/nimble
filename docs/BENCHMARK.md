@@ -102,6 +102,18 @@ The first online run lost "10th term of 2, 6, 18" to a Wikipedia article on a tr
 
 Form A's first online misses: the AI answered in raw LaTeX (`\(\frac{\sqrt{2}}{2}\)`), called simple interest compound ($1,687.30 for $180), glued UNKNOWN to a right answer ("5UNKNOWN"), and rounded a sine-law angle to 27.4° (27.33°). One key was too strict (it wanted -2 before 2). The fix was a Pre-Calc 11 solver that runs before the AI (`pc11()` in docs/engine.js, `Precalc11.kt` on Kotlin; the Apple apps run engine.js), and the Worker now turns LaTeX into plain text and keeps an answer with UNKNOWN glued on. **A+ on the web, iPhone, Mac and Android, both forms, online and offline.**
 
+## BC curriculum: Foundations of Mathematics and Pre-Calculus 10
+
+`test/courses/fmpc10.js`, two 40-question forms written before any run: primes, factors and multiples, exponent laws, expanding and factoring, measurement (unit conversion, surface area and volume), right-triangle trigonometry, lines and functions, systems, and pay. Run `COURSE=fmpc10 node test/exam-course.js`.
+
+| Run (2026-10-20) | Form A | Form B (held out) |
+|---|---|---|
+| Web offline, first run | 10/40 (25%) | 40/40 (100%) |
+| Apple offline | 40/40 | 40/40 |
+| Kotlin offline | 40/40 | 40/40 |
+
+Online is not graded yet: the Worker passed 6,000 estimated neurons for the day, which is the line the loop does not cross for live rounds, so the online run waits for the 17:00 reset. Form A's first offline run also caught a real bug in the Pre-Calc 12 factoring: "factor 6x^2 + 9x" printed "3(2x + 3)(x - 0)". A common factor now comes out first ("3x(2x + 3)", "2x²(2x + 5)"). The solver is `fm10()` in docs/engine.js and `Precalc10.kt` on Kotlin. **A+ offline on every platform.**
+
 ## The 1,000-question exam
 
 `test/exam-1000.js` is a bank of 1,049 questions: math (633) and units (177) are computed, so the expected answers cannot be mistyped, and they run offline every time at no cost. The 239 AI questions (capitals, elements, authors, dates, facts) are asked a rotating slice at a time (`CAP`, default 250) so the free Groq caps hold. `npm run exam:1000`, weekly in CI.
