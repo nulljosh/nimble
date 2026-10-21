@@ -104,7 +104,7 @@ struct ResultView: View {
                                     Button { openURL(u) } label: {
                                         Text(item.name)
                                             .font(.nimbleCaptionMedium)
-                                            .foregroundStyle(Color.bulbDeep)
+                                            .foregroundStyle(Color.text)
                                             .underline()
                                     }
                                     .buttonStyle(.plain)
@@ -167,7 +167,7 @@ struct ResultView: View {
                 if let searchURL, URL(string: searchURL) != nil {
                     Button("Search on DuckDuckGo →") { state.openInDDG() }
                         .font(.nimbleCalloutMedium)
-                        .foregroundStyle(Color.bulbDeep)
+                        .foregroundStyle(Color.text)
                         .buttonStyle(.plain)
                 }
             }
@@ -308,7 +308,7 @@ struct TextAnswerView: View {
                                 Button { openURL(u) } label: {
                                     Text(item.name)
                                         .font(.nimbleCaptionMedium)
-                                        .foregroundStyle(Color.bulbDeep)
+                                        .foregroundStyle(Color.text)
                                         .underline()
                                 }
                                 .buttonStyle(.plain)
@@ -329,7 +329,7 @@ struct TextAnswerView: View {
                             Button { openURL(u) } label: {
                                 Text(whyLabel)
                                     .font(.nimbleCaptionMedium)
-                                    .foregroundStyle(Color.bulbDeep)
+                                    .foregroundStyle(Color.text)
                                     .underline()
                             }
                             .buttonStyle(.plain)
@@ -532,7 +532,7 @@ struct Eyebrow: View {
             .font(.nimbleEyebrow)
             .tracking(1.3)
             .textCase(.uppercase)
-            .foregroundStyle(Color.bulbDeep)
+            .foregroundStyle(Color.text)
             .accessibilityAddTraits(.isHeader)
     }
 }
@@ -706,7 +706,7 @@ private struct MathResultView: View {
                     .padding(.top, 4)
                 }
                 .font(.nimbleCalloutMedium)
-                .foregroundStyle(Color.bulbDeep)
+                .foregroundStyle(Color.text)
             }
         }
     }
@@ -827,7 +827,7 @@ private struct ColorResultView: View {
 
     private func colorRow(label: String, value: String) -> some View {
         HStack(spacing: 8) {
-            Text(label).font(.nimbleEyebrow).foregroundStyle(Color.bulbDeep).frame(minWidth: 30)
+            Text(label).font(.nimbleEyebrow).foregroundStyle(Color.text).frame(minWidth: 30)
             Text(value).font(.nimbleCallout).monospacedDigit().foregroundStyle(Color.text)
         }
     }

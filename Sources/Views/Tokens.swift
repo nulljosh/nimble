@@ -17,7 +17,7 @@ extension Color {
     static let dim = adaptive(light: 0x1d1d1f, dark: 0xf5f5f7, alpha: 0.6)
     static let hairline = adaptive(light: 0xe5e5ea, dark: 0x38383a)
     static let bulb = adaptive(light: 0xffca30, dark: 0xffca30)
-    static let bulbDeep = adaptive(light: 0x8a6412, dark: 0xffca30)
+    static let bulbDeep = adaptive(light: 0xffca30, dark: 0xffca30)  // marks only (icons, strokes, tint); text stays Color.text
 
     static func adaptive(light: UInt32, dark: UInt32, alpha: CGFloat = 1) -> Color {
         func rgb(_ hex: UInt32) -> (CGFloat, CGFloat, CGFloat) {

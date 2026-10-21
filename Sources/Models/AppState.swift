@@ -36,7 +36,7 @@ enum NimbleTheme: String, CaseIterable, Codable {
         switch self {
         case .orange: Color.adaptive(light: 0x9a4a00, dark: 0xff8c12)
         case .red: Color.adaptive(light: 0xb00000, dark: 0xdb0000)
-        case .yellow: Color.adaptive(light: 0x8a6412, dark: 0xffca30)  // the same as Color.bulbDeep
+        case .yellow: Color.adaptive(light: 0xffca30, dark: 0xffca30)  // brand yellow, not gold (Joshua 2026-10-21)
         case .green: Color.adaptive(light: 0x3f6e0a, dark: 0x75bf21)
         case .blue: Color.adaptive(light: 0x1d5bb8, dark: 0x297de8)
         case .purple: Color.adaptive(light: 0x6105b0, dark: 0x6105b0)

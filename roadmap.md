@@ -227,5 +227,5 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 
 ## Ingested 2026-10-21
 - [x] README has too much primitive stuff, cut it back. Done 2026-10-21.
-- [ ] Color palette needs more white, less brownish yellow. Background is white and true black since 9.9.0. Still brownish: the deep gold ink (#8a6412) on ANSWER, the search glass and the selected tab. (Q: keep it, or neutral ink with yellow only on the Ask fill?) Mac README shot is still the old warm dark. The live App Store build (9.4.4) is still cream until the v10 build ships.
+- [x] Color palette needs more white, less brownish yellow. Done 2026-10-21: white and true black backgrounds, brand yellow #FFCA30 for icons, strokes, the graph and the selected tab; text that was gold is now plain text color. Web, iOS and Mac. Mac README shot still the old warm dark.
 - [x] GitHub tests are failing, fix CI. Already green: Tests passed on 2026-10-20.
