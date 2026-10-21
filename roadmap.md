@@ -224,3 +224,8 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 
 ## Ingested 2026-10-16
 - [ ] README: refresh the primitive.dev screenshot with a more generic example (banner, H1 and GitHub badge removed 2026-10-18).
+
+## Ingested 2026-10-21
+- [ ] README has too much primitive stuff, cut it back.
+- [ ] Color palette needs more white, less brownish yellow.
+- [ ] GitHub tests are failing, fix CI.
