@@ -84,7 +84,10 @@ test("Groq hanging: its timeout hands the question to Workers AI instead of wait
   // AbortSignal.timeout's timer does not hold the process open; this one does, or node can exit mid-test (CI did).
   const hold = setTimeout(() => {}, 5000);
   const t = Date.now();
-  const r = await worker.fetch(new Request("https://w.example/", { method: "POST", body: JSON.stringify({ q: "capital of italy" }) }), env);
+  // AbortSignal.timeout's timer is unref'd in Node, so hold the event loop open until the timeout fires.
+  const keepAlive = setInterval(() => {}, 10);
+  let r;
+  try { r = await worker.fetch(new Request("https://w.example/", { method: "POST", body: JSON.stringify({ q: "capital of italy" }) }), env); } finally { clearInterval(keepAlive); }
   clearTimeout(hold);
   assert.equal((await r.json()).answer, "Paris.");
   assert.ok(Date.now() - t < 2000);
