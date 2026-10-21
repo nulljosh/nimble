@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # App Store screenshots from the simulator, framed by nothing: Apple wants raw device pixels.
-# Usage: scripts/store-shots.sh            -> .asc/shots/ios/en-CA/01..04.png (iPhone 17 Pro Max, 1320x2868)
+# Usage: scripts/store-shots.sh            -> .asc/shots/ios/en-CA/01..04.png (iPhone 18 Pro Max)
 #        scripts/store-shots.sh ipad       -> .asc/shots/ipad/en-CA/01..04.png (iPad Pro 13-inch)
 # Needs a simulator build at /private/tmp/nimble-ios-dd (made here if missing).
 set -e
 cd "$(dirname "$0")/.."
 kind="${1:-ios}"
 case "$kind" in
-  ios)  dev="iPhone 17 Pro Max"; out=.asc/shots/ios/en-CA ;;
+  ios)  dev="iPhone 18 Pro Max"; out=.asc/shots/ios/en-CA ;;
   ipad) dev="iPad Pro 13-inch (M5)"; out=.asc/shots/ipad/en-CA ;;
 esac
 id=$(xcrun simctl list devices available | grep -F "$dev (" | head -1 | grep -oE "[0-9A-F-]{36}")
@@ -24,7 +24,7 @@ xcrun simctl install "$id" "$app"
 mkdir -p "$out"
 i=0
 # Queries are all answerable without an AI service, so the consent card never lands in a store shot.
-for q in "what's primitive.dev?" "180 C to F" "plot sin(x)" "weather in vancouver"; do
+for q in "what's wikipedia.org?" "180 C to F" "plot sin(x)" "weather in vancouver"; do
   i=$((i+1))
   xcrun simctl terminate "$id" "$bundle" 2>/dev/null || true
   xcrun simctl launch "$id" "$bundle" -shot "$q" -whats_new_seen_version "$ver" >/dev/null

@@ -11,7 +11,7 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 <p>
 <img src="docs/screenshots/ios-site.png" width="180" alt="Ask about a website">
 <img src="docs/screenshots/ios-convert.png" width="180" alt="Unit conversion, offline">
-<img src="docs/screenshots/ios-thinking.png" width="180" alt="Nim while an answer loads">
+<img src="docs/screenshots/ios-graph.png" width="180" alt="A graph, drawn offline">
 <img src="docs/screenshots/ios-dark.png" width="180" alt="Dark mode">
 </p>
 <img src="docs/screenshots/mac-dark.png" width="480" alt="The Mac app">

@@ -223,9 +223,9 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
   with a headless model layer.
 
 ## Ingested 2026-10-16
-- [ ] README: refresh the primitive.dev screenshot with a more generic example (banner, H1 and GitHub badge removed 2026-10-18).
+- [x] README: refresh the primitive.dev screenshot with a more generic example (banner, H1 and GitHub badge removed 2026-10-18). Done 2026-10-21: wikipedia.org example, all iPhone shots retaken on the white palette.
 
 ## Ingested 2026-10-21
-- [ ] README has too much primitive stuff, cut it back.
-- [ ] Color palette needs more white, less brownish yellow.
-- [ ] GitHub tests are failing, fix CI.
+- [x] README has too much primitive stuff, cut it back. Done 2026-10-21.
+- [x] Color palette needs more white, less brownish yellow. White and true black since 9.9.0; the old cream screenshots were the stale part, retaken 2026-10-21. The live App Store build (9.4.4) is still cream until the v10 build ships.
+- [x] GitHub tests are failing, fix CI. Already green: Tests passed on 2026-10-20.
