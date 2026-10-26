@@ -70,7 +70,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 - [ ] [Sonnet] App Intents and Shortcuts: "Ask Nimble" from Siri, Spotlight and the Action button.
 - [ ] [Sonnet] Widgets: a home screen ask box and a "question of the day".
 - [ ] [Sonnet] Apple Watch answers by voice with the same exam score as the phone.
-- [ ] [Haiku] Raycast and Alfred extensions over the public API.
+- [x] [Haiku] Raycast and Alfred extensions over the public API. 2026-10-26: `extensions/raycast` (Ask Nimble, type-checks with tsc, not run inside Raycast or submitted to the store) and `extensions/alfred/nimble.py` (Script Filter, checked live against the Worker).
 - [ ] [Haiku] Linux packages (deb, rpm, flatpak) from the KMP desktop build.
 
 ### v61-v70 Voice: ask and hear it, hands free

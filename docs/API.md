@@ -42,6 +42,8 @@ print(ask("capital of france")["answer"])  # None when no model knew it
 
 Both take an optional `key` and `turns`. `python3 sdk/nimble.py minimum wage in bc` works from the shell.
 
+Raycast and Alfred clients live in `extensions/` (`raycast/` is an Ask Nimble command, `alfred/` is a Script Filter).
+
 ## Limits and keys
 
 Without a key: 20 questions a minute per IP. With a key: 60 a minute, in your own bucket. Send it as `Authorization: Bearer <key>` or `x-api-key: <key>`. A wrong key gets 401, a spent bucket gets 429.

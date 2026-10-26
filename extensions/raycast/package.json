@@ -1,0 +1,33 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nimble",
+  "title": "Nimble",
+  "description": "One question in, one sentence out. Ask Nimble from Raycast.",
+  "icon": "command-icon.png",
+  "author": "nulljosh",
+  "license": "MIT",
+  "categories": ["Productivity"],
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask Nimble",
+      "description": "Ask a question and get one sentence back.",
+      "mode": "view",
+      "arguments": [
+        { "name": "question", "placeholder": "capital of france", "type": "text", "required": true }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop"
+  }
+}
