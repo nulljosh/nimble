@@ -70,7 +70,6 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 - [ ] [Sonnet] App Intents and Shortcuts: "Ask Nimble" from Siri, Spotlight and the Action button.
 - [ ] [Sonnet] Widgets: a home screen ask box and a "question of the day".
 - [ ] [Sonnet] Apple Watch answers by voice with the same exam score as the phone.
-- [x] [Haiku] Raycast and Alfred extensions over the public API. 2026-10-26: `extensions/raycast` (Ask Nimble, type-checks with tsc, not run inside Raycast or submitted to the store) and `extensions/alfred/nimble.py` (Script Filter, checked live against the Worker).
 - [ ] [Haiku] Linux packages (deb, rpm, flatpak) from the KMP desktop build.
 
 ### v61-v70 Voice: ask and hear it, hands free
@@ -223,9 +222,5 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
   with a headless model layer.
 
 ## Ingested 2026-10-16
-- [x] README: refresh the primitive.dev screenshot with a more generic example (banner, H1 and GitHub badge removed 2026-10-18). Done 2026-10-21: wikipedia.org example, all iPhone shots retaken on the white palette.
 
 ## Ingested 2026-10-21
-- [x] README has too much primitive stuff, cut it back. Done 2026-10-21.
-- [x] Color palette needs more white, less brownish yellow. Done 2026-10-21: white and true black backgrounds, brand yellow #FFCA30 for icons, strokes, the graph and the selected tab; text that was gold is now plain text color. Web, iOS and Mac. Mac README shot still the old warm dark.
-- [x] GitHub tests are failing, fix CI. Already green: Tests passed on 2026-10-20.
