@@ -67,7 +67,6 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 ### v51-v60 Everywhere: Nimble wherever a question starts
 
-- [x] [Sonnet] App Intents and Shortcuts: "Ask Nimble" from Siri, Spotlight and the Action button.
 - [ ] [Sonnet] Widgets: a home screen ask box and a "question of the day".
 - [ ] [Sonnet] Apple Watch answers by voice with the same exam score as the phone.
 - [ ] [Haiku] Linux packages (deb, rpm, flatpak) from the KMP desktop build.
