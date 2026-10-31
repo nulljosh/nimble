@@ -4,7 +4,7 @@
 
 Ask a question. Get one sentence back.
 
-Math, units and graphs answer on the device. Everything else goes to an open model, with a second one when a date, a number or a fresh fact needs checking. DuckDuckGo and Wikipedia catch what the models miss. No API keys, no accounts, no telemetry.
+Math, units and graphs answer on the device. Everything else goes to an open model. A second model checks dates, numbers and fresh facts. DuckDuckGo and Wikipedia catch what the models miss. No API keys, no accounts, no telemetry.
 
 **[nimble.jaybulb.com →](https://nimble.jaybulb.com)** · **[Open the web app →](https://nimble.jaybulb.com/app)**
 
@@ -18,7 +18,7 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 
 ## Get it
 
-[Watch the 23 second promo](docs/promo/nimble-promo.mp4). In a terminal: `brew install nulljosh/tap/nimble`, then `nimble "question"`.
+[Watch the 23 second promo](docs/promo/nimble-promo.mp4). In a terminal, on the Mac or Linux, run `brew install nulljosh/tap/nimble`, then `nimble "question"`.
 
 | | |
 |---|---|
@@ -32,23 +32,49 @@ Math, units and graphs answer on the device. Everything else goes to an open mod
 
 1. Units, math and graphs: evaluated on the device. `5 miles to km`, `15% of 240`, `plot sin(x)`.
 2. Dictionary, weather, local time and currency: pattern-gated live sources.
-3. Everything else: `worker/worker.js` asks Groq's free models first (gpt-oss 120B, then Qwen 27B, then gpt-oss 20B) and Cloudflare Workers AI second (Qwen3, then Gemma for time-sensitive, date and number questions). When two models split, a third breaks the tie. If nothing agrees, the app shows "Sources disagree" with both answers and their model names. Known answers are cached for six hours, a daily neuron guard protects the Cloudflare free tier, and `GET /stats` shows both providers' usage. If every model is out, Wikipedia answers.
+3. Everything else: `worker/worker.js` asks Groq's free models first (gpt-oss 120B, then Qwen 27B, then gpt-oss 20B). Cloudflare Workers AI is second (Qwen3, then Gemma for time-sensitive, date and number questions).
 
-Agents get the same engine at `https://nimble.jaybulb.com/api/answer?q=5+miles+to+km` and over MCP at `https://nimble.jaybulb.com/mcp`. Tools: answer, convert, math, graph.
+When two models split, a third breaks the tie. If nothing agrees, the app shows "Sources disagree" with both answers and their model names. If every model is out, Wikipedia answers.
 
-Every answer names its source, and time-sensitive answers carry an "as of" line. Light and dark follow the system. 8 accent themes, picked in Settings.
+Known answers are cached for six hours. A daily neuron guard protects the Cloudflare free tier. `GET /stats` shows both providers' usage.
+
+Agents get the same engine over REST at `https://nimble.jaybulb.com/api/answer?q=5+miles+to+km` and over MCP at `https://nimble.jaybulb.com/mcp`. Tools: answer, convert, math, graph.
+
+Every answer names its source. Time-sensitive answers carry an "as of" line.
 
 ## How good is it
 
 On a 154-question exam, Groq's free models score 154 (answers in 0.94 s at the median, 2.0 s at p95) and the local Samantha model scores 147. A second exam of 1,049 questions runs weekly: math and units are computed and offline (810 of 810), facts are a rotating slice. Method and numbers in [docs/BENCHMARK.md](docs/BENCHMARK.md). The public API, with keys, is in [docs/API.md](docs/API.md).
 
-## What else it does
+## Features
 
-Weather, currency, local time, word origins, markets and the latest game score come back as cards. Recent questions sit under the field on every surface and never leave the device. On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer, and you can select several to share or delete. Follow-ups work: ask "and in celsius?" and the last three turns come along. Tap the mic and ask out loud. Share any answer as a yellow card. Tap Listen to hear any answer read aloud by the device's own voice, on the web, iPhone, Mac and Android. A home screen widget keeps your last answer on iPhone, and "Ask Nimble" works from Siri, Spotlight, Shortcuts and the Action button; the Mac answers straight from the menu bar. Agents get the same engine over REST at `/api` and MCP at `/mcp`. Nine languages: English, French, Spanish, Chinese, Punjabi, German, Portuguese, Hindi, Japanese. On the Mac or Linux, `brew install nulljosh/tap/nimble` gives you `nimble "question"` in the terminal. An Apple Watch app and lock screen widgets ship with the iPhone app.
+Weather, currency, local time, word origins, markets and the latest game score come back as cards.
+
+Recent questions sit under the field on every surface. They never leave the device.
+
+On iPhone there are three tabs: Ask, History and Settings. History keeps each question with its saved answer. Select several to share or delete.
+
+Follow-ups work. Ask "and in celsius?" and the last three turns come along.
+
+Tap the mic and ask out loud. Share any answer as a yellow card. Tap Listen to hear any answer read aloud by the device's own voice, on the web, iPhone, Mac and Android.
+
+A home screen widget keeps your last answer on iPhone. "Ask Nimble" works from Siri, Spotlight, Shortcuts and the Action button. The Mac answers straight from the menu bar. An Apple Watch app and lock screen widgets ship with the iPhone app.
+
+Nine languages: English, French, Spanish, Chinese, Punjabi, German, Portuguese, Hindi, Japanese.
+
+Light and dark follow the system. There are 8 accent themes, picked in Settings.
 
 ## Offline pack
 
-You can download a small pack of Wikipedia article intros once: the top 9,000 English articles, about 1.9 MB. It works on the web, iPhone, Mac and Android. On the web, tap "Download offline answers" in the menu; on the apps, use the Offline answers row in Settings. After that, when the network is gone, questions about those articles still get an answer, with the article link and the date the pack was built. Nothing downloads on its own. Private mode goes further: on the web (menu), iPhone, Mac and Android (Settings), with it on no question leaves the device, and answers come only from math, units, graphs, this pack and, where Apple Intelligence is ready, the on-device model. Math is offline everywhere; units and graphs are offline on the web, iPhone and Mac. See `docs/pack/README.md` for the format and the license.
+You can download a small pack of Wikipedia article intros once. It holds the top 9,000 English articles, about 1.9 MB, and works on the web, iPhone, Mac and Android.
+
+On the web, tap "Download offline answers" in the menu. On the apps, use the Offline answers row in Settings. Nothing downloads on its own.
+
+After that, questions about those articles still get an answer when the network is gone. The answer comes with the article link and the date the pack was built.
+
+Private mode goes further. With it on, no question leaves the device on the web (menu), iPhone, Mac and Android (Settings). Answers come only from math, units, graphs, this pack and, where Apple Intelligence is ready, the on-device model.
+
+Math is offline everywhere. Units and graphs are offline on the web, iPhone and Mac. See `docs/pack/README.md` for the format and the license.
 
 ## Development
 
