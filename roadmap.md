@@ -223,3 +223,8 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 ## Ingested 2026-10-16
 
 ## Ingested 2026-10-21
+
+## Ingested 2026-10-30
+- [ ] README is way too spammy. What's the exam badge?
+- [ ] Needs rename (not 'nimble answers')
+- [ ] Remove the Chinese girl mascot, make the lightbulb the mascot
