@@ -6,8 +6,6 @@ Ask a question. Get one sentence back.
 
 Math, units and graphs answer on the device. Everything else goes to an open model. A second model checks dates, numbers and fresh facts. DuckDuckGo and Wikipedia catch what the models miss. No API keys, no accounts, no telemetry.
 
-**[nimble.jaybulb.com →](https://nimble.jaybulb.com)** · **[Open the web app →](https://nimble.jaybulb.com/app)**
-
 <p>
 <img src="docs/screenshots/ios-site.png" width="180" alt="Ask about a website">
 <img src="docs/screenshots/ios-convert.png" width="180" alt="Unit conversion, offline">
