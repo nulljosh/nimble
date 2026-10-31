@@ -425,36 +425,38 @@ main > section:not(.hero) h2 {
 
 /* Footer */
 footer {
-  padding: var(--s5) 0 0;
+  padding: var(--space-5) 0 0;
   text-align: center;
   border-top: 1px solid var(--line);
   font-size: var(--fs-13);
   color: var(--mid);
 }
 
-  /* Story block: Nim's mark beside a closing line, above the directory. */
-  footer .foot-story { display: grid; grid-template-columns: 120px 1fr; align-items: start; gap: var(--space-6); max-width: var(--max-wide); margin: 0 auto; padding: var(--space-6) var(--gutter) var(--space-7); text-align: left; }
-  footer .foot-story img { margin-top: var(--space-1); }
-  footer .foot-story h2 { margin: 0 0 var(--space-3); font-size: var(--fs-28); line-height: var(--lh-xl); font-weight: 600; letter-spacing: var(--track-display); color: var(--dark); }
-  footer .foot-story p { margin: 0; max-width: 60ch; font-size: var(--fs-17); line-height: var(--lh-md); color: var(--mid); }
-  @media (max-width: 700px) { footer .foot-story { grid-template-columns: 1fr; gap: var(--space-5); } footer .foot-story img { width: 80px; height: 80px; } }
-  /* The engraved scene under the bar: paper and ink follow the page, light and dark. */
-  .foot-scene { display: block; width: 100%; height: clamp(260px, 30vw, 360px); margin-top: var(--space-6); --scene-paper: var(--bg); --scene-ink: var(--yellow-deep); }
-  /* Footer directory: four columns, two-by-two on phones. */
-  footer .foot-rule { display: flex; align-items: center; gap: var(--space-4); max-width: var(--max-wide); margin: 0 auto; padding: var(--space-4) var(--gutter) var(--space-6); font-size: var(--fs-13); letter-spacing: .06em; font-weight: 500; color: var(--mid); }
+  /* Story block: Nim's mark beside the closing line, the copy full width under it on phones. */
+  footer .foot-story { display: grid; grid-template-columns: 56px 1fr; column-gap: var(--space-3); row-gap: var(--space-2); align-items: center; max-width: var(--max-wide); margin: 0 auto; padding: var(--space-3) var(--gutter); text-align: left; }
+  footer .foot-story img { width: 56px; height: 56px; }
+  footer .foot-story h2 { margin: 0; font-size: 20px; line-height: 26px; font-weight: 600; letter-spacing: var(--track-display); color: var(--dark); }
+  footer .foot-story p { grid-column: 1 / -1; margin: 0; max-width: 60ch; font-size: 14px; line-height: 20px; color: var(--mid); }
+  @media (min-width: 700px) { footer .foot-story { grid-template-columns: 120px 1fr; column-gap: var(--space-6); row-gap: 0; padding: var(--space-5) var(--gutter); } footer .foot-story img { width: 120px; height: 120px; } footer .foot-story h2 { margin: 0 0 var(--space-3); font-size: var(--fs-28); line-height: var(--lh-xl); } footer .foot-story p { grid-column: 2; font-size: var(--fs-17); line-height: var(--lh-md); } }
+  /* The engraved scene under the bar, the same band height as Temida's footer: paper and ink follow the page, light and dark. */
+  .foot-scene { display: block; width: 100%; height: clamp(150px, 10vw, 180px); margin-top: var(--space-3); --scene-paper: var(--bg); --scene-ink: var(--yellow-deep); }
+  /* Footer rule: a short divider line with the wordmark and tagline. */
+  footer .foot-rule { display: flex; align-items: center; gap: var(--space-4); max-width: var(--max-wide); margin: 0 auto; padding: var(--space-2) var(--gutter) var(--space-4); font-size: var(--fs-13); letter-spacing: .06em; font-weight: 500; color: var(--mid); }
   footer .foot-rule::before { content: ""; order: 1; flex: 1; height: 1px; background: var(--line); }
   footer .foot-rule > :first-child { order: 0; }
   footer .foot-rule > :last-child { order: 2; }
-  @media (max-width: 520px) { footer .foot-rule { flex-wrap: wrap; justify-content: center; gap: var(--space-3) var(--space-4); } footer .foot-rule::before { order: -1; flex-basis: 100%; } }
-  .foot-dir { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-6) var(--space-5); max-width: var(--max-wide); margin: 0 auto; padding: 0 var(--gutter) var(--space-6); text-align: left; }
-  .foot-col h3 { margin: 0 0 var(--space-2); font-size: var(--fs-13); font-weight: 600; color: var(--dark); letter-spacing: 0.02em; }
+  @media (max-width: 520px) { footer .foot-rule { flex-wrap: wrap; justify-content: center; gap: var(--space-1) var(--space-3); } footer .foot-rule::before { order: -1; flex-basis: 100%; } }
+  /* Footer directory: four link groups side by side. Each link keeps a 44px hit box. */
+  .foot-dir { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2) var(--space-3); max-width: var(--max-wide); margin: 0 auto; padding: 0 var(--gutter) var(--space-2); text-align: left; }
+  .foot-col h3 { margin: 0 0 var(--space-1); font-size: var(--fs-13); font-weight: 600; color: var(--dark); letter-spacing: 0.02em; }
   .foot-col ul { list-style: none; margin: 0; padding: 0; }
-  .foot-col a { position: relative; display: inline-block; min-width: 44px; padding: var(--tap-pad) 0; margin: calc(var(--tap-pad) * -1 + var(--space-1)) 0; color: var(--mid); text-decoration: none; font-size: var(--fs-13); line-height: var(--lh-sm); }
+  .foot-col a { position: relative; display: inline-block; min-width: 44px; min-height: 44px; box-sizing: border-box; padding: 12px 0; margin: -8px 0; color: var(--mid); text-decoration: none; font-size: var(--fs-13); line-height: var(--lh-sm); }
   .foot-col a:hover { color: var(--dark); text-decoration: underline; }
-  .foot-bar { max-width: var(--max-wide); margin: 0 auto; padding: var(--space-4) var(--gutter) 0; border-top: 1px solid var(--line); }
+  .foot-bar { max-width: var(--max-wide); margin: 0 auto; padding: var(--space-2) var(--gutter) 0; border-top: 1px solid var(--line); }
   .foot-bar .foot-meta { margin: 0; text-align: left; color: var(--mid); font-size: var(--fs-13); line-height: var(--lh-md); }
   .foot-bar .foot-meta a { color: var(--mid); }
-  @media (max-width: 700px) { .foot-dir { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 420px) { .foot-dir { gap: var(--space-2) var(--space-2); } }
+  @media (min-width: 700px) { .foot-dir { gap: var(--space-5) var(--space-5); padding-bottom: var(--space-4); } }
 
 .credit {
   margin-top: var(--s1);
