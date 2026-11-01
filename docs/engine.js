@@ -114,6 +114,49 @@ function numberFact(s){
   if(b) return BigInt(b[1]).toString({binary:2, hex:16, hexadecimal:16, octal:8}[b[2]]).toUpperCase();
   return null;
 }
+// "Show steps" for algebra and calculus: a linear equation solved line by line, or a derivative taken
+// term by term with the rule each one uses. Null when there is nothing worth expanding. Offline.
+function workSteps(query){
+  const q = String(query).trim().toLowerCase().replace(/[?.!]+$/, "").replace(/[−–]/g, "-").replace(/^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?/, "");
+  let m;
+  if((m = /^solve\s+(?:for x:?\s*)?([^=]*x[^=]*)=\s*([^=]+)$/.exec(q)) && !/\b(sin|cos|tan|log|ln)\b/.test(q)){
+    const line = side => { const b = pcAt(side, 0), k = pcAt(side, 1), k2 = pcAt(side, 2); if(b === null || k === null || k2 === null) return null; const a = k - b; return Math.abs(k2 - b - 2 * a) < 1e-9 ? [a, b] : null; };
+    const L = line(m[1]), R = line(m[2]); if(!L || !R) return null;
+    const a = +(L[0] - R[0]).toPrecision(12), b = +(R[1] - L[1]).toPrecision(12); if(Math.abs(a) < 1e-12) return null;
+    const ax = a === 1 ? "x" : a === -1 ? "-x" : pcFrac(a) + "x", steps = [m[1].trim() + " = " + m[2].trim()];
+    if(Math.abs(R[0]) > 1e-12 || Math.abs(L[1]) > 1e-12) steps.push("Move the x terms left and the numbers right: " + ax + " = " + pcFrac(b));
+    const inv = +(1 / a).toPrecision(12), x = pcFrac(+(b / a).toPrecision(12));
+    if(a !== 1) steps.push(Number.isInteger(inv) && Math.abs(a) < 1 ? "Multiply both sides by " + inv + ": x = " + x : "Divide both sides by " + pcFrac(a) + ": x = " + x);
+    return steps.length >= 2 ? steps : null;
+  }
+  if((m = /^(?:the )?derivative of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$|^(?:differentiate|d\/dx)\s+(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$/.exec(q))){
+    const t = cParse(m[1] || m[2]); if(!t || !cHasX(t)) return null;
+    const d = n => cStr(cSimp(cD(n))), terms = t.t === "+" ? t.ts : [t], steps = [];
+    for(const term of terms){
+      const s = cStr(cSimp(term)), [c, fs] = cSplit(term), xs = fs.filter(cHasX);
+      if(!cHasX(term)){ steps.push("d/dx " + s + " = 0 (a constant)"); continue; }
+      if(term.t === "/"){
+        steps.push("Quotient rule on " + s + ": (f/g)' = (f'g - fg')/g^2");
+        steps.push("f = " + cStr(term.a) + ", f' = " + d(term.a), "g = " + cStr(term.b) + ", g' = " + d(term.b));
+        steps.push("So d/dx " + s + " = " + d(term));
+        continue;
+      }
+      if(xs.length >= 2){
+        steps.push("Product rule on " + s + ": (fg)' = f'g + fg'");
+        xs.slice(0, 2).forEach(f => steps.push("(" + cStr(f) + ")' = " + d(f)));
+        steps.push("So d/dx " + s + " = " + d(term));
+        continue;
+      }
+      const f = xs[0], inner = f.t === "f" || f.t === "^" ? f.a : null;
+      if(inner && inner.t !== "x" && cHasX(inner) && !(f.t === "^" && cHasX(f.b))) steps.push("Let u = " + cStr(inner) + ", so u' = " + d(inner));
+      const rule = f.t === "x" ? "d/dx x = 1" : f.t === "^" && !cHasX(f.b) ? (inner.t === "x" ? "power rule" : "power rule, then the chain rule") : f.t === "^" ? "exponential rule" : f.t === "f" ? (inner.t === "x" ? "derivative of " + f.f : "chain rule") : f.t === "/" ? "quotient rule" : "rule";
+      steps.push("d/dx " + s + " = " + d(term) + " (" + rule + (c !== 1 && c !== -1 ? ", constant multiple" : "") + ")");
+    }
+    if(terms.length > 1) steps.push("Add the terms: " + d(t));
+    return steps.length >= 2 ? steps : null;
+  }
+  return null;
+}
 // "Show steps": one line per evaluation step, or null. A single operation has one step and
 // nothing to expand, so it gets null too: a plain "2+2" shows no button.
 function mathSteps(s){
@@ -4929,6 +4972,8 @@ async function renderAnswer(query, opts){
       +(a.icon&&!photo?'<img class="mockup-icon" src="'+esc(a.icon)+'" alt="" width="24" height="24" loading="lazy">':'')
       +(a.title.toLowerCase()===query.toLowerCase()?'':'<h3 aria-level="2">'+esc(a.title)+'</h3>')
       +(a.rows ? '<div class="compare-rows">'+a.rows.map(r=>'<p><span class="compare-label">'+esc(r.label)+'</span> <strong class="num">'+esc(r.value)+'</strong></p>').join("")+'</div>' : '<p>'+esc(a.body)+'</p>')+'</a>'+fresh(a);
+    const work = a.src==="Nimble math" ? workSteps(query) : null;
+    if(work) h+='<details class="why steps"><summary>'+esc(T("Show steps"))+'</summary><ol>'+work.map(l=>"<li>"+esc(l)+"</li>").join("")+"</ol></details>";
     // "Why this answer": the source line opens the exact text the sentence was cut from, with a link.
     // Shown only when that text says more than the sentence did.
     const why = typeof a.grounding==="string" && a.grounding.trim().length > a.body.trim().length;
@@ -5051,4 +5096,4 @@ if(typeof document!=="undefined" && document.currentScript && /^https?:$/.test(l
   addEventListener("load", () => document.head.append(Object.assign(document.createElement("script"), {src})));
 }
 if(typeof module!=="undefined") require("./courses.js")(termAsk, pcNum, TEXT_COURSES);
-if(typeof module!=="undefined") module.exports={numberFact,precalc,constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,evalAt,wireGraphs,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={numberFact,precalc,constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,workSteps,samplePoints,evalAt,wireGraphs,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};

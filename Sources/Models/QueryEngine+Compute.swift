@@ -165,6 +165,11 @@ final class PrecalcJS: @unchecked Sendable {
         guard let ctx = context else { return nil }
         if let pc = ctx.objectForKeyedSubscript("precalc")?.call(withArguments: [text]), pc.isObject,
            let body = pc.objectForKeyedSubscript("body")?.toString(), !body.isEmpty, body != "undefined" {
+            // An equation or derivative with working to show answers as math, so "Show steps" opens under it.
+            if let w = ctx.objectForKeyedSubscript("workSteps")?.call(withArguments: [text]), w.isArray,
+               let steps = w.toArray() as? [String], !steps.isEmpty {
+                return .math(body, steps: steps)
+            }
             return .text(heading: nil, body: body, source: "Nimble math", sourceURL: nil, imageURL: nil)
         }
         if let pc = ctx.objectForKeyedSubscript("precalc")?.call(withArguments: [text]), pc.isObject,

@@ -60,7 +60,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 ### v41-v50 Follow-ups: a short conversation, kept on the device
 
 - [x] [Sonnet] Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web. (9.8.0)
-- [ ] [Sonnet] Math shows its steps for algebra and calculus, offline.
+- [x] [Sonnet] Math shows its steps for algebra and calculus, offline. (web, iPhone, Mac via engine.js workSteps; Kotlin still to mirror)
 
 ### v51-v60 Everywhere: Nimble wherever a question starts
 
