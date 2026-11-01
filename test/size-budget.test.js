@@ -16,10 +16,11 @@ test("app.html first load is under 300 KB gzipped", () => {
   assert.ok(total < BUDGET, `first load ${Math.round(total / 1024)} KB: ${sizes.map(([f, s]) => `${f} ${Math.round(s / 1024)}`).join(", ")}`);
 });
 
-// The site's CSP must allow every form the pages post to, and never a script from another origin.
+// The site's CSP must allow every form the pages post to, and never a script from another origin,
+// except Cloudflare's analytics beacon, which the edge injects into every page (blocked, it logs an error).
 test("_headers: the CSP allows each form's action and loads scripts from this site only", () => {
   const csp = fs.readFileSync(path.join(DOCS, "_headers"), "utf8").match(/Content-Security-Policy: (.+)/)[1];
-  assert.match(csp, /script-src 'self' 'unsafe-inline';/);
+  assert.match(csp, /script-src 'self' 'unsafe-inline'( https:\/\/static\.cloudflareinsights\.com)?;/);
   const pages = fs.readdirSync(DOCS).filter((f) => f.endsWith(".html"));
   for (const f of pages) {
     const html = fs.readFileSync(path.join(DOCS, f), "utf8");
