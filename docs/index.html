@@ -65,6 +65,19 @@ a:hover { text-decoration: underline; }
   --dark: var(--black);  /* the hero stays yellow in dark mode, so its ink stays black */
 }
 .hero .container { position: relative; z-index: 2; }
+/* The hero fills the screen; the product sits behind the copy and melts into the yellow at both ends. */
+.hero { min-height: 100svh; }
+.hero-nav { position: relative; z-index: 3; }
+.hero-bg { position: absolute; z-index: 1; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; padding: 96px var(--gutter) 0;
+  mix-blend-mode: multiply; opacity: .3;
+  -webkit-mask-image: linear-gradient(transparent 4%, #000 30%, #000 72%, transparent 97%); mask-image: linear-gradient(transparent 4%, #000 30%, #000 72%, transparent 97%);
+  transform: translate3d(0, var(--py, 0), 0); will-change: transform; }
+/* The product melts into the yellow before the hero ends, wherever the parallax has carried it. */
+.hero::after { content: ""; position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 28%; background: linear-gradient(transparent, var(--yellow) 85%); pointer-events: none; }
+.hero-bg .demo-wrap { width: min(100%, 900px); margin: 0; }
+.hero-bg .mockup { min-height: 640px; box-shadow: none; --panel: #fff; --panel-line: rgba(0,0,0,.1); --panel-text: #1d1d1f; --panel-mid: rgba(0,0,0,.6); color: #1d1d1f; }
+.hero-bg .mockup .mockup-photo img.on { opacity: .5; }
+.hero-copy { will-change: transform, opacity; }
 
 
 
@@ -116,7 +129,7 @@ a:hover { text-decoration: underline; }
   margin-bottom: var(--s1);
 }
 /* From tablet up the headline steps to the display size. Phones keep 34px. */
-@media (min-width: 768px) { .hero h1 { font-size: var(--fs-48); line-height: var(--lh-3xl); } }
+@media (min-width: 768px) { .hero h1 { font-size: clamp(48px, 7vw, 96px); line-height: 1.02; letter-spacing: -0.035em; } }
 
 .hero-version {
   font-variant-numeric: tabular-nums;
@@ -492,6 +505,9 @@ footer {
       <a href="/app" class="btn btn-dark" data-i18n="Open the web app">Open the web app</a>
       <a href="https://apps.apple.com/app/nimble-answers/id6807858746" class="btn btn-outline" id="dl">App Store</a>
     </div>
+  </div>
+  <!-- The real engine, cycling real answers, is the hero's background. Not interactive: the app is one tap away. -->
+  <div class="hero-bg" aria-hidden="true" inert>
     <div class="demo-wrap">
     <form class="mockup" id="demo" autocomplete="off">
       <div class="mockup-bar">
@@ -509,7 +525,6 @@ footer {
       <div class="mockup-credit" id="demoC">live demo, the real engine</div>
     </form>
     </div>
-    <p class="demo-caption">The real engine, running right here. Type anything.</p>
   </div>
 </section>
 
@@ -652,7 +667,7 @@ footer {
     <div class="foot-col">
       <h3>Explore</h3>
       <ul>
-        <li><a href="#demo">Try it live</a></li>
+        <li><a href="/app">Open the app</a></li>
         <li><a href="#features">Features</a></li>
         <li><a href="#install">Install</a></li>
       </ul>
@@ -745,6 +760,16 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
   }
   f.addEventListener('submit',function(e){e.preventDefault();run();});
   run();
+})();
+// Hero parallax: the product behind drifts at 0.45, the copy lifts at 0.2 and fades. Off under reduced motion.
+(function(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var bg=document.querySelector('.hero-bg'), copy=document.querySelector('.hero-copy'), t=0;
+  addEventListener('scroll',function(){ if(t) return; t=requestAnimationFrame(function(){ t=0;
+    var y=scrollY, h=innerHeight; if(y>h*1.2) return;
+    bg.style.setProperty('--py',(y*.45)+'px');
+    copy.style.transform='translate3d(0,'+(y*.2)+'px,0)'; copy.style.opacity=Math.max(0,1-y/(h*.7));
+  }); },{passive:true});
 })();
 // Point download buttons at the latest release assets.
 // Badge shows the newest release; each download button takes the newest release that
