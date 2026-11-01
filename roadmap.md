@@ -59,7 +59,6 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 ### v41-v50 Follow-ups: a short conversation, kept on the device
 
-- [ ] [Sonnet] Math shows its steps for algebra and calculus, offline. (web, iPhone, Mac via engine.js workSteps; Android, Windows, Linux via Calculus12.workSteps)
 
 ### v51-v60 Everywhere: Nimble wherever a question starts
 
