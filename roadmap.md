@@ -34,7 +34,7 @@ feature and a real domain (getnimbleapp.com or nimbleapp.com; buy via /buy-domai
 settled). Web stays free with the $1 unlock through Stripe. Decide pricing shape at v8 (private
 mode is the premium feature), buy the domain at v9, flip the switch at v10.
 
-- [ ] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces.
+- [ ] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces. 2026-11-01: web done, axe-core WCAG 2.1 AA plus best practice, zero violations on /, /app, /privacy, /brand, /status and /splash in light and dark, live. Left: VoiceOver and Dynamic Type on iPhone, Mac and Watch.
 - [ ] [Haiku] Landing, README, whitepaper and screenshots rebuilt for 10.0 with the new look and the benchmark.
 - [ ] [Opus] 10.0 launch: Product Hunt, HN (when the account allows), release notes, and the What's New that explains what a decade of versions bought you in one screen.
 
