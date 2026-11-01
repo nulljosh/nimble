@@ -268,6 +268,16 @@ extension QueryEngineTests {
         XCTAssertNil(engine.graphExpression("graph the economy"))
     }
 
+    func testGraphResamplesAnyWindow() {
+        // Pan and zoom resample the same curve over a new window; trace reads one point.
+        let pts = QueryEngine.samplePoints("x^2", from: -2, to: 2)
+        XCTAssertEqual(pts.count, 201)
+        XCTAssertEqual(pts.first!.x, -2, accuracy: 1e-12)
+        XCTAssertEqual(pts.last!.y, 4, accuracy: 1e-9)
+        XCTAssertEqual(QueryEngine.value(of: "3sin(x)", at: 0)!, 0, accuracy: 1e-12)
+        XCTAssertEqual(QueryEngine.value(of: "2x+1", at: 3)!, 7, accuracy: 1e-12)
+    }
+
     func testSampleGraphOffline() {
         guard case let .graph(_, pts)? = engine.sampleGraph("2x^2") else { return XCTFail("no graph") }
         XCTAssertEqual(pts.count, 201)

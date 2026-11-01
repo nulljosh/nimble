@@ -635,32 +635,87 @@ struct RecentList: View {
 private struct GraphResultView: View {
     let expr: String
     let points: [CGPoint]
+    // Drag pans, pinch zooms, tap (or hover on the Mac) reads the point off the curve, double tap resets.
+    @State private var range: ClosedRange<Double> = -10...10
+    @State private var dragStart: ClosedRange<Double>?
+    @State private var zoomStart: ClosedRange<Double>?
+    @State private var traceX: Double?
+
+    private var shown: [CGPoint] {
+        range == -10...10 ? points : QueryEngine.samplePoints(expr, from: range.lowerBound, to: range.upperBound)
+    }
+
+    private func xAt(_ px: CGFloat, width: CGFloat) -> Double {
+        range.lowerBound + Double(px / max(width, 1)) * (range.upperBound - range.lowerBound)
+    }
+
+    private static func label(_ v: Double) -> String {
+        let r = Double(String(format: "%.4g", v)) ?? v
+        return abs(r) < 1e-9 ? "0" : String(format: "%g", r)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Canvas { ctx, size in
-                let xs = points.map(\.x), ys = points.map(\.y)
-                guard let x0 = xs.min(), let x1 = xs.max(), let y0 = ys.min(), let y1 = ys.max(), x1 > x0 else { return }
-                let ySpan = max(y1 - y0, 1e-9)
-                func pt(_ p: CGPoint) -> CGPoint {
-                    CGPoint(x: (p.x - x0) / (x1 - x0) * size.width,
-                            y: size.height - (p.y - y0) / ySpan * size.height)
+            GeometryReader { geo in
+                let pts = shown
+                Canvas { ctx, size in
+                    let ys = pts.map(\.y)
+                    let x0 = range.lowerBound, x1 = range.upperBound
+                    guard let y0 = ys.min(), let y1 = ys.max(), x1 > x0 else { return }
+                    let ySpan = max(y1 - y0, 1e-9)
+                    func pt(_ p: CGPoint) -> CGPoint {
+                        CGPoint(x: (p.x - x0) / (x1 - x0) * size.width,
+                                y: size.height - (p.y - y0) / ySpan * size.height)
+                    }
+                    var axes = Path()
+                    if y0 <= 0, y1 >= 0 { let y = pt(CGPoint(x: x0, y: 0)).y; axes.move(to: CGPoint(x: 0, y: y)); axes.addLine(to: CGPoint(x: size.width, y: y)) }
+                    if x0 <= 0, x1 >= 0 { let x = pt(CGPoint(x: 0, y: y0)).x; axes.move(to: CGPoint(x: x, y: 0)); axes.addLine(to: CGPoint(x: x, y: size.height)) }
+                    ctx.stroke(axes, with: .color(Color.dim), lineWidth: 1)
+                    var curve = Path()
+                    // Break the line where sampled neighbours are far apart (asymptotes).
+                    var pen = false
+                    for (i, p) in pts.enumerated() {
+                        let jump = i > 0 && abs(p.x - pts[i - 1].x) > (x1 - x0) / 50
+                        if !pen || jump { curve.move(to: pt(p)); pen = true } else { curve.addLine(to: pt(p)) }
+                    }
+                    ctx.stroke(curve, with: .color(Color.bulbDeep), style: StrokeStyle(lineWidth: 2, lineJoin: .round))
+                    if let tx = traceX, let ty = QueryEngine.value(of: expr, at: tx), ty.isFinite {
+                        var at = pt(CGPoint(x: tx, y: ty)); at.y = min(max(at.y, 0), size.height)
+                        ctx.fill(Path(ellipseIn: CGRect(x: at.x - 5, y: at.y - 5, width: 10, height: 10)), with: .color(Color.bulbDeep))
+                        let text = ctx.resolve(Text("(\(Self.label(tx)), \(Self.label(ty)))").font(.nimbleCalloutMedium).foregroundStyle(Color.text))
+                        let w = text.measure(in: size).width
+                        ctx.draw(text, at: CGPoint(x: min(at.x + 10, size.width - w), y: max(at.y - 14, 10)), anchor: .leading)
+                    }
                 }
-                var axes = Path()
-                if y0 <= 0, y1 >= 0 { let y = pt(CGPoint(x: x0, y: 0)).y; axes.move(to: CGPoint(x: 0, y: y)); axes.addLine(to: CGPoint(x: size.width, y: y)) }
-                if x0 <= 0, x1 >= 0 { let x = pt(CGPoint(x: 0, y: y0)).x; axes.move(to: CGPoint(x: x, y: 0)); axes.addLine(to: CGPoint(x: x, y: size.height)) }
-                ctx.stroke(axes, with: .color(Color.dim), lineWidth: 1)
-                var curve = Path()
-                // Break the line where sampled neighbours are far apart (asymptotes).
-                var pen = false
-                for (i, p) in points.enumerated() {
-                    let jump = i > 0 && abs(p.x - points[i - 1].x) > (x1 - x0) / 50
-                    if !pen || jump { curve.move(to: pt(p)); pen = true } else { curve.addLine(to: pt(p)) }
+                .contentShape(Rectangle())
+                .gesture(DragGesture(minimumDistance: 8)
+                    .onChanged { v in
+                        let base = dragStart ?? range; dragStart = base
+                        let dx = Double(v.translation.width / max(geo.size.width, 1)) * (base.upperBound - base.lowerBound)
+                        range = (base.lowerBound - dx)...(base.upperBound - dx)
+                        traceX = xAt(v.location.x, width: geo.size.width)
+                    }
+                    .onEnded { _ in dragStart = nil })
+                .simultaneousGesture(MagnifyGesture()
+                    .onChanged { v in
+                        let base = zoomStart ?? range; zoomStart = base
+                        let mid = (base.lowerBound + base.upperBound) / 2
+                        let half = (base.upperBound - base.lowerBound) / 2 / max(Double(v.magnification), 0.01)
+                        if half > 1e-6, half < 1e7 { range = (mid - half)...(mid + half) }
+                    }
+                    .onEnded { _ in zoomStart = nil })
+                .onTapGesture(count: 2) { range = -10...10; traceX = nil }
+                .onTapGesture(count: 1, coordinateSpace: .local) { loc in traceX = xAt(loc.x, width: geo.size.width) }
+                #if os(macOS)
+                .onContinuousHover { phase in
+                    if case .active(let p) = phase { traceX = xAt(p.x, width: geo.size.width) } else { traceX = nil }
                 }
-                ctx.stroke(curve, with: .color(Color.bulbDeep), style: StrokeStyle(lineWidth: 2, lineJoin: .round))
+                #endif
             }
             .frame(height: 160)
-            .accessibilityHidden(true)
+            .accessibilityElement()
+            .accessibilityLabel("Graph of y = \(expr)")
+            .accessibilityHint("Drag to pan, pinch to zoom, double tap to reset.")
             Text("y = \(expr)")
                 .font(.nimbleCalloutMedium)
                 .foregroundStyle(Color.soft)

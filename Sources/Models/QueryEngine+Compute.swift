@@ -118,16 +118,25 @@ extension QueryEngine {
 
     /// Samples y over x in [-10, 10] with the same parser as the calculator. No network.
     func sampleGraph(_ expr: String) -> QueryResult? {
-        let pts = (0...200).compactMap { i -> CGPoint? in
-            let x = -10 + Double(i) / 10
-            // Substitute x, then make implicit multiplication explicit: 2(x), (x)(x), 3sin(x).
-            let s = expr.replacingOccurrences(of: "x", with: "(\(x))", options: .regularExpression)
-                .replacingOccurrences(of: "(?<=[0-9)])\\s*(?=[a-z(])", with: "*", options: .regularExpression)
-            guard let y = Self.evaluateExpression(s) else { return nil }
-            return CGPoint(x: x, y: y)
-        }
+        let pts = Self.samplePoints(expr)
         guard pts.count > 2 else { return nil }
         return .graph(expr: expr, points: pts)
+    }
+
+    /// y at one x: substitute x, then make implicit multiplication explicit: 2(x), (x)(x), 3sin(x).
+    static func value(of expr: String, at x: Double) -> Double? {
+        let s = expr.replacingOccurrences(of: "x", with: "(\(x))", options: .regularExpression)
+            .replacingOccurrences(of: "(?<=[0-9)])\\s*(?=[a-z(])", with: "*", options: .regularExpression)
+        return evaluateExpression(s)
+    }
+
+    /// 201 samples across [x0, x1]; the graph view resamples with it as you pan and zoom.
+    static func samplePoints(_ expr: String, from x0: Double = -10, to x1: Double = 10) -> [CGPoint] {
+        (0...200).compactMap { i -> CGPoint? in
+            let x = x0 + (x1 - x0) * Double(i) / 200
+            guard let y = value(of: expr, at: x) else { return nil }
+            return CGPoint(x: x, y: y)
+        }
     }
 }
 
