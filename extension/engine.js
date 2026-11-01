@@ -158,26 +158,69 @@ function graphExpr(s){
   const y=/^(y|f\(x\))\s*=\s*/.test(q); q=q.replace(/^(y|f\(x\))\s*=\s*/,"");
   return (verb||y) && q.includes("x") && /^[0-9a-z+\-*/^(). ]+$/.test(q) ? q : null;
 }
-function samplePoints(expr){
+// Substitute x, then make implicit multiplication explicit: 2(x), (x)(x), 3sin(x).
+const evalAt=(expr,x)=>tryMath(expr.replace(/x/g,`(${x})`).replace(/(?<=[0-9)])\s*(?=[a-z(])/g,"*"));
+function samplePoints(expr, x0=-10, x1=10){
   const pts=[];
-  for(let i=0;i<=200;i++){ const x=-10+i/10;
-    // Substitute x, then make implicit multiplication explicit: 2(x), (x)(x), 3sin(x).
-    const y=tryMath(expr.replace(/x/g,`(${x})`).replace(/(?<=[0-9)])\s*(?=[a-z(])/g,"*"));
+  for(let i=0;i<=200;i++){ const x=+(x0+(x1-x0)*i/200).toPrecision(12), y=evalAt(expr,x);
     if(y!==null) pts.push({x,y}); }
   return pts;
 }
-function graph(expr){
+// The graph is an SVG string so it renders anywhere; wireGraphs() below makes it pan, zoom and trace in a browser.
+function graph(expr, x0=-10, x1=10){
   try{
-    const pts=samplePoints(expr); if(pts.length<3) return null;
-    const W=480,H=200, xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
-    const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys), ys_=Math.max(y1-y0,1e-9);
+    const pts=samplePoints(expr,x0,x1); if(pts.length<3) return null;
+    const W=480,H=200, ys=pts.map(p=>p.y);
+    const y0=Math.min(...ys),y1=Math.max(...ys), ys_=Math.max(y1-y0,1e-9);
     const X=x=>(x-x0)/(x1-x0)*W, Y=y=>H-(y-y0)/ys_*H;
     let d="",prev=null;
     for(const p of pts){ d+=(prev===null||p.x-prev>(x1-x0)/50?"M":"L")+X(p.x).toFixed(1)+" "+Y(p.y).toFixed(1); prev=p.x; }
     const ax=(y0<=0&&y1>=0?`<line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}"/>`:"")+(x0<=0&&x1>=0?`<line y1="0" y2="${H}" x1="${X(0)}" x2="${X(0)}"/>`:"");
-    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><g stroke="currentColor" stroke-opacity=".3">${ax}</g><path d="${d}" fill="none" stroke="var(--yellow-deep, #ffca30)" stroke-width="2" stroke-linejoin="round"/></svg>`;
+    const e=String(expr).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+    return `<svg class="nim-graph" role="img" aria-label="Graph of y = ${e}. Drag to pan, pinch or scroll to zoom, double-click to reset." data-expr="${e}" data-x0="${x0}" data-x1="${x1}" data-y0="${y0}" data-y1="${y0+ys_}" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;touch-action:none;cursor:crosshair"><g stroke="currentColor" stroke-opacity=".3">${ax}</g><path d="${d}" fill="none" stroke="var(--yellow-deep, #ffca30)" stroke-width="2" stroke-linejoin="round"/><circle class="nim-tr" r="6" style="fill:var(--yellow-deep, #ffca30);stroke:var(--bg, #fff);stroke-width:2" visibility="hidden"/><text class="nim-tl" font-size="20" font-weight="600" style="fill:var(--text, #111);paint-order:stroke;stroke:var(--bg, #fff);stroke-width:4px" visibility="hidden"></text></svg>`;
   }catch{ return null; }
 }
+// Pan (drag), zoom (wheel, pinch) and trace (hover or touch) on every graph in the page, by delegation, so no
+// caller has to wire anything. ponytail: re-samples 201 points per move; fine at this size, throttle if it ever lags.
+function wireGraphs(doc){
+  if(!doc||doc.__nimGraphs) return; doc.__nimGraphs=true;
+  const W=480,H=200, ptrs=new Map(); let drag=null;
+  const fmt=n=>{ const r=+n.toPrecision(4); return Math.abs(r)<1e-9?"0":String(r); };
+  const view=svg=>({expr:svg.dataset.expr.replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"'), x0:+svg.dataset.x0, x1:+svg.dataset.x1, y0:+svg.dataset.y0, y1:+svg.dataset.y1});
+  const vx=(svg,cx)=>{ const r=svg.getBoundingClientRect(); return (cx-r.left)/r.width*W; };
+  function redraw(svg,x0,x1){
+    if(!(x1-x0>1e-6&&x1-x0<1e7)) return;
+    const html=graph(view(svg).expr,x0,x1); if(!html) return;
+    const t=doc.createElement("div"); t.innerHTML=html; const n=t.firstChild;
+    for(const k of ["x0","x1","y0","y1"]) svg.dataset[k]=n.dataset[k];
+    svg.innerHTML=n.innerHTML;
+  }
+  function trace(svg,cx){
+    const v=view(svg), x=v.x0+vx(svg,cx)/W*(v.x1-v.x0), y=evalAt(v.expr,x);
+    const c=svg.querySelector(".nim-tr"), l=svg.querySelector(".nim-tl"); if(!c||!l) return;
+    if(y===null||!isFinite(y)){ c.setAttribute("visibility","hidden"); l.setAttribute("visibility","hidden"); return; }
+    const px=(x-v.x0)/(v.x1-v.x0)*W, py=H-(y-v.y0)/Math.max(v.y1-v.y0,1e-9)*H;
+    c.setAttribute("cx",px); c.setAttribute("cy",Math.min(H,Math.max(0,py))); c.setAttribute("visibility","visible");
+    l.textContent=`(${fmt(x)}, ${fmt(y)})`; l.setAttribute("x",Math.min(W-170,px+10)); l.setAttribute("y",Math.max(22,Math.min(H-8,py-10))); l.setAttribute("visibility","visible");
+  }
+  function zoom(svg,cx,f){ const v=view(svg), at=v.x0+vx(svg,cx)/W*(v.x1-v.x0); redraw(svg,at-(at-v.x0)*f,at+(v.x1-at)*f); }
+  const on=(t,fn,o)=>doc.addEventListener(t,e=>{ const svg=e.target.closest&&e.target.closest("svg.nim-graph"); if(svg) fn(e,svg); },o);
+  const gap=()=>{ const [a,b]=[...ptrs.values()]; return Math.hypot(a[0]-b[0],a[1]-b[1]); };
+  on("pointerdown",(e,svg)=>{ ptrs.set(e.pointerId,[e.clientX,e.clientY]); drag={svg,x:e.clientX,d:ptrs.size===2?gap():0}; svg.setPointerCapture&&svg.setPointerCapture(e.pointerId); });
+  on("pointermove",(e,svg)=>{
+    if(!drag||drag.svg!==svg){ trace(svg,e.clientX); return; }
+    ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+    if(ptrs.size===2){ const [a,b]=[...ptrs.values()], d=gap(); if(drag.d&&d) zoom(svg,(a[0]+b[0])/2,drag.d/d); drag.d=d; return; }
+    const v=view(svg), r=svg.getBoundingClientRect(), dx=(e.clientX-drag.x)/r.width*(v.x1-v.x0);
+    drag.x=e.clientX; redraw(svg,v.x0-dx,v.x1-dx); trace(svg,e.clientX);
+  });
+  const up=e=>{ ptrs.delete(e.pointerId); if(!ptrs.size) drag=null; };
+  doc.addEventListener("pointerup",up); doc.addEventListener("pointercancel",up);
+  on("pointerout",(e,svg)=>{ if(drag||svg.contains(e.relatedTarget)) return; for(const k of [".nim-tr",".nim-tl"]){ const n=svg.querySelector(k); n&&n.setAttribute("visibility","hidden"); } });
+  on("wheel",(e,svg)=>{ e.preventDefault(); zoom(svg,e.clientX,Math.pow(1.0015,e.deltaY)); },{passive:false});
+  on("dblclick",(e,svg)=>redraw(svg,-10,10));
+}
+if(typeof document!=="undefined") wireGraphs(document);
 
 // ponytail: encyclopedia paragraphs are not answers; keep the first sentence.
 // Don't split after a short capitalized abbreviation (Mr., Dr., St., Ver.).
@@ -5006,4 +5049,4 @@ if(typeof document!=="undefined" && document.currentScript && /^https?:$/.test(l
   addEventListener("load", () => document.head.append(Object.assign(document.createElement("script"), {src})));
 }
 if(typeof module!=="undefined") require("./courses.js")(termAsk, pcNum, TEXT_COURSES);
-if(typeof module!=="undefined") module.exports={numberFact,precalc,constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};
+if(typeof module!=="undefined") module.exports={numberFact,precalc,constant,tellMore,reportWrong,packSearch,packHits,packAnswer,PACK_MIN,agrees,sourcesFor,sourceRow,onTopic,answerEntities,photoFromEntity,topicFor,identity,siteHost,site,shareText,shareSource,shareImage,SHARE_SHAPES,cardShape,renderAnswer,tryMath,mathSteps,samplePoints,evalAt,wireGraphs,tryConvert,convertValue,graphExpr,graph,currencyExpr,market,stockSymbol,parseDaily,changeText,asOfLabel,isTimeSensitive,sports,sportsQuery,sportsRecent,sportsRecentDay,gameRow,kickoffLabel,sportsStatus,CRYPTO_RE,first,answer,wiki,relationOf,getJSON,aiConsent,aiRecipient,mascot,appLink,listenLabel,history:searchHistory,turns,isSpecificQuestion,labelIfGeneric};

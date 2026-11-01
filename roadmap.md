@@ -61,7 +61,7 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 - [ ] [Sonnet] Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
 - [ ] [Sonnet] Math shows its steps for algebra and calculus, offline.
-- [ ] [Haiku] Graphs: pinch, pan and trace a point on every surface.
+- [ ] [Haiku] Graphs: pinch, pan and trace a point on every surface. Web done 2026-11-01 (drag, wheel, pinch, hover to trace, double-click resets); iOS, Mac and Kotlin left.
 
 ### v51-v60 Everywhere: Nimble wherever a question starts
 
