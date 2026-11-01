@@ -1,4 +1,4 @@
-# Builds the real Windows/Linux/Android binaries from kmp/. The .msi and .deb can only be
+# Builds the real Windows/Linux/Android binaries from kmp/. The .msi, .deb and .rpm can only be
 # produced on their own OS, which is why this runs on GitHub and not the Mac.
 name: native release
 on:
@@ -13,11 +13,15 @@ jobs:
         include:
           - { os: windows-latest, task: packageMsi, glob: "**/*.msi" }
           - { os: ubuntu-latest,  task: packageDeb, glob: "**/*.deb" }
+          - { os: ubuntu-latest,  task: packageRpm, glob: "**/*.rpm" }
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: "17" }
+      # jpackage builds an .rpm with rpmbuild, which ubuntu-latest does not ship.
+      - if: matrix.task == 'packageRpm'
+        run: sudo apt-get update -q && sudo apt-get install -y -q rpm
       - run: ./gradlew :composeApp:${{ matrix.task }} --no-daemon
         working-directory: kmp
       - uses: actions/upload-artifact@v4

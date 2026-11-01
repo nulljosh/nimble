@@ -49,6 +49,7 @@ compose.desktop {
             targetFormats(
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Msi,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Deb,
+                org.jetbrains.compose.desktop.application.dsl.TargetFormat.Rpm,
                 org.jetbrains.compose.desktop.application.dsl.TargetFormat.Dmg,
             )
             packageName = "Nimble"
