@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The chosen mascot in the answer card while an answer loads: Nim in her thinking pose (eyes up, an unlit
+/// The chosen mascot in the answer card while an answer loads: the lightbulb in its thinking pose (eyes up, not lit
 /// bulb overhead) or Fen. Both bob slowly; Reduce Motion leaves them still.
 struct FlitThinking: View {
     @Environment(AppState.self) private var state

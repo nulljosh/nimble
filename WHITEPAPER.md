@@ -61,7 +61,7 @@ CC BY-SA 4.0.
 SwiftUI on macOS 14+ and iOS 17+. A menu bar item and the ⌥Space hotkey summon the Mac
 window from anywhere. iPhone has three tabs: Ask, History and Settings. Kotlin
 Multiplatform (`kmp/`) covers Android, Windows and Linux desktop. The web app and landing
-page live in `docs/`. Nim, the mascot, waves, thinks and dozes on every platform.
+page live in `docs/`. The lightbulb, the mascot, waves, thinks and dozes on every platform.
 
 ## Privacy
 

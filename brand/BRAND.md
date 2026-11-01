@@ -1,6 +1,6 @@
 # Nimble brand kit and design system
 
-Nimble answers a question instantly. The mark is a lightbulb. The mascot is Nim.
+Nimble answers a question instantly. The mark is a lightbulb. The mascot is the lightbulb too.
 
 ## The mark
 One bold flat glyph on a tile. No text, no outline, no emblem.
@@ -27,5 +27,5 @@ Nimble Sans for every word, system font fallback. Scale 34/41 bold, 22/28, 17/24
 - Radii: cards 28, grouped lists 20, controls fully round. Controls are 48 point capsules.
 - Liquid Glass on the search field and Ask button (iOS 26, macOS 26), material below. Motion 0.2 s, honours reduced motion.
 
-## Nim and Fen
-Nim is a calm adult in a leather jacket, gold hoops and a choker, on a yellow disc. Four poses: wave (empty), think (loading), cheer (answer), doze (resting, not placed yet). Edit `scripts/nim-poses.py`, never the SVGs. Fen is the fennec fox alternative. Keep both whole.
+## The lightbulb and Fen
+The mascot is the icon's lightbulb with a face, on a yellow disc (Joshua, 2026-11-01). Four poses: wave (empty), think (loading), cheer (answer), doze (resting, not placed yet). Edit `scripts/nim-poses.py`, never the SVGs. Fen is the fennec fox alternative. Keep both whole.

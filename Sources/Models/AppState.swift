@@ -143,7 +143,7 @@ final class AppState {
         #endif
     }
 
-    /// Asset name of the chosen mascot. Nim is the default; anything but "fen" (an old "flit" too) is Nim.
+    /// Asset name of the chosen mascot. The lightbulb is the default; anything but "fen" (an old "flit" too) is Nim.
     var mascotAsset: String { mascot == "fen" ? "Fen" : "Nim" }
 
     func loadPreferences() {

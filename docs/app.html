@@ -269,7 +269,7 @@ form { position: relative; }
     <button type="button" id="new" data-i18n="New question" hidden>New question</button>
   </div>
   <section class="card" id="r" aria-live="polite" hidden></section>
-  <img class="flit" id="flit" src="mascot/nim-wave.svg" width="96" height="96" alt="Nim, Nimble's mascot, waving">
+  <img class="flit" id="flit" src="mascot/nim-wave.svg" width="96" height="96" alt="The Nimble lightbulb, waving">
   <div class="chips" id="chips"></div>
   <section class="recent" id="recent" aria-label="Recent searches" data-i18n-aria-label="Recent searches" hidden>
     <div class="recent-head"><div class="mockup-label" data-i18n="Recent">Recent</div><button type="button" id="clear" data-i18n="Clear">Clear</button></div>
@@ -301,14 +301,14 @@ form { position: relative; }
 <script src="engine.js?v=offline"></script>
 <script>
 document.querySelector('meta[name="theme-color"]').content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
-// The two mascots. Nim is the default (docs/mascot/nim-*.svg, drawn by scripts/nim-poses.py); Fen is the
+// The two mascots. The lightbulb is the default (docs/mascot/nim-*.svg, drawn by scripts/nim-poses.py); Fen is the
 // fennec from docs/mascot/fen.svg, inlined so the empty state and the loading card work offline too.
 var FEN='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" aria-hidden="true" focusable="false"><path style="fill:var(--bulb-deep)" d="M60 196 C 30 190, 26 160, 48 152 C 44 172, 60 180, 82 178 Z" /><circle style="fill:var(--flit-belly)" cx="48" cy="156" r="10" /><ellipse style="fill:var(--bulb)" cx="120" cy="178" rx="48" ry="36" /><ellipse style="fill:var(--flit-belly)" cx="120" cy="190" rx="28" ry="18" /><path style="fill:var(--bulb)" d="M74 118 C 50 60, 62 30, 84 36 C 98 44, 104 90, 100 122 Z" /><path style="fill:var(--flit-cheek)" d="M80 112 C 66 70, 72 48, 84 48 C 92 56, 96 92, 94 118 Z"  opacity="0.45"/><path style="fill:var(--bulb)" d="M166 118 C 190 60, 178 30, 156 36 C 142 44, 136 90, 140 122 Z" /><path style="fill:var(--flit-cheek)" d="M160 112 C 174 70, 168 48, 156 48 C 148 56, 144 92, 146 118 Z"  opacity="0.45"/><circle style="fill:var(--bulb)" cx="120" cy="120" r="50" /><ellipse style="fill:var(--flit-belly)" cx="120" cy="140" rx="24" ry="16" /><circle style="fill:var(--flit-cheek)" cx="86" cy="134" r="8"  opacity="0.35"/><circle style="fill:var(--flit-cheek)" cx="154" cy="134" r="8"  opacity="0.35"/><circle style="fill:var(--black)" cx="100" cy="112" r="14" /><circle style="fill:var(--flit-glint)" cx="105" cy="106" r="5" /><circle style="fill:var(--black)" cx="140" cy="112" r="14" /><circle style="fill:var(--flit-glint)" cx="145" cy="106" r="5" /><path style="fill:var(--black);stroke:var(--black)" d="M112 136 L128 136 L120 146 Z"   stroke-width="3" stroke-linejoin="round"/></svg>';
-// The empty-state image: a data URI for Fen (no network, works offline), Nim waving for everyone else.
+// The empty-state image: a data URI for Fen (no network, works offline), The lightbulb waving for everyone else.
 function paintMascotImg(){
   var fen=mascot()==='fen', el=document.getElementById('flit');
   el.src=fen?'data:image/svg+xml,'+encodeURIComponent(FEN):'mascot/nim-wave.svg';
-  el.alt=fen?"Fen, Nimble's fennec":"Nim, Nimble's mascot, waving";
+  el.alt=fen?"Fen, Nimble's fennec":"The Nimble lightbulb, waving";
 }
 paintMascotImg();
 // Everything below speaks the visitor's language, so it starts once the locale has loaded.
@@ -432,7 +432,7 @@ var T=I18N.t;
   // Mascot switch: Nim or Fen. Repaints the empty state at once; the next loading card picks it up too.
   var mascotBtn=document.getElementById('mascot');
   function paintMascot(){
-    mascotBtn.textContent=T('Mascot: {s}',{s:mascot()==='fen'?'Fen':'Nim'});
+    mascotBtn.textContent=T('Mascot: {s}',{s:mascot()==='fen'?'Fen':'Bulb'});
     paintMascotImg();
   }
   paintMascot();
