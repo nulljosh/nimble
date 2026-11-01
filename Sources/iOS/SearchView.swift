@@ -85,6 +85,12 @@ struct SearchView: View {
         // nimble://ask from the widget: land with the caret in the field.
         .onOpenURL { url in
             guard url.scheme == "nimble" else { return }
+            // nimble://ask?q= (question of the day) asks it straight away; a bare link focuses the field.
+            if let q = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first(where: { $0.name == "q" })?.value, !q.isEmpty {
+                state.queryText = String(q.prefix(300))
+                state.performQuery()
+                return
+            }
             Task { try? await Task.sleep(for: .milliseconds(300)); isInputFocused = true }
         }
         .tint(state.theme.ink)  // caret and toolbar in the theme accent, not system blue
