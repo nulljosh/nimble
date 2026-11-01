@@ -39,7 +39,8 @@ fun Answer.fetchedAt(): Long? = when (this) {
 fun Answer.isStale(now: Long): Boolean = fetchedAt()?.let { now - it > 600_000 } == true
 
 sealed class Answer {
-    data class Math(val value: String) : Answer()
+    /** [steps] is the "Show steps" list for an equation or a derivative; empty when there is nothing to expand. */
+    data class Math(val value: String, val steps: List<String> = emptyList()) : Answer()
     /** "plot x^2": the expression and its samples over [-10, 10], drawn offline. */
     data class Graph(val expr: String, val points: List<Pair<Double, Double>>) : Answer()
     /** Etymology, weather, local time or currency: one big number and a quiet line. */
@@ -141,7 +142,11 @@ class AnswerClient(
         identityAnswer(input)?.let { return it }
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
         Units.convert(input)?.let { return Answer.Math(it) }
-        Precalc.answer(input)?.let { return it }
+        Precalc.answer(input)?.let { a ->
+            // An equation or derivative with working to show answers as math, so "Show steps" opens under it.
+            val work = Calculus12.workSteps(input)
+            return if (work != null && a is Answer.Text) Answer.Math(a.body, work) else a
+        }
         com.nulljosh.nimble.Graph.expr(input)?.let { e -> com.nulljosh.nimble.Graph.points(e).takeIf { it.size > 2 }?.let { return Answer.Graph(e, it) } }
         constantAnswer(input)?.let { return it }
 

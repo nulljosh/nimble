@@ -531,6 +531,17 @@ private fun SiteIcon(url: String, client: AnswerClient) {
  * tr("Why this answer"): a 48dp toggle under the source line. Open, it shows the Wikipedia intro behind the answer and a
  * 48dp link to the page. Taps here stop at the toggle, so they do not also open the whole answer.
  */
+/** tr("Show steps"): a 48dp toggle that opens the working, one numbered line per step, as on the web. */
+@Composable
+private fun ShowSteps(steps: List<String>, theme: NimbleTheme) {
+    var open by remember { mutableStateOf(false) }
+    Box(
+        Modifier.defaultMinSize(minHeight = 48.dp).clickable(onClickLabel = tr("Show steps")) { open = !open },
+        contentAlignment = Alignment.CenterStart,
+    ) { Text(tr("Show steps"), color = theme.accent, fontSize = 14.sp) }
+    if (open) steps.forEachIndexed { i, line -> Text("${i + 1}. $line", color = theme.text, fontSize = 14.sp) }
+}
+
 @Composable
 private fun WhyThisAnswer(text: String, pageUrl: String?, theme: NimbleTheme) {
     val uriHandler = LocalUriHandler.current
@@ -562,12 +573,15 @@ private fun WhyThisAnswer(text: String, pageUrl: String?, theme: NimbleTheme) {
 private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient) {
     Column(Modifier.widthIn(max = 640.dp)) {
         when (answer) {
-            is Answer.Math -> Text(
-                answer.value,
-                color = theme.accent,
-                fontSize = 44.sp,
-                fontWeight = FontWeight.Bold
-            )
+            is Answer.Math -> {
+                Text(
+                    answer.value,
+                    color = theme.accent,
+                    fontSize = if (answer.steps.isEmpty()) 44.sp else 28.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                if (answer.steps.isNotEmpty()) ShowSteps(answer.steps, theme)
+            }
 
             is Answer.Graph -> GraphResult(answer, theme)
 

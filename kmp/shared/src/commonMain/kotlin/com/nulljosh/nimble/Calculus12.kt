@@ -471,6 +471,63 @@ internal object Calculus12 {
         return if (parts.isNotEmpty()) parts.joinToString(" or ") else "nowhere"
     }
 
+    /**
+     * "Show steps" for algebra and calculus, a port of `workSteps()` in docs/engine.js: a linear equation solved line by
+     * line, or a derivative taken term by term with the rule each one uses. Null when there is nothing to expand.
+     */
+    fun workSteps(query: String): List<String>? {
+        val q = query.trim().lowercase().replace(Regex("[?.!]+$"), "").replace(Regex("[−–]"), "-")
+            .replaceFirst(Regex("^(?:what(?:'s|’s| is) |find |calculate |determine )(?:the )?"), "")
+        find("""^solve\s+(?:for x:?\s*)?([^=]*x[^=]*)=\s*([^=]+)$""", q)?.takeIf { !has("""\b(sin|cos|tan|log|ln)\b""", q) }?.let { m ->
+            fun line(side: String): Pair<Double, Double>? {
+                val b = Precalc.pcAt(side, 0.0) ?: return null; val k = Precalc.pcAt(side, 1.0) ?: return null; val k2 = Precalc.pcAt(side, 2.0) ?: return null
+                val a = k - b; return if (abs(k2 - b - 2 * a) < 1e-9) a to b else null
+            }
+            val l = line(m[1]) ?: return null; val r = line(m[2]) ?: return null
+            val a = prec(l.first - r.first, 12); val b = prec(r.second - l.second, 12)
+            if (abs(a) < 1e-12) return null
+            val ax = when (a) { 1.0 -> "x"; -1.0 -> "-x"; else -> pcFrac(a) + "x" }
+            val steps = mutableListOf(m[1].trim() + " = " + m[2].trim())
+            if (abs(r.first) > 1e-12 || abs(l.second) > 1e-12) steps += "Move the x terms left and the numbers right: $ax = ${pcFrac(b)}"
+            val inv = prec(1 / a, 12); val x = pcFrac(prec(b / a, 12))
+            if (a != 1.0) steps += if (isInt(inv) && abs(a) < 1) "Multiply both sides by ${Precalc.js(inv)}: x = $x" else "Divide both sides by ${pcFrac(a)}: x = $x"
+            return steps.takeIf { it.size >= 2 }
+        }
+        val m = find("""^(?:the )?derivative of (?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$|^(?:differentiate|d/dx)\s+(?:y\s*=\s*|f\(x\)\s*=\s*)?(.+)$""", q) ?: return null
+        val t = fx(m[1].ifEmpty { m[2] }) ?: return null
+        fun dd(n: C) = str(simp(d(n)))
+        val terms = if (t is C.Sum) t.ts else listOf(t)
+        val steps = mutableListOf<String>()
+        for (term in terms) {
+            val s = str(simp(term)); val (c, fs) = split(term); val xs = fs.filter(::hasX)
+            if (!hasX(term)) { steps += "d/dx $s = 0 (a constant)"; continue }
+            if (term is C.Div) {
+                steps += "Quotient rule on $s: (f/g)' = (f'g - fg')/g^2"
+                steps += "f = ${str(term.a)}, f' = ${dd(term.a)}"; steps += "g = ${str(term.b)}, g' = ${dd(term.b)}"
+                steps += "So d/dx $s = ${dd(term)}"; continue
+            }
+            if (xs.size >= 2) {
+                steps += "Product rule on $s: (fg)' = f'g + fg'"
+                xs.take(2).forEach { steps += "(${str(it)})' = ${dd(it)}" }
+                steps += "So d/dx $s = ${dd(term)}"; continue
+            }
+            val f = xs[0]
+            val inner = when (f) { is C.F -> f.a; is C.Pow -> f.a; else -> null }
+            if (inner != null && inner != C.X && hasX(inner) && !(f is C.Pow && hasX(f.b))) steps += "Let u = ${str(inner)}, so u' = ${dd(inner)}"
+            val rule = when {
+                f == C.X -> "d/dx x = 1"
+                f is C.Pow && !hasX(f.b) -> if (inner == C.X) "power rule" else "power rule, then the chain rule"
+                f is C.Pow -> "exponential rule"
+                f is C.F -> if (inner == C.X) "derivative of ${f.f}" else "chain rule"
+                f is C.Div -> "quotient rule"
+                else -> "rule"
+            }
+            steps += "d/dx $s = ${dd(term)} ($rule${if (c != 1.0 && c != -1.0) ", constant multiple" else ""})"
+        }
+        if (terms.size > 1) steps += "Add the terms: ${dd(t)}"
+        return steps.takeIf { it.size >= 2 }
+    }
+
     private fun out(body: String) = Answer.Text(heading = null, body = body, source = "Nimble math")
     private fun find(pattern: String, s: String): List<String>? = Regex(pattern).find(s)?.groupValues
     private fun has(pattern: String, s: String) = Regex(pattern).containsMatchIn(s)
