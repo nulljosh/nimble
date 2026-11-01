@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Nimble
+Comment=Instant answers: math, facts, definitions
+Exec=nimble
+Icon=com.nulljosh.Nimble
+Categories=Utility;Education;

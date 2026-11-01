@@ -1,0 +1,27 @@
+# Flatpak around the Compose desktop build. CI runs createDistributable first, which leaves
+# the jpackage app image at composeApp/build/compose/binaries/main/app/Nimble.
+app-id: com.nulljosh.Nimble
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: nimble
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=x11
+  - --device=dri
+modules:
+  - name: nimble
+    buildsystem: simple
+    build-commands:
+      - cp -r app/Nimble /app/nimble
+      - mkdir -p /app/bin && printf '#!/bin/sh\nexec /app/nimble/bin/Nimble "$@"\n' > /app/bin/nimble && chmod +x /app/bin/nimble
+      - install -Dm644 com.nulljosh.Nimble.desktop /app/share/applications/com.nulljosh.Nimble.desktop
+      - install -Dm644 icon.png /app/share/icons/hicolor/256x256/apps/com.nulljosh.Nimble.png
+    sources:
+      - type: dir
+        path: ../composeApp/build/compose/binaries/main
+      - type: file
+        path: com.nulljosh.Nimble.desktop
+      - type: file
+        path: icon.png
