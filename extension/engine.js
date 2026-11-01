@@ -159,7 +159,9 @@ function graphExpr(s){
   return (verb||y) && q.includes("x") && /^[0-9a-z+\-*/^(). ]+$/.test(q) ? q : null;
 }
 // Substitute x, then make implicit multiplication explicit: 2(x), (x)(x), 3sin(x).
-const evalAt=(expr,x)=>tryMath(expr.replace(/x/g,`(${x})`).replace(/(?<=[0-9)])\s*(?=[a-z(])/g,"*"));
+// x as fixed digits (String(1e-7) is "1e-7", and the parser reads that e as Euler's number); "0+" because tryMath
+// turns down a lone number, so "plot x" at x = 3 ("(3)") still has a value.
+const evalAt=(expr,x)=>tryMath("0+("+expr.replace(/x/g,`(${x.toFixed(12)})`).replace(/(?<=[0-9)])\s*(?=[a-z(])/g,"*")+")");
 function samplePoints(expr, x0=-10, x1=10){
   const pts=[];
   for(let i=0;i<=200;i++){ const x=+(x0+(x1-x0)*i/200).toPrecision(12), y=evalAt(expr,x);

@@ -125,7 +125,8 @@ extension QueryEngine {
 
     /// y at one x: substitute x, then make implicit multiplication explicit: 2(x), (x)(x), 3sin(x).
     static func value(of expr: String, at x: Double) -> Double? {
-        let s = expr.replacingOccurrences(of: "x", with: "(\(x))", options: .regularExpression)
+        // Fixed digits: "\(1e-07)" would put an e in the expression, and the parser reads e as Euler's number.
+        let s = expr.replacingOccurrences(of: "x", with: "(" + String(format: "%.12f", x) + ")", options: .regularExpression)
             .replacingOccurrences(of: "(?<=[0-9)])\\s*(?=[a-z(])", with: "*", options: .regularExpression)
         return evaluateExpression(s)
     }

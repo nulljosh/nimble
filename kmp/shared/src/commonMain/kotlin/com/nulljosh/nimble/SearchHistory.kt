@@ -100,6 +100,7 @@ fun relativeAge(then: Long, now: Long): String {
 /** The plain text of an answer that a history row keeps, or null when the answer has no text to keep. */
 fun historySnippet(answer: Answer): String? = when (answer) {
     is Answer.Math -> answer.value
+    is Answer.Graph -> "y = ${answer.expr}"
     is Answer.Text -> answer.body
     is Answer.News -> answer.items.joinToString(" ") { it.sentence }
     // A split keeps only its first answer.

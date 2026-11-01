@@ -276,6 +276,8 @@ extension QueryEngineTests {
         XCTAssertEqual(pts.last!.y, 4, accuracy: 1e-9)
         XCTAssertEqual(QueryEngine.value(of: "3sin(x)", at: 0)!, 0, accuracy: 1e-12)
         XCTAssertEqual(QueryEngine.value(of: "2x+1", at: 3)!, 7, accuracy: 1e-12)
+        XCTAssertEqual(QueryEngine.value(of: "x", at: 3)!, 3, accuracy: 1e-12)
+        XCTAssertEqual(QueryEngine.value(of: "x", at: 1e-7)!, 1e-7, accuracy: 1e-12)
     }
 
     func testSampleGraphOffline() {

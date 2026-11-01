@@ -105,6 +105,8 @@ test("graph samples offline", () => {
   assert.equal(pts.length, 201);
   assert.equal(pts[0].y, 200);
   assert.ok(Math.abs(E.samplePoints("3sin(x)")[100].y) < 1e-9);
+  assert.equal(E.samplePoints("x").length, 201);           // a lone x is still a value
+  assert.ok(Math.abs(E.evalAt("x", 1e-7) - 1e-7) < 1e-12);  // 1e-7 is not 1*e-7
 });
 
 test("a bare domain question reads the site, not Wikipedia", async () => {

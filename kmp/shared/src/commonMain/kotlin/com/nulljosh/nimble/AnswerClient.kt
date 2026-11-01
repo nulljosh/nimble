@@ -40,6 +40,8 @@ fun Answer.isStale(now: Long): Boolean = fetchedAt()?.let { now - it > 600_000 }
 
 sealed class Answer {
     data class Math(val value: String) : Answer()
+    /** "plot x^2": the expression and its samples over [-10, 10], drawn offline. */
+    data class Graph(val expr: String, val points: List<Pair<Double, Double>>) : Answer()
     /** Etymology, weather, local time or currency: one big number and a quiet line. */
     data class CardAnswer(val card: Card) : Answer()
     data class Text(
@@ -140,6 +142,7 @@ class AnswerClient(
         QueryEngine.evaluateMath(input)?.let { return Answer.Math(it) }
         Units.convert(input)?.let { return Answer.Math(it) }
         Precalc.answer(input)?.let { return it }
+        com.nulljosh.nimble.Graph.expr(input)?.let { e -> com.nulljosh.nimble.Graph.points(e).takeIf { it.size > 2 }?.let { return Answer.Graph(e, it) } }
         constantAnswer(input)?.let { return it }
 
         // Offline: the pack answers first, else an honest miss. Math above already worked with no network.

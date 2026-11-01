@@ -569,6 +569,8 @@ private fun ResultCard(answer: Answer, theme: NimbleTheme, client: AnswerClient)
                 fontWeight = FontWeight.Bold
             )
 
+            is Answer.Graph -> GraphResult(answer, theme)
+
             is Answer.CardAnswer -> CardResult(answer.card, theme)
 
             is Answer.Market -> MarketResult(answer, theme)
