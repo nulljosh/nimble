@@ -35,3 +35,6 @@ QA hooks always sandbox storage: any `-shot*` or `-qaSandbox` launch arg moves h
 xcodegen generate && open Nimble.xcodeproj
 scripts/release-macos.sh   # signed + notarized Mac release zip
 ```
+
+## Versioning
+Honest semver from here. 2.0 to 5.0 all shipped on 2026-10-02 and 8.0 to 10.0 in two days; that was inflation. The number cannot go down: the App Store is live at 9.4.4 (iPhone) and 9.4.3 (Mac), and GitHub, Homebrew and the Mac updater are at 10.0.0. So a feature is a minor (10.1.0), a fix is a patch (10.0.1), and a major only on Joshua's call for a change to how the app works. Never a major per roadmap row, never a loop target number.
