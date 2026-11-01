@@ -68,15 +68,21 @@ a:hover { text-decoration: underline; }
 /* The hero fills the screen; the product sits behind the copy and melts into the yellow at both ends. */
 .hero { min-height: 100svh; }
 .hero-nav { position: relative; z-index: 3; }
-.hero-bg { position: absolute; z-index: 1; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; padding: 96px var(--gutter) 0;
-  mix-blend-mode: multiply; opacity: .3;
+.hero-bg { position: absolute; z-index: 0; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; padding: 96px var(--gutter) 0;
+  mix-blend-mode: multiply; opacity: .75;
   -webkit-mask-image: linear-gradient(transparent 4%, #000 30%, #000 72%, transparent 97%); mask-image: linear-gradient(transparent 4%, #000 30%, #000 72%, transparent 97%);
   transform: translate3d(0, var(--py, 0), 0); will-change: transform; }
 /* The product melts into the yellow before the hero ends, wherever the parallax has carried it. */
 .hero::after { content: ""; position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 28%; background: linear-gradient(transparent, var(--yellow) 85%); pointer-events: none; }
-.hero-bg .demo-wrap { width: min(100%, 900px); margin: 0; }
-.hero-bg .mockup { min-height: 640px; box-shadow: none; --panel: #fff; --panel-line: rgba(0,0,0,.1); --panel-text: #1d1d1f; --panel-mid: rgba(0,0,0,.6); color: #1d1d1f; }
-.hero-bg .mockup .mockup-photo img.on { opacity: .5; }
+.hero-bg { align-items: stretch; padding: 88px var(--gutter) 0; }
+.wall { width: min(100%, 1240px); display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 236px; gap: 20px; }
+.wall .tile { min-height: 0; box-shadow: none; --panel: #fff; --panel-line: rgba(0,0,0,.1); --panel-text: #1d1d1f; --panel-mid: rgba(0,0,0,.62); color: #1d1d1f; }
+.wall .mockup-result { overflow: hidden; }
+.wall .mockup-ghost { position: static; display: block; transform: none; animation: none; color: #1d1d1f; opacity: .7; white-space: nowrap; }
+.wall .mockup-photo, .wall .mockup-icon, .wall .news-thumb, .wall .mockup-credit { display: none; }  /* the app answering, not photos */
+@media (max-width: 760px) { .wall { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; gap: 12px; } .wall .tile:nth-child(n+7) { display: none; } }
+/* A soft pool of yellow under the copy keeps the headline clean; the cards show around it. */
+.hero::before { content: ""; position: absolute; z-index: 1; inset: 0; pointer-events: none; background: radial-gradient(ellipse 62% 48% at 50% 47%, var(--yellow) 50%, color-mix(in srgb, var(--yellow) 0%, transparent) 100%); }
 .hero-copy { will-change: transform, opacity; }
 
 
@@ -499,7 +505,6 @@ footer {
       <!-- The lightbulb mascot, lit. Drawn by scripts/nim-poses.py. -->
       <img class="hero-flit" src="mascot/nim-cheer.svg" width="128" height="128" alt="The Nimble lightbulb, lit up">
     </div>
-    <p class="hero-version" id="ver" aria-live="polite"></p>
     <p data-i18n="Math and units answer on your device. Everything else, one sentence with a source.">Math and units answer on your device. Everything else, one sentence with a source.</p>
     <div class="hero-buttons">
       <a href="/app" class="btn btn-dark" data-i18n="Open the web app">Open the web app</a>
@@ -508,23 +513,7 @@ footer {
   </div>
   <!-- The real engine, cycling real answers, is the hero's background. Not interactive: the app is one tap away. -->
   <div class="hero-bg" aria-hidden="true" inert>
-    <div class="demo-wrap">
-    <form class="mockup" id="demo" autocomplete="off">
-      <div class="mockup-bar">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="stroke:var(--yellow-deep)" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <div class="mockup-field">
-          <input class="mockup-input" id="demoQ" value="" aria-label="Ask Nimble" spellcheck="false">
-          <span class="mockup-ghost" id="demoG" aria-hidden="true">who wrote hamlet</span>
-        </div>
-        <span class="mockup-caret" aria-hidden="true"></span>
-      </div>
-      <div class="mockup-result" id="demoR">
-        <div class="mockup-label">Answer</div>
-        <p>Press return.</p>
-      </div>
-      <div class="mockup-credit" id="demoC">live demo, the real engine</div>
-    </form>
-    </div>
+    <div class="wall" id="wall"></div>
   </div>
 </section>
 
@@ -716,50 +705,28 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
   if(dev==='windows'){b.href='https://github.com/nulljosh/nimble/releases/latest';b.dataset.i18n='Download for Windows';b.textContent=I18N.t('Download for Windows');b.dataset.asset='.msi';}
   else if(dev==='android'){b.href='https://github.com/nulljosh/nimble/releases/latest';b.dataset.i18n='Download for Android';b.textContent=I18N.t('Download for Android');b.dataset.asset='.apk';}
   // iPhone and Mac keep the App Store link (one listing for both).
-  var f=document.getElementById('demo'), q=document.getElementById('demoQ'), r=document.getElementById('demoR'), c=document.getElementById('demoC'), g=document.getElementById('demoG');
-  // Example queries cycle through the empty field; return runs whichever is showing.
-  var examples=[g.textContent], idx=0;
-  fetch('suggestions.json').then(function(x){return x.json();}).then(function(list){
-    examples=SHOWCASE.concat(list.filter(function(x){return SHOWCASE.indexOf(x)<0;}).sort(function(){return Math.random()-0.5;})); idx=0;
-  }).catch(function(){});
-  function show(res){
-    r.classList.remove('swap'); void r.offsetWidth; r.classList.add('swap');
-    r.innerHTML=res.h;
-    // Show steps unfold on their own so a visitor sees the working without tapping.
-    var st=r.querySelector('details.steps'); if(st) setTimeout(function(){ st.open=true; }, 700);
-    // The showcase source text opens the same way, so the Hamlet frame reads down to its sources.
-    if(res.a&&res.a.showWhy){ var wy=r.querySelector('details.why'); if(wy) setTimeout(function(){ wy.open=true; }, 700); }
-    c.textContent=res.credit;
-    // Add "Open in app" link to the credit line when a query is shown
-    if(q.value.trim()){
-      var link=document.createElement('a');
-      link.href=appLink(q.value);
-      link.textContent='Open in app';
-      link.style.marginLeft='var(--space-3)';
-      link.style.textDecoration='underline';
-      c.appendChild(link);
-    }
-  }
-  // Fetch the next answer first, then swap placeholder and answer together.
-  // 8s keeps a visitor well under the worker's 20/min AI cap (math/units are offline).
-  setInterval(async function(){
-    if(q.value || document.hidden) return;
-    // Examples are not the visitor's question: they never spend an AI call.
-    var next=examples[(idx+1)%examples.length], res=await renderAnswer(next,{ifUnset:'no',scripted:SCRIPTED[next]});
-    if(q.value) return;
-    idx=(idx+1)%examples.length;
-    g.classList.remove('swap'); void g.offsetWidth; g.classList.add('swap');
-    setTimeout(function(){ g.textContent=next; show(res); }, 330);
-  }, 8000);
-  q.addEventListener('input',function(){ g.classList.toggle('off', !!q.value); });
-  // A question the visitor typed may reach the AI; the showing example never does.
-  async function run(){
-    var typed=q.value.trim(), query=(typed||g.textContent).trim(); if(!query) return;
-    r.innerHTML='<div class="mockup-label">Answer</div><p>Thinking…</p>'; c.textContent='';
-    show(await renderAnswer(query, typed?{}:{ifUnset:'no',scripted:SCRIPTED[query]}));
-  }
-  f.addEventListener('submit',function(e){e.preventDefault();run();});
-  run();
+  // The wall behind the hero: Nimble cards, each typing a question and answering it with the real engine.
+  // Math and units run on the device, Hamlet is scripted, so the wall never touches the network.
+  var QS=['(3+4)*2','12 km in miles','15% of 80','who wrote hamlet','sqrt(144)','72 f in c','2^10','5 cups in ml','1 mile in km','365*24','10% of 250','3 feet in cm'];
+  var wall=document.getElementById('wall'), still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var bar='<div class="mockup-bar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="stroke:var(--yellow-deep)" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="mockup-field"><span class="mockup-ghost"></span></div><span class="mockup-caret"></span></div><div class="mockup-result"></div>';
+  var wait=function(ms){ return new Promise(function(k){ setTimeout(k,ms); }); };
+  for(var i=0;i<9;i++){ (function(i){
+    var t=document.createElement('div'); t.className='mockup tile'; t.innerHTML=bar; wall.appendChild(t);
+    var g=t.querySelector('.mockup-ghost'), r=t.querySelector('.mockup-result'), n=i;
+    (async function loop(){
+      await wait(still?0:i*700);
+      for(;;){
+        var q=QS[n%QS.length]; n+=9;
+        var res=await renderAnswer(q,{ifUnset:'no',scripted:SCRIPTED[q]});
+        r.classList.remove('swap'); r.innerHTML=''; g.textContent='';
+        if(still) g.textContent=q; else for(var k=1;k<=q.length;k++){ g.textContent=q.slice(0,k); await wait(60+Math.random()*70); }
+        await wait(still?0:300); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=res.h;
+        if(still) return;
+        do { await wait(5200+Math.random()*2600); } while(document.hidden);
+      }
+    })();
+  })(i); }
 })();
 // Hero parallax: the product behind drifts at 0.45, the copy lifts at 0.2 and fades. Off under reduced motion.
 (function(){
@@ -777,7 +744,7 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
 fetch('https://api.github.com/repos/nulljosh/nimble/releases?per_page=10').then(function(r){return r.json();}).then(function(rels){
   rels=(rels||[]).filter(function(r){return !r.draft&&!r.prerelease;});
   if(!rels.length) return;
-  var num=String(rels[0].tag_name).replace(/^v/i,'');document.getElementById('ver').textContent=num;document.getElementById('footver').textContent=num;
+  var num=String(rels[0].tag_name).replace(/^v/i,'');document.getElementById('footver').textContent=num;
   document.querySelectorAll('[data-asset]').forEach(function(a){
     for(var i=0;i<rels.length;i++){
       var hit=(rels[i].assets||[]).find(function(x){return x.name.endsWith(a.dataset.asset);});
