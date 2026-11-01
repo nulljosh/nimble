@@ -30,7 +30,8 @@ data class SportsGame(val teams: List<SportsTeam>, val state: String?, val statu
 enum class SportsState { Scores, NoGame, Unavailable }
 
 /** Scoreboard of one league: the ESPN path, the display name, the page to open, and the period unit (if any). */
-internal class League(val path: String, val name: String, val url: String, val unit: String?, val periods: Int)
+// tsdb: TheSportsDB league id, for a league ESPN no longer carries (the CFL). Null reads ESPN.
+internal class League(val path: String, val name: String, val url: String, val unit: String?, val periods: Int, val tsdb: String? = null)
 
 private val LEAGUES: Map<String, League> = mapOf(
     "nba" to League("basketball/nba", "NBA", "https://www.espn.com/nba/scoreboard", "quarter", 4),
@@ -39,6 +40,8 @@ private val LEAGUES: Map<String, League> = mapOf(
     "nhl" to League("hockey/nhl", "NHL", "https://www.espn.com/nhl/scoreboard", "period", 3),
     "epl" to League("soccer/eng.1", "Premier League", "https://www.espn.com/soccer/league/_/name/eng.1", null, 0),
     "mls" to League("soccer/usa.1", "MLS", "https://www.espn.com/soccer/league/_/name/usa.1", null, 0),
+    // ESPN's CFL board stopped in 2022, so the CFL comes from TheSportsDB's free key (league 4405).
+    "cfl" to League("", "CFL", "https://www.cfl.ca/schedule/", null, 0, "4405"),
 )
 
 // Teams split by ";". A "|" lists the names a fan types (the first is the ESPN display name). Without one,
@@ -49,17 +52,18 @@ private val TEAMS: Map<String, String> = mapOf(
     "mlb" to "Arizona Diamondbacks;Atlanta Braves;Baltimore Orioles;Boston Red Sox|Red Sox;Chicago Cubs;Chicago White Sox|White Sox;Cincinnati Reds;Cleveland Guardians;Colorado Rockies;Detroit Tigers;Houston Astros;Kansas City Royals;Los Angeles Angels;Los Angeles Dodgers;Miami Marlins;Milwaukee Brewers;Minnesota Twins;New York Mets;New York Yankees;Athletics;Philadelphia Phillies;Pittsburgh Pirates;San Diego Padres;San Francisco Giants;Seattle Mariners;St. Louis Cardinals;Tampa Bay Rays;Texas Rangers;Toronto Blue Jays|Blue Jays;Washington Nationals",
     "nhl" to "Anaheim Ducks;Boston Bruins;Buffalo Sabres;Calgary Flames;Carolina Hurricanes;Chicago Blackhawks;Colorado Avalanche;Columbus Blue Jackets|Blue Jackets;Dallas Stars;Detroit Red Wings|Red Wings;Edmonton Oilers;Florida Panthers;Los Angeles Kings;Minnesota Wild;Montreal Canadiens;Nashville Predators;New Jersey Devils;New York Islanders;New York Rangers;Ottawa Senators;Philadelphia Flyers;Pittsburgh Penguins;San Jose Sharks;Seattle Kraken;St. Louis Blues;Tampa Bay Lightning;Toronto Maple Leafs|Maple Leafs;Utah Mammoth|Utah Hockey Club|Mammoth;Vancouver Canucks;Vegas Golden Knights|Golden Knights;Washington Capitals;Winnipeg Jets",
     "epl" to "Arsenal;Aston Villa|Villa;AFC Bournemouth|Bournemouth;Brentford;Brighton & Hove Albion|Brighton;Burnley;Chelsea;Crystal Palace|Palace;Everton;Fulham;Leeds United|Leeds;Liverpool;Manchester City|Man City;Manchester United|Man United|Man Utd;Newcastle United|Newcastle;Nottingham Forest|Nottingham;Sunderland;Tottenham Hotspur|Tottenham|Spurs;West Ham United|West Ham;Wolverhampton Wanderers|Wolves",
+    "cfl" to "BC Lions|B.C. Lions|Lions;Calgary Stampeders|Stampeders|Stamps;Edmonton Elks|Elks;Saskatchewan Roughriders|Roughriders|Riders;Winnipeg Blue Bombers|Blue Bombers|Bombers;Hamilton Tiger-Cats|Tiger-Cats|Tiger Cats|Ticats;Toronto Argonauts|Argonauts|Argos;Ottawa Redblacks|Redblacks;Montreal Alouettes|Alouettes|Als",
     "mls" to "Atlanta United FC|Atlanta United;Austin FC;CF Montréal|CF Montreal|Montreal;Charlotte FC;Chicago Fire FC|Chicago Fire;FC Cincinnati|Cincinnati;Colorado Rapids|Rapids;Columbus Crew|Columbus Crew SC;D.C. United|DC United;FC Dallas|Dallas FC;Houston Dynamo FC|Houston Dynamo;Inter Miami CF|Inter Miami;LA Galaxy|Galaxy;Los Angeles FC|LAFC;Minnesota United FC|Minnesota United;Nashville SC|Nashville;New England Revolution|Revolution;New York City FC|NYCFC;New York Red Bulls|Red Bulls;Orlando City SC|Orlando City;Philadelphia Union;Portland Timbers|Timbers;Real Salt Lake|Salt Lake;San Diego FC;San Jose Earthquakes|Earthquakes;Seattle Sounders FC|Sounders|Seattle Sounders;Sporting Kansas City|Sporting KC;St. Louis City SC|St. Louis City;Toronto FC;Vancouver Whitecaps FC|Whitecaps|Vancouver Whitecaps",
 )
 
 // Nicknames that are also everyday words: these match only with a score word, never alone.
-private val COMMON: Set<String> = "heat magic jazz thunder wild kings nets suns spurs warriors hawks bulls bears giants cardinals panthers rangers jets stars rockets nuggets pelicans clippers wizards hornets pistons titans chiefs chargers raiders packers vikings lions cowboys eagles falcons saints rams dolphins patriots colts broncos bills ravens steelers texans jaguars browns bengals seahawks commanders buccaneers lightning flames senators bruins blues ducks sharks devils hurricanes capitals islanders flyers avalanche predators kraken coyotes canadiens sabres athletics guardians orioles royals rays tigers twins angels reds cubs mets braves astros padres nationals mariners pirates phillies yankees brewers rockies marlins diamondbacks dodgers wolves villa palace crew union revolution timbers galaxy rapids dynamo sounders whitecaps earthquakes mammoth blazers sixers raptors cavaliers bucks grizzlies pacers".split(" ").toSet()
+private val COMMON: Set<String> = "riders elks als argos bombers stamps alouettes heat magic jazz thunder wild kings nets suns spurs warriors hawks bulls bears giants cardinals panthers rangers jets stars rockets nuggets pelicans clippers wizards hornets pistons titans chiefs chargers raiders packers vikings lions cowboys eagles falcons saints rams dolphins patriots colts broncos bills ravens steelers texans jaguars browns bengals seahawks commanders buccaneers lightning flames senators bruins blues ducks sharks devils hurricanes capitals islanders flyers avalanche predators kraken coyotes canadiens sabres athletics guardians orioles royals rays tigers twins angels reds cubs mets braves astros padres nationals mariners pirates phillies yankees brewers rockies marlins diamondbacks dodgers wolves villa palace crew union revolution timbers galaxy rapids dynamo sounders whitecaps earthquakes mammoth blazers sixers raptors cavaliers bucks grizzlies pacers".split(" ").toSet()
 
 // A score word. "win" and "game" count; "history" and "coach" do not, so they never reach a scoreboard.
 private val intentRe = Regex("""\b(scores?|scored|won|wins?|winner|lose|loses|lost|loss|beat|beats|beaten|games?|results?|final|finals|playing|match|tonight|last night)\b""")
 // Questions about the future, opinions, rosters and news are never a score lookup.
 private val negRe = Regex("""\b(will|would|should|could|might|why|how many|how much|how to|how do|odds|predict\w*|bet|best|worst|trade|traded|draft|drafted|sign|signed|coach|roster|news|history|rumou?rs?)\b""")
-private val leagueRe = Regex("""^(?:(?:today's|todays|latest|recent|last night's)\s+)?(nba|nfl|mlb|nhl|mls|epl|premier league)\s+(?:scores?|results?|games?)$""")
+private val leagueRe = Regex("""^(?:(?:today's|todays|latest|recent|last night's)\s+)?(nba|nfl|mlb|nhl|mls|cfl|epl|premier league)\s+(?:scores?|results?|games?)$""")
 private val trailingPunct = Regex("""[?!.]+$""")
 
 // Accented letters that appear in team names, folded to plain ASCII (the web does this with NFD).
@@ -327,6 +331,7 @@ object Scores {
     // The next game on a team's ESPN page, when it is still to come. ESPN puts its status on the competition.
     private suspend fun next(lg: String, ours: JsonObject, now: Long, zoneId: String?, fetch: suspend (String) -> String?): SportsGame? {
         val id = ours.obj("team")?.str("id") ?: return null
+        if (LEAGUES.getValue(lg).tsdb != null) return null
         val body = fetch("https://site.api.espn.com/apis/site/v2/sports/${LEAGUES.getValue(lg).path}/teams/$id") ?: return null
         val root = runCatching { json.parseToJsonElement(body) as? JsonObject }.getOrNull() ?: return null
         val e = (root.obj("team")?.get("nextEvent") as? JsonArray)?.firstOrNull() as? JsonObject ?: return null
@@ -341,10 +346,52 @@ object Scores {
     // One league's events for one day (ymd), or the current scoreboard when ymd is null: a list (possibly empty),
     // or null when the request failed.
     private suspend fun board(lg: String, ymd: String?, fetch: suspend (String) -> String?): List<JsonObject>? {
+        LEAGUES.getValue(lg).tsdb?.let { return tsdbBoard(it, ymd, fetch) }
         val query = if (ymd == null) "" else "?dates=$ymd"
         val body = fetch("https://site.api.espn.com/apis/site/v2/sports/${LEAGUES.getValue(lg).path}/scoreboard$query") ?: return null
         val root = runCatching { json.parseToJsonElement(body) as? JsonObject }.getOrNull() ?: return null
         val events = root["events"] as? JsonArray ?: return null
         return events.mapNotNull { it as? JsonObject }
     }
+
+    // TheSportsDB (free key 123): one day's games, or with no day its last and next game, as ESPN-shaped events.
+    private suspend fun tsdbBoard(id: String, ymd: String?, fetch: suspend (String) -> String?): List<JsonObject>? {
+        val queries = if (ymd != null) listOf("eventsday.php?d=${ymd.substring(0, 4)}-${ymd.substring(4, 6)}-${ymd.substring(6)}&l=$id")
+            else listOf("eventspastleague.php?id=$id", "eventsnextleague.php?id=$id")
+        val out = mutableListOf<JsonObject>()
+        for (q in queries) {
+            val body = fetch("https://www.thesportsdb.com/api/v1/json/123/$q") ?: return null
+            val root = runCatching { json.parseToJsonElement(body) as? JsonObject }.getOrNull() ?: return null
+            (root["events"] as? JsonArray)?.mapNotNull { it as? JsonObject }?.forEach { out += tsdbEvent(it) }
+        }
+        return out
+    }
+
+}
+
+// strTimestamp is UTC. FT and AOT are finals, NS (or nothing) not started, anything else in play.
+internal fun tsdbEvent(e: JsonObject): JsonObject {
+    val status = e.str("strStatus") ?: ""
+    val done = status in setOf("FT", "AOT", "AET")
+    val state = if (done) "post" else if (status.isEmpty() || status == "NS") "pre" else "in"
+    fun side(name: String?, score: String?, other: String?, homeAway: String) = JsonObject(mapOf(
+        "homeAway" to JsonPrimitive(homeAway),
+        "score" to JsonPrimitive(score ?: ""),
+        "winner" to JsonPrimitive(done && (score?.toDoubleOrNull() ?: 0.0) > (other?.toDoubleOrNull() ?: 0.0)),
+        "team" to JsonObject(mapOf("displayName" to JsonPrimitive(name), "shortDisplayName" to JsonPrimitive(name), "name" to JsonPrimitive(name))),
+    ))
+    val stamp = e.str("strTimestamp") ?: "${e.str("dateEvent") ?: ""}T${e.str("strTime") ?: "00:00:00"}"
+    val type = buildMap<String, JsonElement> {
+        put("state", JsonPrimitive(state))
+        if (done) put("detail", JsonPrimitive(if (status == "FT") "Final" else "Final/OT"))
+        if (state == "in") put("shortDetail", JsonPrimitive(status))
+    }
+    return JsonObject(mapOf(
+        "date" to JsonPrimitive(if (stamp.endsWith("Z")) stamp else stamp + "Z"),
+        "status" to JsonObject(mapOf("type" to JsonObject(type))),
+        "competitions" to JsonArray(listOf(JsonObject(mapOf("competitors" to JsonArray(listOf(
+            side(e.str("strHomeTeam"), e.str("intHomeScore"), e.str("intAwayScore"), "home"),
+            side(e.str("strAwayTeam"), e.str("intAwayScore"), e.str("intHomeScore"), "away"),
+        )))))),
+    ))
 }

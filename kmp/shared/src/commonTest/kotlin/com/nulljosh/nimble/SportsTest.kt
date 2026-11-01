@@ -303,6 +303,30 @@ class SportsTest {
 
     private fun nflEvent(body: String, index: Int): JsonObject =
         Json.parseToJsonElement(body).jsonObject["events"]!!.jsonArray[index].jsonObject
+
+    // The CFL comes from TheSportsDB. Two real games from Oct 31, 2026, as the free key returns them.
+    @Test
+    fun cflComesFromTheSportsDBAndReadsLikeAnyOtherLeague() = runBlockingTest {
+        val oct31 = """{"events":[
+            {"strTimestamp":"2026-10-31T17:00:00","dateEvent":"2026-10-31","strStatus":"FT","strHomeTeam":"Toronto Argonauts","strAwayTeam":"Winnipeg Blue Bombers","intHomeScore":"22","intAwayScore":"25"},
+            {"strTimestamp":"2026-10-31T20:30:00","dateEvent":"2026-10-31","strStatus":"FT","strHomeTeam":"BC Lions","strAwayTeam":"Saskatchewan Roughriders","intHomeScore":"33","intAwayScore":"26"}]}"""
+        val asked = mutableListOf<String>()
+        val fetch: suspend (String) -> String? = { url ->
+            assertTrue(url.startsWith("https://www.thesportsdb.com/api/v1/json/123/"), url)
+            asked += url
+            if ("d=2026-10-31" in url) oct31 else """{"events":null}"""
+        }
+        val now = 1_793_556_000_000L   // 2026-11-01T18:00:00Z
+        val team = assertNotNull(Scores.answer("did the bc lions win", now, "America/Vancouver", fetch))
+        assertEquals(listOf("BC Lions", "Saskatchewan Roughriders"), team.rows[0].teams.map { it.name })
+        assertEquals(listOf(true, false), team.rows[0].teams.map { it.winner })
+        assertEquals("Final", team.rows[0].status)
+        assertEquals(1, team.rows.size)
+        val board = assertNotNull(Scores.answer("cfl scores", now, "America/Vancouver", fetch))
+        assertEquals(2, board.rows.size)
+        assertTrue(asked.first().contains("eventsday.php?d=2026-11-01&l=4405"), asked.first())
+        assertNull(sportsAsk("riders"))
+    }
 }
 
 private const val SPORTS_FAILURE = "\u0000fail"

@@ -529,7 +529,7 @@ const CRYPTO_KEYS = Object.keys(CRYPTO).join("|");
 // "bitcoin price", "price of bitcoin", "what's the current price of ethereum", or a bare "btc" (the short names only).
 const CRYPTO_RE = new RegExp(`^(?:(?:what(?:'s| is) the )?(?:current )?price (?:of |for )?(${CRYPTO_KEYS})|(${CRYPTO_KEYS}) price|(btc|eth|sol|doge))\\s*\\??$`, "i");
 // Capitals that are words or acronyms: a bare "AI" or "US" is never a stock lookup.
-const NOT_TICKER = new Set("NFL NBA MLB NHL MLS EPL AI US UK EU OK TV IT ID PC CEO CFO NASA USA GDP CPU GPU API URL DNA HTML CSS JS FAQ NYC UN OR AND THE ARE NOT ALL ANY NEW CAN PDF SMS VPN RAM SSD USB TBD WHO HOW WHY YES NO DJ MP PM AM TO OF IN IS ON AT BY DO GO UP".split(" "));
+const NOT_TICKER = new Set("NFL NBA MLB NHL MLS EPL CFL AI US UK EU OK TV IT ID PC CEO CFO NASA USA GDP CPU GPU API URL DNA HTML CSS JS FAQ NYC UN OR AND THE ARE NOT ALL ANY NEW CAN PDF SMS VPN RAM SSD USB TBD WHO HOW WHY YES NO DJ MP PM AM TO OF IN IS ON AT BY DO GO UP".split(" "));
 // "AAPL", "$AAPL", "AAPL stock", "stock price of AAPL", "aapl price". A bare word needs the capitals (so "who is apple" never matches).
 const STOCK_RE = /^(?:(?:what(?:'s| is) the )?(?:stock )?(?:price|quote) (?:of |for )?)?\$?([A-Za-z]{1,5})(?: (?:stock|stock price|share price|shares?|price|quote))?\s*\??$/i;
 function stockSymbol(q){
@@ -612,6 +612,8 @@ const SPORTS_LEAGUES = {
   nhl:{path:"hockey/nhl", name:"NHL", url:"https://www.espn.com/nhl/scoreboard", unit:"period", periods:3},
   epl:{path:"soccer/eng.1", name:"Premier League", url:"https://www.espn.com/soccer/league/_/name/eng.1"},
   mls:{path:"soccer/usa.1", name:"MLS", url:"https://www.espn.com/soccer/league/_/name/usa.1"},
+  // ESPN's CFL board stopped in 2022, so the CFL comes from TheSportsDB's free key (league 4405), mapped to ESPN's shape.
+  cfl:{tsdb:"4405", name:"CFL", url:"https://www.cfl.ca/schedule/", src:"TheSportsDB"},
 };
 // Teams split by ";". A "|" lists the names a fan types (the first is the ESPN display name). Without one,
 // the big four also answer to the last word ("Lakers"); soccer names are listed in full.
@@ -621,10 +623,11 @@ const SPORTS_TEAMS = {
   mlb:"Arizona Diamondbacks;Atlanta Braves;Baltimore Orioles;Boston Red Sox|Red Sox;Chicago Cubs;Chicago White Sox|White Sox;Cincinnati Reds;Cleveland Guardians;Colorado Rockies;Detroit Tigers;Houston Astros;Kansas City Royals;Los Angeles Angels;Los Angeles Dodgers;Miami Marlins;Milwaukee Brewers;Minnesota Twins;New York Mets;New York Yankees;Athletics;Philadelphia Phillies;Pittsburgh Pirates;San Diego Padres;San Francisco Giants;Seattle Mariners;St. Louis Cardinals;Tampa Bay Rays;Texas Rangers;Toronto Blue Jays|Blue Jays;Washington Nationals",
   nhl:"Anaheim Ducks;Boston Bruins;Buffalo Sabres;Calgary Flames;Carolina Hurricanes;Chicago Blackhawks;Colorado Avalanche;Columbus Blue Jackets|Blue Jackets;Dallas Stars;Detroit Red Wings|Red Wings;Edmonton Oilers;Florida Panthers;Los Angeles Kings;Minnesota Wild;Montreal Canadiens;Nashville Predators;New Jersey Devils;New York Islanders;New York Rangers;Ottawa Senators;Philadelphia Flyers;Pittsburgh Penguins;San Jose Sharks;Seattle Kraken;St. Louis Blues;Tampa Bay Lightning;Toronto Maple Leafs|Maple Leafs;Utah Mammoth|Utah Hockey Club|Mammoth;Vancouver Canucks;Vegas Golden Knights|Golden Knights;Washington Capitals;Winnipeg Jets",
   epl:"Arsenal;Aston Villa|Villa;AFC Bournemouth|Bournemouth;Brentford;Brighton & Hove Albion|Brighton;Burnley;Chelsea;Crystal Palace|Palace;Everton;Fulham;Leeds United|Leeds;Liverpool;Manchester City|Man City;Manchester United|Man United|Man Utd;Newcastle United|Newcastle;Nottingham Forest|Nottingham;Sunderland;Tottenham Hotspur|Tottenham|Spurs;West Ham United|West Ham;Wolverhampton Wanderers|Wolves",
+  cfl:"BC Lions|B.C. Lions|Lions;Calgary Stampeders|Stampeders|Stamps;Edmonton Elks|Elks;Saskatchewan Roughriders|Roughriders|Riders;Winnipeg Blue Bombers|Blue Bombers|Bombers;Hamilton Tiger-Cats|Tiger-Cats|Tiger Cats|Ticats;Toronto Argonauts|Argonauts|Argos;Ottawa Redblacks|Redblacks;Montreal Alouettes|Alouettes|Als",
   mls:"Atlanta United FC|Atlanta United;Austin FC;CF Montréal|CF Montreal|Montreal;Charlotte FC;Chicago Fire FC|Chicago Fire;FC Cincinnati|Cincinnati;Colorado Rapids|Rapids;Columbus Crew|Columbus Crew SC;D.C. United|DC United;FC Dallas|Dallas FC;Houston Dynamo FC|Houston Dynamo;Inter Miami CF|Inter Miami;LA Galaxy|Galaxy;Los Angeles FC|LAFC;Minnesota United FC|Minnesota United;Nashville SC|Nashville;New England Revolution|Revolution;New York City FC|NYCFC;New York Red Bulls|Red Bulls;Orlando City SC|Orlando City;Philadelphia Union;Portland Timbers|Timbers;Real Salt Lake|Salt Lake;San Diego FC;San Jose Earthquakes|Earthquakes;Seattle Sounders FC|Sounders|Seattle Sounders;Sporting Kansas City|Sporting KC;St. Louis City SC|St. Louis City;Toronto FC;Vancouver Whitecaps FC|Whitecaps|Vancouver Whitecaps",
 };
 // Nicknames that are also everyday words: these match only with a score word, never alone.
-const SPORTS_COMMON = new Set("heat magic jazz thunder wild kings nets suns spurs warriors hawks bulls bears giants cardinals panthers rangers jets stars rockets nuggets pelicans clippers wizards hornets pistons titans chiefs chargers raiders packers vikings lions cowboys eagles falcons saints rams dolphins patriots colts broncos bills ravens steelers texans jaguars browns bengals seahawks commanders buccaneers lightning flames senators bruins blues ducks sharks devils hurricanes capitals islanders flyers avalanche predators kraken coyotes canadiens sabres athletics guardians orioles royals rays tigers twins angels reds cubs mets braves astros padres nationals mariners pirates phillies yankees brewers rockies marlins diamondbacks dodgers wolves villa palace crew union revolution timbers galaxy rapids dynamo sounders whitecaps earthquakes mammoth blazers sixers raptors cavaliers bucks grizzlies pacers".split(" "));
+const SPORTS_COMMON = new Set("riders elks als argos bombers stamps alouettes heat magic jazz thunder wild kings nets suns spurs warriors hawks bulls bears giants cardinals panthers rangers jets stars rockets nuggets pelicans clippers wizards hornets pistons titans chiefs chargers raiders packers vikings lions cowboys eagles falcons saints rams dolphins patriots colts broncos bills ravens steelers texans jaguars browns bengals seahawks commanders buccaneers lightning flames senators bruins blues ducks sharks devils hurricanes capitals islanders flyers avalanche predators kraken coyotes canadiens sabres athletics guardians orioles royals rays tigers twins angels reds cubs mets braves astros padres nationals mariners pirates phillies yankees brewers rockies marlins diamondbacks dodgers wolves villa palace crew union revolution timbers galaxy rapids dynamo sounders whitecaps earthquakes mammoth blazers sixers raptors cavaliers bucks grizzlies pacers".split(" "));
 const sportsFold = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[‘’]/g,"'").replace(/\s+/g," ").trim();
 // alias -> [{lg, keys}], and one regex over every alias (longest first) to find the team in a query.
 const SPORTS_INDEX = new Map();
@@ -638,7 +641,7 @@ for(const lg of Object.keys(SPORTS_TEAMS)){
 }
 const SPORTS_ALIAS_RE = new RegExp("(?:^|[^a-z0-9])(" + [...SPORTS_INDEX.keys()].sort((a,b)=>b.length-a.length)
   .map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|") + ")(?![a-z0-9])");
-const SPORTS_LEAGUE_RE = /^(?:(?:today's|todays|latest|recent|last night's)\s+)?(nba|nfl|mlb|nhl|mls|epl|premier league)\s+(?:scores?|results?|games?)$/;
+const SPORTS_LEAGUE_RE = /^(?:(?:today's|todays|latest|recent|last night's)\s+)?(nba|nfl|mlb|nhl|mls|cfl|epl|premier league)\s+(?:scores?|results?|games?)$/;
 // A score word. "win" and "game" count; "history" and "coach" do not, so they never reach a scoreboard.
 const SPORTS_INTENT_RE = /\b(scores?|scored|won|wins?|winner|lose|loses|lost|loss|beat|beats|beaten|games?|results?|final|finals|playing|match|tonight|last night)\b/;
 // Questions about the future, opinions, rosters and news are never a score lookup.
@@ -665,8 +668,27 @@ const ymdOf = (date, tz) => isNaN(date) ? "" : new Intl.DateTimeFormat("en-CA",{
 const sportsDay = (now, back, tz) => ymdOf(new Date(now.getTime() - back*864e5), tz);
 // One league's events for one day (ymd), or the current scoreboard when ymd is null: an array (possibly empty), or null when the request failed.
 async function sportsBoard(lg, ymd){
+  if(SPORTS_LEAGUES[lg].tsdb) return tsdbBoard(SPORTS_LEAGUES[lg].tsdb, ymd);
   const d = await getJSON(`https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[lg].path}/scoreboard${ymd ? "?dates="+ymd : ""}`, {timeout:SPORTS_TIMEOUT_MS});
   return d && Array.isArray(d.events) ? d.events : null;
+}
+// TheSportsDB (free key 123): one day's games, or with no day its last and next game, as ESPN-shaped events.
+async function tsdbBoard(id, ymd){
+  const get = q => getJSON(`https://www.thesportsdb.com/api/v1/json/123/${q}`, {timeout:SPORTS_TIMEOUT_MS});
+  const ds = ymd ? [await get(`eventsday.php?d=${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6)}&l=${id}`)]
+    : [await get(`eventspastleague.php?id=${id}`), await get(`eventsnextleague.php?id=${id}`)];
+  if(ds.some(d=>!d)) return null;
+  return ds.flatMap(d=>Array.isArray(d.events) ? d.events : []).map(tsdbEvent);
+}
+// strTimestamp is UTC. FT and AOT are finals, NS (or nothing) not started, anything else in play.
+function tsdbEvent(e){
+  const done = /^(FT|AOT|AET)$/.test(e.strStatus || ""), pre = !e.strStatus || e.strStatus==="NS";
+  const state = done ? "post" : pre ? "pre" : "in";
+  const side = (name, score, other, homeAway) => ({homeAway, score: score ?? "", winner: done && Number(score) > Number(other),
+    team:{displayName:name, shortDisplayName:name, name}});
+  return {date: (e.strTimestamp || `${e.dateEvent}T${e.strTime || "00:00:00"}`).replace(/Z?$/, "Z"),
+    status:{type:{state, detail: done ? (e.strStatus==="FT" ? "Final" : "Final/OT") : undefined, shortDetail: state==="in" ? e.strStatus : undefined}},
+    competitions:[{competitors:[side(e.strHomeTeam, e.intHomeScore, e.intAwayScore, "home"), side(e.strAwayTeam, e.intAwayScore, e.intHomeScore, "away")]}]};
 }
 const ordinal = n => n + (n%10===1 && n%100!==11 ? "st" : n%10===2 && n%100!==12 ? "nd" : n%10===3 && n%100!==13 ? "rd" : "th");
 // "Final", "Final/OT", "3rd quarter 4:12", "Scheduled for 7:30 pm". Soccer and baseball use ESPN's own short text.
@@ -736,7 +758,7 @@ function sportsRecentDay(events, tz){
 // After a finished game, the team's next one from its ESPN team page (one call), so "canucks score" also says
 // when they play next. Null when ESPN lists none or the call fails.
 async function sportsNext(lg, ours, now, tz){
-  const id = ours?.team?.id; if(!id) return null;
+  const id = ours?.team?.id; if(!id || SPORTS_LEAGUES[lg].tsdb) return null;
   const d = await getJSON(`https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[lg].path}/teams/${id}`, {timeout:SPORTS_TIMEOUT_MS});
   const e = d?.team?.nextEvent?.[0], c = e?.competitions?.[0];
   const ev = c && {...e, status: e.status || c.status}, mine = c?.competitors?.find(x=>x.team?.id===id);
@@ -753,7 +775,7 @@ async function sports(query, opts={}){
   const days = p.lastNight ? [1] : [0, 1];
   let failed = false;
   if(p.league){
-    const lg = p.league, L = SPORTS_LEAGUES[lg], base = {kind:"sports", src, title:`${L.name} scores`, league:L.name, url:L.url};
+    const lg = p.league, L = SPORTS_LEAGUES[lg], base = {kind:"sports", src: L.src || src, title:`${L.name} scores`, league:L.name, url:L.url};
     const show = (evs, dated) => ({...base, rows: evs.slice(0,8).map(e=>gameRow(e, null, lg, now, tz, dated)), asOf});
     for(const back of days){
       const ev = await sportsBoard(lg, sportsDay(now, back, tz));
@@ -773,7 +795,7 @@ async function sports(query, opts={}){
   const title = p.team.replace(/\b\w/g, c=>c.toUpperCase()), base = {kind:"sports", src, title};
   const found = async (lg, hit, dated) => {
     const next = sportsState(hit.ev)==="post" ? await sportsNext(lg, hit.ours, now, tz).catch(()=>null) : null;
-    return {...base, url: SPORTS_LEAGUES[lg].url, rows:[gameRow(hit.ev, hit.ours, lg, now, tz, dated), ...(next ? [next] : [])], asOf};
+    return {...base, src: SPORTS_LEAGUES[lg].src || src, url: SPORTS_LEAGUES[lg].url, rows:[gameRow(hit.ev, hit.ours, lg, now, tz, dated), ...(next ? [next] : [])], asOf};
   };
   for(const back of days) for(const lg of Object.keys(p.teams)){
     const ev = await sportsBoard(lg, sportsDay(now, back, tz));

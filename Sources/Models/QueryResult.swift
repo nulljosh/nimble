@@ -79,13 +79,14 @@ enum SportsOutcome: Equatable {
 
 /// The sports card. league is set for league scores ("NBA scores"); url is the page the card links to.
 struct SportsCard: Equatable {
-    static let source = "ESPN"
     let title: String
     let league: String?
     let games: [SportsGame]
     let outcome: SportsOutcome
     let url: String
     let asOf: Freshness?
+    /// Who the scores come from: ESPN, or TheSportsDB for the CFL.
+    var source: String = "ESPN"
 }
 
 extension String {
@@ -238,7 +239,7 @@ enum QueryResult: Equatable {
         // The share image carries one sentence, not the whole list.
         case .news(let items, let source, _): return items.first.map { ($0.sentence, source) }
         case .text(_, _, let source, _, _, _, _, _, _), .list(_, let source), .card(_, _, _, let source, _, _), .market(_, _, _, let source, _, _): return (text, source)
-        case .sports: return (text, SportsCard.source)
+        case .sports(let card): return (text, card.source)
         case .disagree(let alts, _, _): return (text, alts.map(\.model).joined(separator: " / "))
         }
     }

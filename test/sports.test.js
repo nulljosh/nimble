@@ -336,3 +336,31 @@ test("the scoreboard is the only source a score ever comes from: no other host i
 test("freshness: the as-of time is the fetch time, formatted in the zone asked for", () => {
   assert.equal(E.asOfLabel(NOW.toISOString(), false, TZ), "Oct 12, 1:00 pm");
 });
+
+// CFL comes from TheSportsDB, not ESPN. Two real games from Oct 31, 2026, as the free key returns them.
+test("CFL: a team score and the league board come from TheSportsDB, mapped to the same rows", async () => {
+  const oct31 = { events: [
+    { strTimestamp: "2026-10-31T17:00:00", dateEvent: "2026-10-31", strStatus: "FT", strHomeTeam: "Toronto Argonauts", strAwayTeam: "Winnipeg Blue Bombers", intHomeScore: "22", intAwayScore: "25" },
+    { strTimestamp: "2026-10-31T20:30:00", dateEvent: "2026-10-31", strStatus: "FT", strHomeTeam: "BC Lions", strAwayTeam: "Saskatchewan Roughriders", intHomeScore: "33", intAwayScore: "26" },
+  ] };
+  const seen = [];
+  globalThis.fetch = async url => {
+    const u = new URL(url);
+    assert.equal(u.host, "www.thesportsdb.com");
+    seen.push(u.pathname.split("/").pop() + "?" + u.searchParams.toString());
+    const body = u.searchParams.get("d") === "2026-10-31" ? oct31 : { events: null };
+    return { ok: true, status: 200, json: async () => body, text: async () => "" };
+  };
+  try {
+    const now = new Date("2026-11-01T18:00:00Z");
+    const team = await E.sports("did the bc lions win", { now, tz: TZ });
+    assert.equal(team.src, "TheSportsDB");
+    assert.deepEqual(team.rows[0].teams.map(t => [t.name, t.score, t.winner]), [["BC Lions", "33", true], ["Saskatchewan Roughriders", "26", false]]);
+    assert.equal(team.rows[0].status, "Final", "yesterday is not dated, same as ESPN leagues");
+    assert.equal(team.rows.length, 1, "no next game: TheSportsDB's team page is not on the free key");
+    const board = await E.sports("cfl scores", { now, tz: TZ });
+    assert.equal(board.league, "CFL");
+    assert.equal(board.rows.length, 2);
+    assert.ok(seen[0].startsWith("eventsday.php?d=2026-11-01&l=4405"), seen[0]);
+  } finally { restore(); }
+});

@@ -289,7 +289,7 @@ final class SportsTests: XCTestCase {
         XCTAssertEqual(card?.games.first?.line, "Jaguars 19, Eagles 17")
         XCTAssertEqual(card?.url, "https://www.espn.com/nfl/scoreboard")
         XCTAssertEqual(card?.asOf?.label(in: tz), "Oct 12, 1:00 pm")
-        XCTAssertEqual(SportsCard.source, "ESPN")
+        XCTAssertEqual(card?.source, "ESPN")
         let shareable = QueryResult.sports(card!).copyText
         XCTAssertEqual(shareable, "Jaguars 19, Eagles 17, Final")
         XCTAssertFalse(shareable?.contains("\u{2014}") ?? true)
@@ -319,5 +319,25 @@ final class SportsTests: XCTestCase {
         XCTAssertEqual(QueryEngine.titleCase("lakers"), "Lakers")
         XCTAssertEqual(QueryEngine.titleCase("st. louis"), "St. Louis")
         XCTAssertEqual(QueryEngine.titleCase("man city"), "Man City")
+    }
+}
+
+/// The CFL comes from TheSportsDB. Its events map onto the same ESPN shape, so gameRow and the card read them unchanged.
+final class CFLTests: XCTestCase {
+    func testTheSportsDBEventMapsToAFinalWithTheWinnerMarked() {
+        let raw = #"{"events":[{"strTimestamp":"2026-10-31T20:30:00","dateEvent":"2026-10-31","strStatus":"FT","strHomeTeam":"BC Lions","strAwayTeam":"Saskatchewan Roughriders","intHomeScore":"33","intAwayScore":"26"}]}"#
+        let page = try! JSONDecoder().decode(TSDBPage.self, from: Data(raw.utf8))
+        let ev = QueryEngine.tsdbEvent(page.events![0])
+        XCTAssertEqual(QueryEngine.sportsState(ev), "post")
+        let game = QueryEngine.gameRow(ev, ours: 0, league: "cfl", now: Date(timeIntervalSince1970: 1_793_556_000), tz: TimeZone(identifier: "America/Vancouver"))
+        XCTAssertEqual(game.teams.map(\.name), ["BC Lions", "Saskatchewan Roughriders"])
+        XCTAssertEqual(game.teams.map(\.score), ["33", "26"])
+        XCTAssertEqual(game.teams.map(\.winner), [true, false])
+    }
+
+    func testCFLQuestionsAreDetected() {
+        XCTAssertEqual(QueryEngine.sportsAsk("cfl scores")?.league, "cfl")
+        XCTAssertEqual(QueryEngine.sportsAsk("did the bc lions win")?.teams.map(\.league), ["cfl"])
+        XCTAssertNil(QueryEngine.sportsAsk("riders"))
     }
 }

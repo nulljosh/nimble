@@ -74,7 +74,7 @@ struct ResultView: View {
                 SportsResultView(card: card)
             } footer: {
                 if card.outcome == .found {
-                    link(String(localized: "powered by \(SportsCard.source)"), to: card.url)
+                    link(String(localized: "powered by \(card.source)"), to: card.url)
                 }
             }
 

@@ -27,12 +27,15 @@ extension QueryEngine {
         /// The period word and count for live status ("3rd quarter 4:12"). Nil where ESPN's own text is used.
         let unit: String?
         let periods: Int
+        /// TheSportsDB league id, for a league ESPN no longer carries (the CFL). Nil reads ESPN.
+        var tsdb: String? = nil
+        var source: String { tsdb == nil ? "ESPN" : "TheSportsDB" }
     }
 
     static let sportsTimeout: TimeInterval = 4
 
     /// Order matters: it is the order the day's boards are checked in.
-    static let sportsLeagueOrder = ["nba", "nfl", "mlb", "nhl", "epl", "mls"]
+    static let sportsLeagueOrder = ["nba", "nfl", "mlb", "nhl", "epl", "mls", "cfl"]
     static let sportsLeagues: [String: SportsLeague] = [
         "nba": SportsLeague(path: "basketball/nba", name: "NBA", url: "https://www.espn.com/nba/scoreboard", unit: "quarter", periods: 4),
         "nfl": SportsLeague(path: "football/nfl", name: "NFL", url: "https://www.espn.com/nfl/scoreboard", unit: "quarter", periods: 4),
@@ -40,6 +43,8 @@ extension QueryEngine {
         "nhl": SportsLeague(path: "hockey/nhl", name: "NHL", url: "https://www.espn.com/nhl/scoreboard", unit: "period", periods: 3),
         "epl": SportsLeague(path: "soccer/eng.1", name: "Premier League", url: "https://www.espn.com/soccer/league/_/name/eng.1", unit: nil, periods: 0),
         "mls": SportsLeague(path: "soccer/usa.1", name: "MLS", url: "https://www.espn.com/soccer/league/_/name/usa.1", unit: nil, periods: 0),
+        // ESPN's CFL board stopped in 2022, so the CFL comes from TheSportsDB's free key (league 4405).
+        "cfl": SportsLeague(path: "", name: "CFL", url: "https://www.cfl.ca/schedule/", unit: nil, periods: 0, tsdb: "4405"),
     ]
 
     /// Teams split by ";". A "|" lists the names a fan types (the first is the ESPN display name). Without one,
@@ -50,11 +55,12 @@ extension QueryEngine {
         "mlb": "Arizona Diamondbacks;Atlanta Braves;Baltimore Orioles;Boston Red Sox|Red Sox;Chicago Cubs;Chicago White Sox|White Sox;Cincinnati Reds;Cleveland Guardians;Colorado Rockies;Detroit Tigers;Houston Astros;Kansas City Royals;Los Angeles Angels;Los Angeles Dodgers;Miami Marlins;Milwaukee Brewers;Minnesota Twins;New York Mets;New York Yankees;Athletics;Philadelphia Phillies;Pittsburgh Pirates;San Diego Padres;San Francisco Giants;Seattle Mariners;St. Louis Cardinals;Tampa Bay Rays;Texas Rangers;Toronto Blue Jays|Blue Jays;Washington Nationals",
         "nhl": "Anaheim Ducks;Boston Bruins;Buffalo Sabres;Calgary Flames;Carolina Hurricanes;Chicago Blackhawks;Colorado Avalanche;Columbus Blue Jackets|Blue Jackets;Dallas Stars;Detroit Red Wings|Red Wings;Edmonton Oilers;Florida Panthers;Los Angeles Kings;Minnesota Wild;Montreal Canadiens;Nashville Predators;New Jersey Devils;New York Islanders;New York Rangers;Ottawa Senators;Philadelphia Flyers;Pittsburgh Penguins;San Jose Sharks;Seattle Kraken;St. Louis Blues;Tampa Bay Lightning;Toronto Maple Leafs|Maple Leafs;Utah Mammoth|Utah Hockey Club|Mammoth;Vancouver Canucks;Vegas Golden Knights|Golden Knights;Washington Capitals;Winnipeg Jets",
         "epl": "Arsenal;Aston Villa|Villa;AFC Bournemouth|Bournemouth;Brentford;Brighton & Hove Albion|Brighton;Burnley;Chelsea;Crystal Palace|Palace;Everton;Fulham;Leeds United|Leeds;Liverpool;Manchester City|Man City;Manchester United|Man United|Man Utd;Newcastle United|Newcastle;Nottingham Forest|Nottingham;Sunderland;Tottenham Hotspur|Tottenham|Spurs;West Ham United|West Ham;Wolverhampton Wanderers|Wolves",
+        "cfl": "BC Lions|B.C. Lions|Lions;Calgary Stampeders|Stampeders|Stamps;Edmonton Elks|Elks;Saskatchewan Roughriders|Roughriders|Riders;Winnipeg Blue Bombers|Blue Bombers|Bombers;Hamilton Tiger-Cats|Tiger-Cats|Tiger Cats|Ticats;Toronto Argonauts|Argonauts|Argos;Ottawa Redblacks|Redblacks;Montreal Alouettes|Alouettes|Als",
         "mls": "Atlanta United FC|Atlanta United;Austin FC;CF Montréal|CF Montreal|Montreal;Charlotte FC;Chicago Fire FC|Chicago Fire;FC Cincinnati|Cincinnati;Colorado Rapids|Rapids;Columbus Crew|Columbus Crew SC;D.C. United|DC United;FC Dallas|Dallas FC;Houston Dynamo FC|Houston Dynamo;Inter Miami CF|Inter Miami;LA Galaxy|Galaxy;Los Angeles FC|LAFC;Minnesota United FC|Minnesota United;Nashville SC|Nashville;New England Revolution|Revolution;New York City FC|NYCFC;New York Red Bulls|Red Bulls;Orlando City SC|Orlando City;Philadelphia Union;Portland Timbers|Timbers;Real Salt Lake|Salt Lake;San Diego FC;San Jose Earthquakes|Earthquakes;Seattle Sounders FC|Sounders|Seattle Sounders;Sporting Kansas City|Sporting KC;St. Louis City SC|St. Louis City;Toronto FC;Vancouver Whitecaps FC|Whitecaps|Vancouver Whitecaps",
     ]
 
     /// Nicknames that are also everyday words: these match only with a score word, never alone.
-    static let sportsCommon: Set<String> = Set("heat magic jazz thunder wild kings nets suns spurs warriors hawks bulls bears giants cardinals panthers rangers jets stars rockets nuggets pelicans clippers wizards hornets pistons titans chiefs chargers raiders packers vikings lions cowboys eagles falcons saints rams dolphins patriots colts broncos bills ravens steelers texans jaguars browns bengals seahawks commanders buccaneers lightning flames senators bruins blues ducks sharks devils hurricanes capitals islanders flyers avalanche predators kraken coyotes canadiens sabres athletics guardians orioles royals rays tigers twins angels reds cubs mets braves astros padres nationals mariners pirates phillies yankees brewers rockies marlins diamondbacks dodgers wolves villa palace crew union revolution timbers galaxy rapids dynamo sounders whitecaps earthquakes mammoth blazers sixers raptors cavaliers bucks grizzlies pacers".split(separator: " ").map(String.init))
+    static let sportsCommon: Set<String> = Set("riders elks als argos bombers stamps alouettes heat magic jazz thunder wild kings nets suns spurs warriors hawks bulls bears giants cardinals panthers rangers jets stars rockets nuggets pelicans clippers wizards hornets pistons titans chiefs chargers raiders packers vikings lions cowboys eagles falcons saints rams dolphins patriots colts broncos bills ravens steelers texans jaguars browns bengals seahawks commanders buccaneers lightning flames senators bruins blues ducks sharks devils hurricanes capitals islanders flyers avalanche predators kraken coyotes canadiens sabres athletics guardians orioles royals rays tigers twins angels reds cubs mets braves astros padres nationals mariners pirates phillies yankees brewers rockies marlins diamondbacks dodgers wolves villa palace crew union revolution timbers galaxy rapids dynamo sounders whitecaps earthquakes mammoth blazers sixers raptors cavaliers bucks grizzlies pacers".split(separator: " ").map(String.init))
 
     /// Alias (folded) to the leagues and folded names it stands for, in league order.
     static let sportsIndex: [String: [(league: String, keys: Set<String>)]] = {
@@ -79,7 +85,7 @@ extension QueryEngine {
         return "(?:^|[^a-z0-9])(" + escaped.joined(separator: "|") + ")(?![a-z0-9])"
     }()
 
-    static let sportsLeaguePattern = #"^(?:(?:today's|todays|latest|recent|last night's)\s+)?(nba|nfl|mlb|nhl|mls|epl|premier league)\s+(?:scores?|results?|games?)$"#
+    static let sportsLeaguePattern = #"^(?:(?:today's|todays|latest|recent|last night's)\s+)?(nba|nfl|mlb|nhl|mls|cfl|epl|premier league)\s+(?:scores?|results?|games?)$"#
     /// A score word. "win" and "game" count; "history" and "coach" do not, so they never reach a scoreboard.
     static let sportsIntentPattern = #"\b(scores?|scored|won|wins?|winner|lose|loses|lost|loss|beat|beats|beaten|games?|results?|final|finals|playing|match|tonight|last night)\b"#
     /// Questions about the future, opinions, rosters and news are never a score lookup.
@@ -281,7 +287,7 @@ extension QueryEngine {
             let title = "\(l.name) scores"
             func card(_ events: [SportsEvent], dated: Bool) -> SportsCard {
                 let games = events.prefix(8).map { Self.gameRow($0, ours: nil, league: league, now: now, tz: tz, dated: dated) }
-                return SportsCard(title: title, league: l.name, games: games, outcome: .found, url: l.url, asOf: fresh)
+                return SportsCard(title: title, league: l.name, games: games, outcome: .found, url: l.url, asOf: fresh, source: l.source)
             }
             for back in days {
                 guard let events = await sportsBoard(league, Self.sportsDay(now, back: back, tz: tz), session) else { failed = true; continue }
@@ -306,7 +312,8 @@ extension QueryEngine {
             let id = hit.event.competitions?.first?.competitors?[hit.index].team?.id
             let next = Self.sportsState(hit.event) == "post" ? await sportsNext(league, id, now: now, tz: tz, session) : nil
             return SportsCard(title: title, league: nil, games: [game] + (next.map { [$0] } ?? []), outcome: .found,
-                              url: Self.sportsLeagues[league]?.url ?? "https://www.espn.com", asOf: fresh)
+                              url: Self.sportsLeagues[league]?.url ?? "https://www.espn.com", asOf: fresh,
+                              source: Self.sportsLeagues[league]?.source ?? "ESPN")
         }
         for back in days {
             for entry in ask.teams {
@@ -345,7 +352,7 @@ extension QueryEngine {
     }
 
     private func sportsNext(_ league: String, _ teamID: String?, now: Date, tz: TimeZone?, _ session: URLSession) async -> SportsGame? {
-        guard let teamID, let l = Self.sportsLeagues[league],
+        guard let teamID, let l = Self.sportsLeagues[league], l.tsdb == nil,
               let url = URL(string: "https://site.api.espn.com/apis/site/v2/sports/\(l.path)/teams/\(teamID)") else { return nil }
         var request = URLRequest(url: url)
         request.timeoutInterval = Self.sportsTimeout
@@ -357,6 +364,7 @@ extension QueryEngine {
     /// One league's events for one day (ymd), or the current scoreboard when ymd is nil: an array (possibly empty),
     /// or nil when the request failed.
     private func sportsBoard(_ league: String, _ ymd: String?, _ session: URLSession) async -> [SportsEvent]? {
+        if let id = Self.sportsLeagues[league]?.tsdb { return await tsdbBoard(id, ymd, session) }
         guard let l = Self.sportsLeagues[league],
               let url = URL(string: "https://site.api.espn.com/apis/site/v2/sports/\(l.path)/scoreboard" + (ymd.map { "?dates=\($0)" } ?? "")) else { return nil }
         var request = URLRequest(url: url)
@@ -366,6 +374,49 @@ extension QueryEngine {
               let board = try? JSONDecoder().decode(SportsEvent.Board.self, from: data) else { return nil }
         return board.events
     }
+}
+
+extension QueryEngine {
+    /// TheSportsDB (free key 123): one day's games, or with no day its last and next game, as ESPN-shaped events.
+    fileprivate func tsdbBoard(_ id: String, _ ymd: String?, _ session: URLSession) async -> [SportsEvent]? {
+        let queries = ymd.map { y in ["eventsday.php?d=\(y.prefix(4))-\(y.dropFirst(4).prefix(2))-\(y.suffix(2))&l=\(id)"] }
+            ?? ["eventspastleague.php?id=\(id)", "eventsnextleague.php?id=\(id)"]
+        var out: [SportsEvent] = []
+        for q in queries {
+            guard let url = URL(string: "https://www.thesportsdb.com/api/v1/json/123/" + q) else { return nil }
+            var request = URLRequest(url: url)
+            request.timeoutInterval = Self.sportsTimeout
+            guard let (data, response) = try? await session.data(for: request),
+                  (response as? HTTPURLResponse)?.statusCode == 200,
+                  let page = try? JSONDecoder().decode(TSDBPage.self, from: data) else { return nil }
+            out += (page.events ?? []).map(Self.tsdbEvent)
+        }
+        return out
+    }
+
+    /// strTimestamp is UTC. FT and AOT are finals, NS (or nothing) not started, anything else in play.
+    static func tsdbEvent(_ e: TSDBEvent) -> SportsEvent {
+        let status = e.strStatus ?? ""
+        let done = ["FT", "AOT", "AET"].contains(status), pre = status.isEmpty || status == "NS"
+        let state = done ? "post" : pre ? "pre" : "in"
+        func side(_ name: String?, _ score: String?, _ other: String?, _ homeAway: String) -> SportsEvent.Competitor {
+            let won = done && (Double(score ?? "") ?? 0) > (Double(other ?? "") ?? 0)
+            return SportsEvent.Competitor(homeAway: homeAway, score: LooseText(score ?? ""), winner: won,
+                                          team: SportsEvent.Team(displayName: name, shortDisplayName: name, name: name))
+        }
+        let stamp = e.strTimestamp ?? "\(e.dateEvent ?? "")T\(e.strTime ?? "00:00:00")"
+        let type = SportsEvent.StatusType(name: nil, state: state, detail: done ? (status == "FT" ? "Final" : "Final/OT") : nil,
+                                          shortDetail: state == "in" ? status : nil)
+        return SportsEvent(date: stamp.hasSuffix("Z") ? stamp : stamp + "Z", status: SportsEvent.Status(period: nil, displayClock: nil, type: type),
+                           competitions: [SportsEvent.Competition(competitors: [side(e.strHomeTeam, e.intHomeScore, e.intAwayScore, "home"),
+                                                                                side(e.strAwayTeam, e.intAwayScore, e.intHomeScore, "away")])])
+    }
+}
+
+/// The fields of a TheSportsDB event the CFL card reads.
+struct TSDBPage: Decodable { let events: [TSDBEvent]? }
+struct TSDBEvent: Decodable {
+    let strTimestamp, dateEvent, strTime, strStatus, strHomeTeam, strAwayTeam, intHomeScore, intAwayScore: String?
 }
 
 /// The parts of ESPN's scoreboard the card reads. Every field is optional, so a game with a missing part still shows.
@@ -406,6 +457,8 @@ struct SportsEvent: Decodable {
 /// ESPN sends a score as a string ("19"); a number is read the same way. Anything else is no score.
 struct LooseText: Decodable {
     let text: String
+
+    init(_ text: String) { self.text = text }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.singleValueContainer()
