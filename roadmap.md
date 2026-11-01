@@ -59,12 +59,12 @@ has a theme; its last slice is the major's release (tag, notes, landing, README,
 
 ### v41-v50 Follow-ups: a short conversation, kept on the device
 
-- [ ] [Sonnet] Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web.
+- [x] [Sonnet] Follow-ups ("and in celsius?", "who was before him?") on iOS, Mac and Kotlin, matching the web. (9.8.0)
 - [ ] [Sonnet] Math shows its steps for algebra and calculus, offline.
 
 ### v51-v60 Everywhere: Nimble wherever a question starts
 
-- [ ] [Sonnet] Widgets: a home screen ask box and a "question of the day".
+- [x] [Sonnet] Widgets: a home screen ask box and a "question of the day". (built 11-01, ships with the next store build)
 - [ ] [Sonnet] Apple Watch answers by voice with the same exam score as the phone.
 - [ ] [Haiku] Linux packages (deb, rpm, flatpak) from the KMP desktop build.
 
