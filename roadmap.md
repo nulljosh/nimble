@@ -224,5 +224,5 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 ## Ingested 2026-10-21
 
 ## Ingested 2026-10-30
-- [ ] Needs rename (not 'nimble answers')
+- [ ] (blocked: naming is Joshua's pick, 2026-11-01) Needs rename (not 'nimble answers')
 - [x] (11-01: lightbulb with a face in all four poses on web, iOS, Mac and Android; scripts/nim-poses.py draws it) Remove the Chinese girl mascot, make the lightbulb the mascot
