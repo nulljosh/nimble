@@ -218,4 +218,3 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 ## Ingested 2026-10-21
 
 ## Ingested 2026-10-30
-- [ ] (blocked: naming is Joshua's pick, 2026-11-01) Needs rename (not 'nimble answers')
