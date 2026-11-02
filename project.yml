@@ -206,3 +206,25 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.tests
         GENERATE_INFOPLIST_FILE: YES
+  # Xcode's accessibility audit (labels, contrast, Dynamic Type clipping, hit regions) on the iPhone app.
+  NimbleUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: UITests
+    dependencies:
+      - target: Nimble-iOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nulljosh.nimble.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Nimble-iOS
+schemes:
+  NimbleAudit:
+    build:
+      targets:
+        Nimble-iOS: all
+        NimbleUITests: [test]
+    test:
+      targets: [NimbleUITests]

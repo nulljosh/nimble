@@ -197,6 +197,7 @@ struct ResultView: View {
 struct TextAnswerView: View {
     @Environment(AppState.self) private var state
     @Environment(\.openURL) private var openURL
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let heading: String?
     let answer: String
     let source: String
@@ -342,7 +343,7 @@ struct TextAnswerView: View {
         } footer: {
             if whyText != nil {
                 Button {
-                    withAnimation(.easeOut(duration: 0.2)) { showWhy.toggle() }
+                    withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { showWhy.toggle() }
                 } label: {
                     HStack(spacing: 8) {
                         Text(sourceLabel)

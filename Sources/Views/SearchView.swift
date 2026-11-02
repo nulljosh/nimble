@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(AppState.self) private var state
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @FocusState private var isInputFocused: Bool
     /// The History list takes the place of the answer until Back, Escape or a row is asked again.
     @State private var showingHistory = false
@@ -45,7 +46,7 @@ struct SearchView: View {
                     .environment(state)
                     .padding(.horizontal, 18)
                     .padding(.bottom, 14)
-                    .animation(.spring(duration: 0.3), value: state.result == .loading)
+                    .animation(reduceMotion ? nil : .spring(duration: 0.3), value: state.result == .loading)
             } else if !state.askingAIConsent, !state.history.entries.isEmpty {
                 // Recent searches, only while the HUD has no answer on screen.
                 RecentList(title: "RECENT", items: state.history.entries.prefix(5).map(\.q), size: 14, onClear: { state.clearHistory() })

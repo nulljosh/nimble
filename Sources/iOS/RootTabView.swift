@@ -8,7 +8,8 @@ struct RootTabView: View {
 
     init() {
         // Tab labels in the Nimble face at the web's small size. The bar takes the screens' background.
-        let font = UIFont(name: "NimbleSans-Regular", size: 12) ?? .systemFont(ofSize: 12)
+        // Scaled with Dynamic Type from the caption size, like the system tab bar.
+        let font = UIFontMetrics(forTextStyle: .caption1).scaledFont(for: UIFont(name: "NimbleSans-Regular", size: 12) ?? .systemFont(ofSize: 12))
         let appearance = UITabBarAppearance()
         appearance.configureWithOpaqueBackground()
         appearance.backgroundColor = UIColor(Color.bg)

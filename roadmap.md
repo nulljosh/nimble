@@ -34,7 +34,7 @@ feature and a real domain (getnimbleapp.com or nimbleapp.com; buy via /buy-domai
 settled). Web stays free with the $1 unlock through Stripe. Decide pricing shape at v8 (private
 mode is the premium feature), buy the domain at v9, flip the switch at v10.
 
-- [ ] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces. 2026-11-01: web done, axe-core WCAG 2.1 AA plus best practice, zero violations on /, /app, /privacy, /brand, /status and /splash in light and dark, live. Left: VoiceOver and Dynamic Type on iPhone, Mac and Watch.
+- [ ] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces. 2026-11-01: web done, axe-core WCAG 2.1 AA plus best practice, zero violations on /, /app, /privacy, /brand, /status and /splash in light and dark, live. Left: VoiceOver and Dynamic Type on iPhone, Mac and Watch. 11-01 night: Reduce Motion guards on the three animations, tab labels scale with Dynamic Type, and `NimbleAudit` (UITests/AccessibilityAuditTests.swift, Xcode performAccessibilityAudit on every tab at L and AX-XXXL) runs on the iPhone 17 Pro sim: 13 findings left, contrast and Dynamic Type clipping. Fix those, then the audit is the gate.
 - [ ] [Opus] 10.0 launch: Product Hunt, HN (when the account allows), release notes, and the What's New that explains what a decade of versions bought you in one screen.
 
 ## Loop to v100 (from 9.10, 2026-10-18)

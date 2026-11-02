@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @Environment(AppState.self) private var state
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @FocusState private var isInputFocused: Bool
     @AppStorage("whats_new_seen_version", store: NimbleStorage.defaults()) private var whatsNewSeenVersion = ""
@@ -29,7 +30,7 @@ struct SearchView: View {
                             }
                         }
                         .padding(.top, 24)
-                        .animation(.spring(duration: 0.3), value: state.result == .loading)
+                        .animation(reduceMotion ? nil : .spring(duration: 0.3), value: state.result == .loading)
 
                         Text("Math, units and graphs work offline. Everything else gets one sentence and a source.")
                             .font(.nimbleSmall)
