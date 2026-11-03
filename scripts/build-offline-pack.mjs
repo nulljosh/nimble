@@ -125,7 +125,8 @@ async function vitalTitles() {
 }
 
 async function candidates() {
-  const { y, m } = lastCompleteMonth();
+  // The monthly top list lands a few days after the month ends (404 on Nov 3), so look from a week back.
+  const { y, m } = lastCompleteMonth(new Date(Date.now() - 7 * 86400000));
   const ym = `${y}/${pad(m)}`;
   const monthly = await cachedGet(`month:${ym}`, `${BASE}/${ym}/all-days`);
   if (monthly.status !== 200) throw new Error(`monthly pageviews failed: ${monthly.status}`);
