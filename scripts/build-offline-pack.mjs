@@ -74,7 +74,7 @@ async function cachedGet(key, url) {
     try { return JSON.parse(readFileSync(file, "utf8")); } catch { unlinkSync(file); } // a run killed mid-write: refetch
   }
   const res = await politeGet(url);
-  if (res.status === 0) return res; // transient failure: not cached, next run retries it
+  if (res.status !== 200) return res; // failures and not-yet-published lists (404) stay uncached, next run retries them
   writeFileSync(file, JSON.stringify(res));
   return res;
 }
@@ -125,10 +125,15 @@ async function vitalTitles() {
 }
 
 async function candidates() {
-  // The monthly top list lands a few days after the month ends (404 on Nov 3), so look from a week back.
-  const { y, m } = lastCompleteMonth(new Date(Date.now() - 7 * 86400000));
-  const ym = `${y}/${pad(m)}`;
-  const monthly = await cachedGet(`month:${ym}`, `${BASE}/${ym}/all-days`);
+  // The monthly top list lands a few days after the month ends (404 on Nov 3), so fall back a month.
+  let monthly, ym;
+  for (const back of [0, 1]) {
+    const now = new Date();
+    const { y, m } = lastCompleteMonth(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - back, 1)));
+    ym = `${y}/${pad(m)}`;
+    monthly = await cachedGet(`month:${ym}`, `${BASE}/${ym}/all-days`);
+    if (monthly.status === 200) break;
+  }
   if (monthly.status !== 200) throw new Error(`monthly pageviews failed: ${monthly.status}`);
   const score = new Map();
   for (const a of monthly.body.items[0].articles) if (isArticleTitle(a.article)) score.set(a.article, a.views);
