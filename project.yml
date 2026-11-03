@@ -221,6 +221,15 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         TEST_TARGET_NAME: Nimble-iOS
 schemes:
+  # A shared scheme stops xcodebuild auto-creating the others, so the app schemes are listed too.
+  Nimble:
+    build:
+      targets:
+        Nimble: all
+  Nimble-iOS:
+    build:
+      targets:
+        Nimble-iOS: all
   NimbleAudit:
     build:
       targets:
