@@ -34,7 +34,7 @@ struct AIEngineSettings: View {
             #endif
             Text("Your key stays on this device and is sent only to \(state.ai.engine.displayName).")
                 .font(.nimbleSmall)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color.dim)
         }
     }
 }
@@ -61,12 +61,12 @@ private struct SamanthaStatusRow: View {
                         Text(String(localized: "Samantha is running"))
                         Text(model)
                             .font(.nimbleSmall)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.dim)
                             .lineLimit(1)
                             .truncationMode(.middle)
                     case .unknown:
                         Text(String(localized: "Checking Samantha"))
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.dim)
                     case .down:
                         Text(String(localized: "Samantha is not running"))
                     }
@@ -76,7 +76,7 @@ private struct SamanthaStatusRow: View {
             HStack(spacing: 8) {
                 if let latency = status.lastLatency {
                     Text(String(localized: "Last answer: \(String(format: "%.1fs", latency))"))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color.dim)
                 }
                 Spacer(minLength: 0)
                 if !isRunning, status.state != .unknown {

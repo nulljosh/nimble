@@ -527,11 +527,13 @@ struct AnswerCard<Content: View, Footer: View>: View {
 /// Small caps label in the accent: "ANSWER", "BEFORE I ANSWER", "RECENT".
 struct Eyebrow: View {
     let text: LocalizedStringKey
+    // The letter spacing grows with the type, or large sizes read as cramped and the audit flags it.
+    @ScaledMetric(relativeTo: .caption2) private var tracking = 1.3
 
     var body: some View {
         Text(text)
             .font(.nimbleEyebrow)
-            .tracking(1.3)
+            .tracking(tracking)
             .textCase(.uppercase)
             .foregroundStyle(Color.text)
             .accessibilityAddTraits(.isHeader)
@@ -563,20 +565,29 @@ struct ConsentCard: View {
             }
             .accessibilityElement(children: .combine)
             buttons {
-                Button("Allow") { state.answerAIConsent(true) }
-                    .font(.nimbleSubheadBold)
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 10)
-                    .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
-                    .buttonStyle(.plain)
-                Button("Don't Allow") { state.answerAIConsent(false) }
-                    .font(.nimbleSubheadMedium)
-                    .foregroundStyle(Color.text)
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 10)
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.hairline, lineWidth: 1))
-                    .buttonStyle(.plain)
+                // Padding sits inside the label so the whole pill is the tap target, at least 44 points tall.
+                Button { state.answerAIConsent(true) } label: {
+                    Text("Allow")
+                        .font(.nimbleSubheadBold)
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .frame(minHeight: 44)
+                        .background(Color.bulb, in: RoundedRectangle(cornerRadius: 10))
+                        .contentShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
+                Button { state.answerAIConsent(false) } label: {
+                    Text("Don't Allow")
+                        .font(.nimbleSubheadMedium)
+                        .foregroundStyle(Color.text)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
+                        .frame(minHeight: 44)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.hairline, lineWidth: 1))
+                        .contentShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .buttonStyle(.plain)
             }
         }
         .padding(24)

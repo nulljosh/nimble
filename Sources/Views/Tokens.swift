@@ -13,8 +13,9 @@ extension Color {
     static let text = adaptive(light: 0x1d1d1f, dark: 0xf5f5f7)
     /// Text at 72%.
     static let soft = adaptive(light: 0x1d1d1f, dark: 0xf5f5f7, alpha: 0.72)
-    /// Text at 60%. Not named `secondary`, which would shadow SwiftUI's own.
-    static let dim = adaptive(light: 0x1d1d1f, dark: 0xf5f5f7, alpha: 0.6)
+    /// Text at 64%, the lightest that still clears 4.5:1 on white (60% came in just under).
+    /// Not named `secondary`, which would shadow SwiftUI's own.
+    static let dim = adaptive(light: 0x1d1d1f, dark: 0xf5f5f7, alpha: 0.64)
     static let hairline = adaptive(light: 0xe5e5ea, dark: 0x38383a)
     static let bulb = adaptive(light: 0xffca30, dark: 0xffca30)
     static let bulbDeep = adaptive(light: 0xffca30, dark: 0xffca30)  // marks only (icons, strokes, tint); text stays Color.text

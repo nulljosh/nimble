@@ -52,7 +52,8 @@ struct SearchView: View {
                     if UserDefaults.standard.bool(forKey: "shotDisagree") { state.aiConsent = true }
                     state.queryText = q; state.performQuery(); return
                 }
-                guard whatsNewSeenVersion == whatsNewVersion else { return }
+                // A first launch opens on the consent card; the keyboard would cover it and its buttons.
+                guard whatsNewSeenVersion == whatsNewVersion, !state.askingAIConsent else { return }
                 isInputFocused = true
             }
             // The consent card's Allow button sat behind the keyboard; drop it while the card shows.

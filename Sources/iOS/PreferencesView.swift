@@ -78,6 +78,7 @@ struct PreferencesView: View {
                 ))
             } footer: {
                 Text("When on, the text you type is sent to \(state.aiRecipient). Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.")
+                    .foregroundStyle(Color.dim)
             }
 
             Section("AI Engine") {
