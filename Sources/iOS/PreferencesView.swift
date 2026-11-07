@@ -7,7 +7,7 @@ struct PreferencesView: View {
         @Bindable var state = state
 
         List {
-            Section("Accent") {
+            Section {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 4) {
                     ForEach(NimbleTheme.allCases, id: \.self) { theme in
                         Button {
@@ -32,9 +32,9 @@ struct PreferencesView: View {
                     }
                 }
                 .padding(.vertical, 4)
-            }
+            } header: { SectionHeader("Accent") }
 
-            Section(String(localized: "Mascot")) {
+            Section {
                 HStack(spacing: 12) {
                     Picker(String(localized: "Mascot"), selection: $state.mascot) {
                         Text(verbatim: "Bulb").tag("nim")
@@ -50,9 +50,9 @@ struct PreferencesView: View {
                         .frame(width: 28, height: 28)
                         .accessibilityHidden(true)
                 }
-            }
+            } header: { SectionHeader("Mascot") }
 
-            Section("Preferences") {
+            Section {
                 Toggle("Offline Math", isOn: Binding(
                     get: { state.mathEnabled },
                     set: { state.mathEnabled = $0; state.savePreferences() }
@@ -65,11 +65,11 @@ struct PreferencesView: View {
                     get: { state.defaultSuggestions },
                     set: { state.defaultSuggestions = $0; state.savePreferences() }
                 ))
-            }
+            } header: { SectionHeader("Preferences") }
 
-            Section("Offline answers") {
+            Section {
                 OfflineAnswersRow(store: state.offlinePack)
-            }
+            } header: { SectionHeader("Offline answers") }
 
             Section {
                 Toggle("AI Answers", isOn: Binding(
@@ -78,12 +78,13 @@ struct PreferencesView: View {
                 ))
             } footer: {
                 Text("When on, the text you type is sent to \(state.aiRecipient). Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.")
-                    .foregroundStyle(Color.dim)
+                    .font(.nimbleCaption)
+                    .foregroundStyle(Color.text) // the footer runs under the tab bar, where anything lighter fails 4.5:1
             }
 
-            Section("AI Engine") {
+            Section {
                 AIEngineSettings(state: state)
-            }
+            } header: { SectionHeader("AI Engine") }
             .onDisappear { state.savePreferences() }
 
             Section {
@@ -94,4 +95,12 @@ struct PreferencesView: View {
         }
         .navigationTitle("Settings")
     }
+}
+
+/// The system section header's grey sits just under 4.5:1 on the grouped background, so headers use the soft text colour.
+private struct SectionHeader: View {
+    let title: LocalizedStringKey
+    init(_ title: LocalizedStringKey) { self.title = title }
+    // A named text style, so the header scales with Dynamic Type instead of the list's fixed header size.
+    var body: some View { Text(title).font(.nimbleCaptionMedium).foregroundStyle(Color.soft) }
 }

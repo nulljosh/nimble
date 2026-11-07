@@ -70,7 +70,7 @@ extension Font {
     static let nimbleCaptionMedium = nimble(13, .medium, relativeTo: .footnote)
     static let nimbleSmall = nimble(12, .regular, relativeTo: .caption)
     static let nimbleFine = nimble(11, .regular, relativeTo: .caption2)
-    static let nimbleEyebrow = nimble(11, .bold, relativeTo: .caption2)
+    static let nimbleEyebrow = nimble(11, .bold, relativeTo: .caption)
     static let nimbleMicro = nimble(10, .semibold, relativeTo: .caption2)
 }
 

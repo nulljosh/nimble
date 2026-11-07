@@ -21,10 +21,10 @@ struct AIEngineSettings: View {
                 SecureField("API key", text: $state.ai.apiKey)
                     .onSubmit { state.savePreferences() }
             }
-            TextField("Model", text: $state.ai.model, prompt: Text(state.ai.engine.defaultModel))
+            TextField("Model", text: $state.ai.model, prompt: Text(state.ai.engine.defaultModel).foregroundStyle(Color.dim))
                 .onSubmit { state.savePreferences() }
             if state.ai.engine == .ollama || state.ai.engine == .samantha {
-                TextField("Server", text: $state.ai.baseURL, prompt: Text(state.ai.engine.defaultBaseURL))
+                TextField("Server", text: $state.ai.baseURL, prompt: Text(state.ai.engine.defaultBaseURL).foregroundStyle(Color.dim))
                     .onSubmit { state.savePreferences() }
             }
             #if os(macOS)

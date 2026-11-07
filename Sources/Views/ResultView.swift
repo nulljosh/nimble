@@ -527,7 +527,7 @@ struct AnswerCard<Content: View, Footer: View>: View {
 /// Small caps label in the accent: "ANSWER", "BEFORE I ANSWER", "RECENT".
 struct Eyebrow: View {
     let text: LocalizedStringKey
-    // The letter spacing grows with the type, or large sizes read as cramped and the audit flags it.
+    // The letter spacing grows with the type, or large sizes read as cramped.
     @ScaledMetric(relativeTo: .caption2) private var tracking = 1.3
 
     var body: some View {
