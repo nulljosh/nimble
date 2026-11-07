@@ -84,6 +84,7 @@ struct PreferencesView: View {
 
             Section {
                 AIEngineSettings(state: state)
+                    .tint(Color.soft) // the picker's value text
             } header: { SectionHeader("AI Engine") }
             .onDisappear { state.savePreferences() }
 
@@ -92,6 +93,7 @@ struct PreferencesView: View {
                 Button("Copy Search Link") { state.copySearchLink() }
                 Button("Open in DuckDuckGo") { state.openInDDG() }
             }
+            .tint(Color.text) // the yellow accent on white fails 4.5:1 for text buttons
         }
         .navigationTitle("Settings")
     }
