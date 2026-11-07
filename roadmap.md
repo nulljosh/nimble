@@ -218,3 +218,4 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 ## Ingested 2026-10-21
 
 ## Ingested 2026-10-30
+- [x] 2026-11-07: 10.2.0 tagged, GitHub release out, iPhone (build 113) and Mac (202611071351) WAITING_FOR_REVIEW.
