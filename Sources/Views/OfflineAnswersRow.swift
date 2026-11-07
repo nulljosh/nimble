@@ -11,7 +11,7 @@ struct OfflineAnswersRow: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("The opening lines of the 9,000 most-read Wikipedia articles. Download once, on your tap. Answers work with no network.")
                 .font(compact ? .nimbleSmall : .nimbleSubhead)
-                .foregroundStyle(Color.dim)
+                .foregroundStyle(Color.soft)
                 .fixedSize(horizontal: false, vertical: true)
 
             switch store.phase {
@@ -19,7 +19,7 @@ struct OfflineAnswersRow: View {
                 if store.phase == .failed {
                     Text("Could not download the offline pack. Try again on a connection.")
                         .font(compact ? .nimbleSmall : .nimbleSubhead)
-                        .foregroundStyle(Color.dim)
+                        .foregroundStyle(Color.soft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Button(downloadLabel) {
@@ -36,7 +36,7 @@ struct OfflineAnswersRow: View {
                     .tint(Color.bulbDeep)
                 Text("Downloading \(Int((fraction * 100).rounded())) percent")
                     .font(compact ? .nimbleSmall : .nimbleSubhead)
-                    .foregroundStyle(Color.dim)
+                    .foregroundStyle(Color.soft)
                     .monospacedDigit()
                     .frame(minHeight: 44, alignment: .leading)
 

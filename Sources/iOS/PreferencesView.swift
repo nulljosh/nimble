@@ -76,17 +76,14 @@ struct PreferencesView: View {
                     get: { state.aiConsent == true },
                     set: { state.aiConsent = $0; state.savePreferences() }
                 ))
-            } footer: {
                 Text("When on, the text you type is sent to \(state.aiRecipient). Nothing else is sent. When off, answers come from DuckDuckGo and Wikipedia only.")
                     .font(.nimbleCaption)
-                    .foregroundStyle(Color.text) // the footer runs under the tab bar, where anything lighter fails 4.5:1
-            }
-
-            Section {
+                    .foregroundStyle(Color.soft) // in the row, not a Section footer: list footers did not scale with Dynamic Type
                 AIEngineSettings(state: state)
-                    .tint(Color.soft) // the picker's value text
-            } header: { SectionHeader("AI Engine") }
-            .onDisappear { state.savePreferences() }
+                    .pickerStyle(.navigationLink) // a menu picker's value label is fixed size and flagged as clipped
+                    .foregroundStyle(Color.text, Color.soft) // the value is drawn in the secondary style; system grey is just under 4.5:1
+                    .onDisappear { state.savePreferences() }
+            }
 
             Section {
                 Button("Copy Result") { state.copyResultText() }

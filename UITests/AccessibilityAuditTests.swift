@@ -13,9 +13,14 @@ final class AccessibilityAuditTests: XCTestCase {
                 if tabs.count > i { tabs.element(boundBy: i).tap() }
                 // Audit, then scroll and audit again so rows that started below the tab bar are checked on screen.
                 for pass in 0..<2 {
-                    if pass == 1 { app.swipeUp(); app.swipeUp(); sleep(2) } // let the scroll settle before measuring
-                    let visible = CGRect(x: 0, y: 0, width: app.frame.width,
-                                         height: app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.height)
+                    if pass == 1 {
+                        guard app.collectionViews.firstMatch.exists else { break } // nothing to scroll on this tab
+                        app.swipeUp(); app.swipeUp(); sleep(2) // let the scroll settle before measuring
+                    }
+                    // On screen and clear of the bars: the navigation bar on top, the tab bar below.
+                    let top = app.navigationBars.firstMatch.exists ? app.navigationBars.firstMatch.frame.maxY : 0
+                    let bottom = app.tabBars.firstMatch.exists ? app.tabBars.firstMatch.frame.minY : app.frame.height
+                    let visible = CGRect(x: 0, y: top, width: app.frame.width, height: bottom - top)
                     try app.performAccessibilityAudit { issue in
                         let e = issue.element
                         // Contrast can't be measured on an element that is off screen or under the tab bar; the other pass covers it.
