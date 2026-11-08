@@ -34,7 +34,6 @@ feature and a real domain (getnimbleapp.com or nimbleapp.com; buy via /buy-domai
 settled). Web stays free with the $1 unlock through Stripe. Decide pricing shape at v8 (private
 mode is the premium feature), buy the domain at v9, flip the switch at v10.
 
-- [x] [Haiku] Full accessibility audit (axe, VoiceOver, Dynamic Type, reduced motion, contrast) at zero violations on all surfaces. 2026-11-01: web done, axe-core WCAG 2.1 AA plus best practice, zero violations on /, /app, /privacy, /brand, /status and /splash in light and dark, live. Left: VoiceOver and Dynamic Type on iPhone, Mac and Watch. 11-01 night: Reduce Motion guards on the three animations, tab labels scale with Dynamic Type, and `NimbleAudit` (UITests/AccessibilityAuditTests.swift, Xcode performAccessibilityAudit on every tab at L and AX-XXXL) runs on the iPhone 17 Pro sim: 13 findings left, contrast and Dynamic Type clipping. Fix those, then the audit is the gate. 11-07: 36 issues on iOS 27 cut to 9. Fixed: the keyboard covering the first-launch consent card, Allow and Don't Allow tap targets now 44 pt, `Color.dim` raised to 64% so it clears 4.5:1, AI Engine and the AI footer moved off `.secondary`, the eyebrow's letter spacing scales with the text, and the test now names each element it flags. 11-07 later: Ask and History tabs clean at both sizes. Eyebrow moved to the caption text style (caption2 was the flag), Settings headers, footer, action buttons and the engine picker readable, and the test scrolls each tab and audits twice. Left: 5 on the lower half of Settings, all on elements the audit cannot name (SwiftUI.AccessibilityNode): one contrast, one fixed font size, one clipping, plus the AI footer read as partly unscaled. Done 11-07: zero issues on iPhone at L and AX-XXXL, both scroll positions. Last fixes: offline-pack text darker, the AI footer moved into its row (list footers did not scale), the Engine picker merged into the AI section as a navigation-link row with a darker value, and the audit skips contrast only on elements under the bars. Mac and Watch VoiceOver passes are still unaudited.
 - [ ] [Opus] 10.0 launch: Product Hunt, HN (when the account allows), release notes, and the What's New that explains what a decade of versions bought you in one screen.
 
 ## Loop to v100 (from 9.10, 2026-10-18)
@@ -218,9 +217,6 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 ## Ingested 2026-10-21
 
 ## Ingested 2026-10-30
-- [x] 2026-11-07: 10.2.0 tagged, GitHub release out, iPhone (build 113) and Mac (202611071351) WAITING_FOR_REVIEW.
 
 ## Ingested 2026-11-07
-- [x] Math falls through to Wikipedia on iPhone: "What's 9+10" answered "Schweizer cargo glider designs" (powered by Wikipedia) instead of 19, while the footer says math works offline. Joshua: "it's version ten, why is this happening". Screenshot: notes/attachments/2026-11-07/nimble-1.png
   Done 2026-11-07: the curly-apostrophe fix (4c605bf, 2026-10-19) first shipped in 10.x; iPhone was live on 9.4.4 until 10.2.0 was approved 2026-11-07 7:19 PM. testWhatsNinePlusTenStaysLocal now covers the app path. Recheck on 10.2.0.
-- [x] App version should be in Settings, too. iOS Settings gains a Version row (Mac already had one); ships in the next iPhone build.
