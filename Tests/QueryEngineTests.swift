@@ -166,6 +166,14 @@ final class QueryEngineTests: XCTestCase {
         XCTAssertEqual(engine.evaluateMath("what's 9+10"), "19")
     }
 
+    /// The app path, not just the calculator: "What’s 9+10" answered a Wikipedia glider article on iPhone (2026-11-07).
+    func testWhatsNinePlusTenStaysLocal() {
+        for q in ["What’s 9+10", "What's 9+10", "What’s 9 + 10?", "whats 9+10", "What is 9+10"] {
+            guard case .math(let v, _) = engine.localAnswer(q) else { return XCTFail("\(q) left math") }
+            XCTAssertEqual(v, "19", q)
+        }
+    }
+
     func testLogWithBaseInTheName() {
         XCTAssertEqual(engine.evaluateMath("log10(1000)"), "3")
         XCTAssertEqual(engine.evaluateMath("log2(8)"), "3")

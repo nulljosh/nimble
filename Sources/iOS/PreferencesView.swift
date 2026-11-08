@@ -91,6 +91,11 @@ struct PreferencesView: View {
                 Button("Open in DuckDuckGo") { state.openInDDG() }
             }
             .tint(Color.text) // the yellow accent on white fails 4.5:1 for text buttons
+
+            Section {
+                LabeledContent("Version", value: Bundle.main.marketingVersion)
+                    .foregroundStyle(Color.text, Color.soft)
+            }
         }
         .navigationTitle("Settings")
     }

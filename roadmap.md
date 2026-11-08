@@ -219,3 +219,8 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 
 ## Ingested 2026-10-30
 - [x] 2026-11-07: 10.2.0 tagged, GitHub release out, iPhone (build 113) and Mac (202611071351) WAITING_FOR_REVIEW.
+
+## Ingested 2026-11-07
+- [x] Math falls through to Wikipedia on iPhone: "What's 9+10" answered "Schweizer cargo glider designs" (powered by Wikipedia) instead of 19, while the footer says math works offline. Joshua: "it's version ten, why is this happening". Screenshot: notes/attachments/2026-11-07/nimble-1.png
+  Done 2026-11-07: the curly-apostrophe fix (4c605bf, 2026-10-19) first shipped in 10.x; iPhone was live on 9.4.4 until 10.2.0 was approved 2026-11-07 7:19 PM. testWhatsNinePlusTenStaysLocal now covers the app path. Recheck on 10.2.0.
+- [x] App version should be in Settings, too. iOS Settings gains a Version row (Mac already had one); ships in the next iPhone build.

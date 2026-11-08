@@ -226,6 +226,9 @@ schemes:
     build:
       targets:
         Nimble: all
+        NimbleTests: [test]
+    test:
+      targets: [NimbleTests]
   Nimble-iOS:
     build:
       targets:
