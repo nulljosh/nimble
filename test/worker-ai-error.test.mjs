@@ -21,7 +21,7 @@ async function ask({ throws = {}, answers = {} }) {
   const req = new Request("https://w.example/", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ q: "capital of france" }) });
   return (await worker.fetch(req, env)).json();
 }
-const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
+const QWEN = "@cf/qwen/qwen3.8-27b";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 
 test("both models failing on quota reports the error as aiError", async () => {

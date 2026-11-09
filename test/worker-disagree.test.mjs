@@ -4,7 +4,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import worker, { agree, disagreement } from "../worker/worker.js";
 
-const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
+const QWEN = "@cf/qwen/qwen3.8-27b";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 const realFetch = globalThis.fetch;
 test.after(() => { globalThis.fetch = realFetch; });

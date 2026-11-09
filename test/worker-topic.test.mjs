@@ -49,7 +49,7 @@ test.after(() => { globalThis.fetch = realFetch; });
 test("an answer with a photo names the page the photo came from as topic", async () => {
   const { j } = await run("who wrote hamlet", {
     wiki: [HAMLET, SHAKE],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "Hamlet was written by William Shakespeare.", "@cf/google/gemma-4-26b-a4b-it": "Hamlet was written by William Shakespeare." },
+    answers: { "@cf/qwen/qwen3.8-27b": "Hamlet was written by William Shakespeare.", "@cf/google/gemma-4-26b-a4b-it": "Hamlet was written by William Shakespeare." },
   });
   assert.equal(j.answer, "Hamlet was written by William Shakespeare.");
   assert.equal(j.topic, "William Shakespeare", "the photo's page is the credit: the answer's entity");
@@ -64,7 +64,7 @@ test("without a photo, topic falls back to the first grounding page", async () =
   const noPic = { ...HAMLET, thumbnail: undefined };
   const { j } = await run("who wrote hamlet", {
     wiki: [noPic],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "Hamlet was written by William Shakespeare." },
+    answers: { "@cf/qwen/qwen3.8-27b": "Hamlet was written by William Shakespeare." },
   });
   assert.equal(j.image, undefined);
   assert.equal(j.topic, "Hamlet");
@@ -83,7 +83,7 @@ test("topicUrl uses underscores and encodes the title like the refs do", async (
   const page = { title: "Saint-Germain-des-Prés", index: 1, extract: "Saint-Germain-des-Prés is a district in Paris.", thumbnail: { source: "https://upload.wikimedia.org/a.jpg" } };
   const { j } = await run("what is saint germain", {
     wiki: [page],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "Saint-Germain-des-Prés is a district in Paris." },
+    answers: { "@cf/qwen/qwen3.8-27b": "Saint-Germain-des-Prés is a district in Paris." },
   });
   assert.equal(j.topic, "Saint-Germain-des-Prés");
   assert.equal(j.topicUrl, encodeURI("https://en.wikipedia.org/wiki/Saint-Germain-des-Prés"));
@@ -93,7 +93,7 @@ test("topicUrl uses underscores and encodes the title like the refs do", async (
 test("the grounding rule is sent only when reference text exists", async () => {
   const withRef = await run("capital of france", {
     wiki: [FRANCE],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "The capital of France is Paris." },
+    answers: { "@cf/qwen/qwen3.8-27b": "The capital of France is Paris." },
   });
   assert.match(withRef.seen[0].system, /Do not add a date or figure the reference lacks/);
   const noRef = await run("capital of france", { wiki: [], answers: {} });
@@ -112,7 +112,7 @@ test("the 'since' sentence stays out unless it names an office", async () => {
 test("old clients still get answer, source, image and refs", async () => {
   const { j } = await run("who wrote hamlet", {
     wiki: [HAMLET, SHAKE],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "Hamlet was written by William Shakespeare." },
+    answers: { "@cf/qwen/qwen3.8-27b": "Hamlet was written by William Shakespeare." },
   });
   assert.deepEqual(Object.keys(j).filter((k) => ["answer", "source", "image", "refs", "topic", "topicUrl"].includes(k)).sort(),
     ["answer", "image", "refs", "source", "topic", "topicUrl"]);
@@ -142,7 +142,7 @@ const APPLE_FRUIT = { title: "Apple", index: 1, extract: "An apple is a round, e
 test("largest planet: the photo is Jupiter, the answer's entity, not the Earth page the question found", async () => {
   const { j } = await run("largest planet", {
     wiki: [EARTH, JUPITER],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "Jupiter is the largest planet in the Solar System." },
+    answers: { "@cf/qwen/qwen3.8-27b": "Jupiter is the largest planet in the Solar System." },
   });
   assert.equal(j.image.url, "https://upload.wikimedia.org/jupiter.jpg");
   assert.equal(j.topic, "Jupiter");
@@ -152,7 +152,7 @@ test("largest planet: the photo is Jupiter, the answer's entity, not the Earth p
 test("an answer with no entity gets no photo, even when a search page has one", async () => {
   const { j } = await run("largest planet", {
     wiki: [EARTH],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "It is the biggest one of all." },
+    answers: { "@cf/qwen/qwen3.8-27b": "It is the biggest one of all." },
   });
   assert.equal(j.image, undefined);
 });
@@ -161,7 +161,7 @@ test("an entity page that does not contain the entity gets no photo", async () =
   const other = { title: "Jupiter", index: 1, extract: "A gas giant with a faint ring system.", thumbnail: { source: "https://upload.wikimedia.org/x.jpg" } };
   const { j } = await run("largest planet", {
     wiki: [other],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "Saturn is the largest planet." },
+    answers: { "@cf/qwen/qwen3.8-27b": "Saturn is the largest planet." },
   });
   assert.equal(j.image, undefined);
 });
@@ -169,7 +169,7 @@ test("an entity page that does not contain the entity gets no photo", async () =
 test("an echoed entity needs a shared content word with the answer, so the apple fruit page is no photo for a founder answer", async () => {
   const { j } = await run("who founded apple", {
     wiki: [APPLE_FRUIT],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "Apple was founded by Steve Jobs in 1976." },
+    answers: { "@cf/qwen/qwen3.8-27b": "Apple was founded by Steve Jobs in 1976." },
   });
   assert.equal(j.image, undefined);
 });
@@ -179,7 +179,7 @@ test("a name with a particle stays whole: Leonardo da Vinci, not Vinci", async (
   const vinci = { title: "Vinci", index: 2, extract: "Vinci is a town in Italy.", thumbnail: { source: "https://upload.wikimedia.org/vinci.jpg" } };
   const { j } = await run("who painted the mona lisa", {
     wiki: [vinci, leo],
-    answers: { "@cf/qwen/qwen3-30b-a3b-fp8": "Leonardo da Vinci painted the Mona Lisa." },
+    answers: { "@cf/qwen/qwen3.8-27b": "Leonardo da Vinci painted the Mona Lisa." },
   });
   assert.equal(j.topic, "Leonardo da Vinci");
   assert.equal(j.image.url, "https://upload.wikimedia.org/leo.jpg");

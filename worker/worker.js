@@ -2,7 +2,7 @@
 // (no external API key needed) and synthesizes one answer.
 // POST { "q": "who is the ceo of apple", "turns": [{"q": "...", "a": "..."}] } -> { "answer": "Tim Cook." } or { "answer": "UNKNOWN" }
 // turns is optional: the last three exchanges, so "and in celsius?" has something to refer to.
-const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
+const QWEN = "@cf/qwen/qwen3.8-27b";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 const LLAMA = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 // Groq's free tier, asked first when the GROQ_KEY secret is set: separate daily caps per model and no neurons.

@@ -9,7 +9,7 @@ import worker, {
   NEURONS_PER_CALL, BUDGET_NEURONS, TTL_CACHE, TTL_TIMELY, _resetForTests, NimbleCounts,
 } from "../worker/worker.js";
 
-const QWEN = "@cf/qwen/qwen3-30b-a3b-fp8";
+const QWEN = "@cf/qwen/qwen3.8-27b";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
 const LLAMA = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 const ORIGIN = "https://w.example";
