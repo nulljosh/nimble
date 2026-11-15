@@ -222,3 +222,6 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
   Done 2026-11-07: the curly-apostrophe fix (4c605bf, 2026-10-19) first shipped in 10.x; iPhone was live on 9.4.4 until 10.2.0 was approved 2026-11-07 7:19 PM. testWhatsNinePlusTenStaysLocal now covers the app path. Recheck on 10.2.0.
 
 ## Ingested 2026-11-08
+
+## Ingested 2026-11-14
+- [ ] (Note "Nimble") App Store title is "Nimble Answers", needs a one-word name. Bare "Nimble" was taken (see above), so this means a new single word via `asc-name-creator`, then `rename`.
