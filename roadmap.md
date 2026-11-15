@@ -224,4 +224,4 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 ## Ingested 2026-11-08
 
 ## Ingested 2026-11-14
-- [ ] (Note "Nimble") App Store title is "Nimble Answers", needs a one-word name. Bare "Nimble" was taken (see above), so this means a new single word via `asc-name-creator`, then `rename`.
+- [ ] (Note "Nimble") Bare "Nimble" is held by another account (rechecked 2026-11-14). Variants rejected by Joshua (Nimblest). Store title stays "Nimble Answers" unless Apple grants a name claim.
