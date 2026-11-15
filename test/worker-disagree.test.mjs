@@ -2,7 +2,7 @@
 // answer route is tested with Wikipedia and both models stubbed: a clash adds disagree and alts, and no photo.
 import test from "node:test";
 import assert from "node:assert/strict";
-import worker, { agree, disagreement } from "../worker/worker.js";
+import worker, { agree, disagreement, groundedBy } from "../worker/worker.js";
 
 const QWEN = "@cf/qwen/qwen3.8-27b";
 const GEMMA = "@cf/google/gemma-4-26b-a4b-it";
@@ -50,7 +50,7 @@ test("near-synonyms agree: Tim and Timothy are the same name, and a one-sided ex
 });
 
 // The answer route, with Wikipedia and the models stubbed.
-function ask(q, { wiki = [], answers }) {
+function ask(q, { wiki = [], answers, calls = [], env: extra = {} }) {
   globalThis.fetch = async (url) => {
     url = String(url);
     if (/\/page\/summary\//.test(url)) return new Response("{}", { status: 404 });
@@ -58,7 +58,8 @@ function ask(q, { wiki = [], answers }) {
   };
   const env = {
     RATE_LIMITER: { limit: async () => ({ success: true }) },
-    AI: { run: async (model) => ({ response: answers[model] ?? "UNKNOWN" }) },
+    AI: { run: async (model) => (calls.push(model), answers[model] instanceof Promise ? answers[model] : { response: answers[model] ?? "UNKNOWN" }) },
+    ...extra,
   };
   return worker.fetch(new Request("https://w.example/", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ q }) }), env)
     .then((r) => r.json());
@@ -89,10 +90,50 @@ test("a reference that names one clash token settles it: no disagree, the answer
 
 test("the route adds no disagreement fields when the models agree", async () => {
   const j = await ask("who wrote hamlet, and when?", {
-    wiki: [SHAKE_PHOTO],
+    wiki: [],
     answers: { [QWEN]: "Hamlet was written by William Shakespeare.", [GEMMA]: "Hamlet was written by William Shakespeare." },
   });
   assert.equal(j.disagree, undefined);
   assert.equal(j.alts, undefined);
   assert.equal(j.source, "Gemma + Qwen");
+});
+
+test("groundedBy: the reference names every key fact of the answer", () => {
+  assert.equal(groundedBy("1912.", "RMS Titanic sank on 15 April 1912.", "what year did the titanic sink"), true);
+  assert.equal(groundedBy("The Berlin Wall fell on 9 November 1989.", "The wall opened on 9 November 1989.", "when did the berlin wall come down"), true);
+  assert.equal(groundedBy("1913.", "RMS Titanic sank on 15 April 1912.", "what year did the titanic sink"), false, "a number the page lacks");
+  assert.equal(groundedBy("Yes.", "anything", "is water wet"), false, "no key token, nothing to ground");
+  assert.equal(groundedBy("1912.", "", "what year did the titanic sink"), false, "no reference");
+});
+
+test("same facts in other words agree on the route: no Llama call", async () => {
+  const calls = [];
+  const j = await ask("when did the berlin wall come down", {
+    wiki: [],
+    calls,
+    answers: { [QWEN]: "The Berlin Wall fell on 9 November 1989.", [GEMMA]: "It came down on November 9, 1989." },
+  });
+  assert.equal(j.source, "Gemma + Qwen");
+  assert.equal(calls.length, 2, "Qwen and Gemma only");
+});
+
+test("a page that already names the answer's facts returns it without waiting on the second model", async () => {
+  const j = await ask("what year did the titanic sink", {
+    wiki: [{ title: "Titanic", index: 1, extract: "RMS Titanic sank on 15 April 1912 after striking an iceberg." }],
+    answers: { [QWEN]: "1912.", [GEMMA]: new Promise(() => {}) },
+  });
+  assert.equal(j.answer, "1912.");
+  assert.equal(j.source, "Qwen");
+});
+
+test("a slow second model past its deadline leaves the first answer standing", async () => {
+  const t = Date.now();
+  const j = await ask("when was the eiffel tower finished", {
+    wiki: [],
+    env: { SECOND_WAIT_MS: "50" },
+    answers: { [QWEN]: "The Eiffel Tower was completed in 1889.", [GEMMA]: new Promise(() => {}) },
+  });
+  assert.equal(j.answer, "The Eiffel Tower was completed in 1889.");
+  assert.equal(j.source, "Qwen");
+  assert.ok(Date.now() - t < 1000, "did not wait for the hung model");
 });

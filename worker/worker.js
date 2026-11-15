@@ -548,12 +548,18 @@ async function handle(req, env, ctx) {
     if (typeof q !== "string" || !q.trim()) return json({ error: "empty q" }, 400);
     if (q.length > 500) return json({ error: "too long" }, 400);
     const t0 = Date.now();
+    // Server-Timing: where a miss spends its time (cache, lookups, wiki, groq, more = second model and Llama, photo).
+    const marks = [];
+    let tLast = t0;
+    const mark = (name) => { const now = Date.now(); marks.push(`${name};dur=${now - tLast}`); tLast = now; };
+    const timed = (r) => (r.headers.set("server-timing", marks.join(", ")), r);
 
     // An identical question (normalized) inside the TTL is served from the Cache API: no AI, no neurons.
     // Follow-up turns depend on the conversation, so they skip the cache. The cache read and the day's counts
     // (a Durable Object round trip) run side by side.
     const cKey = turns.length === 0 ? cacheUrl(url.origin, more ? `more: ${q}` : q) : null;
     const [counts, hit] = await Promise.all([loadCounts(url.origin, env), cKey ? cacheGet(cKey) : null]);
+    mark("cache");
     if (hit) {
       counts.cacheHits++;
       await later(saveCounts(url.origin, counts, env));
@@ -565,6 +571,7 @@ async function handle(req, env, ctx) {
     if (wage) return json({ answer: wage, source: "Government of Canada" });
     const compared = turns.length ? null : await comparePopulation(q);
     if (compared) return json({ ...compared, source: "Wikidata" });
+    mark("lookups");
     // Past the daily estimate: no AI call. The client shows its resting note because aiError is set.
     const resting = () => json({ answer: "UNKNOWN", resting: true, aiError: BUDGET_NOTE });
     if (overBudget(counts) && !env.GROQ_KEY) return resting();
@@ -572,13 +579,16 @@ async function handle(req, env, ctx) {
     // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
     // A subject of a letter or two ("who created c") finds the wrong pages ("The Who"), so it gets no reference at all.
     const { text: context, pages } = tinySubject(q) && !turns.length ? { text: "", pages: [] } : await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
+    mark("wiki");
     // Set only when an AI call threw and the answer is UNKNOWN because of it (see the flow below).
     const aiFailures = [];
     // Every reply goes through here. Known answers are cached (UNKNOWN and errors never are), and the counts are saved.
     const finish = async (o) => {
+      mark("more");
       const known = o.answer !== "UNKNOWN";
       // A disagreement has no photo: the sources do not say which answer is right, so no picture leans either way.
       const photo = known && !o.disagree ? await photoFor(q, o.answer) : null;
+      mark("photo");
       const refs = known ? groundingRefs(o.answer, pages, q) : [];
       const topic = known ? topicOf(photo?.page, refs) : null;
       const body = { ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) };
@@ -586,7 +596,7 @@ async function handle(req, env, ctx) {
       // Keyed by the first source that answered (Groq, Qwen, Gemma), whole request time as the user felt it.
       if (o.source) counts.sample = { source: o.source.split(" ")[0], ms: Date.now() - t0 };
       await later(saveCounts(url.origin, counts, env));
-      return json(body);
+      return timed(json(body));
     };
     const today = new Date().toISOString().slice(0, 10);
     const system =
@@ -721,12 +731,21 @@ async function handle(req, env, ctx) {
     // same calls, but the slow one no longer waits for the other (p50 went over 2 s with them in a row).
     const early = !more && needsSecondModel(q) && !overBudget(counts) ? askCounted(GEMMA) : null;
     const groq = env.GROQ_KEY ? await askGroq() : null;
+    mark("groq");
     if (groq === null && overBudget(counts)) return resting();
     const [first, house] = groq !== null ? [groq, "Groq"] : [await askCounted(QWEN), "Qwen"];
     // "Tell me more" never asks a second model: three sentences from two models never match word for word.
     if (first !== "UNKNOWN" && (more || !needsSecondModel(q) || overBudget(counts))) return finish({ answer: first, source: house });
     if (overBudget(counts)) return resting();
-    const second = await (early ?? askCounted(GEMMA));
+    const grounding = pages.map((p) => p.extract || "").join(" ");
+    // Live Wikipedia already names every key fact of the first answer ("1989"): a second model cannot change the
+    // reply, so it is not waited on. A changing fact still waits, the page may lag the news.
+    if (first !== "UNKNOWN" && !isTimeSensitive(q) && groundedBy(first, grounding, q)) return finish({ answer: first, source: house });
+    // Otherwise the second model gets a short deadline once the first has answered; late counts as UNKNOWN,
+    // so the first answer stands. Gemma on Workers AI took 0.6 to 2.3 s on dates (2026-11-15) and never changed one.
+    const pending = early ?? askCounted(GEMMA);
+    const second = first === "UNKNOWN" ? await pending
+      : await Promise.race([pending, new Promise((ok) => setTimeout(() => ok("UNKNOWN"), Number(env.SECOND_WAIT_MS ?? 700)))]);
 
     // The client shows `source` under the answer, so it names only the models that actually produced it.
     // A reference with no figure makes both models say UNKNOWN to a settled question ("how much vitamin d do
@@ -741,15 +760,16 @@ async function handle(req, env, ctx) {
       return finish({ answer: "UNKNOWN", ...(aiFailures.length ? { aiError: aiFailures[aiFailures.length - 1] } : {}) });
     if (first === "UNKNOWN") return finish({ answer: second, source: "Gemma" });
     if (second === "UNKNOWN") return finish({ answer: first, source: house });
-    if (normalize(first) === normalize(second)) return finish({ answer: first, source: `Gemma + ${house}` });
+    // Same key facts in other words ("9 November 1989" and "November 9, 1989") agree; a word-for-word test called Llama on every date.
+    if (agree(first, second, q)) return finish({ answer: first, source: `Gemma + ${house}` });
 
     // Qwen and Gemma disagree. Rather than let Qwen arbitrate its own dispute, ask a third,
     // independent model and take the majority. Only adds fields (disagree, alts) when the reference does not settle it.
-    const dis = disagreement(first, second, pages.map((p) => p.extract || "").join(" "), q);
+    const dis = disagreement(first, second, grounding, q);
     const third = await askCounted(LLAMA);
     if (third !== "UNKNOWN") {
-      if (normalize(third) === normalize(first)) return finish({ answer: first, source: `${house} + Llama`, ...dis });
-      if (normalize(third) === normalize(second)) return finish({ answer: second, source: "Gemma + Llama", ...dis });
+      if (agree(third, first, q)) return finish({ answer: first, source: `${house} + Llama`, ...dis });
+      if (agree(third, second, q)) return finish({ answer: second, source: "Gemma + Llama", ...dis });
     }
 
     // All three differ (or Llama said UNKNOWN). No synthesis call any more: the house model's answer, with
@@ -833,6 +853,15 @@ export function agree(a, b, q = "") {
   if (isUnknown(a) || isUnknown(b)) return true;
   if (normalize(a) === normalize(b)) return true;
   return clashTokens(keyTokens(a, q), keyTokens(b, q)).length === 0;
+}
+// True when the reference text names every key token (number or name the question did not give) of the answer,
+// and the answer has at least one. "1912." against a Titanic page that says 1912 is grounded.
+export function groundedBy(answer, grounding, q = "") {
+  if (isUnknown(answer) || !grounding) return false;
+  const { nums, names } = keyTokens(answer, q);
+  if (!nums.size && !names.size) return false;
+  const words = new Set(String(grounding).replace(/(\d),(?=\d{3}\b)/g, "$1").toLowerCase().match(/[a-z0-9]+(?:\.\d+)?/g) || []);
+  return [...nums, ...names].every((t) => words.has(t));
 }
 // The fields to add to a reply: {} when the answers agree, or when a reference names one of the tokens
 // they clash on (the reference settles it). Otherwise both answers with their model names, and no pick.
