@@ -35,9 +35,9 @@ export const tinySubject = (q) => q.replace(/[?!.]/g, "").replace(ASK_WORDS, "")
 export async function freshContext(q, attempt = 0) {
   try {
     const r = await fetch(
-      "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=thumbnail&pithumbsize=800&format=json&formatversion=2&gsrsearch=" +
+      "https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrlimit=3&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=thumbnail&pithumbsize=320&format=json&formatversion=2&gsrsearch=" +
         encodeURIComponent(searchTerm(q)),
-      { headers: { "user-agent": "nimble-answers/1.0 (trommatic.workers.dev)" }, signal: AbortSignal.timeout(4000) },
+      { headers: { "user-agent": "NimbleAnswers/1.0 (https://nimble.jaybulb.com)" }, signal: AbortSignal.timeout(4000) },
     );
     // A throttled or empty Wikipedia reply leaves the models on their stale memory ("Joe Biden"),
     // so one retry after a beat is worth more than a fast wrong answer.
@@ -119,11 +119,17 @@ function photoFromEntity(s, entity, answerWords) {
   return [...answerWords].some((w) => !own.has(w) && lead.has(w));
 }
 // The photo for an AI answer, with the Wikipedia page it came from (its title is the credit). No entity, no photo.
-async function photoFor(q, answer) {
+async function photoFor(q, answer, pages = []) {
   const ents = answerEntities(q, answer);
   if (!ents.length) return null;
   const answerWords = new Set(keyWordsW(answer));
-  const sums = await Promise.all(ents.map((e) => wikiSummary(e.name)));
+  // A grounding page titled with the entity's own name already holds its lead paragraph and thumbnail (the same
+  // PageImages picture the summary gives), so it skips the summary fetch: 30 to 300 ms after every answer.
+  const own = (name) => pages.find((p) => String(p.title).toLowerCase() === name.toLowerCase());
+  const sums = await Promise.all(ents.map((e) => {
+    const p = own(e.name);
+    return p ? { title: p.title, extract: String(p.extract || "").split("\n")[0], thumbnail: p.thumbnail } : wikiSummary(e.name);
+  }));
   const i = ents.findIndex((e, k) => photoFromEntity(sums[k], e, answerWords));
   if (i < 0) return null;
   const t = sums[i].thumbnail;
@@ -558,6 +564,11 @@ async function handle(req, env, ctx) {
     // Follow-up turns depend on the conversation, so they skip the cache. The cache read and the day's counts
     // (a Durable Object round trip) run side by side.
     const cKey = turns.length === 0 ? cacheUrl(url.origin, more ? `more: ${q}` : q) : null;
+    // The Wikipedia search depends only on the question, so it starts now, beside the cache read and the counts
+    // (a Durable Object round trip once the 30 s memo is cold). A hit wastes one free search.
+    // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
+    // A subject of a letter or two ("who created c") finds the wrong pages ("The Who"), so it gets no reference at all.
+    const contextP = tinySubject(q) && !turns.length ? Promise.resolve({ text: "", pages: [] }) : freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
     const [counts, hit] = await Promise.all([loadCounts(url.origin, env), cKey ? cacheGet(cKey) : null]);
     mark("cache");
     if (hit) {
@@ -576,9 +587,7 @@ async function handle(req, env, ctx) {
     const resting = () => json({ answer: "UNKNOWN", resting: true, aiError: BUDGET_NOTE });
     if (overBudget(counts) && !env.GROQ_KEY) return resting();
 
-    // A bare follow-up ("and in celsius?") searches badly alone, so lead with the last question.
-    // A subject of a letter or two ("who created c") finds the wrong pages ("The Who"), so it gets no reference at all.
-    const { text: context, pages } = tinySubject(q) && !turns.length ? { text: "", pages: [] } : await freshContext(turns.length ? `${turns[turns.length - 1].q} ${q}` : q);
+    const { text: context, pages } = await contextP;
     mark("wiki");
     // Set only when an AI call threw and the answer is UNKNOWN because of it (see the flow below).
     const aiFailures = [];
@@ -587,7 +596,7 @@ async function handle(req, env, ctx) {
       mark("more");
       const known = o.answer !== "UNKNOWN";
       // A disagreement has no photo: the sources do not say which answer is right, so no picture leans either way.
-      const photo = known && !o.disagree ? await photoFor(q, o.answer) : null;
+      const photo = known && !o.disagree ? await photoFor(q, o.answer, pages) : null;
       mark("photo");
       const refs = known ? groundingRefs(o.answer, pages, q) : [];
       const topic = known ? topicOf(photo?.page, refs) : null;
@@ -664,9 +673,21 @@ async function handle(req, env, ctx) {
         return null;
       }
     };
+    // gpt-oss-120b answers in about 0.3 s but spikes past 1 s (0.7 to 1.4 s on 2026-11-15). Past GROQ_HEDGE_MS a
+    // second copy of the same request goes out and the first answer back wins: same model, same answer, and the
+    // extra call only on the slow ones. Null only when every copy refused, so the next model takes over as before.
+    const hedged = (model) => new Promise((done) => {
+      let open = 1, over = false;
+      const take = (a) => {
+        if (over) return;
+        if (a !== null || --open === 0) { over = true; clearTimeout(timer); done(a); }
+      };
+      const timer = setTimeout(() => { if (!over) { open++; tryGroq(model).then(take); } }, Number(env.GROQ_HEDGE_MS ?? 500));
+      tryGroq(model).then(take);
+    });
     const askGroq = async () => {
       for (const model of GROQ_MODELS) {
-        const a = await tryGroq(model);
+        const a = await (model === GROQ_MODELS[0] ? hedged(model) : tryGroq(model));
         if (a !== null) return a;
       }
       // Every model refused with a bare 429: a burst, not the day's cap. One breath, then the first model once more,

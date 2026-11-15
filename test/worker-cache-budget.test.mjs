@@ -450,3 +450,16 @@ test("a subject of a letter or two gets no Wikipedia reference (\"who created c\
   assert.equal(tinySubject("who created python"), false);
   assert.equal(tinySubject("capital of france"), false);
 });
+
+test("groq: a slow first call gets a second copy past the hedge, and the first answer back wins", async () => {
+  installCaches(fakeCaches());
+  let n = 0;
+  // The first copy hangs, the second answers at once.
+  const seen = stubGroq(() => (n++ === 0 ? new Promise(() => {}) : groqSays("Paris.")));
+  const t = Date.now();
+  const { json } = await post("capital of france", { env: { GROQ_KEY: "k", GROQ_HEDGE_MS: 20 } });
+  assert.equal(json.answer, "Paris.");
+  assert.equal(json.source, "Groq");
+  assert.deepEqual(seen, ["openai/gpt-oss-120b", "openai/gpt-oss-120b"], "the same model twice, never the next one");
+  assert.ok(Date.now() - t < 1000);
+});
