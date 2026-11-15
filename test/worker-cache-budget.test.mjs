@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import worker, {
   groqCooldown,
   normalizeQuestion, cacheUrl, isTimeSensitive, needsSecondModel, estNeurons, overBudget,
-  NEURONS_PER_CALL, BUDGET_NEURONS, TTL_CACHE, TTL_TIMELY, _resetForTests, NimbleCounts,
+  NEURONS_PER_CALL, BUDGET_NEURONS, TTL_CACHE, TTL_TIMELY, TTL_STABLE, ttlFor, report, _resetForTests, NimbleCounts,
 } from "../worker/worker.js";
 
 const QWEN = "@cf/qwen/qwen3.8-27b";
@@ -26,6 +26,7 @@ function fakeCaches() {
       put: async (req, res) => {
         m.set(req.url, { body: await res.text(), headers: { "content-type": res.headers.get("content-type"), "cache-control": res.headers.get("cache-control") } });
       },
+      delete: async (req) => m.delete(req.url),
     },
   };
 }
@@ -59,8 +60,11 @@ function post(q, { answers = {}, turns, env: extra = {} } = {}) {
 
 test("normalize: trims, lowercases and collapses whitespace", () => {
   assert.equal(normalizeQuestion("  Capital   OF\tFrance  "), "capital of france");
-  assert.equal(normalizeQuestion("What\u2019s the capital of France?"), "what is the capital of france");
-  assert.equal(normalizeQuestion("whats the capital of france ?!"), "what is the capital of france");
+  assert.equal(normalizeQuestion("What\u2019s the capital of France?"), "capital of france");
+  assert.equal(normalizeQuestion("whats the capital of france ?!"), "capital of france");
+  assert.equal(normalizeQuestion("what  are the  planets"), "planets");
+  assert.equal(normalizeQuestion("what is"), "what is", "nothing after it, nothing folded");
+  assert.equal(normalizeQuestion("who is the ceo of apple"), "who is the ceo of apple", "only a leading what is");
   assert.equal(normalizeQuestion("Who's the PM of Canada."), "who is the pm of canada");
   // Words that only start like a question word are left alone.
   assert.equal(normalizeQuestion("whatsapp founder"), "whatsapp founder");
@@ -165,16 +169,38 @@ test("UNKNOWN is never cached: the same question asks the models again", async (
   assert.equal([...c.m.keys()].filter((k) => k.includes("/__nimble/answer")).length, 0);
 });
 
-test("a time-sensitive answer is cached for one hour, others for six", async () => {
+test("a live answer is cached an hour, a changing fact six hours, a settled fact three days", async () => {
   const c = fakeCaches();
   installCaches(c);
   await post("latest iphone", { answers: { [QWEN]: "The newest iPhone is the iPhone 18." } });
   await post("capital of france", { answers: { [QWEN]: "Paris is the capital of France." } });
+  await post("population of canada", { answers: { [QWEN]: "About 41 million people." } });
   const ttl = (q) => c.m.get(cacheUrl(ORIGIN, q)).headers["cache-control"];
   assert.equal(ttl("latest iphone"), `max-age=${TTL_TIMELY}`);
-  assert.equal(ttl("capital of france"), `max-age=${TTL_CACHE}`);
+  assert.equal(ttl("capital of france"), `max-age=${TTL_STABLE}`);
+  assert.equal(ttl("population of canada"), `max-age=${TTL_CACHE}`);
   assert.equal(TTL_TIMELY, 3600);
   assert.equal(TTL_CACHE, 21600);
+  assert.equal(TTL_STABLE, 259200);
+});
+
+test("ttlFor: anything that can change between visits never gets the three-day TTL", () => {
+  for (const q of ["apple ceo", "president of france", "weather in vancouver", "what time is it in tokyo", "who won the world series", "bitcoin price", "how old is taylor swift", "newest pixel phone", "when does costco open"])
+    assert.notEqual(ttlFor(q), TTL_STABLE, q);
+  for (const q of ["capital of peru", "who wrote hamlet", "what year did the titanic sink", "boiling point of water", "who painted the mona lisa"])
+    assert.equal(ttlFor(q), TTL_STABLE, q);
+});
+
+test("a This is wrong report evicts the cached answer", async () => {
+  const c = fakeCaches();
+  installCaches(c);
+  await post("how far is the moon", { answers: { [QWEN]: "About 378,000 kilometers." } });
+  assert.ok(c.m.has(cacheUrl(ORIGIN, "how far is the moon")));
+  const box = { fetch: async () => new Response("[]") };
+  const env = { COUNTS: { idFromName: () => "g", get: () => box }, RATE_LIMITER: { limit: async () => ({ success: true }) } };
+  const r = await report(new Request(`${ORIGIN}/report`, { method: "POST", body: JSON.stringify({ q: "How far is the Moon?", answer: "About 378,000 kilometers." }) }), new URL(`${ORIGIN}/report`), env);
+  assert.equal(r.status, 200);
+  assert.equal(c.m.has(cacheUrl(ORIGIN, "how far is the moon")), false);
 });
 
 // ---- neuron guard and /stats ------------------------------------------------------------------
@@ -227,7 +253,7 @@ test("GET /stats returns exactly the day, the counts and the Groq gauge, with no
   const res = await worker.fetch(new Request(`${ORIGIN}/stats`), { RATE_LIMITER: { limit: async () => ({ success: true }) }, AI: { run: async () => { throw new Error("no AI on /stats"); } } });
   assert.equal(res.status, 200);
   const j = await res.json();
-  assert.deepEqual(Object.keys(j).sort(), ["aiCalls", "cacheHits", "day", "estNeurons", "exam", "groqCalls", "groqRefused", "latency"]);
+  assert.deepEqual(Object.keys(j).sort(), ["aiCalls", "cacheHits", "day", "estNeurons", "exam", "groqCalls", "groqRefused", "hitRate", "latency", "misses"]);
   assert.equal(j.day, new Date().toISOString().slice(0, 10));
   assert.equal(j.aiCalls, 10);
   assert.equal(j.estNeurons, 600);

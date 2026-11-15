@@ -300,6 +300,13 @@ export const TTL_CACHE = 6 * 3600; // seconds
 export const TTL_TIMELY = 3600; // time-sensitive answers go stale fast
 const TIMELY = /\b(current|latest|today|price|score|now)\b|\bwho is the\b/i;
 export const isTimeSensitive = (q) => TIMELY.test(q);
+// A settled fact ("capital of france", "who wrote hamlet") is kept three days; a question about anything that can
+// change between visits (an office, a population, a score, the weather, a release) keeps six hours, and a live one an
+// hour. Six hours put the hit rate at about 36% (2026-11-15). A "This is wrong" report evicts the answer at once, so a
+// wrong one does not ride the long TTL.
+export const TTL_STABLE = 3 * 86400;
+const CHANGING = /\b(time|tonight|tomorrow|yesterday|weekend|this (week|month|year|season)|next|last (week|month|year|night)|upcoming|recent(ly)?|newest|live|trending|weather|forecast|temperature|rain|snow|stocks?|shares?|bitcoin|crypto|market|election|polls?|won|wins?|winner|champions?|ceo|president|prime minister|premier|chancellor|leader|mayor|governor|king|queen|pope|population|age|old|rank(ing)?|record|richest|net worth|salary|released?|season|playoffs|standings|odds|schedule|open|closed|hours)\b|\bwhat day\b|\bhow many (people|users|subscribers|followers)\b/i;
+export const ttlFor = (q) => (isTimeSensitive(q) ? TTL_TIMELY : CHANGING.test(q) ? TTL_CACHE : TTL_STABLE);
 // Question shapes where two models clashing is worth a second call (see the flow below).
 // "Who was the first president of South Africa" came back "F.W. de Klerk" from one model: firsts and lasts are where a
 // lone model guesses, so they get the second opinion (and the Sources disagree card when the two clash).
@@ -310,8 +317,10 @@ export const needsSecondModel = (q) => isTimeSensitive(q) || WHEN.test(q) || /\d
 export const normalizeQuestion = (q) => String(q).trim().toLowerCase()
   .replace(/[\u2018\u2019]/g, "'")
   .replace(/\b(what|who|where|when|how)(?:'s|s)\b/g, "$1 is")
-  .replace(/[\s?!.]+$/, "")
-  .replace(/\s+/g, " ");
+  .replace(/\s+/g, " ")
+  // A leading "what is the" adds nothing to the answer: "what is the capital of france" is "capital of france".
+  .replace(/^what (?:is|are) (?:the |a |an )?(?=\S)/, "")
+  .replace(/[\s?!.]+$/, "");
 // Bump PROMPT_V when the prompt changes: answers written under the old prompt must not outlive it in the cache.
 const PROMPT_V = 4;
 export const cacheUrl = (origin, q) => `${origin}/__nimble/answer?v=${PROMPT_V}&q=${encodeURIComponent(normalizeQuestion(q))}`;
@@ -322,7 +331,7 @@ export const overBudget = (c) => estNeurons(c.aiCalls) > BUDGET_NEURONS;
 // The Cache API is per data center (it survives a deploy: a cached answer outlives the fix that changes it, until
 // its TTL ends), so every cached answer here is best effort: a colo only sees its own traffic. A global count needs a KV namespace (see wrangler.jsonc).
 const store = () => globalThis.caches?.default ?? null;
-const fresh = (day = "") => ({ day, aiCalls: 0, cacheHits: 0, groqCalls: 0, groqRefused: 0 });
+const fresh = (day = "") => ({ day, aiCalls: 0, cacheHits: 0, misses: 0, groqCalls: 0, groqRefused: 0 });
 let mem = fresh();
 // Groq models at their daily cap, until their retry-after runs out: skipped without a call, so a capped model stops
 // costing every question a refused round trip. ponytail: per isolate; each isolate learns from its own first refusal.
@@ -349,7 +358,7 @@ async function cachePut(key, body, ttl) {
 // Today's counts: this isolate's numbers, raised to whatever the Cache API holds for today.
 // With the COUNTS Durable Object bound, one global instance holds the day's numbers (max-merged, so a
 // racing isolate can lose a few counts but never move them backwards); without it, the Cache API is the store.
-const FIELDS = ["aiCalls", "cacheHits", "groqCalls", "groqRefused"];
+const FIELDS = ["aiCalls", "cacheHits", "misses", "groqCalls", "groqRefused"];
 export class NimbleCounts {
   constructor(state) {
     this.state = state;
@@ -408,10 +417,7 @@ async function loadCounts(origin, env, force = false) {
   }
   try {
     const s = JSON.parse(text || "{}");
-    mem.aiCalls = Math.max(mem.aiCalls, Number(s.aiCalls) || 0);
-    mem.cacheHits = Math.max(mem.cacheHits, Number(s.cacheHits) || 0);
-    mem.groqCalls = Math.max(mem.groqCalls, Number(s.groqCalls) || 0);
-    mem.groqRefused = Math.max(mem.groqRefused, Number(s.groqRefused) || 0);
+    for (const k of FIELDS) mem[k] = Math.max(mem[k], Number(s[k]) || 0);
   } catch {
     // unreadable counter: keep the isolate's own numbers
   }
@@ -420,7 +426,7 @@ async function loadCounts(origin, env, force = false) {
 async function saveCounts(origin, c, env) {
   await globalCounts(env, { method: "POST", body: JSON.stringify(c) })?.catch(() => null);
   delete c.sample; // sent once
-  await cachePut(statsUrl(origin, c.day), { aiCalls: c.aiCalls, cacheHits: c.cacheHits, groqCalls: c.groqCalls, groqRefused: c.groqRefused }, 2 * 86400);
+  await cachePut(statsUrl(origin, c.day), Object.fromEntries(FIELDS.map((k) => [k, c[k]])), 2 * 86400);
 }
 async function statsReply(origin, env) {
   const c = await loadCounts(origin, env, true);
@@ -430,7 +436,9 @@ async function statsReply(origin, env) {
   const latency = Object.fromEntries(Object.entries(c.lat || {}).map(([k, v]) => [k, { n: v.length, p50: pct(v, 0.5), p95: pct(v, 0.95) }]));
   const box = env?.COUNTS?.get(env.COUNTS.idFromName("global"));
   const exam = box ? await box.fetch("https://counts/exam").then((r) => r.json()).catch(() => null) : null;
-  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused, latency, exam });
+  // hitRate: answers served from the cache over every answer request that got as far as the AI path (#78 wants > 0.5).
+  const asked = c.cacheHits + c.misses;
+  return json({ day: c.day, aiCalls: c.aiCalls, cacheHits: c.cacheHits, misses: c.misses, hitRate: asked ? Math.round((c.cacheHits / asked) * 100) / 100 : null, estNeurons: estNeurons(c.aiCalls), groqCalls: c.groqCalls, groqRefused: c.groqRefused, latency, exam });
 }
 
 // Any throw becomes a JSON UNKNOWN with CORS headers, so the apps fall through to their next source instead of
@@ -601,9 +609,10 @@ async function handle(req, env, ctx) {
       const refs = known ? groundingRefs(o.answer, pages, q) : [];
       const topic = known ? topicOf(photo?.page, refs) : null;
       const body = { ...o, ...(photo ? { image: photo.image } : {}), ...(refs.length ? { refs } : {}), ...(topic || {}) };
-      if (cKey && known && !o.aiError) await later(cachePut(cKey, body, isTimeSensitive(q) ? TTL_TIMELY : TTL_CACHE));
+      if (cKey && known && !o.aiError) await later(cachePut(cKey, body, ttlFor(q)));
       // Keyed by the first source that answered (Groq, Qwen, Gemma), whole request time as the user felt it.
       if (o.source) counts.sample = { source: o.source.split(" ")[0], ms: Date.now() - t0 };
+      counts.misses++;
       await later(saveCounts(url.origin, counts, env));
       return timed(json(body));
     };
@@ -1023,6 +1032,10 @@ export async function report(req, url, env) {
   const q = String(b?.q ?? "").trim().slice(0, 300), answer = String(b?.answer ?? "").trim().slice(0, 500);
   if (!q) return json({ error: "no question" }, 400);
   await box.fetch("https://counts/report", { method: "POST", body: JSON.stringify({ q, answer, at: new Date().toISOString() }) });
+  // The reported answer leaves this data center's cache now, so a fix reaches the next asker instead of waiting out
+  // the TTL (three days for a settled fact). Anyone can do this, but it only costs a fresh answer, behind the limit.
+  const s = store();
+  if (s?.delete) await Promise.all([q, `more: ${q}`].map((k) => s.delete(new Request(cacheUrl(url.origin, k))).catch(() => false)));
   return json({ ok: true });
 }
 
