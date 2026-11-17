@@ -225,3 +225,8 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 
 ## Ingested 2026-11-14
 - [ ] (Note "Nimble") Bare "Nimble" is held by another account (rechecked 2026-11-14). Variants rejected by Joshua (Nimblest). Store title stays "Nimble Answers" unless Apple grants a name claim.
+
+## Ingested 2026-11-16
+- [ ] (Note "Nimble") App Store screenshots are stale; stop using Primitive as the example.
+- [ ] (Nimble) Why does GitHub say it is Kotlin? It is a macOS and iOS app first. Fix the language stats (linguist-vendored/gitattributes).
+- [ ] (Nimble) GitHub repo is a mess. Tidy it.
