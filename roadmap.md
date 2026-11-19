@@ -230,3 +230,10 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 - [ ] (Note "Nimble") App Store screenshots are stale; stop using Primitive as the example.
 - [ ] (Nimble) Why does GitHub say it is Kotlin? It is a macOS and iOS app first. Fix the language stats (linguist-vendored/gitattributes).
 - [ ] (Nimble) GitHub repo is a mess. Tidy it.
+
+## Ingested 2026-11-18
+- [ ] Refresh App Store screenshots; remove the primitive.dev example (notes/attachments/2026-11-18/22334-1.png).
+- [ ] Simplify settings (notes/attachments/2026-11-18/22334-2.png).
+- [ ] Add user accounts: login, register, and a privacy policy too?
+- [ ] Remove the stale mascot picker (Bulb/Fen). Only one mascot, no choice.
+- [ ] Download offline answers by default; users can delete them manually in Settings.
