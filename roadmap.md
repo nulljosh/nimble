@@ -237,3 +237,4 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 - [ ] Add user accounts: login, register, and a privacy policy too?
 - [ ] Remove the stale mascot picker (Bulb/Fen). Only one mascot, no choice.
 - [ ] Download offline answers by default; users can delete them manually in Settings.
+- [ ] User feedback (Liam Blaine, mail 2026-10-12): accent colour isn't saved after force-close and relaunch. With AI Answers on, he only gets Wikipedia answers. Some answers are off-topic ("What was the first color photograph of a rainbow?" returned what a rainbow is). Wants a Home / New Question button to start fresh after an answer, and a History section (hamburger menu) for past questions and answers.
