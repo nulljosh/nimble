@@ -73,16 +73,21 @@ a:hover { text-decoration: underline; }
   -webkit-mask-image: linear-gradient(transparent 4%, #000 30%, #000 72%, transparent 97%); mask-image: linear-gradient(transparent 4%, #000 30%, #000 72%, transparent 97%);
   transform: translate3d(0, var(--py, 0), 0); will-change: transform; }
 /* The product melts into the yellow before the hero ends, wherever the parallax has carried it. */
-.hero::after { content: ""; position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 28%; background: linear-gradient(transparent, var(--yellow) 85%); pointer-events: none; }
+.hero::after { content: ""; position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; height: 16%; background: linear-gradient(transparent, var(--yellow) 85%); pointer-events: none; }
 .hero-bg { align-items: stretch; padding: 88px var(--gutter) 0; }
-.wall { width: min(100%, 1240px); display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 236px; gap: 20px; }
-.wall .tile { min-height: 0; box-shadow: none; --panel: #fff; --panel-line: rgba(0,0,0,.1); --panel-text: #1d1d1f; --panel-mid: rgba(0,0,0,.62); color: #1d1d1f; }
-.wall .mockup-result { overflow: hidden; }
-.wall .mockup-ghost { position: static; display: block; transform: none; animation: none; color: #1d1d1f; opacity: .7; white-space: nowrap; }
-.wall .mockup-photo, .wall .mockup-icon, .wall .news-thumb, .wall .mockup-credit { display: none; }  /* the app answering, not photos */
-@media (max-width: 760px) { .wall { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 200px; gap: 12px; } .wall .tile:nth-child(n+7) { display: none; } }
-/* A soft pool of yellow under the copy keeps the headline clean; the cards show around it. */
-.hero::before { content: ""; position: absolute; z-index: 1; inset: 0; pointer-events: none; background: radial-gradient(ellipse 62% 48% at 50% 47%, var(--yellow) 50%, color-mix(in srgb, var(--yellow) 0%, transparent) 100%); }
+/* Keynote stage: ONE Nimble search surface, full bleed. The bar types a real question; the answer lands
+   behind the headline at keynote scale, ghosted, so the copy stays black on yellow. Offline engine only. */
+.stage { position: relative; width: min(100%, 1240px); display: flex; flex-direction: column; color: #1d1d1f; }
+.stage-bar { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-2); border-bottom: 2px solid rgba(0,0,0,.14); font-size: clamp(22px, 2.6vw, 34px); font-weight: 600; letter-spacing: -0.02em; color: rgba(0,0,0,.42); }
+.stage-bar svg { flex: none; width: 1em; height: 1em; stroke: currentColor; }
+.stage-caret { width: 3px; height: 1.1em; background: rgba(0,0,0,.5); animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.stage-answer { flex: 1; display: flex; align-items: center; justify-content: center; white-space: nowrap; font-weight: 800; letter-spacing: -0.06em; line-height: .9; font-variant-numeric: tabular-nums; color: rgba(0,0,0,.09); }
+.stage-answer small { font-size: .32em; letter-spacing: -0.02em; margin-left: .12em; align-self: flex-end; padding-bottom: .5em; }
+.stage-answer.in { animation: keynote-in 900ms cubic-bezier(.16,1,.3,1) both; }
+.stage-answer.out { animation: keynote-out 400ms ease-in both; }
+@keyframes keynote-in { from { opacity: 0; transform: translateY(6%) scale(.96); letter-spacing: 0; } to { opacity: 1; transform: none; } }
+@keyframes keynote-out { to { opacity: 0; transform: translateY(-4%) scale(1.02); } }
 .hero-copy { will-change: transform, opacity; }
 
 
@@ -477,6 +482,24 @@ footer {
   @media (max-width: 420px) { .foot-dir { gap: var(--space-2) var(--space-2); } }
   @media (min-width: 700px) { .foot-dir { gap: var(--space-5) var(--space-5); padding-bottom: var(--space-4); } }
 
+/* Keynote pass: yellow stat numbers, one flat yellow band, sections build in as they scroll up. */
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); max-width: var(--max-wide); margin: 0 auto var(--space-7); }
+.stat b { display: block; font-size: clamp(56px, 7vw, 88px); line-height: 1; font-weight: 800; letter-spacing: -0.05em; color: var(--yellow); font-variant-numeric: tabular-nums; }
+.stat span { display: block; margin-top: var(--space-2); font-size: var(--fs-15); color: var(--mid); }
+@media (max-width: 600px) { .stats { grid-template-columns: 1fr; gap: var(--space-6); } }
+/* Light mode: the bulb yellow on white is too faint for a number, so the stats take ink. */
+@media (prefers-color-scheme: light) { .stat b { color: var(--text); } }
+.band { background: var(--yellow); color: var(--black); --dark: var(--black); --mid: var(--on-yellow-mid); }
+.band p a { color: var(--black); }
+.band .btn-dark { background: var(--black); color: var(--yellow); }
+.price { font-size: clamp(88px, 16vw, 200px) !important; line-height: 1; font-weight: 800; letter-spacing: -0.06em; color: var(--black) !important; margin: 0 auto var(--space-4) !important; max-width: none !important; }
+.feature-nim { display: block; width: 72px; height: 72px; margin-bottom: var(--space-3); }
+.feature:hover .feature-nim { animation: flit-bob .6s ease-in-out 2 alternate; }
+.build { opacity: 0; transform: translateY(32px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+.build.on { opacity: 1; transform: none; }
+/* Footer: the lightbulb waves and sways, the scene below it moves. */
+footer .foot-story img { animation: flit-bob 2.4s ease-in-out infinite alternate; }
+
 .credit {
   margin-top: var(--s1);
   font-size: var(--fs-13);
@@ -513,7 +536,10 @@ footer {
   </div>
   <!-- The real engine, cycling real answers, is the hero's background. Not interactive: the app is one tap away. -->
   <div class="hero-bg" aria-hidden="true" inert>
-    <div class="wall" id="wall"></div>
+    <div class="stage" id="stage">
+      <div class="stage-bar"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span id="stage-q"></span><span class="stage-caret"></span></div>
+      <div class="stage-answer" id="stage-a"></div>
+    </div>
   </div>
 </section>
 
@@ -522,14 +548,17 @@ footer {
     <h2 data-i18n="Answers, not ten blue links.">Answers, not ten blue links.</h2>
     <div class="features-grid">
       <div class="feature">
+        <img class="feature-nim" src="mascot/nim-think.svg" width="72" height="72" alt="" loading="lazy">
         <h3 data-i18n="Math and units, offline">Math and units, offline</h3>
         <p>Arithmetic, trig, powers, percentages and unit conversion, evaluated on the device. No network needed.</p>
       </div>
       <div class="feature">
+        <img class="feature-nim" src="mascot/nim-wave.svg" width="72" height="72" alt="" loading="lazy">
         <h3 data-i18n="Two models, one sentence">Two models, one sentence</h3>
         <p>A free open model answers first. A second joins for dates, numbers and fresh facts, and a third breaks a tie. When nothing agrees, you see both answers. Every answer names its source.</p>
       </div>
       <div class="feature">
+        <img class="feature-nim" src="mascot/nim-cheer.svg" width="72" height="72" alt="" loading="lazy">
         <h3 data-i18n="Graphs">Graphs</h3>
         <p>Type <em>y = x^2</em> or <em>plot sin(x)</em> and get the curve, sampled on device.</p>
       </div>
@@ -575,6 +604,11 @@ footer {
 <section class="offline" id="measured">
   <div class="container">
     <h2>Measured.</h2>
+    <div class="stats">
+      <div class="stat"><b data-to="152">152</b><span>of 154 right, Groq's free models</span></div>
+      <div class="stat"><b data-to="147">147</b><span>of 154, our own model on a Mac mini</span></div>
+      <div class="stat"><b data-to="810">810</b><span>of 810 math and units, offline</span></div>
+    </div>
     <p>A 154-question exam against the live service: Groq's free models score 152, and our own small model, running on a Mac mini, scores 147. A second exam of 1,049 questions runs every week.</p>
     <p>Math and units are checked offline, 810 of 810. Method and every number are in the <a href="https://github.com/nulljosh/nimble/blob/main/docs/BENCHMARK.md">benchmark</a>.</p>
   </div>
@@ -594,8 +628,9 @@ footer {
   </div>
 </section>
 
-<section class="oss">
+<section class="oss band">
   <div class="container">
+    <p class="price">$0.99</p>
     <h2>Open source, one dollar</h2>
     <p>Nimble is open source under Apache 2.0. A ground-up rewrite of the original <a href="https://github.com/Maybulb/Nimble">Maybulb/Nimble</a> in native SwiftUI. The web app is free. The iPhone and Mac apps are $0.99 once, which pays for signed builds and the answer service. No API keys, no accounts, no subscriptions.</p>
     <a href="https://github.com/nulljosh/nimble" class="btn btn-dark">View on GitHub</a>
@@ -636,7 +671,7 @@ footer {
 
 <footer>
   <section class="foot-story" aria-label="About Nimble">
-    <img src="mascot/nim.svg" width="120" height="120" alt="The Nimble lightbulb" loading="lazy">
+    <img src="mascot/nim-wave.svg" width="120" height="120" alt="The Nimble lightbulb, waving" loading="lazy">
     <div>
       <h2>One question.<br>One sentence.</h2>
       <p>A search bar that skips the results page. Open source, free on the web and $0.99 on iPhone and Mac, with Android, Windows and Linux builds alongside.</p>
@@ -694,10 +729,6 @@ footer {
 <script src="engine.js?v=offline"></script>
 <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function(){});</script>
 <script>
-// Live demo: the same engine the app ships. The showcase runs first: a photo answer, math with steps, news, weather.
-var SHOWCASE=['who wrote hamlet','(3+4)*2','news','weather in Vancouver'];
-// Scripted showcase answers: the Wikipedia lines are written out, so the demo never waits on a lookup or spends an AI call.
-var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy of Hamlet, Prince of Denmark, often shortened to Hamlet, is a tragedy written by William Shakespeare sometime between 1599 and 1601.',src:'Wikipedia',url:'https://en.wikipedia.org/wiki/Hamlet',grounding:'It is Shakespeare\'s longest play.',showWhy:true,image:{url:'hamlet-16x9.jpg',width:361,height:203},sources:[{name:'Hamlet',url:'https://en.wikipedia.org/wiki/Hamlet'},{name:'Prince Hamlet',url:'https://en.wikipedia.org/wiki/Prince_Hamlet'}]}};
 (function(){
   var tc=document.querySelector('meta[name="theme-color"]'); if(tc) tc.content=getComputedStyle(document.documentElement).getPropertyValue('--bulb').trim();
   var names={iphone:'iPhone',android:'Android',mac:'Mac',windows:'Windows'}, dev=document.documentElement.dataset.device;
@@ -705,28 +736,46 @@ var SCRIPTED={'who wrote hamlet':{kind:'text',title:'Hamlet',body:'The Tragedy o
   if(dev==='windows'){b.href='https://github.com/nulljosh/nimble/releases/latest';b.dataset.i18n='Download for Windows';b.textContent=I18N.t('Download for Windows');b.dataset.asset='.msi';}
   else if(dev==='android'){b.href='https://github.com/nulljosh/nimble/releases/latest';b.dataset.i18n='Download for Android';b.textContent=I18N.t('Download for Android');b.dataset.asset='.apk';}
   // iPhone and Mac keep the App Store link (one listing for both).
-  // The wall behind the hero: Nimble cards, each typing a question and answering it with the real engine.
-  // Math and units run on the device, Hamlet is scripted, so the wall never touches the network.
-  var QS=['(3+4)*2','12 km in miles','15% of 80','who wrote hamlet','sqrt(144)','72 f in c','2^10','5 cups in ml','1 mile in km','365*24','10% of 250','3 feet in cm'];
-  var wall=document.getElementById('wall'), still=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var bar='<div class="mockup-bar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="stroke:var(--yellow-deep)" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div class="mockup-field"><span class="mockup-ghost"></span></div><span class="mockup-caret"></span></div><div class="mockup-result"></div>';
+  // The keynote stage behind the hero: one bar types a question, the real offline engine answers it huge.
+  // ponytail: math and units only, so the stage never touches the network and every answer is a short number.
+  var QS=['2^10','12 km in miles','(3+4)*2','72 f in c','15% of 80','5 cups in ml','sqrt(144)','365*24','1 mile in km'];
+  var stage=document.getElementById('stage'), sq=document.getElementById('stage-q'), sa=document.getElementById('stage-a');
+  var still=matchMedia('(prefers-reduced-motion: reduce)').matches;
   var wait=function(ms){ return new Promise(function(k){ setTimeout(k,ms); }); };
-  for(var i=0;i<9;i++){ (function(i){
-    var t=document.createElement('div'); t.className='mockup tile'; t.innerHTML=bar; wall.appendChild(t);
-    var g=t.querySelector('.mockup-ghost'), r=t.querySelector('.mockup-result'), n=i;
-    (async function loop(){
-      await wait(still?0:i*700);
-      for(;;){
-        var q=QS[n%QS.length]; n+=9;
-        var res=await renderAnswer(q,{ifUnset:'no',scripted:SCRIPTED[q]});
-        r.classList.remove('swap'); r.innerHTML=''; g.textContent='';
-        if(still) g.textContent=q; else for(var k=1;k<=q.length;k++){ g.textContent=q.slice(0,k); await wait(60+Math.random()*70); }
-        await wait(still?0:300); void r.offsetWidth; r.classList.add('swap'); r.innerHTML=res.h;
-        if(still) return;
-        do { await wait(5200+Math.random()*2600); } while(document.hidden);
-      }
-    })();
-  })(i); }
+  var short=function(n){ return String(+(+n).toPrecision(4)); };
+  function solve(q){
+    var c=tryConvert(q); if(c) return {num:short(c.to), unit:c.toUnit};
+    var m=tryMath(q); return m===null?null:{num:short(m), unit:''};
+  }
+  function show(r){
+    sa.textContent=r.num;
+    if(r.unit){ var u=document.createElement('small'); u.textContent=r.unit; sa.appendChild(u); }
+    // Keynote scale: as big as the stage allows for this many characters, capped by the screen height.
+    var chars=r.num.length+r.unit.length*.4;
+    sa.style.fontSize=Math.min(stage.clientWidth*.92/(chars*.62), innerHeight*.42)+'px';
+  }
+  (async function loop(){
+    for(var n=0;;n++){
+      var q=QS[n%QS.length], r=solve(q); if(!r) continue;
+      if(still){ sq.textContent=q; show(r); return; }
+      sa.className='stage-answer out'; await wait(400); sa.className='stage-answer'; sa.textContent=''; sq.textContent='';
+      for(var k=1;k<=q.length;k++){ sq.textContent=q.slice(0,k); await wait(70+Math.random()*60); }
+      await wait(250); show(r); void sa.offsetWidth; sa.className='stage-answer in';
+      do { await wait(3400); } while(document.hidden);
+    }
+  })();
+})();
+// Keynote builds: each section after the hero rises in once; stat numbers count up. Off under reduced motion.
+(function(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+  var io=new IntersectionObserver(function(es){ es.forEach(function(e){
+    if(!e.isIntersecting) return; io.unobserve(e.target); e.target.classList.add('on');
+    e.target.querySelectorAll('[data-to]').forEach(function(b){
+      var to=+b.dataset.to, t0=performance.now();
+      (function tick(t){ var k=Math.min(1,(t-t0)/1400); b.textContent=Math.round(to*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(tick); })(t0);
+    });
+  }); },{threshold:.18});
+  document.querySelectorAll('main > section:not(.hero) > .container, .foot-story').forEach(function(el){ el.classList.add('build'); io.observe(el); });
 })();
 // Hero parallax: the product behind drifts at 0.45, the copy lifts at 0.2 and fades. Off under reduced motion.
 (function(){

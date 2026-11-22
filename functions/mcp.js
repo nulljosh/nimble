@@ -43,6 +43,12 @@ export async function onRequest({ request: req }) {
   const params = msg.params && typeof msg.params === 'object' ? msg.params : {};
   const reply = result => json({ jsonrpc: '2.0', id, result });
 
+  // Every notification (initialized, cancelled, progress, roots/list_changed...) gets a bare 202.
+  // Replying "Method not found" to one breaks clients that send cancellations.
+  if (typeof method === 'string' && method.startsWith('notifications/')) {
+    return new Response(null, { status: 202, headers: CORS });
+  }
+
   switch (method) {
     case 'initialize':
       return reply({
@@ -50,8 +56,6 @@ export async function onRequest({ request: req }) {
         capabilities: { tools: {} },
         serverInfo: { name: 'nimble', version: VERSION },
       });
-    case 'notifications/initialized':
-      return new Response(null, { status: 202, headers: CORS });
     case 'ping':
       return reply({});
     case 'tools/list':

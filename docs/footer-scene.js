@@ -23,7 +23,7 @@
     "}",
     // Concentric rings around a point: the glow of the bulb.
     "float rings(vec2 px, vec2 c, float s, float t) {",
-    "  float d = abs(fract(length(px - c) / s) - 0.5) * 2.0;",
+    "  float d = abs(fract((length(px - c) - time * 10.0 * dpr) / s) - 0.5) * 2.0;",
     "  return 1.0 - smoothstep(t - 0.12, t + 0.12, d);",
     "}",
     // Karst towers: steep rounded domes of hashed height, one per cell, in units of the plate's height.
@@ -77,7 +77,7 @@
     // Glow rings around the bulb, fading out.
     "  float d = length(px - c);",
     "  kind = 5.0;",
-    "  return (1.0 - smoothstep(R, R * 3.6, d)) * 0.74;",
+    "  return (1.0 - smoothstep(R, R * (3.4 + 0.3 * sin(time * 1.3)), d)) * 0.74;",
     "}",
     "void main() {",
     "  vec2 px = gl_FragCoord.xy;",
@@ -85,7 +85,7 @@
     "  float kind, tone;",
     "  if (uv.y < WATER) {",
     // The river mirrors the towers and the bulb, broken up by slow ripples.
-    "    float ripple = sin(uv.y * 240.0) * 0.004 + (noise2(vec2(uv.x * 40.0, uv.y * 90.0)) - 0.5) * 0.012;",
+    "    float ripple = sin(uv.y * 240.0 + time * 2.0) * 0.004 + (noise2(vec2(uv.x * 40.0 + time * 0.8, uv.y * 90.0)) - 0.5) * 0.012;",
     "    vec2 m = vec2(uv.x + ripple, WATER + (WATER - uv.y) * 0.95);",
     "    float depth = uv.y / WATER;",
     "    float k; tone = scene(m, k) * 0.5 * depth + 0.05; kind = 4.0;",
@@ -131,7 +131,8 @@
   gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   var u = function (n) { return gl.getUniformLocation(prog, n); };
 
-  // One still frame is the whole scene: no motion, so reduced motion needs no special case, and it draws only on resize or a theme change.
+  // The glow rings drift out and the river flows. It runs only while the footer is on screen; reduced motion gets one still frame.
+  var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches, t0 = performance.now(), raf = 0;
   function draw() {
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
@@ -139,13 +140,17 @@
     gl.viewport(0, 0, w, h);
     var css = getComputedStyle(canvas);
     gl.uniform2f(u("res"), w, h);
-    gl.uniform1f(u("time"), 0);
+    gl.uniform1f(u("time"), still ? 0 : (performance.now() - t0) / 1000);
     gl.uniform1f(u("dpr"), dpr);
     gl.uniform3fv(u("paper"), rgb(css.getPropertyValue("--scene-paper").trim() || "#f5f0e4"));
     gl.uniform3fv(u("ink"), rgb(css.getPropertyValue("--scene-ink").trim() || "#8a6412"));
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
   draw();
+  function loop() { draw(); raf = requestAnimationFrame(loop); }
+  if (!still && "IntersectionObserver" in window) new IntersectionObserver(function (es) {
+    if (es[0].isIntersecting) { if (!raf) loop(); } else { cancelAnimationFrame(raf); raf = 0; }
+  }).observe(canvas);
   window.addEventListener("resize", draw);
   var mq = window.matchMedia("(prefers-color-scheme: dark)");
   if (mq.addEventListener) mq.addEventListener("change", draw);

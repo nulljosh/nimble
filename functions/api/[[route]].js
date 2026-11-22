@@ -12,7 +12,8 @@ const CORS = {
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body, null, 2), {
     status,
-    headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=300', ...CORS },
+    // Only a real answer is cached; a failed source must not stick for five minutes.
+    headers: { 'content-type': 'application/json', 'cache-control': status === 200 ? 'public, max-age=300' : 'no-store', ...CORS },
   });
 
 const ENDPOINTS = {
