@@ -238,3 +238,14 @@ Each bullet is one PR. Bugs, features, and UI/UX are mixed together, grab any on
 - [ ] Remove the stale mascot picker (Bulb/Fen). Only one mascot, no choice.
 - [ ] Download offline answers by default; users can delete them manually in Settings.
 - [ ] User feedback (Liam Blaine, mail 2026-10-12): accent colour isn't saved after force-close and relaunch. With AI Answers on, he only gets Wikipedia answers. Some answers are off-topic ("What was the first color photograph of a rainbow?" returned what a rainbow is). Wants a Home / New Question button to start fresh after an answer, and a History section (hamburger menu) for past questions and answers.
+
+## Ingested 2026-11-23
+
+- [ ] **Nimble**: Thorough QA Mac and iOS app
+  - What’s next steps?
+  - V10 is pretty good
+  - It uses llm and doesn’t have a lot of apparent bugs
+  - What’re next steps?
+  - Can we squish the version to lower?
+- [ ] **Nimble**: Landing page needs better blending
+  - Use Keyrate and plank as inspiration
