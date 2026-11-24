@@ -1,4 +1,5 @@
 # X thread, Nimble Answers
+Post: https://x.com/nulljosh1/status/2112022791306559833 (2026-10-19)
 
 1/
 Built a search bar that skips the search results.
